@@ -15,6 +15,9 @@ namespace Microsoft.Liftr
         public static bool OrdinalEndsWith(this string self, string value)
             => self.EndsWith(value, StringComparison.OrdinalIgnoreCase);
 
+        public static int OrdinalIndexOf(this string self, string value)
+            => self.IndexOf(value, StringComparison.OrdinalIgnoreCase);
+
         public static string ToBase64(this string input)
         {
             var bytes = Encoding.UTF8.GetBytes(input);
