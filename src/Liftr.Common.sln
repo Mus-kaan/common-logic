@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29025.244
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Hosting", "Liftr.Hosting\Liftr.Hosting.csproj", "{A651BA62-A289-406F-8145-7FD256CD2DDC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Hosting", "Liftr.Hosting\Liftr.Hosting.csproj", "{A651BA62-A289-406F-8145-7FD256CD2DDC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.DataSource.Mongo", "Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj", "{629A2EE7-20D0-47D7-A9A9-638BA7EF6AD2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Logging", "Liftr.Logging\Liftr.Logging.csproj", "{336FAA25-B1F3-4541-BB14-A42ED60E88EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{A651BA62-A289-406F-8145-7FD256CD2DDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A651BA62-A289-406F-8145-7FD256CD2DDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A651BA62-A289-406F-8145-7FD256CD2DDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{629A2EE7-20D0-47D7-A9A9-638BA7EF6AD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{629A2EE7-20D0-47D7-A9A9-638BA7EF6AD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{629A2EE7-20D0-47D7-A9A9-638BA7EF6AD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{629A2EE7-20D0-47D7-A9A9-638BA7EF6AD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{336FAA25-B1F3-4541-BB14-A42ED60E88EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{336FAA25-B1F3-4541-BB14-A42ED60E88EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{336FAA25-B1F3-4541-BB14-A42ED60E88EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{336FAA25-B1F3-4541-BB14-A42ED60E88EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

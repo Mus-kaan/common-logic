@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Microsoft.Liftr.DataSource.Mongo</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.DataSource.Mongo</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="2.8.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
+  </ItemGroup>
+
+</Project>
