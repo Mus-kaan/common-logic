@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Microsoft.Liftr.Contracts</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Contracts</RootNamespace>
+  </PropertyGroup>
+
+</Project>

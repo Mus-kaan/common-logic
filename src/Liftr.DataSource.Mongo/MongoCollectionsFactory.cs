@@ -45,12 +45,12 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 {
                     clusterConfigurator.Subscribe<CommandSucceededEvent>(e =>
                     {
-                        _logger.Verbose("[Mongo | CommandSucceeded] Event :{@CommandSucceededEvent}, Start at UTC: " + DateTime.Now.Subtract(e.Duration).ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), e);
+                        _logger.Verbose("[Mongo | CommandSucceeded] Event :{@CommandSucceededEvent}, Start at UTC: " + DateTime.Now.Subtract(e.Duration).ToZuluString(), e);
                     });
 
                     clusterConfigurator.Subscribe<CommandFailedEvent>(e =>
                     {
-                        _logger.Verbose("[Mongo | CommandFailed] Event :{@CommandFailedEvent}, Start at UTC: " + DateTime.Now.Subtract(e.Duration).ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), e);
+                        _logger.Verbose("[Mongo | CommandFailed] Event :{@CommandFailedEvent}, Start at UTC: " + DateTime.Now.Subtract(e.Duration).ToZuluString(), e);
                     });
                 };
             }

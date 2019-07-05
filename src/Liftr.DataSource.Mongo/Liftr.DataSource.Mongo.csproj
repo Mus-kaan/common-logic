@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
+    <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
   </ItemGroup>
 
 </Project>
