@@ -69,7 +69,7 @@ namespace Microsoft.Liftr.Contracts
         {
             try
             {
-                var resourceId = resourceUri.Substring(resourceUri.OrdinalIndexOf($"/{c_subscriptions}/") + 15);
+                var resourceId = resourceUri.Substring(resourceUri.OrdinalIndexOf($"/{c_subscriptions}/"));
                 return new ResourceId(resourceId);
             }
             catch (Exception ex)

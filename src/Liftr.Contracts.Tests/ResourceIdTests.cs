@@ -29,6 +29,23 @@ namespace Microsoft.Liftr.Contracts.Tests
             Assert.Equal("AvSet", rid.TypedNames[0].ResourceName);
         }
 
+        [Fact]
+        public void CanParseResourceUri()
+        {
+            string resourceUri = "https://portal.azure.com/?feature.customportal=false#@microsoft.onmicrosoft.com/resource/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/providers/Microsoft.Compute/availabilitySets/AvSet";
+            var rid = ResourceId.FromResourceUri(resourceUri);
+
+            Assert.Equal("d21a525e-7c86-486d-a79e-a4f3622f639a", rid.SubscriptionId);
+            Assert.Equal("private-link-service", rid.ResourceGroup);
+            Assert.Equal("Microsoft.Compute", rid.Provider);
+            Assert.Equal("availabilitySets", rid.ResourceType);
+            Assert.Equal("AvSet", rid.ResourceName);
+
+            Assert.Single(rid.TypedNames);
+            Assert.Equal("availabilitySets", rid.TypedNames[0].ResourceType);
+            Assert.Equal("AvSet", rid.TypedNames[0].ResourceName);
+        }
+
         [Theory]
         [InlineData("/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/providers/Microsoft.Compute/")]
         [InlineData("asdasasfdsf")]
