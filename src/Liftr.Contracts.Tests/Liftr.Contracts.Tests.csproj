@@ -2,7 +2,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
     <IsPackable>false</IsPackable>
     <AssemblyName>Microsoft.Liftr.Contracts.Tests</AssemblyName>
     <RootNamespace>Microsoft.Liftr.Contracts.Tests</RootNamespace>
