@@ -7,7 +7,7 @@ using MongoDB.Driver;
 using MongoDB.Driver.Core.Events;
 using Serilog;
 using System;
-using System.Globalization;
+using System.Security.Authentication;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.DataSource.Mongo
@@ -36,8 +36,8 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            var mongoUrl = new MongoUrl(options.ConnectionString);
-            var mongoClientSettings = MongoClientSettings.FromUrl(mongoUrl);
+            var mongoClientSettings = MongoClientSettings.FromUrl(new MongoUrl(options.ConnectionString));
+            mongoClientSettings.SslSettings = new SslSettings() { EnabledSslProtocols = SslProtocols.Tls12 };
 
             if (options.LogDBOperation)
             {
