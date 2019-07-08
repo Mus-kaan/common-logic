@@ -1,14 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
     <AssemblyName>Microsoft.Liftr.Logging</AssemblyName>
     <RootNamespace>Microsoft.Liftr.Logging</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="2.8.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Serilog" Version="$(PackageVersion_Serilog)" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="$(PackageVersion_Serilog_Sinks_Console)" />
   </ItemGroup>
-
 </Project>

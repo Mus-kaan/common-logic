@@ -31,6 +31,5 @@ namespace Microsoft.Liftr.DataSource.Mongo
         {
 
         }
-
     }
 }
