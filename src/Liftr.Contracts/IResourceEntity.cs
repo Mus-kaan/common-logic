@@ -3,13 +3,25 @@
 //-----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Liftr.Contracts
 {
-    public interface IResourceEntity : IEntityId
+    public interface IResourceEntity
     {
-        string ETag { get; set; }
+        string EntityId { get; }
+
+        string SubscriptionId { get; }
+
+        string ResourceGroup { get; }
+
+        string Name { get; }
+
+        string Location { get; }
+
+        string Tags { get; }
+
+        string ProvisioningState { get; }
+
+        DateTime CreatedUTC { get; }
     }
 }

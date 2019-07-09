@@ -71,7 +71,8 @@ namespace Microsoft.Liftr.DataSource.Mongo
             throw new InvalidOperationException(msg);
         }
 
-        internal async Task<IMongoCollection<T>> CreateCollectionAsync<T>(string collectionName)
+        [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
+        public async Task<IMongoCollection<T>> CreateCollectionAsync<T>(string collectionName)
         {
             if (!await CollectionExistsAsync(_db, collectionName))
             {

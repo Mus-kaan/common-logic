@@ -2,14 +2,12 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-namespace Microsoft.Liftr.Contracts
+using System;
+
+namespace Microsoft.Liftr.Logging
 {
-    public class EntityId : IEntityId
+    [AttributeUsage(AttributeTargets.Property)]
+    public sealed class DoNotLogAttribute : Attribute
     {
-        public string SubscriptionId { get; set; }
-
-        public string ResourceGroup { get; set; }
-
-        public string ResourceName { get; set; }
     }
 }
