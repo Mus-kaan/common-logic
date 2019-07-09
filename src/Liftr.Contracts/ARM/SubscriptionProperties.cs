@@ -2,14 +2,16 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-namespace Microsoft.Liftr.Contracts
+using System;
+
+namespace Microsoft.Liftr.Contracts.ARM
 {
-    public interface IEntityId
+    public class SubscriptionProperties
     {
-        string SubscriptionId { get; set; }
+        public Guid? TenantId { get; set; }
 
-        string ResourceGroup { get; set; }
+        public string LocationPlacementId { get; set; }
 
-        string ResourceName { get; set; }
+        public string QuotaId { get; set; }
     }
 }

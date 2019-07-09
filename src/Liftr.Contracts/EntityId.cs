@@ -4,12 +4,12 @@
 
 namespace Microsoft.Liftr.Contracts
 {
-    public interface IEntityId
+    public class EntityId : IEntityId
     {
-        string SubscriptionId { get; set; }
+        public string SubscriptionId { get; set; }
 
-        string ResourceGroup { get; set; }
+        public string ResourceGroup { get; set; }
 
-        string ResourceName { get; set; }
+        public string ResourceName { get; set; }
     }
 }

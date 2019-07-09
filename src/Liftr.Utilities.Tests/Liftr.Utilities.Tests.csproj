@@ -4,6 +4,7 @@
     <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
     <IsPackable>false</IsPackable>
     <AssemblyName>Microsoft.Liftr.Utilities.Tests</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Utilities.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(PackageVersion_Microsoft_NET_Test_Sdk)" />

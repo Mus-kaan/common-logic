@@ -11,6 +11,8 @@ namespace Microsoft.Liftr.Utilities.Tests
 {
     public class UtilityTests
     {
+        private const string c_exceptedSerilized = "{\"strProp\":\"string value a.\",\"intProp\":-1222,\"timeStampInZulu\":\"2019-07-05T15:50:54.1793804Z\",\"timeSpanValue\":\"PT55M20.4S\",\"enumValue1\":\"TestEnumValue1\",\"enumValue2\":\"SkuPremium\",\"enumValue3\":\"ALLCAP\",\"enumValue4\":\"Snake_Value\",\"enumValue5\":\"Basic\",\"enumValue6\":\"PremiumSKU\"}";
+
         [Theory]
         [InlineData("aaa", "aaa")]
         [InlineData("aAa", "aaa")]
@@ -61,6 +63,14 @@ namespace Microsoft.Liftr.Utilities.Tests
             {
                 timeString.ParseZuluDateTime();
             });
+        }
+
+        [Fact]
+        public void JsonConverterTest()
+        {
+            var obj = new TestClass();
+            var serialized = obj.ToJson();
+            Assert.Equal(c_exceptedSerilized, serialized);
         }
     }
 }

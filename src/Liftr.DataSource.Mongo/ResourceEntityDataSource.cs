@@ -21,15 +21,5 @@ namespace Microsoft.Liftr.DataSource.Mongo
             _collection = collection;
             _timeSource = timeSource;
         }
-
-        public async Task<IResourceEntity> AddEntityAsync(IResourceEntity entity)
-        {
-            return entity;
-        }
-
-        public async Task<IResourceEntity> GetResourceEntityAsync(IEntityId id)
-        {
-
-        }
     }
 }

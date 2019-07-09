@@ -5,4 +5,7 @@
     <AssemblyName>Microsoft.Liftr.Utilities</AssemblyName>
     <RootNamespace>Microsoft.Liftr.Utilities</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+  </ItemGroup>
 </Project>
