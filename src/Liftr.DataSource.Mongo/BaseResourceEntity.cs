@@ -11,6 +11,11 @@ namespace Microsoft.Liftr.DataSource.Mongo
 {
     public abstract class BaseResourceEntity : IResourceEntity
     {
+        protected BaseResourceEntity()
+        {
+            EntityId = ObjectId.GenerateNewId().ToString();
+        }
+
         /// <summary>
         /// Unique, indexed.
         /// </summary>
@@ -43,6 +48,6 @@ namespace Microsoft.Liftr.DataSource.Mongo
         public string ProvisioningState { get; set; }
 
         [BsonElement("createdAt")]
-        public DateTime CreatedUTC { get; set; }
+        public DateTime CreatedUTC { get; set; } = LiftrDateTime.MinValue;
     }
 }

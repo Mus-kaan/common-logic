@@ -12,7 +12,7 @@ using System.Globalization;
 using System.Linq;
 using System.Xml;
 
-namespace Microsoft.Liftr.Utilities
+namespace Microsoft.Liftr
 {
     public static class JsonExtensions
     {
@@ -34,6 +34,11 @@ namespace Microsoft.Liftr.Utilities
         };
 
         public static JsonSerializer JsonSerializer => JsonSerializer.Create(DefaultFormatterSettings);
+
+        public static string ToJsonString(this object self)
+        {
+            return ToJson(self, DefaultFormatterSettings);
+        }
 
         public static string ToJson(this object self)
         {

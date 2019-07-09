@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.DataSource.Mongo
 {
-    public sealed class MongoCollectionsFactory
+    public class MongoCollectionsFactory
     {
         private readonly ILogger _logger;
         private readonly IMongoDatabase _db;
@@ -78,6 +78,27 @@ namespace Microsoft.Liftr.DataSource.Mongo
             {
                 _db.CreateCollection(collectionName);
                 return _db.GetCollection<T>(collectionName);
+            }
+
+            var msg = $"Collection with name {collectionName} already exist.";
+            _logger.Fatal(msg);
+            throw new InvalidOperationException(msg);
+        }
+
+        [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
+        public async Task<IMongoCollection<T>> CreateEntityCollectionAsync<T>(string collectionName) where T : BaseResourceEntity
+        {
+            if (!await CollectionExistsAsync(_db, collectionName))
+            {
+                var collection = await CreateCollectionAsync<T>(collectionName);
+
+                var nameIdx = new CreateIndexModel<T>(Builders<T>.IndexKeys.Ascending(item => item.Name), new CreateIndexOptions<T> { Unique = true });
+                collection.Indexes.CreateOne(nameIdx);
+
+                var subIdx = new CreateIndexModel<T>(Builders<T>.IndexKeys.Ascending(item => item.SubscriptionId), new CreateIndexOptions<T> { Unique = false });
+                collection.Indexes.CreateOne(subIdx);
+
+                return collection;
             }
 
             var msg = $"Collection with name {collectionName} already exist.";

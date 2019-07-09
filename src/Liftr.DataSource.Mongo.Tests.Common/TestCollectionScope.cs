@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Diagnostics;
@@ -15,9 +14,19 @@ namespace Microsoft.Liftr.DataSource.Mongo
         private readonly string _collectionName;
 
         public TestCollectionScope(Func<IMongoDatabase, string, IMongoCollection<T>> collectionCrator)
+            : this(TestDBConnection.TestDatabase, TestDBConnection.RandomCollectionName(), collectionCrator)
         {
-            _db = TestDBConnection.TestDatabase;
-            _collectionName = GenerateRandomCollectionName();
+        }
+
+        public TestCollectionScope(IMongoDatabase db, Func<IMongoDatabase, string, IMongoCollection<T>> collectionCrator)
+            : this(db, TestDBConnection.RandomCollectionName(), collectionCrator)
+        {
+        }
+
+        public TestCollectionScope(IMongoDatabase db, string collectionName, Func<IMongoDatabase, string, IMongoCollection<T>> collectionCrator)
+        {
+            _db = db;
+            _collectionName = collectionName;
             Collection = collectionCrator(_db, _collectionName);
         }
 
@@ -34,12 +43,5 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 Debug.WriteLine(ex);
             }
         }
-
-        #region Private methods
-        private static string GenerateRandomCollectionName()
-        {
-            return "test.collection." + ObjectId.GenerateNewId().ToString();
-        }
-        #endregion
     }
 }
