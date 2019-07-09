@@ -1,13 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
     <AssemblyName>Microsoft.Liftr.DataSource.Mongo.Tests.Common</AssemblyName>
     <RootNamespace>Microsoft.Liftr.DataSource.Mongo</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj" />
   </ItemGroup>
-
 </Project>

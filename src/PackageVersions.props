@@ -3,7 +3,7 @@
   <PropertyGroup>
     <PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>2.2.0</PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>
     <PackageVersion_Microsoft_Extensions_Configuration_AzureKeyVault>2.2.0</PackageVersion_Microsoft_Extensions_Configuration_AzureKeyVault>
-    <PackageVersion_Microsoft_NET_Test_Sdk>15.9.0</PackageVersion_Microsoft_NET_Test_Sdk>
+    <PackageVersion_Microsoft_NET_Test_Sdk>16.0.1</PackageVersion_Microsoft_NET_Test_Sdk>
     <PackageVersion_MongoDB_Driver>2.8.1</PackageVersion_MongoDB_Driver>
     <PackageVersion_Newtonsoft_Json>12.0.2</PackageVersion_Newtonsoft_Json>
     <PackageVersion_Serilog>2.8.0</PackageVersion_Serilog>
