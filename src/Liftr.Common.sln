@@ -9,13 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DataSource.Mongo", "L
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Logging", "Liftr.Logging\Liftr.Logging.csproj", "{336FAA25-B1F3-4541-BB14-A42ED60E88EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Contracts", "Liftr.Contracts\Liftr.Contracts.csproj", "{7BD6E1C0-4B0F-4DDC-83A2-FD9298907FB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Contracts", "Liftr.Contracts\Liftr.Contracts.csproj", "{7BD6E1C0-4B0F-4DDC-83A2-FD9298907FB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Utilities", "Liftr.Utilities\Liftr.Utilities.csproj", "{236CF19C-399F-460F-A068-935185814C14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Utilities", "Liftr.Utilities\Liftr.Utilities.csproj", "{236CF19C-399F-460F-A068-935185814C14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Utilities.Tests", "Liftr.Utilities.Tests\Liftr.Utilities.Tests.csproj", "{BCE2A045-4B3F-4D3C-A87E-A226EF09176C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Utilities.Tests", "Liftr.Utilities.Tests\Liftr.Utilities.Tests.csproj", "{BCE2A045-4B3F-4D3C-A87E-A226EF09176C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Contracts.Tests", "Liftr.Contracts.Tests\Liftr.Contracts.Tests.csproj", "{67D5E047-67CC-4A4C-A0E9-524F7F69B54A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Contracts.Tests", "Liftr.Contracts.Tests\Liftr.Contracts.Tests.csproj", "{67D5E047-67CC-4A4C-A0E9-524F7F69B54A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_build", "_build", "{29892849-A243-4D10-ADCE-8C22C791CDE0}"
 	ProjectSection(SolutionItems) = preProject
@@ -24,6 +24,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_build", "_build", "{298928
 		NuGet.config = NuGet.config
 		PackageVersions.props = PackageVersions.props
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.DataSource.Mongo.Tests.Common", "Liftr.DataSource.Mongo.Tests.Common\Liftr.DataSource.Mongo.Tests.Common.csproj", "{50927DA1-CA1A-415D-B367-64884D31F75E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +61,10 @@ Global
 		{67D5E047-67CC-4A4C-A0E9-524F7F69B54A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67D5E047-67CC-4A4C-A0E9-524F7F69B54A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67D5E047-67CC-4A4C-A0E9-524F7F69B54A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50927DA1-CA1A-415D-B367-64884D31F75E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50927DA1-CA1A-415D-B367-64884D31F75E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50927DA1-CA1A-415D-B367-64884D31F75E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50927DA1-CA1A-415D-B367-64884D31F75E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
