@@ -42,7 +42,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
         [Fact]
         public async Task BasicDataSourceUsageAsync()
         {
-            var s = new MockEntityDataSource(_collectionScope.Collection);
+            IResourceEntityDataSource<MockResourceEntity> s = new MockEntityDataSource(_collectionScope.Collection);
 
             var subId1 = Guid.NewGuid().ToString();
             var subId2 = Guid.NewGuid().ToString();

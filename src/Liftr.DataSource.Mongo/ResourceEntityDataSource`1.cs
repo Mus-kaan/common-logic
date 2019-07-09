@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.DataSource.Mongo
 {
-    public class ResourceEntityDataSource<TResource> where TResource : BaseResourceEntity
+    public class ResourceEntityDataSource<TResource> : IResourceEntityDataSource<TResource> where TResource : BaseResourceEntity
     {
         protected readonly IMongoCollection<TResource> _collection;
 

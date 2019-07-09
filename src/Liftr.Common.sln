@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.DataSource.Mongo.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.DataSource.Mongo.Tests", "Liftr.DataSource.Mongo.Tests\Liftr.DataSource.Mongo.Tests.csproj", "{FECC342E-C729-4936-ABCD-CBC72C524CB4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.DataSource.Abstractions", "Liftr.DataSource.Abstractions\Liftr.DataSource.Abstractions.csproj", "{146F2075-7E59-4EF9-977E-A3FCADB8542A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,10 @@ Global
 		{FECC342E-C729-4936-ABCD-CBC72C524CB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FECC342E-C729-4936-ABCD-CBC72C524CB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FECC342E-C729-4936-ABCD-CBC72C524CB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{146F2075-7E59-4EF9-977E-A3FCADB8542A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{146F2075-7E59-4EF9-977E-A3FCADB8542A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{146F2075-7E59-4EF9-977E-A3FCADB8542A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{146F2075-7E59-4EF9-977E-A3FCADB8542A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
