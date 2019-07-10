@@ -18,6 +18,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
         /// <summary>
         /// Unique, indexed.
+        /// Id of the entity. This is different from the ARM resource Id.
         /// </summary>
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
@@ -25,26 +26,43 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
         /// <summary>
         /// Indexed, shard key.
+        /// Subscription Id
         /// </summary>
         [BsonElement("subscriptionId")]
         public string SubscriptionId { get; set; }
 
+        /// <summary>
+        /// Resource Group
+        /// </summary>
         [BsonElement("rg")]
         public string ResourceGroup { get; set; }
 
         /// <summary>
         /// Unique, indexed.
+        /// The name of the resource.
         /// </summary>
         [BsonElement("name")]
         public string Name { get; set; }
 
+        /// <summary>
+        /// The type of the resource.
+        /// </summary>
+        [BsonElement("type")]
+        public string Type { get; set; }
+
+        /// <summary>
+        /// The location of the resource.
+        /// </summary>
         [BsonElement("loc")]
         public string Location { get; set; }
 
+        /// <summary>
+        /// The tags of the resource.
+        /// </summary>
         [BsonElement("tags")]
         public string Tags { get; set; }
 
-        [BsonElement("state")]
+        [BsonElement("provisionState")]
         public string ProvisioningState { get; set; }
 
         [BsonElement("createdAt")]
