@@ -3,7 +3,35 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29025.244
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Hosting", "Liftr.Hosting\Liftr.Hosting.csproj", "{A651BA62-A289-406F-8145-7FD256CD2DDC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Hosting", "Liftr.Hosting\Liftr.Hosting.csproj", "{A651BA62-A289-406F-8145-7FD256CD2DDC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DataSource.Mongo", "Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj", "{629A2EE7-20D0-47D7-A9A9-638BA7EF6AD2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Logging", "Liftr.Logging\Liftr.Logging.csproj", "{336FAA25-B1F3-4541-BB14-A42ED60E88EA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Contracts", "Liftr.Contracts\Liftr.Contracts.csproj", "{7BD6E1C0-4B0F-4DDC-83A2-FD9298907FB7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Utilities", "Liftr.Utilities\Liftr.Utilities.csproj", "{236CF19C-399F-460F-A068-935185814C14}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Utilities.Tests", "Liftr.Utilities.Tests\Liftr.Utilities.Tests.csproj", "{BCE2A045-4B3F-4D3C-A87E-A226EF09176C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Contracts.Tests", "Liftr.Contracts.Tests\Liftr.Contracts.Tests.csproj", "{67D5E047-67CC-4A4C-A0E9-524F7F69B54A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_build", "_build", "{29892849-A243-4D10-ADCE-8C22C791CDE0}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		NuGet.config = NuGet.config
+		PackageVersions.props = PackageVersions.props
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DataSource.Mongo.Tests.Common", "Liftr.DataSource.Mongo.Tests.Common\Liftr.DataSource.Mongo.Tests.Common.csproj", "{50927DA1-CA1A-415D-B367-64884D31F75E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DataSource.Mongo.Tests", "Liftr.DataSource.Mongo.Tests\Liftr.DataSource.Mongo.Tests.csproj", "{FECC342E-C729-4936-ABCD-CBC72C524CB4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DataSource.Abstractions", "Liftr.DataSource.Abstractions\Liftr.DataSource.Abstractions.csproj", "{146F2075-7E59-4EF9-977E-A3FCADB8542A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Logging.AspNetCore", "Liftr.Logging.AspNetCore\Liftr.Logging.AspNetCore.csproj", "{AB670CE0-356D-457F-BBE9-D25462011106}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +43,46 @@ Global
 		{A651BA62-A289-406F-8145-7FD256CD2DDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A651BA62-A289-406F-8145-7FD256CD2DDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A651BA62-A289-406F-8145-7FD256CD2DDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{629A2EE7-20D0-47D7-A9A9-638BA7EF6AD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{629A2EE7-20D0-47D7-A9A9-638BA7EF6AD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{629A2EE7-20D0-47D7-A9A9-638BA7EF6AD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{629A2EE7-20D0-47D7-A9A9-638BA7EF6AD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{336FAA25-B1F3-4541-BB14-A42ED60E88EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{336FAA25-B1F3-4541-BB14-A42ED60E88EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{336FAA25-B1F3-4541-BB14-A42ED60E88EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{336FAA25-B1F3-4541-BB14-A42ED60E88EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BD6E1C0-4B0F-4DDC-83A2-FD9298907FB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BD6E1C0-4B0F-4DDC-83A2-FD9298907FB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BD6E1C0-4B0F-4DDC-83A2-FD9298907FB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BD6E1C0-4B0F-4DDC-83A2-FD9298907FB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{236CF19C-399F-460F-A068-935185814C14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{236CF19C-399F-460F-A068-935185814C14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{236CF19C-399F-460F-A068-935185814C14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{236CF19C-399F-460F-A068-935185814C14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCE2A045-4B3F-4D3C-A87E-A226EF09176C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCE2A045-4B3F-4D3C-A87E-A226EF09176C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCE2A045-4B3F-4D3C-A87E-A226EF09176C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCE2A045-4B3F-4D3C-A87E-A226EF09176C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67D5E047-67CC-4A4C-A0E9-524F7F69B54A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67D5E047-67CC-4A4C-A0E9-524F7F69B54A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67D5E047-67CC-4A4C-A0E9-524F7F69B54A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67D5E047-67CC-4A4C-A0E9-524F7F69B54A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50927DA1-CA1A-415D-B367-64884D31F75E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50927DA1-CA1A-415D-B367-64884D31F75E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50927DA1-CA1A-415D-B367-64884D31F75E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50927DA1-CA1A-415D-B367-64884D31F75E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FECC342E-C729-4936-ABCD-CBC72C524CB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FECC342E-C729-4936-ABCD-CBC72C524CB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FECC342E-C729-4936-ABCD-CBC72C524CB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FECC342E-C729-4936-ABCD-CBC72C524CB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{146F2075-7E59-4EF9-977E-A3FCADB8542A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{146F2075-7E59-4EF9-977E-A3FCADB8542A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{146F2075-7E59-4EF9-977E-A3FCADB8542A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{146F2075-7E59-4EF9-977E-A3FCADB8542A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB670CE0-356D-457F-BBE9-D25462011106}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB670CE0-356D-457F-BBE9-D25462011106}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB670CE0-356D-457F-BBE9-D25462011106}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB670CE0-356D-457F-BBE9-D25462011106}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

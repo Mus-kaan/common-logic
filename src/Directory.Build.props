@@ -18,6 +18,25 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <MajorVersion>1</MajorVersion>
     <MinorVersion>0</MinorVersion>
     <PatchVersion>0</PatchVersion>
+    <BuildMetadata Condition=" '$(BuildMetadata)' == '' ">0</BuildMetadata>
+    <Version>$(MajorVersion).$(MinorVersion).$(PatchVersion)-build$(BuildMetadata)</Version>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <LiftrClassLibraryTargetFramework>netstandard2.0</LiftrClassLibraryTargetFramework>
+    <LiftrExeTargetFramework>netcoreapp2.2</LiftrExeTargetFramework>
+  </PropertyGroup>
+
+  <!-- Enable deterministic build -->
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <!--Generate XML documentation-->
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)\PackageVersions.props"/>
 </Project>

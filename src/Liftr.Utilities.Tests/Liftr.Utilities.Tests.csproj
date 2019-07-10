@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>Microsoft.Liftr.Utilities.Tests</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Utilities.Tests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(PackageVersion_Microsoft_NET_Test_Sdk)" />
+    <PackageReference Include="xunit" Version="$(PackageVersion_xunit)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(PackageVersion_xunit_runner_visualstudio)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
+  </ItemGroup>
+</Project>

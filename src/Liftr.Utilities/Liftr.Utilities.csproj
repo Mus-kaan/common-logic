@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <AssemblyName>Microsoft.Liftr.Utilities</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Utilities</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="$(PackageVersion_Newtonsoft_Json)" />
+  </ItemGroup>
+</Project>

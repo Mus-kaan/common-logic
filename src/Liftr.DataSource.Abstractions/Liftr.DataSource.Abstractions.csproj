@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <AssemblyName>Microsoft.Liftr.DataSource.Abstractions</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.DataSource</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
+  </ItemGroup>
+</Project>

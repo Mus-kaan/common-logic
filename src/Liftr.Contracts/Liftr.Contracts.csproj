@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <AssemblyName>Microsoft.Liftr.Contracts</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Contracts</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
+  </ItemGroup>
+</Project>
