@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.DataSource.Mongo
 {
-    public class MongoCollectionsFactory
+    public class MongoCollectionsFactory : IMongoCollectionsFactory
     {
         private readonly ILogger _logger;
         private readonly IMongoDatabase _db;
@@ -71,6 +71,18 @@ namespace Microsoft.Liftr.DataSource.Mongo
             throw new InvalidOperationException(msg);
         }
 
+        public IMongoCollection<T> GetCollection<T>(string collectionName)
+        {
+            if (CollectionExists(_db, collectionName))
+            {
+                return _db.GetCollection<T>(collectionName);
+            }
+
+            var msg = $"Collection with name {collectionName} does not exist.";
+            _logger.Fatal(msg);
+            throw new InvalidOperationException(msg);
+        }
+
         [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
         public async Task<IMongoCollection<T>> CreateCollectionAsync<T>(string collectionName)
         {
@@ -106,6 +118,41 @@ namespace Microsoft.Liftr.DataSource.Mongo
             throw new InvalidOperationException(msg);
         }
 
+        [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
+        public IMongoCollection<T> CreateCollection<T>(string collectionName)
+        {
+            if (!CollectionExists(_db, collectionName))
+            {
+                _db.CreateCollection(collectionName);
+                return _db.GetCollection<T>(collectionName);
+            }
+
+            var msg = $"Collection with name {collectionName} already exist.";
+            _logger.Fatal(msg);
+            throw new InvalidOperationException(msg);
+        }
+
+        [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
+        public IMongoCollection<T> CreateEntityCollection<T>(string collectionName) where T : BaseResourceEntity
+        {
+            if (!CollectionExists(_db, collectionName))
+            {
+                var collection = CreateCollection<T>(collectionName);
+
+                var nameIdx = new CreateIndexModel<T>(Builders<T>.IndexKeys.Ascending(item => item.Name), new CreateIndexOptions<T> { Unique = true });
+                collection.Indexes.CreateOne(nameIdx);
+
+                var subIdx = new CreateIndexModel<T>(Builders<T>.IndexKeys.Ascending(item => item.SubscriptionId), new CreateIndexOptions<T> { Unique = false });
+                collection.Indexes.CreateOne(subIdx);
+
+                return collection;
+            }
+
+            var msg = $"Collection with name {collectionName} already exist.";
+            _logger.Fatal(msg);
+            throw new InvalidOperationException(msg);
+        }
+
         #region Private
         private static async Task<bool> CollectionExistsAsync(IMongoDatabase db, string collectionName)
         {
@@ -116,6 +163,17 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
             // check for existence
             return await collections.AnyAsync();
+        }
+
+        private static bool CollectionExists(IMongoDatabase db, string collectionName)
+        {
+            var filter = new BsonDocument("name", collectionName);
+
+            // filter by collection name
+            var collections = db.ListCollections(new ListCollectionsOptions { Filter = filter });
+
+            // check for existence
+            return collections.Any();
         }
         #endregion
     }

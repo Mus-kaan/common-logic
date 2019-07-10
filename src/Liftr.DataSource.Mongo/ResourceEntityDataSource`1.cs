@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Contracts;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -13,17 +14,21 @@ namespace Microsoft.Liftr.DataSource.Mongo
     public class ResourceEntityDataSource<TResource> : IResourceEntityDataSource<TResource> where TResource : BaseResourceEntity
     {
         protected readonly IMongoCollection<TResource> _collection;
+        protected readonly ITimeSource _timeSource;
 
-        public ResourceEntityDataSource(IMongoCollection<TResource> collection)
+        public ResourceEntityDataSource(IMongoCollection<TResource> collection, ITimeSource timeSource)
         {
             _collection = collection;
+            _timeSource = timeSource;
         }
 
-        public virtual async Task AddEntityAsync(TResource entity)
+        public virtual async Task<TResource> AddEntityAsync(TResource entity)
         {
             try
             {
+                entity.CreatedUTC = _timeSource.UtcNow;
                 await _collection.InsertOneAsync(entity);
+                return entity;
             }
             catch (Exception ex) when (ex.IsMongoDuplicatedKeyException())
             {

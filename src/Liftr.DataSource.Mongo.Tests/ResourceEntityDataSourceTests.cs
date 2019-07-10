@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Utilities;
 using System;
@@ -42,15 +43,14 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
         [Fact]
         public async Task BasicDataSourceUsageAsync()
         {
-            IResourceEntityDataSource<MockResourceEntity> s = new MockEntityDataSource(_collectionScope.Collection);
+            var ts = new MockTimeSource();
+            IResourceEntityDataSource<MockResourceEntity> s = new MockEntityDataSource(_collectionScope.Collection, ts);
 
             var subId1 = Guid.NewGuid().ToString();
             var subId2 = Guid.NewGuid().ToString();
             var rg1 = "resourceGroupName1";
 
-            var entity1 = new MockResourceEntity() { SubscriptionId = subId1, ResourceGroup = rg1, Name = "entityName1", VNet = "VnetId123" };
-
-            await s.AddEntityAsync(entity1);
+            var entity1 = await s.AddEntityAsync(new MockResourceEntity() { SubscriptionId = subId1, ResourceGroup = rg1, Name = "entityName1", VNet = "VnetId123" });
 
             // Can retrieve.
             {

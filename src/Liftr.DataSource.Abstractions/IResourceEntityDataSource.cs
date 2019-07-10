@@ -10,7 +10,7 @@ namespace Microsoft.Liftr.DataSource
 {
     public interface IResourceEntityDataSource<TResource> where TResource : IResourceEntity
     {
-        Task AddEntityAsync(TResource entity);
+        Task<TResource> AddEntityAsync(TResource entity);
 
         Task<TResource> GetEntityAsync(string subscriptionId, string resourceGroup, string name);
 
