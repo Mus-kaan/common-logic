@@ -27,6 +27,11 @@ namespace Microsoft.Liftr.Contracts.Tests
             Assert.Single(rid.TypedNames);
             Assert.Equal("availabilitySets", rid.TypedNames[0].ResourceType);
             Assert.Equal("AvSet", rid.TypedNames[0].ResourceName);
+
+            var rid2 = new ResourceId(rid.SubscriptionId, rid.ResourceGroup, rid.Provider, rid.ResourceType, rid.ResourceName);
+            Assert.Equal(rid.ToString(), rid2.ToString());
+
+            Assert.Equal(rid.ToString(), new ResourceId(rid2.ToString()).ToString());
         }
 
         [Fact]

@@ -11,7 +11,7 @@ namespace Microsoft.Liftr.Contracts
     {
         private const string c_subscriptions = "subscriptions";
         private const string c_resourceGroups = "resourceGroups";
-        private const string c_resourceGroup = "providers";
+        private const string c_providers = "providers";
 
         private readonly string _resourceIdStr;
 
@@ -23,7 +23,7 @@ namespace Microsoft.Liftr.Contracts
             var parts = resourceId.Split('/');
             if (parts.Length >= 9 && parts.Length % 2 == 1)
             {
-                if (parts[1].OrdinalEquals(c_subscriptions) && parts[3].OrdinalEquals(c_resourceGroups) && parts[5].OrdinalEquals(c_resourceGroup))
+                if (parts[1].OrdinalEquals(c_subscriptions) && parts[3].OrdinalEquals(c_resourceGroups) && parts[5].OrdinalEquals(c_providers))
                 {
                     isValidResourceIdFormat = true;
                 }
@@ -47,6 +47,19 @@ namespace Microsoft.Liftr.Contracts
             }
 
             TypedNames = names.ToArray();
+        }
+
+        public ResourceId(string subscriptionId, string resourceGroup, string provider, string resourceType, string resourceName)
+        {
+            SubscriptionId = subscriptionId;
+            ResourceGroup = resourceGroup;
+            Provider = provider;
+            ResourceType = resourceType;
+            ResourceName = resourceName;
+            List<ResourceTypeNamePair> names = new List<ResourceTypeNamePair>();
+            names.Add(new ResourceTypeNamePair() { ResourceType = resourceType, ResourceName = resourceName });
+            TypedNames = names.ToArray();
+            _resourceIdStr = $"/{c_subscriptions}/{SubscriptionId}/{c_resourceGroups}/{ResourceGroup}/{c_providers}/{Provider}/{ResourceType}/{ResourceName}";
         }
 
         public string SubscriptionId { get; }
