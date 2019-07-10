@@ -25,11 +25,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_build", "_build", "{298928
 		PackageVersions.props = PackageVersions.props
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.DataSource.Mongo.Tests.Common", "Liftr.DataSource.Mongo.Tests.Common\Liftr.DataSource.Mongo.Tests.Common.csproj", "{50927DA1-CA1A-415D-B367-64884D31F75E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DataSource.Mongo.Tests.Common", "Liftr.DataSource.Mongo.Tests.Common\Liftr.DataSource.Mongo.Tests.Common.csproj", "{50927DA1-CA1A-415D-B367-64884D31F75E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.DataSource.Mongo.Tests", "Liftr.DataSource.Mongo.Tests\Liftr.DataSource.Mongo.Tests.csproj", "{FECC342E-C729-4936-ABCD-CBC72C524CB4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DataSource.Mongo.Tests", "Liftr.DataSource.Mongo.Tests\Liftr.DataSource.Mongo.Tests.csproj", "{FECC342E-C729-4936-ABCD-CBC72C524CB4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.DataSource.Abstractions", "Liftr.DataSource.Abstractions\Liftr.DataSource.Abstractions.csproj", "{146F2075-7E59-4EF9-977E-A3FCADB8542A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DataSource.Abstractions", "Liftr.DataSource.Abstractions\Liftr.DataSource.Abstractions.csproj", "{146F2075-7E59-4EF9-977E-A3FCADB8542A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Logging.AspNetCore", "Liftr.Logging.AspNetCore\Liftr.Logging.AspNetCore.csproj", "{AB670CE0-356D-457F-BBE9-D25462011106}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,6 +79,10 @@ Global
 		{146F2075-7E59-4EF9-977E-A3FCADB8542A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{146F2075-7E59-4EF9-977E-A3FCADB8542A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{146F2075-7E59-4EF9-977E-A3FCADB8542A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB670CE0-356D-457F-BBE9-D25462011106}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB670CE0-356D-457F-BBE9-D25462011106}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB670CE0-356D-457F-BBE9-D25462011106}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB670CE0-356D-457F-BBE9-D25462011106}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <AssemblyName>Microsoft.Liftr.Logging.AspNetCore</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Logging.AspNetCore</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="$(PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions)" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="$(PackageVersion_Microsoft_ApplicationInsights_AspNetCore)" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(PackageVersion_Microsoft_Extensions_Configuration_Json)" />
+    <PackageReference Include="Serilog.AspNetCore" Version="$(PackageVersion_Serilog_AspNetCore)" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="$(PackageVersion_Serilog_Settings_Configuration)" />
+    <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="$(PackageVersion_Serilog_Sinks_ApplicationInsights)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
+  </ItemGroup>
+</Project>
