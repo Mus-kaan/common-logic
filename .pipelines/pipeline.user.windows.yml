@@ -19,6 +19,12 @@ version:
 versioning:
   commands:
 
+package_sources:
+  nuget:
+    config_files:                               # A list of glob patterns specifying the configuration files. Use this if you already have NuGet.Config files in your repository.
+      - include:                                # Configuration files to include for automatic inference.
+        - "src/NuGet.Config"
+
 restore:
   commands:
     - !!defaultcommand
