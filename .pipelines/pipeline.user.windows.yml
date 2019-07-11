@@ -1,0 +1,64 @@
+environment:
+  host:
+    os: 'windows'
+    flavor: "server"
+    version: "2016"
+  runtime:
+    provider: 'appcontainer'
+    image: 'cdpxwin.azurecr.io/global/vse2017u5-external-azsdk-ext-win14393.1884:4.2'
+
+signing_options:
+  profile: 'internal_azure_service'   # This service deploys to Azure!
+
+version:
+  name: 'Liftr.Common'                                              
+  major: 1                                                              # The major version number.
+  minor: 0                                                              # The minor version number
+  system: 'buildrevision'                                               
+
+versioning:
+  commands:
+
+restore:
+  commands:
+    - !!defaultcommand
+      name: 'Restore Windows'
+      command: 'run-windows-restore.cmd'
+      
+build:
+  commands:
+    - !!buildcommand
+      name: 'Build Windows'
+      command: 'run-windows-build.cmd'
+
+test:
+  commands:
+    - !!testcommand
+      name: 'Run Windows Tests'
+      command: 'run-windows-tests.cmd'
+      fail_on_stderr: true
+      testresults:
+        - title: 'Windows Tests'
+          type: 'vstest'
+          platform: 'Any CPU'
+          configuration: 'Debug'
+          include:
+            - '**/*.trx'
+
+package:
+  commands:
+    - !!buildcommand
+      name: 'Package'
+      command: 'run-windows-pack.cmd'
+      artifacts:
+        - from: 'nupkgs'
+          to: 'nupkgs'
+          include:
+            - '**/*'
+
+static_analysis_options: # OPTIONAL: If you wish to add options to FxCop, ModernCop, PoliCheck, or BinSkim
+  binskim_options:       # OPTIONAL: If you want to add options for BinSkim.
+    files_to_scan:     
+      - from: 'src/**/bin'
+        include:
+          - '**/Microsoft.Liftr.*.dll'
