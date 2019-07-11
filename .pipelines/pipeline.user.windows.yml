@@ -10,6 +10,10 @@ environment:
 signing_options:
   profile: 'internal_azure_service'   # This service deploys to Azure!
 
+workspace_options:                  # Metadata section
+  enable_legacy_networking: true    # Default is false. If false, only the Restore stage enables network connectivity to the user build container. 
+                                    # If true, all stages enable network connectivity to user build container.
+
 version:
   name: 'Liftr.Common'                                              
   major: 1                                                              # The major version number.

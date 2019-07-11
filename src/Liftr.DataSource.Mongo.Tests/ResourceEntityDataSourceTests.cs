@@ -41,7 +41,6 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
         }
 
         [Fact]
-        [Trait("NeedNetwork", "Yes")]
         public async Task BasicDataSourceUsageAsync()
         {
             var ts = new MockTimeSource();

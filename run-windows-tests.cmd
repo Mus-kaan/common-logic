@@ -2,7 +2,7 @@
 
 echo "Starting Windows tests..."
 
-dotnet test %~dp0\src\Liftr.Common.sln --logger:trx --filter "TraitName!=NeedNetwork" || goto :error
+dotnet test %~dp0\src\Liftr.Common.sln --logger:trx || goto :error
 
 echo "Finished Windows tests successfully"
 goto :EOF
