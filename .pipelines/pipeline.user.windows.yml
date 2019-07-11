@@ -17,7 +17,7 @@ workspace_options:                  # Metadata section
 version:
   name: 'Liftr.Common'                                              
   major: 1                                                              # The major version number.
-  minor: 0                                                              # The minor version number
+  minor: 2                                                              # The minor version number
   system: 'buildrevision'                                               
 
 versioning:
