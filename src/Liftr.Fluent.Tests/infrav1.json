@@ -1,0 +1,12 @@
+{
+    "partnerName": "TestPartNameInHawaii",
+    "shortPartnerName": "test",
+    "environment": "Test",
+    "locationStr": "centralus",
+    "dataCoreName": "rpdata",
+    "computeCoreName": "rpcompute",
+    "cosmosSecreteName": "asd",
+    "webAppTierStr": "Standard",
+    "webAppSizeStr": "S1",
+    "aspNetEnv": "Development"
+}

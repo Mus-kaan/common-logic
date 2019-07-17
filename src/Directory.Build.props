@@ -38,5 +38,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
+  <!--Do not generate nuget packages by default-->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
   <Import Project="$(MSBuildThisFileDirectory)\PackageVersions.props"/>
 </Project>

@@ -2,6 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
     <AssemblyName>Microsoft.Liftr.Hosting</AssemblyName>
     <RootNamespace>Microsoft.Liftr.Hosting</RootNamespace>
   </PropertyGroup>

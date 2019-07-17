@@ -1,0 +1,12 @@
+{
+  "partnerName": "IncrediBuild",
+  "shortPartnerName": "ibuild",
+  "environment": "Dev",
+  "locationStr": "centralus",
+  "dataCoreName": "rpdata",
+  "computeCoreName": "rpcompute",
+  "cosmosSecreteName": "IncrediBuildRP-IncrediBuildMongoOptions--ConnectionString",
+  "webAppTierStr": "Standard",
+  "webAppSizeStr": "S1",
+  "aspNetEnv": "Prod"
+}

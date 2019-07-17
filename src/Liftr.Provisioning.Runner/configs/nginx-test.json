@@ -1,0 +1,12 @@
+{
+  "partnerName": "Nginx",
+  "shortPartnerName": "ngx",
+  "environment": "Test",
+  "locationStr": "centralus",
+  "dataCoreName": "rpdata",
+  "computeCoreName": "rpcompute",
+  "cosmosSecreteName": "NginxRP-NginxMongoOptions--ConnectionString",
+  "webAppTierStr": "Standard",
+  "webAppSizeStr": "S1",
+  "aspNetEnv": "Test"
+}
