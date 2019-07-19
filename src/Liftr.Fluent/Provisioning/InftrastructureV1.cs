@@ -48,15 +48,15 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             _logger.Information("Creating Resource Group ...");
             var rg = await _azure.CreateResourceGroupAsync(context.Location, rgName, context.Tags);
-            _logger.Information("Created {@ResourceGroup}", rg);
+            _logger.Information($"Created Resource Group with Id {rg.Id}");
 
             _logger.Information("Creating Key Vault ...");
             var kv = await _azure.CreateKeyVaultAsync(context.Location, rgName, kvName, context.Tags, _azure.ClientId);
-            _logger.Information("Created {@KeyVault}", kv);
+            _logger.Information($"Created KeyVault with Id {kv.Id}");
 
             _logger.Information("Creating CosmosDB ...");
             (var db, string connectionString) = await _azure.CreateCosmosDBAsync(context.Location, rgName, cosmosName, context.Tags);
-            _logger.Information("Created {@CosmosDB}", db);
+            _logger.Information($"Created CosmosDB with Id {db.Id}");
 
             _logger.Information("Puting the CosmosDB Connection String in the key vault ...");
             IKeyVaultClient keyVaultClient = new KeyVaultClient(
@@ -68,7 +68,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 }), _azure.KeyVaultHttpClient);
 
             await keyVaultClient.SetSecretAsync(kv.VaultUri, cosmosSecreteName, connectionString, context.Tags);
-            _logger.Information("Finished creating data resource group: {@ResourceGroup}", rg);
+            _logger.Information($"Finished creating data resource group with Id {rg.Id}");
 
             return (rg, kv.Id);
         }
@@ -80,11 +80,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             _logger.Information("Creating Resource Group ...");
             var rg = await _azure.CreateResourceGroupAsync(context.Location, rgName, context.Tags);
-            _logger.Information("Created {@ResourceGroup}", rg);
+            _logger.Information($"Created Resource Group with Id {rg.Id}");
 
             _logger.Information("Creating Web App ...");
             var webApp = await _azure.CreateWebAppAsync(context.Location, rgName, webAppName, context.Tags, tier, aspNetEnv);
-            _logger.Information("Created {@WebApp}", webApp);
+            _logger.Information($"Created Web App with Id {webApp.Id}");
 
             _logger.Information("Updating key vault to allow the web app to access ...");
             var kv = await _azure.GetKeyVaultByIdAsync(kvResourceId);
@@ -102,7 +102,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     .Attach()
                  .ApplyAsync();
 
-            _logger.Information("Finished creating compute resource group: {@ResourceGroup}", rg);
+            _logger.Information($"Finished creating compute resource group with Id {rg.Id}");
 
             return rg;
         }

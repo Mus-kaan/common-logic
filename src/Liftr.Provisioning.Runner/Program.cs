@@ -20,7 +20,7 @@ namespace Microsoft.Liftr.Provisioning.Runner
         {
             var logger = new LoggerConfiguration()
                 .WriteTo.Console()
-                .WriteTo.File("log-.txt", rollingInterval: RollingInterval.Minute)
+                .WriteTo.File("log-.txt", rollingInterval: RollingInterval.Day)
                 .CreateLogger();
 
             if (args.Length != 1)
