@@ -2,6 +2,10 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -32,6 +36,34 @@ namespace Microsoft.Liftr.Fluent.Tests
 
                 // It is deleted.
                 Assert.Null(await client.GetResourceGroupAsync(scope.ResourceGroupName));
+            }
+        }
+
+        [Fact]
+        public async Task CleanUpOldTestRGAsync()
+        {
+            using (var scope = new TestResourceGroupScope("unittest-rg-", _output))
+            {
+                var client = scope.Client;
+                await client.DeleteResourceGroupWithTagAsync("Creator", "UnitTest", (IReadOnlyDictionary<string, string> tags) =>
+                {
+                    if (tags.ContainsKey("CreatedAt"))
+                    {
+                        try
+                        {
+                            var timeStamp = DateTime.Parse(tags["CreatedAt"], CultureInfo.InvariantCulture);
+                            if (timeStamp < DateTime.Now.AddDays(-7))
+                            {
+                                return true;
+                            }
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                    return false;
+                });
             }
         }
     }

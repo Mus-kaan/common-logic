@@ -1,0 +1,45 @@
+{
+  "MONITORING_TENANT": "PLACEHOLDER_MONITORING_TENANT",
+  "MONITORING_ROLE": "PLACEHOLDER_MONITORING_ROLE",
+  "MONITORING_XSTORE_ACCOUNTS": "GCSPlaceholder",
+  "AdditionalEnvironmentVariables": [
+    {
+      "Key": "DATACENTER",
+      "Value": "PLACEHOLDER_REGION"
+    },
+    {
+      "Key": "MONITORING_GCS_ENVIRONMENT",
+      "Value": "PLACEHOLDER_MONITORING_GCS_ENVIRONMENT"
+    },
+    {
+      "Key": "MONITORING_GCS_ACCOUNT",
+      "Value": "PLACEHOLDER_MONITORING_GCS_ACCOUNT"
+    },
+    {
+      "Key": "MONITORING_GCS_NAMESPACE",
+      "Value": "PLACEHOLDER_MONITORING_GCS_NAMESPACE"
+    },
+    {
+      "Key": "MONITORING_GCS_REGION",
+      "Value": "PLACEHOLDER_REGION"
+    },
+    {
+      "Key": "MONITORING_GCS_AUTH_ID",
+      "Value": "PLACEHOLDER_MONITORING_GCS_AUTH_ID"
+    },
+    {
+      "Key": "MONITORING_GCS_AUTH_ID_TYPE",
+      "Value": "AuthKeyVault"
+    },
+    {
+      "Key": "MONITORING_CONFIG_VERSION",
+      "Value": "PLACEHOLDER_MONITORING_CONFIG_VERSION"
+    },
+    {
+      "Key": "MONITORING_USE_GENEVA_CONFIG_SERVICE",
+      "Value": "true"
+    }
+
+  ]
+
+}

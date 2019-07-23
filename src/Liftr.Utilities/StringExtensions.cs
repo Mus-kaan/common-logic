@@ -9,6 +9,9 @@ namespace Microsoft.Liftr
 {
     public static class StringExtensions
     {
+        public static bool StrictEquals(this string self, string input)
+            => self.Equals(input, StringComparison.Ordinal);
+
         public static bool OrdinalEquals(this string self, string input)
             => self.Equals(input, StringComparison.OrdinalIgnoreCase);
 

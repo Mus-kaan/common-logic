@@ -1,0 +1,17 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms/firstPartyApps/settings",
+      "name": "WILL_BE_CHANGED [concat(parameters('appServicePlanName'), '/AntMDS/CERTIFICATE_PFX_GENEVACERT')]",
+      "apiVersion": "2015-08-01",
+      "location": "WILL_BE_CHANGED [variables('siteLocation')]",
+      "properties": {
+        "firstPartyId": "AntMDS",
+        "settingName": "CERTIFICATE_PFX_GENEVACERT",
+        "settingValue": "WILL_BE_CHANGED [parameters('genevaCertContent')]"
+      }
+    }
+  ]
+}

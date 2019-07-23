@@ -5,6 +5,7 @@
 using Microsoft.Azure.Management.AppService.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
+using Microsoft.Liftr.Fluent.Contracts.Geneva;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -48,6 +49,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string AspNetEnv { get; set; }
 
+        public CertificateOptions ClientCert { get; set; }
+
+        public GenevaOptions MDSOptions { get; set; }
+
         public void CheckValid()
         {
             if (PartnerName?.Length < c_minParName)
@@ -73,6 +78,16 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             if (string.IsNullOrEmpty(CosmosSecreteName))
             {
                 throw new InvalidOperationException(nameof(CosmosSecreteName));
+            }
+
+            if (ClientCert == null)
+            {
+                throw new InvalidOperationException(nameof(ClientCert));
+            }
+
+            if (MDSOptions == null)
+            {
+                throw new InvalidOperationException(nameof(MDSOptions));
             }
 
             Region.Create(LocationStr);

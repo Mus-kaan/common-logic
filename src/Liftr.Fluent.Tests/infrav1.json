@@ -1,12 +1,26 @@
 {
-    "partnerName": "TestPartNameInHawaii",
-    "shortPartnerName": "test",
-    "environment": "Test",
-    "locationStr": "centralus",
-    "dataCoreName": "rpdata",
-    "computeCoreName": "rpcompute",
-    "cosmosSecreteName": "asd",
-    "webAppTierStr": "Standard",
-    "webAppSizeStr": "S1",
-    "aspNetEnv": "Development"
+  "partnerName": "TestPartner",
+  "shortPartnerName": "ppp",
+  "environment": "Test",
+  "locationStr": "centralus",
+  "dataCoreName": "rpdata",
+  "computeCoreName": "rpcompute",
+  "cosmosSecreteName": "IncrediBuildRP-IncrediBuildMongoOptions--ConnectionString",
+  "webAppTierStr": "Standard",
+  "webAppSizeStr": "S1",
+  "aspNetEnv": "Development",
+  "ClientCert": {
+    "CertificateName": "TestAMEClientCert",
+    "SubjectName": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
+    "SubjectAlternativeNames": [ "antares-mds-agent.geneva.keyvault.liftr-dev.net" ]
+  },
+  "MDSOptions": {
+    "MonitoringTenant": "UnitTest",
+    "MonitoringRole": "UnitTestRole",
+    "MonitoringGCSEnvironment": "Test",
+    "MonitoringGCSAccount": "LiftrDev",
+    "MonitoringGCSNamespace": "LiftrDev",
+    "MonitoringGCSClientCertificateSAN": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
+    "MonitoringConfigVersion": "3.0"
+  }
 }

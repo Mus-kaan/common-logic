@@ -3,6 +3,8 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -22,33 +24,58 @@ namespace Microsoft.Liftr.Fluent.Tests
         [Fact]
         public async Task CanCreateKeyVaultAsync()
         {
+            var logger = TestLogger.GetLogger(_output);
             using (var scope = new TestResourceGroupScope("unittest-kv-", _output))
             {
-                var client = scope.Client;
-                var rg = await client.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
+                var azure = scope.Client;
+                var rg = await azure.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
                 var name = SdkContext.RandomResourceName("test-vault-", 15);
-                var created = await client.CreateKeyVaultAsync(TestCommon.Location, scope.ResourceGroupName, name, TestCommon.Tags, TestCredentials.ClientId);
+                var kv = await azure.CreateKeyVaultAsync(TestCommon.Location, scope.ResourceGroupName, name, TestCommon.Tags, TestCredentials.ClientId);
 
                 // List
                 {
-                    var resources = await client.ListKeyVaultAsync(scope.ResourceGroupName);
+                    var resources = await azure.ListKeyVaultAsync(scope.ResourceGroupName);
                     Assert.Single(resources);
                     var r = resources.First();
                     Assert.Equal(name, r.Name);
                     TestCommon.CheckCommonTags(r.Inner.Tags);
 
                     Assert.Single(r.AccessPolicies);
-                    Assert.Equal("11f2c714-9364-47dc-a018-fb2ddc0a1a0f", r.AccessPolicies[0].ObjectId);
+                    Assert.Equal(TestCredentials.ObjectId, r.AccessPolicies[0].ObjectId);
                 }
 
                 // Get
                 {
-                    var r = await client.GetKeyVaultByIdAsync(created.Id);
+                    var r = await azure.GetKeyVaultByIdAsync(kv.Id);
                     Assert.Equal(name, r.Name);
                     TestCommon.CheckCommonTags(r.Inner.Tags);
 
                     Assert.Single(r.AccessPolicies);
-                    Assert.Equal("11f2c714-9364-47dc-a018-fb2ddc0a1a0f", r.AccessPolicies[0].ObjectId);
+                    Assert.Equal(TestCredentials.ObjectId, r.AccessPolicies[0].ObjectId);
+                }
+
+                // Verify AME OneCert creations.
+                using (var valet = new KeyVaultConcierge(kv.VaultUri, azure.ClientId, azure.ClientSecret, logger))
+                {
+                    var certName = SdkContext.RandomResourceName("ame", 8);
+                    var subjectName = certName + ".liftr-dev.net";
+                    var subjectAlternativeNames = new List<string>() { "*." + subjectName };
+                    var certIssuerName = "one-cert-issuer";
+
+                    await valet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
+                    await valet.CreateCertificateAsync(certName, certIssuerName, subjectName, subjectAlternativeNames, TestCommon.Tags);
+                    var cert = await valet.DownloadCertAsync(certName);
+                }
+
+                await azure.RemoveAccessPolicyAsync(kv.Id, TestCredentials.ObjectId);
+
+                // Get
+                {
+                    var r = await azure.GetKeyVaultByIdAsync(kv.Id);
+                    Assert.Equal(name, r.Name);
+                    TestCommon.CheckCommonTags(r.Inner.Tags);
+
+                    Assert.Empty(r.AccessPolicies);
                 }
             }
         }

@@ -27,10 +27,10 @@ namespace Microsoft.Liftr.Fluent.Tests
         {
             var logger = TestLogger.GetLogger(_output);
             var options = InfraV1Options.FromFile("infrav1.json");
-            options.ShortPartnerName = SdkContext.RandomResourceName("ut", 10);
+            options.ShortPartnerName = SdkContext.RandomResourceName("antmds", 10);
             var context = new NamingContext(options.PartnerName, options.ShortPartnerName, options.Environment, options.Location);
             TestCommon.AddCommonTags(context.Tags);
-            var client = new AzureClient(TestCredentials.GetAzure(), TestCredentials.ClientId, TestCredentials.ClientSecret, logger);
+            var client = new AzureClient(TestCredentials.GetAzure(), TestCredentials.ClientId, TestCredentials.ClientSecret, TestCredentials.ObjectId, logger);
 
             using (var dataScope = new TestResourceGroupScope(client, context.ResourceGroupName(options.DataCoreName)))
             using (var computeScope = new TestResourceGroupScope(client, context.ResourceGroupName(options.ComputeCoreName)))
@@ -54,18 +54,17 @@ namespace Microsoft.Liftr.Fluent.Tests
                     Assert.Single(kvs);
                     var r = kvs.First();
                     TestCommon.CheckCommonTags(r.Inner.Tags);
-                    Assert.Equal(2, r.AccessPolicies.Count);
+                    Assert.Single(r.AccessPolicies);
 
                     // Insert side.
                     {
-                        var insertPolicy = r.AccessPolicies.Where(i => i.ObjectId.OrdinalEquals("11f2c714-9364-47dc-a018-fb2ddc0a1a0f")).FirstOrDefault();
-                        Assert.Single(insertPolicy.Permissions.Secrets);
-                        Assert.Equal(SecretPermissions.Set.ToString(), insertPolicy.Permissions.Secrets[0]);
+                        var insertPolicy = r.AccessPolicies.Where(i => i.ObjectId.OrdinalEquals(TestCredentials.ObjectId));
+                        Assert.Empty(insertPolicy);
                     }
 
                     // Web app side.
                     {
-                        var webAppPolicy = r.AccessPolicies.Where(i => !i.ObjectId.OrdinalEquals("11f2c714-9364-47dc-a018-fb2ddc0a1a0f")).FirstOrDefault();
+                        var webAppPolicy = r.AccessPolicies.Where(i => !i.ObjectId.OrdinalEquals(TestCredentials.ObjectId)).FirstOrDefault();
                         Assert.Equal(2, webAppPolicy.Permissions.Secrets.Count);
                         Assert.NotEqual(-1, webAppPolicy.Permissions.Secrets.IndexOf(SecretPermissions.List.ToString()));
                         Assert.NotEqual(-1, webAppPolicy.Permissions.Secrets.IndexOf(SecretPermissions.Get.ToString()));

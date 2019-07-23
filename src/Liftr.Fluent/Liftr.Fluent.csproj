@@ -8,9 +8,15 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="$(PackageVersion_Microsoft_Azure_KeyVault)" />
+    <PackageReference Include="Microsoft.CSharp" Version="$(PackageVersion_Microsoft_CSharp)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Fluent.Contracts\Liftr.Fluent.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Geneva\*.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

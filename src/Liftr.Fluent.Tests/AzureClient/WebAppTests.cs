@@ -4,6 +4,9 @@
 
 using Microsoft.Azure.Management.AppService.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Liftr.Fluent.Contracts.Geneva;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -23,6 +26,7 @@ namespace Microsoft.Liftr.Fluent.Tests
         [Fact]
         public async Task CanCreateWebAppAsync()
         {
+            var logger = TestLogger.GetLogger(_output);
             using (var scope = new TestResourceGroupScope("unittest-antares-", _output))
             {
                 var client = scope.Client;
@@ -34,9 +38,28 @@ namespace Microsoft.Liftr.Fluent.Tests
                 var resources = await client.ListWebAppAsync(scope.ResourceGroupName);
                 Assert.Single(resources);
 
-                var r = resources.First();
-                Assert.Equal(name, r.Name);
-                TestCommon.CheckCommonTags(r.Inner.Tags);
+                var webApp = resources.First();
+                Assert.Equal(name, webApp.Name);
+                TestCommon.CheckCommonTags(webApp.Inner.Tags);
+
+                var kv = await client.CreateKeyVaultAsync(TestCommon.Location, scope.ResourceGroupName, SdkContext.RandomResourceName("test-vault-", 15), TestCommon.Tags, TestCredentials.ClientId);
+
+                // Verify AME OneCert creations.
+                using (var valet = new KeyVaultConcierge(kv.VaultUri, client.ClientId, client.ClientSecret, logger))
+                {
+                    var certName = SdkContext.RandomResourceName("ame", 8);
+                    var subjectName = certName + ".liftr-dev.net";
+                    var subjectAlternativeNames = new List<string>() { "*." + subjectName };
+                    var certIssuerName = "one-cert-issuer";
+
+                    await valet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
+                    await valet.CreateCertificateAsync(certName, certIssuerName, subjectName, subjectAlternativeNames, TestCommon.Tags);
+                    var cert = await valet.DownloadCertAsync(certName);
+
+                    await client.UploadCertificateToWebAppAsync(webApp.Id, "test-cert", Convert.FromBase64String(cert.Value));
+                }
+
+                var appServicePlan = await client.GetAppServicePlanByIdAsync(webApp.AppServicePlanId);
             }
         }
     }

@@ -45,6 +45,11 @@ namespace Microsoft.Liftr
             return ToJson(self, DefaultFormatterSettings);
         }
 
+        public static JObject ToJObject(this object self)
+        {
+            return JObject.Parse(self.ToJson());
+        }
+
         public static string ToJson(this object self, JsonSerializerSettings settings)
         {
             if (self == null)

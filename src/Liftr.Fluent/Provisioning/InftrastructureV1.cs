@@ -2,14 +2,13 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.AppService.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Liftr.Fluent.Contracts;
 using Serilog;
 using System;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent.Provisioning
@@ -34,13 +33,16 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 context = new NamingContext(options.PartnerName, options.ShortPartnerName, options.Environment, options.Location);
             }
 
-            (var dataRG, string keyVaultResourceId) = await CreateDataResourceGroupAsync(options.DataCoreName, context, options.CosmosSecreteName);
-            var computeRG = await CreateComputeGroupAsync(options.ComputeCoreName, context, options.WebAppTier, options.AspNetEnv, keyVaultResourceId);
+            (var dataRG, string keyVaultResourceId) = await CreateDataResourceGroupAsync(options.DataCoreName, context, options.CosmosSecreteName, options.ClientCert);
+            var computeRG = await CreateComputeGroupAsync(options.ComputeCoreName, context, options.WebAppTier, options.AspNetEnv, keyVaultResourceId, options);
+
+            await _azure.RemoveAccessPolicyAsync(keyVaultResourceId, _azure.ServicePrincipalObjectId);
+            _logger.Information("Removed Key Vault access policy for the SDK writer {@ServicePrincipalObjectId}", _azure.ServicePrincipalObjectId);
 
             return (dataRG, computeRG);
         }
 
-        public async Task<(IResourceGroup rg, string keyVaultResourceId)> CreateDataResourceGroupAsync(string coreName, NamingContext context, string cosmosSecreteName)
+        public async Task<(IResourceGroup rg, string keyVaultResourceId)> CreateDataResourceGroupAsync(string coreName, NamingContext context, string cosmosSecreteName, CertificateOptions clientCertOptions)
         {
             var rgName = context.ResourceGroupName(coreName);
             var kvName = context.KeyVaultName(coreName);
@@ -58,22 +60,24 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             (var db, string connectionString) = await _azure.CreateCosmosDBAsync(context.Location, rgName, cosmosName, context.Tags);
             _logger.Information($"Created CosmosDB with Id {db.Id}");
 
-            _logger.Information("Puting the CosmosDB Connection String in the key vault ...");
-            IKeyVaultClient keyVaultClient = new KeyVaultClient(
-                new KeyVaultClient.AuthenticationCallback(async (authority, resource, scope) =>
-                {
-                    var authContext = new AuthenticationContext(authority, TokenCache.DefaultShared);
-                    var result = await authContext.AcquireTokenAsync(resource, new ClientCredential(_azure.ClientId, _azure.ClientSecret));
-                    return result.AccessToken;
-                }), _azure.KeyVaultHttpClient);
+            using (var valet = new KeyVaultConcierge(kv.VaultUri, _azure.ClientId, _azure.ClientSecret, _logger))
+            {
+                _logger.Information("Puting the CosmosDB Connection String in the key vault ...");
+                await valet.SetSecretAsync(cosmosSecreteName, connectionString, context.Tags);
 
-            await keyVaultClient.SetSecretAsync(kv.VaultUri, cosmosSecreteName, connectionString, context.Tags);
+                _logger.Information("Creating AME management certificate in Key Vault with name {@certName} ...", clientCertOptions.CertificateName);
+                var certIssuerName = "one-cert-issuer";
+                await valet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
+                await valet.CreateCertificateAsync(clientCertOptions.CertificateName, certIssuerName, clientCertOptions.SubjectName, clientCertOptions.SubjectAlternativeNames, context.Tags);
+                _logger.Information("Finished creating AME management certificate in Key Vault with name {@certName}", clientCertOptions.CertificateName);
+            }
+
             _logger.Information($"Finished creating data resource group with Id {rg.Id}");
 
             return (rg, kv.Id);
         }
 
-        public async Task<IResourceGroup> CreateComputeGroupAsync(string coreName, NamingContext context, PricingTier tier, string aspNetEnv, string kvResourceId)
+        public async Task<IResourceGroup> CreateComputeGroupAsync(string coreName, NamingContext context, PricingTier tier, string aspNetEnv, string kvResourceId, InfraV1Options options)
         {
             var rgName = context.ResourceGroupName(coreName);
             var webAppName = context.WebAppName(coreName);
@@ -101,6 +105,16 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     .AllowSecretPermissions(SecretPermissions.List, SecretPermissions.Get)
                     .Attach()
                  .ApplyAsync();
+
+            using (var valet = new KeyVaultConcierge(kv.VaultUri, _azure.ClientId, _azure.ClientSecret, _logger))
+            {
+                _logger.Information("Uploading ANT geneva configurations ...");
+                var cert = await valet.DownloadCertAsync(options.ClientCert.CertificateName);
+                await _azure.DeployGenevaToAppServicePlanAsync(webApp.AppServicePlanId, options.MDSOptions, cert.Value);
+                _logger.Information("Finished uploading ANT geneva configurations");
+            }
+
+            await webApp.RestartAsync();
 
             _logger.Information($"Finished creating compute resource group with Id {rg.Id}");
 

@@ -12,7 +12,7 @@ namespace Microsoft.Liftr.Fluent.Tests
     {
         public TestResourceGroupScope(string baseName, ITestOutputHelper output)
         {
-            Client = new AzureClient(TestCredentials.GetAzure(), TestCredentials.ClientId, TestCredentials.ClientSecret, TestLogger.GetLogger(output));
+            Client = new AzureClient(TestCredentials.GetAzure(), TestCredentials.ClientId, TestCredentials.ClientSecret, TestCredentials.ObjectId, TestLogger.GetLogger(output));
             ResourceGroupName = SdkContext.RandomResourceName(baseName, 25);
         }
 

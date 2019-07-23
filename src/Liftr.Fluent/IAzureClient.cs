@@ -7,8 +7,9 @@ using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Microsoft.Liftr.Fluent.Contracts.Geneva;
+using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent
@@ -19,7 +20,7 @@ namespace Microsoft.Liftr.Fluent
 
         string ClientSecret { get; }
 
-        HttpClient KeyVaultHttpClient { get; }
+        string ServicePrincipalObjectId { get; }
 
         #region Resource Group
         Task<IResourceGroup> CreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags);
@@ -27,6 +28,8 @@ namespace Microsoft.Liftr.Fluent
         Task<IResourceGroup> GetResourceGroupAsync(string rgName);
 
         Task DeleteResourceGroupAsync(string rgName);
+
+        Task DeleteResourceGroupWithTagAsync(string tagName, string tagValue, Func<IReadOnlyDictionary<string, string>, bool> tagsFilter = null);
         #endregion Resource Group
 
         #region CosmosDB
@@ -41,12 +44,22 @@ namespace Microsoft.Liftr.Fluent
         Task<IVault> GetKeyVaultByIdAsync(string kvResourceId);
 
         Task<IEnumerable<IVault>> ListKeyVaultAsync(string rgName);
+
+        Task RemoveAccessPolicyAsync(string kvResourceId, string servicePrincipalObjectId);
         #endregion Key Vault
 
         #region Web App
         Task<IWebApp> CreateWebAppAsync(Region location, string rgName, string webAppName, IDictionary<string, string> tags, PricingTier tier, string aspNetEnv);
 
         Task<IEnumerable<IWebApp>> ListWebAppAsync(string rgName);
+
+        Task<IAppServicePlan> GetAppServicePlanByIdAsync(string planResourceId);
+
+        Task<IWebApp> GetWebAppWithIdAsync(string resourceId);
+
+        Task<IAppServiceCertificate> UploadCertificateToWebAppAsync(string webAppId, string certName, byte[] pfxByteArray);
+
+        Task DeployGenevaToAppServicePlanAsync(string appServicePlanResoureId, GenevaOptions genevaOptions, string based64EncodedPFX);
         #endregion Web App
     }
 }

@@ -8,5 +8,19 @@
   "cosmosSecreteName": "NginxRP-NginxMongoOptions--ConnectionString",
   "webAppTierStr": "Standard",
   "webAppSizeStr": "S1",
-  "aspNetEnv": "Test"
+  "aspNetEnv": "Test",
+  "ClientCert": {
+    "CertificateName": "GenevaAMECert",
+    "SubjectName": "antares-mds-agent.nginx.geneva.keyvault.liftr-dev.net",
+    "SubjectAlternativeNames": [ "antares-mds-agent.nginx.geneva.keyvault.liftr-dev.net" ]
+  },
+  "MDSOptions": {
+    "MonitoringTenant": "Nginx",
+    "MonitoringRole": "RP",
+    "MonitoringGCSEnvironment": "Test",
+    "MonitoringGCSAccount": "LiftrDev",
+    "MonitoringGCSNamespace": "LiftrDev",
+    "MonitoringGCSClientCertificateSAN": "antares-mds-agent.nginx.geneva.keyvault.liftr-dev.net",
+    "MonitoringConfigVersion": "3.0"
+  }
 }
