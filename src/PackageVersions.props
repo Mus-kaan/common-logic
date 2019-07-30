@@ -10,6 +10,7 @@
     <PackageVersion_Microsoft_Extensions_Configuration_Json>2.2.0</PackageVersion_Microsoft_Extensions_Configuration_Json>
     <PackageVersion_Microsoft_NET_Test_Sdk>16.0.1</PackageVersion_Microsoft_NET_Test_Sdk>
     <PackageVersion_MongoDB_Driver>2.8.1</PackageVersion_MongoDB_Driver>
+    <PackageVersion_Moq>4.12.0</PackageVersion_Moq>
     <PackageVersion_Newtonsoft_Json>12.0.2</PackageVersion_Newtonsoft_Json>
     <PackageVersion_Serilog>2.8.0</PackageVersion_Serilog>
     <PackageVersion_Serilog_AspNetCore>2.1.1</PackageVersion_Serilog_AspNetCore>
@@ -19,6 +20,7 @@
     <PackageVersion_Serilog_Sinks_Debug>1.0.1</PackageVersion_Serilog_Sinks_Debug>
     <PackageVersion_Serilog_Sinks_File>4.0.0</PackageVersion_Serilog_Sinks_File>
     <PackageVersion_Serilog_Sinks_Xunit2>1.0.0</PackageVersion_Serilog_Sinks_Xunit2>
+    <PackageVersion_System_Diagnostics_DiagnosticSource>4.5.1</PackageVersion_System_Diagnostics_DiagnosticSource>
     <PackageVersion_xunit>2.4.1</PackageVersion_xunit>
     <PackageVersion_xunit_runner_visualstudio>2.4.1</PackageVersion_xunit_runner_visualstudio>
   </PropertyGroup>

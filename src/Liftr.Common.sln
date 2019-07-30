@@ -31,7 +31,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DataSource.Mongo.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DataSource.Abstractions", "Liftr.DataSource.Abstractions\Liftr.DataSource.Abstractions.csproj", "{146F2075-7E59-4EF9-977E-A3FCADB8542A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Logging.AspNetCore", "Liftr.Logging.AspNetCore\Liftr.Logging.AspNetCore.csproj", "{AB670CE0-356D-457F-BBE9-D25462011106}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Logging.AspNetCore", "Liftr.Logging.AspNetCore\Liftr.Logging.AspNetCore.csproj", "{AB670CE0-356D-457F-BBE9-D25462011106}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleWebApp", "SampleWebApp\SampleWebApp.csproj", "{A3072A32-8A9F-492B-91CE-4C91214B6F4C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DiagnosticSource", "Liftr.DiagnosticSource\Liftr.DiagnosticSource.csproj", "{19489C1B-B028-4C2D-97CE-96E0C04F2D66}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Logging.AspNetCore.Tests", "Liftr.Logging.AspNetCore.Tests\Liftr.Logging.AspNetCore.Tests.csproj", "{4A6175BE-90EE-4977-B10A-8169EDAAAC24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +89,18 @@ Global
 		{AB670CE0-356D-457F-BBE9-D25462011106}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB670CE0-356D-457F-BBE9-D25462011106}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB670CE0-356D-457F-BBE9-D25462011106}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3072A32-8A9F-492B-91CE-4C91214B6F4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3072A32-8A9F-492B-91CE-4C91214B6F4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3072A32-8A9F-492B-91CE-4C91214B6F4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3072A32-8A9F-492B-91CE-4C91214B6F4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19489C1B-B028-4C2D-97CE-96E0C04F2D66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19489C1B-B028-4C2D-97CE-96E0C04F2D66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19489C1B-B028-4C2D-97CE-96E0C04F2D66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19489C1B-B028-4C2D-97CE-96E0C04F2D66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A6175BE-90EE-4977-B10A-8169EDAAAC24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A6175BE-90EE-4977-B10A-8169EDAAAC24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A6175BE-90EE-4977-B10A-8169EDAAAC24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A6175BE-90EE-4977-B10A-8169EDAAAC24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
