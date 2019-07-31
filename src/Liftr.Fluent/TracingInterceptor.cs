@@ -20,7 +20,7 @@ namespace Microsoft.Liftr.Fluent
 
         public void Information(string message)
         {
-            _logger.Information(message);
+            _logger.Verbose(message);
         }
 
         public void ReceiveResponse(string invocationId, HttpResponseMessage response)

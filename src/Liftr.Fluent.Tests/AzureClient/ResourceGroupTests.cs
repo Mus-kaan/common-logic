@@ -52,7 +52,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                         try
                         {
                             var timeStamp = DateTime.Parse(tags["CreatedAt"], CultureInfo.InvariantCulture);
-                            if (timeStamp < DateTime.Now.AddDays(-7))
+                            if (timeStamp < DateTime.Now.AddDays(-2))
                             {
                                 return true;
                             }

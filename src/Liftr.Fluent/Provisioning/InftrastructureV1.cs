@@ -8,17 +8,16 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Serilog;
 using System;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent.Provisioning
 {
     public class InftrastructureV1
     {
-        private readonly IAzureClient _azure;
+        private readonly ILiftrAzure _azure;
         private readonly ILogger _logger;
 
-        public InftrastructureV1(IAzureClient azureClient, ILogger logger)
+        public InftrastructureV1(ILiftrAzure azureClient, ILogger logger)
         {
             _azure = azureClient;
             _logger = logger;

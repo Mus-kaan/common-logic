@@ -35,7 +35,7 @@ namespace Microsoft.Liftr.Fluent.Contracts.Tests
 
             {
                 var tags = context.Tags.ToJson();
-                Assert.Equal("{\"PartnerName\":\"TestPartnerCompanyInNYC\",\"Environment\":\"dogfood\",\"InfraVersion\":\"v1\"}", tags);
+                Assert.Equal("{\"PartnerName\":\"TestPartnerCompanyInNYC\",\"Environment\":\"dogfood\",\"InfraVersion\":\"v1\",\"RegionTag\":\"centralus\"}", tags);
             }
         }
     }

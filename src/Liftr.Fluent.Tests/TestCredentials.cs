@@ -12,17 +12,18 @@ namespace Microsoft.Liftr.Fluent.Tests
 {
     public class TestCredentials : TestServicePrincipalMS
     {
+        public static AzureCredentials GetCredentials() => new AzureCredentialsFactory().FromServicePrincipal(ClientId, ClientSecret, TenantId, AzureEnvironment.AzureGlobalCloud);
+
         public static Azure.Management.Fluent.IAzure GetAzure()
         {
             ServiceClientTracing.AddTracingInterceptor(new TracingInterceptor(LoggerFactory.ConsoleLogger));
             ServiceClientTracing.IsEnabled = true;
 
-            var credentials = new AzureCredentialsFactory().FromServicePrincipal(ClientId, ClientSecret, TenantId, AzureEnvironment.AzureGlobalCloud);
             var azure = Azure.Management.Fluent.Azure
                             .Configure()
                             .WithDelegatingHandler(new HttpLoggingDelegatingHandler())
                             .WithLogLevel(HttpLoggingDelegatingHandler.Level.Basic)
-                            .Authenticate(credentials)
+                            .Authenticate(GetCredentials())
                             .WithSubscription(SubscriptionId);
 
             return azure;

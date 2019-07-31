@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "resources": [
+    {
+      "apiVersion": "2018-04-01",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "WILL_BE_CHANGED [variables('virtualNetworkName')]",
+      "location": "WILL_BE_CHANGED [parameters('location')]",
+      "tags": "WILL_BE_CHANGED",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "WILL_BE_CHANGED 10.248.0.0/13"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "WILL_BE_CHANGED [variables('privateLinkSubnet')]",
+            "properties": {
+              "addressPrefix": "WILL_BE_CHANGED 192.168.1.0/24",
+              "privateLinkServiceNetworkPolicies": "Disabled",
+              "privateEndpointNetworkPolicies": "Disabled"
+            }
+          },
+          {
+            "name": "WILL_BE_CHANGED [variables('internetFrontend')]",
+            "properties": {
+              "addressPrefix": "WILL_BE_CHANGED 192.168.1.0/24"
+            }
+          },
+          {
+            "name": "WILL_BE_CHANGED [variables('backend')]",
+            "properties": {
+              "addressPrefix": "WILL_BE_CHANGED 192.168.1.0/24"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

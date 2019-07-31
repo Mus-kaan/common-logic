@@ -4,6 +4,7 @@
 
 using Microsoft.Azure.Management.AppService.Fluent;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
+using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
@@ -14,8 +15,10 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent
 {
-    public interface IAzureClient
+    public interface ILiftrAzure
     {
+        IAzure FluentClient { get; }
+
         string ClientId { get; }
 
         string ClientSecret { get; }
@@ -61,5 +64,9 @@ namespace Microsoft.Liftr.Fluent
 
         Task DeployGenevaToAppServicePlanAsync(string appServicePlanResoureId, GenevaOptions genevaOptions, string based64EncodedPFX);
         #endregion Web App
+
+        #region Deployments
+        Task<IDeployment> CreateDeploymentAsync(Region location, string rgName, string template, string templateParameters = null, bool noLogging = false);
+        #endregion
     }
 }

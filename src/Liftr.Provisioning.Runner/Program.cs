@@ -65,7 +65,7 @@ namespace Microsoft.Liftr.Provisioning.Runner
 
                 logger.Information("Selected subscription: " + azure.SubscriptionId);
 
-                var client = new AzureClient(azure, authContract.ClientId, authContract.ClientSecret, authContract.ServicePrincipalObjectId, logger);
+                var client = new LiftrAzure(credentials, azure, authContract.ClientId, authContract.ClientSecret, authContract.ServicePrincipalObjectId, logger);
                 var infra = new InftrastructureV1(client, logger);
 
                 // This will take a long time. Be patient.

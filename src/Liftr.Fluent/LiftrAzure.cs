@@ -7,6 +7,7 @@ using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Models;
 using Microsoft.Liftr.Fluent.Contracts.Geneva;
@@ -20,20 +21,24 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent
 {
-    public class AzureClient : IAzureClient
+    public class LiftrAzure : ILiftrAzure
     {
         public const string c_AspEnv = "ASPNETCORE_ENVIRONMENT";
-        private readonly IAzure _azure;
         private readonly ILogger _logger;
 
-        public AzureClient(IAzure azure, string clientId, string clientSecret, string servicePrincipalObjectId, ILogger logger)
+        public LiftrAzure(AzureCredentials credentials, IAzure fluentClient, string clientId, string clientSecret, string servicePrincipalObjectId, ILogger logger)
         {
-            _azure = azure;
+            Credentials = credentials;
+            FluentClient = fluentClient;
             ClientId = clientId;
             ClientSecret = clientSecret;
             ServicePrincipalObjectId = servicePrincipalObjectId;
             _logger = logger;
         }
+
+        public AzureCredentials Credentials { get; }
+
+        public IAzure FluentClient { get; }
 
         public string ClientId { get; }
 
@@ -46,14 +51,14 @@ namespace Microsoft.Liftr.Fluent
         {
             _logger.Information("Creating a resource group with name: " + rgName);
 
-            if (await _azure.ResourceGroups.ContainAsync(rgName))
+            if (await FluentClient.ResourceGroups.ContainAsync(rgName))
             {
                 var err = $"Resource Group with name '{rgName}' already existed.";
                 _logger.Fatal(err);
                 throw new InvalidOperationException(err);
             }
 
-            var resourceGroup = await _azure
+            var resourceGroup = await FluentClient
                 .ResourceGroups
                 .Define(rgName)
                 .WithRegion(location)
@@ -70,7 +75,7 @@ namespace Microsoft.Liftr.Fluent
             try
             {
                 _logger.Information("Getting resource group with name: " + rgName);
-                return await _azure
+                return await FluentClient
                 .ResourceGroups
                 .GetByNameAsync(rgName);
             }
@@ -84,7 +89,7 @@ namespace Microsoft.Liftr.Fluent
         public async Task DeleteResourceGroupAsync(string rgName)
         {
             _logger.Information("Deleteing resource group with name: " + rgName);
-            await _azure
+            await FluentClient
                 .ResourceGroups
                 .DeleteByNameAsync(rgName);
             _logger.Information("Finished delete resource group with name: " + rgName);
@@ -92,7 +97,7 @@ namespace Microsoft.Liftr.Fluent
 
         public async Task DeleteResourceGroupWithTagAsync(string tagName, string tagValue, Func<IReadOnlyDictionary<string, string>, bool> tagsFilter = null)
         {
-            var rgs = await _azure
+            var rgs = await FluentClient
                 .ResourceGroups
                 .ListByTagAsync(tagName, tagValue);
             _logger.Information("There are {@rgCount} with tagName {@tagName} and {@tagValue}.", rgs.Count(), tagName, tagValue);
@@ -114,7 +119,7 @@ namespace Microsoft.Liftr.Fluent
         public async Task<(ICosmosDBAccount cosmosDBAccount, string mongoConnectionString)> CreateCosmosDBAsync(Region location, string rgName, string cosmosDBName, IDictionary<string, string> tags)
         {
             _logger.Information($"Creating a CosmosDB with name {cosmosDBName} ...");
-            ICosmosDBAccount cosmosDBAccount = await _azure
+            ICosmosDBAccount cosmosDBAccount = await FluentClient
                 .CosmosDBAccounts
                 .Define(cosmosDBName)
                 .WithRegion(location)
@@ -136,7 +141,7 @@ namespace Microsoft.Liftr.Fluent
         public async Task<IEnumerable<ICosmosDBAccount>> ListCosmosDBAsync(string rgName)
         {
             _logger.Information($"Listing CosmosDB in resource group {rgName} ...");
-            return await _azure
+            return await FluentClient
                 .CosmosDBAccounts
                 .ListByResourceGroupAsync(rgName);
         }
@@ -148,7 +153,7 @@ namespace Microsoft.Liftr.Fluent
             _logger.Information($"Creating a Vault with name {vaultName} ...");
 
             // TODO: figure out how to remove Key Vault Access Policy of the management service principal.
-            IVault vault = await _azure.Vaults
+            IVault vault = await FluentClient.Vaults
                         .Define(vaultName)
                         .WithRegion(location)
                         .WithExistingResourceGroup(rgName)
@@ -172,7 +177,7 @@ namespace Microsoft.Liftr.Fluent
             try
             {
                 _logger.Information($"Getting KeyVault with resource Id {kvResourceId} ...");
-                return await _azure.Vaults.GetByIdAsync(kvResourceId);
+                return await FluentClient.Vaults.GetByIdAsync(kvResourceId);
             }
             catch (CloudException ex) when (ex.Message.Contains("could not be found"))
             {
@@ -184,7 +189,7 @@ namespace Microsoft.Liftr.Fluent
         public async Task<IEnumerable<IVault>> ListKeyVaultAsync(string rgName)
         {
             _logger.Information($"Listing KeyVault in resource group {rgName} ...");
-            return await _azure
+            return await FluentClient
                 .Vaults
                 .ListByResourceGroupAsync(rgName);
         }
@@ -205,7 +210,7 @@ namespace Microsoft.Liftr.Fluent
 
             _logger.Information($"Creating an App Service Plan with name {webAppName} ...");
 
-            var webApp = await _azure.WebApps
+            var webApp = await FluentClient.WebApps
                         .Define(webAppName)
                         .WithRegion(location)
                         .WithExistingResourceGroup(rgName)
@@ -226,7 +231,7 @@ namespace Microsoft.Liftr.Fluent
         public async Task<IEnumerable<IWebApp>> ListWebAppAsync(string rgName)
         {
             _logger.Information($"Listing WebApp in resource group {rgName} ...");
-            return await _azure
+            return await FluentClient
                 .WebApps
                 .ListByResourceGroupAsync(rgName);
         }
@@ -236,7 +241,7 @@ namespace Microsoft.Liftr.Fluent
             try
             {
                 _logger.Information($"Getting App Service Plan with resource Id {planResourceId} ...");
-                return await _azure
+                return await FluentClient
                     .AppServices
                     .AppServicePlans
                     .GetByIdAsync(planResourceId);
@@ -253,7 +258,7 @@ namespace Microsoft.Liftr.Fluent
             try
             {
                 _logger.Information($"Getting Web App with resource Id {resourceId} ...");
-                return await _azure
+                return await FluentClient
                     .WebApps
                     .GetByIdAsync(resourceId);
             }
@@ -338,17 +343,25 @@ namespace Microsoft.Liftr.Fluent
                 _logger.Information("Deployment template Parameters: {@templateParameters}", templateParameters);
             }
 
-            var deployment = await _azure.Deployments
-                .Define(deploymentName)
-                .WithExistingResourceGroup(rgName)
-                .WithTemplate(template)
-                .WithParameters(templateParameters)
-                .WithMode(DeploymentMode.Incremental)
-                .CreateAsync();
+            try
+            {
+                var deployment = await FluentClient.Deployments
+                    .Define(deploymentName)
+                    .WithExistingResourceGroup(rgName)
+                    .WithTemplate(template)
+                    .WithParameters(templateParameters)
+                    .WithMode(DeploymentMode.Incremental)
+                    .CreateAsync();
 
-            _logger.Information($"Finished the ARM deployment with name {deploymentName} ...");
-
-            return deployment;
+                _logger.Information($"Finished the ARM deployment with name {deploymentName} ...");
+                return deployment;
+            }
+            catch
+            {
+                var error = await DeploymentExtensions.GetDeploymentErrorDetailsAsync(FluentClient.SubscriptionId, rgName, deploymentName, Credentials);
+                _logger.Error("ARM deployment with name {@deploymentName} Failed with Error: {@DeploymentError}", deploymentName, error);
+                throw new ARMDeploymentFailureException() { Details = error };
+            }
         }
         #endregion
     }
