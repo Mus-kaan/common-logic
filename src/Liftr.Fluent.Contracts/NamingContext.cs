@@ -73,14 +73,26 @@ namespace Microsoft.Liftr.Fluent.Contracts
         public string CosmosDBName(string baseName)
             => $"{ShortPartnerName}-{baseName}-{ShortEnvName(Environment)}-{Location.ShortName()}-db";
 
+        public string DiskName(string baseName, int number)
+            => $"{baseName}-disk{number}";
+
+        public string DiskName(string diskType, string identifier)
+            => $"{diskType}-disk{identifier}";
+
         public string VMName(string baseName, string role, int number)
             => $"{baseName}-{role}-vm{number}";
+
+        public string VMName(string baseName, string role, string identifier)
+            => $"{baseName}-{role}-vm{identifier}";
 
         public string VNetName(string baseName)
             => $"{baseName}-vnet";
 
         public string NICName(string baseName, int number)
             => $"{baseName}-nic{number}";
+
+        public string NICName(string baseName, string identifier)
+            => $"{baseName}-nic{identifier}";
 
         public string NSGName(string baseName, string context)
             => $"{baseName}-{context}-nsg";
@@ -90,6 +102,9 @@ namespace Microsoft.Liftr.Fluent.Contracts
 
         public string PublicLoadBalancerName(string baseName)
             => $"{baseName}-lb";
+
+        public string PublicIPName(string vmOrServiceName)
+            => $"{vmOrServiceName}-pip";
 
         public string LeafDomainName(string baseName)
             => SdkContext.RandomResourceName($"{ShortPartnerName}-{baseName}-{ShortEnvName(Environment)}-{Location.ShortName()}-", 25);

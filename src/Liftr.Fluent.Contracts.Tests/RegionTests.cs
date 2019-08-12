@@ -89,14 +89,14 @@ namespace Microsoft.Liftr.Fluent.Contracts.Tests
             int i = 0;
             foreach (var region in fields)
             {
-                VerityRegionToTextAndBack((Region)region.GetValue(null));
+                VerifyRegionToTextAndBack((Region)region.GetValue(null));
                 i++;
             }
 
             Assert.Equal(32, i);
         }
 
-        private static void VerityRegionToTextAndBack(Region location)
+        private static void VerifyRegionToTextAndBack(Region location)
         {
             Assert.Equal(location, location.ShortName().ParseShortAzureRegion());
         }
