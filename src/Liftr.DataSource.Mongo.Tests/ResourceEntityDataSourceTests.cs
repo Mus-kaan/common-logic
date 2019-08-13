@@ -4,13 +4,9 @@
 
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Logging;
-using Microsoft.Liftr.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -50,7 +46,13 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
             var subId2 = Guid.NewGuid().ToString();
             var rg1 = "resourceGroupName1";
 
-            var entity1 = await s.AddEntityAsync(new MockResourceEntity() { SubscriptionId = subId1, ResourceGroup = rg1, Name = "entityName1", VNet = "VnetId123" });
+            var mockEntity = new MockResourceEntity() { SubscriptionId = subId1, ResourceGroup = rg1, Name = "entityName1", VNet = "VnetId123" };
+            mockEntity.Tags = new Dictionary<string, string>()
+            {
+                ["tag1"] = "val1",
+                ["tag2"] = "val2",
+            };
+            var entity1 = await s.AddEntityAsync(mockEntity);
 
             // Can retrieve.
             {
@@ -59,6 +61,8 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
                 Assert.Equal(subId1, retrieved.SubscriptionId);
                 Assert.Equal(rg1, retrieved.ResourceGroup);
                 Assert.Equal("VnetId123", retrieved.VNet);
+                Assert.Equal("val1", retrieved.Tags["tag1"]);
+                Assert.Equal("val2", retrieved.Tags["tag2"]);
 
                 var exceptedStr = entity1.ToJson();
                 var actualStr = retrieved.ToJson();

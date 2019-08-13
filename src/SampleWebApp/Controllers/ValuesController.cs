@@ -57,8 +57,9 @@ namespace SampleWebApp.Controllers
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody] string value)
+        public ValueRequest Post([FromBody] ValueRequest req)
         {
+            return req;
         }
 
         // PUT api/values/5

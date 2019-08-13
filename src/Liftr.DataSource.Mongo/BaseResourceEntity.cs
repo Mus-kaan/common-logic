@@ -6,6 +6,7 @@ using Microsoft.Liftr.Contracts;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Liftr.DataSource.Mongo
 {
@@ -60,10 +61,11 @@ namespace Microsoft.Liftr.DataSource.Mongo
         /// The tags of the resource.
         /// </summary>
         [BsonElement("tags")]
-        public string Tags { get; set; }
+        public IDictionary<string, string> Tags { get; set; }
 
         [BsonElement("provisionState")]
-        public string ProvisioningState { get; set; }
+        [BsonRepresentation(BsonType.String)]
+        public ProvisioningState ProvisioningState { get; set; }
 
         [BsonElement("createdAt")]
         public DateTime CreatedUTC { get; set; } = LiftrDateTime.MinValue;

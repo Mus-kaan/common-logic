@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Liftr.Contracts
 {
@@ -41,9 +42,9 @@ namespace Microsoft.Liftr.Contracts
         /// <summary>
         /// The tags of the resource.
         /// </summary>
-        string Tags { get; }
+        IDictionary<string, string> Tags { get; }
 
-        string ProvisioningState { get; }
+        ProvisioningState ProvisioningState { get; }
 
         DateTime CreatedUTC { get; }
     }
