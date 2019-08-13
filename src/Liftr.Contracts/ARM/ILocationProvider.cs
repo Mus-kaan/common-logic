@@ -5,9 +5,13 @@
 namespace Microsoft.Liftr.Contracts.ARM
 {
     /// <summary>
-    /// An Azure resource.
+    /// The location provider for an Azure resource.
     /// </summary>
-    public interface IARMResource : IBaseResource, ILocationProvider, ITagsProvider
+    public interface ILocationProvider
     {
+        /// <summary>
+        /// The location of the resource. This cannot be changed after the resource is created.
+        /// </summary>
+        string Location { get; set; }
     }
 }
