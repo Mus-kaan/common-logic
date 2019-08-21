@@ -2,9 +2,9 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PackageVersion_Microsoft_ApplicationInsights_AspNetCore>2.7.1</PackageVersion_Microsoft_ApplicationInsights_AspNetCore>
+    <PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>2.2.0</PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>
     <PackageVersion_Microsoft_AspNetCore_Mvc_Versioning>3.1.3</PackageVersion_Microsoft_AspNetCore_Mvc_Versioning>
     <PackageVersion_Microsoft_AspNetCore_Razor_Design>2.2.0</PackageVersion_Microsoft_AspNetCore_Razor_Design>
-    <PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>2.2.0</PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>
     <PackageVersion_Microsoft_Azure_KeyVault>3.0.3</PackageVersion_Microsoft_Azure_KeyVault>
     <PackageVersion_Microsoft_Azure_Management_Fluent>1.23.0</PackageVersion_Microsoft_Azure_Management_Fluent>
     <PackageVersion_Microsoft_CSharp>4.5.0</PackageVersion_Microsoft_CSharp>
@@ -22,6 +22,7 @@
     <PackageVersion_Serilog_Sinks_Debug>1.0.1</PackageVersion_Serilog_Sinks_Debug>
     <PackageVersion_Serilog_Sinks_File>4.0.0</PackageVersion_Serilog_Sinks_File>
     <PackageVersion_Serilog_Sinks_Xunit2>1.0.0</PackageVersion_Serilog_Sinks_Xunit2>
+    <PackageVersion_Swashbuckle_AspNetCore>4.0.1</PackageVersion_Swashbuckle_AspNetCore>
     <PackageVersion_System_Diagnostics_DiagnosticSource>4.5.1</PackageVersion_System_Diagnostics_DiagnosticSource>
     <PackageVersion_xunit>2.4.1</PackageVersion_xunit>
     <PackageVersion_xunit_runner_visualstudio>2.4.1</PackageVersion_xunit_runner_visualstudio>

@@ -37,7 +37,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleWebApp", "SampleWebAp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DiagnosticSource", "Liftr.DiagnosticSource\Liftr.DiagnosticSource.csproj", "{19489C1B-B028-4C2D-97CE-96E0C04F2D66}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Logging.AspNetCore.Tests", "Liftr.Logging.AspNetCore.Tests\Liftr.Logging.AspNetCore.Tests.csproj", "{4A6175BE-90EE-4977-B10A-8169EDAAAC24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Logging.AspNetCore.Tests", "Liftr.Logging.AspNetCore.Tests\Liftr.Logging.AspNetCore.Tests.csproj", "{4A6175BE-90EE-4977-B10A-8169EDAAAC24}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Hosting.Tests", "Liftr.Hosting.Tests\Liftr.Hosting.Tests.csproj", "{ECA70B79-3BE8-40B9-8BA9-54FB9C631F76}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -101,6 +103,10 @@ Global
 		{4A6175BE-90EE-4977-B10A-8169EDAAAC24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A6175BE-90EE-4977-B10A-8169EDAAAC24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A6175BE-90EE-4977-B10A-8169EDAAAC24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECA70B79-3BE8-40B9-8BA9-54FB9C631F76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECA70B79-3BE8-40B9-8BA9-54FB9C631F76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECA70B79-3BE8-40B9-8BA9-54FB9C631F76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECA70B79-3BE8-40B9-8BA9-54FB9C631F76}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

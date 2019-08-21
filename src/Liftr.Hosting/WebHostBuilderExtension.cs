@@ -12,6 +12,9 @@ namespace Microsoft.Liftr.Hosting
 {
     public static class WebHostBuilderExtension
     {
+        /// <summary>
+        /// This will load all the secrets start with 'secretsPrefix'. Sample secret name: "prefix-Logging--LogLevel--Default".
+        /// </summary>
         public static IWebHostBuilder UseKeyVaultProvider(this IWebHostBuilder builder, string secretsPrefix)
         {
             return builder.ConfigureAppConfiguration((context, config) =>
@@ -28,6 +31,9 @@ namespace Microsoft.Liftr.Hosting
             });
         }
 
+        /// <summary>
+        /// This will load all the secrets start with 'secretsPrefix'. Sample secret name: "prefix-Logging--LogLevel--Default".
+        /// </summary>
         public static IWebHostBuilder UseManagedIdentityAndKeyVault(this IWebHostBuilder builder, string secretsPrefix)
         {
             return builder.ConfigureAppConfiguration((context, config) =>

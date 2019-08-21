@@ -6,6 +6,9 @@ using Microsoft.Azure.KeyVault.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.AzureKeyVault;
 using System;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Hosting.Tests")]
 
 namespace Microsoft.Liftr.Hosting
 {
@@ -22,6 +25,11 @@ namespace Microsoft.Liftr.Hosting
             if (string.IsNullOrEmpty(prefix))
             {
                 throw new ArgumentNullException(nameof(prefix));
+            }
+
+            if (prefix.Contains("-"))
+            {
+                throw new ArgumentException("'-' is reserved for nested configurations. Please do not use it in prefix.", nameof(prefix));
             }
 
             _prefix = $"{prefix}-";
