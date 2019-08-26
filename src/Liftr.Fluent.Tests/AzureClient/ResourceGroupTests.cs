@@ -45,25 +45,31 @@ namespace Microsoft.Liftr.Fluent.Tests
             using (var scope = new TestResourceGroupScope("unittest-rg-", _output))
             {
                 var client = scope.Client;
-                await client.DeleteResourceGroupWithTagAsync("Creator", "UnitTest", (IReadOnlyDictionary<string, string> tags) =>
+                try
                 {
-                    if (tags.ContainsKey("CreatedAt"))
+                    await client.DeleteResourceGroupWithTagAsync("Creator", "UnitTest", (IReadOnlyDictionary<string, string> tags) =>
                     {
-                        try
+                        if (tags.ContainsKey("CreatedAt"))
                         {
-                            var timeStamp = DateTime.Parse(tags["CreatedAt"], CultureInfo.InvariantCulture);
-                            if (timeStamp < DateTime.Now.AddDays(-2))
+                            try
                             {
-                                return true;
+                                var timeStamp = DateTime.Parse(tags["CreatedAt"], CultureInfo.InvariantCulture);
+                                if (timeStamp < DateTime.Now.AddDays(-2))
+                                {
+                                    return true;
+                                }
+                            }
+                            catch
+                            {
                             }
                         }
-                        catch
-                        {
-                        }
-                    }
 
-                    return false;
-                });
+                        return false;
+                    });
+                }
+                catch
+                {
+                }
             }
         }
     }

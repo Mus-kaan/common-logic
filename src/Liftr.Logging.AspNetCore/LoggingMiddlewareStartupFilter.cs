@@ -8,14 +8,14 @@ using System;
 
 namespace Microsoft.Liftr.Logging.AspNetCore
 {
-    internal class LogFilterOverwriteStartupFilter : IStartupFilter
+    internal class LoggingMiddlewareStartupFilter : IStartupFilter
     {
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
         {
             return app =>
             {
                 // Configure middleware
-                app.UseMiddleware<LogFilterOverwriteMiddleware>();
+                app.UseMiddleware<LoggingMiddleware>();
 
                 // Call the next configure method
                 next(app);

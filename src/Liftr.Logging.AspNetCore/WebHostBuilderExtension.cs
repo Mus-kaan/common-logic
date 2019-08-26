@@ -18,8 +18,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore
         /// 1. Application Insights SDK is added. The instrumentation key can be configured in the appsettings.json.
         /// 2. The Serilog <see cref="Serilog.Log"/> logger will be configured according to the 'Serilog' section in the appsettings.json.
         /// 3. Minimum log filter can be override by setting a request header or query parameter and the overide value will be passed to all out-going http calls.
-        /// i.e. <see cref="LogFilterOverwriteMiddleware"/> will be added to the ASP.NET core middleware pipeline before the code in the 'Startup.cs'.
-        /// 4. <see cref="LogFilterOverwriteMiddleware"/> can be disabled by setting the value of 'Serilog:AllowFilterDynamicOverride' to 'false' in appsettings.json.
+        /// i.e. <see cref="LoggingMiddleware"/> will be added to the ASP.NET core middleware pipeline before the code in the 'Startup.cs'.
+        /// 4. <see cref="LoggingMiddleware"/> can be disabled by setting the value of 'Serilog:AllowFilterDynamicOverride' to 'false' in appsettings.json.
         /// </summary>
         /// <param name="webHostBuilder"></param>
         /// <returns></returns>
@@ -37,11 +37,11 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                     (var allowOverride, var defaultLevel) = GetOverrideOptions(host);
                     if (allowOverride)
                     {
-                        config.ReadFrom.Configuration(host.Configuration).MinimumLevel.ControlledBy(LogFilterOverrideScope.EnableFilterOverride(defaultLevel));
+                        config.ReadFrom.Configuration(host.Configuration).MinimumLevel.ControlledBy(LogFilterOverrideScope.EnableFilterOverride(defaultLevel)).Enrich.FromLogContext();
                     }
                     else
                     {
-                        config.ReadFrom.Configuration(host.Configuration);
+                        config.ReadFrom.Configuration(host.Configuration).Enrich.FromLogContext();
                     }
                 })
                 .ConfigureServices((host, services) =>
@@ -50,7 +50,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                     if (allowOverride)
                     {
                         var subscriber = new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener());
-                        services.AddSingleton<IStartupFilter, LogFilterOverwriteStartupFilter>();
+                        services.AddSingleton<IStartupFilter, LoggingMiddlewareStartupFilter>();
                         services.AddSingleton(subscriber);
                     }
 

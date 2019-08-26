@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Liftr.DiagnosticSource;
 using Serilog.Events;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -15,13 +14,12 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Logging.AspNetCore
 {
-    internal class LogFilterOverwriteMiddleware
+    internal class LoggingMiddleware
     {
-        private const string s_logLevelOverwriteHeaderName = "X-LIFTR-LOG-FILTER-OVERWRITE";
         private const string s_logLevelOverwriteQueryName = "LiftrLogFilterOverwrite";
         private readonly RequestDelegate _next;
 
-        public LogFilterOverwriteMiddleware(RequestDelegate next)
+        public LoggingMiddleware(RequestDelegate next)
         {
             _next = next;
         }
@@ -29,17 +27,15 @@ namespace Microsoft.Liftr.Logging.AspNetCore
         public async Task InvokeAsync(HttpContext httpContext)
         {
             LogEventLevel? overrideLevel = null;
-            string levelOverwrite = string.Empty;
-            try
+
+            string levelOverwrite = GetHeaderValue(httpContext, HeaderConstants.LiftrLogLevelOverwrite);
+            string clientRequestId = GetHeaderValue(httpContext, HeaderConstants.ClientRequestId);
+            string armRequestTrackingId = GetHeaderValue(httpContext, HeaderConstants.ARMRequestTrackingId);
+            string crrelationtId = GetHeaderValue(httpContext, HeaderConstants.RequestCorrelationId);
+
+            if (string.IsNullOrEmpty(crrelationtId))
             {
-                // The vaule can be set from http header.
-                if (httpContext.Request.Headers.TryGetValue(s_logLevelOverwriteHeaderName, out var headerValue))
-                {
-                    levelOverwrite = headerValue.LastOrDefault();
-                }
-            }
-            catch
-            {
+                crrelationtId = "liftr-" + Guid.NewGuid().ToString();
             }
 
             try
@@ -63,12 +59,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                         overrideLevel = level;
 
                         // Pass the log level filter to the next tier.
-                        if (CallContextHolder.CommonHttpHeaders.Value == null)
-                        {
-                            CallContextHolder.CommonHttpHeaders.Value = new Dictionary<string, string>();
-                        }
-
-                        CallContextHolder.CommonHttpHeaders.Value[s_logLevelOverwriteHeaderName] = levelOverwrite;
+                        CallContextHolder.LogFilterOverwrite.Value = levelOverwrite;
                     }
                 }
             }
@@ -76,10 +67,36 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             {
             }
 
+            if (!string.IsNullOrEmpty(clientRequestId))
+            {
+                CallContextHolder.ClientRequestId.Value = clientRequestId;
+            }
+
+            if (!string.IsNullOrEmpty(armRequestTrackingId))
+            {
+                CallContextHolder.ARMRequestTrackingId.Value = armRequestTrackingId;
+            }
+
+            if (!string.IsNullOrEmpty(crrelationtId))
+            {
+                CallContextHolder.RequestCorrelationId.Value = crrelationtId;
+            }
+
             using (var logFilterOverrideScope = new LogFilterOverrideScope(overrideLevel))
+            using (new ARMHeaderLogContext(armRequestTrackingId, crrelationtId))
             {
                 await _next(httpContext);
             }
+        }
+
+        private string GetHeaderValue(HttpContext httpContext, string headerName)
+        {
+            if (httpContext?.Request?.Headers?.TryGetValue(headerName, out var headerValue) == true)
+            {
+                return headerValue.FirstOrDefault() ?? string.Empty;
+            }
+
+            return string.Empty;
         }
     }
 }

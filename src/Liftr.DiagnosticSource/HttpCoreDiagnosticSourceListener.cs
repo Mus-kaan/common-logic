@@ -48,15 +48,27 @@ namespace Microsoft.Liftr.DiagnosticSource
                     return;
                 }
 
+                var request = _startRequestFetcher.Fetch(value.Value) as HttpRequestMessage;
+
                 // Inject the headers to all out-going http requests.
-                if (CallContextHolder.CommonHttpHeaders.Value != null)
+                if (!string.IsNullOrEmpty(CallContextHolder.LogFilterOverwrite.Value))
                 {
-                    var request = _startRequestFetcher.Fetch(value.Value) as HttpRequestMessage;
-                    var headers = CallContextHolder.CommonHttpHeaders.Value;
-                    foreach (var kvp in headers)
-                    {
-                        request.Headers.Add(kvp.Key, kvp.Value);
-                    }
+                    request.Headers.Add(HeaderConstants.LiftrLogLevelOverwrite, CallContextHolder.LogFilterOverwrite.Value);
+                }
+
+                if (!string.IsNullOrEmpty(CallContextHolder.ClientRequestId.Value))
+                {
+                    request.Headers.Add(HeaderConstants.ClientRequestId, CallContextHolder.ClientRequestId.Value);
+                }
+
+                if (!string.IsNullOrEmpty(CallContextHolder.ARMRequestTrackingId.Value))
+                {
+                    request.Headers.Add(HeaderConstants.ARMRequestTrackingId, CallContextHolder.ARMRequestTrackingId.Value);
+                }
+
+                if (!string.IsNullOrEmpty(CallContextHolder.RequestCorrelationId.Value))
+                {
+                    request.Headers.Add(HeaderConstants.RequestCorrelationId, CallContextHolder.RequestCorrelationId.Value);
                 }
             }
             catch
