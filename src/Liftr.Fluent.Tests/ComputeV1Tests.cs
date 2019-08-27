@@ -37,7 +37,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                 try
                 {
                     var c = new ComputeV1(scope.Client, logger);
-                    await c.CreateServiceClusterAsync(baseName, namingContext, VirtualMachineScaleSetSkuTypes.StandardDS3v2, "vmuser123", "Msusr@123456");
+                    await c.CreateServiceClusterAsync(baseName, namingContext, VirtualMachineScaleSetSkuTypes.StandardA0, "vmuser123", "Msusr@123456");
                 }
                 catch (Exception ex)
                 {

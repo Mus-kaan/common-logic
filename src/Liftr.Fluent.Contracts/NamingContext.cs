@@ -6,6 +6,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.Liftr.Fluent.Contracts
 {
@@ -84,6 +85,9 @@ namespace Microsoft.Liftr.Fluent.Contracts
 
         public string VMName(string baseName, string role, string identifier)
             => $"{baseName}-{role}-vm{identifier}";
+
+        public string IdentifierFromVMName(string baseName, string role, string vmName)
+            => vmName.Substring($"{baseName}-{role}-vm".Length);
 
         public string VNetName(string baseName)
             => $"{baseName}-vnet";

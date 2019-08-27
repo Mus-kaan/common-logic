@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using System;
 using Xunit;
 
 namespace Microsoft.Liftr.Fluent.Contracts.Tests
@@ -37,6 +38,18 @@ namespace Microsoft.Liftr.Fluent.Contracts.Tests
                 var tags = context.Tags.ToJson();
                 Assert.Equal("{\"PartnerName\":\"TestPartnerCompanyInNYC\",\"Environment\":\"dogfood\",\"InfraVersion\":\"v1\",\"RegionTag\":\"centralus\"}", tags);
             }
+        }
+
+        [Theory]
+        [InlineData("baseName", "role", "baseName-role-vmabc123", "abc123")]
+        [InlineData("baseName", "role", "baseName-role-vmdef456", "def456")]
+        public void IdentifierFromVMName_ReturnsCorrectIdentifier(string baseName, string role, string vmName, string expectedValue)
+        {
+            var namingContext = new NamingContext("partnerName", "ptnr", EnvironmentType.DogFood, Region.USWest);
+
+            var returnedValue = namingContext.IdentifierFromVMName(baseName, role, vmName);
+
+            Assert.Equal(returnedValue, expectedValue);
         }
     }
 }
