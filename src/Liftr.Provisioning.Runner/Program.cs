@@ -54,18 +54,17 @@ namespace Microsoft.Liftr.Provisioning.Runner
                 ServiceClientTracing.IsEnabled = true;
 
                 var credentials = SdkContext.AzureCredentialsFactory.FromFile(authFile);
+                if (string.IsNullOrEmpty(credentials.DefaultSubscriptionId))
+                {
+                    throw new InvalidOperationException("Cannot find default subscription Id in the credential file");
+                }
+
+                logger.Information("Selected subscription: {@SubscriptionId}", credentials.DefaultSubscriptionId);
+
                 var authContract = AuthFileContact.FromFile(authFile);
+                var factory = new LiftrAzureFactory(credentials, credentials.DefaultSubscriptionId, logger);
+                var client = factory.GenerateLiftrAzure();
 
-                var azure = Azure.Management.Fluent.Azure
-                    .Configure()
-                    .WithDelegatingHandler(new HttpLoggingDelegatingHandler())
-                    .WithLogLevel(HttpLoggingDelegatingHandler.Level.Basic)
-                    .Authenticate(credentials)
-                    .WithSubscription(credentials.DefaultSubscriptionId);
-
-                logger.Information("Selected subscription: " + azure.SubscriptionId);
-
-                var client = new LiftrAzure(credentials, azure, authContract.ClientId, authContract.ClientSecret, authContract.ServicePrincipalObjectId, logger);
                 var infra = new InftrastructureV1(client, logger);
 
                 // This will take a long time. Be patient.

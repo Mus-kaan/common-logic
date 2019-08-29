@@ -8,9 +8,7 @@ using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Contracts.Geneva;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace Microsoft.Liftr.Fluent.Provisioning
 {
@@ -30,6 +28,12 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         public EnvironmentType Environment { get; set; }
 
         public string LocationStr { get; set; }
+
+        public string SPNObjectId { get; set; }
+
+        public string SPNClientId { get; set; }
+
+        public string SPNClientSecret { get; set; }
 
         [JsonIgnore]
         public Region Location => Region.Create(LocationStr);

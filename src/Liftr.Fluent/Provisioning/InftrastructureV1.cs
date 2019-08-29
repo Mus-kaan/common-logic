@@ -32,16 +32,16 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 context = new NamingContext(options.PartnerName, options.ShortPartnerName, options.Environment, options.Location);
             }
 
-            (var dataRG, string keyVaultResourceId) = await CreateDataResourceGroupAsync(options.DataCoreName, context, options.CosmosSecreteName, options.ClientCert);
+            (var dataRG, string keyVaultResourceId) = await CreateDataResourceGroupAsync(options.DataCoreName, context, options.CosmosSecreteName, options);
             var computeRG = await CreateComputeGroupAsync(options.ComputeCoreName, context, options.WebAppTier, options.AspNetEnv, keyVaultResourceId, options);
 
-            await _azure.RemoveAccessPolicyAsync(keyVaultResourceId, _azure.ServicePrincipalObjectId);
-            _logger.Information("Removed Key Vault access policy for the SDK writer {@ServicePrincipalObjectId}", _azure.ServicePrincipalObjectId);
+            await _azure.RemoveAccessPolicyAsync(keyVaultResourceId, options.SPNObjectId);
+            _logger.Information("Removed Key Vault access policy for the SDK writer {@ServicePrincipalObjectId}", options.SPNObjectId);
 
             return (dataRG, computeRG);
         }
 
-        public async Task<(IResourceGroup rg, string keyVaultResourceId)> CreateDataResourceGroupAsync(string coreName, NamingContext context, string cosmosSecreteName, CertificateOptions clientCertOptions)
+        public async Task<(IResourceGroup rg, string keyVaultResourceId)> CreateDataResourceGroupAsync(string coreName, NamingContext context, string cosmosSecreteName, InfraV1Options options)
         {
             var rgName = context.ResourceGroupName(coreName);
             var kvName = context.KeyVaultName(coreName);
@@ -52,23 +52,23 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             _logger.Information($"Created Resource Group with Id {rg.Id}");
 
             _logger.Information("Creating Key Vault ...");
-            var kv = await _azure.CreateKeyVaultAsync(context.Location, rgName, kvName, context.Tags, _azure.ClientId);
+            var kv = await _azure.CreateKeyVaultAsync(context.Location, rgName, kvName, context.Tags, options.SPNClientId);
             _logger.Information($"Created KeyVault with Id {kv.Id}");
 
             _logger.Information("Creating CosmosDB ...");
             (var db, string connectionString) = await _azure.CreateCosmosDBAsync(context.Location, rgName, cosmosName, context.Tags);
             _logger.Information($"Created CosmosDB with Id {db.Id}");
 
-            using (var valet = new KeyVaultConcierge(kv.VaultUri, _azure.ClientId, _azure.ClientSecret, _logger))
+            using (var valet = new KeyVaultConcierge(kv.VaultUri, options.SPNClientId, options.SPNClientSecret, _logger))
             {
                 _logger.Information("Puting the CosmosDB Connection String in the key vault ...");
                 await valet.SetSecretAsync(cosmosSecreteName, connectionString, context.Tags);
 
-                _logger.Information("Creating AME management certificate in Key Vault with name {@certName} ...", clientCertOptions.CertificateName);
+                _logger.Information("Creating AME management certificate in Key Vault with name {@certName} ...", options.ClientCert.CertificateName);
                 var certIssuerName = "one-cert-issuer";
                 await valet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
-                await valet.CreateCertificateAsync(clientCertOptions.CertificateName, certIssuerName, clientCertOptions.SubjectName, clientCertOptions.SubjectAlternativeNames, context.Tags);
-                _logger.Information("Finished creating AME management certificate in Key Vault with name {@certName}", clientCertOptions.CertificateName);
+                await valet.CreateCertificateAsync(options.ClientCert.CertificateName, certIssuerName, options.ClientCert.SubjectName, options.ClientCert.SubjectAlternativeNames, context.Tags);
+                _logger.Information("Finished creating AME management certificate in Key Vault with name {@certName}", options.ClientCert.CertificateName);
             }
 
             _logger.Information($"Finished creating data resource group with Id {rg.Id}");
@@ -105,7 +105,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     .Attach()
                  .ApplyAsync();
 
-            using (var valet = new KeyVaultConcierge(kv.VaultUri, _azure.ClientId, _azure.ClientSecret, _logger))
+            using (var valet = new KeyVaultConcierge(kv.VaultUri, options.SPNClientId, options.SPNClientSecret, _logger))
             {
                 _logger.Information("Uploading ANT geneva configurations ...");
                 var cert = await valet.DownloadCertAsync(options.ClientCert.CertificateName);

@@ -19,12 +19,6 @@ namespace Microsoft.Liftr.Fluent
     {
         IAzure FluentClient { get; }
 
-        string ClientId { get; }
-
-        string ClientSecret { get; }
-
-        string ServicePrincipalObjectId { get; }
-
         #region Resource Group
         Task<IResourceGroup> CreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags);
 

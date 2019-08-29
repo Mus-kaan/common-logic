@@ -21,30 +21,25 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent
 {
-    public class LiftrAzure : ILiftrAzure
+    /// <summary>
+    /// This is not thread safe, since IAzure is not thread safe by design.
+    /// Please use 'LiftrAzureFactory' to dynamiclly generate it.
+    /// Please do not add 'LiftrAzure' to the dependency injection container, use 'LiftrAzureFactory' instead.
+    /// </summary>
+    internal class LiftrAzure : ILiftrAzure
     {
         public const string c_AspEnv = "ASPNETCORE_ENVIRONMENT";
         private readonly ILogger _logger;
+        private readonly AzureCredentials _credentials;
 
-        public LiftrAzure(AzureCredentials credentials, IAzure fluentClient, string clientId, string clientSecret, string servicePrincipalObjectId, ILogger logger)
+        public LiftrAzure(AzureCredentials credentials, IAzure fluentClient, ILogger logger)
         {
-            Credentials = credentials;
+            _credentials = credentials;
             FluentClient = fluentClient;
-            ClientId = clientId;
-            ClientSecret = clientSecret;
-            ServicePrincipalObjectId = servicePrincipalObjectId;
             _logger = logger;
         }
 
-        public AzureCredentials Credentials { get; }
-
         public IAzure FluentClient { get; }
-
-        public string ClientId { get; }
-
-        public string ClientSecret { get; }
-
-        public string ServicePrincipalObjectId { get; }
 
         #region Resource Group
         public async Task<IResourceGroup> CreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags)
@@ -196,6 +191,11 @@ namespace Microsoft.Liftr.Fluent
 
         public async Task RemoveAccessPolicyAsync(string kvResourceId, string servicePrincipalObjectId)
         {
+            if (string.IsNullOrEmpty(servicePrincipalObjectId))
+            {
+                throw new ArgumentNullException(nameof(servicePrincipalObjectId));
+            }
+
             var vault = await GetKeyVaultByIdAsync(kvResourceId) ?? throw new InvalidOperationException("Cannt find vault with resource Id: " + kvResourceId);
             await vault.Update().WithoutAccessPolicy(servicePrincipalObjectId).ApplyAsync();
             _logger.Information("Finished removing KeyVault {@kvResourceId} access policy of {@servicePrincipalObjectId}", kvResourceId, servicePrincipalObjectId);
@@ -358,7 +358,7 @@ namespace Microsoft.Liftr.Fluent
             }
             catch
             {
-                var error = await DeploymentExtensions.GetDeploymentErrorDetailsAsync(FluentClient.SubscriptionId, rgName, deploymentName, Credentials);
+                var error = await DeploymentExtensions.GetDeploymentErrorDetailsAsync(FluentClient.SubscriptionId, rgName, deploymentName, _credentials);
                 _logger.Error("ARM deployment with name {@deploymentName} Failed with Error: {@DeploymentError}", deploymentName, error);
                 throw new ARMDeploymentFailureException() { Details = error };
             }

@@ -28,9 +28,12 @@ namespace Microsoft.Liftr.Fluent.Tests
             var logger = TestLogger.GetLogger(_output);
             var options = InfraV1Options.FromFile("infrav1.json");
             options.ShortPartnerName = SdkContext.RandomResourceName("antmds", 10);
+            options.SPNClientId = TestCredentials.ClientId;
+            options.SPNClientSecret = TestCredentials.ClientSecret;
+            options.SPNObjectId = TestCredentials.ObjectId;
             var context = new NamingContext(options.PartnerName, options.ShortPartnerName, options.Environment, options.Location);
             TestCommon.AddCommonTags(context.Tags);
-            var client = new LiftrAzure(TestCredentials.GetCredentials(), TestCredentials.GetAzure(), TestCredentials.ClientId, TestCredentials.ClientSecret, TestCredentials.ObjectId, logger);
+            var client = new LiftrAzureFactory(TestCredentials.GetCredentials(), TestCredentials.SubscriptionId, logger).GenerateLiftrAzure();
 
             using (var dataScope = new TestResourceGroupScope(client, context.ResourceGroupName(options.DataCoreName)))
             using (var computeScope = new TestResourceGroupScope(client, context.ResourceGroupName(options.ComputeCoreName)))

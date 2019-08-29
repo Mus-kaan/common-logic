@@ -4,7 +4,6 @@
 
 using Microsoft.Azure.Management.AppService.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.Liftr.Fluent.Contracts.Geneva;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +44,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                 var kv = await client.CreateKeyVaultAsync(TestCommon.Location, scope.ResourceGroupName, SdkContext.RandomResourceName("test-vault-", 15), TestCommon.Tags, TestCredentials.ClientId);
 
                 // Verify AME OneCert creations.
-                using (var valet = new KeyVaultConcierge(kv.VaultUri, client.ClientId, client.ClientSecret, logger))
+                using (var valet = new KeyVaultConcierge(kv.VaultUri, TestCredentials.ClientId, TestCredentials.ClientSecret, logger))
                 {
                     var certName = SdkContext.RandomResourceName("ame", 8);
                     var subjectName = certName + ".liftr-dev.net";

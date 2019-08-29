@@ -55,7 +55,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                 }
 
                 // Verify AME OneCert creations.
-                using (var valet = new KeyVaultConcierge(kv.VaultUri, azure.ClientId, azure.ClientSecret, logger))
+                using (var valet = new KeyVaultConcierge(kv.VaultUri, TestCredentials.ClientId, TestCredentials.ClientSecret, logger))
                 {
                     var certName = SdkContext.RandomResourceName("ame", 8);
                     var subjectName = certName + ".liftr-dev.net";

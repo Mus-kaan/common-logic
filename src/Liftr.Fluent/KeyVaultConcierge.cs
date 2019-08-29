@@ -25,6 +25,16 @@ namespace Microsoft.Liftr.Fluent
         public KeyVaultConcierge(string vaultBaseUrl, string clientId, string clientSecret, Serilog.ILogger logger)
 #pragma warning restore CA1054 // Uri parameters should not be strings
         {
+            if (string.IsNullOrEmpty(clientId))
+            {
+                throw new ArgumentNullException(nameof(clientId));
+            }
+
+            if (string.IsNullOrEmpty(clientSecret))
+            {
+                throw new ArgumentNullException(nameof(clientSecret));
+            }
+
             _vaultBaseUrl = vaultBaseUrl;
             _keyVaultClient = new KeyVaultClient(
                 new KeyVaultClient.AuthenticationCallback(async (authority, resource, scope) =>
