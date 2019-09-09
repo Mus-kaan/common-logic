@@ -17,6 +17,11 @@ namespace Microsoft.Liftr.Contracts
 
         public ResourceId(string resourceId)
         {
+            if (string.IsNullOrEmpty(resourceId))
+            {
+                throw new ArgumentNullException(nameof(resourceId));
+            }
+
             _resourceIdStr = resourceId;
 
             bool isValidResourceIdFormat = false;
@@ -82,7 +87,7 @@ namespace Microsoft.Liftr.Contracts
         {
             try
             {
-                var resourceId = resourceUri.Substring(resourceUri.OrdinalIndexOf($"/{c_subscriptions}/"));
+                var resourceId = resourceUri?.Substring(resourceUri.OrdinalIndexOf($"/{c_subscriptions}/")) ?? throw new ArgumentNullException(nameof(resourceUri));
                 return new ResourceId(resourceId);
             }
             catch (Exception ex)

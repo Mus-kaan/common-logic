@@ -27,16 +27,10 @@ namespace Microsoft.Liftr.Fluent
             _logger = logger;
         }
 
-        public LiftrAzureFactory(AzureCredentials credentials, ILogger logger)
-            : this(credentials, credentials.DefaultSubscriptionId, logger)
-        {
-        }
-
         public ILiftrAzure GenerateLiftrAzure(HttpLoggingDelegatingHandler.Level logLevel = HttpLoggingDelegatingHandler.Level.Basic)
         {
             var azure = Azure.Management.Fluent.Azure
                     .Configure()
-                    .WithDelegatingHandler(new HttpLoggingDelegatingHandler())
                     .WithLogLevel(logLevel)
                     .Authenticate(_credentials)
                     .WithSubscription(_subscriptionId);

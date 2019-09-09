@@ -18,7 +18,7 @@ namespace Microsoft.Liftr
         }
 
         public DuplicatedKeyException(Exception innerException)
-            : base(innerException.Message, innerException)
+            : base(innerException?.Message ?? throw new ArgumentNullException(nameof(innerException)), innerException)
         {
         }
 

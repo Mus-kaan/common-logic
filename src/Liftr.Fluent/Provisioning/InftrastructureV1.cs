@@ -25,6 +25,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public async Task<(IResourceGroup dataResourceGroup, IResourceGroup computeResourceGroup)> CreateDataAndComputeAsync(InfraV1Options options, NamingContext context = null)
         {
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             options.CheckValid();
 
             if (context == null)
@@ -43,6 +48,16 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public async Task<(IResourceGroup rg, string keyVaultResourceId)> CreateDataResourceGroupAsync(string coreName, NamingContext context, string cosmosSecreteName, InfraV1Options options)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             var rgName = context.ResourceGroupName(coreName);
             var kvName = context.KeyVaultName(coreName);
             var cosmosName = context.CosmosDBName(coreName);
@@ -78,6 +93,16 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public async Task<IResourceGroup> CreateComputeGroupAsync(string coreName, NamingContext context, PricingTier tier, string aspNetEnv, string kvResourceId, InfraV1Options options)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             var rgName = context.ResourceGroupName(coreName);
             var webAppName = context.WebAppName(coreName);
 

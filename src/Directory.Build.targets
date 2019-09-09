@@ -16,20 +16,23 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!-- Liftr BuildTools -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.Liftr.BuildTools" Version="1.0.1">
+    <PackageReference Include="Microsoft.Liftr.BuildTools" Version="1.0.5-build0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
 
   <!-- Code Analyzers -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.Liftr.BuildTools.Analyzers" Version="1.0.1">
+    <PackageReference Include="Microsoft.Liftr.BuildTools.Analyzers" Version="1.0.5-build0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2">
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.1-beta.61">
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.3.52">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>

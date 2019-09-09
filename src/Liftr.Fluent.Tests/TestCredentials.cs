@@ -14,6 +14,7 @@ namespace Microsoft.Liftr.Fluent.Tests
     {
         public static AzureCredentials GetCredentials() => new AzureCredentialsFactory().FromServicePrincipal(ClientId, ClientSecret, TenantId, AzureEnvironment.AzureGlobalCloud);
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         public static Azure.Management.Fluent.IAzure GetAzure()
         {
             ServiceClientTracing.AddTracingInterceptor(new TracingInterceptor(LoggerFactory.ConsoleLogger));

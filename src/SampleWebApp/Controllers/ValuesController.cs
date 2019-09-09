@@ -16,6 +16,8 @@ namespace SampleWebApp.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
     public class ValuesController : ControllerBase
     {
         private readonly ILogger _logger;

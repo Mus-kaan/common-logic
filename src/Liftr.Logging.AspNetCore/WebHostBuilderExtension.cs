@@ -60,6 +60,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             return webHostBuilder;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Middleware should fail silently.")]
         private static (bool allowOverride, LogEventLevel defaultLevel) GetOverrideOptions(WebHostBuilderContext host)
         {
             bool allowOverride = true;

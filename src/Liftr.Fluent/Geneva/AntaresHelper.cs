@@ -30,11 +30,22 @@ namespace Microsoft.Liftr.Fluent.Geneva
 
         public static string AssembleConfigJson(GenevaOptions genevaOptions, Region location)
         {
-            genevaOptions.CheckValid();
+            if (genevaOptions == null)
+            {
+                throw new ArgumentNullException(nameof(genevaOptions));
+            }
+
+            if (location == null)
+            {
+                throw new ArgumentNullException(nameof(location));
+            }
+
             if (!File.Exists(c_configJsonTemplatePath))
             {
                 throw new InvalidOperationException($"Cannot find the template file at path: {c_configJsonTemplatePath}");
             }
+
+            genevaOptions.CheckValid();
 
             var templateContent = File.ReadAllText(c_configJsonTemplatePath);
 
@@ -52,6 +63,11 @@ namespace Microsoft.Liftr.Fluent.Geneva
 
         public static string GenerateAntJsonConfigTemplate(Region location, string appServicePlanName, string configContent)
         {
+            if (location == null)
+            {
+                throw new ArgumentNullException(nameof(location));
+            }
+
             if (!File.Exists(c_antMdsConfigTemplatePath))
             {
                 throw new InvalidOperationException($"Cannot find the template file at path: {c_antMdsConfigTemplatePath}");
@@ -68,6 +84,11 @@ namespace Microsoft.Liftr.Fluent.Geneva
 
         public static string GenerateAntXMLConfigTemplate(Region location, string appServicePlanName)
         {
+            if (location == null)
+            {
+                throw new ArgumentNullException(nameof(location));
+            }
+
             if (!File.Exists(c_antMdsXMLConfigTemplatePath))
             {
                 throw new InvalidOperationException($"Cannot find the template file at path: {c_antMdsXMLConfigTemplatePath}");
@@ -83,6 +104,11 @@ namespace Microsoft.Liftr.Fluent.Geneva
 
         public static string GenerateGCSCertTemplate(Region location, string appServicePlanName, string based64EncodedPFX)
         {
+            if (location == null)
+            {
+                throw new ArgumentNullException(nameof(location));
+            }
+
             if (!File.Exists(c_GCSCertTemplatePath))
             {
                 throw new InvalidOperationException($"Cannot find the template file at path: {c_GCSCertTemplatePath}");
@@ -99,6 +125,11 @@ namespace Microsoft.Liftr.Fluent.Geneva
 
         public static string GenerateGCSCertPSWDTemplate(Region location, string appServicePlanName)
         {
+            if (location == null)
+            {
+                throw new ArgumentNullException(nameof(location));
+            }
+
             if (!File.Exists(c_GCSCertPSWDTemplatePath))
             {
                 throw new InvalidOperationException($"Cannot find the template file at path: {c_GCSCertPSWDTemplatePath}");

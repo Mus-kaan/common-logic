@@ -17,15 +17,18 @@ namespace Microsoft.Liftr.Fluent
             // There is no way to get error details using the Azure .NET library. That is a known issue that should
             // be fixed in the future. See https://github.com/Azure/azure-libraries-for-net/issues/39.
             // In the mean time, a direct call is made to the Azure REST API to get the details.
-            var httpClient = new HttpClient(new AzureApiMessageHandler(credentials));
-            var uriBuilder = new UriBuilder("https://management.azure.com");
-            uriBuilder.Path =
-                $"subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}";
-            uriBuilder.Query = "api-version=2018-05-01";
+            using (var handler = new AzureApiMessageHandler(credentials))
+            using (var httpClient = new HttpClient(handler))
+            {
+                var uriBuilder = new UriBuilder("https://management.azure.com");
+                uriBuilder.Path =
+                    $"subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}";
+                uriBuilder.Query = "api-version=2018-05-01";
 
-            var response = await httpClient.GetStringAsync(uriBuilder.Uri);
-            var httpResult = response.FromJson<AzureResponseJson>();
-            return httpResult.Properties.Error;
+                var response = await httpClient.GetStringAsync(uriBuilder.Uri);
+                var httpResult = response.FromJson<AzureResponseJson>();
+                return httpResult.Properties.Error;
+            }
         }
     }
 

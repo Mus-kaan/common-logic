@@ -45,9 +45,7 @@ namespace Microsoft.Liftr.Fluent.Contracts.Tests
         [InlineData("baseName", "role", "baseName-role-vmdef456", "def456")]
         public void IdentifierFromVMName_ReturnsCorrectIdentifier(string baseName, string role, string vmName, string expectedValue)
         {
-            var namingContext = new NamingContext("partnerName", "ptnr", EnvironmentType.DogFood, Region.USWest);
-
-            var returnedValue = namingContext.IdentifierFromVMName(baseName, role, vmName);
+            var returnedValue = NamingContext.IdentifierFromVMName(baseName, role, vmName);
 
             Assert.Equal(returnedValue, expectedValue);
         }

@@ -8,7 +8,7 @@ using Microsoft.Azure.Management.Network.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Serilog;
-using System.Runtime.CompilerServices;
+using System;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent.Provisioning.MultiTenant
@@ -26,6 +26,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning.MultiTenant
 
         public async Task<IResourceGroup> CreateServiceClusterAsync(string baseName, NamingContext context, VirtualMachineScaleSetSkuTypes type, string vmUsername, string vmPassword, int vmCount = 1)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             _logger.Information("Creating Resource Group ...");
             var rg = await _azure.CreateResourceGroupAsync(context.Location, context.ResourceGroupName(baseName), context.Tags);
             _logger.Information($"Created Resource Group with Id {rg.Id}");
@@ -48,7 +53,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning.MultiTenant
             var internetFrontendSubnetName = "internet-frontend";
 
             _logger.Information("Start deploying VNet for Private link Service ...");
-            var vnetName = context.VNetName(baseName);
+            var vnetName = NamingContext.VNetName(baseName);
             var vnetTemplate = TemplateHelper.GeneratePLSVNetTemplate(
                 context.Location,
                 context.Tags,
@@ -72,7 +77,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning.MultiTenant
             var plbBackendPoolName = "publiLBBackendPool";
             var rdpNATPool = "rdp-nat-pool";
             {
-                var lbName = context.InternalLoadBalancerName("private-link");
+                var lbName = NamingContext.InternalLoadBalancerName("private-link");
                 _logger.Information("Start creating an Internal Load Balancer with name {@loadBalancerName} for private endpoint to connect ...", lbName);
                 var ilbProbName = lbName + "tcp3389";
                 privateLinkLB = await _azure.FluentClient
@@ -114,7 +119,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning.MultiTenant
             }
 
             {
-                var lbName = context.PublicLoadBalancerName("internet");
+                var lbName = NamingContext.PublicLoadBalancerName("internet");
                 _logger.Information("Start creating an Internet Load Balancer with name {@loadBalancerName} for public access ...", lbName);
                 var frontendName = "internetFrontend";
                 var probName = lbName + "tcp3389";
@@ -161,7 +166,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning.MultiTenant
 
             var nsg = await _azure.FluentClient
                 .NetworkSecurityGroups
-                .Define(context.NSGName("private", "link"))
+                .Define(NamingContext.NSGName("private", "link"))
                 .WithRegion(context.Location)
                 .WithExistingResourceGroup(rg.Name)
                 .WithTags(context.Tags)

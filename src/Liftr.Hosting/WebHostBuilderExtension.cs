@@ -17,6 +17,11 @@ namespace Microsoft.Liftr.Hosting
         /// </summary>
         public static IWebHostBuilder UseKeyVaultProvider(this IWebHostBuilder builder, string secretsPrefix)
         {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
             return builder.ConfigureAppConfiguration((context, config) =>
             {
                 var builtConfig = config.Build();
@@ -36,6 +41,11 @@ namespace Microsoft.Liftr.Hosting
         /// </summary>
         public static IWebHostBuilder UseManagedIdentityAndKeyVault(this IWebHostBuilder builder, string secretsPrefix)
         {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
             return builder.ConfigureAppConfiguration((context, config) =>
             {
                 var builtConfig = config.Build();

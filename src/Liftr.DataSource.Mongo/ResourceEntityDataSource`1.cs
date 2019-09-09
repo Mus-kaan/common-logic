@@ -24,6 +24,11 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
         public virtual async Task<TResource> AddEntityAsync(TResource entity)
         {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
             try
             {
                 entity.CreatedUTC = _timeSource.UtcNow;

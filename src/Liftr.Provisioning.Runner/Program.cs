@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
@@ -18,6 +17,11 @@ namespace Microsoft.Liftr.Provisioning.Runner
     {
         public static int Main(string[] args)
         {
+            if (args == null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
             var logger = new LoggerConfiguration()
                 .WriteTo.Console()
                 .WriteTo.File("log-.txt", rollingInterval: RollingInterval.Day)
@@ -72,7 +76,9 @@ namespace Microsoft.Liftr.Provisioning.Runner
                 infra.CreateDataAndComputeAsync(options).Wait();
 #pragma warning restore Liftr1005 // Avoid calling System.Threading.Tasks.Task.Wait()
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 logger.Error(ex, ex.Message);
             }

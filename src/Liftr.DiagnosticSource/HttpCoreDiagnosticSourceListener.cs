@@ -71,7 +71,9 @@ namespace Microsoft.Liftr.DiagnosticSource
                     request.Headers.Add(HeaderConstants.RequestCorrelationId, CallContextHolder.RequestCorrelationId.Value);
                 }
             }
+#pragma warning disable CA1031 // Do not catch general exception types. Override this to make sure the injection part is not affecting any application.
             catch
+#pragma warning restore CA1031 // Do not catch general exception types
             {
             }
         }

@@ -15,6 +15,7 @@ using System.Reflection;
 
 namespace SampleWebApp
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
     public class Startup
     {
         public Startup(IConfiguration configuration)

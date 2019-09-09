@@ -10,16 +10,24 @@ namespace Microsoft.Liftr
     public static class StringExtensions
     {
         public static bool StrictEquals(this string self, string input)
-            => self.Equals(input, StringComparison.Ordinal);
+            => string.Equals(self, input, StringComparison.Ordinal);
 
         public static bool OrdinalEquals(this string self, string input)
-            => self.Equals(input, StringComparison.OrdinalIgnoreCase);
+            => string.Equals(self, input, StringComparison.OrdinalIgnoreCase);
 
         public static bool OrdinalEndsWith(this string self, string value)
-            => self.EndsWith(value, StringComparison.OrdinalIgnoreCase);
+        {
+            Ensure.ArgumentNotNull(self, nameof(self));
+
+            return self.EndsWith(value, StringComparison.OrdinalIgnoreCase);
+        }
 
         public static int OrdinalIndexOf(this string self, string value)
-            => self.IndexOf(value, StringComparison.OrdinalIgnoreCase);
+        {
+            Ensure.ArgumentNotNull(self, nameof(self));
+
+            return self.IndexOf(value, StringComparison.OrdinalIgnoreCase);
+        }
 
         public static string ToBase64(this string input)
         {

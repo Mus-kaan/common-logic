@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using System;
 using NSG = Microsoft.Azure.Management.Network.Fluent.NetworkSecurityGroup.Definition;
 
 namespace Microsoft.Liftr.Fluent
@@ -9,7 +10,13 @@ namespace Microsoft.Liftr.Fluent
     public static class FluentExtensions
     {
         public static NSG.IWithCreate AllowVNet80InBound(this NSG.IWithCreate nsgDefWithCreate, int priority = 3100)
-            => nsgDefWithCreate.DefineRule("AllowVNet80InBound")
+        {
+            if (nsgDefWithCreate == null)
+            {
+                throw new ArgumentNullException(nameof(nsgDefWithCreate));
+            }
+
+            return nsgDefWithCreate.DefineRule("AllowVNet80InBound")
                     .AllowInbound()
                     .FromAddress("VirtualNetwork")
                     .FromAnyPort()
@@ -18,9 +25,16 @@ namespace Microsoft.Liftr.Fluent
                     .WithAnyProtocol()
                     .WithPriority(priority)
                     .Attach();
+        }
 
         public static NSG.IWithCreate AllowVNet443InBound(this NSG.IWithCreate nsgDefWithCreate, int priority = 3200)
-            => nsgDefWithCreate.DefineRule("AllowVNet443InBound")
+        {
+            if (nsgDefWithCreate == null)
+            {
+                throw new ArgumentNullException(nameof(nsgDefWithCreate));
+            }
+
+            return nsgDefWithCreate.DefineRule("AllowVNet443InBound")
                     .AllowInbound()
                     .FromAddress("VirtualNetwork")
                     .FromAnyPort()
@@ -29,9 +43,16 @@ namespace Microsoft.Liftr.Fluent
                     .WithAnyProtocol()
                     .WithPriority(priority)
                     .Attach();
+        }
 
         public static NSG.IWithCreate AllowAny80InBound(this NSG.IWithCreate nsgDefWithCreate, int priority = 3300)
-            => nsgDefWithCreate.DefineRule("AllowAny80InBound")
+        {
+            if (nsgDefWithCreate == null)
+            {
+                throw new ArgumentNullException(nameof(nsgDefWithCreate));
+            }
+
+            return nsgDefWithCreate.DefineRule("AllowAny80InBound")
                     .AllowInbound()
                     .FromAnyAddress()
                     .FromAnyPort()
@@ -40,9 +61,16 @@ namespace Microsoft.Liftr.Fluent
                     .WithAnyProtocol()
                     .WithPriority(priority)
                     .Attach();
+        }
 
         public static NSG.IWithCreate AllowAny443InBound(this NSG.IWithCreate nsgDefWithCreate, int priority = 3400)
-            => nsgDefWithCreate.DefineRule("AllowAny443InBound")
+        {
+            if (nsgDefWithCreate == null)
+            {
+                throw new ArgumentNullException(nameof(nsgDefWithCreate));
+            }
+
+            return nsgDefWithCreate.DefineRule("AllowAny443InBound")
                     .AllowInbound()
                     .FromAnyAddress()
                     .FromAnyPort()
@@ -51,5 +79,6 @@ namespace Microsoft.Liftr.Fluent
                     .WithAnyProtocol()
                     .WithPriority(priority)
                     .Attach();
+        }
     }
 }

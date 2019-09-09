@@ -25,7 +25,7 @@ namespace Microsoft.Liftr.Fluent
 
         public void ReceiveResponse(string invocationId, HttpResponseMessage response)
         {
-            _logger.Debug($"ReceiveResponse [{invocationId}]" + "Response: {@HttpResponseMessage}. Response Content:{@HttpContent}.", response, response.Content.ReadAsStringAsync());
+            _logger.Debug($"ReceiveResponse [{invocationId}]" + "Response: {@HttpResponseMessage}. Response Content:{@HttpContent}.", response, response?.Content?.ReadAsStringAsync());
         }
 
         public void SendRequest(string invocationId, HttpRequestMessage request)

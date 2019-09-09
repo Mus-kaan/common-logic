@@ -39,6 +39,7 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [Fact]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public async Task CleanUpOldTestRGAsync()
         {
             using (var scope = new TestResourceGroupScope("unittest-rg-", _output))

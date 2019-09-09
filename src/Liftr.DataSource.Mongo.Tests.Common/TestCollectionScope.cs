@@ -25,6 +25,11 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
         public TestCollectionScope(IMongoDatabase db, string collectionName, Func<IMongoDatabase, string, IMongoCollection<T>> collectionCrator)
         {
+            if (collectionCrator == null)
+            {
+                throw new ArgumentNullException(nameof(collectionCrator));
+            }
+
             _db = db;
             _collectionName = collectionName;
             Collection = collectionCrator(_db, _collectionName);
@@ -38,7 +43,9 @@ namespace Microsoft.Liftr.DataSource.Mongo
             {
                 _db.DropCollection(_collectionName);
             }
+#pragma warning disable CA1031 // Do not catch general exception types. Test code clean up.
             catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
             {
                 Debug.WriteLine(ex);
             }

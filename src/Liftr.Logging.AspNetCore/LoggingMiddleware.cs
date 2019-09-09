@@ -24,6 +24,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             _next = next;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Middleware should fail silently.")]
         public async Task InvokeAsync(HttpContext httpContext)
         {
             LogEventLevel? overrideLevel = null;
@@ -89,7 +90,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             }
         }
 
-        private string GetHeaderValue(HttpContext httpContext, string headerName)
+        private static string GetHeaderValue(HttpContext httpContext, string headerName)
         {
             if (httpContext?.Request?.Headers?.TryGetValue(headerName, out var headerValue) == true)
             {

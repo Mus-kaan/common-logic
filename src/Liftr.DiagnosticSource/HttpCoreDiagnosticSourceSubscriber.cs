@@ -28,7 +28,9 @@ namespace Microsoft.Liftr.DiagnosticSource
             {
                 _listenerSubscription = DiagnosticListener.AllListeners.Subscribe(this);
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch
+#pragma warning restore CA1031 // Do not catch general exception types
             {
             }
         }

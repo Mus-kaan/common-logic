@@ -18,6 +18,7 @@ namespace Microsoft.Liftr.Fluent
     public sealed class KeyVaultConcierge : IDisposable
     {
         private readonly string _vaultBaseUrl;
+        private readonly HttpClient _kvHttpClient;
         private readonly KeyVaultClient _keyVaultClient;
         private readonly Serilog.ILogger _logger;
 
@@ -36,13 +37,14 @@ namespace Microsoft.Liftr.Fluent
             }
 
             _vaultBaseUrl = vaultBaseUrl;
+            _kvHttpClient = new HttpClient();
             _keyVaultClient = new KeyVaultClient(
                 new KeyVaultClient.AuthenticationCallback(async (authority, resource, scope) =>
                 {
                     var authContext = new AuthenticationContext(authority, TokenCache.DefaultShared);
                     var result = await authContext.AcquireTokenAsync(resource, new ClientCredential(clientId, clientSecret));
                     return result.AccessToken;
-                }), new HttpClient());
+                }), _kvHttpClient);
             _logger = logger;
         }
 
@@ -143,6 +145,7 @@ namespace Microsoft.Liftr.Fluent
         public void Dispose()
         {
             _keyVaultClient.Dispose();
+            _kvHttpClient.Dispose();
         }
     }
 }

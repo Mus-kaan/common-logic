@@ -28,6 +28,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             string backendSubnet,
             string backendSubnetCIDR)
         {
+            if (location == null)
+            {
+                throw new ArgumentNullException(nameof(location));
+            }
+
             if (!File.Exists(c_plsVNETTemplatePath))
             {
                 throw new InvalidOperationException($"Cannot find the template file at path: {c_plsVNETTemplatePath}");
@@ -63,6 +68,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public static string GeneratePrivateLinkServiceTemplate(Region location, string privateLinkServiceName, string ilbSubnetId, string ilbFrontendId)
         {
+            if (location == null)
+            {
+                throw new ArgumentNullException(nameof(location));
+            }
+
             if (!File.Exists(c_privateLinkServiceTemplatePath))
             {
                 throw new InvalidOperationException($"Cannot find the template file at path: {c_privateLinkServiceTemplatePath}");

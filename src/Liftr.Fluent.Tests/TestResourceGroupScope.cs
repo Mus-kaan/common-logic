@@ -23,6 +23,7 @@ namespace Microsoft.Liftr.Fluent.Tests
         {
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "<Pending>")]
         public TestResourceGroupScope(string baseName, NamingContext context, ITestOutputHelper output)
             : this(new LiftrAzureFactory(TestCredentials.GetCredentials(), TestCredentials.SubscriptionId, TestLogger.GetLogger(output)).GenerateLiftrAzure(), context.ResourceGroupName(baseName))
         {
@@ -35,6 +36,7 @@ namespace Microsoft.Liftr.Fluent.Tests
 
         public string ResourceGroupName { get; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public void Dispose()
         {
             try

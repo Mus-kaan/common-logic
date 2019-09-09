@@ -14,7 +14,7 @@ namespace Microsoft.Liftr
         public static IEnumerable<FieldInfo> GetConstants(this Type type)
         {
             // Gets all public and static fields and tells it to get the fields from all base types as well.
-            var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+            var fieldInfos = type?.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy) ?? throw new ArgumentNullException(nameof(type));
 
             // Go through the list and only pick out the constants
             // IsLiteral determines if its value is written at
