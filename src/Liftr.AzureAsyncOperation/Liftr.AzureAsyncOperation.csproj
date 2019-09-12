@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+	<IsPackable>true</IsPackable>
+    <RootNamespace>Microsoft.Liftr.AzureAsyncOperation</RootNamespace>
+    <AssemblyName>Microsoft.Liftr.AzureAsyncOperation</AssemblyName>
+	<Description>Provides common infra for Azure Async long running operaions implementation through ARM</Description>
+    <PackageProjectUrl>https://msazure.visualstudio.com/Liftr/_git/Liftr.Common?path=%2Fsrc%2FLiftr.AzureAsyncOperation%2FREADME.md&amp;version=GBmaster</PackageProjectUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="README.md" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="$(PackageVersion_Microsoft_AspNetCore_Mvc_Core)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.AzureAsyncOperation.DataSource\Liftr.AzureAsyncOperation.DataSource.csproj" />
+    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
+    <ProjectReference Include="..\Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj" />
+  </ItemGroup>
+
+</Project>

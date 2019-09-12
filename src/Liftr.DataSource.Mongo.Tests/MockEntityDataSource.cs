@@ -4,9 +4,6 @@
 
 using Microsoft.Liftr.Contracts;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Liftr.DataSource.Mongo.Tests
 {

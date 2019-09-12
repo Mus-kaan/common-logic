@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.DataSource.Mongo.Tests.Common;
 using Microsoft.Liftr.Logging;
 using System;
 using System.Collections.Generic;

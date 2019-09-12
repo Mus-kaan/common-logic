@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+	<IsPackable>true</IsPackable>
+    <RootNamespace>Microsoft.Liftr.AzureAsyncOperation.DataSource</RootNamespace>
+    <AssemblyName>Microsoft.Liftr.AzureAsyncOperation.DataSource</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="$(PackageVersion_MongoDB_Driver)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(PackageVersion_Newtonsoft_Json)" />
+  </ItemGroup>
+
+</Project>
