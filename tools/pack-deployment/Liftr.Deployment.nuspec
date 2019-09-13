@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <metadata minClientVersion="3.3.0">
+    <id>Microsoft.Liftr.Deployment</id>
+    <version>0.0.1</version>
+    <authors>Azure Liftr</authors>
+    <owners>Azure Liftr</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Liftr deployment scripts package.</description>
+    <tags>deployment</tags>
+    <!-- Build actions for items in the contentFiles folder -->
+    <contentFiles>
+        <!-- Include Assets as Content -->
+        <!-- https://devblogs.microsoft.com/nuget/nuget-contentFiles-demystified/ -->
+        <files include="**/deployment/**/*.*" buildAction="EmbeddedResource" copyToOutput="true"/>
+    </contentFiles>
+  </metadata>
+</package>

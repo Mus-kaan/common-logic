@@ -1,0 +1,15 @@
+# Default values for geneva.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+mdsd:
+  dockerTag: master_236
+
+fluentd:
+  dockerTag: master_110
+
+mdm:
+  dockerTag: master_14
+
+secpack:
+  dockerTag: master_17
