@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Hosting.Tests")]
 
-namespace Microsoft.Liftr.Hosting
+namespace Microsoft.Liftr.Configuration
 {
     /// <summary>
     /// Filter the keys to load by prefix and transform the key name.

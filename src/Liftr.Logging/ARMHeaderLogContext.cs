@@ -5,9 +5,9 @@
 using Serilog.Context;
 using System;
 
-namespace Microsoft.Liftr.Logging.AspNetCore
+namespace Microsoft.Liftr.Logging
 {
-    internal sealed class ARMHeaderLogContext : IDisposable
+    public sealed class ARMHeaderLogContext : IDisposable
     {
         private readonly IDisposable _trackingIdContext;
         private readonly IDisposable _correlationIdContext;

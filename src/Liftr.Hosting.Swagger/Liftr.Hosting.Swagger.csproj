@@ -1,16 +1,14 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
     <IsPackable>true</IsPackable>
     <AssemblyName>Microsoft.Liftr.Hosting.Swagger</AssemblyName>
     <RootNamespace>Microsoft.Liftr.Hosting.Swagger</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="$(PackageVersion_Swashbuckle_AspNetCore)" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
   </ItemGroup>

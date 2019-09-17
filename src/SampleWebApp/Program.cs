@@ -5,6 +5,7 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Liftr.Logging.AspNetCore;
+using Microsoft.Liftr.WebHosting;
 
 namespace SampleWebApp
 {
@@ -15,6 +16,7 @@ namespace SampleWebApp
             WebHost
                 .CreateDefaultBuilder(args)
                 .UseLiftrLogger()
+                .UseKeyVaultProvider("IncrediBuildRP")
                 .UseStartup<Startup>()
                 .Build()
                 .Run();

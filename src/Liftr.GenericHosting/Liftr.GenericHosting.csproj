@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.GenericHosting</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.GenericHosting</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(PackageVersion_Microsoft_Extensions_Configuration_EnvironmentVariables)" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(PackageVersion_Microsoft_Extensions_Configuration_Json)" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(PackageVersion_Microsoft_Extensions_Hosting)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Configuration\Liftr.Configuration.csproj" />
+  </ItemGroup>
+</Project>

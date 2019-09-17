@@ -3,11 +3,10 @@
   <PropertyGroup>
     <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
     <IsPackable>true</IsPackable>
-    <AssemblyName>Microsoft.Liftr.Hosting</AssemblyName>
-    <RootNamespace>Microsoft.Liftr.Hosting</RootNamespace>
+    <AssemblyName>Microsoft.Liftr.Configuration</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Configuration</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="$(PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions)" />
     <PackageReference Include="Microsoft.Extensions.Configuration.AzureKeyVault" Version="$(PackageVersion_Microsoft_Extensions_Configuration_AzureKeyVault)" />
   </ItemGroup>
 </Project>

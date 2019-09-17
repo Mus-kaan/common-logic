@@ -1,0 +1,1 @@
+This is a sample project to test and demostrate how to use the common libraries in console apps.

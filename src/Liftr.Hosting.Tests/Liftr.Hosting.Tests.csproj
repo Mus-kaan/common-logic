@@ -12,6 +12,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="$(PackageVersion_xunit_runner_visualstudio)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Liftr.Hosting\Liftr.Hosting.csproj" />
+    <ProjectReference Include="..\Liftr.Configuration\Liftr.Configuration.csproj" />
   </ItemGroup>
 </Project>
