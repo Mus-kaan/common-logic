@@ -26,6 +26,7 @@ namespace Microsoft.Liftr.Configuration
             string vaultEndpoint = builtConfig["VaultEndpoint"];
             if (!string.IsNullOrEmpty(vaultEndpoint))
             {
+                Console.WriteLine($"Start loading secrets from vault '{vaultEndpoint}' into configuration.");
                 if (useManagedIdentity)
                 {
                     // https://docs.microsoft.com/en-us/azure/app-service/overview-managed-identity#obtaining-tokens-for-azure-resources

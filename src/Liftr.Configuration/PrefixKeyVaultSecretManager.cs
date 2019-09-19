@@ -39,7 +39,13 @@ namespace Microsoft.Liftr.Configuration
         {
             // Load a vault secret when its secret name starts with the
             // prefix. Other secrets won't be loaded.
-            return secret.Identifier.Name.StartsWith(_prefix, StringComparison.InvariantCultureIgnoreCase);
+            bool load = secret.Identifier.Name.StartsWith(_prefix, StringComparison.InvariantCultureIgnoreCase);
+            if (load)
+            {
+                Console.WriteLine($"Loading secret with name {secret.Identifier.Name}");
+            }
+
+            return load;
         }
 
         public string GetKey(SecretBundle secret)
