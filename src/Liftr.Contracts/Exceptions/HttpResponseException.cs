@@ -4,6 +4,7 @@
 
 using System;
 using System.Net;
+using System.Net.Http;
 using System.Runtime.Serialization;
 
 namespace Microsoft.Liftr.Contracts.Exceptions
@@ -71,6 +72,16 @@ namespace Microsoft.Liftr.Contracts.Exceptions
                 ErrorResponse = ErrorResponse.Create(
                     code: errorCode,
                     message: message,
+                    target: target),
+            };
+
+        public static HttpResponseException Create(
+            HttpResponseMessage response, string target) => new HttpResponseException(response?.ToString())
+            {
+                StatusCode = response.StatusCode,
+                ErrorResponse = ErrorResponse.Create(
+                    code: response.StatusCode.ToString(),
+                    message: response.ReasonPhrase,
                     target: target),
             };
     }

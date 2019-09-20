@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29025.244
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DataSource.Mongo", "Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj", "{629A2EE7-20D0-47D7-A9A9-638BA7EF6AD2}"
 EndProject
@@ -50,6 +50,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Fluent", "Liftr.Fluent\Liftr.Fluent.csproj", "{08D4FCD3-87AB-448A-AE3A-79A79F75E819}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Fluent.Contracts", "Liftr.Fluent.Contracts\Liftr.Fluent.Contracts.csproj", "{215B1D28-BE23-4454-8045-1E35345B7E39}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.TokenManager", "Liftr.TokenManager\Liftr.TokenManager.csproj", "{8DE88599-FCF1-4F2D-B535-7CC426C4005C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.RPaaS", "Liftr.RPaaS\Liftr.RPaaS.csproj", "{846680C1-6D27-4D19-B36F-0F1B26070337}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Configuration", "Liftr.Configuration\Liftr.Configuration.csproj", "{F5E37EF0-A2A3-49B8-8D69-D0246551638C}"
 EndProject
@@ -147,6 +151,14 @@ Global
 		{215B1D28-BE23-4454-8045-1E35345B7E39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{215B1D28-BE23-4454-8045-1E35345B7E39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{215B1D28-BE23-4454-8045-1E35345B7E39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DE88599-FCF1-4F2D-B535-7CC426C4005C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DE88599-FCF1-4F2D-B535-7CC426C4005C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DE88599-FCF1-4F2D-B535-7CC426C4005C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DE88599-FCF1-4F2D-B535-7CC426C4005C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{846680C1-6D27-4D19-B36F-0F1B26070337}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{846680C1-6D27-4D19-B36F-0F1B26070337}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{846680C1-6D27-4D19-B36F-0F1B26070337}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{846680C1-6D27-4D19-B36F-0F1B26070337}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F5E37EF0-A2A3-49B8-8D69-D0246551638C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F5E37EF0-A2A3-49B8-8D69-D0246551638C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5E37EF0-A2A3-49B8-8D69-D0246551638C}.Release|Any CPU.ActiveCfg = Release|Any CPU
