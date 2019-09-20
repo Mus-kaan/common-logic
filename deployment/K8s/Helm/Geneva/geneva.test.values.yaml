@@ -3,7 +3,7 @@ gcs_namespace: LiftrDev
 azsecpackmoniker: liftrdevsecurity
 gcs_region: westus
 gcs_environment: Test
-gcs_config_version: 1.0
+gcs_config_version: 6.0
 azsecpack_eventversion: 1
 metricEndpoint: https://az-int.metrics.nsatc.net/
 mdsd_debug_log_flags: "-T 0x220000"

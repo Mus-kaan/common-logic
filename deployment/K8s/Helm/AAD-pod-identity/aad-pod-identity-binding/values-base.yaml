@@ -1,0 +1,10 @@
+azureIdentity:
+  enabled: true # enabled/disable deployment of azure identity and binding
+  name: <azure-identity-name>
+  type: 0 # type 0: MSI, type 1: Service Principal
+  resourceID: <azure-identity-resource-id>
+  clientID: <azure-identity-client-id>
+
+azureIdentityBinding:
+  name: <azure-identity-name>
+  selector: <matching selector>
