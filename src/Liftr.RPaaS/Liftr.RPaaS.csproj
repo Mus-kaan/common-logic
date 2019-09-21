@@ -6,7 +6,7 @@
 	<RootNamespace>Microsoft.Liftr.RPaaS</RootNamespace>
 	<AssemblyName>Microsoft.Liftr.RPaaS</AssemblyName>
     <Description>Provides common infra for Rp as a Service</Description>
-    <PackageProjectUrl>https://msazure.visualstudio.com/Liftr/_git/Liftr.Common?path=%2Fsrc%2FLiftr.RPaaS%2FReadMe.md.md&amp;version=GBmaster</PackageProjectUrl>
+    <PackageProjectUrl>https://msazure.visualstudio.com/Liftr/_git/Liftr.Common?path=%2Fsrc%2FLiftr.RPaaS%2FReadMe.md&amp;version=GBmaster</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

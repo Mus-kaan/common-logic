@@ -6,7 +6,7 @@
 	<AssemblyName>Microsoft.Liftr.TokenManager</AssemblyName>
 	<RootNamespace>Microsoft.Liftr.TokenManager</RootNamespace>
     <Description>Provides common infra for Token Manage, for AAD</Description>
-    <PackageProjectUrl>https://msazure.visualstudio.com/Liftr/_git/Liftr.Common?path=%2Fsrc%2FLiftr.TokenManager%2FReadMe.md.md&amp;version=GBmaster</PackageProjectUrl>
+    <PackageProjectUrl>https://msazure.visualstudio.com/Liftr/_git/Liftr.Common?path=%2Fsrc%2FLiftr.TokenManager%2FReadMe.md&amp;version=GBmaster</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
