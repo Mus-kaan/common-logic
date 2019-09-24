@@ -50,6 +50,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             var eventHubConnectionString = "mockEHConnectionString";
             var storageConnectionString = "mockSAConnectionString";
             var location = "mockLocation";
+            var resourceProviderType = "Microsoft.Datadog/datadogs";
 
             var mockEntity = new MonitoringSvcEventHubEntity()
             {
@@ -62,11 +63,12 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 Location = location,
                 PartnerServiceType = MonitoringSvcType.DataDog,
                 DataType = MonitoringSvcDataType.Log,
+                MonitoringSvcResourceProviderType = resourceProviderType,
             };
 
             await _collectionScope.Collection.InsertOneAsync(mockEntity);
 
-            // Can retrieve.
+            // Can retrieve with partnerSvcType.
             {
                 var retrieved = await s.GetEntityAsync(mockEntity.PartnerServiceType, mockEntity.Location);
 
@@ -78,6 +80,22 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 Assert.Equal(location, retrieved.Location);
                 Assert.Equal(MonitoringSvcDataType.Log, retrieved.DataType);
                 Assert.Equal(MonitoringSvcType.DataDog, retrieved.PartnerServiceType);
+                Assert.Equal(resourceProviderType, retrieved.MonitoringSvcResourceProviderType);
+            }
+
+            // Can retrieve with resourceProviderType.
+            {
+                var retrieved = await s.GetEntityAsync(resourceProviderType, mockEntity.Location);
+
+                Assert.Equal(name, retrieved.Name);
+                Assert.Equal(nameSpace, retrieved.Namespace);
+                Assert.Equal(authruleid, retrieved.AuthorizationRuleId);
+                Assert.Equal(eventHubConnectionString, retrieved.EventHubConnStr);
+                Assert.Equal(storageConnectionString, retrieved.StorageConnStr);
+                Assert.Equal(location, retrieved.Location);
+                Assert.Equal(MonitoringSvcDataType.Log, retrieved.DataType);
+                Assert.Equal(MonitoringSvcType.DataDog, retrieved.PartnerServiceType);
+                Assert.Equal(resourceProviderType, retrieved.MonitoringSvcResourceProviderType);
             }
 
             // List entity

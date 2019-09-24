@@ -22,6 +22,11 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
         MonitoringSvcDataType DataType { get; set; }
 
         /// <summary>
+        /// Resource provider type i.e. Microsoft.Datadog/datadogs
+        /// </summary>
+        string MonitoringSvcResourceProviderType { get; set; }
+
+        /// <summary>
         /// Event hub namespace
         /// </summary>
         string Namespace { get; }

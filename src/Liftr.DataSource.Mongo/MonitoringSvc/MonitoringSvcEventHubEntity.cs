@@ -21,6 +21,9 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
         [BsonElement("dataType")]
         public MonitoringSvcDataType DataType { get; set; }
 
+        [BsonElement("monitoringSvcResourceProviderType")]
+        public string MonitoringSvcResourceProviderType { get; set; }
+
         [BsonElement("nameSpace")]
         public string Namespace { get; set; }
 

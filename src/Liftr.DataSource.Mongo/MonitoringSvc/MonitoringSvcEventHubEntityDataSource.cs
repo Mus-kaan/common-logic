@@ -28,6 +28,14 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
             return await cursor.FirstOrDefaultAsync();
         }
 
+        public async Task<IMonitoringSvcEventHubEntity> GetEntityAsync(string monitoringSvcResourceProviderType, string location)
+        {
+            var builder = Builders<MonitoringSvcEventHubEntity>.Filter;
+            var filter = builder.Eq(u => u.MonitoringSvcResourceProviderType, monitoringSvcResourceProviderType) & builder.Eq(u => u.Location, location) & builder.Eq(u => u.Enabled, true);
+            var cursor = await _collection.FindAsync<MonitoringSvcEventHubEntity>(filter);
+            return await cursor.FirstOrDefaultAsync();
+        }
+
         public async Task<IEnumerable<IMonitoringSvcEventHubEntity>> ListEntityAsync()
         {
             var builder = Builders<MonitoringSvcEventHubEntity>.Filter;

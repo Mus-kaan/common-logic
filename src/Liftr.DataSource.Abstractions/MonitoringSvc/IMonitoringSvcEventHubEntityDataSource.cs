@@ -23,6 +23,14 @@ namespace Microsoft.Liftr.DataSource.MonitoringSvc
         Task<IMonitoringSvcEventHubEntity> GetEntityAsync(MonitoringSvcType partnerSvcType, string location);
 
         /// <summary>
+        /// Retrives EventHub entity for given resource provider type and location, event hub usage is per partner and per location
+        /// </summary>
+        /// <param name="monitoringSvcResourceProviderType"></param>
+        /// <param name="location"></param>
+        /// <returns></returns>
+        Task<IMonitoringSvcEventHubEntity> GetEntityAsync(string monitoringSvcResourceProviderType, string location);
+
+        /// <summary>
         /// Retrieves all enabled Eventhub entities configured to forward logs/metrics
         /// </summary>
         /// <returns></returns>
