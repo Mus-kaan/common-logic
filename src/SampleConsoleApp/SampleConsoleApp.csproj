@@ -20,5 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.GenericHosting\Liftr.GenericHosting.csproj" />
+    <ProjectReference Include="..\Liftr.Logging.GenericHosting\Liftr.Logging.GenericHosting.csproj" />
   </ItemGroup>
 </Project>

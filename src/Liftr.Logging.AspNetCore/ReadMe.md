@@ -1,0 +1,1 @@
+﻿https://msazure.visualstudio.com/Liftr/_wiki/wikis/Liftr.wiki?pagePath=%2FFoundations%2FDiagnostics%20(Logs%20%26%20Monitoring)%2FLogger%20in%20Asp.Net%20Core%20Web%20Projects&pageId=28034&wikiVersion=GBwikiMaster

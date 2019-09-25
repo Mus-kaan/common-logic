@@ -13,17 +13,17 @@ namespace GenericHostSample
     #region snippet1
     internal class TimedHostedService : IHostedService, IDisposable
     {
-        private readonly ILogger _logger;
+        private readonly Serilog.ILogger _logger;
         private Timer _timer;
 
-        public TimedHostedService(ILogger<TimedHostedService> logger)
+        public TimedHostedService(Serilog.ILogger logger)
         {
             _logger = logger;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Timed Background Service is starting.");
+            _logger.Information("Timed Background Service is starting.");
 
             _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
 
@@ -32,7 +32,7 @@ namespace GenericHostSample
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Timed Background Service is stopping.");
+            _logger.Information("Timed Background Service is stopping.");
 
             _timer?.Change(Timeout.Infinite, 0);
 
@@ -46,7 +46,7 @@ namespace GenericHostSample
 
         private void DoWork(object state)
         {
-            _logger.LogInformation("Timed Background Service is working.");
+            _logger.Information("Timed Background Service is working.");
         }
     }
     #endregion

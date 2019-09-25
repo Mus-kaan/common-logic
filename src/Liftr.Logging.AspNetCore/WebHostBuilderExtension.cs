@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Liftr.DiagnosticSource;
 using Serilog;
+using Serilog.Context;
 using Serilog.Events;
 using System;
 
@@ -29,6 +30,9 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             {
                 throw new ArgumentNullException(nameof(webHostBuilder));
             }
+
+            LogContext.PushProperty("RunningSessionId", Guid.NewGuid().ToString());
+            LogContext.PushProperty("ProcessStartTime", DateTime.UtcNow.ToZuluString());
 
             webHostBuilder
                 .UseApplicationInsights() // Cross tier correlation is added here.

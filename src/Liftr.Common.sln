@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.572
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DataSource.Mongo", "Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj", "{629A2EE7-20D0-47D7-A9A9-638BA7EF6AD2}"
 EndProject
@@ -64,6 +64,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{E6C8A847-172D-4E1A-ADFB-AC96B7C1314F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleConsoleApp", "SampleConsoleApp\SampleConsoleApp.csproj", "{2BAF3C8B-DC8E-4A22-8A1E-8CE2D038089F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Logging.GenericHosting", "Liftr.Logging.GenericHosting\Liftr.Logging.GenericHosting.csproj", "{39FF46EE-FCB6-4483-A340-B7D71D5AABB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -175,6 +177,10 @@ Global
 		{2BAF3C8B-DC8E-4A22-8A1E-8CE2D038089F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2BAF3C8B-DC8E-4A22-8A1E-8CE2D038089F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2BAF3C8B-DC8E-4A22-8A1E-8CE2D038089F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39FF46EE-FCB6-4483-A340-B7D71D5AABB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39FF46EE-FCB6-4483-A340-B7D71D5AABB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39FF46EE-FCB6-4483-A340-B7D71D5AABB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39FF46EE-FCB6-4483-A340-B7D71D5AABB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

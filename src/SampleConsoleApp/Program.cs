@@ -5,8 +5,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Liftr.GenericHosting;
+using Microsoft.Liftr.Logging.GenericHosting;
 using System.IO;
 
 namespace GenericHostSample
@@ -24,15 +24,11 @@ namespace GenericHostSample
                     configHost.AddCommandLine(args);
                 })
                 .UseDefaultAppConfigWithKeyVault(keyVaultPrefix: "IncrediBuildRP")
+                .UseLiftrLogger()
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddHostedService<LifetimeEventsHostedService>();
                     services.AddHostedService<TimedHostedService>();
-                })
-                .ConfigureLogging((hostContext, configLogging) =>
-                {
-                    configLogging.AddConsole();
-                    configLogging.AddDebug();
                 })
                 .UseConsoleLifetime()
                 .Build();
