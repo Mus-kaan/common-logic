@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DependencyCollector;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -36,6 +37,8 @@ namespace Microsoft.Liftr.Logging.GenericHosting
                     {
                         var appInsightsConfig = TelemetryConfiguration.CreateDefault();
                         appInsightsConfig.InstrumentationKey = ikey;
+                        DependencyTrackingTelemetryModule depModule = new DependencyTrackingTelemetryModule();
+                        depModule.Initialize(appInsightsConfig);
                         var appInsightsClient = new TelemetryClient(appInsightsConfig);
                         serilogConfig = serilogConfig.WriteTo.ApplicationInsights(appInsightsClient, TelemetryConverter.Events);
                         services.AddSingleton(appInsightsClient);
