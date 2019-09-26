@@ -33,6 +33,7 @@
     <PackageVersion_Serilog>2.8.0</PackageVersion_Serilog>
     <PackageVersion_Serilog_AspNetCore>2.1.1</PackageVersion_Serilog_AspNetCore>
     <PackageVersion_Serilog_Extensions_Hosting>3.0.0</PackageVersion_Serilog_Extensions_Hosting>
+    <PackageVersion_Serilog_Formatting_Compact>1.0.0</PackageVersion_Serilog_Formatting_Compact>
     <PackageVersion_Serilog_Settings_Configuration>3.1.0</PackageVersion_Serilog_Settings_Configuration>
     <PackageVersion_Serilog_Sinks_ApplicationInsights>3.0.3</PackageVersion_Serilog_Sinks_ApplicationInsights>
     <PackageVersion_Serilog_Sinks_Console>3.1.1</PackageVersion_Serilog_Sinks_Console>

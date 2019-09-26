@@ -8,6 +8,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Serilog" Version="$(PackageVersion_Serilog)" />
+    <PackageReference Include="Serilog.Formatting.Compact" Version="$(PackageVersion_Serilog_Formatting_Compact)" />
     <PackageReference Include="Serilog.Sinks.Console" Version="$(PackageVersion_Serilog_Sinks_Console)" />
+    <PackageReference Include="Serilog.Sinks.File" Version="$(PackageVersion_Serilog_Sinks_File)" />
   </ItemGroup>
 </Project>
