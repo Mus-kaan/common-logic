@@ -7,8 +7,12 @@ using MongoDB.Driver;
 using MongoDB.Driver.Core.Events;
 using Serilog;
 using System;
+using System.Runtime.CompilerServices;
 using System.Security.Authentication;
 using System.Threading.Tasks;
+
+[assembly: InternalsVisibleTo("Microsoft.Lift.AzureAsyncOperation.DataSource.Test")]
+[assembly: InternalsVisibleTo("Microsoft.Liftr.DataSource.Mongo.Tests")]
 
 namespace Microsoft.Liftr.DataSource.Mongo
 {
@@ -84,7 +88,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
         }
 
         [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
-        public async Task<IMongoCollection<T>> CreateCollectionAsync<T>(string collectionName)
+        internal async Task<IMongoCollection<T>> CreateCollectionAsync<T>(string collectionName)
         {
             if (!await CollectionExistsAsync(_db, collectionName))
             {
@@ -98,7 +102,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
         }
 
         [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
-        public async Task<IMongoCollection<T>> CreateEntityCollectionAsync<T>(string collectionName) where T : BaseResourceEntity
+        internal async Task<IMongoCollection<T>> CreateEntityCollectionAsync<T>(string collectionName) where T : BaseResourceEntity
         {
             if (!await CollectionExistsAsync(_db, collectionName))
             {
@@ -119,7 +123,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
         }
 
         [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
-        public IMongoCollection<T> CreateCollection<T>(string collectionName)
+        internal IMongoCollection<T> CreateCollection<T>(string collectionName)
         {
             if (!CollectionExists(_db, collectionName))
             {
@@ -133,7 +137,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
         }
 
         [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
-        public IMongoCollection<T> CreateEntityCollection<T>(string collectionName) where T : BaseResourceEntity
+        internal IMongoCollection<T> CreateEntityCollection<T>(string collectionName) where T : BaseResourceEntity
         {
             if (!CollectionExists(_db, collectionName))
             {

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
     <IsPackable>false</IsPackable>
-    <AssemblyName>MIcrosoft.Lift.AzureAsyncOperation.DataSource.Test</AssemblyName>
+    <AssemblyName>Microsoft.Lift.AzureAsyncOperation.DataSource.Test</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(PackageVersion_Microsoft_NET_Test_Sdk)" />
