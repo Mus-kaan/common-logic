@@ -16,6 +16,7 @@
     <PackageVersion_Microsoft_Extensions_Configuration_CommandLine>2.2.0</PackageVersion_Microsoft_Extensions_Configuration_CommandLine>
     <PackageVersion_Microsoft_Extensions_Configuration_EnvironmentVariables>2.2.0</PackageVersion_Microsoft_Extensions_Configuration_EnvironmentVariables>
     <PackageVersion_Microsoft_Extensions_Configuration_Json>2.2.0</PackageVersion_Microsoft_Extensions_Configuration_Json>
+    <PackageVersion_Microsoft_Extensions_DependencyInjection_Abstractions>2.2.0</PackageVersion_Microsoft_Extensions_DependencyInjection_Abstractions>
     <PackageVersion_Microsoft_Extensions_Hosting>2.2.0</PackageVersion_Microsoft_Extensions_Hosting>
     <PackageVersion_Microsoft_Extensions_Hosting_Abstractions>2.2.0</PackageVersion_Microsoft_Extensions_Hosting_Abstractions>
     <PackageVersion_Microsoft_Extensions_Http>2.2.0</PackageVersion_Microsoft_Extensions_Http>

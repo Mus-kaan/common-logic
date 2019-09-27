@@ -5,6 +5,8 @@
 using Microsoft.Liftr.Contracts.MonitoringSvc;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 
 namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
@@ -16,9 +18,13 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
         public string EntityId { get; set; }
 
         [BsonElement("partnerServiceType")]
+        [JsonConverter(typeof(StringEnumConverter))]
+        [BsonRepresentation(BsonType.String)]
         public MonitoringSvcType PartnerServiceType { get; set; }
 
         [BsonElement("dataType")]
+        [JsonConverter(typeof(StringEnumConverter))]
+        [BsonRepresentation(BsonType.String)]
         public MonitoringSvcDataType DataType { get; set; }
 
         [BsonElement("monitoringSvcResourceProviderType")]
