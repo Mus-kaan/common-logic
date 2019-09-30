@@ -65,7 +65,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{E6C8
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleConsoleApp", "SampleConsoleApp\SampleConsoleApp.csproj", "{2BAF3C8B-DC8E-4A22-8A1E-8CE2D038089F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Logging.GenericHosting", "Liftr.Logging.GenericHosting\Liftr.Logging.GenericHosting.csproj", "{39FF46EE-FCB6-4483-A340-B7D71D5AABB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Logging.GenericHosting", "Liftr.Logging.GenericHosting\Liftr.Logging.GenericHosting.csproj", "{39FF46EE-FCB6-4483-A340-B7D71D5AABB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

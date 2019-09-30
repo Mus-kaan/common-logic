@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Liftr.DiagnosticSource;
@@ -58,7 +59,17 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                         services.AddSingleton(subscriber);
                     }
 
-                    services.AddSingleton(Log.Logger);
+                    services.AddSingleton<Serilog.ILogger>((sp) =>
+                    {
+                        var ikey = host.Configuration.GetSection("ApplicationInsights")?.GetSection("InstrumentationKey")?.Value;
+                        if (!string.IsNullOrEmpty(ikey))
+                        {
+                            var appInsightsClient = sp.GetService<TelemetryClient>();
+                            AppInsightsHelper.AppInsightsClient = appInsightsClient;
+                        }
+
+                        return Log.Logger;
+                    });
                 });
 
             return webHostBuilder;

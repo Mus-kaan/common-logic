@@ -11,6 +11,21 @@ namespace Microsoft.Liftr.Logging
 {
     public static class LoggerExtensions
     {
+        public static ITimedOperation StartTimedOperation(this ILogger logger, string operationName, string operationId = null)
+        {
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            if (string.IsNullOrEmpty(operationId))
+            {
+                operationId = Guid.NewGuid().ToString();
+            }
+
+            return new TimedOperation(logger, operationName, operationId);
+        }
+
         public static void LogInformation<T>(this ILogger logger, string messageTemplate, T propertyValue, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
         {
             if (logger == null)

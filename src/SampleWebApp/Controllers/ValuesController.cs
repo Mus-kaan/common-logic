@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Logging.AspNetCore;
 using Serilog;
 using Serilog.Events;
@@ -20,6 +21,7 @@ namespace SampleWebApp.Controllers
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
     public class ValuesController : ControllerBase
     {
+        private static int s_cnt = 0;
         private readonly ILogger _logger;
 
         public ValuesController(Serilog.ILogger logger)
@@ -37,6 +39,7 @@ namespace SampleWebApp.Controllers
 #pragma warning disable Liftr1005 // Avoid calling System.Threading.Tasks.Task.Wait()
 #pragma warning disable CA2234 // Pass system uri objects instead of strings
             client.GetAsync("https://msazure.visualstudio.com").Wait();
+            DoWorkAsync().Wait();
 #pragma warning restore CA2234 // Pass system uri objects instead of strings
 #pragma warning restore Liftr1005 // Avoid calling System.Threading.Tasks.Task.Wait()
 
@@ -84,6 +87,43 @@ namespace SampleWebApp.Controllers
             _logger.Information("This is a Information log.");
             _logger.Verbose("This is a Verbose log.");
             _logger.Debug("This is a Debug log.");
+        }
+
+        private async Task DoWorkAsync()
+        {
+            s_cnt++;
+            _logger.Information("Timed Background Service is working.");
+            using (var op = _logger.StartTimedOperation("GetMSWebPage"))
+            {
+                op.SetContextProperty("CntVal", s_cnt);
+                try
+                {
+                    _logger.Information("Before start http get.");
+                    await Task.Delay(300);
+                    if (s_cnt % 3 == 2)
+                    {
+                        throw new InvalidOperationException($"num: {s_cnt}");
+                    }
+
+                    using (var client = new HttpClient())
+                    {
+#pragma warning disable CA2234 // Pass system uri objects instead of strings
+                        var result = await client.GetStringAsync("https://microsoft.com");
+#pragma warning restore CA2234 // Pass system uri objects instead of strings
+                        _logger.Debug("Respose length: {length}", result.Length);
+                        op.SetProperty("ResponseLength", result.Length);
+                        op.SetResultDescription("Get ms web succeed.");
+                    }
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+                {
+                    _logger.Error(ex, "Do work failed.");
+                    op.FailOperation("Do work failed.");
+                    throw;
+                }
+            }
         }
     }
 }

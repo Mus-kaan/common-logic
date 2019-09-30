@@ -40,6 +40,7 @@ namespace Microsoft.Liftr.Logging.GenericHosting
                         DependencyTrackingTelemetryModule depModule = new DependencyTrackingTelemetryModule();
                         depModule.Initialize(appInsightsConfig);
                         var appInsightsClient = new TelemetryClient(appInsightsConfig);
+                        AppInsightsHelper.AppInsightsClient = appInsightsClient;
                         serilogConfig = serilogConfig.WriteTo.ApplicationInsights(appInsightsClient, TelemetryConverter.Events);
                         services.AddSingleton(appInsightsClient);
                         services.AddHostedService<AppInsightsFlushService>();
