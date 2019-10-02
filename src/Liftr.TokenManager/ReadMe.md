@@ -17,8 +17,8 @@ public class Startup
 Below are the sample TokenManagerConfiguration for dogfood
 ```
 "TokenManagerConfiguration": {
-    "ArmEndpoint": "https://api-dogfood.resources.windows-int.net",
+    "ArmEndpoint": "https://management.core.windows.net/",
     "AadEndpoint": "https://login.windows-ppe.net",
-    "TenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+    "TenantId": "f686d426-8d16-42db-81b7-ab578e110ccd"
   }
 ```

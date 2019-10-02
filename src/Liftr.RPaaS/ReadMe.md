@@ -18,7 +18,7 @@ Below are the sample RPaaSConfiguration for dogfood
 ```
 "RPaaSConfiguration": {
     "MetaRPEndpoint": "https://api-dogfood.resources.windows-int.net",
-    "MetaRPAccessorClientId": "a31ac660-3fdf-4bae-a9de-53800bad6a83",
-    "MetaRPAccessorClientSecret": "https://ms.portal.azure.com/#@MSAzureCloud.onmicrosoft.com/resource/subscriptions/d8f298fb-60f5-4676-a7d3-25442ec5ce1e/resourceGroups/do-not-delete-unit-test-rg/providers/Microsoft.KeyVault/vaults/no-delete-liftr-dev/secrets"
+    "MetaRPAccessorClientId": "0f84289f-2c8a-4ad8-8d43-da5fc98073f0",
+    "MetaRPAccessorClientSecret": "https://ms.portal.azure.com/#@MSAzureCloud.onmicrosoft.com/asset/Microsoft_Azure_KeyVault/Secret/https://app-managementplane-test.vault.azure.net/secrets/monitoringmanagement-RPaaSConfiguration--MetaRPAccessorClientSecret/39ca8f0247ca455d8829bc815e0adf79"
   }
 ```
