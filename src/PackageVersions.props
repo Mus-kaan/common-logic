@@ -43,6 +43,7 @@
     <PackageVersion_Serilog_Sinks_File>4.0.0</PackageVersion_Serilog_Sinks_File>
     <PackageVersion_Serilog_Sinks_Xunit2>1.0.0</PackageVersion_Serilog_Sinks_Xunit2>
     <PackageVersion_Swashbuckle_AspNetCore>4.0.1</PackageVersion_Swashbuckle_AspNetCore>
+    <PackageVersion_Swashbuckle_AspNetCore_Annotations>4.0.1</PackageVersion_Swashbuckle_AspNetCore_Annotations>
     <PackageVersion_System_Diagnostics_DiagnosticSource>4.5.1</PackageVersion_System_Diagnostics_DiagnosticSource>
     <PackageVersion_xunit>2.4.1</PackageVersion_xunit>
     <PackageVersion_xunit_runner_visualstudio>2.4.1</PackageVersion_xunit_runner_visualstudio>

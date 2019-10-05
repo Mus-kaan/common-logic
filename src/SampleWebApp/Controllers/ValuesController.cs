@@ -7,9 +7,11 @@ using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Logging.AspNetCore;
 using Serilog;
 using Serilog.Events;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -31,7 +33,8 @@ namespace SampleWebApp.Controllers
 
         // GET api/values
         [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
+        [SwaggerOperation(OperationId = "List")]
+        public ActionResult<IEnumerable<string>> GetList()
         {
             Log();
             Log();
@@ -48,6 +51,7 @@ namespace SampleWebApp.Controllers
 
         // GET api/values/5
         [HttpGet("{id}")]
+        [SwaggerOperation(OperationId = "Get")]
         public ActionResult<string> Get(int id)
         {
             var client = new HttpClient();
@@ -62,6 +66,7 @@ namespace SampleWebApp.Controllers
 
         // POST api/values
         [HttpPost]
+        [SwaggerOperation(OperationId = "Post")]
         public ValueRequest Post([FromBody] ValueRequest req)
         {
             return req;
@@ -69,12 +74,16 @@ namespace SampleWebApp.Controllers
 
         // PUT api/values/5
         [HttpPut("{id}")]
+        [ProducesResponseType((int)HttpStatusCode.Created, Type = typeof(int))]
+        [SwaggerOperation(OperationId = "Put")]
         public void Put(int id, [FromBody] string value)
         {
         }
 
         // DELETE api/values/5
         [HttpDelete("{id}")]
+        [ProducesResponseType((int)HttpStatusCode.Accepted, Type = typeof(void))]
+        [SwaggerOperation(OperationId = "Delete")]
         public void Delete(int id)
         {
         }

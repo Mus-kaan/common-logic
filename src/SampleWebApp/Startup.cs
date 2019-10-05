@@ -34,7 +34,11 @@ namespace SampleWebApp
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+                c.EnableAnnotations();
                 c.OperationFilter<DefaultResponseOperationFilter>();
+                c.OperationFilter<RPSwaggerOperationFilter>();
+                c.SchemaFilter<RPSwaggerSchemaFilter>();
+                c.DocumentFilter<RPSwaggerDocumentFilter>();
 
                 // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
