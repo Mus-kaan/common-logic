@@ -11,7 +11,7 @@
     <PackageReference Include="Serilog.Sinks.File" Version="$(PackageVersion_Serilog_Sinks_File)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Liftr.Fluent\Liftr.Fluent.csproj" />
+    <ProjectReference Include="..\Liftr.Fluent.Provisioning\Liftr.Fluent.Provisioning.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="configs\**\*">

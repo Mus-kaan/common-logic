@@ -7,18 +7,11 @@ using Microsoft.Liftr.Fluent.Contracts.Geneva;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.IO;
 
 namespace Microsoft.Liftr.Fluent.Geneva
 {
     public static class AntaresHelper
     {
-        private const string c_configJsonTemplatePath = "Geneva\\GenevaAntaresConfigJson.json";
-        private const string c_antMdsConfigTemplatePath = "Geneva\\AntMDSConfigTemplate.json";
-        private const string c_antMdsXMLConfigTemplatePath = "Geneva\\AntMDSConfigXMLTemplate.json";
-        private const string c_GCSCertTemplatePath = "Geneva\\GCSCertTemplate.json";
-        private const string c_GCSCertPSWDTemplatePath = "Geneva\\GCSCertPSWDTemplate.json";
-
         private const string c_placeHolder_MONITORING_TENANT = "PLACEHOLDER_MONITORING_TENANT";
         private const string c_placeHolder_MONITORING_ROLE = "PLACEHOLDER_MONITORING_ROLE";
         private const string c_placeHolder_REGION = "PLACEHOLDER_REGION";
@@ -40,14 +33,9 @@ namespace Microsoft.Liftr.Fluent.Geneva
                 throw new ArgumentNullException(nameof(location));
             }
 
-            if (!File.Exists(c_configJsonTemplatePath))
-            {
-                throw new InvalidOperationException($"Cannot find the template file at path: {c_configJsonTemplatePath}");
-            }
-
             genevaOptions.CheckValid();
 
-            var templateContent = File.ReadAllText(c_configJsonTemplatePath);
+            var templateContent = EmbeddedContentReader.GetContent("Microsoft.Liftr.Fluent.Geneva.GenevaAntaresConfigJson.json");
 
             templateContent = templateContent.Replace(c_placeHolder_MONITORING_TENANT, genevaOptions.MonitoringTenant);
             templateContent = templateContent.Replace(c_placeHolder_MONITORING_ROLE, genevaOptions.MonitoringRole);
@@ -68,12 +56,7 @@ namespace Microsoft.Liftr.Fluent.Geneva
                 throw new ArgumentNullException(nameof(location));
             }
 
-            if (!File.Exists(c_antMdsConfigTemplatePath))
-            {
-                throw new InvalidOperationException($"Cannot find the template file at path: {c_antMdsConfigTemplatePath}");
-            }
-
-            var templateContent = File.ReadAllText(c_antMdsConfigTemplatePath);
+            var templateContent = EmbeddedContentReader.GetContent("Microsoft.Liftr.Fluent.Geneva.AntMDSConfigTemplate.json");
             dynamic configObj = JObject.Parse(templateContent);
             var r = configObj.resources[0];
             r.name = $"{appServicePlanName}/AntMDS/ConfigJson";
@@ -89,12 +72,7 @@ namespace Microsoft.Liftr.Fluent.Geneva
                 throw new ArgumentNullException(nameof(location));
             }
 
-            if (!File.Exists(c_antMdsXMLConfigTemplatePath))
-            {
-                throw new InvalidOperationException($"Cannot find the template file at path: {c_antMdsXMLConfigTemplatePath}");
-            }
-
-            var templateContent = File.ReadAllText(c_antMdsXMLConfigTemplatePath);
+            var templateContent = EmbeddedContentReader.GetContent("Microsoft.Liftr.Fluent.Geneva.AntMDSConfigXMLTemplate.json");
             dynamic configObj = JObject.Parse(templateContent);
             var r = configObj.resources[0];
             r.name = $"{appServicePlanName}/AntMDS/MdsConfigXml";
@@ -109,12 +87,7 @@ namespace Microsoft.Liftr.Fluent.Geneva
                 throw new ArgumentNullException(nameof(location));
             }
 
-            if (!File.Exists(c_GCSCertTemplatePath))
-            {
-                throw new InvalidOperationException($"Cannot find the template file at path: {c_GCSCertTemplatePath}");
-            }
-
-            var templateContent = File.ReadAllText(c_GCSCertTemplatePath);
+            var templateContent = EmbeddedContentReader.GetContent("Microsoft.Liftr.Fluent.Geneva.GCSCertTemplate.json");
             dynamic obj = JObject.Parse(templateContent);
             var r = obj.resources[0];
             r.name = $"{appServicePlanName}/AntMDS/CERTIFICATE_PFX_GENEVACERT";
@@ -130,12 +103,7 @@ namespace Microsoft.Liftr.Fluent.Geneva
                 throw new ArgumentNullException(nameof(location));
             }
 
-            if (!File.Exists(c_GCSCertPSWDTemplatePath))
-            {
-                throw new InvalidOperationException($"Cannot find the template file at path: {c_GCSCertPSWDTemplatePath}");
-            }
-
-            var templateContent = File.ReadAllText(c_GCSCertPSWDTemplatePath);
+            var templateContent = EmbeddedContentReader.GetContent("Microsoft.Liftr.Fluent.Geneva.GCSCertPSWDTemplate.json");
             dynamic obj = JObject.Parse(templateContent);
             var r = obj.resources[0];
             r.name = $"{appServicePlanName}/AntMDS/CERTIFICATE_PASSWORD_GENEVACERT";

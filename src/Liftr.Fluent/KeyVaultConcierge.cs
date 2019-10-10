@@ -4,13 +4,8 @@
 
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.KeyVault.Models;
-using Microsoft.Azure.Management.BatchAI.Fluent.Models;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent
@@ -18,7 +13,6 @@ namespace Microsoft.Liftr.Fluent
     public sealed class KeyVaultConcierge : IDisposable
     {
         private readonly string _vaultBaseUrl;
-        private readonly HttpClient _kvHttpClient;
         private readonly KeyVaultClient _keyVaultClient;
         private readonly Serilog.ILogger _logger;
 
@@ -37,15 +31,30 @@ namespace Microsoft.Liftr.Fluent
             }
 
             _vaultBaseUrl = vaultBaseUrl;
-            _kvHttpClient = new HttpClient();
-            _keyVaultClient = new KeyVaultClient(
-                new KeyVaultClient.AuthenticationCallback(async (authority, resource, scope) =>
-                {
-                    var authContext = new AuthenticationContext(authority, TokenCache.DefaultShared);
-                    var result = await authContext.AcquireTokenAsync(resource, new ClientCredential(clientId, clientSecret));
-                    return result.AccessToken;
-                }), _kvHttpClient);
+            _keyVaultClient = KeyVaultClientFactory.FromClientIdAndSecret(clientId, clientSecret);
             _logger = logger;
+        }
+
+#pragma warning disable CA1054 // Uri parameters should not be strings
+        public KeyVaultConcierge(string vaultBaseUrl, KeyVaultClient kvClient, Serilog.ILogger logger)
+#pragma warning restore CA1054 // Uri parameters should not be strings
+        {
+            if (string.IsNullOrEmpty(vaultBaseUrl))
+            {
+                throw new ArgumentNullException(nameof(vaultBaseUrl));
+            }
+
+            _vaultBaseUrl = vaultBaseUrl;
+            _keyVaultClient = kvClient;
+            _logger = logger;
+        }
+
+        public async Task<SecretBundle> GetSecretAsync(string secretName)
+        {
+            _logger.Information("Start getting secret with name: {@secretName} ...", secretName);
+            var result = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, secretName);
+            _logger.Information("Finished getting secret with name: {@secretName}.", secretName);
+            return result;
         }
 
         public async Task<SecretBundle> SetSecretAsync(string secretName, string value, IDictionary<string, string> tags = null)
@@ -53,6 +62,23 @@ namespace Microsoft.Liftr.Fluent
             _logger.Information("Start setting secret with name: {@secretName} ...", secretName);
             var result = await _keyVaultClient.SetSecretAsync(_vaultBaseUrl, secretName, value, tags);
             _logger.Information("Finished setting secret with name: {@secretName}.", secretName);
+            return result;
+        }
+
+        public async Task<IEnumerable<SecretItem>> ListSecretsAsync(string prefix = null)
+        {
+            List<SecretItem> result = new List<SecretItem>();
+            _logger.Information("Start listing secrets with prefix: {@prefix} ...", prefix);
+            var secrets = await _keyVaultClient.GetSecretsAsync(_vaultBaseUrl);
+            foreach (var secret in secrets)
+            {
+                if (string.IsNullOrEmpty(prefix) || secret.Identifier.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.Add(secret);
+                }
+            }
+
+            _logger.Information("Finished listing secrets with name: {@prefix}.", prefix);
             return result;
         }
 
@@ -66,7 +92,7 @@ namespace Microsoft.Liftr.Fluent
 
         public async Task<IssuerBundle> SetCertificateIssuerAsync(string issuerName, string provider)
         {
-            _logger.Information("Start getting issuer with name: {@issuerName}, provider: {@provider} ...", issuerName, provider);
+            _logger.Information("Start getting issuer with name: {issuerName}, provider: {provider} ...", issuerName, provider);
             var issuer = await _keyVaultClient.SetCertificateIssuerAsync(_vaultBaseUrl, issuerName, provider);
             _logger.Information("Finished getting issuer with name: {@issuerName} .", issuerName);
             return issuer;
@@ -95,13 +121,13 @@ namespace Microsoft.Liftr.Fluent
                 {
                     Subject = $"CN={certificateSubject}",
                     SubjectAlternativeNames = new SubjectAlternativeNames(emails: null, dnsNames: subjectAlternativeNames),
-                    ValidityInMonths = 12,
+                    ValidityInMonths = 3,
                 },
                 LifetimeActions = new List<LifetimeAction>()
                 {
                     new LifetimeAction(
-                        new Trigger(lifetimePercentage: 50),
-                        new Azure.KeyVault.Models.Action(ActionType.EmailContacts)),
+                        new Trigger(daysBeforeExpiry: 15),
+                        new Azure.KeyVault.Models.Action(ActionType.AutoRenew)),
                 },
             };
 
@@ -145,7 +171,6 @@ namespace Microsoft.Liftr.Fluent
         public void Dispose()
         {
             _keyVaultClient.Dispose();
-            _kvHttpClient.Dispose();
         }
     }
 }

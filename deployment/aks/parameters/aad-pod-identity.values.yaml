@@ -1,0 +1,11 @@
+azureIdentity:
+  enabled: true # enabled/disable deployment of azure identity and binding
+  name: "azure-identity"
+  type: 0 # type 0: MSI, type 1: Service Principal
+  # The following two values also need to be specified (in value files or in command line arguments):
+  # resourceID: /subscriptions/[[subscriptionId]]/resourceGroups/acrbuild-common/providers/Microsoft.ManagedIdentity/userAssignedIdentities/[[userAssignedIdentityName]]
+  # clientID: [[userAssignedIdentityClientId]]
+
+azureIdentityBinding:
+  name: "azure-identity-binding"
+  selector: liftr-aad-pod-identity

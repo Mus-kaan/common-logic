@@ -14,10 +14,10 @@
     <PackageReference Include="Serilog.Sinks.Debug" Version="$(PackageVersion_Serilog_Sinks_Debug)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Liftr.Fluent\Liftr.Fluent.csproj" />
+    <ProjectReference Include="..\Liftr.Fluent.Provisioning\Liftr.Fluent.Provisioning.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="infrav1.json">
+    <None Update="*.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -1,0 +1,12 @@
+{
+  "partnerName": "IncrediBuild",
+  "shortPartnerName": "ib",
+  "environment": "DogFood",
+  "locationStr": "westus2",
+  "GlobalBaseName": "gbl1001",
+  "GlobalLocationStr": "centralus",
+  "DataBaseName": "data1001",
+  "ComputeBaseName": "com1001",
+  "DBConnectionStringSecretName": "IncrediBuildRP-IncrediBuildMongoOptions--ConnectionString",
+  "HostName": "ib-rp-web-wus.azliftr-test.io"
+}

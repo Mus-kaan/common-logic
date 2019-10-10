@@ -3,21 +3,26 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.AppService.Fluent;
+using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
+using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Models;
+using Microsoft.Azure.Management.TrafficManager.Fluent;
 using Microsoft.Liftr.Fluent.Contracts.Geneva;
 using Microsoft.Liftr.Fluent.Geneva;
 using Microsoft.Rest.Azure;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using static Microsoft.Azure.Management.Fluent.Azure;
 
 namespace Microsoft.Liftr.Fluent
 {
@@ -32,14 +37,17 @@ namespace Microsoft.Liftr.Fluent
         private readonly ILogger _logger;
         private readonly AzureCredentials _credentials;
 
-        public LiftrAzure(AzureCredentials credentials, IAzure fluentClient, ILogger logger)
+        public LiftrAzure(AzureCredentials credentials, IAzure fluentClient, IAuthenticated authenticated, ILogger logger)
         {
             _credentials = credentials;
             FluentClient = fluentClient;
+            Authenticated = authenticated;
             _logger = logger;
         }
 
         public IAzure FluentClient { get; }
+
+        public IAuthenticated Authenticated { get; }
 
         #region Resource Group
         public async Task<IResourceGroup> CreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags)
@@ -49,8 +57,8 @@ namespace Microsoft.Liftr.Fluent
             if (await FluentClient.ResourceGroups.ContainAsync(rgName))
             {
                 var err = $"Resource Group with name '{rgName}' already existed.";
-                _logger.Fatal(err);
-                throw new InvalidOperationException(err);
+                _logger.Warning(err);
+                throw new DuplicateNameException(err);
             }
 
             var resourceGroup = await FluentClient
@@ -110,6 +118,40 @@ namespace Microsoft.Liftr.Fluent
         }
         #endregion Resource Group
 
+        #region Traffic Manager
+        public async Task<ITrafficManagerProfile> CreateTrafficManagerAsync(string rgName, string tmName, IDictionary<string, string> tags)
+        {
+            _logger.Information("Creating a Traffic Manager with name {@tmName} ...", tmName);
+            var tm = await FluentClient
+                .TrafficManagerProfiles
+                .Define(tmName)
+                .WithExistingResourceGroup(rgName)
+                .WithLeafDomainLabel(tmName)
+                .WithWeightBasedRouting()
+                .DefineExternalTargetEndpoint("default-endpoint")
+                    .ToFqdn("40.76.4.15") // microsoft.com
+                    .FromRegion(Region.USWest)
+                    .WithTrafficDisabled()
+                    .Attach()
+                .WithTags(tags)
+                .CreateAsync();
+
+            _logger.Information("Created Traffic Manager with Id {resourceId}", tm.Id);
+
+            return tm;
+        }
+
+        public async Task<ITrafficManagerProfile> GetTrafficManagerAsync(string tmId)
+        {
+            _logger.Information("Getting a Traffic Manager with Id {resourceId} ...", tmId);
+            var tm = await FluentClient
+                .TrafficManagerProfiles
+                .GetByIdAsync(tmId);
+
+            return tm;
+        }
+        #endregion
+
         #region CosmosDB
         public async Task<(ICosmosDBAccount cosmosDBAccount, string mongoConnectionString)> CreateCosmosDBAsync(Region location, string rgName, string cosmosDBName, IDictionary<string, string> tags)
         {
@@ -133,6 +175,13 @@ namespace Microsoft.Liftr.Fluent
             return (cosmosDBAccount, mongoConnectionString);
         }
 
+        public async Task<ICosmosDBAccount> GetCosmosDBAsync(string dbResourceId)
+        {
+            return await FluentClient
+                .CosmosDBAccounts
+                .GetByIdAsync(dbResourceId);
+        }
+
         public async Task<IEnumerable<ICosmosDBAccount>> ListCosmosDBAsync(string rgName)
         {
             _logger.Information($"Listing CosmosDB in resource group {rgName} ...");
@@ -143,9 +192,17 @@ namespace Microsoft.Liftr.Fluent
         #endregion CosmosDB
 
         #region Key Vault
-        public async Task<IVault> CreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags, string writerClientId)
+        public async Task<IVault> CreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags, string adminSPNClientId)
         {
-            _logger.Information($"Creating a Vault with name {vaultName} ...");
+            _logger.Information("Creating a Vault with name {vaultName}, adminSPNClientId {adminSPNClientId} ...", vaultName, adminSPNClientId);
+
+            if (!Guid.TryParse(adminSPNClientId, out _))
+            {
+                var errMsg = "The input kv admin client id is not in a valid Guid format.";
+                var ex = new InvalidOperationException(errMsg);
+                _logger.Error(ex, errMsg);
+                throw ex;
+            }
 
             // TODO: figure out how to remove Key Vault Access Policy of the management service principal.
             IVault vault = await FluentClient.Vaults
@@ -153,7 +210,7 @@ namespace Microsoft.Liftr.Fluent
                         .WithRegion(location)
                         .WithExistingResourceGroup(rgName)
                         .DefineAccessPolicy()
-                            .ForServicePrincipal(writerClientId)
+                            .ForServicePrincipal(adminSPNClientId)
                             .AllowSecretAllPermissions()
                             .AllowCertificateAllPermissions()
                             .Attach()
@@ -201,6 +258,58 @@ namespace Microsoft.Liftr.Fluent
             _logger.Information("Finished removing KeyVault {@kvResourceId} access policy of {@servicePrincipalObjectId}", kvResourceId, servicePrincipalObjectId);
         }
         #endregion Key Vault
+
+        #region Aks Cluster
+        public async Task<IKubernetesCluster> CreateAksClusterAsync(
+            Region region,
+            string rgName,
+            string aksName,
+            string rootUserName,
+            string sshPublicKey,
+            string servicePrincipalClientId,
+            string servicePrincipalSecret,
+            ContainerServiceVirtualMachineSizeTypes vmSizeType,
+            int vmCount,
+            IDictionary<string, string> tags)
+        {
+            _logger.Information($"Creating a Kubernetes cluster with name {aksName} ...");
+
+            var k8sCluster = await FluentClient.KubernetesClusters
+                             .Define(aksName)
+                             .WithRegion(region)
+                             .WithExistingResourceGroup(rgName)
+                             .WithLatestVersion()
+                             .WithRootUsername(rootUserName)
+                             .WithSshKey(sshPublicKey)
+                             .WithServicePrincipalClientId(servicePrincipalClientId)
+                             .WithServicePrincipalSecret(servicePrincipalSecret)
+                             .DefineAgentPool("pool1")
+                                 .WithVirtualMachineSize(vmSizeType)
+                                 .WithAgentPoolVirtualMachineCount(vmCount)
+                                 .Attach()
+                             .WithDnsPrefix(aksName)
+                             .WithTags(tags)
+                             .CreateAsync();
+
+            _logger.Information($"Created Kubernetes cluster with name {aksName}");
+            return k8sCluster;
+        }
+
+        public async Task<IKubernetesCluster> GetAksClusterAsync(string aksResourceId)
+        {
+            return await FluentClient
+                .KubernetesClusters
+                .GetByIdAsync(aksResourceId);
+        }
+
+        public async Task<IEnumerable<IKubernetesCluster>> ListAksClusterAsync(string rgName)
+        {
+            _logger.Information($"Listing Aks cluster in resource group {rgName} ...");
+            return await FluentClient
+                .KubernetesClusters
+                .ListByResourceGroupAsync(rgName);
+        }
+        #endregion Aks Cluster
 
         #region Web App
         public async Task<IWebApp> CreateWebAppAsync(Region location, string rgName, string webAppName, IDictionary<string, string> tags, PricingTier tier, string aspNetEnv)
@@ -322,6 +431,27 @@ namespace Microsoft.Liftr.Fluent
 
         #endregion Web App
 
+        #region Identity
+        public async Task<IIdentity> CreateMSIAsync(Region location, string rgName, string msiName, IDictionary<string, string> tags)
+        {
+            _logger.Information("Creating a MSI with name {msiName} ...", msiName);
+            var msi = await FluentClient.Identities
+                .Define(msiName)
+                .WithRegion(location)
+                .WithExistingResourceGroup(rgName)
+                .WithTags(tags)
+                .CreateAsync();
+            _logger.Information("Created MSI with Id {ResourceId} ...", msi.Id);
+            return msi;
+        }
+
+        public async Task<IIdentity> GetMSIAsync(string msiId)
+        {
+            _logger.Information("Getting MSI with Id {ResourceId} ...", msiId);
+            return await FluentClient.Identities.GetByIdAsync(msiId);
+        }
+        #endregion
+
         #region Deployments
         public async Task<IDeployment> CreateDeploymentAsync(Region location, string rgName, string template, string templateParameters = null, bool noLogging = false)
         {
@@ -356,11 +486,12 @@ namespace Microsoft.Liftr.Fluent
                 _logger.Information($"Finished the ARM deployment with name {deploymentName} ...");
                 return deployment;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.Error("ARM deployment failed", ex);
                 var error = await DeploymentExtensions.GetDeploymentErrorDetailsAsync(FluentClient.SubscriptionId, rgName, deploymentName, _credentials);
                 _logger.Error("ARM deployment with name {@deploymentName} Failed with Error: {@DeploymentError}", deploymentName, error);
-                throw new ARMDeploymentFailureException() { Details = error };
+                throw new ARMDeploymentFailureException("ARM deployment failed", ex) { Details = error };
             }
         }
         #endregion

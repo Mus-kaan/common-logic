@@ -1,0 +1,28 @@
+{
+  "$schema": "http://schema.express.azure.com/schemas/2015-01-01-alpha/RolloutSpec.json",
+  "RolloutMetadata": {
+    "ServiceModelPath": "ServiceModel.Dogfood.json",
+    "Name": "Deploy app on West US regional Compute resources",
+    "RolloutType": "Major",
+    "BuildSource": {
+      "Parameters": {
+        "VersionFile": "version.txt"
+      }
+    },
+    "Notification": {
+      "Email": {
+        "To": "wuweng@microsoft.com"
+      }
+    }
+  },
+  "OrchestratedSteps": [
+    {
+      "Name": "DeployAppOnWestUSRegionalComputeResources",
+      "TargetType": "ServiceResource",
+      "TargetName": "ShellExtensionDeployIBAppWestUS",
+      "Actions": [
+        "Shell/deploy-aks-app-regional-compute"
+      ]
+    }
+  ]
+}

@@ -40,7 +40,7 @@ namespace Microsoft.Liftr.Fluent.Contracts
             Tags = new Dictionary<string, string>()
             {
                 [nameof(PartnerName)] = PartnerName,
-                [nameof(Environment)] = ShortEnvName(Environment),
+                [nameof(Environment)] = Environment.ToString(),
                 [c_infraVersionTagName] = "v1",
                 [c_RegionTagName] = location.ToString(),
             };
@@ -62,16 +62,25 @@ namespace Microsoft.Liftr.Fluent.Contracts
         }
 
         public string ResourceGroupName(string baseName)
-            => $"{ShortPartnerName}-{baseName}-{ShortEnvName(Environment)}-{Location.ShortName()}-rg";
+            => GenerateCommonName(baseName, "rg");
+
+        public string MSIName(string baseName)
+            => GenerateCommonName(baseName, "msi");
 
         public string KeyVaultName(string baseName)
-            => $"{ShortPartnerName}-{baseName}-{Location.ShortName()}";
+            => GenerateCommonName(baseName, "kv");
 
         public string WebAppName(string baseName)
-            => $"{ShortPartnerName}-{baseName}-{ShortEnvName(Environment)}-{Location.ShortName()}";
+            => GenerateCommonName(baseName);
+
+        public string AKSName(string baseName)
+            => GenerateCommonName(baseName, "aks");
+
+        public string TrafficManagerName(string baseName)
+            => GenerateCommonName(baseName, "tm");
 
         public string CosmosDBName(string baseName)
-            => $"{ShortPartnerName}-{baseName}-{ShortEnvName(Environment)}-{Location.ShortName()}-db";
+            => GenerateCommonName(baseName, "db");
 
         public static string DiskName(string baseName, int number)
             => $"{baseName}-disk{number}";
@@ -112,6 +121,23 @@ namespace Microsoft.Liftr.Fluent.Contracts
         public string LeafDomainName(string baseName)
             => SdkContext.RandomResourceName($"{ShortPartnerName}-{baseName}-{ShortEnvName(Environment)}-{Location.ShortName()}-", 25);
 
+        public string GenerateCommonName(string baseName, string suffix = null, bool noRegion = false)
+        {
+            var name = $"{ShortPartnerName}-{ShortEnvName(Environment)}-{baseName}";
+
+            if (!noRegion)
+            {
+                name = $"{name}-{Location.ShortName()}";
+            }
+
+            if (!string.IsNullOrEmpty(suffix))
+            {
+                name = $"{name}-{suffix}";
+            }
+
+            return name;
+        }
+
         #region Private
         private static string ShortEnvName(EnvironmentType env)
         {
@@ -122,7 +148,7 @@ namespace Microsoft.Liftr.Fluent.Contracts
                 case EnvironmentType.PPE:
                     return "ppe";
                 case EnvironmentType.DogFood:
-                    return "dogfood";
+                    return "df";
                 case EnvironmentType.Dev:
                     return "dev";
                 case EnvironmentType.Test:

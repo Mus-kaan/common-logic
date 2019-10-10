@@ -16,27 +16,27 @@ namespace Microsoft.Liftr.Fluent.Contracts.Tests
             var context = new NamingContext("TestPartnerCompanyInNYC", "pnyc", EnvironmentType.DogFood, Region.USCentral);
             {
                 var name = context.ResourceGroupName("rpdata");
-                Assert.Equal("pnyc-rpdata-dogfood-cus-rg", name);
+                Assert.Equal("pnyc-df-rpdata-cus-rg", name);
             }
 
             {
                 var name = context.KeyVaultName("kvmoniker");
-                Assert.Equal("pnyc-kvmoniker-cus", name);
+                Assert.Equal("pnyc-df-kvmoniker-cus-kv", name);
             }
 
             {
                 var name = context.WebAppName("gatewayapp");
-                Assert.Equal("pnyc-gatewayapp-dogfood-cus", name);
+                Assert.Equal("pnyc-df-gatewayapp-cus", name);
             }
 
             {
                 var name = context.CosmosDBName("fakedb");
-                Assert.Equal("pnyc-fakedb-dogfood-cus-db", name);
+                Assert.Equal("pnyc-df-fakedb-cus-db", name);
             }
 
             {
                 var tags = context.Tags.ToJson();
-                Assert.Equal("{\"PartnerName\":\"TestPartnerCompanyInNYC\",\"Environment\":\"dogfood\",\"InfraVersion\":\"v1\",\"RegionTag\":\"centralus\"}", tags);
+                Assert.Equal("{\"PartnerName\":\"TestPartnerCompanyInNYC\",\"Environment\":\"DogFood\",\"InfraVersion\":\"v1\",\"RegionTag\":\"centralus\"}", tags);
             }
         }
 

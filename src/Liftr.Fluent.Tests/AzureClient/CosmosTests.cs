@@ -30,6 +30,9 @@ namespace Microsoft.Liftr.Fluent.Tests
                 var dbName = SdkContext.RandomResourceName("test-db", 15);
                 var created = await client.CreateCosmosDBAsync(TestCommon.Location, scope.ResourceGroupName, dbName, TestCommon.Tags);
 
+                // Second deployment will not fail.
+                await client.CreateCosmosDBAsync(TestCommon.Location, scope.ResourceGroupName, dbName, TestCommon.Tags);
+
                 var dbs = await client.ListCosmosDBAsync(scope.ResourceGroupName);
                 Assert.Single(dbs);
 

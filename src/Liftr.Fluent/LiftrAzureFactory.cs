@@ -29,13 +29,14 @@ namespace Microsoft.Liftr.Fluent
 
         public ILiftrAzure GenerateLiftrAzure(HttpLoggingDelegatingHandler.Level logLevel = HttpLoggingDelegatingHandler.Level.Basic)
         {
-            var azure = Azure.Management.Fluent.Azure
+            var authenticated = Azure.Management.Fluent.Azure
                     .Configure()
                     .WithLogLevel(logLevel)
-                    .Authenticate(_credentials)
-                    .WithSubscription(_subscriptionId);
+                    .Authenticate(_credentials);
 
-            var client = new LiftrAzure(_credentials, azure, _logger);
+            var azure = authenticated.WithSubscription(_subscriptionId);
+
+            var client = new LiftrAzure(_credentials, azure, authenticated, _logger);
 
             return client;
         }

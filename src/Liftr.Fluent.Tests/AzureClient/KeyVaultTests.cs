@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -52,6 +51,19 @@ namespace Microsoft.Liftr.Fluent.Tests
 
                     Assert.Single(r.AccessPolicies);
                     Assert.Equal(TestCredentials.ObjectId, r.AccessPolicies[0].ObjectId);
+                }
+
+                // Verify SSLAdmin OneCert creations.
+                using (var valet = new KeyVaultConcierge(kv.VaultUri, TestCredentials.ClientId, TestCredentials.ClientSecret, logger))
+                {
+                    var certName = SdkContext.RandomResourceName("ssl", 8);
+                    var subjectName = certName + ".azliftr-test.io";
+                    var subjectAlternativeNames = new List<string>() { "*." + subjectName };
+                    var certIssuerName = "one-cert-issuer";
+
+                    await valet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
+                    await valet.CreateCertificateAsync(certName, certIssuerName, subjectName, subjectAlternativeNames, TestCommon.Tags);
+                    var cert = await valet.DownloadCertAsync(certName);
                 }
 
                 // Verify AME OneCert creations.

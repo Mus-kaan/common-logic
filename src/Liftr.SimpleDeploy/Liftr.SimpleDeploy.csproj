@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>true</IsPackable>
+    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
+    <RootNamespace>Microsoft.Liftr.SimpleDeploy</RootNamespace>
+    <AssemblyName>Microsoft.Liftr.SimpleDeploy</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="sample-appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="configs\**\*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="$(PackageVersion_CommandLineParser)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Fluent.Provisioning\Liftr.Fluent.Provisioning.csproj" />
+    <ProjectReference Include="..\Liftr.Logging.GenericHosting\Liftr.Logging.GenericHosting.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="*.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

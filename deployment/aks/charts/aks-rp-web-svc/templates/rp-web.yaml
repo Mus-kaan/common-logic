@@ -1,0 +1,72 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ingress-tls-secret
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ required "TLS cert must be provided." .Values.sslcertb64 }}
+  tls.key: {{ required "TLS key must be provided." .Values.sslkeyb64 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rp-web
+  labels:
+    app: rp-web
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: rp-web
+  template:
+    metadata:
+      labels:
+        app: rp-web
+        aadpodidbinding: liftr-aad-pod-identity
+    spec:
+      containers:
+      - name: rp-web-container
+        image: {{ required "The imageRegistry parameter must be provided." .Values.imageRegistry }}/{{ required "The imageName parameter must be provided." .Values.imageName }}
+        ports:
+          - containerPort: 5000
+        env:
+          - name: STATSD_HOST
+            value: geneva-services
+          - name: VaultEndpoint
+            value: {{ required "The Key Vault endpoint for the app to load secrets must be provided." .Values.vaultEndpoint }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: "rp-web-svc"
+spec:
+    ports:
+        - port: 80
+          protocol: TCP
+          targetPort: 5000
+    selector:
+        app: rp-web
+    type: ClusterIP
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: rp-web-ingress
+  namespace: {{ .Release.Namespace }}
+spec:
+  rules:
+    - host:  {{ required "The hostname must be provided." .Values.hostname }}
+      http:
+          paths:
+          - backend:
+              serviceName: "rp-web-svc"
+              servicePort: 80
+            path: /
+  # This section is only required if TLS is to be enabled for the Ingress
+  tls:
+      - hosts:
+          - {{ required "The hostname must be provided." .Values.hostname }}
+        secretName: ingress-tls-secret

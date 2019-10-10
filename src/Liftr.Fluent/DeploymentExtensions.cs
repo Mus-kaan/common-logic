@@ -12,7 +12,7 @@ namespace Microsoft.Liftr.Fluent
 {
     public static class DeploymentExtensions
     {
-        public static async Task<DeploymentError> GetDeploymentErrorDetailsAsync(string subscriptionId, string resourceGroupName, string deploymentName, AzureCredentials credentials)
+        public static async Task<string> GetDeploymentDetailsAsync(string subscriptionId, string resourceGroupName, string deploymentName, AzureCredentials credentials)
         {
             // There is no way to get error details using the Azure .NET library. That is a known issue that should
             // be fixed in the future. See https://github.com/Azure/azure-libraries-for-net/issues/39.
@@ -26,9 +26,15 @@ namespace Microsoft.Liftr.Fluent
                 uriBuilder.Query = "api-version=2018-05-01";
 
                 var response = await httpClient.GetStringAsync(uriBuilder.Uri);
-                var httpResult = response.FromJson<AzureResponseJson>();
-                return httpResult.Properties.Error;
+                return response;
             }
+        }
+
+        public static async Task<DeploymentError> GetDeploymentErrorDetailsAsync(string subscriptionId, string resourceGroupName, string deploymentName, AzureCredentials credentials)
+        {
+            var response = await GetDeploymentDetailsAsync(subscriptionId, resourceGroupName, deploymentName, credentials);
+            var httpResult = response.FromJson<AzureResponseJson>();
+            return httpResult.Properties.Error;
         }
     }
 
