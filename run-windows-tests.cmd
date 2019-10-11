@@ -1,5 +1,8 @@
 @echo off
 
+echo "Current path:"
+cd
+
 echo "Starting Windows tests..."
 
 dotnet test %~dp0\src\Liftr.Common.sln --collect:"Code Coverage" --logger:trx || goto :error

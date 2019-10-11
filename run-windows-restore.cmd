@@ -1,5 +1,8 @@
 @echo off
 
+echo "Current path:"
+cd
+
 echo "Starting Windows pakcage restore"
 
 dotnet restore %~dp0\src\Liftr.Common.sln -v minimal || goto :error

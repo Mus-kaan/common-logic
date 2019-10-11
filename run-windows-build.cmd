@@ -1,5 +1,8 @@
 @echo off
 
+echo "Current path:"
+cd
+
 echo "Starting Windows build..."
 
 IF "%CDP_MAJOR_NUMBER_ONLY%"=="" set CDP_MAJOR_NUMBER_ONLY=0
