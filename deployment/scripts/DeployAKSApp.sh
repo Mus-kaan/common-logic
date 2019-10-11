@@ -14,6 +14,10 @@ case $i in
     AKSAppChartPackage="${i#*=}"
     shift # past argument=value
     ;;
+    --APP_ASPNETCORE_ENVIRONMENT=*)
+    APP_ASPNETCORE_ENVIRONMENT="${i#*=}"
+    shift # past argument=value
+    ;;
     *)
     echo "Not matched option '${i#*=}' passed in."
     exit 1
@@ -31,6 +35,11 @@ if [ -z ${AKSAppChartPackage+x} ]; then
     exit 1
 fi
 echo "AKSAppChartPackage: $AKSAppChartPackage"
+
+if [ -z ${APP_ASPNETCORE_ENVIRONMENT+x} ]; then
+APP_ASPNETCORE_ENVIRONMENT="Development"
+fi
+echo "APP_ASPNETCORE_ENVIRONMENT: $APP_ASPNETCORE_ENVIRONMENT"
 
 echo "************************************************************"
 echo "Start helm upgrade AKS APP chart ..."
@@ -148,6 +157,7 @@ $Helm upgrade $HelmReleaseName --install --recreate-pods \
 --set sslkeyb64="$sslKeyB64Content" \
 --set controller.service.omitClusterIP=true \
 --set defaultBackend.service.omitClusterIP=true \
+--set APP_ASPNETCORE_ENVIRONMENT="$APP_ASPNETCORE_ENVIRONMENT" \
 --namespace default $AKSAppChartPackage
 
 # Wait and check Helm deployment status

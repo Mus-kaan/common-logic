@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Liftr.Fluent.Provisioning
 {
@@ -17,6 +18,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         public string CopyKVSecretsWithPrefix { get; set; }
 
         public string ProvisioningSPNClientId { get; set; }
+
+        public IEnumerable<string> DataPlaneSubscriptions { get; set; }
 
         public void CheckValues()
         {

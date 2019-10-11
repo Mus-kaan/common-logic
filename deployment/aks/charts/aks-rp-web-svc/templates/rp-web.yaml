@@ -35,6 +35,8 @@ spec:
             value: geneva-services
           - name: VaultEndpoint
             value: {{ required "The Key Vault endpoint for the app to load secrets must be provided." .Values.vaultEndpoint }}
+          - name: ASPNETCORE_ENVIRONMENT
+            value: {{ required "The APP_ASPNETCORE_ENVIRONMENT must be provided." .Values.APP_ASPNETCORE_ENVIRONMENT }}
 ---
 apiVersion: v1
 kind: Service

@@ -234,9 +234,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     msi = await client.CreateMSIAsync(namingContext.Location, rgName, msiName, namingContext.Tags);
                     _logger.Information("Created MSI with Id {ResourceId}", msi.Id);
 
-                    _logger.Information("Granting the identity binding access for the MSI {MSIId} to the AKS SPN with {AKSobjectId} ...", msi.Id, aksInfo.AKSSPNObjectId);
                     try
                     {
+                        _logger.Information("Granting the identity binding access for the MSI {MSIId} to the AKS SPN with {AKSobjectId} ...", msi.Id, aksInfo.AKSSPNObjectId);
                         await client.Authenticated.RoleAssignments
                             .Define(SdkContext.RandomGuid())
                             .ForObjectId(aksInfo.AKSSPNObjectId)
@@ -253,6 +253,27 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 else
                 {
                     _logger.Information("Use existing MSI with id {ResourceId}.", msi.Id);
+                }
+
+                if (computeOptions.DataPlaneSubscriptions != null)
+                {
+                    foreach (var subscrptionId in computeOptions.DataPlaneSubscriptions)
+                    {
+                        try
+                        {
+                            _logger.Information("Granting the MSI {MSIReourceId} contributor role to the subscription with {subscrptionId} ...", msi.Id, subscrptionId);
+                            await client.Authenticated.RoleAssignments
+                                .Define(SdkContext.RandomGuid())
+                                .ForObjectId(msi.Inner.PrincipalId.Value.ToString())
+                                .WithBuiltInRole(BuiltInRole.Contributor)
+                                .WithSubscriptionScope(subscrptionId)
+                                .CreateAsync();
+                        }
+                        catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+                        {
+                            _logger.Information("There exists the same role assignment for the MSI {MSIReourceId} to the subscription {subscrptionId}.", msi.Id, subscrptionId);
+                        }
+                    }
                 }
 
                 targetReousrceId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.KeyVault/vaults/{kvName}";

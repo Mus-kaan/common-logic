@@ -4,6 +4,7 @@
 
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Microsoft.Liftr.SimpleDeploy
 {
@@ -23,5 +24,7 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         [JsonIgnore]
         public Region GlobalLocation => Region.Create(GlobalLocationStr);
+
+        public IEnumerable<string> DataPlaneSubscriptions { get; set; }
     }
 }

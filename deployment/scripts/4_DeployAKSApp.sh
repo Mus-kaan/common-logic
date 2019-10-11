@@ -14,6 +14,10 @@ if [ "$ConfigFilePath" = "" ]; then
     exit 1 # terminate and indicate error
 fi
 
+if [ "$APP_ASPNETCORE_ENVIRONMENT" = "" ]; then
+APP_ASPNETCORE_ENVIRONMENT="Development"
+fi
+
 AKSSvcLabel="nginx-ingress-controller"
 AKSAppChartPackage="liftr-rp-web-*.tgz"
 
@@ -31,6 +35,7 @@ echo "Get Key Vault endpoint and save on disk."
 --ProvisionAction="UpdateAKSPublicIpInTrafficManager" \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId" \
 --ConfigFilePath="$ConfigFilePath" \
+--APP_ASPNETCORE_ENVIRONMENT="$APP_ASPNETCORE_ENVIRONMENT" \
 --AKSSvcLabel="$AKSSvcLabel"
 echo "-----------------------------------------------------------------"
 echo "Finished update AKS service public IP in traffic manager"

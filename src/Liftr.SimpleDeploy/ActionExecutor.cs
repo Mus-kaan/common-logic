@@ -215,6 +215,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                             KVDBSecretName = computeOptions.DBConnectionStringSecretName,
                             CopyKVSecretsWithPrefix = namingContext.PartnerName,
                             ProvisioningSPNClientId = _envOptions.ProvisioningRunnerClientId,
+                            DataPlaneSubscriptions = computeOptions.DataPlaneSubscriptions,
                         };
 
                         if (!string.IsNullOrEmpty(computeOptions.GlobalBaseName))
