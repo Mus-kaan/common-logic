@@ -13,6 +13,7 @@ namespace Microsoft.Liftr.DiagnosticSource
         /// result it returned for the previous request.
         /// </summary>
         public const string ClientRequestId = "X-MS-Client-Request-Id";
+        public const string LiftrClientRequestId = "X-Liftr-Client-Request-Id";
 
         /// <summary>
         /// Arm populates the header key "x-ms-arm-request-tracking-id" before sending
@@ -20,6 +21,7 @@ namespace Microsoft.Liftr.DiagnosticSource
         /// https://stackoverflow.microsoft.com/questions/151637/what-header-key-will-be-unique-when-receiving-request-from-arm
         /// </summary>
         public const string ARMRequestTrackingId = "X-MS-Arm-Request-Tracking-Id";
+        public const string LiftrARMRequestTrackingId = "X-Liftr-Arm-Request-Tracking-Id";
 
         /// <summary>
         /// Specifies the tracing correlation Id for the request. The resource provider
@@ -27,6 +29,7 @@ namespace Microsoft.Liftr.DiagnosticSource
         /// https://docs.microsoft.com/en-us/rest/api/datafactory/v1/data-factory-gateway
         /// </summary>
         public const string RequestCorrelationId = "X-MS-Correlation-Request-Id";
+        public const string LiftrRequestCorrelationId = "X-Liftr-Correlation-Request-Id";
 
         public const string LiftrLogLevelOverwrite = "X-Liftr-Log-Filter-Overwrite";
     }

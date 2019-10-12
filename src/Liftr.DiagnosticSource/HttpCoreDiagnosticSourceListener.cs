@@ -58,17 +58,17 @@ namespace Microsoft.Liftr.DiagnosticSource
 
                 if (!string.IsNullOrEmpty(CallContextHolder.ClientRequestId.Value))
                 {
-                    request.Headers.Add(HeaderConstants.ClientRequestId, CallContextHolder.ClientRequestId.Value);
+                    request.Headers.Add(HeaderConstants.LiftrClientRequestId, CallContextHolder.ClientRequestId.Value);
                 }
 
                 if (!string.IsNullOrEmpty(CallContextHolder.ARMRequestTrackingId.Value))
                 {
-                    request.Headers.Add(HeaderConstants.ARMRequestTrackingId, CallContextHolder.ARMRequestTrackingId.Value);
+                    request.Headers.Add(HeaderConstants.LiftrARMRequestTrackingId, CallContextHolder.ARMRequestTrackingId.Value);
                 }
 
                 if (!string.IsNullOrEmpty(CallContextHolder.RequestCorrelationId.Value))
                 {
-                    request.Headers.Add(HeaderConstants.RequestCorrelationId, CallContextHolder.RequestCorrelationId.Value);
+                    request.Headers.Add(HeaderConstants.LiftrRequestCorrelationId, CallContextHolder.RequestCorrelationId.Value);
                 }
             }
 #pragma warning disable CA1031 // Do not catch general exception types. Override this to make sure the injection part is not affecting any application.

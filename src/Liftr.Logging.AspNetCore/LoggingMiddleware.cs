@@ -30,9 +30,24 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             LogEventLevel? overrideLevel = null;
 
             string levelOverwrite = GetHeaderValue(httpContext, HeaderConstants.LiftrLogLevelOverwrite);
-            string clientRequestId = GetHeaderValue(httpContext, HeaderConstants.ClientRequestId);
-            string armRequestTrackingId = GetHeaderValue(httpContext, HeaderConstants.ARMRequestTrackingId);
-            string crrelationtId = GetHeaderValue(httpContext, HeaderConstants.RequestCorrelationId);
+            string clientRequestId = GetHeaderValue(httpContext, HeaderConstants.LiftrClientRequestId);
+            string armRequestTrackingId = GetHeaderValue(httpContext, HeaderConstants.LiftrARMRequestTrackingId);
+            string crrelationtId = GetHeaderValue(httpContext, HeaderConstants.LiftrRequestCorrelationId);
+
+            if (string.IsNullOrEmpty(clientRequestId))
+            {
+                clientRequestId = GetHeaderValue(httpContext, HeaderConstants.ClientRequestId);
+            }
+
+            if (string.IsNullOrEmpty(armRequestTrackingId))
+            {
+                armRequestTrackingId = GetHeaderValue(httpContext, HeaderConstants.ARMRequestTrackingId);
+            }
+
+            if (string.IsNullOrEmpty(crrelationtId))
+            {
+                crrelationtId = GetHeaderValue(httpContext, HeaderConstants.RequestCorrelationId);
+            }
 
             if (string.IsNullOrEmpty(crrelationtId))
             {
