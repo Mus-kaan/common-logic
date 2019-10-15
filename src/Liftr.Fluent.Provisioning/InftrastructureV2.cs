@@ -153,7 +153,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             return kv;
         }
 
-        public async Task<(IVault kv, IIdentity msi, IKubernetesCluster aks)> CreateOrUpdateRegionalComputeRGAsync(string baseName, NamingContext namingContext, InfraV2RegionalComputeOptions computeOptions, AKSInfo aksInfo, KeyVaultClient kvClient, CertificateOptions genevaCert = null, CertificateOptions sslCert = null)
+        public async Task<(IVault kv, IIdentity msi, IKubernetesCluster aks)> CreateOrUpdateRegionalComputeRGAsync(string baseName, NamingContext namingContext, InfraV2RegionalComputeOptions computeOptions, AKSInfo aksInfo, KeyVaultClient kvClient, CertificateOptions genevaCert = null, CertificateOptions sslCert = null, CertificateOptions firstPartyCert = null)
         {
             if (namingContext == null)
             {
@@ -302,6 +302,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     .DefineAccessPolicy()
                     .ForObjectId(msi.Inner.PrincipalId.Value.ToString())
                     .AllowSecretPermissions(SecretPermissions.List, SecretPermissions.Get)
+                    .AllowCertificatePermissions(CertificatePermissions.Get, CertificatePermissions.Getissuers, CertificatePermissions.List)
                     .Attach()
                     .ApplyAsync();
                 _logger.Information("Added access policy for msi to kv.");
@@ -340,6 +341,15 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                         await valet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
                         await valet.CreateCertificateAsync(sslCert.CertificateName, certIssuerName, sslCert.SubjectName, sslCert.SubjectAlternativeNames, namingContext.Tags);
                         _logger.Information("Finished creating SSL certificate in Key Vault with name {@certName}", sslCert.CertificateName);
+                    }
+
+                    if (firstPartyCert != null)
+                    {
+                        _logger.Information("Creating First Party certificate in Key Vault with name {@certName} ...", firstPartyCert.CertificateName);
+                        var certIssuerName = "one-cert-issuer";
+                        await valet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
+                        await valet.CreateCertificateAsync(firstPartyCert.CertificateName, certIssuerName, firstPartyCert.SubjectName, firstPartyCert.SubjectAlternativeNames, namingContext.Tags);
+                        _logger.Information("Finished creating First Party certificate in Key Vault with name {@certName}", firstPartyCert.CertificateName);
                     }
                 }
 

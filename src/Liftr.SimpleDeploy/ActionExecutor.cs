@@ -231,7 +231,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                             SubjectAlternativeNames = new List<string>() { computeOptions.HostName },
                         };
 
-                        (var kv, var msi, var aks) = await infra.CreateOrUpdateRegionalComputeRGAsync(computeOptions.ComputeBaseName, namingContext, v2Options, _envOptions.AKSInfo, kvClient, _envOptions.GenevaCert, sslCert);
+                        (var kv, var msi, var aks) = await infra.CreateOrUpdateRegionalComputeRGAsync(computeOptions.ComputeBaseName, namingContext, v2Options, _envOptions.AKSInfo, kvClient, _envOptions.FirstPartyCert, sslCert);
                         File.WriteAllText("vault-name.txt", kv.Name);
                         File.WriteAllText("aks-name.txt", aks.Name);
                         File.WriteAllText("aks-rg.txt", aks.ResourceGroupName);

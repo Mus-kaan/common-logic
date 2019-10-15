@@ -14,6 +14,8 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public CertificateOptions GenevaCert { get; set; }
 
+        public CertificateOptions FirstPartyCert { get; set; }
+
         public AKSInfo AKSInfo { get; set; }
     }
 }

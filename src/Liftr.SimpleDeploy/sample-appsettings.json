@@ -34,6 +34,11 @@
       "SubjectName": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
       "SubjectAlternativeNames": [ "antares-mds-agent.geneva.keyvault.liftr-dev.net" ]
     },
+    "FirstPartyCert": {
+      "CertificateName": "FirstPartyClientCert",
+      "SubjectName": "first-party.aznginx-test.net",
+      "SubjectAlternativeNames": [ "first-party.aznginx-test.net" ]
+    },
     "AKSInfo": {
       "AKSRootUserName": "liftraksvmuser",
       "AKSSSHPublicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDiAVw6gNipzMfXUD/DAj0CwahIMJNYucOrzXxw4O+4gBDSAkRh+uyT5tAE0Ctohpl40fEfJcjwn96upUpgWtcEWCWjWMq1tRRuClw03GcUTMs0T5A9nUfK58+nebdD/YFEWB8meTknK3R4FI7IGdC212N/nm25GcQOKdZmEb8VOXfylVn7dzmqkbR7GdASdvhBF9MkG7YjhGznidkh2f5qmqpYc9oDS8lO/NtuSvSO6sgSHiP9F6D25Dfj5/NywiJAWF8iaoyIayEO0CWGHtM+ou6P/MO6YjNnDVX6HJptbIyQ8epkxQUmyWvf9pYQ8ALX40uGfj5CCUaQN32tUKVF weng5e@5e-box",
