@@ -121,12 +121,12 @@ namespace Microsoft.Liftr.Fluent
                 {
                     Subject = $"CN={certificateSubject}",
                     SubjectAlternativeNames = new SubjectAlternativeNames(emails: null, dnsNames: subjectAlternativeNames),
-                    ValidityInMonths = 3,
+                    ValidityInMonths = 12,
                 },
                 LifetimeActions = new List<LifetimeAction>()
                 {
                     new LifetimeAction(
-                        new Trigger(daysBeforeExpiry: 15),
+                        new Trigger(daysBeforeExpiry: 290), // ECR require certificate to be auto-renewed in less than 90 days.
                         new Azure.KeyVault.Models.Action(ActionType.AutoRenew)),
                 },
             };
