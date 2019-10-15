@@ -46,7 +46,7 @@
       "AKSSPNObjectId": "77413952-924e-4098-8318-2c9f46b10b2f",
       "AKSSPNClientSecretName": "AKSSPClientSecret",
       "AKSMachineCount": 3,
-      "AKSMachineTypeStr": "StandardDS2V2"
+      "AKSMachineTypeStr": "Standard_DS2_v2"
     }
   }
 }
