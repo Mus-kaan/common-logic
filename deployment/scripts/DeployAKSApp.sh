@@ -165,31 +165,41 @@ $Helm upgrade $HelmReleaseName --install --recreate-pods \
 # 1. If the helm upgrade failed, we want the EV2 deployment to fail.
 # 2. After the app is successfully deployed to AKS cluster, it will generate a public IP address. We can retrieve the IP and put it in TM in the next step.
 
-echo "Start checking RP web service deployment status"
-sleep_interval=10
-time_out=30
-wait_counter=0
-# we will query for the api version of the custom resources to be available
-# default timeout 10 * 30 = 300 sec = 5 min
-while true
-do
-    echo "Waiting for the RP web service deployment " && sleep ${sleep_interval} && ((wait_counter++))
-
-    clusterIP=$(kubectl get services/rp-web-svc -o custom-columns=:.spec.clusterIP)
-
-    if [[ $clusterIP != *"none"* ]]; then
-        echo "Finished RP web service deployment."
+interval=20
+total=60
+counter=1
+# default timeout 20 * 60 = 1200 sec = 20 min
+# release status: https://github.com/helm/helm/blob/7cad59091a9451b2aa4f95aa882ea27e6b195f98/_proto/hapi/release/status.proto#L26
+while [ $counter -le $total ]; do
+    releaseMessage="$($Helm status $HelmReleaseName)"
+    # grep doesn't support option -P(perl regex) when run this script in Ev2 machine, has to match the fixed string
+    # TODO (yijia): use jq lib to process releaseMessage with output format in JSON
+    if [[ $releaseMessage = *"STATUS: deployed"* ]]; then
+        echo "Deployment has been succeed."
         set 0
-        break;
-    fi
-
-    if [[ $wait_counter -eq $time_out ]]; then
-        echo "Timeout waiting for the RP web service deployment."
+        break
+    elif [[ $releaseMessage = *"STATUS: pending"* ]]; then
+        sleep ${interval}
+    else
+        echo "Deployment has been failed. Release: $HelmReleaseName. AksClusterName: $AKSName. AKS RG: $AKSRGName"
         set 1
-        break;
+        break
     fi
+    ((counter++))
 done
+
+if [[ $counter -eq $total ]]; then
+    echo "Timeout to run health check."
+    set 1
+fi
+
+# TODO: fix the above grep.
+echo "Wait for extra 120 seconds"
+sleep 120s
 
 echo "-----------------------------------------------------------------"
 echo "Finished helm upgrade AKS APP chart"
 echo "-----------------------------------------------------------------"
+
+echo "kubectl get all"
+kubectl get all
