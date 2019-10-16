@@ -29,13 +29,13 @@ echo "Get Key Vault endpoint and save on disk."
 
 ./DeployAKSApp.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId" \
+--APP_ASPNETCORE_ENVIRONMENT="$APP_ASPNETCORE_ENVIRONMENT" \
 --AKSAppChartPackage="$AKSAppChartPackage"
 
 ./RunProvisioningRunner.sh \
 --ProvisionAction="UpdateAKSPublicIpInTrafficManager" \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId" \
 --ConfigFilePath="$ConfigFilePath" \
---APP_ASPNETCORE_ENVIRONMENT="$APP_ASPNETCORE_ENVIRONMENT" \
 --AKSSvcLabel="$AKSSvcLabel"
 echo "-----------------------------------------------------------------"
 echo "Finished update AKS service public IP in traffic manager"
