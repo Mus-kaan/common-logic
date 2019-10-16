@@ -153,7 +153,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             return kv;
         }
 
-        public async Task<(IVault kv, IIdentity msi, IKubernetesCluster aks)> CreateOrUpdateRegionalComputeRGAsync(string baseName, NamingContext namingContext, InfraV2RegionalComputeOptions computeOptions, AKSInfo aksInfo, KeyVaultClient kvClient, CertificateOptions genevaCert = null, CertificateOptions sslCert = null, CertificateOptions firstPartyCert = null)
+        public async Task<(IVault kv, IIdentity msi, IKubernetesCluster aks)> CreateOrUpdateRegionalComputeRGAsync(string baseName, NamingContext namingContext, InfraV2RegionalComputeOptions computeOptions, AKSInfo aksInfo, KeyVaultClient kvClient, CertificateOptions genevaCert, CertificateOptions sslCert, CertificateOptions firstPartyCert)
         {
             if (namingContext == null)
             {
