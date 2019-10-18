@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="test_appsettings.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="test_appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="2.2.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(PackageVersion_Microsoft_NET_Test_Sdk)" />
+    <PackageReference Include="xunit" Version="$(PackageVersion_xunit)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(PackageVersion_xunit_runner_visualstudio)" />
+    <PackageReference Include="Serilog" Version="$(PackageVersion_Serilog)" />
+    <PackageReference Include="Moq" Version="$(PackageVersion_Moq)" />
+    <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="$(PackageVersion_Microsoft_Azure_Cosmos_Table)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Billing.Web\Liftr.Billing.Web.csproj" />
+  </ItemGroup>
+
+</Project>

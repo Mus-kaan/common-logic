@@ -48,5 +48,7 @@
     <PackageVersion_System_Diagnostics_DiagnosticSource>4.5.1</PackageVersion_System_Diagnostics_DiagnosticSource>
     <PackageVersion_xunit>2.4.1</PackageVersion_xunit>
     <PackageVersion_xunit_runner_visualstudio>2.4.1</PackageVersion_xunit_runner_visualstudio>
+    <PackageVersion_Microsoft_Azure_Cosmos_Table>1.0.5</PackageVersion_Microsoft_Azure_Cosmos_Table>
+    <PackageVersion_Microsoft_Azure_Storage_Queue>11.1.0</PackageVersion_Microsoft_Azure_Storage_Queue>
   </PropertyGroup>
 </Project>
