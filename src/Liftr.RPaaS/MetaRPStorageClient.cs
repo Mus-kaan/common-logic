@@ -61,7 +61,7 @@ namespace Microsoft.Liftr.RPaaS
             {
                 var url = GetMetaraRPResourceUrl(resource.Id, apiVersion);
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();
-                var response = await _httpClient.PostAsync(url, content);
+                var response = await _httpClient.PutAsync(url, content);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -72,7 +72,7 @@ namespace Microsoft.Liftr.RPaaS
 
         private string GetMetaraRPResourceUrl(string resourceId, string apiVersion)
         {
-            return resourceId + "?api-version=" + apiVersion + "&$expand=includeInternalMetadata";
+            return resourceId + "?api-version=" + apiVersion;
         }
 
         private async Task<AuthenticationHeaderValue> GetAuthHeaderAsync()
