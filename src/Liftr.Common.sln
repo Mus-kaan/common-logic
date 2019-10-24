@@ -83,6 +83,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Billing.Web.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Tests.Common", "Liftr.Tests.Common\Liftr.Tests.Common.csproj", "{C33A3C82-369A-4864-B8DF-5D3B45BD0E24}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.ImageBuilder", "Liftr.ImageBuilder\Liftr.ImageBuilder.csproj", "{59FCEAD2-6D14-404D-B0E2-0F8E22621DDF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -225,6 +227,10 @@ Global
 		{C33A3C82-369A-4864-B8DF-5D3B45BD0E24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C33A3C82-369A-4864-B8DF-5D3B45BD0E24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C33A3C82-369A-4864-B8DF-5D3B45BD0E24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59FCEAD2-6D14-404D-B0E2-0F8E22621DDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59FCEAD2-6D14-404D-B0E2-0F8E22621DDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59FCEAD2-6D14-404D-B0E2-0F8E22621DDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59FCEAD2-6D14-404D-B0E2-0F8E22621DDF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -239,6 +245,7 @@ Global
 		{6E234489-0477-4F0E-BBEA-52A15E86BDCF} = {E4958D13-B767-451D-8C50-629C1805BD9A}
 		{671C5D08-6E65-43C8-82B3-7C805C79CFB9} = {E4958D13-B767-451D-8C50-629C1805BD9A}
 		{C33A3C82-369A-4864-B8DF-5D3B45BD0E24} = {E4958D13-B767-451D-8C50-629C1805BD9A}
+		{59FCEAD2-6D14-404D-B0E2-0F8E22621DDF} = {E4958D13-B767-451D-8C50-629C1805BD9A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CF8F327F-EB87-482C-861B-2D635AB4E992}
