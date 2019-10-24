@@ -30,7 +30,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USWest);
             TestCommon.AddCommonTags(context.Tags);
 
-            var clientFactory = new LiftrAzureFactory(TestCredentials.GetCredentials(), TestCredentials.SubscriptionId, logger);
+            var clientFactory = new LiftrAzureFactory(logger, TestCredentials.SubscriptionId, TestCredentials.GetAzureCredentials);
             var client = clientFactory.GenerateLiftrAzure();
 
             var baseName = "v2regiondata";

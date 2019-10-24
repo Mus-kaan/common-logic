@@ -12,25 +12,40 @@ namespace Microsoft.Liftr.Fluent.Tests
 {
     public sealed class TestResourceGroupScope : IDisposable
     {
+        private readonly LiftrAzureFactory _azFactory;
+        private readonly ILiftrAzure _client;
+
         public TestResourceGroupScope(ILiftrAzure client, string resourceGroupName)
         {
-            Client = client;
+            _client = client;
             ResourceGroupName = resourceGroupName;
         }
 
         public TestResourceGroupScope(string baseName, ITestOutputHelper output)
-            : this(new LiftrAzureFactory(TestCredentials.GetCredentials(), TestCredentials.SubscriptionId, TestLogger.GetLogger(output)).GenerateLiftrAzure(), SdkContext.RandomResourceName(baseName, 25))
         {
+            _azFactory = new LiftrAzureFactory(TestLogger.GetLogger(output), TestCredentials.SubscriptionId, TestCredentials.GetAzureCredentials);
+            ResourceGroupName = SdkContext.RandomResourceName(baseName, 25);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "<Pending>")]
-        public TestResourceGroupScope(string baseName, NamingContext context, ITestOutputHelper output)
-            : this(new LiftrAzureFactory(TestCredentials.GetCredentials(), TestCredentials.SubscriptionId, TestLogger.GetLogger(output)).GenerateLiftrAzure(), context.ResourceGroupName(baseName))
+        public TestResourceGroupScope(string baseName, NamingContext namingContext, ITestOutputHelper output)
         {
-            TestCommon.AddCommonTags(context.Tags);
+            if (namingContext == null)
+            {
+                throw new ArgumentNullException(nameof(namingContext));
+            }
+
+            _azFactory = new LiftrAzureFactory(TestLogger.GetLogger(output), TestCredentials.SubscriptionId, TestCredentials.GetAzureCredentials);
+            ResourceGroupName = namingContext.ResourceGroupName(baseName);
+            TestCommon.AddCommonTags(namingContext.Tags);
         }
 
-        public ILiftrAzure Client { get; }
+        public ILiftrAzure Client
+        {
+            get
+            {
+                return _client ?? _azFactory.GenerateLiftrAzure();
+            }
+        }
 
         public NamingContext Naming { get; }
 

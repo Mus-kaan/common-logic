@@ -3,14 +3,11 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.Compute.Fluent;
-using Microsoft.Azure.Management.Compute.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning.MultiTenant;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -26,7 +23,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [Fact]
+        [Fact(Skip = "This need private link service subscription white listing from NRP team.")]
         public async Task CanCreateILBAsync()
         {
             var logger = TestLogger.GetLogger(_output);

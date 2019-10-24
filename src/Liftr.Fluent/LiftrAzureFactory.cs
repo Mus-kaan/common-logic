@@ -12,19 +12,19 @@ namespace Microsoft.Liftr.Fluent
     public class LiftrAzureFactory : ILiftrAzureFactory
     {
         private readonly ILogger _logger;
-        private readonly AzureCredentials _credentials;
+        private readonly Func<AzureCredentials> _credentialsProvider;
         private readonly string _subscriptionId;
 
-        public LiftrAzureFactory(AzureCredentials credentials, string subscriptionId, ILogger logger)
+        public LiftrAzureFactory(ILogger logger, string subscriptionId, Func<AzureCredentials> credentialsProvider)
         {
             if (string.IsNullOrEmpty(subscriptionId))
             {
                 throw new ArgumentNullException(nameof(subscriptionId));
             }
 
-            _credentials = credentials;
             _subscriptionId = subscriptionId;
             _logger = logger;
+            _credentialsProvider = credentialsProvider ?? throw new ArgumentNullException(nameof(credentialsProvider));
         }
 
         public ILiftrAzure GenerateLiftrAzure(HttpLoggingDelegatingHandler.Level logLevel = HttpLoggingDelegatingHandler.Level.Basic)
@@ -32,11 +32,11 @@ namespace Microsoft.Liftr.Fluent
             var authenticated = Azure.Management.Fluent.Azure
                     .Configure()
                     .WithLogLevel(logLevel)
-                    .Authenticate(_credentials);
+                    .Authenticate(_credentialsProvider.Invoke());
 
             var azure = authenticated.WithSubscription(_subscriptionId);
 
-            var client = new LiftrAzure(_credentials, azure, authenticated, _logger);
+            var client = new LiftrAzure(_credentialsProvider.Invoke(), azure, authenticated, _logger);
 
             return client;
         }

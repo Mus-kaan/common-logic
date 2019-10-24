@@ -76,24 +76,24 @@ namespace Microsoft.Liftr.SimpleDeploy
                 _logger.Information("ActionExecutor Action:{ExeAction}", _options.Action);
                 _logger.Information("RunnerCommandOptions: {@RunnerCommandOptions}", _options);
 
-                AzureCredentials azureCredentials = null;
+                Func<AzureCredentials> azureCredentialsProvider = null;
                 KeyVaultClient kvClient = null;
                 if (!string.IsNullOrEmpty(_options.AuthFile))
                 {
                     _logger.Information("Use auth json file to authenticate against Azure.");
-                    azureCredentials = SdkContext.AzureCredentialsFactory.FromFile(_options.AuthFile);
-
-                    var authContract = AuthFileContact.FromFile(_options.AuthFile);
+                    var authContract = AuthFileContract.FromFile(_options.AuthFile);
                     kvClient = KeyVaultClientFactory.FromClientIdAndSecret(authContract.ClientId, authContract.ClientSecret);
+
+                    azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory.FromFile(_options.AuthFile);
                 }
                 else
                 {
                     _logger.Information("Use MSI to authenticate against Azure.");
-                    azureCredentials = SdkContext.AzureCredentialsFactory
+                    kvClient = KeyVaultClientFactory.FromMSI();
+
+                    azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory
                     .FromMSI(new MSILoginInformation(MSIResourceType.VirtualMachine), AzureEnvironment.AzureGlobalCloud, _envOptions.TenantId)
                     .WithDefaultSubscription(_options.SubscriptionId);
-
-                    kvClient = KeyVaultClientFactory.FromMSI();
                 }
 
                 if (_options.Action == ActionType.UpdateAKSPublicIpInTrafficManager)
@@ -104,9 +104,9 @@ namespace Microsoft.Liftr.SimpleDeploy
                     }
                 }
 
-                LiftrAzureFactory azFactory = new LiftrAzureFactory(azureCredentials, _options.SubscriptionId, _logger);
+                LiftrAzureFactory azFactory = new LiftrAzureFactory(_logger, _options.SubscriptionId, azureCredentialsProvider);
 
-                _ = RunActionAsync(azureCredentials, kvClient, azFactory);
+                _ = RunActionAsync(kvClient, azFactory);
             }
             catch (Exception ex)
             {
@@ -123,7 +123,7 @@ namespace Microsoft.Liftr.SimpleDeploy
             return Task.CompletedTask;
         }
 
-        private async Task RunActionAsync(AzureCredentials azureCredentials, KeyVaultClient kvClient, LiftrAzureFactory azFactory)
+        private async Task RunActionAsync(KeyVaultClient kvClient, LiftrAzureFactory azFactory)
         {
             using (var operation = _logger.StartTimedOperation(_options.Action.ToString()))
             {

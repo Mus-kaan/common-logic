@@ -12,7 +12,7 @@ namespace Microsoft.Liftr.Fluent.Tests
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "<Pending>")]
     public static class TestCommon
     {
-        public static readonly Region Location = Region.USCentral;
+        public static readonly Region Location = Region.USEast;
 
         public static readonly Dictionary<string, string> Tags
             = new Dictionary<string, string>()

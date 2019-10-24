@@ -15,6 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Fluent.Provisioning\Liftr.Fluent.Provisioning.csproj" />
+    <ProjectReference Include="..\Liftr.Tests.Common\Liftr.Tests.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="*.json">
