@@ -9,7 +9,9 @@ using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Azure.Management.TrafficManager.Fluent;
 using Microsoft.Liftr.Fluent.Contracts.Geneva;
 using System;
@@ -25,7 +27,11 @@ namespace Microsoft.Liftr.Fluent
 
         IAuthenticated Authenticated { get; }
 
+        AzureCredentials AzureCredentials { get; }
+
         #region Resource Group
+        Task<IResourceGroup> GetOrCreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags);
+
         Task<IResourceGroup> CreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags);
 
         Task<IResourceGroup> GetResourceGroupAsync(string rgName);
@@ -34,6 +40,14 @@ namespace Microsoft.Liftr.Fluent
 
         Task DeleteResourceGroupWithTagAsync(string tagName, string tagValue, Func<IReadOnlyDictionary<string, string>, bool> tagsFilter = null);
         #endregion Resource Group
+
+        #region Storage Account
+        Task<IStorageAccount> GetOrCreateStorageAccountAsync(Region location, string rgName, string storageAccountName, IDictionary<string, string> tags);
+
+        Task<IStorageAccount> CreateStorageAccountAsync(Region location, string rgName, string storageAccountName, IDictionary<string, string> tags);
+
+        Task<IStorageAccount> GetStorageAccountAsync(string rgName, string storageAccountName);
+        #endregion Storage Account
 
         #region Traffic Manager
         Task<ITrafficManagerProfile> CreateTrafficManagerAsync(string rgName, string tmName, IDictionary<string, string> tags);
@@ -50,7 +64,11 @@ namespace Microsoft.Liftr.Fluent
         #endregion CosmosDB
 
         #region Key Vault
+        Task<IVault> GetOrCreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags, string adminSPNClientId);
+
         Task<IVault> CreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags, string adminSPNClientId);
+
+        Task<IVault> GetKeyVaultAsync(string rgName, string vaultName);
 
         Task<IVault> GetKeyVaultByIdAsync(string kvResourceId);
 

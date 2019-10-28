@@ -21,7 +21,6 @@ namespace Microsoft.Liftr.Fluent.Tests
         [Fact]
         public async Task CanCreateAsync()
         {
-            var logger = TestLogger.GetLogger(_output);
             using (var scope = new TestResourceGroupScope("unittest-msi-", _output))
             {
                 var client = scope.Client;

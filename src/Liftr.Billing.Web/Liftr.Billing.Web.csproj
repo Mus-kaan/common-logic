@@ -1,5 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
@@ -7,17 +7,13 @@
     <AssemblyName>Microsoft.Liftr.Billing.Web</AssemblyName>
     <RootNamespace>Microsoft.Liftr.Billing.Web</RootNamespace>
   </PropertyGroup>
-
-  
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="$(PackageVersion_Microsoft_Azure_Cosmos_Table)" />
     <PackageReference Include="Microsoft.Azure.Storage.Queue" Version="$(PackageVersion_Microsoft_Azure_Storage_Queue)" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Logging.AspNetCore\Liftr.Logging.AspNetCore.csproj" />
     <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
   </ItemGroup>
-
 </Project>

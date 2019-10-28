@@ -23,7 +23,6 @@ namespace Microsoft.Liftr.Fluent.Tests
         [Fact]
         public async Task CanCreateKeyVaultAsync()
         {
-            var logger = TestLogger.GetLogger(_output);
             using (var scope = new TestResourceGroupScope("unittest-kv-", _output))
             {
                 var azure = scope.Client;
@@ -54,7 +53,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                 }
 
                 // Verify SSLAdmin OneCert creations.
-                using (var valet = new KeyVaultConcierge(kv.VaultUri, TestCredentials.ClientId, TestCredentials.ClientSecret, logger))
+                using (var valet = new KeyVaultConcierge(kv.VaultUri, TestCredentials.ClientId, TestCredentials.ClientSecret, scope.Logger))
                 {
                     var certName = SdkContext.RandomResourceName("ssl", 8);
                     var subjectName = certName + ".azliftr-test.io";
@@ -67,7 +66,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                 }
 
                 // Verify AME OneCert creations.
-                using (var valet = new KeyVaultConcierge(kv.VaultUri, TestCredentials.ClientId, TestCredentials.ClientSecret, logger))
+                using (var valet = new KeyVaultConcierge(kv.VaultUri, TestCredentials.ClientId, TestCredentials.ClientSecret, scope.Logger))
                 {
                     var certName = SdkContext.RandomResourceName("ame", 8);
                     var subjectName = certName + ".liftr-dev.net";

@@ -128,8 +128,8 @@ namespace Microsoft.Liftr.ImageBuilder
             await blob.FetchAttributesAsync();
             while (blob.CopyState.Status == CopyStatus.Pending)
             {
-                _logger.Information("Waiting for blob to finish copy. {@blobUrl}", blob.Uri);
-                await Task.Delay(TimeSpan.FromSeconds(10));
+                _logger.Debug("Waiting for blob to finish copy. {@blobUrl}", blob.Uri);
+                await Task.Delay(TimeSpan.FromSeconds(60));
                 await blob.FetchAttributesAsync();
             }
         }

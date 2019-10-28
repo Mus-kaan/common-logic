@@ -11,7 +11,7 @@ namespace Microsoft.Liftr.Fluent.Contracts.Tests
     public class NamingContextTests
     {
         [Fact]
-        public void NamingConvertions()
+        public void DogfoodNamingConvertions()
         {
             var context = new NamingContext("TestPartnerCompanyInNYC", "pnyc", EnvironmentType.DogFood, Region.USCentral);
             {
@@ -36,7 +36,22 @@ namespace Microsoft.Liftr.Fluent.Contracts.Tests
 
             {
                 var tags = context.Tags.ToJson();
-                Assert.Equal("{\"PartnerName\":\"TestPartnerCompanyInNYC\",\"Environment\":\"DogFood\",\"InfraVersion\":\"v1\",\"RegionTag\":\"centralus\"}", tags);
+                Assert.True(tags.OrdinalContains("{\"PartnerName\":\"TestPartnerCompanyInNYC\",\"Environment\":\"DogFood\",\"InfraVersion\":\"v2\",\"RegionTag\":\"centralus\",\"FirstCreatedAt\":"));
+            }
+        }
+
+        [Fact]
+        public void ProdNamingConvertions()
+        {
+            var context = new NamingContext("Nginx", "ngx", EnvironmentType.Production, Region.USEast);
+            {
+                var name = context.StorageAccountName("sbi20191001");
+                Assert.Equal("stngxprodsbi20191001eus", name);
+            }
+
+            {
+                var name = context.SharedImageGalleryName("sbi20191001");
+                Assert.Equal("ngx_prod_sbi20191001_eus_sig", name);
             }
         }
 

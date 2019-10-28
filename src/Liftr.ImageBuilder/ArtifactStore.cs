@@ -8,6 +8,7 @@ using Microsoft.Liftr.Contracts;
 using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.ImageBuilder
@@ -25,7 +26,7 @@ namespace Microsoft.Liftr.ImageBuilder
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<string> UploadFileAndGenerateReadSASAsync(CloudStorageAccount storageAccount, string filePath)
+        public async Task<string> UploadBuildArtifactsAndGenerateReadSASAsync(CloudStorageAccount storageAccount, string filePath)
         {
             if (storageAccount == null)
             {
@@ -61,10 +62,48 @@ namespace Microsoft.Liftr.ImageBuilder
             return blob.Uri.ToString() + sas;
         }
 
+        public async Task<int> CleanUpOldArtifactsAsync(CloudStorageAccount storageAccount)
+        {
+            int deletedCount = 0;
+
+            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+            CloudBlobContainer blobContainer = blobClient.GetContainerReference(_storeOptions.ContainerName);
+            await blobContainer.CreateIfNotExistsAsync();
+
+            var directory = blobContainer.GetDirectoryReference("drop");
+            var folders = directory.ListBlobs().Where(b => b as CloudBlobDirectory != null).ToList();
+            foreach (var folder in folders)
+            {
+                var timeStamp = DateTime.Parse(folder.Uri.LocalPath.Split('/')[3], CultureInfo.InvariantCulture);
+                var cutOffTime = _timeSource.UtcNow.AddDays(-1 * _storeOptions.OldArtifactTTLInDays);
+                if (timeStamp < cutOffTime)
+                {
+                    var toDeletes = blobContainer.ListBlobs(prefix: GetBlobName(folder), useFlatBlobListing: true);
+
+                    foreach (var toDelete in toDeletes)
+                    {
+                        var blob = blobContainer.GetBlockBlobReference(GetBlobName(toDelete));
+                        await blob.DeleteAsync();
+                        _logger.Information("Deleted blob with name {blobUri}", toDelete.Uri.AbsoluteUri);
+                        deletedCount++;
+                    }
+                }
+            }
+
+            return deletedCount;
+        }
+
         internal string GetBlobName(string fileName)
         {
             var timeStamp = _timeSource.UtcNow;
-            return $"{timeStamp.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}/{timeStamp.ToZuluString()}/{fileName}";
+            return $"drop/{timeStamp.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}/{timeStamp.ToZuluString()}/{fileName}";
+        }
+
+        private string GetBlobName(IListBlobItem item)
+        {
+            var localPath = item.Uri.LocalPath;
+            var name = localPath.Substring(_storeOptions.ContainerName.Length + 2);
+            return name;
         }
     }
 }

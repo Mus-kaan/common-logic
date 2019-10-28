@@ -40,8 +40,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                 Assert.Equal(tmName, retrieved.Name);
                 TestCommon.CheckCommonTags(retrieved.Inner.Tags);
 
-                var logger = TestLogger.GetLogger(_output);
-                var helper = new AKSHelper(logger);
+                var helper = new AKSHelper(scope.Logger);
 
                 await helper.AddPulicIpToTrafficManagerAsync(scope.Client.FluentClient, created.Id, "endpoint1", "40.76.4.151", enabled: false);
                 await helper.AddPulicIpToTrafficManagerAsync(scope.Client.FluentClient, created.Id, "endpoint1", "40.76.4.151", enabled: true);

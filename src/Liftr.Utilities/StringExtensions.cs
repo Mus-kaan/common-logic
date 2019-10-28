@@ -15,6 +15,13 @@ namespace Microsoft.Liftr
         public static bool OrdinalEquals(this string self, string input)
             => string.Equals(self, input, StringComparison.OrdinalIgnoreCase);
 
+        public static bool OrdinalContains(this string self, string value)
+        {
+            Ensure.ArgumentNotNull(self, nameof(self));
+
+            return self.OrdinalIndexOf(value) != -1;
+        }
+
         public static bool OrdinalEndsWith(this string self, string value)
         {
             Ensure.ArgumentNotNull(self, nameof(self));

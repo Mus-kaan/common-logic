@@ -13,6 +13,7 @@ using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Logging;
 using Serilog.Context;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -76,18 +77,11 @@ namespace Microsoft.Liftr.ImageBuilder
                 _logger.Information("ActionExecutor Action:{ExeAction}", _options.Action);
                 _logger.Information("BuilderCommandOptions: {@BuilderCommandOptions}", _options);
 
-                if (_options.Action == ActionType.UploadArtifactForImageBuilder)
+                if (_options.Action == ActionType.GenerateCustomizedSBI)
                 {
                     if (!File.Exists(_options.ArtifactPath))
                     {
                         var errMsg = $"Cannot find the artifact package in the location : {_options.ArtifactPath}";
-                        _logger.Error(errMsg);
-                        throw new InvalidOperationException(errMsg);
-                    }
-
-                    if (!File.Exists(_options.AIBTemplatePath))
-                    {
-                        var errMsg = $"Cannot find the Azure Image Builder template file at the location : {_options.AIBTemplatePath}";
                         _logger.Error(errMsg);
                         throw new InvalidOperationException(errMsg);
                     }
@@ -122,7 +116,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
                 LiftrAzureFactory azFactory = new LiftrAzureFactory(_logger, _options.SubscriptionId, azureCredentialsProvider);
 
-                _ = RunActionAsync(kvClient, azFactory);
+                _ = RunActionAsync(kvClient, azFactory, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -137,7 +131,7 @@ namespace Microsoft.Liftr.ImageBuilder
             return Task.CompletedTask;
         }
 
-        private async Task RunActionAsync(KeyVaultClient kvClient, LiftrAzureFactory azFactory)
+        private async Task RunActionAsync(KeyVaultClient kvClient, LiftrAzureFactory azFactory, CancellationToken cancellationToken)
         {
             await Task.Yield();
             using (var operation = _logger.StartTimedOperation(_options.Action.ToString()))
@@ -155,42 +149,58 @@ namespace Microsoft.Liftr.ImageBuilder
                     _logger.Information("Parsed config file: {@config}", config);
 
                     var namingContext = new NamingContext(config.PartnerName, config.ShortPartnerName, config.Environment, config.Location);
-                    namingContext.Tags["FirstCreatedAt"] = DateTime.UtcNow.ToZuluString();
 
                     var rgName = namingContext.ResourceGroupName(config.GalleryBaseName);
-                    var galleryName = $"{namingContext.ShortPartnerName}_{config.GalleryBaseName}_sig";
-                    var storageAccountName = $"st{namingContext.ShortPartnerName}{config.GalleryBaseName}".ToLowerInvariant();
+                    var galleryName = namingContext.SharedImageGalleryName(config.GalleryBaseName);
+                    var storageAccountName = namingContext.StorageAccountName(config.GalleryBaseName);
                     var kvName = namingContext.KeyVaultName(config.GalleryBaseName);
+                    ImageBuilderOptions imgOptions = new ImageBuilderOptions()
+                    {
+                        ResourceGroupName = rgName,
+                        GalleryName = galleryName,
+                        ImageDefinitionName = config.ImageName,
+                        StorageAccountName = storageAccountName,
+                        Location = namingContext.Location,
+                        Tags = new Dictionary<string, string>(namingContext.Tags),
+                        ImageVersionTTLInDays = config.ImageVersionTTLInDays,
+                    };
+                    _logger.Information("ImageBuilderOptions: {@ImageBuilderOptions}", imgOptions);
+
                     ImageBuilderOrchestrator orchestrator = new ImageBuilderOrchestrator(
-                        _envOptions,
                         azFactory,
-                        namingContext,
-                        rgName,
-                        galleryName,
-                        config.ImageName,
-                        storageAccountName,
                         _timeSource,
                         _logger);
 
                     if (_options.Action == ActionType.CreateOrUpdateImageGalleryResources)
                     {
-                        await orchestrator.CreateOrUpdateInfraAsync(kvName);
+                        await orchestrator.CreateOrUpdateInfraAsync(
+                            imgOptions,
+                            _envOptions.ProvisioningRunnerClientId,
+                            _envOptions.AzureVMImageBuilderObjectId,
+                            kvName);
                     }
-                    else if (_options.Action == ActionType.UploadArtifactForImageBuilder)
+                    else if (_options.Action == ActionType.GenerateCustomizedSBI)
                     {
-                        var generatedBuilderTemplate = await orchestrator.UploadArtifactAndPrepareBuilderTemplateAsync(
+                        var generatedBuilderTemplate = await orchestrator.BuildCustomizedSBIAsync(
+                            imgOptions,
                             _envOptions.ArtifactOptions,
                             _options.ArtifactPath,
                             _options.ImageMetaPath,
-                            _options.AIBTemplatePath,
-                            _envOptions.BaseSBIVerion);
+                            _envOptions.BaseSBIVerion,
+                            cancellationToken);
 
                         File.WriteAllText("AIB-template.json", generatedBuilderTemplate);
                         _logger.Information("Wrote the generated template in file: AIB-template.json");
                     }
                     else if (_options.Action == ActionType.MoveSBIToOurStorage)
                     {
-                        await orchestrator.MoveSBIToOurStorageAsync(kvName, kvClient);
+                        var kvId = $"subscriptions/{azFactory.GenerateLiftrAzure().FluentClient.SubscriptionId}/resourceGroups/{imgOptions.ResourceGroupName}/providers/Microsoft.KeyVault/vaults/{kvName}";
+
+                        await orchestrator.MoveSBIToOurStorageAsync(
+                            imgOptions,
+                            _envOptions.SBIMoverOptions,
+                            kvId,
+                            kvClient);
                     }
 
                     File.WriteAllText("ImageBuilderResourceGroupName.txt", rgName);

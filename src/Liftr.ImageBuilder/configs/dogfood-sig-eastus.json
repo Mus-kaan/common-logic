@@ -4,5 +4,6 @@
   "environment": "DogFood",
   "locationStr": "eastus",
   "GalleryBaseName": "sbi0915",
-  "ImageName": "NgxDataPlane"
+  "ImageName": "NgxDataPlane",
+  "ImageVersionTTLInDays": 30
 }

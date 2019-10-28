@@ -5,9 +5,8 @@
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using System;
 using System.Collections.Generic;
-using Xunit;
 
-namespace Microsoft.Liftr.Fluent.Tests
+namespace Microsoft.Liftr
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "<Pending>")]
     public static class TestCommon
@@ -27,7 +26,10 @@ namespace Microsoft.Liftr.Fluent.Tests
         {
             foreach (var kvp in Tags)
             {
-                Assert.Equal(kvp.Value, tags[kvp.Key]);
+                if (!kvp.Value.StrictEquals(tags[kvp.Key]))
+                {
+                    throw new InvalidOperationException($"Tags value not equal. Expect: {kvp.Value}, Actual: {tags[kvp.Key]}");
+                }
             }
         }
 

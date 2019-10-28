@@ -12,6 +12,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Models;
+using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Azure.Management.TrafficManager.Fluent;
 using Microsoft.Liftr.Fluent.Contracts.Geneva;
 using Microsoft.Liftr.Fluent.Geneva;
@@ -19,7 +20,6 @@ using Microsoft.Rest.Azure;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using static Microsoft.Azure.Management.Fluent.Azure;
@@ -35,11 +35,10 @@ namespace Microsoft.Liftr.Fluent
     {
         public const string c_AspEnv = "ASPNETCORE_ENVIRONMENT";
         private readonly ILogger _logger;
-        private readonly AzureCredentials _credentials;
 
         public LiftrAzure(AzureCredentials credentials, IAzure fluentClient, IAuthenticated authenticated, ILogger logger)
         {
-            _credentials = credentials;
+            AzureCredentials = credentials;
             FluentClient = fluentClient;
             Authenticated = authenticated;
             _logger = logger;
@@ -49,44 +48,54 @@ namespace Microsoft.Liftr.Fluent
 
         public IAuthenticated Authenticated { get; }
 
-        #region Resource Group
-        public async Task<IResourceGroup> CreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags)
-        {
-            _logger.Information("Creating a resource group with name: " + rgName);
+        public AzureCredentials AzureCredentials { get; }
 
-            if (await FluentClient.ResourceGroups.ContainAsync(rgName))
+        #region Resource Group
+        public async Task<IResourceGroup> GetOrCreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags)
+        {
+            var rg = await GetResourceGroupAsync(rgName);
+
+            if (rg == null)
             {
-                var err = $"Resource Group with name '{rgName}' already existed.";
-                _logger.Warning(err);
-                throw new DuplicateNameException(err);
+                rg = await CreateResourceGroupAsync(location, rgName, tags);
             }
 
-            var resourceGroup = await FluentClient
+            return rg;
+        }
+
+        public async Task<IResourceGroup> CreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags)
+        {
+            _logger.Information("Creating a resource group with name: {rgName}", rgName);
+            var rg = await FluentClient
                 .ResourceGroups
                 .Define(rgName)
                 .WithRegion(location)
                 .WithTags(tags)
                 .CreateAsync();
-
-            _logger.Information("Created a resource group with name: " + rgName);
-
-            return resourceGroup;
+            _logger.Information("Created a resource group with Id:{resourceId}", rg.Id);
+            return rg;
         }
 
         public async Task<IResourceGroup> GetResourceGroupAsync(string rgName)
         {
             try
             {
-                _logger.Information("Getting resource group with name: " + rgName);
-                return await FluentClient
+                _logger.Information("Getting resource group with name: {rgName}", rgName);
+                var rg = await FluentClient
                 .ResourceGroups
                 .GetByNameAsync(rgName);
+                if (rg != null)
+                {
+                    _logger.Information("Retrieved the Resource Group with Id:{resourceId}", rg.Id);
+                    return rg;
+                }
             }
             catch (CloudException ex) when (ex.Message.Contains("could not be found"))
             {
-                _logger.Information(ex, ex.Message);
-                return null;
             }
+
+            _logger.Information("Cannot find resource group with name: {rgName}.", rgName);
+            return null;
         }
 
         public async Task DeleteResourceGroupAsync(string rgName)
@@ -117,6 +126,51 @@ namespace Microsoft.Liftr.Fluent
             await Task.WhenAll(tasks);
         }
         #endregion Resource Group
+
+        #region Storage Account
+        public async Task<IStorageAccount> GetOrCreateStorageAccountAsync(Region location, string rgName, string storageAccountName, IDictionary<string, string> tags)
+        {
+            var stor = await GetStorageAccountAsync(rgName, storageAccountName);
+
+            if (stor == null)
+            {
+                stor = await CreateStorageAccountAsync(location, rgName, storageAccountName, tags);
+            }
+
+            return stor;
+        }
+
+        public async Task<IStorageAccount> CreateStorageAccountAsync(Region location, string rgName, string storageAccountName, IDictionary<string, string> tags)
+        {
+            _logger.Information("Creating storage account with name {storageAccountName} in {rgName}", storageAccountName, rgName);
+
+            var storageAccount = await FluentClient.StorageAccounts
+                .Define(storageAccountName)
+                .WithRegion(location)
+                .WithExistingResourceGroup(rgName)
+                .WithOnlyHttpsTraffic()
+                .WithTags(tags)
+                .CreateAsync();
+
+            _logger.Information("Created storage account with {resourceId}", storageAccount.Id);
+            return storageAccount;
+        }
+
+        public async Task<IStorageAccount> GetStorageAccountAsync(string rgName, string storageAccountName)
+        {
+            _logger.Information("Getting storage account. rgName: {rgName}, storageAccountName: {storageAccountName} ...", rgName, storageAccountName);
+            var stor = await FluentClient
+                .StorageAccounts
+                .GetByResourceGroupAsync(rgName, storageAccountName);
+
+            if (stor == null)
+            {
+                _logger.Information("Cannot find storage account. rgName: {rgName}, storageAccountName: {storageAccountName} ...", rgName, storageAccountName);
+            }
+
+            return stor;
+        }
+        #endregion Storage Account
 
         #region Traffic Manager
         public async Task<ITrafficManagerProfile> CreateTrafficManagerAsync(string rgName, string tmName, IDictionary<string, string> tags)
@@ -192,6 +246,18 @@ namespace Microsoft.Liftr.Fluent
         #endregion CosmosDB
 
         #region Key Vault
+        public async Task<IVault> GetOrCreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags, string adminSPNClientId)
+        {
+            var kv = await GetKeyVaultAsync(rgName, vaultName);
+
+            if (kv == null)
+            {
+                kv = await CreateKeyVaultAsync(location, rgName, vaultName, tags, adminSPNClientId);
+            }
+
+            return kv;
+        }
+
         public async Task<IVault> CreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags, string adminSPNClientId)
         {
             _logger.Information("Creating a Vault with name {vaultName}, adminSPNClientId {adminSPNClientId} ...", vaultName, adminSPNClientId);
@@ -222,6 +288,21 @@ namespace Microsoft.Liftr.Fluent
             _logger.Information($"Created Vault with name {vaultName}");
 
             return vault;
+        }
+
+        public async Task<IVault> GetKeyVaultAsync(string rgName, string vaultName)
+        {
+            _logger.Information("Getting Key Vault. rgName: {rgName}, vaultName: {vaultName} ...", rgName, vaultName);
+            var stor = await FluentClient
+                .Vaults
+                .GetByResourceGroupAsync(rgName, vaultName);
+
+            if (stor == null)
+            {
+                _logger.Information("Cannot find Key Vault. rgName: {rgName}, vaultName: {vaultName} ...", rgName, vaultName);
+            }
+
+            return stor;
         }
 
         public async Task<IVault> GetKeyVaultByIdAsync(string kvResourceId)
@@ -489,7 +570,7 @@ namespace Microsoft.Liftr.Fluent
             catch (Exception ex)
             {
                 _logger.Error("ARM deployment failed", ex);
-                var error = await DeploymentExtensions.GetDeploymentErrorDetailsAsync(FluentClient.SubscriptionId, rgName, deploymentName, _credentials);
+                var error = await DeploymentExtensions.GetDeploymentErrorDetailsAsync(FluentClient.SubscriptionId, rgName, deploymentName, AzureCredentials);
                 _logger.Error("ARM deployment with name {@deploymentName} Failed with Error: {@DeploymentError}", deploymentName, error);
                 throw new ARMDeploymentFailureException("ARM deployment failed", ex) { Details = error };
             }

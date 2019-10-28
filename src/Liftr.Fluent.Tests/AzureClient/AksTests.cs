@@ -23,7 +23,6 @@ namespace Microsoft.Liftr.Fluent.Tests
         [Fact]
         public async Task CanCreateAksAsync()
         {
-            var logger = TestLogger.GetLogger(_output);
             using (var scope = new TestResourceGroupScope("unittest-aks-", _output))
             {
                 var client = scope.Client;

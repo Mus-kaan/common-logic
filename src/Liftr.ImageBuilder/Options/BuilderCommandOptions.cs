@@ -10,12 +10,12 @@ namespace Microsoft.Liftr.ImageBuilder
     {
         CreateOrUpdateImageGalleryResources,
         MoveSBIToOurStorage,
-        UploadArtifactForImageBuilder,
+        GenerateCustomizedSBI,
     }
 
     public class BuilderCommandOptions
     {
-        [Option('a', "action", Required = true, HelpText = "Action type, one of: [ CreateOrUpdateImageGalleryResources, MoveSBIToOurStorage, UploadArtifactForImageBuilder ]")]
+        [Option('a', "action", Required = true, HelpText = "Action type, one of: [ CreateOrUpdateImageGalleryResources, MoveSBIToOurStorage, GenerateCustomizedSBI ]")]
         public ActionType Action { get; set; }
 
         [Option('f', "file", Required = true, HelpText = "Path to the configuration file.")]
@@ -27,11 +27,8 @@ namespace Microsoft.Liftr.ImageBuilder
         [Option("authFile", Required = false, HelpText = "Use auth file to login instead of managed identity.")]
         public string AuthFile { get; set; }
 
-        [Option("artifactPath", Required = false, HelpText = "Path to the artifact package file.")]
+        [Option("artifactPath", Required = false, HelpText = "Path to the artifact package file. The artifact must be packed in a tar file. We will call 'bake-image.sh' in the package.")]
         public string ArtifactPath { get; set; }
-
-        [Option("aibTemplatePath", Required = false, HelpText = "Path to the 'image-builder-sbi.template.base.json'.")]
-        public string AIBTemplatePath { get; set; } = "image-builder-sbi.template.base.json";
 
         [Option("imageMetaPath", Required = false, HelpText = "Path to the 'image-meta.json'.")]
         public string ImageMetaPath { get; set; }

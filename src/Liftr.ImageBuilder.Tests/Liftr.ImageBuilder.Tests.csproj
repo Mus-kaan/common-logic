@@ -3,20 +3,27 @@
   <PropertyGroup>
     <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
     <IsPackable>false</IsPackable>
-    <AssemblyName>Microsoft.Liftr.Fluent.Tests</AssemblyName>
-    <RootNamespace>Microsoft.Liftr.Fluent.Tests</RootNamespace>
+    <AssemblyName>Microsoft.Liftr.ImageBuilder.Tests</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.ImageBuilder.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(PackageVersion_Microsoft_NET_Test_Sdk)" />
+    <PackageReference Include="Serilog.Sinks.Xunit2" Version="$(PackageVersion_Serilog_Sinks_Xunit2)" />
     <PackageReference Include="xunit" Version="$(PackageVersion_xunit)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(PackageVersion_xunit_runner_visualstudio)" />
+    <PackageReference Include="Serilog.Sinks.Debug" Version="$(PackageVersion_Serilog_Sinks_Debug)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Liftr.Fluent.Provisioning\Liftr.Fluent.Provisioning.csproj" />
+    <ProjectReference Include="..\Liftr.ImageBuilder\Liftr.ImageBuilder.csproj" />
     <ProjectReference Include="..\Liftr.Tests.Common\Liftr.Tests.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="*.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="packer.tar">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

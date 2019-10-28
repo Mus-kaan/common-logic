@@ -24,5 +24,7 @@ namespace Microsoft.Liftr.ImageBuilder
         public string GalleryBaseName { get; set; }
 
         public string ImageName { get; set; }
+
+        public int ImageVersionTTLInDays { get; set; }
     }
 }

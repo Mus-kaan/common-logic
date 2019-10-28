@@ -24,20 +24,18 @@ namespace Microsoft.Liftr.Fluent.Tests
         [Fact]
         public async Task VerifyGlobalResourceGroupAsync()
         {
-            var logger = TestLogger.GetLogger(_output);
             var shortPartnerName = "v2";
             var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USWest);
             TestCommon.AddCommonTags(context.Tags);
 
-            var clientFactory = new LiftrAzureFactory(logger, TestCredentials.SubscriptionId, TestCredentials.GetAzureCredentials);
-            var client = clientFactory.GenerateLiftrAzure();
-
             var globalCoreName = SdkContext.RandomResourceName("v", 3);
             var globalRGName = context.ResourceGroupName(globalCoreName);
 
-            using (var globalScope = new TestResourceGroupScope(client, globalRGName))
+            using (var globalScope = new TestResourceGroupScope(globalRGName))
             {
-                var infra = new InftrastructureV2(clientFactory, logger);
+                var clientFactory = new LiftrAzureFactory(globalScope.Logger, TestCredentials.SubscriptionId, TestCredentials.GetAzureCredentials);
+                var client = clientFactory.GenerateLiftrAzure();
+                var infra = new InftrastructureV2(clientFactory, globalScope.Logger);
 
                 // This will take a long time. Be patient. About 6 minutes.
                 var kv = await infra.CreateOrUpdateGlobalRGAsync(globalCoreName, context, TestCredentials.ClientId);

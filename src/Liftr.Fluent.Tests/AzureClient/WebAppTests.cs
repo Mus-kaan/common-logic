@@ -25,7 +25,6 @@ namespace Microsoft.Liftr.Fluent.Tests
         [Fact]
         public async Task CanCreateWebAppAsync()
         {
-            var logger = TestLogger.GetLogger(_output);
             using (var scope = new TestResourceGroupScope("unittest-antares-", _output))
             {
                 var client = scope.Client;
@@ -44,7 +43,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                 var kv = await client.CreateKeyVaultAsync(TestCommon.Location, scope.ResourceGroupName, SdkContext.RandomResourceName("test-vault-", 15), TestCommon.Tags, TestCredentials.ClientId);
 
                 // Verify AME OneCert creations.
-                using (var valet = new KeyVaultConcierge(kv.VaultUri, TestCredentials.ClientId, TestCredentials.ClientSecret, logger))
+                using (var valet = new KeyVaultConcierge(kv.VaultUri, TestCredentials.ClientId, TestCredentials.ClientSecret, scope.Logger))
                 {
                     var certName = SdkContext.RandomResourceName("ame", 8);
                     var subjectName = certName + ".liftr-dev.net";

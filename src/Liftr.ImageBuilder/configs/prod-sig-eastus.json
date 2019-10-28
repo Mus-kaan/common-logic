@@ -4,5 +4,6 @@
   "environment": "Production",
   "locationStr": "eastus",
   "GalleryBaseName": "sbi1015",
-  "ImageName": "NgxDataPlane"
+  "ImageName": "NgxDataPlane",
+  "ImageVersionTTLInDays": 60
 }

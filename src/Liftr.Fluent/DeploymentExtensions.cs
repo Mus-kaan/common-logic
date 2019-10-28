@@ -5,7 +5,6 @@
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using System;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent
@@ -17,7 +16,7 @@ namespace Microsoft.Liftr.Fluent
             // There is no way to get error details using the Azure .NET library. That is a known issue that should
             // be fixed in the future. See https://github.com/Azure/azure-libraries-for-net/issues/39.
             // In the mean time, a direct call is made to the Azure REST API to get the details.
-            using (var handler = new AzureApiMessageHandler(credentials))
+            using (var handler = new AzureApiAuthHandler(credentials))
             using (var httpClient = new HttpClient(handler))
             {
                 var uriBuilder = new UriBuilder("https://management.azure.com");
@@ -62,23 +61,5 @@ namespace Microsoft.Liftr.Fluent
         public string Code { get; set; }
 
         public string Message { get; set; }
-    }
-
-    public class AzureApiMessageHandler : DelegatingHandler
-    {
-        private readonly AzureCredentials _credentials;
-
-        public AzureApiMessageHandler(AzureCredentials credentials)
-        {
-            _credentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
-            InnerHandler = new HttpClientHandler();
-        }
-
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            await _credentials.ProcessHttpRequestAsync(request, cancellationToken);
-
-            return await base.SendAsync(request, cancellationToken);
-        }
     }
 }

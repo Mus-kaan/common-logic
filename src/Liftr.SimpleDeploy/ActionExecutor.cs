@@ -195,7 +195,6 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                     var infra = new InftrastructureV2(azFactory, _logger);
                     var namingContext = new NamingContext(config.PartnerName, config.ShortPartnerName, config.Environment, config.Location);
-                    namingContext.Tags["FirstCreatedAt"] = DateTime.UtcNow.ToZuluString();
 
                     if (_options.Action == ActionType.CreateOrUpdateGlobal)
                     {

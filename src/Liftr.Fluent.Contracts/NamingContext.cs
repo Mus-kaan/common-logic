@@ -28,7 +28,8 @@ namespace Microsoft.Liftr.Fluent.Contracts
     public class NamingContext
     {
         public const string c_infraVersionTagName = "InfraVersion";
-        public const string c_RegionTagName = "RegionTag"; // TODO: this might be unuseful?
+        public const string c_RegionTagName = "RegionTag";
+        public const string c_createdAtTagName = "FirstCreatedAt";
 
         public NamingContext(string partnerName, string shortPartnerName, EnvironmentType environment, Region location)
         {
@@ -41,8 +42,9 @@ namespace Microsoft.Liftr.Fluent.Contracts
             {
                 [nameof(PartnerName)] = PartnerName,
                 [nameof(Environment)] = Environment.ToString(),
-                [c_infraVersionTagName] = "v1",
+                [c_infraVersionTagName] = "v2",
                 [c_RegionTagName] = location.ToString(),
+                [c_createdAtTagName] = DateTime.UtcNow.ToZuluString(),
             };
         }
 
@@ -64,6 +66,18 @@ namespace Microsoft.Liftr.Fluent.Contracts
         public string ResourceGroupName(string baseName)
             => GenerateCommonName(baseName, "rg");
 
+        public string StorageAccountName(string baseName)
+        {
+            var name = "st" + GenerateCommonName(baseName, suffix: null, noRegion: false, delimiter: string.Empty);
+            name = name.ToLowerInvariant();
+            if (name.Length > 24)
+            {
+                throw new InvalidOperationException($"{nameof(StorageAccountName)} cannot be longer than 24 characters.");
+            }
+
+            return name;
+        }
+
         public string MSIName(string baseName)
             => GenerateCommonName(baseName, "msi");
 
@@ -81,6 +95,9 @@ namespace Microsoft.Liftr.Fluent.Contracts
 
         public string CosmosDBName(string baseName)
             => GenerateCommonName(baseName, "db");
+
+        public string SharedImageGalleryName(string baseName)
+           => GenerateCommonName(baseName, "sig", noRegion: false, delimiter: "_");
 
         public static string DiskName(string baseName, int number)
             => $"{baseName}-disk{number}";
@@ -121,18 +138,18 @@ namespace Microsoft.Liftr.Fluent.Contracts
         public string LeafDomainName(string baseName)
             => SdkContext.RandomResourceName($"{ShortPartnerName}-{baseName}-{ShortEnvName(Environment)}-{Location.ShortName()}-", 25);
 
-        public string GenerateCommonName(string baseName, string suffix = null, bool noRegion = false)
+        public string GenerateCommonName(string baseName, string suffix = null, bool noRegion = false, string delimiter = "-")
         {
-            var name = $"{ShortPartnerName}-{ShortEnvName(Environment)}-{baseName}";
+            var name = $"{ShortPartnerName}{delimiter}{ShortEnvName(Environment)}{delimiter}{baseName}";
 
             if (!noRegion)
             {
-                name = $"{name}-{Location.ShortName()}";
+                name = $"{name}{delimiter}{Location.ShortName()}";
             }
 
             if (!string.IsNullOrEmpty(suffix))
             {
-                name = $"{name}-{suffix}";
+                name = $"{name}{delimiter}{suffix}";
             }
 
             return name;
