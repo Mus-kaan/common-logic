@@ -164,36 +164,9 @@ $Helm upgrade $HelmReleaseName --install --recreate-pods \
 # Reasons:
 # 1. If the helm upgrade failed, we want the EV2 deployment to fail.
 # 2. After the app is successfully deployed to AKS cluster, it will generate a public IP address. We can retrieve the IP and put it in TM in the next step.
+echo "kubectl rollout status deployment/rp-web"
+kubectl rollout status deployment/rp-web
 
-interval=20
-total=60
-counter=1
-# default timeout 20 * 60 = 1200 sec = 20 min
-# release status: https://github.com/helm/helm/blob/7cad59091a9451b2aa4f95aa882ea27e6b195f98/_proto/hapi/release/status.proto#L26
-while [ $counter -le $total ]; do
-    releaseMessage="$($Helm status $HelmReleaseName)"
-    # grep doesn't support option -P(perl regex) when run this script in Ev2 machine, has to match the fixed string
-    # TODO (yijia): use jq lib to process releaseMessage with output format in JSON
-    if [[ $releaseMessage = *"STATUS: deployed"* ]]; then
-        echo "Deployment has been succeed."
-        set 0
-        break
-    elif [[ $releaseMessage = *"STATUS: pending"* ]]; then
-        sleep ${interval}
-    else
-        echo "Deployment has been failed. Release: $HelmReleaseName. AksClusterName: $AKSName. AKS RG: $AKSRGName"
-        set 1
-        break
-    fi
-    ((counter++))
-done
-
-if [[ $counter -eq $total ]]; then
-    echo "Timeout to run health check."
-    set 1
-fi
-
-# TODO: fix the above grep.
 echo "Wait for extra 120 seconds"
 sleep 120s
 

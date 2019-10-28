@@ -95,28 +95,12 @@ $Helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 echo "helm upgrade aks-pod-identity-infra"
 $Helm upgrade aks-pod-identity-infra --install --recreate-pods --namespace default aad-pod-identity-infra-*.tgz
 
-echo "Start checking aks-pod-identity-infra deployment status"
-sleep_interval=10
-time_out=30
-wait_counter=1
-# we will query for the api version of the custom resources to be available
-# default timeout 10 * 30 = 300 sec = 5 min
-while true
-do
-    kubectl get daemonsets/nmi | grep nmi && kubectl get deployments/mic | grep mic && echo "Finished AAD Pod Identity Infra deployment" && break
+echo "Start waiting for aks-pod-identity-infra deployment to finish ..."
+kubectl rollout status daemonset/nmi
+kubectl rollout status deployment/mic
 
-    # retry after some time.
-    echo "Waiting for the AKS pod identity infra deployment " && sleep ${sleep_interval} && ((wait_counter++))
-
-    if [[ $wait_counter -eq $time_out ]]; then
-        echo "Timeout waiting for the AKS pod identity infra deployment."
-        break;
-    fi
-done
-
-# TODO: fix the above grep.
-echo "Wait for extra 120 seconds"
-sleep 120s
+echo "Wait for extra 240 seconds to let the custom resource controller be available."
+sleep 240s
 
 # Deploy azure identity binding components to default namespace
 echo "helm upgrade aks-pod-identity-binding"
@@ -129,6 +113,3 @@ $Helm upgrade aks-pod-identity-binding --install --recreate-pods \
 echo "-------------------------------------"
 echo "Finished helm upgrade aks pod identity chart"
 echo "-------------------------------------"
-
-echo "kubectl get all"
-kubectl get all

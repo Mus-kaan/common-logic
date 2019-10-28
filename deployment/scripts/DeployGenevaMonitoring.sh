@@ -135,6 +135,12 @@ $Helm upgrade aks-geneva --install --recreate-pods \
 --set gcskeyb64="$genevaServiceKey" \
 --namespace default geneva-*.tgz
 
+kubectl rollout status daemonset/geneva-services
+
+# kubectl rollout status deployment/prom-mdm-converter
+# kubectl rollout status deployment/aks-geneva-prometheus-server
+kubectl rollout status deployment/aks-geneva-prometheus-kube-state-metrics
+
 echo "-------------------------------------"
 echo "Finished helm upgrade geneva chart"
 echo "-------------------------------------"
