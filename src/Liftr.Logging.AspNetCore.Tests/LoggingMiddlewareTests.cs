@@ -121,7 +121,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 observeredFilter = CallContextHolder.LogFilterOverwrite.Value;
                 observeredClientId = CallContextHolder.ClientRequestId.Value;
                 observeredTrackingId = CallContextHolder.ARMRequestTrackingId.Value;
-                observeredCorrelationId = CallContextHolder.RequestCorrelationId.Value;
+                observeredCorrelationId = CallContextHolder.CorrelationId.Value;
             });
 
             var contextMock = new Mock<HttpContext>();
@@ -164,7 +164,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
             var middleware = new LoggingMiddleware(next: async (innerHttpContext) =>
             {
                 await Task.CompletedTask;
-                observeredValue = CallContextHolder.RequestCorrelationId.Value;
+                observeredValue = CallContextHolder.CorrelationId.Value;
             });
 
             var contextMock = new Mock<HttpContext>();

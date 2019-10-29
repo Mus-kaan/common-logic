@@ -5,7 +5,10 @@
 using System.Runtime.CompilerServices;
 using System.Threading;
 
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Logging")]
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.AspNetCore")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.AspNetCore.Tests")]
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.GenericHosting")]
 
 namespace Microsoft.Liftr.DiagnosticSource
 {
@@ -34,6 +37,6 @@ namespace Microsoft.Liftr.DiagnosticSource
         /// Specifies the tracing correlation Id for the request. The resource provider
         /// must log this so that end-to-end requests can be correlated across Azure.
         /// </summary>
-        public static readonly AsyncLocal<string> RequestCorrelationId = new AsyncLocal<string>(); // https://docs.microsoft.com/en-us/rest/api/datafactory/v1/data-factory-gateway
+        public static readonly AsyncLocal<string> CorrelationId = new AsyncLocal<string>(); // https://docs.microsoft.com/en-us/rest/api/datafactory/v1/data-factory-gateway
     }
 }

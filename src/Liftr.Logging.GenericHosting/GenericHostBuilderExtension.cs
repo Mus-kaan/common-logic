@@ -7,8 +7,10 @@ using Microsoft.ApplicationInsights.DependencyCollector;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Liftr.DiagnosticSource;
 using Serilog;
 using Serilog.Context;
+using Serilog.Events;
 using System;
 
 namespace Microsoft.Liftr.Logging.GenericHosting
@@ -29,8 +31,15 @@ namespace Microsoft.Liftr.Logging.GenericHosting
             return builder
                 .ConfigureServices((hostContext, services) =>
                 {
+                    (var allowOverride, var defaultLevel) = GetOverrideOptions(hostContext);
+
                     var serilogConfig = new LoggerConfiguration();
                     serilogConfig = serilogConfig.ReadFrom.Configuration(hostContext.Configuration);
+
+                    if (allowOverride)
+                    {
+                        serilogConfig = serilogConfig.MinimumLevel.ControlledBy(LogFilterOverrideScope.EnableFilterOverride(defaultLevel));
+                    }
 
                     var ikey = hostContext.Configuration.GetSection("ApplicationInsights")?.GetSection("InstrumentationKey")?.Value;
                     if (!string.IsNullOrEmpty(ikey))
@@ -53,8 +62,37 @@ namespace Microsoft.Liftr.Logging.GenericHosting
 
                     services.AddSingleton<Serilog.ILogger>(Log.Logger);
                     Log.Information("Serilog logger is added to DI container.");
+
+                    var subscriber = new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener());
+                    services.AddSingleton(subscriber);
                 })
                 .UseSerilog();
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Middleware should fail silently.")]
+        private static (bool allowOverride, LogEventLevel defaultLevel) GetOverrideOptions(HostBuilderContext host)
+        {
+            bool allowOverride = true;
+            try
+            {
+                var allowOverrideStr = host.Configuration.GetSection("Serilog")?.GetSection("AllowFilterDynamicOverride")?.Value;
+                allowOverride = bool.Parse(allowOverrideStr);
+            }
+            catch
+            {
+            }
+
+            LogEventLevel defaultLevel = LogEventLevel.Information;
+            try
+            {
+                var defaultLevelStr = host.Configuration.GetSection("Serilog")?.GetSection("MinimumLevel")?.GetSection("Default")?.Value;
+                defaultLevel = (LogEventLevel)Enum.Parse(typeof(LogEventLevel), defaultLevelStr);
+            }
+            catch
+            {
+            }
+
+            return (allowOverride, defaultLevel);
         }
     }
 }

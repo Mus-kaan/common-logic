@@ -95,11 +95,12 @@ namespace Microsoft.Liftr.Logging.AspNetCore
 
             if (!string.IsNullOrEmpty(crrelationtId))
             {
-                CallContextHolder.RequestCorrelationId.Value = crrelationtId;
+                CallContextHolder.CorrelationId.Value = crrelationtId;
             }
 
             using (var logFilterOverrideScope = new LogFilterOverrideScope(overrideLevel))
-            using (new ARMHeaderLogContext(armRequestTrackingId, crrelationtId))
+            using (new LogContextPropertyScope("LiftrTrackingId", armRequestTrackingId))
+            using (new LogContextPropertyScope("LiftrCorrelationId", crrelationtId))
             {
                 await _next(httpContext);
             }

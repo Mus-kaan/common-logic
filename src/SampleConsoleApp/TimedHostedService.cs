@@ -60,6 +60,7 @@ namespace GenericHostSample
         {
             _cnt++;
             _logger.Information("Timed Background Service is working.");
+            _logger.GetInstanceMetadata();
             using (var op = _logger.StartTimedOperation("GetMSWebPage"))
             {
                 op.SetContextProperty("CntVal", _cnt);

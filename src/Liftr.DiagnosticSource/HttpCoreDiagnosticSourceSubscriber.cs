@@ -4,9 +4,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-
-[assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.AspNetCore")]
 
 namespace Microsoft.Liftr.DiagnosticSource
 {

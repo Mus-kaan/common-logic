@@ -66,9 +66,9 @@ namespace Microsoft.Liftr.DiagnosticSource
                     request.Headers.Add(HeaderConstants.LiftrARMRequestTrackingId, CallContextHolder.ARMRequestTrackingId.Value);
                 }
 
-                if (!string.IsNullOrEmpty(CallContextHolder.RequestCorrelationId.Value))
+                if (!string.IsNullOrEmpty(CallContextHolder.CorrelationId.Value))
                 {
-                    request.Headers.Add(HeaderConstants.LiftrRequestCorrelationId, CallContextHolder.RequestCorrelationId.Value);
+                    request.Headers.Add(HeaderConstants.LiftrRequestCorrelationId, CallContextHolder.CorrelationId.Value);
                 }
             }
 #pragma warning disable CA1031 // Do not catch general exception types. Override this to make sure the injection part is not affecting any application.

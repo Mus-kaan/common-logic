@@ -5,6 +5,7 @@
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.Liftr.DiagnosticSource;
 using Serilog.Context;
 using System;
 using System.Collections.Generic;
@@ -21,10 +22,22 @@ namespace Microsoft.Liftr.Logging
         private readonly string _operationId;
         private readonly string _startTime = DateTime.UtcNow.ToZuluString();
         private readonly Stopwatch _sw = Stopwatch.StartNew();
+        private readonly LogContextPropertyScope _correlationIdScope;
         private bool _isSuccessful = true;
 
-        public TimedOperation(Serilog.ILogger logger, string operationName, string operationId)
+        public TimedOperation(Serilog.ILogger logger, string operationName, string operationId = null)
         {
+            if (string.IsNullOrEmpty(operationId))
+            {
+                operationId = "liftr-" + Guid.NewGuid().ToString();
+            }
+
+            if (string.IsNullOrEmpty(CallContextHolder.CorrelationId.Value))
+            {
+                CallContextHolder.CorrelationId.Value = operationId;
+                _correlationIdScope = new LogContextPropertyScope("LiftrCorrelationId", operationId);
+            }
+
             _logger = logger;
             _operationName = operationName;
             _appInsightsOperation = AppInsightsHelper.AppInsightsClient?.StartOperation<RequestTelemetry>(operationName);
@@ -35,9 +48,16 @@ namespace Microsoft.Liftr.Logging
 
         public void Dispose()
         {
+            if (_correlationIdScope != null)
+            {
+                // If the correlation Id is added by this instance, it should clear it after it is going out of scope.
+                CallContextHolder.CorrelationId.Value = string.Empty;
+            }
+
             _sw.Stop();
             _logger.Information("Finished TimedOperation '{TimedOperationName}' with '{TimedOperationId}'. Successful: {isSuccessful}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationName, _operationId, _isSuccessful, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
             _appInsightsOperation?.Dispose();
+            _correlationIdScope?.Dispose();
         }
 
         public void SetProperty(string name, string value)

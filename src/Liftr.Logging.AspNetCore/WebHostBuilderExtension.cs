@@ -51,13 +51,10 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 })
                 .ConfigureServices((host, services) =>
                 {
-                    (var allowOverride, var defaultLevel) = GetOverrideOptions(host);
-                    if (allowOverride)
-                    {
-                        var subscriber = new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener());
-                        services.AddSingleton<IStartupFilter, LoggingMiddlewareStartupFilter>();
-                        services.AddSingleton(subscriber);
-                    }
+                    var subscriber = new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener());
+                    services.AddSingleton(subscriber);
+
+                    services.AddSingleton<IStartupFilter, LoggingMiddlewareStartupFilter>();
 
                     services.AddSingleton<Serilog.ILogger>((sp) =>
                     {

@@ -14,6 +14,7 @@
     <PackageReference Include="Serilog.Sinks.File" Version="$(PackageVersion_Serilog_Sinks_File)" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Liftr.DiagnosticSource\Liftr.DiagnosticSource.csproj" />
     <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
   </ItemGroup>
 </Project>
