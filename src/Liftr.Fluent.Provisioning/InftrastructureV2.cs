@@ -17,6 +17,7 @@ using Microsoft.Rest.Azure;
 using Serilog;
 using System;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent.Provisioning
@@ -70,7 +71,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             return kv;
         }
 
-        public async Task<(ICosmosDBAccount db, ITrafficManagerProfile tm, IVault kv)> CreateOrUpdateRegionalDataRGAsync(string baseName, NamingContext namingContext, bool createKeyVault)
+        public async Task<(IResourceGroup rg, ICosmosDBAccount db, ITrafficManagerProfile tm, IVault kv, IResourceGroup dpRG)> CreateOrUpdateRegionalDataRGAsync(string baseName, NamingContext namingContext, bool createKeyVault = false, int dataPlaneStorageCount = 0)
         {
             if (namingContext == null)
             {
@@ -82,22 +83,16 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             IVault kv = null;
 
             var rgName = namingContext.ResourceGroupName(baseName);
+            var storageName = namingContext.StorageAccountName(baseName);
             var trafficManagerName = namingContext.TrafficManagerName(baseName);
             var kvName = namingContext.KeyVaultName(baseName);
             var cosmosName = namingContext.CosmosDBName(baseName);
 
             var client = _azureClientFactory.GenerateLiftrAzure();
 
-            _logger.Information("Creating Resource Group ...");
-            try
-            {
-                var rg = await client.CreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
-                _logger.Information("Created Resource Group with Id {ResourceId}", rg.Id);
-            }
-            catch (DuplicateNameException ex)
-            {
-                _logger.Information("There exist a RG with the same name. Reuse it. {ExceptionDetail}", ex);
-            }
+            var rg = await client.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
+
+            var stor = await client.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, storageName, namingContext.Tags);
 
             _logger.Information("Creating Traffic Manager ...");
             var targetReousrceId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.Network/trafficmanagerprofiles/{trafficManagerName}";
@@ -131,7 +126,20 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 _logger.Information("There has an existing CosmosDB with the same {ResourceId}. Stop creating a new one.", db.Id);
             }
 
-            return (db, tm, kv);
+            IResourceGroup dpRG = null;
+            if (dataPlaneStorageCount > 0)
+            {
+                var dpRGName = namingContext.ResourceGroupName(baseName + "-dp");
+                dpRG = await client.GetOrCreateResourceGroupAsync(namingContext.Location, dpRGName, namingContext.Tags);
+
+                for (int i = 1; i <= dataPlaneStorageCount; i++)
+                {
+                    var storName = namingContext.StorageAccountName($"{baseName}dp{i:D3}");
+                    var dpStor = await client.GetOrCreateStorageAccountAsync(namingContext.Location, dpRGName, storName, namingContext.Tags);
+                }
+            }
+
+            return (rg, db, tm, kv, dpRG);
         }
 
         public async Task<IVault> GetKeyVaultAsync(string baseName, NamingContext namingContext)
@@ -150,7 +158,14 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             return kv;
         }
 
-        public async Task<(IVault kv, IIdentity msi, IKubernetesCluster aks)> CreateOrUpdateRegionalComputeRGAsync(string baseName, NamingContext namingContext, InfraV2RegionalComputeOptions computeOptions, AKSInfo aksInfo, KeyVaultClient kvClient, CertificateOptions genevaCert, CertificateOptions sslCert, CertificateOptions firstPartyCert)
+        public async Task<(IVault kv, IIdentity msi, IKubernetesCluster aks)> CreateOrUpdateRegionalComputeRGAsync(
+            NamingContext namingContext,
+            InfraV2RegionalComputeOptions computeOptions,
+            AKSInfo aksInfo,
+            KeyVaultClient kvClient,
+            CertificateOptions genevaCert,
+            CertificateOptions sslCert,
+            CertificateOptions firstPartyCert)
         {
             if (namingContext == null)
             {
@@ -179,18 +194,29 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             IIdentity msi = null;
             IKubernetesCluster aks = null;
 
-            var rgName = namingContext.ResourceGroupName(baseName);
-            var msiName = namingContext.MSIName(baseName);
-            var kvName = namingContext.KeyVaultName(baseName);
-            var aksName = namingContext.AKSName(baseName);
+            var rgName = namingContext.ResourceGroupName(computeOptions.ComputeBaseName);
+            var dataRGName = namingContext.ResourceGroupName(computeOptions.DataBaseName);
+            var msiName = namingContext.MSIName(computeOptions.ComputeBaseName);
+            var kvName = namingContext.KeyVaultName(computeOptions.ComputeBaseName);
+            var aksName = namingContext.AKSName(computeOptions.ComputeBaseName);
 
             var client = _azureClientFactory.GenerateLiftrAzure();
 
-            var db = await client.GetCosmosDBAsync(computeOptions.CosmosDBResourceId);
+            var dbId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{namingContext.ResourceGroupName(computeOptions.DataBaseName)}/providers/Microsoft.DocumentDB/databaseAccounts/{namingContext.CosmosDBName(computeOptions.DataBaseName)}";
+            var db = await client.GetCosmosDBAsync(dbId);
             if (db == null)
             {
-                var ex = new InvalidOperationException("Cannot find cosmos DB with resource Id: " + computeOptions.CosmosDBResourceId);
-                _logger.Error("Cannot find cosmos DB with resource Id: {ResourceId}", computeOptions.CosmosDBResourceId);
+                var ex = new InvalidOperationException("Cannot find cosmos DB with resource Id: " + dbId);
+                _logger.Error("Cannot find cosmos DB with resource Id: {ResourceId}", dbId);
+                throw ex;
+            }
+
+            var stor = await client.GetStorageAccountAsync(dataRGName, namingContext.StorageAccountName(computeOptions.DataBaseName));
+            if (db == null)
+            {
+                var errMsg = $"Cannot find the storage with name {namingContext.StorageAccountName(computeOptions.DataBaseName)} in RG {dataRGName}.";
+                var ex = new InvalidOperationException(errMsg);
+                _logger.Error(ex, errMsg);
                 throw ex;
             }
 
@@ -293,7 +319,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     .ApplyAsync();
                 _logger.Information("Added access policy for msi to local kv.");
 
-                var regionalKv = await client.GetKeyVaultByIdAsync(computeOptions.RegionalKeyVaultResourceId);
+                var regionalKvId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{namingContext.ResourceGroupName(computeOptions.DataBaseName)}/providers/Microsoft.KeyVault/vaults/{namingContext.KeyVaultName(computeOptions.DataBaseName)}";
+                var regionalKv = await client.GetKeyVaultByIdAsync(regionalKvId);
                 if (regionalKv != null)
                 {
                     _logger.Information("Start adding access policy for msi to regional kv.");
@@ -323,7 +350,25 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
                     _logger.Information("Puting the CosmosDB Connection String in the key vault ...");
                     var dbConnectionStrings = await db.ListConnectionStringsAsync();
-                    await valet.SetSecretAsync(computeOptions.KVDBSecretName, dbConnectionStrings.ConnectionStrings[0].ConnectionString, namingContext.Tags);
+                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-DataStorageOptions--CosmosConnectionString", dbConnectionStrings.ConnectionStrings[0].ConnectionString, namingContext.Tags);
+
+                    _logger.Information("Puting the Storage Connection String in the key vault ...");
+                    var storConnectionString = await stor.GetPrimaryConnectionStringAsync();
+                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-DataStorageOptions--StorageConnectionString", storConnectionString, namingContext.Tags);
+
+                    var dpRGName = namingContext.ResourceGroupName(computeOptions.DataBaseName + "-dp");
+                    var dpRG = await client.GetResourceGroupAsync(dpRGName);
+                    if (dpRGName != null)
+                    {
+                        var accounts = await client.ListStorageAccountAsync(dpRGName);
+                        if (accounts.Any())
+                        {
+                            _logger.Information("Puting the Data Plane Storage Connection Strings in the key vault ...");
+                            var connectionStrings = await Task.WhenAll(accounts.Select(async (a) => await a.GetPrimaryConnectionStringAsync()));
+                            var obj = new { ConnectionStrings = connectionStrings };
+                            await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-DataStorageOptions--DataPlaneConnectionStrings", obj.ToJson(), namingContext.Tags);
+                        }
+                    }
 
                     if (genevaCert != null)
                     {

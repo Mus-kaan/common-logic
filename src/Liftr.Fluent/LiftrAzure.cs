@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Fluent;
@@ -166,6 +167,18 @@ namespace Microsoft.Liftr.Fluent
             }
 
             return stor;
+        }
+
+        public async Task<IEnumerable<IStorageAccount>> ListStorageAccountAsync(string rgName)
+        {
+            _logger.Information("Listing storage accounts in rgName: {rgName} ...", rgName);
+
+            var accounts = await FluentClient
+                .StorageAccounts
+                .ListByResourceGroupAsync(rgName);
+
+            _logger.Information("Found {cnt} storage accounts in rgName: {rgName} ...", accounts.Count(), rgName);
+            return accounts.ToList();
         }
         #endregion Storage Account
 

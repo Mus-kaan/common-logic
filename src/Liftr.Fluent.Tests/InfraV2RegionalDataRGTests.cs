@@ -41,7 +41,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var client = globalScope.Client;
 
                     // This will take a long time. Be patient. About 6 minutes.
-                    (var db, var tm, var kv) = await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, true);
+                    (_, var db, var tm, var kv, _) = await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, true, 5);
 
                     // Check global resource group.
                     {
@@ -58,7 +58,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     }
 
                     // Same deployment will not throw exception.
-                    await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, true);
+                    await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, true, 5);
                 }
                 catch (Exception ex)
                 {

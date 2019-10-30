@@ -1,31 +1,45 @@
 {
   "profiles": {
-    "global-resource": {
+    "1_global-resource": {
       "commandName": "Project",
-      "commandLineArgs": "-a CreateOrUpdateGlobal -f configs\\sample-dogfood-global.json -s d21a525e-7c86-486d-a79e-a4f3622f639a --authFile my.azureauth-ms.auth.json",
+      "commandLineArgs": "-a CreateOrUpdateGlobal -f configs\\sample-global.json -s d21a525e-7c86-486d-a79e-a4f3622f639a --authFile my.azureauth-ms.auth.json",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "westus2-data": {
+    "2_eastus-data": {
       "commandName": "Project",
-      "commandLineArgs": "-a CreateOrUpdateRegionalData -f configs\\sample-dogfood-regional-data-westus2.json -s d21a525e-7c86-486d-a79e-a4f3622f639a --authFile my.azureauth-ms.auth.json",
+      "commandLineArgs": "-a CreateOrUpdateRegionalData -f configs\\sample-regional-data-eastus.json -s d21a525e-7c86-486d-a79e-a4f3622f639a --authFile my.azureauth-ms.auth.json",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "wcus-data": {
+    "3_eastus-compute": {
       "commandName": "Project",
-      "commandLineArgs": "-a CreateOrUpdateRegionalData -f configs\\sample-dogfood-regional-data-westcentralus.json -s d21a525e-7c86-486d-a79e-a4f3622f639a --authFile my.azureauth-ms.auth.json",
+      "commandLineArgs": "-a CreateOrUpdateRegionalCompute -f configs\\sample-regional-compute-eastus.json -s d21a525e-7c86-486d-a79e-a4f3622f639a --authFile my.azureauth-ms.auth.json",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "westus2-compute1": {
+    "ame_1_global-resource": {
       "commandName": "Project",
-      "commandLineArgs": "-a CreateOrUpdateRegionalCompute -f configs\\sample-dogfood-regional-compute-westus2.json -s d21a525e-7c86-486d-a79e-a4f3622f639a --authFile my.azureauth-ms.auth.json",
+      "commandLineArgs": "-a CreateOrUpdateGlobal -f configs\\sample-global.json -s 60fad35b-3a47-4ca0-b691-4a789f737cea --authFile liftr-unit-test-20191001-ame.auth.json",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "AMEDev"
+      }
+    },
+    "ame_2_eastus-data": {
+      "commandName": "Project",
+      "commandLineArgs": "-a CreateOrUpdateRegionalData -f configs\\sample-regional-data-eastus.json -s 60fad35b-3a47-4ca0-b691-4a789f737cea --authFile liftr-unit-test-20191001-ame.auth.json",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "AMEDev"
+      }
+    },
+    "ame_3_eastus-compute": {
+      "commandName": "Project",
+      "commandLineArgs": "-a CreateOrUpdateRegionalCompute -f configs\\sample-regional-compute-eastus-ame.json -s 60fad35b-3a47-4ca0-b691-4a789f737cea --authFile liftr-unit-test-20191001-ame.auth.json",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "AMEDev"
       }
     }
   }

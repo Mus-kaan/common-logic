@@ -9,5 +9,7 @@ namespace Microsoft.Liftr.SimpleDeploy
         public string DataBaseName { get; set; }
 
         public bool CreateRegionalKeyVault { get; set; }
+
+        public int DataPlaneStorageCount { get; set; }
     }
 }

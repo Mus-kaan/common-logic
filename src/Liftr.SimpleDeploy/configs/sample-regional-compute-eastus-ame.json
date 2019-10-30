@@ -1,0 +1,15 @@
+{
+  "partnerName": "IncrediBuild",
+  "shortPartnerName": "ib",
+  "environment": "Test",
+  "locationStr": "eastus",
+  "GlobalBaseName": "gbl1910",
+  "GlobalLocationStr": "centralus",
+  "DataBaseName": "data1910",
+  "ComputeBaseName": "com1910",
+  "SecretPrefix": "IncrediBuildRP",
+  "HostName": "ib-rp-web-eus.azliftr-test.io",
+  "DataPlaneSubscriptions": [
+    "60fad35b-3a47-4ca0-b691-4a789f737cea"
+  ]
+}

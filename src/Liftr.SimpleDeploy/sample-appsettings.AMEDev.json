@@ -1,0 +1,10 @@
+{
+  "EnvironmentOptions": {
+    "TenantId": "33e01921-4d64-4f8c-a055-5bdaffd5e33d", // ame
+    "ProvisioningRunnerClientId": "cd98f0de-8203-42cc-b51b-ee12e45247f3",
+    "AKSInfo": {
+      "AKSSPNClientId": "e715ee55-84df-44a2-a29c-a4cd9e9b2feb",
+      "AKSSPNObjectId": "8b64659c-3d42-4727-8efb-e41aabe7a4d7"
+    }
+  }
+}

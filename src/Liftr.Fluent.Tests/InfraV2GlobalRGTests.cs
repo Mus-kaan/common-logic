@@ -37,7 +37,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                 var client = clientFactory.GenerateLiftrAzure();
                 var infra = new InftrastructureV2(clientFactory, globalScope.Logger);
 
-                // This will take a long time. Be patient. About 6 minutes.
+                // This will take a long time. Be patient.
                 var kv = await infra.CreateOrUpdateGlobalRGAsync(globalCoreName, context, TestCredentials.ClientId);
 
                 // Check global resource group.

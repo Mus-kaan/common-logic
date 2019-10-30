@@ -1,0 +1,41 @@
+{
+  "Options": {
+    "CentralKeyVaultResourceId": "/subscriptions/60fad35b-3a47-4ca0-b691-4a789f737cea/resourceGroups/ib-test-gbl1910-cus-rg/providers/Microsoft.KeyVault/vaults/ib-test-gbl1910-cus-kv",
+    "DataBaseName": "data1910",
+    "SecretPrefix": "NginxRP",
+    "CopyKVSecretsWithPrefix": "Nginx",
+    "DataPlaneSubscriptions": [
+      "60fad35b-3a47-4ca0-b691-4a789f737cea"
+    ]
+  },
+  "AKS": {
+    "AKSRootUserName": "liftraksvmuser",
+    "AKSSSHPublicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDiAVw6gNipzMfXUD/DAj0CwahIMJNYucOrzXxw4O+4gBDSAkRh+uyT5tAE0Ctohpl40fEfJcjwn96upUpgWtcEWCWjWMq1tRRuClw03GcUTMs0T5A9nUfK58+nebdD/YFEWB8meTknK3R4FI7IGdC212N/nm25GcQOKdZmEb8VOXfylVn7dzmqkbR7GdASdvhBF9MkG7YjhGznidkh2f5qmqpYc9oDS8lO/NtuSvSO6sgSHiP9F6D25Dfj5/NywiJAWF8iaoyIayEO0CWGHtM+ou6P/MO6YjNnDVX6HJptbIyQ8epkxQUmyWvf9pYQ8ALX40uGfj5CCUaQN32tUKVF weng5e@5e-box",
+    "AKSSPNClientSecretName": "AKSSPClientSecret",
+    "AKSMachineCount": 3,
+    "AKSMachineTypeStr": "Standard_DS2_v2",
+    "AKSSPNClientId": "e715ee55-84df-44a2-a29c-a4cd9e9b2feb",
+    "AKSSPNObjectId": "8b64659c-3d42-4727-8efb-e41aabe7a4d7"
+  },
+  "GenevaCert": {
+    "CertificateName": "GenevaAMEClientCert",
+    "SubjectName": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
+    "SubjectAlternativeNames": [
+      "antares-mds-agent.geneva.keyvault.liftr-dev.net"
+    ]
+  },
+  "SSLCert": {
+    "CertificateName": "SSLCert",
+    "SubjectName": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
+    "SubjectAlternativeNames": [
+      "antares-mds-agent.geneva.keyvault.liftr-dev.net"
+    ]
+  },
+  "FirstPartyCert": {
+    "CertificateName": "ClientCert",
+    "SubjectName": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
+    "SubjectAlternativeNames": [
+      "antares-mds-agent.geneva.keyvault.liftr-dev.net"
+    ]
+  }
+}

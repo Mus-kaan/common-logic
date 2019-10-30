@@ -45,6 +45,8 @@ namespace Microsoft.Liftr.Fluent
         Task<IStorageAccount> CreateStorageAccountAsync(Region location, string rgName, string storageAccountName, IDictionary<string, string> tags);
 
         Task<IStorageAccount> GetStorageAccountAsync(string rgName, string storageAccountName);
+
+        Task<IEnumerable<IStorageAccount>> ListStorageAccountAsync(string rgName);
         #endregion Storage Account
 
         #region Traffic Manager

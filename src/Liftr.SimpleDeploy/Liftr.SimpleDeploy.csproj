@@ -8,7 +8,7 @@
     <AssemblyName>Microsoft.Liftr.SimpleDeploy</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="sample-appsettings.json">
+    <Content Include="sample-*.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="configs\**\*">

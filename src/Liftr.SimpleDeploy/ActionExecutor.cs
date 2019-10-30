@@ -204,19 +204,19 @@ namespace Microsoft.Liftr.SimpleDeploy
                     }
                     else if (_options.Action == ActionType.CreateOrUpdateRegionalData)
                     {
-                        await infra.CreateOrUpdateRegionalDataRGAsync(dataOptions.DataBaseName, namingContext, dataOptions.CreateRegionalKeyVault);
+                        await infra.CreateOrUpdateRegionalDataRGAsync(dataOptions.DataBaseName, namingContext, dataOptions.CreateRegionalKeyVault, dataOptions.DataPlaneStorageCount);
                         _logger.Information("Successfully managed regional data resources.");
                     }
                     else if (_options.Action == ActionType.CreateOrUpdateRegionalCompute)
                     {
                         InfraV2RegionalComputeOptions v2Options = new InfraV2RegionalComputeOptions()
                         {
-                            CosmosDBResourceId = $"subscriptions/{_options.SubscriptionId}/resourceGroups/{namingContext.ResourceGroupName(computeOptions.DataBaseName)}/providers/Microsoft.DocumentDB/databaseAccounts/{namingContext.CosmosDBName(computeOptions.DataBaseName)}",
-                            KVDBSecretName = computeOptions.DBConnectionStringSecretName,
+                            DataBaseName = computeOptions.DataBaseName,
+                            ComputeBaseName = computeOptions.ComputeBaseName,
+                            SecretPrefix = computeOptions.SecretPrefix,
                             CopyKVSecretsWithPrefix = namingContext.PartnerName,
                             ProvisioningSPNClientId = _envOptions.ProvisioningRunnerClientId,
                             DataPlaneSubscriptions = computeOptions.DataPlaneSubscriptions,
-                            RegionalKeyVaultResourceId = $"subscriptions/{_options.SubscriptionId}/resourceGroups/{namingContext.ResourceGroupName(computeOptions.DataBaseName)}/providers/Microsoft.KeyVault/vaults/{namingContext.KeyVaultName(computeOptions.DataBaseName)}",
                         };
 
                         if (!string.IsNullOrEmpty(computeOptions.GlobalBaseName))
@@ -233,7 +233,6 @@ namespace Microsoft.Liftr.SimpleDeploy
                         };
 
                         (var kv, var msi, var aks) = await infra.CreateOrUpdateRegionalComputeRGAsync(
-                            computeOptions.ComputeBaseName,
                             namingContext,
                             v2Options,
                             _envOptions.AKSInfo,
@@ -298,6 +297,10 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                         _logger.Information("Successfully updated AKS public IP in the traffic manager.");
                     }
+
+                    _logger.Information("----------------------------------------------------------------------");
+                    _logger.Information("Finished successfully!");
+                    _logger.Information("----------------------------------------------------------------------");
                 }
                 catch (Exception ex)
                 {

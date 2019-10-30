@@ -1,7 +1,7 @@
 {
   "partnerName": "IncrediBuild",
   "shortPartnerName": "ib",
-  "environment": "DogFood",
+  "environment": "Test",
   "locationStr": "centralus",
-  "GlobalBaseName": "gbl1001"
+  "GlobalBaseName": "gbl1910"
 }

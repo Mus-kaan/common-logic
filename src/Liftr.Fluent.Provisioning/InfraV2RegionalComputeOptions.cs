@@ -9,13 +9,13 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 {
     public class InfraV2RegionalComputeOptions
     {
-        public string CosmosDBResourceId { get; set; }
-
         public string CentralKeyVaultResourceId { get; set; }
 
-        public string RegionalKeyVaultResourceId { get; set; }
+        public string DataBaseName { get; set; }
 
-        public string KVDBSecretName { get; set; }
+        public string ComputeBaseName { get; set; }
+
+        public string SecretPrefix { get; set; }
 
         public string CopyKVSecretsWithPrefix { get; set; }
 
@@ -25,19 +25,24 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public void CheckValues()
         {
-            if (string.IsNullOrEmpty(CosmosDBResourceId))
-            {
-                throw new InvalidOperationException($"{nameof(CosmosDBResourceId)} is not valid.");
-            }
-
             if (string.IsNullOrEmpty(CentralKeyVaultResourceId))
             {
                 throw new InvalidOperationException($"{nameof(CentralKeyVaultResourceId)} is not valid.");
             }
 
-            if (string.IsNullOrEmpty(KVDBSecretName))
+            if (string.IsNullOrEmpty(DataBaseName))
             {
-                throw new InvalidOperationException($"{nameof(KVDBSecretName)} is not valid.");
+                throw new InvalidOperationException($"{nameof(DataBaseName)} is not valid.");
+            }
+
+            if (string.IsNullOrEmpty(ComputeBaseName))
+            {
+                throw new InvalidOperationException($"{nameof(ComputeBaseName)} is not valid.");
+            }
+
+            if (string.IsNullOrEmpty(SecretPrefix))
+            {
+                throw new InvalidOperationException($"{nameof(SecretPrefix)} is not valid.");
             }
 
             if (string.IsNullOrEmpty(CopyKVSecretsWithPrefix))
