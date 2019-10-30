@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.Fluent\Liftr.Fluent.csproj" />
+    <ProjectReference Include="..\Liftr.KeyVault\Liftr.KeyVault.csproj" />
     <ProjectReference Include="..\Liftr.Logging.GenericHosting\Liftr.Logging.GenericHosting.csproj" />
   </ItemGroup>
   <ItemGroup>

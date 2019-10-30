@@ -51,8 +51,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 })
                 .ConfigureServices((host, services) =>
                 {
-                    var subscriber = new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener());
-                    services.AddSingleton(subscriber);
+                    services.AddSingleton<HttpCoreDiagnosticSourceSubscriber>(sp => new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener()));
 
                     services.AddSingleton<IStartupFilter, LoggingMiddlewareStartupFilter>();
 

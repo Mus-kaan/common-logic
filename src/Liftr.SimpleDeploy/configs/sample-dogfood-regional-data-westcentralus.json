@@ -3,5 +3,6 @@
   "shortPartnerName": "ib",
   "environment": "DogFood",
   "locationStr": "westcentralus",
-  "DataBaseName": "data1001"
+  "DataBaseName": "data1001",
+  "CreateRegionalKeyVault": true
 }

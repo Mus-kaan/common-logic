@@ -7,7 +7,7 @@ using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System.Net.Http;
 
-namespace Microsoft.Liftr.Fluent
+namespace Microsoft.Liftr.KeyVault
 {
     public static class KeyVaultClientFactory
     {

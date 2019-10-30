@@ -7,6 +7,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
+using Microsoft.Liftr.KeyVault;
 using System;
 
 namespace Microsoft.Liftr

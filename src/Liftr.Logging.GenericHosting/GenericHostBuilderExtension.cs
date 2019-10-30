@@ -51,7 +51,7 @@ namespace Microsoft.Liftr.Logging.GenericHosting
                         var appInsightsClient = new TelemetryClient(appInsightsConfig);
                         AppInsightsHelper.AppInsightsClient = appInsightsClient;
                         serilogConfig = serilogConfig.WriteTo.ApplicationInsights(appInsightsClient, TelemetryConverter.Events);
-                        services.AddSingleton(appInsightsClient);
+                        services.AddSingleton(sp => appInsightsClient);
                         services.AddHostedService<AppInsightsFlushService>();
                     }
 
@@ -63,8 +63,7 @@ namespace Microsoft.Liftr.Logging.GenericHosting
                     services.AddSingleton<Serilog.ILogger>(Log.Logger);
                     Log.Information("Serilog logger is added to DI container.");
 
-                    var subscriber = new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener());
-                    services.AddSingleton(subscriber);
+                    services.AddSingleton(sp => new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener()));
                 })
                 .UseSerilog();
         }

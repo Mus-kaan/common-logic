@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Liftr.KeyVault;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,7 +29,15 @@ namespace Microsoft.Liftr.Fluent.Tests
                 var azure = scope.Client;
                 var rg = await azure.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
                 var name = SdkContext.RandomResourceName("test-vault-", 15);
-                var kv = await azure.CreateKeyVaultAsync(TestCommon.Location, scope.ResourceGroupName, name, TestCommon.Tags, TestCredentials.ClientId);
+                var kv = await azure.CreateKeyVaultAsync(TestCommon.Location, scope.ResourceGroupName, name, TestCommon.Tags);
+
+                await kv.Update()
+                .DefineAccessPolicy()
+                .ForServicePrincipal(TestCredentials.ClientId)
+                .AllowSecretAllPermissions()
+                .AllowCertificateAllPermissions()
+                .Attach()
+                .ApplyAsync();
 
                 // List
                 {

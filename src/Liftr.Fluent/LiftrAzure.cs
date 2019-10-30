@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Management.AppService.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Fluent;
@@ -14,8 +13,6 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Models;
 using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Azure.Management.TrafficManager.Fluent;
-using Microsoft.Liftr.Fluent.Contracts.Geneva;
-using Microsoft.Liftr.Fluent.Geneva;
 using Microsoft.Rest.Azure;
 using Serilog;
 using System;
@@ -246,46 +243,33 @@ namespace Microsoft.Liftr.Fluent
         #endregion CosmosDB
 
         #region Key Vault
-        public async Task<IVault> GetOrCreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags, string adminSPNClientId)
+        public async Task<IVault> GetOrCreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags)
         {
             var kv = await GetKeyVaultAsync(rgName, vaultName);
 
             if (kv == null)
             {
-                kv = await CreateKeyVaultAsync(location, rgName, vaultName, tags, adminSPNClientId);
+                kv = await CreateKeyVaultAsync(location, rgName, vaultName, tags);
             }
 
             return kv;
         }
 
-        public async Task<IVault> CreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags, string adminSPNClientId)
+        public async Task<IVault> CreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags)
         {
-            _logger.Information("Creating a Vault with name {vaultName}, adminSPNClientId {adminSPNClientId} ...", vaultName, adminSPNClientId);
+            _logger.Information("Creating a Key Vault with name {vaultName} ...", vaultName);
 
-            if (!Guid.TryParse(adminSPNClientId, out _))
-            {
-                var errMsg = "The input kv admin client id is not in a valid Guid format.";
-                var ex = new InvalidOperationException(errMsg);
-                _logger.Error(ex, errMsg);
-                throw ex;
-            }
-
-            // TODO: figure out how to remove Key Vault Access Policy of the management service principal.
             IVault vault = await FluentClient.Vaults
                         .Define(vaultName)
                         .WithRegion(location)
                         .WithExistingResourceGroup(rgName)
-                        .DefineAccessPolicy()
-                            .ForServicePrincipal(adminSPNClientId)
-                            .AllowSecretAllPermissions()
-                            .AllowCertificateAllPermissions()
-                            .Attach()
+                        .WithEmptyAccessPolicy()
                         .WithTags(tags)
                         .WithDeploymentEnabled()
                         .WithTemplateDeploymentEnabled()
                         .CreateAsync();
 
-            _logger.Information($"Created Vault with name {vaultName}");
+            _logger.Information("Created Key Vault with resourceId {resourceId}", vault.Id);
 
             return vault;
         }
@@ -391,126 +375,6 @@ namespace Microsoft.Liftr.Fluent
                 .ListByResourceGroupAsync(rgName);
         }
         #endregion Aks Cluster
-
-        #region Web App
-        public async Task<IWebApp> CreateWebAppAsync(Region location, string rgName, string webAppName, IDictionary<string, string> tags, PricingTier tier, string aspNetEnv)
-        {
-            tags = new Dictionary<string, string>(tags);
-            tags[c_AspEnv] = aspNetEnv;
-
-            _logger.Information($"Creating an App Service Plan with name {webAppName} ...");
-
-            var webApp = await FluentClient.WebApps
-                        .Define(webAppName)
-                        .WithRegion(location)
-                        .WithExistingResourceGroup(rgName)
-                        .WithNewWindowsPlan(tier)
-                        .WithPlatformArchitecture(PlatformArchitecture.X64) // For Geneva monitoring.
-                        .WithWebAppAlwaysOn(alwaysOn: true)
-                        .WithTags(tags)
-                        .WithAppSetting(c_AspEnv, aspNetEnv)
-                        .WithAppSetting("WEBSITE_FIRST_PARTY_ID", "AntMDS") // For Geneva monitoring.
-                        .WithSystemAssignedManagedServiceIdentity()
-                        .CreateAsync();
-
-            _logger.Information($"Created App Service Plan with name {webAppName}");
-
-            return webApp;
-        }
-
-        public async Task<IEnumerable<IWebApp>> ListWebAppAsync(string rgName)
-        {
-            _logger.Information($"Listing WebApp in resource group {rgName} ...");
-            return await FluentClient
-                .WebApps
-                .ListByResourceGroupAsync(rgName);
-        }
-
-        public async Task<IAppServicePlan> GetAppServicePlanByIdAsync(string planResourceId)
-        {
-            try
-            {
-                _logger.Information($"Getting App Service Plan with resource Id {planResourceId} ...");
-                return await FluentClient
-                    .AppServices
-                    .AppServicePlans
-                    .GetByIdAsync(planResourceId);
-            }
-            catch (CloudException ex) when (ex.Message.Contains("could not be found"))
-            {
-                _logger.Information(ex, ex.Message);
-                return null;
-            }
-        }
-
-        public async Task<IWebApp> GetWebAppWithIdAsync(string resourceId)
-        {
-            try
-            {
-                _logger.Information($"Getting Web App with resource Id {resourceId} ...");
-                return await FluentClient
-                    .WebApps
-                    .GetByIdAsync(resourceId);
-            }
-            catch (CloudException ex) when (ex.Message.Contains("could not be found"))
-            {
-                _logger.Information(ex, ex.Message);
-                return null;
-            }
-        }
-
-        public async Task<IAppServiceCertificate> UploadCertificateToWebAppAsync(string webAppId, string certName, byte[] pfxByteArray)
-        {
-            var webApp = await GetWebAppWithIdAsync(webAppId) ?? throw new InvalidOperationException("Cannot find web app with id: " + webAppId);
-            _logger.Information($"Creating an App Service Certificate with name {certName} ...");
-            var cert = await webApp.Manager
-                .AppServiceCertificates
-                .Define(certName)
-                .WithRegion(webApp.Region)
-                .WithExistingResourceGroup(webApp.ResourceGroupName)
-                .WithPfxByteArray(pfxByteArray)
-                .WithPfxPassword(string.Empty)
-                .CreateAsync();
-            _logger.Information($"Created App Service Certificate with name {certName}");
-
-            return cert;
-        }
-
-        public async Task DeployGenevaToAppServicePlanAsync(string appServicePlanResoureId, GenevaOptions genevaOptions, string based64EncodedPFX)
-        {
-            var appServicePlan = await GetAppServicePlanByIdAsync(appServicePlanResoureId);
-            if (appServicePlan == null)
-            {
-                var ex = new InvalidOperationException($"Cannot find the app serivce plan with Resource Id {appServicePlanResoureId}. Please make sure it exist before deploying Geneva to it.");
-                _logger.Error(ex, ex.Message);
-                throw ex;
-            }
-
-            var jsonConfig = AntaresHelper.AssembleConfigJson(genevaOptions, appServicePlan.Region);
-            _logger.Information("Generated Antares json config: {@AntMDSConfig}", jsonConfig);
-
-            var jsonConfigTemplate = AntaresHelper.GenerateAntJsonConfigTemplate(appServicePlan.Region, appServicePlan.Name, jsonConfig);
-            _logger.Information("Putting ConfigJson file to the App Service plan with name {@AppServicePlanName} ...", appServicePlan.Name);
-            var jsonDeployment = await CreateDeploymentAsync(appServicePlan.Region, appServicePlan.ResourceGroupName, jsonConfigTemplate);
-            _logger.Information("Finished putting ConfigJson file to the App Service plan with name {@AppServicePlanName}", appServicePlan.Name);
-
-            var xmlConfigTemplate = AntaresHelper.GenerateAntXMLConfigTemplate(appServicePlan.Region, appServicePlan.Name);
-            _logger.Information("Putting XMLConfig file to the App Service plan with name {@AppServicePlanName} ...", appServicePlan.Name);
-            var xmlDeployment = await CreateDeploymentAsync(appServicePlan.Region, appServicePlan.ResourceGroupName, xmlConfigTemplate);
-            _logger.Information("Finished putting XMLConfig file to the App Service plan with name {@AppServicePlanName}", appServicePlan.Name);
-
-            var gcsCertTemplate = AntaresHelper.GenerateGCSCertTemplate(appServicePlan.Region, appServicePlan.Name, based64EncodedPFX);
-            _logger.Information("Putting GCS cert to the App Service plan with name {@AppServicePlanName} ...", appServicePlan.Name);
-            var certDeployment = await CreateDeploymentAsync(appServicePlan.Region, appServicePlan.ResourceGroupName, gcsCertTemplate, templateParameters: null, noLogging: true);
-            _logger.Information("Finished GCS cert to the App Service plan with name {@AppServicePlanName}", appServicePlan.Name);
-
-            var gcsCertPSWDTemplate = AntaresHelper.GenerateGCSCertPSWDTemplate(appServicePlan.Region, appServicePlan.Name);
-            _logger.Information("Putting GCS cert PSWD to the App Service plan with name {@AppServicePlanName} ...", appServicePlan.Name);
-            var certPSWDDeployment = await CreateDeploymentAsync(appServicePlan.Region, appServicePlan.ResourceGroupName, gcsCertPSWDTemplate);
-            _logger.Information("Finished GCS cert PSWD to the App Service plan with name {@AppServicePlanName}", appServicePlan.Name);
-        }
-
-        #endregion Web App
 
         #region Identity
         public async Task<IIdentity> CreateMSIAsync(Region location, string rgName, string msiName, IDictionary<string, string> tags)

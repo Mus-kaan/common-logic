@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Microsoft.Liftr.Fluent
+namespace Microsoft.Liftr.KeyVault
 {
     public sealed class KeyVaultConcierge : IDisposable
     {

@@ -13,6 +13,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string CentralKeyVaultResourceId { get; set; }
 
+        public string RegionalKeyVaultResourceId { get; set; }
+
         public string KVDBSecretName { get; set; }
 
         public string CopyKVSecretsWithPrefix { get; set; }

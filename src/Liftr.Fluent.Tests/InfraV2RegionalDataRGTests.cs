@@ -6,6 +6,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -23,39 +24,47 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [Fact]
-        public async Task VerifyGlobalResourceGroupAsync()
+        public async Task VerifyRegionalDataResourceCreationAsync()
         {
-            var shortPartnerName = SdkContext.RandomResourceName("v2", 6);
+            var shortPartnerName = SdkContext.RandomResourceName("v", 6);
             var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USWest);
             TestCommon.AddCommonTags(context.Tags);
 
-            var baseName = "v2regiondata";
+            var baseName = "data";
             var rgName = context.ResourceGroupName(baseName);
 
             using (var globalScope = new TestResourceGroupScope(rgName))
             {
-                var infra = new InftrastructureV2(globalScope.AzFactory, globalScope.Logger);
-                var client = globalScope.Client;
-
-                // This will take a long time. Be patient. About 6 minutes.
-                (var db, var tm) = await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context);
-
-                // Check global resource group.
+                try
                 {
-                    var rg = await client.GetResourceGroupAsync(globalScope.ResourceGroupName);
-                    Assert.Equal(globalScope.ResourceGroupName, rg.Name);
-                    TestCommon.CheckCommonTags(rg.Inner.Tags);
+                    var infra = new InftrastructureV2(globalScope.AzFactory, globalScope.Logger);
+                    var client = globalScope.Client;
 
-                    var dbs = await client.ListCosmosDBAsync(globalScope.ResourceGroupName);
-                    Assert.Single(dbs);
-                    TestCommon.CheckCommonTags(dbs.First().Inner.Tags);
+                    // This will take a long time. Be patient. About 6 minutes.
+                    (var db, var tm, var kv) = await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, true);
 
-                    var retrievedTM = await client.GetTrafficManagerAsync(tm.Id);
-                    TestCommon.CheckCommonTags(retrievedTM.Inner.Tags);
+                    // Check global resource group.
+                    {
+                        var rg = await client.GetResourceGroupAsync(globalScope.ResourceGroupName);
+                        Assert.Equal(globalScope.ResourceGroupName, rg.Name);
+                        TestCommon.CheckCommonTags(rg.Inner.Tags);
+
+                        var dbs = await client.ListCosmosDBAsync(globalScope.ResourceGroupName);
+                        Assert.Single(dbs);
+                        TestCommon.CheckCommonTags(dbs.First().Inner.Tags);
+
+                        var retrievedTM = await client.GetTrafficManagerAsync(tm.Id);
+                        TestCommon.CheckCommonTags(retrievedTM.Inner.Tags);
+                    }
+
+                    // Same deployment will not throw exception.
+                    await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, true);
                 }
-
-                // Same deployment will not throw exception.
-                await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context);
+                catch (Exception ex)
+                {
+                    globalScope.Logger.Error(ex, $"{nameof(VerifyRegionalDataResourceCreationAsync)} failed.");
+                    throw;
+                }
             }
         }
     }

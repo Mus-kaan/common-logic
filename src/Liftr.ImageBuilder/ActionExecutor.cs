@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
+using Microsoft.Liftr.KeyVault;
 using Microsoft.Liftr.Logging;
 using Serilog.Context;
 using System;

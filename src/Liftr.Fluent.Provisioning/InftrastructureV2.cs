@@ -12,6 +12,7 @@ using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.TrafficManager.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
+using Microsoft.Liftr.KeyVault;
 using Microsoft.Rest.Azure;
 using Serilog;
 using System;
@@ -56,31 +57,20 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 _logger.Information("There exist a RG with the same name. Reuse it. {ExceptionDetail}", ex);
             }
 
-            _logger.Information("Creating Key Vault ...");
-            var targetReousrceId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.KeyVault/vaults/{kvName}";
-            kv = await client.GetKeyVaultByIdAsync(targetReousrceId);
-            if (kv == null)
-            {
-                kv = await client.CreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags, kvAdminClientId);
-                _logger.Information("Created KeyVault with Id {ResourceId}", kv.Id);
-            }
-            else
-            {
-                _logger.Information("There has an existing Key Vault with the same {ResourceId}. Stop creating a new one.", kv.Id);
+            kv = await client.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
 
-                await kv.Update()
-                    .DefineAccessPolicy()
-                        .ForServicePrincipal(kvAdminClientId)
-                        .AllowSecretAllPermissions()
-                        .AllowCertificateAllPermissions()
-                        .Attach()
-                    .ApplyAsync();
-            }
+            await kv.Update()
+                   .DefineAccessPolicy()
+                       .ForServicePrincipal(kvAdminClientId)
+                       .AllowSecretAllPermissions()
+                       .AllowCertificateAllPermissions()
+                       .Attach()
+                   .ApplyAsync();
 
             return kv;
         }
 
-        public async Task<(ICosmosDBAccount db, ITrafficManagerProfile tm)> CreateOrUpdateRegionalDataRGAsync(string baseName, NamingContext namingContext)
+        public async Task<(ICosmosDBAccount db, ITrafficManagerProfile tm, IVault kv)> CreateOrUpdateRegionalDataRGAsync(string baseName, NamingContext namingContext, bool createKeyVault)
         {
             if (namingContext == null)
             {
@@ -89,9 +79,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             ICosmosDBAccount db = null;
             ITrafficManagerProfile tm = null;
+            IVault kv = null;
 
             var rgName = namingContext.ResourceGroupName(baseName);
             var trafficManagerName = namingContext.TrafficManagerName(baseName);
+            var kvName = namingContext.KeyVaultName(baseName);
             var cosmosName = namingContext.CosmosDBName(baseName);
 
             var client = _azureClientFactory.GenerateLiftrAzure();
@@ -120,6 +112,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 _logger.Information("There has an existing Traffic Manager with the same {ResourceId}. Stop creating a new one.", tm.Id);
             }
 
+            if (createKeyVault)
+            {
+                kv = await client.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
+            }
+
             _logger.Information("Creating CosmosDB ...");
             targetReousrceId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.DocumentDB/databaseAccounts/{cosmosName}";
             db = await client.GetCosmosDBAsync(targetReousrceId);
@@ -134,10 +131,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 _logger.Information("There has an existing CosmosDB with the same {ResourceId}. Stop creating a new one.", db.Id);
             }
 
-            return (db, tm);
+            return (db, tm, kv);
         }
 
-        public async Task<IVault> GetComputeKeyVaultAsync(string baseName, NamingContext namingContext)
+        public async Task<IVault> GetKeyVaultAsync(string baseName, NamingContext namingContext)
         {
             if (namingContext == null)
             {
@@ -276,28 +273,17 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     }
                 }
 
-                targetReousrceId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.KeyVault/vaults/{kvName}";
-                kv = await client.GetKeyVaultByIdAsync(targetReousrceId);
-                if (kv == null)
-                {
-                    _logger.Information("Creating Key Vault ...");
-                    kv = await client.CreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags, computeOptions.ProvisioningSPNClientId);
-                    _logger.Information("Created KeyVault with Id {ResourceId}", kv.Id);
-                }
-                else
-                {
-                    _logger.Information("Use existing Key Vault with Id {ResourceId}.", kv.Id);
+                kv = await client.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
 
-                    await kv.Update()
-                    .DefineAccessPolicy()
-                        .ForServicePrincipal(computeOptions.ProvisioningSPNClientId)
-                        .AllowSecretAllPermissions()
-                        .AllowCertificateAllPermissions()
-                        .Attach()
-                    .ApplyAsync();
-                }
+                await kv.Update()
+                       .DefineAccessPolicy()
+                           .ForServicePrincipal(computeOptions.ProvisioningSPNClientId)
+                           .AllowSecretAllPermissions()
+                           .AllowCertificateAllPermissions()
+                           .Attach()
+                       .ApplyAsync();
 
-                _logger.Information("Start adding access policy for msi to kv.");
+                _logger.Information("Start adding access policy for msi to local kv.");
                 await kv.Update()
                     .DefineAccessPolicy()
                     .ForObjectId(msi.Inner.PrincipalId.Value.ToString())
@@ -305,7 +291,21 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     .AllowCertificatePermissions(CertificatePermissions.Get, CertificatePermissions.Getissuers, CertificatePermissions.List)
                     .Attach()
                     .ApplyAsync();
-                _logger.Information("Added access policy for msi to kv.");
+                _logger.Information("Added access policy for msi to local kv.");
+
+                var regionalKv = await client.GetKeyVaultByIdAsync(computeOptions.RegionalKeyVaultResourceId);
+                if (regionalKv != null)
+                {
+                    _logger.Information("Start adding access policy for msi to regional kv.");
+                    await regionalKv.Update()
+                        .DefineAccessPolicy()
+                        .ForObjectId(msi.Inner.PrincipalId.Value.ToString())
+                        .AllowSecretPermissions(SecretPermissions.List, SecretPermissions.Get)
+                        .AllowCertificatePermissions(CertificatePermissions.Get, CertificatePermissions.List, CertificatePermissions.List)
+                        .Attach()
+                        .ApplyAsync();
+                    _logger.Information("Added access policy for msi to regional kv.");
+                }
 
                 using (var valet = new KeyVaultConcierge(kv.VaultUri, kvClient, _logger))
                 {

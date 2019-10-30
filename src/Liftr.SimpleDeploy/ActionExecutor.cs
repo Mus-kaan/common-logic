@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
+using Microsoft.Liftr.KeyVault;
 using Microsoft.Liftr.Logging;
 using Serilog.Context;
 using System;
@@ -203,7 +204,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     }
                     else if (_options.Action == ActionType.CreateOrUpdateRegionalData)
                     {
-                        await infra.CreateOrUpdateRegionalDataRGAsync(dataOptions.DataBaseName, namingContext);
+                        await infra.CreateOrUpdateRegionalDataRGAsync(dataOptions.DataBaseName, namingContext, dataOptions.CreateRegionalKeyVault);
                         _logger.Information("Successfully managed regional data resources.");
                     }
                     else if (_options.Action == ActionType.CreateOrUpdateRegionalCompute)
@@ -215,6 +216,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                             CopyKVSecretsWithPrefix = namingContext.PartnerName,
                             ProvisioningSPNClientId = _envOptions.ProvisioningRunnerClientId,
                             DataPlaneSubscriptions = computeOptions.DataPlaneSubscriptions,
+                            RegionalKeyVaultResourceId = $"subscriptions/{_options.SubscriptionId}/resourceGroups/{namingContext.ResourceGroupName(computeOptions.DataBaseName)}/providers/Microsoft.KeyVault/vaults/{namingContext.KeyVaultName(computeOptions.DataBaseName)}",
                         };
 
                         if (!string.IsNullOrEmpty(computeOptions.GlobalBaseName))
@@ -251,7 +253,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     {
                         var aksRGName = namingContext.ResourceGroupName(computeOptions.ComputeBaseName);
                         var aksName = namingContext.AKSName(computeOptions.ComputeBaseName);
-                        var kv = await infra.GetComputeKeyVaultAsync(computeOptions.ComputeBaseName, namingContext);
+                        var kv = await infra.GetKeyVaultAsync(computeOptions.ComputeBaseName, namingContext);
                         if (kv == null)
                         {
                             var errMsg = "Cannot find key vault in the compute rg";

@@ -7,5 +7,7 @@ namespace Microsoft.Liftr.SimpleDeploy
     public class DataResourceOptions : BaseResourceOptions
     {
         public string DataBaseName { get; set; }
+
+        public bool CreateRegionalKeyVault { get; set; }
     }
 }

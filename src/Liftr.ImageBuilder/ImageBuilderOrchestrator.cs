@@ -16,6 +16,7 @@ using Microsoft.Azure.Storage.Auth;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
+using Microsoft.Liftr.KeyVault;
 using Microsoft.Rest.Azure;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -64,7 +65,15 @@ namespace Microsoft.Liftr.ImageBuilder
 
             var rg = await liftrAzure.GetOrCreateResourceGroupAsync(imgOptions.Location, imgOptions.ResourceGroupName, imgOptions.Tags);
             var storageAccount = await liftrAzure.GetOrCreateStorageAccountAsync(imgOptions.Location, imgOptions.ResourceGroupName, imgOptions.StorageAccountName, imgOptions.Tags);
-            var kv = await liftrAzure.GetOrCreateKeyVaultAsync(imgOptions.Location, imgOptions.ResourceGroupName, kvName, imgOptions.Tags, provisioningRunnerClientId);
+            var kv = await liftrAzure.GetOrCreateKeyVaultAsync(imgOptions.Location, imgOptions.ResourceGroupName, kvName, imgOptions.Tags);
+
+            await kv.Update()
+                  .DefineAccessPolicy()
+                      .ForServicePrincipal(provisioningRunnerClientId)
+                      .AllowSecretAllPermissions()
+                      .AllowCertificateAllPermissions()
+                      .Attach()
+                  .ApplyAsync();
 
             try
             {
