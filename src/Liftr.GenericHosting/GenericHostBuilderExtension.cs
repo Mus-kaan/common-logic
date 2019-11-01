@@ -66,6 +66,10 @@ namespace Microsoft.Liftr.GenericHosting
                 throw new ArgumentNullException(nameof(builder));
             }
 
+            // Work around the following issue which will be fixed in .Net Core 3.0.
+            // https://github.com/aspnet/AspNetCore/issues/4150
+            builder.UseEnvironment(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production");
+
             return builder.ConfigureAppConfiguration((context, config) =>
             {
                 config.SetBasePath(Environment.CurrentDirectory);

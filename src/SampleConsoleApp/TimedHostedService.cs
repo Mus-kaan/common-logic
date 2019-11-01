@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Extensions.Hosting;
+using Microsoft.Liftr;
 using Microsoft.Liftr.Logging;
 using System;
 using System.Globalization;
@@ -27,6 +28,7 @@ namespace GenericHostSample
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.Information("Timed Background Service is starting.");
+            _logger.LogProcessStart();
 
             _ = StartPeriodicWorkAsync();
 

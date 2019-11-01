@@ -15,10 +15,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <MajorVersion Condition=" '$(MajorVersion)' == '' ">1</MajorVersion>
-    <MinorVersion Condition=" '$(MinorVersion)' == '' ">0</MinorVersion>
+    <MajorVersion Condition=" '$(MajorVersion)' == '' ">0</MajorVersion>
+    <MinorVersion Condition=" '$(MinorVersion)' == '' ">2</MinorVersion>
     <PatchVersion Condition=" '$(PatchVersion)' == '' ">0</PatchVersion>
-    <BuildMetadata Condition=" '$(BuildMetadata)' == '' ">0</BuildMetadata>
+    <BuildMetadata Condition=" '$(BuildMetadata)' == '' ">1</BuildMetadata>
     <Version>$(MajorVersion).$(MinorVersion).$(PatchVersion)-build$(BuildMetadata)</Version>
   </PropertyGroup>
 

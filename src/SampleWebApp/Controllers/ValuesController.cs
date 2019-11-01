@@ -3,7 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Liftr.Logging;
+using Microsoft.Liftr;
 using Microsoft.Liftr.Logging.AspNetCore;
 using Serilog;
 using Serilog.Events;
