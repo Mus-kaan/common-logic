@@ -12,12 +12,11 @@ namespace Microsoft.Liftr.DataSource
     {
         Task<TResource> AddEntityAsync(TResource entity);
 
-        Task<TResource> GetEntityAsync(string subscriptionId, string resourceGroup, string name);
+        /// <summary>
+        /// Get an entity by the entity Id (Mongo DB Object Id).
+        /// </summary>
+        Task<TResource> GetEntityAsync(string entityId);
 
-        Task<TResource> GetEntityAsync(string name);
-
-        Task<IList<TResource>> ListEntitiesAsync(string subscriptionId, string resourceGroup);
-
-        Task<bool> DeleteEntityAsync(string subscriptionId, string resourceGroup, string name);
+        Task<IEnumerable<TResource>> ListEntitiesByResourceIdAsync(string resourceId);
     }
 }

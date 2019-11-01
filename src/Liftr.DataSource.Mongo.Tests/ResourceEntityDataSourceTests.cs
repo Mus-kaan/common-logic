@@ -5,8 +5,8 @@
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DataSource.Mongo.Tests.Common;
 using Microsoft.Liftr.Logging;
+using MongoDB.Bson;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -25,7 +25,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
             {
 #pragma warning disable CS0618 // Type or member is obsolete
 #pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-                var collection = collectionFactory.CreateEntityCollectionAsync<MockResourceEntity>(collectionName).Result;
+                var collection = collectionFactory.GetOrCreateEntityCollectionAsync<MockResourceEntity>(collectionName).Result;
 #pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
 #pragma warning restore CS0618 // Type or member is obsolete
                 return collection;
@@ -43,84 +43,51 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
             var ts = new MockTimeSource();
             IResourceEntityDataSource<MockResourceEntity> s = new MockEntityDataSource(_collectionScope.Collection, ts);
 
-            var subId1 = Guid.NewGuid().ToString();
-            var subId2 = Guid.NewGuid().ToString();
-            var rg1 = "resourceGroupName1";
+            var rid = "/subscriptions/b0a321d2-3073-44f0-b012-6e60db53ae22/resourceGroups/ngx-test-sbi0920-eus-rg/providers/Microsoft.Storage/storageAccounts/stngxtestsbi0920eus";
 
-            var mockEntity = new MockResourceEntity() { SubscriptionId = subId1, ResourceGroup = rg1, Name = "entityName1", VNet = "VnetId123" };
-            mockEntity.Tags = new Dictionary<string, string>()
-            {
-                ["tag1"] = "val1",
-                ["tag2"] = "val2",
-            };
+            var mockEntity = new MockResourceEntity() { ResourceId = rid, VNet = "VnetId123" };
             var entity1 = await s.AddEntityAsync(mockEntity);
 
             // Can retrieve.
             {
-                var retrieved = await s.GetEntityAsync(entity1.SubscriptionId, entity1.ResourceGroup, entity1.Name);
+                var retrieved = await s.GetEntityAsync(entity1.EntityId);
 
-                Assert.Equal(subId1, retrieved.SubscriptionId);
-                Assert.Equal(rg1, retrieved.ResourceGroup);
+                Assert.Equal(rid, retrieved.ResourceId);
                 Assert.Equal("VnetId123", retrieved.VNet);
-                Assert.Equal("val1", retrieved.Tags["tag1"]);
-                Assert.Equal("val2", retrieved.Tags["tag2"]);
 
                 var exceptedStr = entity1.ToJson();
                 var actualStr = retrieved.ToJson();
                 Assert.Equal(exceptedStr, actualStr);
             }
 
-            // Can retrieve only by name.
+            // Can retrieve only by resoure id.
             {
-                var retrieved = await s.GetEntityAsync(entity1.Name);
+                var retrieved = await s.ListEntitiesByResourceIdAsync(entity1.ResourceId);
 
                 var exceptedStr = entity1.ToJson();
-                var actualStr = retrieved.ToJson();
+                var actualStr = retrieved.First().ToJson();
                 Assert.Equal(exceptedStr, actualStr);
             }
 
-            Assert.Null(await s.GetEntityAsync(entity1.SubscriptionId, entity1.ResourceGroup, entity1.Name + "asdasd"));
+            Assert.Null(await s.GetEntityAsync(ObjectId.GenerateNewId().ToString()));
 
-            Assert.Null(await s.GetEntityAsync(entity1.Name + "asdasd"));
+            Assert.Empty(await s.ListEntitiesByResourceIdAsync(entity1.ResourceId + "asdasd"));
 
             // Same EntityId throws.
             await Assert.ThrowsAsync<DuplicatedKeyException>(async () =>
             {
-                var entity = new MockResourceEntity() { EntityId = entity1.EntityId, SubscriptionId = subId2, ResourceGroup = rg1, Name = "entityName2" };
+                var entity = new MockResourceEntity() { EntityId = entity1.EntityId, ResourceId = "asdasdas" };
                 await s.AddEntityAsync(entity);
             });
 
-            // Same Name throws.
-            await Assert.ThrowsAsync<DuplicatedKeyException>(async () =>
+            // Same Resource Id is OK.
             {
-                var entity = new MockResourceEntity() { SubscriptionId = subId2, ResourceGroup = rg1, Name = entity1.Name };
-                await s.AddEntityAsync(entity);
-            });
-
-            // Add multiple entities.
-            for (int i = 0; i < 50; i++)
-            {
-                var entity = new MockResourceEntity();
-                entity.SubscriptionId = i % 2 == 1 ? subId1 : subId2;
-                entity.ResourceGroup = "resourceGroupName" + ((i % 3) + 1);
-                entity.Name = "name" + i;
+                var entity = new MockResourceEntity() { ResourceId = rid, VNet = "VnetId456" };
                 await s.AddEntityAsync(entity);
             }
 
-            Assert.Empty(await s.ListEntitiesAsync(subId1, rg1 + "asdasdasd"));
-
-            int originaleCnt = 9;
-            var enties = await s.ListEntitiesAsync(subId1, rg1);
-            Assert.Equal(originaleCnt, enties.Count());
-
-            for (int i = 0; i < originaleCnt; i++)
-            {
-                var e = enties[i];
-                Assert.True(await s.DeleteEntityAsync(e.SubscriptionId, e.ResourceGroup, e.Name));
-                Assert.Equal(originaleCnt - i - 1, (await s.ListEntitiesAsync(subId1, rg1)).Count());
-            }
-
-            Assert.False(await s.DeleteEntityAsync(entity1.SubscriptionId, entity1.ResourceGroup, entity1.Name));
+            var entities = await s.ListEntitiesByResourceIdAsync(rid);
+            Assert.Equal(2, entities.Count());
         }
     }
 }

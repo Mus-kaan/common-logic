@@ -70,9 +70,8 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 return _db.GetCollection<T>(collectionName);
             }
 
-            var msg = $"Collection with name {collectionName} does not exist.";
-            _logger.Fatal(msg);
-            throw new InvalidOperationException(msg);
+            _logger.Fatal($"Collection with name {nameof(collectionName)} does not exist.", collectionName);
+            throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
         }
 
         public IMongoCollection<T> GetCollection<T>(string collectionName)
@@ -82,9 +81,28 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 return _db.GetCollection<T>(collectionName);
             }
 
-            var msg = $"Collection with name {collectionName} does not exist.";
-            _logger.Fatal(msg);
-            throw new InvalidOperationException(msg);
+            _logger.Fatal($"Collection with name {nameof(collectionName)} does not exist.", collectionName);
+            throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
+        }
+
+        public async Task<IMongoCollection<T>> GetOrCreateEntityCollectionAsync<T>(string collectionName) where T : BaseResourceEntity
+        {
+            if (!await CollectionExistsAsync(_db, collectionName))
+            {
+                _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
+#pragma warning disable CS0618 // Type or member is obsolete
+                var collection = await CreateCollectionAsync<T>(collectionName);
+#pragma warning restore CS0618 // Type or member is obsolete
+
+                var resourceIdIdx = new CreateIndexModel<T>(Builders<T>.IndexKeys.Ascending(item => item.ResourceId), new CreateIndexOptions<T> { Unique = false });
+                collection.Indexes.CreateOne(resourceIdIdx);
+
+                return collection;
+            }
+            else
+            {
+                return await GetCollectionAsync<T>(collectionName);
+            }
         }
 
         [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
@@ -96,30 +114,8 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 return _db.GetCollection<T>(collectionName);
             }
 
-            var msg = $"Collection with name {collectionName} already exist.";
-            _logger.Fatal(msg);
-            throw new InvalidOperationException(msg);
-        }
-
-        [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
-        internal async Task<IMongoCollection<T>> CreateEntityCollectionAsync<T>(string collectionName) where T : BaseResourceEntity
-        {
-            if (!await CollectionExistsAsync(_db, collectionName))
-            {
-                var collection = await CreateCollectionAsync<T>(collectionName);
-
-                var nameIdx = new CreateIndexModel<T>(Builders<T>.IndexKeys.Ascending(item => item.Name), new CreateIndexOptions<T> { Unique = true });
-                collection.Indexes.CreateOne(nameIdx);
-
-                var subIdx = new CreateIndexModel<T>(Builders<T>.IndexKeys.Ascending(item => item.SubscriptionId), new CreateIndexOptions<T> { Unique = false });
-                collection.Indexes.CreateOne(subIdx);
-
-                return collection;
-            }
-
-            var msg = $"Collection with name {collectionName} already exist.";
-            _logger.Fatal(msg);
-            throw new InvalidOperationException(msg);
+            _logger.Fatal($"Collection with name {nameof(collectionName)} does not exist.", collectionName);
+            throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
         }
 
         [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
@@ -131,30 +127,8 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 return _db.GetCollection<T>(collectionName);
             }
 
-            var msg = $"Collection with name {collectionName} already exist.";
-            _logger.Fatal(msg);
-            throw new InvalidOperationException(msg);
-        }
-
-        [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
-        internal IMongoCollection<T> CreateEntityCollection<T>(string collectionName) where T : BaseResourceEntity
-        {
-            if (!CollectionExists(_db, collectionName))
-            {
-                var collection = CreateCollection<T>(collectionName);
-
-                var nameIdx = new CreateIndexModel<T>(Builders<T>.IndexKeys.Ascending(item => item.Name), new CreateIndexOptions<T> { Unique = true });
-                collection.Indexes.CreateOne(nameIdx);
-
-                var subIdx = new CreateIndexModel<T>(Builders<T>.IndexKeys.Ascending(item => item.SubscriptionId), new CreateIndexOptions<T> { Unique = false });
-                collection.Indexes.CreateOne(subIdx);
-
-                return collection;
-            }
-
-            var msg = $"Collection with name {collectionName} already exist.";
-            _logger.Fatal(msg);
-            throw new InvalidOperationException(msg);
+            _logger.Fatal($"Collection with name {nameof(collectionName)} does not exist.", collectionName);
+            throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
         }
 
         #region Private

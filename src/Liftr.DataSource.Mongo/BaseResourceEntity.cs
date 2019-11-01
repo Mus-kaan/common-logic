@@ -6,7 +6,6 @@ using Microsoft.Liftr.Contracts;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
-using System.Collections.Generic;
 
 namespace Microsoft.Liftr.DataSource.Mongo
 {
@@ -18,7 +17,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
         }
 
         /// <summary>
-        /// Unique, indexed.
+        /// Unique, indexed, shard key.
         /// Id of the entity. This is different from the ARM resource Id.
         /// </summary>
         [BsonId]
@@ -26,42 +25,11 @@ namespace Microsoft.Liftr.DataSource.Mongo
         public string EntityId { get; set; }
 
         /// <summary>
-        /// Indexed, shard key.
-        /// Subscription Id
+        /// Indexed, not unique.
+        /// ARM resource Id.
         /// </summary>
-        [BsonElement("subscriptionId")]
-        public string SubscriptionId { get; set; }
-
-        /// <summary>
-        /// Resource Group
-        /// </summary>
-        [BsonElement("rg")]
-        public string ResourceGroup { get; set; }
-
-        /// <summary>
-        /// Unique, indexed.
-        /// The name of the resource.
-        /// </summary>
-        [BsonElement("name")]
-        public string Name { get; set; }
-
-        /// <summary>
-        /// The type of the resource.
-        /// </summary>
-        [BsonElement("type")]
-        public string Type { get; set; }
-
-        /// <summary>
-        /// The location of the resource.
-        /// </summary>
-        [BsonElement("loc")]
-        public string Location { get; set; }
-
-        /// <summary>
-        /// The tags of the resource.
-        /// </summary>
-        [BsonElement("tags")]
-        public IDictionary<string, string> Tags { get; set; }
+        [BsonElement("rid")]
+        public string ResourceId { get; set; }
 
         [BsonElement("provisionState")]
         [BsonRepresentation(BsonType.String)]
@@ -69,5 +37,8 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
         [BsonElement("createdAt")]
         public DateTime CreatedUTC { get; set; } = LiftrDateTime.MinValue;
+
+        [BsonElement("etag")]
+        public string ETag { get; set; }
     }
 }

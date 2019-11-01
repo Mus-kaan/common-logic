@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 
 namespace Microsoft.Liftr.Contracts
 {
@@ -15,37 +14,14 @@ namespace Microsoft.Liftr.Contracts
         string EntityId { get; }
 
         /// <summary>
-        /// Subscription Id
+        /// ARM resource Id.
         /// </summary>
-        string SubscriptionId { get; }
-
-        /// <summary>
-        /// Resource Group
-        /// </summary>
-        string ResourceGroup { get; }
-
-        /// <summary>
-        /// The name of the resource.
-        /// </summary>
-        string Name { get; }
-
-        /// <summary>
-        /// The type of the resource.
-        /// </summary>
-        string Type { get; }
-
-        /// <summary>
-        /// The location of the resource.
-        /// </summary>
-        string Location { get; }
-
-        /// <summary>
-        /// The tags of the resource.
-        /// </summary>
-        IDictionary<string, string> Tags { get; }
+        string ResourceId { get; }
 
         ProvisioningState ProvisioningState { get; }
 
         DateTime CreatedUTC { get; }
+
+        string ETag { get; set; }
     }
 }
