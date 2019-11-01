@@ -87,7 +87,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.ImageBuilder", "Liftr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.ImageBuilder.Tests", "Liftr.ImageBuilder.Tests\Liftr.ImageBuilder.Tests.csproj", "{F7817F47-0281-4933-852B-3849FD28161A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.KeyVault", "Liftr.KeyVault\Liftr.KeyVault.csproj", "{28E45D28-1AEF-4489-893F-A9C71F64242C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.KeyVault", "Liftr.KeyVault\Liftr.KeyVault.csproj", "{28E45D28-1AEF-4489-893F-A9C71F64242C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Queue", "Liftr.Queue\Liftr.Queue.csproj", "{05C29794-2077-4A1A-BC4C-7AF871C0BBF1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Queue.Abstractions", "Liftr.Queue.Abstractions\Liftr.Queue.Abstractions.csproj", "{35E9C211-BAB8-434C-8666-FABA33163F58}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Queue.Tests", "Liftr.Queue.Tests\Liftr.Queue.Tests.csproj", "{63D7CBAF-DD3C-4EB2-96ED-042345D6CD4D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -243,6 +249,18 @@ Global
 		{28E45D28-1AEF-4489-893F-A9C71F64242C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28E45D28-1AEF-4489-893F-A9C71F64242C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28E45D28-1AEF-4489-893F-A9C71F64242C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05C29794-2077-4A1A-BC4C-7AF871C0BBF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05C29794-2077-4A1A-BC4C-7AF871C0BBF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05C29794-2077-4A1A-BC4C-7AF871C0BBF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05C29794-2077-4A1A-BC4C-7AF871C0BBF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35E9C211-BAB8-434C-8666-FABA33163F58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35E9C211-BAB8-434C-8666-FABA33163F58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35E9C211-BAB8-434C-8666-FABA33163F58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35E9C211-BAB8-434C-8666-FABA33163F58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63D7CBAF-DD3C-4EB2-96ED-042345D6CD4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63D7CBAF-DD3C-4EB2-96ED-042345D6CD4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63D7CBAF-DD3C-4EB2-96ED-042345D6CD4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63D7CBAF-DD3C-4EB2-96ED-042345D6CD4D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

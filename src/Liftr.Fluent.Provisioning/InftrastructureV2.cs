@@ -350,11 +350,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
                     _logger.Information("Puting the CosmosDB Connection String in the key vault ...");
                     var dbConnectionStrings = await db.ListConnectionStringsAsync();
-                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-DataStorageOptions--CosmosConnectionString", dbConnectionStrings.ConnectionStrings[0].ConnectionString, namingContext.Tags);
+                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(DataStorageOptions)}--{nameof(DataStorageOptions.CosmosConnectionString)}", dbConnectionStrings.ConnectionStrings[0].ConnectionString, namingContext.Tags);
 
                     _logger.Information("Puting the Storage Connection String in the key vault ...");
                     var storConnectionString = await stor.GetPrimaryConnectionStringAsync();
-                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-DataStorageOptions--StorageConnectionString", storConnectionString, namingContext.Tags);
+                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(DataStorageOptions)}--{nameof(DataStorageOptions.StorageConnectionString)}", storConnectionString, namingContext.Tags);
 
                     var dpRGName = namingContext.ResourceGroupName(computeOptions.DataBaseName + "-dp");
                     var dpRG = await client.GetResourceGroupAsync(dpRGName);
@@ -366,7 +366,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                             _logger.Information("Puting the Data Plane Storage Connection Strings in the key vault ...");
                             var connectionStrings = await Task.WhenAll(accounts.Select(async (a) => await a.GetPrimaryConnectionStringAsync()));
                             var obj = new { ConnectionStrings = connectionStrings };
-                            await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-DataStorageOptions--DataPlaneConnectionStrings", obj.ToJson(), namingContext.Tags);
+                            await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(DataStorageOptions)}--{nameof(DataStorageOptions.DataPlaneStorageConnectionStrings)}", obj.ToJson(), namingContext.Tags);
                         }
                     }
 

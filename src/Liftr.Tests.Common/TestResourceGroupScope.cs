@@ -5,6 +5,8 @@
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Auth;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Serilog;
@@ -63,6 +65,18 @@ namespace Microsoft.Liftr
         public NamingContext Naming { get; }
 
         public string ResourceGroupName { get; }
+
+        public async Task<CloudStorageAccount> GetTestStorageAccountAsync()
+        {
+            var name = SdkContext.RandomResourceName("ut", 15);
+            var az = AzFactory.GenerateLiftrAzure();
+            var rg = await az.GetOrCreateResourceGroupAsync(TestCommon.Location, ResourceGroupName, TestCommon.Tags);
+            var stor = await az.GetOrCreateStorageAccountAsync(TestCommon.Location, ResourceGroupName, name, TestCommon.Tags);
+            var keys = await stor.GetKeysAsync();
+            var key = keys[0];
+            var cred = new StorageCredentials(name, key.Value, key.KeyName);
+            return new CloudStorageAccount(cred, useHttps: true);
+        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public void Dispose()

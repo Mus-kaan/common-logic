@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Serilog.Sinks.Xunit2" Version="$(PackageVersion_Serilog_Sinks_Xunit2)" />
     <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="$(PackageVersion_Serilog_Sinks_ApplicationInsights)" />
+    <PackageReference Include="Microsoft.Azure.Storage.Queue" Version="$(PackageVersion_Microsoft_Azure_Storage_Queue)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Fluent\Liftr.Fluent.csproj" />

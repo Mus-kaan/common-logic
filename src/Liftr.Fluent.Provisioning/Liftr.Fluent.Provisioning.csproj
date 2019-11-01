@@ -7,6 +7,7 @@
     <RootNamespace>Microsoft.Liftr.Fluent.Provisioning</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.Fluent\Liftr.Fluent.csproj" />
     <ProjectReference Include="..\Liftr.KeyVault\Liftr.KeyVault.csproj" />
   </ItemGroup>

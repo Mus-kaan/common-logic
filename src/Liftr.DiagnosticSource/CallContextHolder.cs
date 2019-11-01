@@ -9,6 +9,7 @@ using System.Threading;
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.AspNetCore")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.AspNetCore.Tests")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.GenericHosting")]
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Queue")]
 
 namespace Microsoft.Liftr.DiagnosticSource
 {
