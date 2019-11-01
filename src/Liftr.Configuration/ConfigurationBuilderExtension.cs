@@ -44,5 +44,24 @@ namespace Microsoft.Liftr.Configuration
                 }
             }
         }
+
+        /// <summary>
+        /// This will load all the secrets start with 'secretsPrefix', the prefix will be removed when load in memory. Sample secret name: "prefix-Logging--LogLevel--Default".
+        /// </summary>
+        public static void AddKeyVaultConfigurations(this IConfigurationBuilder config, KeyVaultClient keyVaultClient, string secretsPrefix)
+        {
+            if (config == null)
+            {
+                throw new ArgumentNullException(nameof(config));
+            }
+
+            var builtConfig = config.Build();
+
+            string vaultEndpoint = builtConfig["VaultEndpoint"];
+            if (!string.IsNullOrEmpty(vaultEndpoint))
+            {
+                config.AddAzureKeyVault(vaultEndpoint, keyVaultClient, new PrefixKeyVaultSecretManager(secretsPrefix));
+            }
+        }
     }
 }

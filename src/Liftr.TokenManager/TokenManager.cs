@@ -5,6 +5,7 @@
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.TokenManager
@@ -36,6 +37,20 @@ namespace Microsoft.Liftr.TokenManager
                             .AcquireTokenAsync(
                                 _tokenManagerConfiguration.ArmEndpoint,
                                 new ClientCredential(clientId, clientSecret));
+                _cache.SetTokenItem(clientId, token);
+            }
+
+            return token.AccessToken;
+        }
+
+        public async Task<string> GetTokenAsync(string clientId, X509Certificate2 certificate)
+        {
+            var token = _cache.GetTokenItem(clientId);
+
+            if (token == null)
+            {
+                var clientAssertion = new ClientAssertionCertificate(clientId, certificate);
+                token = await _authContext.AcquireTokenAsync(_tokenManagerConfiguration.ArmEndpoint, clientAssertion);
                 _cache.SetTokenItem(clientId, token);
             }
 

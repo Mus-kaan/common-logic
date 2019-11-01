@@ -9,11 +9,10 @@ public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        services.UseTokenManager(Configuration);
+        services.UseTokenManager(Configuration, useKeyVault);
     }
 }
 ```
-
 Below are the sample TokenManagerConfiguration for dogfood
 ```
 "TokenManagerConfiguration": {

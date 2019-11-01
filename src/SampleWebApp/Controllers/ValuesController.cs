@@ -67,8 +67,9 @@ namespace SampleWebApp.Controllers
         // POST api/values
         [HttpPost]
         [SwaggerOperation(OperationId = "Post")]
-        public ValueRequest Post([FromBody] ValueRequest req)
+        public async Task<ValueRequest> PostAsync([FromBody] ValueRequest req)
         {
+            await Task.FromResult("PLACEHOLDER");
             return req;
         }
 

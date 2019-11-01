@@ -13,12 +13,15 @@ public class Startup
     }
 }
 ```
-
-Below are the sample RPaaSConfiguration for dogfood
+You have to first configure the token manager.
+If you are not using the `UseKeyVaultProvider` web host builder extension, you have to
+add a singleton for the key vault client manually in order to authenticate the key vault.
+Below are the sample RPaaSConfiguration for dogfood.
 ```
 "RPaaSConfiguration": {
     "MetaRPEndpoint": "https://api-dogfood.resources.windows-int.net",
     "MetaRPAccessorClientId": "0f84289f-2c8a-4ad8-8d43-da5fc98073f0",
-    "MetaRPAccessorClientSecret": "https://ms.portal.azure.com/#@MSAzureCloud.onmicrosoft.com/asset/Microsoft_Azure_KeyVault/Secret/https://app-managementplane-test.vault.azure.net/secrets/monitoringmanagement-RPaaSConfiguration--MetaRPAccessorClientSecret/39ca8f0247ca455d8829bc815e0adf79"
+    "MetaRPAccessorVaultEndpoint": "https://mykeyvault.vault.azure.net/",
+	"MetaRPAccessorCertificateName": "MyCert"
   }
 ```

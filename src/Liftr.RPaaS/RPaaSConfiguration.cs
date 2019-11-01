@@ -10,6 +10,8 @@ namespace Microsoft.Liftr.RPaaS
 
         public string MetaRPAccessorClientId { get; set; }
 
-        public string MetaRPAccessorClientSecret { get; set; }
+        public string MetaRPAccessorVaultEndpoint { get; set; }
+
+        public string MetaRPAccessorCertificateName { get; set; }
     }
 }

@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Azure.KeyVault;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.Liftr.Contracts.ARM;
 using Microsoft.Liftr.Contracts.Exceptions;
@@ -10,18 +12,27 @@ using Newtonsoft.Json;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.RPaaS
 {
-    public class MetaRPStorageClient : IMetaRPStorageClient
+    public class MetaRPStorageClient : IMetaRPStorageClient, IDisposable
     {
         private readonly RPaaSConfiguration _configuration;
         private readonly ITokenManager _tokenManager;
+        private readonly IKeyVaultClient _keyVaultClient;
         private readonly HttpClient _httpClient;
+        private readonly MemoryCache _memoryCache;
+        private static readonly TimeSpan s_bufferTime = TimeSpan.FromHours(1);
+        private bool _disposed = false;
 
-        public MetaRPStorageClient(IOptions<RPaaSConfiguration> configuration, ITokenManager tokenManager, HttpClient httpClient)
+        public MetaRPStorageClient(
+            IOptions<RPaaSConfiguration> configuration,
+            ITokenManager tokenManager,
+            IKeyVaultClient keyVaultClient,
+            HttpClient httpClient)
         {
             if (configuration == null)
             {
@@ -30,8 +41,15 @@ namespace Microsoft.Liftr.RPaaS
 
             _configuration = configuration.Value;
             _tokenManager = tokenManager ?? throw new ArgumentNullException(nameof(tokenManager));
+            _keyVaultClient = keyVaultClient ?? throw new ArgumentNullException(nameof(keyVaultClient));
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _httpClient.BaseAddress = new Uri(_configuration.MetaRPEndpoint);
+
+            _memoryCache = new MemoryCache(
+                new MemoryCacheOptions()
+                {
+                    ExpirationScanFrequency = TimeSpan.FromSeconds(10),
+                });
         }
 
         public async Task<T> GetResourceAsync<T>(string resourceId, string apiVersion) where T : ARMResource
@@ -70,6 +88,27 @@ namespace Microsoft.Liftr.RPaaS
             }
         }
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _httpClient.Dispose();
+                    _memoryCache.Dispose();
+                    _keyVaultClient.Dispose();
+                }
+
+                _disposed = true;
+            }
+        }
+
         private string GetMetaraRPResourceUrl(string resourceId, string apiVersion)
         {
             return resourceId + "?api-version=" + apiVersion;
@@ -77,9 +116,44 @@ namespace Microsoft.Liftr.RPaaS
 
         private async Task<AuthenticationHeaderValue> GetAuthHeaderAsync()
         {
-            return new AuthenticationHeaderValue(
+            var certificate = await LoadCertificateAsync();
+
+            var authenticationHeader = new AuthenticationHeaderValue(
                         "Bearer",
-                        await _tokenManager.GetTokenAsync(_configuration.MetaRPAccessorClientId, _configuration.MetaRPAccessorClientSecret));
+                        await _tokenManager.GetTokenAsync(_configuration.MetaRPAccessorClientId, certificate));
+
+            certificate.Dispose();
+            return authenticationHeader;
+        }
+
+        private async Task<X509Certificate2> LoadCertificateAsync()
+        {
+            var localCertificate = LoadCertificateFromCache();
+
+            if (localCertificate == null)
+            {
+                var kvCertificate = await _keyVaultClient.GetCertificateAsync(
+                    _configuration.MetaRPAccessorVaultEndpoint, _configuration.MetaRPAccessorCertificateName);
+
+                var secretId = kvCertificate.SecretIdentifier.Identifier;
+                var privateKeySecretBundle = await _keyVaultClient.GetSecretAsync(secretId);
+                var privateKeyBytes = Convert.FromBase64String(privateKeySecretBundle.Value);
+                using (var certificate = new X509Certificate2(privateKeyBytes, string.Empty, X509KeyStorageFlags.DefaultKeySet))
+                {
+                    _memoryCache.Set(
+                        _configuration.MetaRPAccessorCertificateName, certificate, DateTimeOffset.UtcNow + s_bufferTime);
+                    return certificate;
+                }
+            }
+
+            return localCertificate;
+        }
+
+        private X509Certificate2 LoadCertificateFromCache()
+        {
+            X509Certificate2 result = null;
+            _memoryCache.TryGetValue(_configuration.MetaRPAccessorCertificateName, out result);
+            return result;
         }
     }
 }
