@@ -12,6 +12,7 @@ namespace Microsoft.Liftr.Contracts.Tests
     public class ProvisioningStateTests
     {
         [Theory]
+        [InlineData(ProvisioningState.Accepted, false)]
         [InlineData(ProvisioningState.Creating, false)]
         [InlineData(ProvisioningState.Updating, false)]
         [InlineData(ProvisioningState.Deleting, false)]

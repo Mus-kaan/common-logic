@@ -10,6 +10,7 @@ namespace Microsoft.Liftr.Contracts
     [JsonConverter(typeof(StringEnumConverter))]
     public enum ProvisioningState
     {
+        Accepted,
         Creating,
         Updating,
         Deleting,
