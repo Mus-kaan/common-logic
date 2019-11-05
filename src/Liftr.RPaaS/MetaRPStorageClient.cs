@@ -54,7 +54,7 @@ namespace Microsoft.Liftr.RPaaS
 
         public async Task<T> GetResourceAsync<T>(string resourceId, string apiVersion) where T : ARMResource
         {
-            var url = GetMetaraRPResourceUrl(resourceId, apiVersion);
+            var url = GetMetaRPResourceUrl(resourceId, apiVersion);
             _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();
             var response = await _httpClient.GetAsync(url);
             if (response.IsSuccessStatusCode)
@@ -77,7 +77,7 @@ namespace Microsoft.Liftr.RPaaS
 
             using (var content = new StringContent(JsonConvert.SerializeObject(resource), Encoding.UTF8, "application/json"))
             {
-                var url = GetMetaraRPResourceUrl(resource.Id, apiVersion);
+                var url = GetMetaRPResourceUrl(resource.Id, apiVersion);
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();
                 var response = await _httpClient.PutAsync(url, content);
 
@@ -109,7 +109,7 @@ namespace Microsoft.Liftr.RPaaS
             }
         }
 
-        private string GetMetaraRPResourceUrl(string resourceId, string apiVersion)
+        private string GetMetaRPResourceUrl(string resourceId, string apiVersion)
         {
             return resourceId + "?api-version=" + apiVersion;
         }
@@ -132,18 +132,13 @@ namespace Microsoft.Liftr.RPaaS
 
             if (localCertificate == null)
             {
-                var kvCertificate = await _keyVaultClient.GetCertificateAsync(
+                var secretBundle = await _keyVaultClient.GetSecretAsync(
                     _configuration.MetaRPAccessorVaultEndpoint, _configuration.MetaRPAccessorCertificateName);
-
-                var secretId = kvCertificate.SecretIdentifier.Identifier;
-                var privateKeySecretBundle = await _keyVaultClient.GetSecretAsync(secretId);
-                var privateKeyBytes = Convert.FromBase64String(privateKeySecretBundle.Value);
-                using (var certificate = new X509Certificate2(privateKeyBytes, string.Empty, X509KeyStorageFlags.DefaultKeySet))
-                {
-                    _memoryCache.Set(
-                        _configuration.MetaRPAccessorCertificateName, certificate, DateTimeOffset.UtcNow + s_bufferTime);
-                    return certificate;
-                }
+                var privateKeyBytes = Convert.FromBase64String(secretBundle.Value);
+                var certificate = new X509Certificate2(privateKeyBytes);
+                _memoryCache.Set(
+                    _configuration.MetaRPAccessorCertificateName, certificate, DateTimeOffset.UtcNow + s_bufferTime);
+                return certificate;
             }
 
             return localCertificate;

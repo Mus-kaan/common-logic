@@ -21,7 +21,7 @@ Below are the sample RPaaSConfiguration for dogfood.
 "RPaaSConfiguration": {
     "MetaRPEndpoint": "https://api-dogfood.resources.windows-int.net",
     "MetaRPAccessorClientId": "0f84289f-2c8a-4ad8-8d43-da5fc98073f0",
-    "MetaRPAccessorVaultEndpoint": "https://mykeyvault.vault.azure.net/",
-	"MetaRPAccessorCertificateName": "MyCert"
+    "MetaRPAccessorVaultEndpoint": "https://ibuild-rpdata-cus.vault.azure.net/",
+	"MetaRPAccessorCertificateName": "MetaRPAccessorCert"
   }
 ```

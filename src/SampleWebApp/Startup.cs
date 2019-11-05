@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Liftr.Hosting.Swagger;
+using Microsoft.Liftr.RPaaS;
+using Microsoft.Liftr.TokenManager;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
@@ -29,6 +31,9 @@ namespace SampleWebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.UseTokenManager(Configuration);
+            services.UseMetaRPStorageClient(Configuration);
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>

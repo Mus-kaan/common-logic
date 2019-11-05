@@ -4,7 +4,10 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Liftr;
+using Microsoft.Liftr.Contracts.ARM;
 using Microsoft.Liftr.Logging.AspNetCore;
+using Microsoft.Liftr.RPaaS;
+using Newtonsoft.Json;
 using Serilog;
 using Serilog.Events;
 using Swashbuckle.AspNetCore.Annotations;
@@ -25,10 +28,12 @@ namespace SampleWebApp.Controllers
     {
         private static int s_cnt = 0;
         private readonly ILogger _logger;
+        private readonly IMetaRPStorageClient _metaRPStorageClient;
 
-        public ValuesController(Serilog.ILogger logger)
+        public ValuesController(Serilog.ILogger logger, IMetaRPStorageClient metaRPStorageClient)
         {
             _logger = logger;
+            _metaRPStorageClient = metaRPStorageClient;
         }
 
         // GET api/values
@@ -69,7 +74,10 @@ namespace SampleWebApp.Controllers
         [SwaggerOperation(OperationId = "Post")]
         public async Task<ValueRequest> PostAsync([FromBody] ValueRequest req)
         {
-            await Task.FromResult("PLACEHOLDER");
+            var resourceId = "/subscriptions/f9aed45d-b9e6-462a-a3f5-6ab34857bc17/resourceGroups/myrg/providers/Microsoft.Nginx/frontends/frontend";
+            var apiVersion = "2019-11-01-preview";
+            var resource = await _metaRPStorageClient.GetResourceAsync<ARMResource>(resourceId, apiVersion);
+            Console.WriteLine(JsonConvert.SerializeObject(resource));
             return req;
         }
 
