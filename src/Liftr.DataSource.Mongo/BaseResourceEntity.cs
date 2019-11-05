@@ -31,12 +31,22 @@ namespace Microsoft.Liftr.DataSource.Mongo
         [BsonElement("rid")]
         public string ResourceId { get; set; }
 
+        /// <summary>
+        /// When the entity is deleted, this will be marked as false.
+        /// The actual deletion happened after a fixed time interval.
+        /// </summary>
+        [BsonElement("active")]
+        public bool Active { get; set; } = true;
+
         [BsonElement("provisionState")]
         [BsonRepresentation(BsonType.String)]
         public ProvisioningState ProvisioningState { get; set; }
 
         [BsonElement("createdAt")]
         public DateTime CreatedUTC { get; set; } = LiftrDateTime.MinValue;
+
+        [BsonElement("lastModified")]
+        public DateTime LastModifiedUTC { get; set; } = LiftrDateTime.MinValue;
 
         [BsonElement("etag")]
         public string ETag { get; set; }

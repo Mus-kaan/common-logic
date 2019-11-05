@@ -105,6 +105,26 @@ namespace Microsoft.Liftr.DataSource.Mongo
             }
         }
 
+        public async Task<IMongoCollection<CounterEntity>> GetOrCreateCounterEntityCollectionAsync(string collectionName)
+        {
+            if (!await CollectionExistsAsync(_db, collectionName))
+            {
+                _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
+#pragma warning disable CS0618 // Type or member is obsolete
+                var collection = await CreateCollectionAsync<CounterEntity>(collectionName);
+#pragma warning restore CS0618 // Type or member is obsolete
+
+                var resourceIdIdx = new CreateIndexModel<CounterEntity>(Builders<CounterEntity>.IndexKeys.Ascending(item => item.CounterKey), new CreateIndexOptions<CounterEntity> { Unique = true });
+                collection.Indexes.CreateOne(resourceIdIdx);
+
+                return collection;
+            }
+            else
+            {
+                return await GetCollectionAsync<CounterEntity>(collectionName);
+            }
+        }
+
         [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
         internal async Task<IMongoCollection<T>> CreateCollectionAsync<T>(string collectionName)
         {

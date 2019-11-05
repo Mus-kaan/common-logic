@@ -11,9 +11,8 @@ namespace Microsoft.Liftr.DataSource.Mongo
     {
         public const string TestDatabaseName = "unit-test";
 
-        // TODO: remove this hard-code testing cosmos db.
-        // AME: public static string TestMongodbConStr => "bW9uZ29kYjovL25vLWRlbGV0ZS1saWZ0ci11bml0LXRlc3QtZGI6bEl0YTlEM1ZETkZEM1lVaEFzdENnQ3JKNTRTWDc2Tm9JdmI4alFncTFDNkhROVlicTFua001bURPOGg3UVJkMWdMdHZsQUx6QTBWSFJuM1FSRDVWUkE9PUBuby1kZWxldGUtbGlmdHItdW5pdC10ZXN0LWRiLmRvY3VtZW50cy5henVyZS5jb206MTAyNTUvP3NzbD10cnVlJnJlcGxpY2FTZXQ9Z2xvYmFsZGI=".FromBase64();
-        public static string TestMongodbConStr => "bW9uZ29kYjovL3VuaXR0ZXN0LWRiOmhDclk5anlubEVkUnlPcVFweU16bzRNbWZyRklENmk1M05tM2lNVmM5dlNtWjBCQkE5NmluRmlUY1JOaDZlWGRMYWRXcHJGUVpCTTR4RnhMcDdPUjh3PT1AdW5pdHRlc3QtZGIuZG9jdW1lbnRzLmF6dXJlLmNvbToxMDI1NS8/c3NsPXRydWUmcmVwbGljYVNldD1nbG9iYWxkYg==".FromBase64();
+        // /subscriptions/60fad35b-3a47-4ca0-b691-4a789f737cea/resourcegroups/unit-test-shared-rg/providers/Microsoft.DocumentDB/databaseAccounts/liftr-unittest-eus-db
+        public static string TestMongodbConStr => "bW9uZ29kYjovL2xpZnRyLXVuaXR0ZXN0LWV1cy1kYjpZMTV5UnhTOHo2dlJZNzdNSlJHY2ZRQzJEcXIyV3BIaGpMYTVVN3NES3J6bXpiSWxwNnhTaTdEOUVSNEMxdUxkNjhudUpKQ2xHMWxRSmE3UnNjdUhuQT09QGxpZnRyLXVuaXR0ZXN0LWV1cy1kYi5kb2N1bWVudHMuYXp1cmUuY29tOjEwMjU1Lz9zc2w9dHJ1ZSZyZXBsaWNhU2V0PWdsb2JhbGRi".FromBase64();
 
         public static IMongoClient TestClient { get; } = new MongoClient(TestMongodbConStr);
 

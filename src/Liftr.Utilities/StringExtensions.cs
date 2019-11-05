@@ -22,6 +22,13 @@ namespace Microsoft.Liftr
             return self.OrdinalIndexOf(value) != -1;
         }
 
+        public static bool OrdinalStartsWith(this string self, string value)
+        {
+            Ensure.ArgumentNotNull(self, nameof(self));
+
+            return self.StartsWith(value, StringComparison.OrdinalIgnoreCase);
+        }
+
         public static bool OrdinalEndsWith(this string self, string value)
         {
             Ensure.ArgumentNotNull(self, nameof(self));

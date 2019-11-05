@@ -6,26 +6,17 @@ using System;
 
 namespace Microsoft.Liftr.Contracts
 {
-    public interface IResourceEntity
+    public interface ICounterEntity
     {
         /// <summary>
-        /// Id of the entity. This is different from the ARM resource Id.
+        /// Key of the counter. This will be unique and indexed.
         /// </summary>
-        string EntityId { get; }
+        string CounterKey { get; }
 
-        /// <summary>
-        /// ARM resource Id.
-        /// </summary>
-        string ResourceId { get; }
-
-        bool Active { get; set; }
-
-        ProvisioningState ProvisioningState { get; }
+        int CounterValue { get; set; }
 
         DateTime CreatedUTC { get; }
 
         DateTime LastModifiedUTC { get; set; }
-
-        string ETag { get; set; }
     }
 }

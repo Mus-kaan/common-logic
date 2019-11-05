@@ -278,27 +278,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     _logger.Information("Use existing MSI with id {ResourceId}.", msi.Id);
                 }
 
-                if (computeOptions.DataPlaneSubscriptions != null)
-                {
-                    foreach (var subscrptionId in computeOptions.DataPlaneSubscriptions)
-                    {
-                        try
-                        {
-                            _logger.Information("Granting the MSI {MSIReourceId} contributor role to the subscription with {subscrptionId} ...", msi.Id, subscrptionId);
-                            await client.Authenticated.RoleAssignments
-                                .Define(SdkContext.RandomGuid())
-                                .ForObjectId(msi.Inner.PrincipalId.Value.ToString())
-                                .WithBuiltInRole(BuiltInRole.Contributor)
-                                .WithSubscriptionScope(subscrptionId)
-                                .CreateAsync();
-                        }
-                        catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
-                        {
-                            _logger.Information("There exists the same role assignment for the MSI {MSIReourceId} to the subscription {subscrptionId}.", msi.Id, subscrptionId);
-                        }
-                    }
-                }
-
                 kv = await client.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
 
                 await kv.Update()
@@ -350,11 +329,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
                     _logger.Information("Puting the CosmosDB Connection String in the key vault ...");
                     var dbConnectionStrings = await db.ListConnectionStringsAsync();
-                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(DataStorageOptions)}--{nameof(DataStorageOptions.CosmosConnectionString)}", dbConnectionStrings.ConnectionStrings[0].ConnectionString, namingContext.Tags);
+                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RPAssetOptions)}--{nameof(RPAssetOptions.CosmosConnectionString)}", dbConnectionStrings.ConnectionStrings[0].ConnectionString, namingContext.Tags);
 
                     _logger.Information("Puting the Storage Connection String in the key vault ...");
                     var storConnectionString = await stor.GetPrimaryConnectionStringAsync();
-                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(DataStorageOptions)}--{nameof(DataStorageOptions.StorageConnectionString)}", storConnectionString, namingContext.Tags);
+                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RPAssetOptions)}--{nameof(RPAssetOptions.StorageConnectionString)}", storConnectionString, namingContext.Tags);
 
                     var dpRGName = namingContext.ResourceGroupName(computeOptions.DataBaseName + "-dp");
                     var dpRG = await client.GetResourceGroupAsync(dpRGName);
@@ -366,8 +345,33 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                             _logger.Information("Puting the Data Plane Storage Connection Strings in the key vault ...");
                             var connectionStrings = await Task.WhenAll(accounts.Select(async (a) => await a.GetPrimaryConnectionStringAsync()));
                             var obj = new { ConnectionStrings = connectionStrings };
-                            await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(DataStorageOptions)}--{nameof(DataStorageOptions.DataPlaneStorageConnectionStrings)}", obj.ToJson(), namingContext.Tags);
+                            await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RPAssetOptions)}--{nameof(RPAssetOptions.DataPlaneStorageConnectionStrings)}", obj.ToJson(), namingContext.Tags);
                         }
+                    }
+
+                    if (computeOptions.DataPlaneSubscriptions != null)
+                    {
+                        foreach (var subscrptionId in computeOptions.DataPlaneSubscriptions)
+                        {
+                            try
+                            {
+                                _logger.Information("Granting the MSI {MSIReourceId} contributor role to the subscription with {subscrptionId} ...", msi.Id, subscrptionId);
+                                await client.Authenticated.RoleAssignments
+                                    .Define(SdkContext.RandomGuid())
+                                    .ForObjectId(msi.Inner.PrincipalId.Value.ToString())
+                                    .WithBuiltInRole(BuiltInRole.Contributor)
+                                    .WithSubscriptionScope(subscrptionId)
+                                    .CreateAsync();
+                            }
+                            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+                            {
+                                _logger.Information("There exists the same role assignment for the MSI {MSIReourceId} to the subscription {subscrptionId}.", msi.Id, subscrptionId);
+                            }
+                        }
+
+                        _logger.Information("Puting the compute subscriptions list in the key vault ...");
+                        var obj = new { ConnectionStrings = computeOptions.DataPlaneSubscriptions };
+                        await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RPAssetOptions)}--{nameof(RPAssetOptions.DataPlaneSubscriptions)}", obj.ToJson(), namingContext.Tags);
                     }
 
                     if (genevaCert != null)

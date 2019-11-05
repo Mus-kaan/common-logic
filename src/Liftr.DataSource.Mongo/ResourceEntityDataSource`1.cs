@@ -31,6 +31,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
             try
             {
                 entity.CreatedUTC = _timeSource.UtcNow;
+                entity.LastModifiedUTC = _timeSource.UtcNow;
                 await _collection.InsertOneAsync(entity);
                 return entity;
             }
@@ -48,10 +49,16 @@ namespace Microsoft.Liftr.DataSource.Mongo
             return await cursor.FirstOrDefaultAsync();
         }
 
-        public virtual async Task<IEnumerable<TResource>> ListEntitiesByResourceIdAsync(string resourceId)
+        public virtual async Task<IEnumerable<TResource>> ListEntitiesByResourceIdAsync(string resourceId, bool showActiveOnly = true)
         {
             var builder = Builders<TResource>.Filter;
             var filter = builder.Eq(u => u.ResourceId, resourceId);
+
+            if (showActiveOnly)
+            {
+                filter = filter & builder.Eq(u => u.Active, true);
+            }
+
             var cursor = await _collection.FindAsync(filter);
             return await cursor.ToListAsync();
         }

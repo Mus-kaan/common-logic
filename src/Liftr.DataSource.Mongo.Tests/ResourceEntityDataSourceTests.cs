@@ -88,6 +88,22 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
 
             var entities = await s.ListEntitiesByResourceIdAsync(rid);
             Assert.Equal(2, entities.Count());
+
+            // Same Resource Id with disabled.
+            {
+                var entity = new MockResourceEntity() { ResourceId = rid, VNet = "VnetId456", Active = false };
+                await s.AddEntityAsync(entity);
+            }
+
+            {
+                var activeEntities = await s.ListEntitiesByResourceIdAsync(rid);
+                Assert.Equal(2, activeEntities.Count());
+            }
+
+            {
+                var allEntities = await s.ListEntitiesByResourceIdAsync(rid, showActiveOnly: false);
+                Assert.Equal(3, allEntities.Count());
+            }
         }
     }
 }

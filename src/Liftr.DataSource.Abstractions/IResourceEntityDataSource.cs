@@ -17,6 +17,9 @@ namespace Microsoft.Liftr.DataSource
         /// </summary>
         Task<TResource> GetEntityAsync(string entityId);
 
-        Task<IEnumerable<TResource>> ListEntitiesByResourceIdAsync(string resourceId);
+        /// <summary>
+        /// List all the entities for a specific ARM resource Id.
+        /// </summary>
+        Task<IEnumerable<TResource>> ListEntitiesByResourceIdAsync(string resourceId, bool showActiveOnly = true);
     }
 }
