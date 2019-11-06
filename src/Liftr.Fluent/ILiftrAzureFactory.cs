@@ -8,6 +8,6 @@ namespace Microsoft.Liftr.Fluent
 {
     public interface ILiftrAzureFactory
     {
-        ILiftrAzure GenerateLiftrAzure(HttpLoggingDelegatingHandler.Level logLevel = HttpLoggingDelegatingHandler.Level.Basic);
+        ILiftrAzure GenerateLiftrAzure(string subscriptionId = null, HttpLoggingDelegatingHandler.Level logLevel = HttpLoggingDelegatingHandler.Level.Basic);
     }
 }

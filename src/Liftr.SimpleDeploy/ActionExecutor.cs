@@ -105,7 +105,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     }
                 }
 
-                LiftrAzureFactory azFactory = new LiftrAzureFactory(_logger, _options.SubscriptionId, azureCredentialsProvider);
+                LiftrAzureFactory azFactory = new LiftrAzureFactory(_logger, _envOptions.TenantId, _envOptions.ProvisioningRunnerClientId, _options.SubscriptionId, azureCredentialsProvider);
 
                 _ = RunActionAsync(kvClient, azFactory);
             }

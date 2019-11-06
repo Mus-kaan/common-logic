@@ -57,6 +57,14 @@ namespace Microsoft.Liftr
             }
         }
 
+        public static string TenantId
+        {
+            get
+            {
+                return AuthFileContract.TenantId;
+            }
+        }
+
         public static string ClientId
         {
             get

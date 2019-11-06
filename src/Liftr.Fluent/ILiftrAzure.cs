@@ -7,6 +7,7 @@ using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
+using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
@@ -26,6 +27,10 @@ namespace Microsoft.Liftr.Fluent
         IAuthenticated Authenticated { get; }
 
         AzureCredentials AzureCredentials { get; }
+
+        string TenantId { get; }
+
+        string ClientId { get; }
 
         #region Resource Group
         Task<IResourceGroup> GetOrCreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags);
@@ -49,7 +54,19 @@ namespace Microsoft.Liftr.Fluent
         Task<IEnumerable<IStorageAccount>> ListStorageAccountAsync(string rgName);
         #endregion Storage Account
 
-        #region Traffic Manager
+        #region Network
+        Task<INetwork> GetOrCreateVNetAsync(Region location, string rgName, string vnetName, string addressSpaceCIDR, IDictionary<string, string> tags);
+
+        Task<INetwork> CreateVNetAsync(Region location, string rgName, string vnetName, string addressSpaceCIDR, IDictionary<string, string> tags);
+
+        Task<INetwork> GetVNetAsync(string rgName, string vnetName);
+
+        Task<IPublicIPAddress> GetOrCreatePublicIPAsync(Region location, string rgName, string pipName, IDictionary<string, string> tags);
+
+        Task<IPublicIPAddress> CreatePublicIPAsync(Region location, string rgName, string pipName, IDictionary<string, string> tags);
+
+        Task<IPublicIPAddress> GetPublicIPAsync(string rgName, string pipName);
+
         Task<ITrafficManagerProfile> CreateTrafficManagerAsync(string rgName, string tmName, IDictionary<string, string> tags);
 
         Task<ITrafficManagerProfile> GetTrafficManagerAsync(string tmId);

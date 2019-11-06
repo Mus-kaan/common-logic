@@ -10,11 +10,11 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Fluent.Tests
 {
-    public sealed class TrafficManagerTests
+    public sealed class NetworkTests
     {
         private readonly ITestOutputHelper _output;
 
-        public TrafficManagerTests(ITestOutputHelper output)
+        public NetworkTests(ITestOutputHelper output)
         {
             _output = output;
         }
@@ -23,12 +23,13 @@ namespace Microsoft.Liftr.Fluent.Tests
         public async Task CanCreateTrafficManagerAsync()
         {
             // This test will normally take about 12 minutes.
-            using (var scope = new TestResourceGroupScope("unittest-trafficmanager-", _output))
+            using (var scope = new TestResourceGroupScope("ut-network-", _output))
             {
                 var client = scope.Client;
                 var rg = await client.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
                 var tmName = SdkContext.RandomResourceName("test-tm", 15);
                 var pipName = SdkContext.RandomResourceName("pip", 9);
+                var vnetName = SdkContext.RandomResourceName("vnet", 9);
                 var created = await client.CreateTrafficManagerAsync(scope.ResourceGroupName, tmName, TestCommon.Tags);
 
                 // Second deployment will not fail.
@@ -47,6 +48,12 @@ namespace Microsoft.Liftr.Fluent.Tests
 
                 await helper.AddPulicIpToTrafficManagerAsync(scope.Client.FluentClient, created.Id, "endpoint2", "40.76.4.150", enabled: true);
                 await helper.AddPulicIpToTrafficManagerAsync(scope.Client.FluentClient, created.Id, "endpoint2", "40.76.4.150", enabled: false);
+
+                Assert.NotNull(await client.GetOrCreateVNetAsync(TestCommon.Location, scope.ResourceGroupName, vnetName, "10.197.0.0/16", TestCommon.Tags));
+                Assert.NotNull(await client.GetOrCreateVNetAsync(TestCommon.Location, scope.ResourceGroupName, vnetName, "10.197.0.0/16", TestCommon.Tags));
+
+                Assert.NotNull(await client.GetOrCreatePublicIPAsync(TestCommon.Location, scope.ResourceGroupName, pipName, TestCommon.Tags));
+                Assert.NotNull(await client.GetOrCreatePublicIPAsync(TestCommon.Location, scope.ResourceGroupName, pipName, TestCommon.Tags));
             }
         }
     }

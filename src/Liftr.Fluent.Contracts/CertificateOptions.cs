@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Liftr.Fluent.Provisioning
+namespace Microsoft.Liftr.Fluent.Contracts
 {
     public class CertificateOptions
     {

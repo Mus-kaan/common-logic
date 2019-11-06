@@ -8,6 +8,7 @@ using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
+using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
@@ -34,13 +35,25 @@ namespace Microsoft.Liftr.Fluent
         public const string c_AspEnv = "ASPNETCORE_ENVIRONMENT";
         private readonly ILogger _logger;
 
-        public LiftrAzure(AzureCredentials credentials, IAzure fluentClient, IAuthenticated authenticated, ILogger logger)
+        public LiftrAzure(
+            string tenantId,
+            string clientId,
+            AzureCredentials credentials,
+            IAzure fluentClient,
+            IAuthenticated authenticated,
+            ILogger logger)
         {
+            TenantId = tenantId;
+            ClientId = clientId;
             AzureCredentials = credentials;
             FluentClient = fluentClient;
             Authenticated = authenticated;
             _logger = logger;
         }
+
+        public string TenantId { get; }
+
+        public string ClientId { get; }
 
         public IAzure FluentClient { get; }
 
@@ -182,7 +195,85 @@ namespace Microsoft.Liftr.Fluent
         }
         #endregion Storage Account
 
-        #region Traffic Manager
+        #region Network
+        public async Task<INetwork> GetOrCreateVNetAsync(Region location, string rgName, string vnetName, string addressSpaceCIDR, IDictionary<string, string> tags)
+        {
+            var vnet = await GetVNetAsync(rgName, vnetName);
+            if (vnet == null)
+            {
+                vnet = await CreateVNetAsync(location, rgName, vnetName, addressSpaceCIDR, tags);
+            }
+
+            return vnet;
+        }
+
+        public async Task<INetwork> CreateVNetAsync(Region location, string rgName, string vnetName, string addressSpaceCIDR, IDictionary<string, string> tags)
+        {
+            _logger.Information("Start creating VNet with name: {vnetName} in RG: {rgName} with Addresses: {addressSpaceCIDR} ...", vnetName, rgName, addressSpaceCIDR);
+
+            var vnet = await FluentClient
+                .Networks
+                .Define(vnetName)
+                .WithRegion(location)
+                .WithExistingResourceGroup(rgName)
+                .WithTags(tags)
+                .WithAddressSpace(addressSpaceCIDR)
+                .CreateAsync();
+
+            _logger.Information("Created VNet with resourceId: {resourceId}", vnet.Id);
+            return vnet;
+        }
+
+        public async Task<INetwork> GetVNetAsync(string rgName, string vnetName)
+        {
+            _logger.Information("Start getting VNet with name: {vnetName} in RG: {rgName} ...", vnetName, rgName);
+
+            var vnet = await FluentClient
+                .Networks
+                .GetByResourceGroupAsync(rgName, vnetName);
+
+            return vnet;
+        }
+
+        public async Task<IPublicIPAddress> GetOrCreatePublicIPAsync(Region location, string rgName, string pipName, IDictionary<string, string> tags)
+        {
+            var pip = await GetPublicIPAsync(rgName, pipName);
+            if (pip == null)
+            {
+                pip = await CreatePublicIPAsync(location, rgName, pipName, tags);
+            }
+
+            return pip;
+        }
+
+        public async Task<IPublicIPAddress> CreatePublicIPAsync(Region location, string rgName, string pipName, IDictionary<string, string> tags)
+        {
+            _logger.Information("Start creating Publib IP address with name: {pipName} in RG: {rgName} ...", pipName, rgName);
+
+            var pip = await FluentClient
+                .PublicIPAddresses
+                .Define(pipName)
+                .WithRegion(location)
+                .WithExistingResourceGroup(rgName)
+                .WithStaticIP()
+                .WithTags(tags)
+                .CreateAsync();
+
+            _logger.Information("Created Publib IP address with resourceId: {resourceId}", pip.Id);
+            return pip;
+        }
+
+        public async Task<IPublicIPAddress> GetPublicIPAsync(string rgName, string pipName)
+        {
+            _logger.Information("Start getting Public IP with name: {pipName} ...", pipName);
+
+            var pip = await FluentClient
+                .PublicIPAddresses
+                .GetByResourceGroupAsync(rgName, pipName);
+
+            return pip;
+        }
+
         public async Task<ITrafficManagerProfile> CreateTrafficManagerAsync(string rgName, string tmName, IDictionary<string, string> tags)
         {
             _logger.Information("Creating a Traffic Manager with name {@tmName} ...", tmName);
@@ -278,8 +369,8 @@ namespace Microsoft.Liftr.Fluent
                         .WithExistingResourceGroup(rgName)
                         .WithEmptyAccessPolicy()
                         .WithTags(tags)
-                        .WithDeploymentEnabled()
-                        .WithTemplateDeploymentEnabled()
+                        .WithDeploymentDisabled()
+                        .WithTemplateDeploymentDisabled()
                         .CreateAsync();
 
             _logger.Information("Created Key Vault with resourceId {resourceId}", vault.Id);

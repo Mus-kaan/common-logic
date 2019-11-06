@@ -344,8 +344,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                         {
                             _logger.Information("Puting the Data Plane Storage Connection Strings in the key vault ...");
                             var connectionStrings = await Task.WhenAll(accounts.Select(async (a) => await a.GetPrimaryConnectionStringAsync()));
-                            var obj = new { ConnectionStrings = connectionStrings };
-                            await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RPAssetOptions)}--{nameof(RPAssetOptions.DataPlaneStorageConnectionStrings)}", obj.ToJson(), namingContext.Tags);
+                            RPAssetOptions assets = new RPAssetOptions();
+                            assets.SetStorageConnectionStrings(connectionStrings);
+                            await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RPAssetOptions)}--{nameof(RPAssetOptions.DataPlaneStorageConnectionStrings)}", assets.DataPlaneStorageConnectionStrings, namingContext.Tags);
                         }
                     }
 
@@ -370,8 +371,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                         }
 
                         _logger.Information("Puting the compute subscriptions list in the key vault ...");
-                        var obj = new { ConnectionStrings = computeOptions.DataPlaneSubscriptions };
-                        await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RPAssetOptions)}--{nameof(RPAssetOptions.DataPlaneSubscriptions)}", obj.ToJson(), namingContext.Tags);
+                        RPAssetOptions assets = new RPAssetOptions();
+                        assets.SetSubscriptions(computeOptions.DataPlaneSubscriptions);
+                        await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RPAssetOptions)}--{nameof(RPAssetOptions.DataPlaneSubscriptions)}", assets.DataPlaneSubscriptions, namingContext.Tags);
                     }
 
                     if (genevaCert != null)
