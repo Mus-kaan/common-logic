@@ -199,7 +199,7 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                     if (_options.Action == ActionType.CreateOrUpdateGlobal)
                     {
-                        await infra.CreateOrUpdateGlobalRGAsync(gblOptions.GlobalBaseName, namingContext, _envOptions.ProvisioningRunnerClientId);
+                        await infra.CreateOrUpdateGlobalRGAsync(gblOptions.GlobalBaseName, namingContext);
                         _logger.Information("Successfully managed global resources.");
                     }
                     else if (_options.Action == ActionType.CreateOrUpdateRegionalData)
@@ -215,7 +215,6 @@ namespace Microsoft.Liftr.SimpleDeploy
                             ComputeBaseName = computeOptions.ComputeBaseName,
                             SecretPrefix = computeOptions.SecretPrefix,
                             CopyKVSecretsWithPrefix = namingContext.PartnerName,
-                            ProvisioningSPNClientId = _envOptions.ProvisioningRunnerClientId,
                             DataPlaneSubscriptions = computeOptions.DataPlaneSubscriptions,
                         };
 

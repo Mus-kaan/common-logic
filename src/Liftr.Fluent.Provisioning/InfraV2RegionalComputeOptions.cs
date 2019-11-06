@@ -19,8 +19,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string CopyKVSecretsWithPrefix { get; set; }
 
-        public string ProvisioningSPNClientId { get; set; }
-
         public IEnumerable<string> DataPlaneSubscriptions { get; set; }
 
         public void CheckValues()
@@ -48,11 +46,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             if (string.IsNullOrEmpty(CopyKVSecretsWithPrefix))
             {
                 throw new InvalidOperationException($"{nameof(CopyKVSecretsWithPrefix)} is not valid.");
-            }
-
-            if (string.IsNullOrEmpty(ProvisioningSPNClientId))
-            {
-                throw new InvalidOperationException($"{nameof(ProvisioningSPNClientId)} is not valid.");
             }
         }
     }

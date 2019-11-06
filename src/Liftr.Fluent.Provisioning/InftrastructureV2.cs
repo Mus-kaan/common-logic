@@ -33,7 +33,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<IVault> CreateOrUpdateGlobalRGAsync(string baseName, NamingContext namingContext, string kvAdminClientId)
+        public async Task<IVault> CreateOrUpdateGlobalRGAsync(string baseName, NamingContext namingContext)
         {
             if (namingContext == null)
             {
@@ -60,13 +60,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             kv = await client.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
 
-            await kv.Update()
-                   .DefineAccessPolicy()
-                       .ForServicePrincipal(kvAdminClientId)
-                       .AllowSecretAllPermissions()
-                       .AllowCertificateAllPermissions()
-                       .Attach()
-                   .ApplyAsync();
+            await client.GrantSelfKeyVaultAdminAccessAsync(kv);
 
             return kv;
         }
@@ -249,44 +243,27 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     _logger.Information("There exist a RG with the same name. Reuse it. {ExceptionDetail}", ex);
                 }
 
-                var targetReousrceId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{msiName}";
-                msi = await client.GetMSIAsync(targetReousrceId);
-                if (msi == null)
-                {
-                    _logger.Information("Creating MSI ...");
-                    msi = await client.CreateMSIAsync(namingContext.Location, rgName, msiName, namingContext.Tags);
-                    _logger.Information("Created MSI with Id {ResourceId}", msi.Id);
+                msi = await client.GetOrCreateMSIAsync(namingContext.Location, rgName, msiName, namingContext.Tags);
 
-                    try
-                    {
-                        _logger.Information("Granting the identity binding access for the MSI {MSIId} to the AKS SPN with {AKSobjectId} ...", msi.Id, aksInfo.AKSSPNObjectId);
-                        await client.Authenticated.RoleAssignments
-                            .Define(SdkContext.RandomGuid())
-                            .ForObjectId(aksInfo.AKSSPNObjectId)
-                            .WithBuiltInRole(BuiltInRole.Contributor)
-                            .WithResourceScope(msi)
-                            .CreateAsync();
-                        _logger.Information("Granted the identity binding access for the MSI {MSIId} to the AKS SPN with {AKSobjectId}.", msi.Id, aksInfo.AKSSPNObjectId);
-                    }
-                    catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
-                    {
-                        _logger.Information("There exists the same role assignment for the MSI {MSIId} to the AKS SPN with {AKSobjectId}.", msi.Id, aksInfo.AKSSPNObjectId);
-                    }
-                }
-                else
+                try
                 {
-                    _logger.Information("Use existing MSI with id {ResourceId}.", msi.Id);
+                    _logger.Information("Granting the identity binding access for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId} ...", msi.Id, aksInfo.AKSSPNObjectId);
+                    await client.Authenticated.RoleAssignments
+                        .Define(SdkContext.RandomGuid())
+                        .ForObjectId(aksInfo.AKSSPNObjectId)
+                        .WithBuiltInRole(BuiltInRole.Contributor)
+                        .WithResourceScope(msi)
+                        .CreateAsync();
+                    _logger.Information("Granted the identity binding access for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId}.", msi.Id, aksInfo.AKSSPNObjectId);
+                }
+                catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+                {
+                    _logger.Information("There exists the same role assignment for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId}.", msi.Id, aksInfo.AKSSPNObjectId);
                 }
 
                 kv = await client.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
 
-                await kv.Update()
-                       .DefineAccessPolicy()
-                           .ForServicePrincipal(computeOptions.ProvisioningSPNClientId)
-                           .AllowSecretAllPermissions()
-                           .AllowCertificateAllPermissions()
-                           .Attach()
-                       .ApplyAsync();
+                await client.GrantSelfKeyVaultAdminAccessAsync(kv);
 
                 _logger.Information("Start adding access policy for msi to local kv.");
                 await kv.Update()
@@ -404,7 +381,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     }
                 }
 
-                targetReousrceId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.ContainerService/managedClusters/{aksName}";
+                var targetReousrceId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.ContainerService/managedClusters/{aksName}";
                 aks = await client.GetAksClusterAsync(targetReousrceId);
                 if (aks == null)
                 {

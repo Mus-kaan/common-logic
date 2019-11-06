@@ -176,7 +176,6 @@ namespace Microsoft.Liftr.ImageBuilder
                     {
                         await orchestrator.CreateOrUpdateInfraAsync(
                             imgOptions,
-                            _envOptions.ProvisioningRunnerClientId,
                             _envOptions.AzureVMImageBuilderObjectId,
                             kvName);
                     }

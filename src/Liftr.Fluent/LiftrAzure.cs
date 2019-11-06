@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Fluent;
@@ -426,6 +425,41 @@ namespace Microsoft.Liftr.Fluent
             await vault.Update().WithoutAccessPolicy(servicePrincipalObjectId).ApplyAsync();
             _logger.Information("Finished removing KeyVault {@kvResourceId} access policy of {@servicePrincipalObjectId}", kvResourceId, servicePrincipalObjectId);
         }
+
+        public async Task GrantSelfKeyVaultAdminAccessAsync(IVault kv)
+        {
+            if (string.IsNullOrEmpty(ClientId))
+            {
+                var ex = new ArgumentException("ClientId is empty. Cannot grant access.");
+                _logger.Error(ex, "Please set ClientId in the constructor.");
+                throw ex;
+            }
+
+            await kv.Update()
+                .DefineAccessPolicy()
+                .ForServicePrincipal(ClientId)
+                .AllowSecretAllPermissions()
+                .AllowCertificateAllPermissions()
+                .Attach()
+                .ApplyAsync();
+
+            _logger.Information("Granted admin access to the excuting SPN with client Id {ClientId} of key vault {kvId}", ClientId, kv.Id);
+        }
+
+        public async Task RemoveSelfKeyVaultAccessAsync(IVault kv)
+        {
+            if (string.IsNullOrEmpty(ClientId))
+            {
+                var ex = new InvalidOperationException("ClientId is empty. Cannot remove access.");
+                _logger.Error(ex, "Please set ClientId in the constructor.");
+                throw ex;
+            }
+
+            await kv.Update().WithoutAccessPolicy(ClientId).ApplyAsync();
+
+            _logger.Information("Removed access of the excuting SPN with client Id {ClientId} to key vault {kvId}", ClientId, kv.Id);
+        }
+
         #endregion Key Vault
 
         #region Aks Cluster
@@ -481,6 +515,17 @@ namespace Microsoft.Liftr.Fluent
         #endregion Aks Cluster
 
         #region Identity
+        public async Task<IIdentity> GetOrCreateMSIAsync(Region location, string rgName, string msiName, IDictionary<string, string> tags)
+        {
+            var msi = await GetMSIAsync(rgName, msiName);
+            if (msi == null)
+            {
+                msi = await CreateMSIAsync(location, rgName, msiName, tags);
+            }
+
+            return msi;
+        }
+
         public async Task<IIdentity> CreateMSIAsync(Region location, string rgName, string msiName, IDictionary<string, string> tags)
         {
             _logger.Information("Creating a MSI with name {msiName} ...", msiName);
@@ -494,10 +539,10 @@ namespace Microsoft.Liftr.Fluent
             return msi;
         }
 
-        public async Task<IIdentity> GetMSIAsync(string msiId)
+        public Task<IIdentity> GetMSIAsync(string rgName, string msiName)
         {
-            _logger.Information("Getting MSI with Id {ResourceId} ...", msiId);
-            return await FluentClient.Identities.GetByIdAsync(msiId);
+            _logger.Information("Getting MSI with name {msiName} in RG {rgName} ...", msiName, rgName);
+            return FluentClient.Identities.GetByResourceGroupAsync(rgName, msiName);
         }
         #endregion
 

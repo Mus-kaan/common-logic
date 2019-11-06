@@ -92,6 +92,10 @@ namespace Microsoft.Liftr.Fluent
         Task<IEnumerable<IVault>> ListKeyVaultAsync(string rgName);
 
         Task RemoveAccessPolicyAsync(string kvResourceId, string servicePrincipalObjectId);
+
+        Task GrantSelfKeyVaultAdminAccessAsync(IVault kv);
+
+        Task RemoveSelfKeyVaultAccessAsync(IVault kv);
         #endregion Key Vault
 
         #region Aks Cluster
@@ -113,9 +117,11 @@ namespace Microsoft.Liftr.Fluent
         #endregion Aks Cluster
 
         #region Identity
+        Task<IIdentity> GetOrCreateMSIAsync(Region location, string rgName, string msiName, IDictionary<string, string> tags);
+
         Task<IIdentity> CreateMSIAsync(Region location, string rgName, string msiName, IDictionary<string, string> tags);
 
-        Task<IIdentity> GetMSIAsync(string msiId);
+        Task<IIdentity> GetMSIAsync(string rgName, string msiName);
         #endregion
 
         #region Deployments

@@ -49,14 +49,12 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                 {
                     await orchestrator.CreateOrUpdateInfraAsync(
                                     imgOptions,
-                                    TestCredentials.ClientId,
                                     TestCredentials.AzureVMImageBuilderObjectIdAME,
                                     namingContext.KeyVaultName(baseName));
 
                     // Run another time will not fail.
                     await orchestrator.CreateOrUpdateInfraAsync(
                                     imgOptions,
-                                    TestCredentials.ClientId,
                                     TestCredentials.AzureVMImageBuilderObjectIdAME,
                                     namingContext.KeyVaultName(baseName));
                 }

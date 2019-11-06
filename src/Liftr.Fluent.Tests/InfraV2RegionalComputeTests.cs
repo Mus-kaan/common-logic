@@ -36,7 +36,6 @@ namespace Microsoft.Liftr.Fluent.Tests
 
             var model = JsonConvert.DeserializeObject<ComputeTestModel>(File.ReadAllText("ComputeTestModel.json"));
             model.Options.ComputeBaseName = baseName;
-            model.Options.ProvisioningSPNClientId = TestCredentials.ClientId;
 
             using (var scope = new TestResourceGroupScope(rgName))
             {

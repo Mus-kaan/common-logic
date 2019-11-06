@@ -52,7 +52,7 @@ namespace Microsoft.Liftr.ImageBuilder
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<(IResourceGroup, IStorageAccount, IVault, IGallery, IGalleryImage)> CreateOrUpdateInfraAsync(ImageBuilderOptions imgOptions, string provisioningRunnerClientId, string azureVMImageBuilderObjectId, string kvName)
+        public async Task<(IResourceGroup, IStorageAccount, IVault, IGallery, IGalleryImage)> CreateOrUpdateInfraAsync(ImageBuilderOptions imgOptions, string azureVMImageBuilderObjectId, string kvName)
         {
             if (imgOptions == null)
             {
@@ -66,14 +66,7 @@ namespace Microsoft.Liftr.ImageBuilder
             var rg = await liftrAzure.GetOrCreateResourceGroupAsync(imgOptions.Location, imgOptions.ResourceGroupName, imgOptions.Tags);
             var storageAccount = await liftrAzure.GetOrCreateStorageAccountAsync(imgOptions.Location, imgOptions.ResourceGroupName, imgOptions.StorageAccountName, imgOptions.Tags);
             var kv = await liftrAzure.GetOrCreateKeyVaultAsync(imgOptions.Location, imgOptions.ResourceGroupName, kvName, imgOptions.Tags);
-
-            await kv.Update()
-                  .DefineAccessPolicy()
-                      .ForServicePrincipal(provisioningRunnerClientId)
-                      .AllowSecretAllPermissions()
-                      .AllowCertificateAllPermissions()
-                      .Attach()
-                  .ApplyAsync();
+            await liftrAzure.GrantSelfKeyVaultAdminAccessAsync(kv);
 
             try
             {

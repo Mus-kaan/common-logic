@@ -28,7 +28,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                 var name = SdkContext.RandomResourceName("test-msi-", 15);
 
                 var created = await client.CreateMSIAsync(TestCommon.Location, scope.ResourceGroupName, name, TestCommon.Tags);
-                var retrieved = await client.GetMSIAsync(created.Id);
+                var retrieved = await client.GetMSIAsync(scope.ResourceGroupName, name);
 
                 Assert.Equal(name, retrieved.Name);
                 TestCommon.CheckCommonTags(retrieved.Inner.Tags);

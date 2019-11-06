@@ -55,7 +55,6 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                 {
                     await orchestrator.CreateOrUpdateInfraAsync(
                                 imgOptions,
-                                TestCredentials.ClientId,
                                 TestCredentials.AzureVMImageBuilderObjectIdAME,
                                 namingContext.KeyVaultName(baseName));
 

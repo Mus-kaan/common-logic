@@ -38,7 +38,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                 var infra = new InftrastructureV2(clientFactory, globalScope.Logger);
 
                 // This will take a long time. Be patient.
-                var kv = await infra.CreateOrUpdateGlobalRGAsync(globalCoreName, context, TestCredentials.ClientId);
+                var kv = await infra.CreateOrUpdateGlobalRGAsync(globalCoreName, context);
 
                 // Check global resource group.
                 {
@@ -48,7 +48,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                 }
 
                 // Same deployment will not throw exception.
-                await infra.CreateOrUpdateGlobalRGAsync(globalCoreName, context, TestCredentials.ClientId);
+                await infra.CreateOrUpdateGlobalRGAsync(globalCoreName, context);
             }
         }
     }
