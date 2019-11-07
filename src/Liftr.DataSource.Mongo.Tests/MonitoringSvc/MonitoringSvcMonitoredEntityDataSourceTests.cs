@@ -76,8 +76,12 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 Assert.Equal(priority, retrieved.Priority);
             }
 
-            // List entity
+            // List entity by monitoring resource id
             var list = await s.GetAllEntityByMonitoringResourceIdAsync(monitoringResourceId);
+            Assert.True(list.Count() == 1);
+
+            // List all entity
+            list = await s.GetAllEntityAsync();
             Assert.True(list.Count() == 1);
 
             // Delete entity

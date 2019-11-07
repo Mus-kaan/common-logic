@@ -40,5 +40,11 @@ namespace Microsoft.Liftr.DataSource.MonitoringSvc
         /// <param name="monitoredResourceId"></param>
         /// <returns></returns>
         Task DeleteEntityAsync(string monitoredResourceId);
+
+        /// <summary>
+        /// Retrieves all monitored entities
+        /// </summary>
+        /// <returns></returns>
+        Task<IEnumerable<IMonitoringSvcMonitoredEntity>> GetAllEntityAsync();
     }
 }
