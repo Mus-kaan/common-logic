@@ -105,7 +105,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     }
                 }
 
-                LiftrAzureFactory azFactory = new LiftrAzureFactory(_logger, _envOptions.TenantId, _envOptions.ProvisioningRunnerClientId, _options.SubscriptionId, azureCredentialsProvider);
+                LiftrAzureFactory azFactory = new LiftrAzureFactory(_logger, _envOptions.TenantId, _envOptions.SPNObjectId, _options.SubscriptionId, azureCredentialsProvider);
 
                 _ = RunActionAsync(kvClient, azFactory);
             }
@@ -181,7 +181,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                             }
                     }
 
-                    _logger.Information("Parsed config file: {config}", config);
+                    _logger.Information("Parsed config file: {@config}", config);
 
                     operation.SetContextProperty(nameof(config.PartnerName), config.PartnerName);
                     operation.SetContextProperty(nameof(config.Environment), config.Environment.ToString());

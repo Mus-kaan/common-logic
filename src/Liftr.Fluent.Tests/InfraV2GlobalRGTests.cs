@@ -33,7 +33,7 @@ namespace Microsoft.Liftr.Fluent.Tests
 
             using (var globalScope = new TestResourceGroupScope(globalRGName))
             {
-                var clientFactory = new LiftrAzureFactory(globalScope.Logger, TestCredentials.TenantId, TestCredentials.ClientId, TestCredentials.SubscriptionId, TestCredentials.GetAzureCredentials);
+                var clientFactory = new LiftrAzureFactory(globalScope.Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.GetAzureCredentials);
                 var client = clientFactory.GenerateLiftrAzure();
                 var infra = new InftrastructureV2(clientFactory, globalScope.Logger);
 

@@ -2,14 +2,12 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Contracts;
+
 namespace Microsoft.Liftr.ImageBuilder
 {
-    public class EnvironmentOptions
+    public class EnvironmentOptions : RunningEnvironmentOptions
     {
-        public string TenantId { get; set; }
-
-        public string ProvisioningRunnerClientId { get; set; }
-
         public string AzureVMImageBuilderObjectId { get; set; }
 
         public string BaseSBIVerion { get; set; }

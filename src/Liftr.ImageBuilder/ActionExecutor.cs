@@ -115,7 +115,7 @@ namespace Microsoft.Liftr.ImageBuilder
                     .WithDefaultSubscription(_options.SubscriptionId);
                 }
 
-                LiftrAzureFactory azFactory = new LiftrAzureFactory(_logger, _envOptions.TenantId, _envOptions.ProvisioningRunnerClientId, _options.SubscriptionId, azureCredentialsProvider);
+                LiftrAzureFactory azFactory = new LiftrAzureFactory(_logger, _envOptions.TenantId, _envOptions.SPNObjectId, _options.SubscriptionId, azureCredentialsProvider);
 
                 _ = RunActionAsync(kvClient, azFactory, cancellationToken);
             }

@@ -41,9 +41,9 @@ namespace Microsoft.Liftr.Fluent.Tests
                     CloudBlobContainer blobContainer = blobClient.GetContainerReference(containerName1);
                     await blobContainer.CreateIfNotExistsAsync();
 
-                    await az.GrantBlobContainerReaderAsync(st, containerName1, az.ClientId);
-                    await az.GrantBlobContainerContributorAsync(st, containerName1, az.ClientId);
-                    await az.GrantBlobContributorAsync(rg, az.ClientId);
+                    await az.GrantBlobContainerReaderAsync(st, containerName1, az.SPNObjectId);
+                    await az.GrantBlobContainerContributorAsync(st, containerName1, az.SPNObjectId);
+                    await az.GrantBlobContributorAsync(rg, az.SPNObjectId);
 
                     var msi1 = await az.CreateMSIAsync(TestCommon.Location, scope.ResourceGroupName, SdkContext.RandomResourceName("msi", 15), TestCommon.Tags);
                     var msi2 = await az.CreateMSIAsync(TestCommon.Location, scope.ResourceGroupName, SdkContext.RandomResourceName("msi", 15), TestCommon.Tags);

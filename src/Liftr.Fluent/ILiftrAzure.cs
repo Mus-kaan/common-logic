@@ -30,7 +30,7 @@ namespace Microsoft.Liftr.Fluent
 
         string TenantId { get; }
 
-        string ClientId { get; }
+        string SPNObjectId { get; }
 
         #region Resource Group
         Task<IResourceGroup> GetOrCreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags);
@@ -53,15 +53,15 @@ namespace Microsoft.Liftr.Fluent
 
         Task<IEnumerable<IStorageAccount>> ListStorageAccountAsync(string rgName);
 
-        Task GrantBlobContributorAsync(IResourceGroup rg, string principalId);
+        Task GrantBlobContributorAsync(IResourceGroup rg, string objectId);
 
         Task GrantBlobContributorAsync(IResourceGroup rg, IIdentity msi);
 
-        Task GrantBlobContainerContributorAsync(IStorageAccount storageAccount, string containerName, string principalId);
+        Task GrantBlobContainerContributorAsync(IStorageAccount storageAccount, string containerName, string objectId);
 
         Task GrantBlobContainerContributorAsync(IStorageAccount storageAccount, string containerName, IIdentity msi);
 
-        Task GrantBlobContainerReaderAsync(IStorageAccount storageAccount, string containerName, string principalId);
+        Task GrantBlobContainerReaderAsync(IStorageAccount storageAccount, string containerName, string objectId);
 
         Task GrantBlobContainerReaderAsync(IStorageAccount storageAccount, string containerName, IIdentity msi);
 

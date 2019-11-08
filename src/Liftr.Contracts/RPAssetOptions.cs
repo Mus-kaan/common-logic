@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Liftr
+namespace Microsoft.Liftr.Contracts
 {
     public class RPAssetOptions
     {

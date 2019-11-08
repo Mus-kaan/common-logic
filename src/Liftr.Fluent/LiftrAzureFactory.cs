@@ -14,18 +14,28 @@ namespace Microsoft.Liftr.Fluent
         private readonly ILogger _logger;
         private readonly Func<AzureCredentials> _credentialsProvider;
         private readonly string _tenantId;
-        private readonly string _clientId;
+        private readonly string _spnObjectId;
         private readonly string _subscriptionId;
 
-        public LiftrAzureFactory(ILogger logger, string tenantId, string clientId, string subscriptionId, Func<AzureCredentials> credentialsProvider)
+        public LiftrAzureFactory(ILogger logger, string tenantId, string spnObjectId, string subscriptionId, Func<AzureCredentials> credentialsProvider)
         {
+            if (string.IsNullOrEmpty(spnObjectId))
+            {
+                throw new ArgumentNullException(nameof(spnObjectId));
+            }
+
+            if (string.IsNullOrEmpty(tenantId))
+            {
+                throw new ArgumentNullException(nameof(tenantId));
+            }
+
             if (string.IsNullOrEmpty(subscriptionId))
             {
                 throw new ArgumentNullException(nameof(subscriptionId));
             }
 
             _tenantId = tenantId;
-            _clientId = clientId;
+            _spnObjectId = spnObjectId;
             _subscriptionId = subscriptionId;
             _logger = logger;
             _credentialsProvider = credentialsProvider ?? throw new ArgumentNullException(nameof(credentialsProvider));
@@ -45,7 +55,7 @@ namespace Microsoft.Liftr.Fluent
 
             var azure = authenticated.WithSubscription(subscriptionId);
 
-            var client = new LiftrAzure(_tenantId, _clientId, _credentialsProvider.Invoke(), azure, authenticated, _logger);
+            var client = new LiftrAzure(_tenantId, _spnObjectId, _credentialsProvider.Invoke(), azure, authenticated, _logger);
 
             return client;
         }

@@ -11,6 +11,7 @@ using Microsoft.Azure.Management.KeyVault.Fluent.Models;
 using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.TrafficManager.Fluent;
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.KeyVault;
 using Microsoft.Rest.Azure;
@@ -40,29 +41,37 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 throw new ArgumentNullException(nameof(namingContext));
             }
 
-            IVault kv = null;
-
-            var rgName = namingContext.ResourceGroupName(baseName);
-            var kvName = namingContext.KeyVaultName(baseName);
-
-            var client = _azureClientFactory.GenerateLiftrAzure();
-
-            _logger.Information("Creating Resource Group ...");
             try
             {
-                var rg = await client.CreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
-                _logger.Information("Created Resource Group with Id {ResourceId}", rg.Id);
+                IVault kv = null;
+
+                var rgName = namingContext.ResourceGroupName(baseName);
+                var kvName = namingContext.KeyVaultName(baseName);
+
+                var client = _azureClientFactory.GenerateLiftrAzure();
+
+                _logger.Information("Creating Resource Group ...");
+                try
+                {
+                    var rg = await client.CreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
+                    _logger.Information("Created Resource Group with Id {ResourceId}", rg.Id);
+                }
+                catch (DuplicateNameException ex)
+                {
+                    _logger.Information("There exist a RG with the same name. Reuse it. {ExceptionDetail}", ex);
+                }
+
+                kv = await client.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
+
+                await client.GrantSelfKeyVaultAdminAccessAsync(kv);
+
+                return kv;
             }
-            catch (DuplicateNameException ex)
+            catch (Exception ex)
             {
-                _logger.Information("There exist a RG with the same name. Reuse it. {ExceptionDetail}", ex);
+                _logger.Error(ex, $"{nameof(CreateOrUpdateGlobalRGAsync)} failed.");
+                throw;
             }
-
-            kv = await client.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
-
-            await client.GrantSelfKeyVaultAdminAccessAsync(kv);
-
-            return kv;
         }
 
         public async Task<(IResourceGroup rg, ICosmosDBAccount db, ITrafficManagerProfile tm, IVault kv, IResourceGroup dpRG)> CreateOrUpdateRegionalDataRGAsync(string baseName, NamingContext namingContext, bool createKeyVault = false, int dataPlaneStorageCount = 0)
@@ -269,7 +278,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 _logger.Information("Start adding access policy for msi to local kv.");
                 await kv.Update()
                     .DefineAccessPolicy()
-                    .ForObjectId(msi.Inner.PrincipalId.Value.ToString())
+                    .ForObjectId(msi.GetObjectId())
                     .AllowSecretPermissions(SecretPermissions.List, SecretPermissions.Get)
                     .AllowCertificatePermissions(CertificatePermissions.Get, CertificatePermissions.Getissuers, CertificatePermissions.List)
                     .Attach()
@@ -283,7 +292,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     _logger.Information("Start adding access policy for msi to regional kv.");
                     await regionalKv.Update()
                         .DefineAccessPolicy()
-                        .ForObjectId(msi.Inner.PrincipalId.Value.ToString())
+                        .ForObjectId(msi.GetObjectId())
                         .AllowSecretPermissions(SecretPermissions.List, SecretPermissions.Get)
                         .AllowCertificatePermissions(CertificatePermissions.Get, CertificatePermissions.List, CertificatePermissions.List)
                         .Attach()
@@ -332,7 +341,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                                 _logger.Information("Granting the MSI {MSIReourceId} contributor role to the subscription with {subscrptionId} ...", msi.Id, subscrptionId);
                                 await client.Authenticated.RoleAssignments
                                     .Define(SdkContext.RandomGuid())
-                                    .ForObjectId(msi.Inner.PrincipalId.Value.ToString())
+                                    .ForObjectId(msi.GetObjectId())
                                     .WithBuiltInRole(BuiltInRole.Contributor)
                                     .WithSubscriptionScope(subscrptionId)
                                     .CreateAsync();
@@ -348,6 +357,16 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
                     _logger.Information("Puting the RPAssetOptions in the key vault ...");
                     await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RPAssetOptions)}", rpAssets.ToJson(), namingContext.Tags);
+
+                    _logger.Information($"Puting the {nameof(RunningEnvironmentOptions)} in the key vault ...");
+                    var envOptions = new RunningEnvironmentOptions()
+                    {
+                        TenantId = msi.TenantId,
+                        SPNObjectId = msi.GetObjectId(),
+                    };
+
+                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RunningEnvironmentOptions)}-{nameof(envOptions.TenantId)}", envOptions.TenantId, namingContext.Tags);
+                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RunningEnvironmentOptions)}-{nameof(envOptions.SPNObjectId)}", envOptions.SPNObjectId, namingContext.Tags);
 
                     if (genevaCert != null)
                     {
