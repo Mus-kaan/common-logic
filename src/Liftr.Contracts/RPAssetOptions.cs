@@ -6,49 +6,14 @@ using System.Collections.Generic;
 
 namespace Microsoft.Liftr
 {
-    public sealed class RPAssetOptions
+    public class RPAssetOptions
     {
-        public string CosmosConnectionString { get; set; }
+        public string CosmosDBConnectionString { get; set; }
 
-        public string StorageConnectionString { get; set; }
+        public string StorageAccountName { get; set; }
 
-        public string DataPlaneStorageConnectionStrings { get; set; }
+        public IEnumerable<string> DataPlaneStorageAccounts { get; set; }
 
-        public string DataPlaneSubscriptions { get; set; }
-
-        public IEnumerable<string> GetStorageConnectionStrings()
-        {
-            var strings = DataPlaneStorageConnectionStrings.FromJson<ListItemHolder>();
-            return strings.StringItems;
-        }
-
-        public IEnumerable<string> GetSubscriptions()
-        {
-            var strings = DataPlaneSubscriptions.FromJson<ListItemHolder>();
-            return strings.StringItems;
-        }
-
-        public void SetStorageConnectionStrings(IEnumerable<string> values)
-        {
-            var holder = new ListItemHolder()
-            {
-                StringItems = values,
-            };
-            DataPlaneStorageConnectionStrings = holder.ToJson();
-        }
-
-        public void SetSubscriptions(IEnumerable<string> values)
-        {
-            var holder = new ListItemHolder()
-            {
-                StringItems = values,
-            };
-            DataPlaneSubscriptions = holder.ToJson();
-        }
-    }
-
-    internal class ListItemHolder
-    {
-        public IEnumerable<string> StringItems { get; set; }
+        public IEnumerable<string> DataPlaneSubscriptions { get; set; }
     }
 }

@@ -206,7 +206,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
 
             var stor = await client.GetStorageAccountAsync(dataRGName, namingContext.StorageAccountName(computeOptions.DataBaseName));
-            if (db == null)
+            if (stor == null)
             {
                 var errMsg = $"Cannot find the storage with name {namingContext.StorageAccountName(computeOptions.DataBaseName)} in RG {dataRGName}.";
                 var ex = new InvalidOperationException(errMsg);
@@ -264,6 +264,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 kv = await client.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
 
                 await client.GrantSelfKeyVaultAdminAccessAsync(kv);
+                await client.GrantQueueContributorAsync(stor, msi);
 
                 _logger.Information("Start adding access policy for msi to local kv.");
                 await kv.Update()
@@ -304,27 +305,22 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
                     _logger.Information($"Copied {cnt} secrets from central key vault to local key vault.");
 
-                    _logger.Information("Puting the CosmosDB Connection String in the key vault ...");
+                    var rpAssets = new RPAssetOptions();
                     var dbConnectionStrings = await db.ListConnectionStringsAsync();
-                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RPAssetOptions)}--{nameof(RPAssetOptions.CosmosConnectionString)}", dbConnectionStrings.ConnectionStrings[0].ConnectionString, namingContext.Tags);
+                    rpAssets.CosmosDBConnectionString = dbConnectionStrings.ConnectionStrings[0].ConnectionString;
+                    rpAssets.StorageAccountName = stor.Name;
 
-                    _logger.Information("Puting the Storage Connection String in the key vault ...");
-                    var storConnectionString = await stor.GetPrimaryConnectionStringAsync();
-                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RPAssetOptions)}--{nameof(RPAssetOptions.StorageConnectionString)}", storConnectionString, namingContext.Tags);
-
-                    var dpRGName = namingContext.ResourceGroupName(computeOptions.DataBaseName + "-dp");
-                    var dpRG = await client.GetResourceGroupAsync(dpRGName);
-                    if (dpRGName != null)
+                    var storageRGName = namingContext.ResourceGroupName(computeOptions.DataBaseName + "-dp");
+                    var storageRG = await client.GetResourceGroupAsync(storageRGName);
+                    if (storageRG != null)
                     {
-                        var accounts = await client.ListStorageAccountAsync(dpRGName);
+                        var accounts = await client.ListStorageAccountAsync(storageRGName);
                         if (accounts.Any())
                         {
-                            _logger.Information("Puting the Data Plane Storage Connection Strings in the key vault ...");
-                            var connectionStrings = await Task.WhenAll(accounts.Select(async (a) => await a.GetPrimaryConnectionStringAsync()));
-                            RPAssetOptions assets = new RPAssetOptions();
-                            assets.SetStorageConnectionStrings(connectionStrings);
-                            await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RPAssetOptions)}--{nameof(RPAssetOptions.DataPlaneStorageConnectionStrings)}", assets.DataPlaneStorageConnectionStrings, namingContext.Tags);
+                            rpAssets.DataPlaneStorageAccounts = accounts.Select(acc => acc.Name);
                         }
+
+                        await client.GrantBlobContributorAsync(storageRG, msi);
                     }
 
                     if (computeOptions.DataPlaneSubscriptions != null)
@@ -347,11 +343,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                             }
                         }
 
-                        _logger.Information("Puting the compute subscriptions list in the key vault ...");
-                        RPAssetOptions assets = new RPAssetOptions();
-                        assets.SetSubscriptions(computeOptions.DataPlaneSubscriptions);
-                        await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RPAssetOptions)}--{nameof(RPAssetOptions.DataPlaneSubscriptions)}", assets.DataPlaneSubscriptions, namingContext.Tags);
+                        rpAssets.DataPlaneSubscriptions = computeOptions.DataPlaneSubscriptions;
                     }
+
+                    _logger.Information("Puting the RPAssetOptions in the key vault ...");
+                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RPAssetOptions)}", rpAssets.ToJson(), namingContext.Tags);
 
                     if (genevaCert != null)
                     {

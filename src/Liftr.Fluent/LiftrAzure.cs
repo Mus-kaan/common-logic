@@ -192,6 +192,150 @@ namespace Microsoft.Liftr.Fluent
             _logger.Information("Found {cnt} storage accounts in rgName: {rgName} ...", accounts.Count(), rgName);
             return accounts.ToList();
         }
+
+        public async Task GrantBlobContributorAsync(IResourceGroup rg, string principalId)
+        {
+            try
+            {
+                // Storage Blob Data Contributor
+                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe";
+                await Authenticated.RoleAssignments
+                              .Define(SdkContext.RandomGuid())
+                              .ForServicePrincipal(principalId)
+                              .WithRoleDefinition(roleDefinitionId)
+                              .WithResourceGroupScope(rg)
+                              .CreateAsync();
+                _logger.Information("Granted 'Storage Blob Data Contributor' of Resource Group '{rgId}' to SPN with client Id {principalId}. roleDefinitionId: {roleDefinitionId}", rg.Id, principalId, roleDefinitionId);
+            }
+            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            {
+                _logger.Information("There exists the same role assignment.");
+            }
+        }
+
+        public async Task GrantBlobContributorAsync(IResourceGroup rg, IIdentity msi)
+        {
+            try
+            {
+                // Storage Blob Data Contributor
+                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe";
+                await Authenticated.RoleAssignments
+                              .Define(SdkContext.RandomGuid())
+                              .ForObjectId(msi.Inner.PrincipalId.Value.ToString())
+                              .WithRoleDefinition(roleDefinitionId)
+                              .WithResourceGroupScope(rg)
+                              .CreateAsync();
+                _logger.Information("Granted 'Storage Blob Data Contributor' of Resource Group '{rgId}' to SPN with objectId Id {objectId}. roleDefinitionId: {roleDefinitionId}", rg.Id, msi.Inner.PrincipalId.Value.ToString(), roleDefinitionId);
+            }
+            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            {
+                _logger.Information("There exists the same role assignment.");
+            }
+        }
+
+        public async Task GrantBlobContainerContributorAsync(IStorageAccount storageAccount, string containerName, string principalId)
+        {
+            try
+            {
+                // Storage Blob Data Contributor
+                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe";
+                var containerId = $"{storageAccount.Id}/blobServices/default/containers/{containerName}";
+                await Authenticated.RoleAssignments
+                              .Define(SdkContext.RandomGuid())
+                              .ForServicePrincipal(principalId)
+                              .WithRoleDefinition(roleDefinitionId)
+                              .WithScope(containerId)
+                              .CreateAsync();
+                _logger.Information("Granted 'Storage Blob Data Contributor' of blob container '{containerName}' to SPN with client Id {principalId}. roleDefinitionId: {roleDefinitionId}, containerId: {containerId}", containerName, principalId, roleDefinitionId, containerId);
+            }
+            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            {
+                _logger.Information("There exists the same role assignment.");
+            }
+        }
+
+        public async Task GrantBlobContainerContributorAsync(IStorageAccount storageAccount, string containerName, IIdentity msi)
+        {
+            try
+            {
+                // Storage Blob Data Contributor
+                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe";
+                var containerId = $"{storageAccount.Id}/blobServices/default/containers/{containerName}";
+                await Authenticated.RoleAssignments
+                              .Define(SdkContext.RandomGuid())
+                              .ForObjectId(msi.Inner.PrincipalId.Value.ToString())
+                              .WithRoleDefinition(roleDefinitionId)
+                              .WithScope(containerId)
+                              .CreateAsync();
+                _logger.Information("Granted 'Storage Blob Data Contributor' of blob container '{containerName}' to SPN with objectId {objectId}. roleDefinitionId: {roleDefinitionId}, containerId: {containerId}", containerName, msi.Inner.PrincipalId.Value.ToString(), roleDefinitionId, containerId);
+            }
+            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            {
+                _logger.Information("There exists the same role assignment.");
+            }
+        }
+
+        public async Task GrantBlobContainerReaderAsync(IStorageAccount storageAccount, string containerName, string principalId)
+        {
+            try
+            {
+                // Storage Blob Data Reader
+                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/2a2b9908-6ea1-4ae2-8e65-a410df84e7d1";
+                var containerId = $"{storageAccount.Id}/blobServices/default/containers/{containerName}";
+                await Authenticated.RoleAssignments
+                              .Define(SdkContext.RandomGuid())
+                              .ForServicePrincipal(principalId)
+                              .WithRoleDefinition(roleDefinitionId)
+                              .WithScope(containerId)
+                              .CreateAsync();
+                _logger.Information("Granted 'Storage Blob Data Reader' of blob container '{containerName}' to SPN with client Id '{principalId}'. roleDefinitionId: {roleDefinitionId}, containerId: {containerId}", containerName, principalId, roleDefinitionId, containerId);
+            }
+            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            {
+                _logger.Information("There exists the same role assignment.");
+            }
+        }
+
+        public async Task GrantBlobContainerReaderAsync(IStorageAccount storageAccount, string containerName, IIdentity msi)
+        {
+            try
+            {
+                // Storage Blob Data Reader
+                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/2a2b9908-6ea1-4ae2-8e65-a410df84e7d1";
+                var containerId = $"{storageAccount.Id}/blobServices/default/containers/{containerName}";
+                await Authenticated.RoleAssignments
+                              .Define(SdkContext.RandomGuid())
+                              .ForObjectId(msi.Inner.PrincipalId.Value.ToString())
+                              .WithRoleDefinition(roleDefinitionId)
+                              .WithScope(containerId)
+                              .CreateAsync();
+                _logger.Information("Granted 'Storage Blob Data Reader' of blob container '{containerName}' to SPN with objectId '{objectId}'. roleDefinitionId: {roleDefinitionId}, containerId: {containerId}", containerName, msi.Inner.PrincipalId.Value.ToString(), roleDefinitionId, containerId);
+            }
+            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            {
+                _logger.Information("There exists the same role assignment.");
+            }
+        }
+
+        public async Task GrantQueueContributorAsync(IStorageAccount storageAccount, IIdentity msi)
+        {
+            try
+            {
+                // Storage Queue Data Contributor
+                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/974c5e8b-45b9-4653-ba55-5f855dd0fb88";
+                await Authenticated.RoleAssignments
+                              .Define(SdkContext.RandomGuid())
+                              .ForObjectId(msi.Inner.PrincipalId.Value.ToString())
+                              .WithRoleDefinition(roleDefinitionId)
+                              .WithScope(storageAccount.Id)
+                              .CreateAsync();
+                _logger.Information("Granted 'Storage Queue Data Contributor' storage account '{reousrceId}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}", storageAccount.Id, msi.Inner.PrincipalId.Value.ToString(), roleDefinitionId);
+            }
+            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            {
+                _logger.Information("There exists the same role assignment.");
+            }
+        }
         #endregion Storage Account
 
         #region Network

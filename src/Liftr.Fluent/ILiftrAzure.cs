@@ -52,6 +52,20 @@ namespace Microsoft.Liftr.Fluent
         Task<IStorageAccount> GetStorageAccountAsync(string rgName, string storageAccountName);
 
         Task<IEnumerable<IStorageAccount>> ListStorageAccountAsync(string rgName);
+
+        Task GrantBlobContributorAsync(IResourceGroup rg, string principalId);
+
+        Task GrantBlobContributorAsync(IResourceGroup rg, IIdentity msi);
+
+        Task GrantBlobContainerContributorAsync(IStorageAccount storageAccount, string containerName, string principalId);
+
+        Task GrantBlobContainerContributorAsync(IStorageAccount storageAccount, string containerName, IIdentity msi);
+
+        Task GrantBlobContainerReaderAsync(IStorageAccount storageAccount, string containerName, string principalId);
+
+        Task GrantBlobContainerReaderAsync(IStorageAccount storageAccount, string containerName, IIdentity msi);
+
+        Task GrantQueueContributorAsync(IStorageAccount storageAccount, IIdentity msi);
         #endregion Storage Account
 
         #region Network
