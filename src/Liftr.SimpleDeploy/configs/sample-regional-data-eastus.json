@@ -3,7 +3,6 @@
   "shortPartnerName": "ib",
   "environment": "Test",
   "locationStr": "eastus",
-  "DataBaseName": "data1910",
-  "CreateRegionalKeyVault": true,
+  "DataBaseName": "data191001",
   "DataPlaneStorageCount": 3
 }

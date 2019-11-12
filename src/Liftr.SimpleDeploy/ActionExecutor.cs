@@ -204,7 +204,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     }
                     else if (_options.Action == ActionType.CreateOrUpdateRegionalData)
                     {
-                        await infra.CreateOrUpdateRegionalDataRGAsync(dataOptions.DataBaseName, namingContext, dataOptions.CreateRegionalKeyVault, dataOptions.DataPlaneStorageCount);
+                        await infra.CreateOrUpdateRegionalDataRGAsync(dataOptions.DataBaseName, namingContext, dataOptions.DataPlaneStorageCount);
                         _logger.Information("Successfully managed regional data resources.");
                     }
                     else if (_options.Action == ActionType.CreateOrUpdateRegionalCompute)

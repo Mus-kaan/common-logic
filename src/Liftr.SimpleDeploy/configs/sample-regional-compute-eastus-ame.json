@@ -3,10 +3,10 @@
   "shortPartnerName": "ib",
   "environment": "Test",
   "locationStr": "eastus",
-  "GlobalBaseName": "gbl1910",
+  "GlobalBaseName": "gbl191001",
   "GlobalLocationStr": "centralus",
-  "DataBaseName": "data1910",
-  "ComputeBaseName": "com1910",
+  "DataBaseName": "data191001",
+  "ComputeBaseName": "com191001",
   "SecretPrefix": "IncrediBuildRP",
   "HostName": "ib-rp-web-eus.azliftr-test.io",
   "DataPlaneSubscriptions": [

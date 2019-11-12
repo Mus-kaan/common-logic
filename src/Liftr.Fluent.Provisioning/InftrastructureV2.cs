@@ -74,7 +74,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
         }
 
-        public async Task<(IResourceGroup rg, ICosmosDBAccount db, ITrafficManagerProfile tm, IVault kv, IResourceGroup dpRG)> CreateOrUpdateRegionalDataRGAsync(string baseName, NamingContext namingContext, bool createKeyVault = false, int dataPlaneStorageCount = 0)
+        public async Task<(IResourceGroup rg, IIdentity msi, ICosmosDBAccount db, ITrafficManagerProfile tm, IVault kv, IResourceGroup dpRG)> CreateOrUpdateRegionalDataRGAsync(string baseName, NamingContext namingContext, int dataPlaneStorageCount = 0)
         {
             if (namingContext == null)
             {
@@ -90,12 +90,15 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var trafficManagerName = namingContext.TrafficManagerName(baseName);
             var kvName = namingContext.KeyVaultName(baseName);
             var cosmosName = namingContext.CosmosDBName(baseName);
+            var msiName = namingContext.MSIName(baseName);
 
             var client = _azureClientFactory.GenerateLiftrAzure();
 
             var rg = await client.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
 
             var stor = await client.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, storageName, namingContext.Tags);
+
+            var msi = await client.GetOrCreateMSIAsync(namingContext.Location, rgName, msiName, namingContext.Tags);
 
             _logger.Information("Creating Traffic Manager ...");
             var targetReousrceId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.Network/trafficmanagerprofiles/{trafficManagerName}";
@@ -110,10 +113,17 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 _logger.Information("There has an existing Traffic Manager with the same {ResourceId}. Stop creating a new one.", tm.Id);
             }
 
-            if (createKeyVault)
-            {
-                kv = await client.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
-            }
+            kv = await client.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
+
+            _logger.Information("Start adding access policy for msi to regional kv.");
+            await kv.Update()
+                .DefineAccessPolicy()
+                .ForObjectId(msi.GetObjectId())
+                .AllowSecretPermissions(SecretPermissions.List, SecretPermissions.Get)
+                .AllowCertificatePermissions(CertificatePermissions.Get, CertificatePermissions.Getissuers, CertificatePermissions.List)
+                .Attach()
+                .ApplyAsync();
+            _logger.Information("Added access policy for msi to regional kv.");
 
             _logger.Information("Creating CosmosDB ...");
             targetReousrceId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.DocumentDB/databaseAccounts/{cosmosName}";
@@ -142,7 +152,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 }
             }
 
-            return (rg, db, tm, kv, dpRG);
+            return (rg, msi, db, tm, kv, dpRG);
         }
 
         public async Task<IVault> GetKeyVaultAsync(string baseName, NamingContext namingContext)
@@ -194,16 +204,23 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             _logger.Information("AKS machine count: {AKSMachineCount}", aksInfo.AKSMachineCount);
 
             IVault kv = null;
-            IIdentity msi = null;
             IKubernetesCluster aks = null;
 
             var rgName = namingContext.ResourceGroupName(computeOptions.ComputeBaseName);
             var dataRGName = namingContext.ResourceGroupName(computeOptions.DataBaseName);
-            var msiName = namingContext.MSIName(computeOptions.ComputeBaseName);
             var kvName = namingContext.KeyVaultName(computeOptions.ComputeBaseName);
             var aksName = namingContext.AKSName(computeOptions.ComputeBaseName);
 
             var client = _azureClientFactory.GenerateLiftrAzure();
+
+            var msiName = namingContext.MSIName(computeOptions.DataBaseName);
+            var regionalMsi = await client.GetMSIAsync(namingContext.ResourceGroupName(computeOptions.DataBaseName), msiName);
+            if (regionalMsi == null)
+            {
+                var ex = new InvalidOperationException("Cannot find regional MSI with resource name: " + msiName);
+                _logger.Error("Cannot find regional MSI with resource name: {ResourceName}", msiName);
+                throw ex;
+            }
 
             var dbId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{namingContext.ResourceGroupName(computeOptions.DataBaseName)}/providers/Microsoft.DocumentDB/databaseAccounts/{namingContext.CosmosDBName(computeOptions.DataBaseName)}";
             var db = await client.GetCosmosDBAsync(dbId);
@@ -252,53 +269,36 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     _logger.Information("There exist a RG with the same name. Reuse it. {ExceptionDetail}", ex);
                 }
 
-                msi = await client.GetOrCreateMSIAsync(namingContext.Location, rgName, msiName, namingContext.Tags);
-
                 try
                 {
-                    _logger.Information("Granting the identity binding access for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId} ...", msi.Id, aksInfo.AKSSPNObjectId);
+                    _logger.Information("Granting the identity binding access for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId} ...", regionalMsi.Id, aksInfo.AKSSPNObjectId);
                     await client.Authenticated.RoleAssignments
                         .Define(SdkContext.RandomGuid())
                         .ForObjectId(aksInfo.AKSSPNObjectId)
                         .WithBuiltInRole(BuiltInRole.Contributor)
-                        .WithResourceScope(msi)
+                        .WithResourceScope(regionalMsi)
                         .CreateAsync();
-                    _logger.Information("Granted the identity binding access for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId}.", msi.Id, aksInfo.AKSSPNObjectId);
+                    _logger.Information("Granted the identity binding access for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId}.", regionalMsi.Id, aksInfo.AKSSPNObjectId);
                 }
                 catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
                 {
-                    _logger.Information("There exists the same role assignment for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId}.", msi.Id, aksInfo.AKSSPNObjectId);
+                    _logger.Information("There exists the same role assignment for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId}.", regionalMsi.Id, aksInfo.AKSSPNObjectId);
                 }
 
                 kv = await client.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
 
                 await client.GrantSelfKeyVaultAdminAccessAsync(kv);
-                await client.GrantQueueContributorAsync(stor, msi);
+                await client.GrantQueueContributorAsync(stor, regionalMsi);
 
                 _logger.Information("Start adding access policy for msi to local kv.");
                 await kv.Update()
                     .DefineAccessPolicy()
-                    .ForObjectId(msi.GetObjectId())
+                    .ForObjectId(regionalMsi.GetObjectId())
                     .AllowSecretPermissions(SecretPermissions.List, SecretPermissions.Get)
                     .AllowCertificatePermissions(CertificatePermissions.Get, CertificatePermissions.Getissuers, CertificatePermissions.List)
                     .Attach()
                     .ApplyAsync();
                 _logger.Information("Added access policy for msi to local kv.");
-
-                var regionalKvId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{namingContext.ResourceGroupName(computeOptions.DataBaseName)}/providers/Microsoft.KeyVault/vaults/{namingContext.KeyVaultName(computeOptions.DataBaseName)}";
-                var regionalKv = await client.GetKeyVaultByIdAsync(regionalKvId);
-                if (regionalKv != null)
-                {
-                    _logger.Information("Start adding access policy for msi to regional kv.");
-                    await regionalKv.Update()
-                        .DefineAccessPolicy()
-                        .ForObjectId(msi.GetObjectId())
-                        .AllowSecretPermissions(SecretPermissions.List, SecretPermissions.Get)
-                        .AllowCertificatePermissions(CertificatePermissions.Get, CertificatePermissions.List, CertificatePermissions.List)
-                        .Attach()
-                        .ApplyAsync();
-                    _logger.Information("Added access policy for msi to regional kv.");
-                }
 
                 using (var valet = new KeyVaultConcierge(kv.VaultUri, kvClient, _logger))
                 {
@@ -329,7 +329,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                             rpAssets.DataPlaneStorageAccounts = accounts.Select(acc => acc.Name);
                         }
 
-                        await client.GrantBlobContributorAsync(storageRG, msi);
+                        await client.GrantBlobContributorAsync(storageRG, regionalMsi);
                     }
 
                     if (computeOptions.DataPlaneSubscriptions != null)
@@ -338,17 +338,17 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                         {
                             try
                             {
-                                _logger.Information("Granting the MSI {MSIReourceId} contributor role to the subscription with {subscrptionId} ...", msi.Id, subscrptionId);
+                                _logger.Information("Granting the MSI {MSIReourceId} contributor role to the subscription with {subscrptionId} ...", regionalMsi.Id, subscrptionId);
                                 await client.Authenticated.RoleAssignments
                                     .Define(SdkContext.RandomGuid())
-                                    .ForObjectId(msi.GetObjectId())
+                                    .ForObjectId(regionalMsi.GetObjectId())
                                     .WithBuiltInRole(BuiltInRole.Contributor)
                                     .WithSubscriptionScope(subscrptionId)
                                     .CreateAsync();
                             }
                             catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
                             {
-                                _logger.Information("There exists the same role assignment for the MSI {MSIReourceId} to the subscription {subscrptionId}.", msi.Id, subscrptionId);
+                                _logger.Information("There exists the same role assignment for the MSI {MSIReourceId} to the subscription {subscrptionId}.", regionalMsi.Id, subscrptionId);
                             }
                         }
 
@@ -361,8 +361,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     _logger.Information($"Puting the {nameof(RunningEnvironmentOptions)} in the key vault ...");
                     var envOptions = new RunningEnvironmentOptions()
                     {
-                        TenantId = msi.TenantId,
-                        SPNObjectId = msi.GetObjectId(),
+                        TenantId = regionalMsi.TenantId,
+                        SPNObjectId = regionalMsi.GetObjectId(),
                     };
 
                     await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RunningEnvironmentOptions)}-{nameof(envOptions.TenantId)}", envOptions.TenantId, namingContext.Tags);
@@ -410,7 +410,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 }
             }
 
-            return (kv, msi, aks);
+            return (kv, regionalMsi, aks);
         }
     }
 }
