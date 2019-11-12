@@ -35,7 +35,7 @@
     <PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>5.2.1</PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>
     <PackageVersion_Microsoft_NET_Test_Sdk>16.0.1</PackageVersion_Microsoft_NET_Test_Sdk>
     <PackageVersion_Microsoft_VisualStudio_Azure_Containers_Tools_Targets>1.9.5</PackageVersion_Microsoft_VisualStudio_Azure_Containers_Tools_Targets>
-    <PackageVersion_MongoDB_Driver>2.8.1</PackageVersion_MongoDB_Driver>
+    <PackageVersion_MongoDB_Driver>2.9.3</PackageVersion_MongoDB_Driver>
     <PackageVersion_Moq>4.12.0</PackageVersion_Moq>
     <PackageVersion_Newtonsoft_Json>12.0.2</PackageVersion_Newtonsoft_Json>
     <PackageVersion_Serilog>2.8.0</PackageVersion_Serilog>

@@ -7,6 +7,7 @@ using Microsoft.Liftr.DataSource.MonitoringSvc;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
@@ -63,9 +64,19 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
 
         public async Task<IMonitoringSvcMonitoredEntity> GetEntityAsync(string monitoredResourceId)
         {
-            var filter = Builders<MonitoringSvcMonitoredEntity>.Filter.Eq(u => u.MonitoredResourceId, monitoredResourceId);
+            var filter = Builders<MonitoringSvcMonitoredEntity>.Filter.Eq(u => u.Enabled, true);
             var cursor = await _collection.FindAsync(filter);
             return await cursor.FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<string>> GetAllMonitoringRresourcesAsync()
+        {
+            var filter = Builders<MonitoringSvcMonitoredEntity>.Filter.Eq(u => u.Enabled, true);
+            var cursor = await _collection
+                .Find(filter)
+                .Project(u => u.MonitoringResourceId)
+                .ToListAsync();
+            return cursor.Distinct();
         }
     }
 }

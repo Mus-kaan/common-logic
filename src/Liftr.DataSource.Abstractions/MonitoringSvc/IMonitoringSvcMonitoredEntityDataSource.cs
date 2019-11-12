@@ -46,5 +46,11 @@ namespace Microsoft.Liftr.DataSource.MonitoringSvc
         /// </summary>
         /// <returns></returns>
         Task<IEnumerable<IMonitoringSvcMonitoredEntity>> GetAllEntityAsync();
+
+        /// <summary>
+        /// Get all distinct monitoring resource ids.
+        /// </summary>
+        /// <returns></returns>
+        Task<IEnumerable<string>> GetAllMonitoringRresourcesAsync();
     }
 }
