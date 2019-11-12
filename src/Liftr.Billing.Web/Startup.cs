@@ -11,7 +11,6 @@ using Serilog;
 
 namespace Microsoft.Liftr.Billing.Web
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -24,14 +23,14 @@ namespace Microsoft.Liftr.Billing.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton(Configuration.GetSection("billingOptions").Get<BillingOptions>());
-            services.AddSingleton(c => new BillingServiceProvider(
+            services.AddSingleton<IBillingServiceProvider>(c => new BillingServiceProvider(
                                           c.GetRequiredService<BillingOptions>(),
                                           c.GetRequiredService<Serilog.ILogger>()));
 
             services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public static void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {

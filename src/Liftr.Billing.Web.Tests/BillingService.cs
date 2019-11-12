@@ -58,7 +58,7 @@ namespace Microsoft.Liftr.Billing.Web.Tests
                           {
                               conf.AddJsonFile(configPath);
                           })
-                          .ConfigureServices(services =>
+                          .ConfigureTestServices(services =>
                           {
                               services.AddSingleton(c => BillingServiceProvider.Object);
                           })
