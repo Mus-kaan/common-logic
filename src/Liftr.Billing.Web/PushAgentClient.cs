@@ -5,6 +5,7 @@
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Queue;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,17 +34,20 @@ namespace Microsoft.Liftr.Billing.Web
             _logger = logger;
         }
 
-        public async Task<bool> TryInsertSingleUsageAsync(UsageRecordEntity usageRecord, CancellationToken cancellationToken)
+        public async Task<bool> TryInsertSingleUsageAsync(UsageEvent usageEvent, CancellationToken cancellationToken)
         {
-            if (usageRecord is null)
+            if (usageEvent is null)
             {
-                throw new ArgumentNullException(nameof(usageRecord));
+                throw new ArgumentNullException(nameof(usageEvent));
             }
+
+            var partitionKey = Guid.NewGuid().ToString();
+            var usageRecord = UsageRecordEntity.From(usageEvent, partitionKey);
 
             try
             {
                 var insertedRecord = await TryInsertOrMergeRecordAsync(usageRecord, cancellationToken);
-                await TryPostMessageToQueueAsync(insertedRecord, cancellationToken);
+                await TryPostMessageToQueueAsync(insertedRecord.PartitionKey, cancellationToken);
                 return true;
             }
             catch (StorageException e)
@@ -60,10 +64,36 @@ namespace Microsoft.Liftr.Billing.Web
             }
         }
 
-        private async Task TryPostMessageToQueueAsync(UsageRecordEntity usageRecord, CancellationToken cancellationToken)
+        public async Task<bool> TryInsertBatchUsageAsync(BatchUsageEvent batchUsageEvent, CancellationToken cancellationToken)
+        {
+            if (batchUsageEvent is null)
+            {
+                throw new ArgumentNullException(nameof(batchUsageEvent));
+            }
+
+            try
+            {
+                var partitionKey = await TryInsertBatchAsync(batchUsageEvent, cancellationToken);
+                await TryPostMessageToQueueAsync(partitionKey, cancellationToken);
+                return true;
+            }
+            catch (StorageException e)
+            {
+                _logger.Error(
+                    "Failed to insert usage record {@billingEvent} with {@error}",
+                    new BillingEvent()
+                    {
+                        OperationName = nameof(this.TryInsertSingleUsageAsync),
+                    }, e.Message);
+
+                return false;
+            }
+        }
+
+        private async Task TryPostMessageToQueueAsync(string partitionKey, CancellationToken cancellationToken)
         {
             var pushAgentBatchId = Guid.NewGuid();
-            var message = new PushAgentUsageQueueMessage(usageRecord.PartitionKey, pushAgentBatchId).ToJson();
+            var message = new PushAgentUsageQueueMessage(partitionKey, pushAgentBatchId).ToJson();
 
             await _pushAgentUsageQueue.AddMessageAsync(new CloudQueueMessage(message), cancellationToken);
 
@@ -71,8 +101,8 @@ namespace Microsoft.Liftr.Billing.Web
                 "[UsageQueueInsert]: Inserted a usage record {@billingEvent}",
                 new BillingEvent()
                 {
-                    OperationName = nameof(this.TryInsertSingleUsageAsync),
-                    PartitionKey = usageRecord.PartitionKey,
+                    OperationName = nameof(this.TryPostMessageToQueueAsync),
+                    PartitionKey = partitionKey,
                     PushAgentBatchId = pushAgentBatchId,
                 });
         }
@@ -96,6 +126,30 @@ namespace Microsoft.Liftr.Billing.Web
                 });
 
             return insertedRecord;
+        }
+
+        private async Task<string> TryInsertBatchAsync(BatchUsageEvent batchUsageEvent, CancellationToken cancellationToken)
+        {
+            var operation = new TableBatchOperation();
+
+            var partitionKey = Guid.NewGuid().ToString();
+            foreach (var usageEvent in batchUsageEvent.UsageEvents)
+            {
+                operation.InsertOrMerge(UsageRecordEntity.From(usageEvent, partitionKey));
+            }
+
+            var tablebatchResult = await _pushAgentUsageTable.ExecuteBatchAsync(operation, cancellationToken);
+            var pushAgentBatchId = Guid.NewGuid();
+
+            _logger.Information(
+                "[UsageTableInsert]: Inserted a batch usage record {@billingEvent}",
+                new BillingEvent()
+                {
+                    OperationName = nameof(this.TryInsertBatchAsync),
+                    PartitionKey = partitionKey,
+                });
+
+            return partitionKey;
         }
     }
 }

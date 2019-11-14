@@ -81,14 +81,13 @@ namespace Microsoft.Liftr.Billing.Web
 
         public string OrderNumber { get; set; }
 
-        public static UsageRecordEntity From(UsageEvent usageEvent)
+        public static UsageRecordEntity From(UsageEvent usageEvent, string partitionKey)
         {
             if (usageEvent is null)
             {
                 throw new ArgumentNullException(nameof(usageEvent));
             }
 
-            var partitionKey = Guid.NewGuid().ToString();
             var rowKey = Guid.NewGuid().ToString();
 
             return new UsageRecordEntity(

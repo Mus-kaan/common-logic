@@ -4,10 +4,8 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http2;
-using Microsoft.Liftr.Billing;
 using System;
-using System.Net;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,8 +32,24 @@ namespace Microsoft.Liftr.Billing.Web.Controllers
         [Route("api/usageEvent")]
         public async Task<IActionResult> PostUsageEventAsync([FromBody] UsageEvent usageEvent, CancellationToken cancellationToken)
         {
-            var usageRecordEntity = UsageRecordEntity.From(usageEvent);
-            if (!await _pushAgentClient.TryInsertSingleUsageAsync(usageRecordEntity, cancellationToken))
+            if (!await _pushAgentClient.TryInsertSingleUsageAsync(usageEvent, cancellationToken))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("api/batchUsageEvent")]
+        public async Task<IActionResult> PostBatchUsageEventAsync([FromBody] BatchUsageEvent batchUsageEvent, CancellationToken cancellationToken)
+        {
+            if (batchUsageEvent == null || !batchUsageEvent.UsageEvents.Any() || batchUsageEvent.UsageEvents.Count() > TableConstants.TableServiceBatchMaximumOperations)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, $"Batch size should be between 1 and {TableConstants.TableServiceBatchMaximumOperations}");
+            }
+
+            if (!await _pushAgentClient.TryInsertBatchUsageAsync(batchUsageEvent, cancellationToken))
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
