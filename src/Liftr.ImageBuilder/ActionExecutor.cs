@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Azure.Core;
+using Azure.Identity;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
@@ -11,7 +13,6 @@ using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.KeyVault;
-using Microsoft.Liftr.Logging;
 using Serilog.Context;
 using System;
 using System.Collections.Generic;
@@ -95,6 +96,7 @@ namespace Microsoft.Liftr.ImageBuilder
                     }
                 }
 
+                TokenCredential tokenCredential = null;
                 Func<AzureCredentials> azureCredentialsProvider = null;
                 KeyVaultClient kvClient = null;
                 if (!string.IsNullOrEmpty(_options.AuthFile))
@@ -104,6 +106,7 @@ namespace Microsoft.Liftr.ImageBuilder
                     kvClient = KeyVaultClientFactory.FromClientIdAndSecret(authContract.ClientId, authContract.ClientSecret);
 
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory.FromFile(_options.AuthFile);
+                    tokenCredential = new ClientSecretCredential(authContract.TenantId, authContract.ClientId, authContract.ClientSecret);
                 }
                 else
                 {
@@ -113,9 +116,10 @@ namespace Microsoft.Liftr.ImageBuilder
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory
                     .FromMSI(new MSILoginInformation(MSIResourceType.VirtualMachine), AzureEnvironment.AzureGlobalCloud, _envOptions.TenantId)
                     .WithDefaultSubscription(_options.SubscriptionId);
+                    tokenCredential = new ManagedIdentityCredential();
                 }
 
-                LiftrAzureFactory azFactory = new LiftrAzureFactory(_logger, _envOptions.TenantId, _envOptions.SPNObjectId, _options.SubscriptionId, azureCredentialsProvider);
+                LiftrAzureFactory azFactory = new LiftrAzureFactory(_logger, _envOptions.TenantId, _envOptions.SPNObjectId, _options.SubscriptionId, tokenCredential, azureCredentialsProvider, _envOptions.LiftrAzureOptions);
 
                 _ = RunActionAsync(kvClient, azFactory, cancellationToken);
             }

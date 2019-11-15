@@ -18,8 +18,8 @@ namespace Microsoft.Liftr
             {
                 ["Creator"] = "UnitTest",
                 ["CreatedAt"] = DateTime.UtcNow.ToShortDateString(),
-                ["TestOwner"] = "John Doe",
-                ["TestDepartment"] = "IT",
+                ["TestRunningMachine"] = Environment.MachineName,
+                ["TestDummyTag"] = "Dummy value",
             };
 
         public static void CheckCommonTags(IDictionary<string, string> tags)

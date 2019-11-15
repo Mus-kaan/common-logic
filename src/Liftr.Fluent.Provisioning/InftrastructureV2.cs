@@ -17,6 +17,7 @@ using Microsoft.Liftr.KeyVault;
 using Microsoft.Rest.Azure;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -74,11 +75,23 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
         }
 
-        public async Task<(IResourceGroup rg, IIdentity msi, ICosmosDBAccount db, ITrafficManagerProfile tm, IVault kv, IResourceGroup dpRG)> CreateOrUpdateRegionalDataRGAsync(string baseName, NamingContext namingContext, int dataPlaneStorageCount = 0)
+        public async Task<(IResourceGroup rg, IIdentity msi, ICosmosDBAccount db, ITrafficManagerProfile tm, IVault kv)> CreateOrUpdateRegionalDataRGAsync(
+            string baseName,
+            NamingContext namingContext,
+            IEnumerable<string> dataPlaneSubscriptions = null,
+            int dataPlaneStorageCountPerSubscription = 0)
         {
             if (namingContext == null)
             {
                 throw new ArgumentNullException(nameof(namingContext));
+            }
+
+            if (dataPlaneStorageCountPerSubscription > 0)
+            {
+                if (dataPlaneSubscriptions == null || !dataPlaneSubscriptions.Any())
+                {
+                    throw new ArgumentException("data plane Subscriptions cannot be empty.", nameof(dataPlaneSubscriptions));
+                }
             }
 
             ICosmosDBAccount db = null;
@@ -92,20 +105,42 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var cosmosName = namingContext.CosmosDBName(baseName);
             var msiName = namingContext.MSIName(baseName);
 
-            var client = _azureClientFactory.GenerateLiftrAzure();
+            var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
 
-            var rg = await client.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
+            var rg = await liftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
 
-            var stor = await client.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, storageName, namingContext.Tags);
+            var stor = await liftrAzure.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, storageName, namingContext.Tags);
+            await liftrAzure.DelegateStorageKeyOperationToKeyVaultAsync(stor);
 
-            var msi = await client.GetOrCreateMSIAsync(namingContext.Location, rgName, msiName, namingContext.Tags);
+            var msi = await liftrAzure.GetOrCreateMSIAsync(namingContext.Location, rgName, msiName, namingContext.Tags);
+
+            if (dataPlaneSubscriptions != null)
+            {
+                foreach (var subscrptionId in dataPlaneSubscriptions)
+                {
+                    try
+                    {
+                        _logger.Information("Granting the MSI {MSIReourceId} contributor role to the subscription with {subscrptionId} ...", msi.Id, subscrptionId);
+                        await liftrAzure.Authenticated.RoleAssignments
+                            .Define(SdkContext.RandomGuid())
+                            .ForObjectId(msi.GetObjectId())
+                            .WithBuiltInRole(BuiltInRole.Contributor)
+                            .WithSubscriptionScope(subscrptionId)
+                            .CreateAsync();
+                    }
+                    catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+                    {
+                        _logger.Information("There exists the same role assignment for the MSI {MSIReourceId} to the subscription {subscrptionId}.", msi.Id, subscrptionId);
+                    }
+                }
+            }
 
             _logger.Information("Creating Traffic Manager ...");
-            var targetReousrceId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.Network/trafficmanagerprofiles/{trafficManagerName}";
-            tm = await client.GetTrafficManagerAsync(targetReousrceId);
+            var targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.Network/trafficmanagerprofiles/{trafficManagerName}";
+            tm = await liftrAzure.GetTrafficManagerAsync(targetResourceId);
             if (tm == null)
             {
-                tm = await client.CreateTrafficManagerAsync(rgName, trafficManagerName, namingContext.Tags);
+                tm = await liftrAzure.CreateTrafficManagerAsync(rgName, trafficManagerName, namingContext.Tags);
                 _logger.Information("Created Traffic Manager with Id {ResourceId}", tm.Id);
             }
             else
@@ -113,7 +148,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 _logger.Information("There has an existing Traffic Manager with the same {ResourceId}. Stop creating a new one.", tm.Id);
             }
 
-            kv = await client.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
+            kv = await liftrAzure.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
 
             _logger.Information("Start adding access policy for msi to regional kv.");
             await kv.Update()
@@ -126,11 +161,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             _logger.Information("Added access policy for msi to regional kv.");
 
             _logger.Information("Creating CosmosDB ...");
-            targetReousrceId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.DocumentDB/databaseAccounts/{cosmosName}";
-            db = await client.GetCosmosDBAsync(targetReousrceId);
+            targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.DocumentDB/databaseAccounts/{cosmosName}";
+            db = await liftrAzure.GetCosmosDBAsync(targetResourceId);
             if (db == null)
             {
-                (var createdDb, string connectionString) = await client.CreateCosmosDBAsync(namingContext.Location, rgName, cosmosName, namingContext.Tags);
+                (var createdDb, _) = await liftrAzure.CreateCosmosDBAsync(namingContext.Location, rgName, cosmosName, namingContext.Tags);
                 db = createdDb;
                 _logger.Information("Created CosmosDB with Id {ResourceId}", db.Id);
             }
@@ -139,20 +174,25 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 _logger.Information("There has an existing CosmosDB with the same {ResourceId}. Stop creating a new one.", db.Id);
             }
 
-            IResourceGroup dpRG = null;
-            if (dataPlaneStorageCount > 0)
+            if (dataPlaneStorageCountPerSubscription > 0 && dataPlaneSubscriptions != null)
             {
-                var dpRGName = namingContext.ResourceGroupName(baseName + "-dp");
-                dpRG = await client.GetOrCreateResourceGroupAsync(namingContext.Location, dpRGName, namingContext.Tags);
-
-                for (int i = 1; i <= dataPlaneStorageCount; i++)
+                foreach (var dpSubscription in dataPlaneSubscriptions)
                 {
-                    var storName = namingContext.StorageAccountName($"{baseName}dp{i:D3}");
-                    var dpStor = await client.GetOrCreateStorageAccountAsync(namingContext.Location, dpRGName, storName, namingContext.Tags);
+                    var dataPlaneLiftrAzure = _azureClientFactory.GenerateLiftrAzure(dpSubscription);
+                    IResourceGroup dataPlaneStorageRG = await dataPlaneLiftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, namingContext.ResourceGroupName(baseName + "-dp"), namingContext.Tags);
+                    await dataPlaneLiftrAzure.DelegateStorageKeyOperationToKeyVaultAsync(dataPlaneStorageRG);
+
+                    var existingStorageAccountCount = (await dataPlaneLiftrAzure.ListStorageAccountAsync(dataPlaneStorageRG.Name)).Count();
+
+                    for (int i = existingStorageAccountCount; i < dataPlaneStorageCountPerSubscription; i++)
+                    {
+                        var storageAccountName = SdkContext.RandomResourceName(baseName, 24);
+                        await dataPlaneLiftrAzure.GetOrCreateStorageAccountAsync(namingContext.Location, dataPlaneStorageRG.Name, storageAccountName, namingContext.Tags);
+                    }
                 }
             }
 
-            return (rg, msi, db, tm, kv, dpRG);
+            return (rg, msi, db, tm, kv);
         }
 
         public async Task<IVault> GetKeyVaultAsync(string baseName, NamingContext namingContext)
@@ -165,9 +205,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var rgName = namingContext.ResourceGroupName(baseName);
             var kvName = namingContext.KeyVaultName(baseName);
 
-            var client = _azureClientFactory.GenerateLiftrAzure();
-            var targetReousrceId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.KeyVault/vaults/{kvName}";
-            var kv = await client.GetKeyVaultByIdAsync(targetReousrceId);
+            var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
+            var targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.KeyVault/vaults/{kvName}";
+            var kv = await liftrAzure.GetKeyVaultByIdAsync(targetResourceId);
             return kv;
         }
 
@@ -211,10 +251,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var kvName = namingContext.KeyVaultName(computeOptions.ComputeBaseName);
             var aksName = namingContext.AKSName(computeOptions.ComputeBaseName);
 
-            var client = _azureClientFactory.GenerateLiftrAzure();
+            var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
 
             var msiName = namingContext.MSIName(computeOptions.DataBaseName);
-            var regionalMsi = await client.GetMSIAsync(namingContext.ResourceGroupName(computeOptions.DataBaseName), msiName);
+            var regionalMsi = await liftrAzure.GetMSIAsync(namingContext.ResourceGroupName(computeOptions.DataBaseName), msiName);
             if (regionalMsi == null)
             {
                 var ex = new InvalidOperationException("Cannot find regional MSI with resource name: " + msiName);
@@ -222,8 +262,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 throw ex;
             }
 
-            var dbId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{namingContext.ResourceGroupName(computeOptions.DataBaseName)}/providers/Microsoft.DocumentDB/databaseAccounts/{namingContext.CosmosDBName(computeOptions.DataBaseName)}";
-            var db = await client.GetCosmosDBAsync(dbId);
+            var dbId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{namingContext.ResourceGroupName(computeOptions.DataBaseName)}/providers/Microsoft.DocumentDB/databaseAccounts/{namingContext.CosmosDBName(computeOptions.DataBaseName)}";
+            var db = await liftrAzure.GetCosmosDBAsync(dbId);
             if (db == null)
             {
                 var ex = new InvalidOperationException("Cannot find cosmos DB with resource Id: " + dbId);
@@ -231,8 +271,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 throw ex;
             }
 
-            var stor = await client.GetStorageAccountAsync(dataRGName, namingContext.StorageAccountName(computeOptions.DataBaseName));
-            if (stor == null)
+            var storageAccount = await liftrAzure.GetStorageAccountAsync(dataRGName, namingContext.StorageAccountName(computeOptions.DataBaseName));
+            if (storageAccount == null)
             {
                 var errMsg = $"Cannot find the storage with name {namingContext.StorageAccountName(computeOptions.DataBaseName)} in RG {dataRGName}.";
                 var ex = new InvalidOperationException(errMsg);
@@ -240,7 +280,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 throw ex;
             }
 
-            var centralKv = await client.GetKeyVaultByIdAsync(computeOptions.CentralKeyVaultResourceId);
+            var centralKv = await liftrAzure.GetKeyVaultByIdAsync(computeOptions.CentralKeyVaultResourceId);
             if (centralKv == null)
             {
                 var ex = new InvalidOperationException("Cannot find central key vault with resource Id: " + computeOptions.CentralKeyVaultResourceId);
@@ -261,7 +301,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 _logger.Information("Creating Resource Group ...");
                 try
                 {
-                    var rg = await client.CreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
+                    var rg = await liftrAzure.CreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
                     _logger.Information("Created Resource Group with Id {ResourceId}", rg.Id);
                 }
                 catch (DuplicateNameException ex)
@@ -272,7 +312,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 try
                 {
                     _logger.Information("Granting the identity binding access for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId} ...", regionalMsi.Id, aksInfo.AKSSPNObjectId);
-                    await client.Authenticated.RoleAssignments
+                    await liftrAzure.Authenticated.RoleAssignments
                         .Define(SdkContext.RandomGuid())
                         .ForObjectId(aksInfo.AKSSPNObjectId)
                         .WithBuiltInRole(BuiltInRole.Contributor)
@@ -285,10 +325,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     _logger.Information("There exists the same role assignment for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId}.", regionalMsi.Id, aksInfo.AKSSPNObjectId);
                 }
 
-                kv = await client.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
+                kv = await liftrAzure.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
 
-                await client.GrantSelfKeyVaultAdminAccessAsync(kv);
-                await client.GrantQueueContributorAsync(stor, regionalMsi);
+                await liftrAzure.GrantSelfKeyVaultAdminAccessAsync(kv);
+                await liftrAzure.GrantQueueContributorAsync(storageAccount, regionalMsi);
 
                 _logger.Information("Start adding access policy for msi to local kv.");
                 await kv.Update()
@@ -317,42 +357,26 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     var rpAssets = new RPAssetOptions();
                     var dbConnectionStrings = await db.ListConnectionStringsAsync();
                     rpAssets.CosmosDBConnectionString = dbConnectionStrings.ConnectionStrings[0].ConnectionString;
-                    rpAssets.StorageAccountName = stor.Name;
-
-                    var storageRGName = namingContext.ResourceGroupName(computeOptions.DataBaseName + "-dp");
-                    var storageRG = await client.GetResourceGroupAsync(storageRGName);
-                    if (storageRG != null)
-                    {
-                        var accounts = await client.ListStorageAccountAsync(storageRGName);
-                        if (accounts.Any())
-                        {
-                            rpAssets.DataPlaneStorageAccounts = accounts.Select(acc => acc.Name);
-                        }
-
-                        await client.GrantBlobContributorAsync(storageRG, regionalMsi);
-                    }
+                    rpAssets.StorageAccountName = storageAccount.Name;
 
                     if (computeOptions.DataPlaneSubscriptions != null)
                     {
-                        foreach (var subscrptionId in computeOptions.DataPlaneSubscriptions)
+                        var dpSubs = new List<DataPlaneSubscriptionInfo>();
+
+                        foreach (var dpSub in computeOptions.DataPlaneSubscriptions)
                         {
-                            try
+                            var dpSubInfo = new DataPlaneSubscriptionInfo()
                             {
-                                _logger.Information("Granting the MSI {MSIReourceId} contributor role to the subscription with {subscrptionId} ...", regionalMsi.Id, subscrptionId);
-                                await client.Authenticated.RoleAssignments
-                                    .Define(SdkContext.RandomGuid())
-                                    .ForObjectId(regionalMsi.GetObjectId())
-                                    .WithBuiltInRole(BuiltInRole.Contributor)
-                                    .WithSubscriptionScope(subscrptionId)
-                                    .CreateAsync();
-                            }
-                            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
-                            {
-                                _logger.Information("There exists the same role assignment for the MSI {MSIReourceId} to the subscription {subscrptionId}.", regionalMsi.Id, subscrptionId);
-                            }
+                                SubscriptionId = dpSub,
+                            };
+
+                            var az = _azureClientFactory.GenerateLiftrAzure(dpSub);
+                            var stors = await az.ListStorageAccountAsync(namingContext.ResourceGroupName(computeOptions.DataBaseName + "-dp"));
+                            dpSubInfo.StorageAccountIds = stors.Select(st => st.Id);
+                            dpSubs.Add(dpSubInfo);
                         }
 
-                        rpAssets.DataPlaneSubscriptions = computeOptions.DataPlaneSubscriptions;
+                        rpAssets.DataPlaneSubscriptions = dpSubs;
                     }
 
                     _logger.Information("Puting the RPAssetOptions in the key vault ...");
@@ -396,12 +420,12 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     }
                 }
 
-                var targetReousrceId = $"subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.ContainerService/managedClusters/{aksName}";
-                aks = await client.GetAksClusterAsync(targetReousrceId);
+                var targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.ContainerService/managedClusters/{aksName}";
+                aks = await liftrAzure.GetAksClusterAsync(targetResourceId);
                 if (aks == null)
                 {
                     _logger.Information("Creating AKS cluster ...");
-                    aks = await client.CreateAksClusterAsync(namingContext.Location, rgName, aksName, aksInfo.AKSRootUserName, aksInfo.AKSSSHPublicKey, aksInfo.AKSSPNClientId, aksSPNClientSecret.Value, aksInfo.AKSMachineType, aksInfo.AKSMachineCount, namingContext.Tags);
+                    aks = await liftrAzure.CreateAksClusterAsync(namingContext.Location, rgName, aksName, aksInfo.AKSRootUserName, aksInfo.AKSSSHPublicKey, aksInfo.AKSSPNClientId, aksSPNClientSecret.Value, aksInfo.AKSMachineType, aksInfo.AKSMachineCount, namingContext.Tags);
                     _logger.Information("Created AKS cluster with Id {ResourceId}", aks.Id);
                 }
                 else

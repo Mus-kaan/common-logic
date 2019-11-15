@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Azure.Core;
 using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Fluent;
@@ -32,22 +33,27 @@ namespace Microsoft.Liftr.Fluent
     internal class LiftrAzure : ILiftrAzure
     {
         public const string c_AspEnv = "ASPNETCORE_ENVIRONMENT";
+        private readonly LiftrAzureOptions _options;
         private readonly ILogger _logger;
 
         public LiftrAzure(
             string tenantId,
             string spnObjectId,
+            TokenCredential tokenCredential,
             AzureCredentials credentials,
             IAzure fluentClient,
             IAuthenticated authenticated,
+            LiftrAzureOptions options,
             ILogger logger)
         {
             TenantId = tenantId;
             SPNObjectId = spnObjectId;
-            AzureCredentials = credentials;
-            FluentClient = fluentClient;
-            Authenticated = authenticated;
-            _logger = logger;
+            TokenCredential = tokenCredential ?? throw new ArgumentNullException(nameof(tokenCredential));
+            AzureCredentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
+            FluentClient = fluentClient ?? throw new ArgumentNullException(nameof(fluentClient));
+            Authenticated = authenticated ?? throw new ArgumentNullException(nameof(authenticated));
+            _options = options ?? throw new ArgumentNullException(nameof(options));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public string TenantId { get; }
@@ -57,6 +63,8 @@ namespace Microsoft.Liftr.Fluent
         public IAzure FluentClient { get; }
 
         public IAuthenticated Authenticated { get; }
+
+        public TokenCredential TokenCredential { get; }
 
         public AzureCredentials AzureCredentials { get; }
 
@@ -108,13 +116,24 @@ namespace Microsoft.Liftr.Fluent
             return null;
         }
 
-        public async Task DeleteResourceGroupAsync(string rgName)
+        public async Task DeleteResourceGroupAsync(string rgName, bool noThrow = false)
         {
             _logger.Information("Deleteing resource group with name: " + rgName);
-            await FluentClient
+            try
+            {
+                await FluentClient
                 .ResourceGroups
                 .DeleteByNameAsync(rgName);
-            _logger.Information("Finished delete resource group with name: " + rgName);
+                _logger.Information("Finished delete resource group with name: " + rgName);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Cannot delete resource group with name {rgName}", rgName);
+                if (!noThrow)
+                {
+                    throw;
+                }
+            }
         }
 
         public async Task DeleteResourceGroupWithTagAsync(string tagName, string tagValue, Func<IReadOnlyDictionary<string, string>, bool> tagsFilter = null)
@@ -129,7 +148,7 @@ namespace Microsoft.Liftr.Fluent
             {
                 if (tagsFilter == null || tagsFilter.Invoke(rg.Tags) == true)
                 {
-                    tasks.Add(DeleteResourceGroupAsync(rg.Name));
+                    tasks.Add(DeleteResourceGroupAsync(rg.Name, noThrow: true));
                 }
             }
 
@@ -264,7 +283,10 @@ namespace Microsoft.Liftr.Fluent
         public Task GrantBlobContainerReaderAsync(IStorageAccount storageAccount, string containerName, IIdentity msi)
             => GrantBlobContainerReaderAsync(storageAccount, containerName, msi.GetObjectId());
 
-        public async Task GrantQueueContributorAsync(IStorageAccount storageAccount, IIdentity msi)
+        public Task GrantQueueContributorAsync(IStorageAccount storageAccount, IIdentity msi)
+            => GrantQueueContributorAsync(storageAccount, msi.GetObjectId());
+
+        public async Task GrantQueueContributorAsync(IStorageAccount storageAccount, string objectId)
         {
             try
             {
@@ -272,11 +294,53 @@ namespace Microsoft.Liftr.Fluent
                 var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/974c5e8b-45b9-4653-ba55-5f855dd0fb88";
                 await Authenticated.RoleAssignments
                               .Define(SdkContext.RandomGuid())
-                              .ForObjectId(msi.GetObjectId())
+                              .ForObjectId(objectId)
                               .WithRoleDefinition(roleDefinitionId)
                               .WithScope(storageAccount.Id)
                               .CreateAsync();
-                _logger.Information("Granted 'Storage Queue Data Contributor' storage account '{reousrceId}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}", storageAccount.Id, msi.GetObjectId(), roleDefinitionId);
+                _logger.Information("Granted 'Storage Queue Data Contributor' storage account '{resourceId}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}", storageAccount.Id, objectId, roleDefinitionId);
+            }
+            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            {
+                _logger.Information("There exists the same role assignment.");
+            }
+        }
+
+        public async Task DelegateStorageKeyOperationToKeyVaultAsync(IStorageAccount storageAccount)
+        {
+            try
+            {
+                // Storage Account Key Operator Service Role
+                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/81a9662b-bebf-436f-a333-f67b29880f12";
+                _logger.Information("Assigning 'Storage Account Key Operator Service Role' {roleDefinitionId} to Key Vault's First party App with objectId: {objectId} ...", roleDefinitionId, _options.AzureKeyVaultObjectId);
+                await Authenticated.RoleAssignments
+                              .Define(SdkContext.RandomGuid())
+                              .ForObjectId(_options.AzureKeyVaultObjectId)
+                              .WithRoleDefinition(roleDefinitionId)
+                              .WithScope(storageAccount.Id)
+                              .CreateAsync();
+                _logger.Information("Granted 'Storage Account Key Operator Service Role' {roleDefinitionId} to Key Vault's First party App with objectId: {objectId}", roleDefinitionId, _options.AzureKeyVaultObjectId);
+            }
+            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            {
+                _logger.Information("There exists the same role assignment.");
+            }
+        }
+
+        public async Task DelegateStorageKeyOperationToKeyVaultAsync(IResourceGroup rg)
+        {
+            try
+            {
+                // Storage Account Key Operator Service Role
+                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/81a9662b-bebf-436f-a333-f67b29880f12";
+                _logger.Information("Assigning 'Storage Account Key Operator Service Role' {roleDefinitionId} to Key Vault's First party App with objectId: {objectId} on rg: {rgId} ...", roleDefinitionId, _options.AzureKeyVaultObjectId, rg.Id);
+                await Authenticated.RoleAssignments
+                              .Define(SdkContext.RandomGuid())
+                              .ForObjectId(_options.AzureKeyVaultObjectId)
+                              .WithRoleDefinition(roleDefinitionId)
+                              .WithResourceGroupScope(rg)
+                              .CreateAsync();
+                _logger.Information("Granted 'Storage Account Key Operator Service Role' {roleDefinitionId} to Key Vault's First party App with objectId: {objectId} on rg: {rgId}", roleDefinitionId, _options.AzureKeyVaultObjectId, rg.Id);
             }
             catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
             {

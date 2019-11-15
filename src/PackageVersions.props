@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <PackageVersion_Azure_Identity>1.0.0</PackageVersion_Azure_Identity>
+    <PackageVersion_Azure_Storage_Blobs>12.0.0</PackageVersion_Azure_Storage_Blobs>
+    <PackageVersion_Azure_Storage_Queues>12.0.0</PackageVersion_Azure_Storage_Queues>
     <PackageVersion_CommandLineParser>2.6.0</PackageVersion_CommandLineParser>
     <PackageVersion_Microsoft_ApplicationInsights>2.11.0</PackageVersion_Microsoft_ApplicationInsights>
     <PackageVersion_Microsoft_ApplicationInsights_AspNetCore>2.7.1</PackageVersion_Microsoft_ApplicationInsights_AspNetCore>

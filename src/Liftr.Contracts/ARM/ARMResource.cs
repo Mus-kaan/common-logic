@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Liftr.Contracts.ARM
@@ -10,7 +9,7 @@ namespace Microsoft.Liftr.Contracts.ARM
     /// <summary>
     /// An Azure resource.
     /// </summary>
-    public class ARMResource : IARMResource
+    public abstract class ARMResource : IARMResource
     {
         /// <summary>
         /// The resource ID.
@@ -23,13 +22,9 @@ namespace Microsoft.Liftr.Contracts.ARM
         public string Name { get; set; }
 
         /// <summary>
-        /// The type of the resource. Must be overwridden.
+        /// The type of the resource.
         /// </summary>
-        public virtual string Type
-        {
-            get { throw new NotSupportedException(); }
-            set { throw new NotSupportedException(); }
-        }
+        public abstract string Type { get; set; }
 
         /// <summary>
         /// The tags of the resource.

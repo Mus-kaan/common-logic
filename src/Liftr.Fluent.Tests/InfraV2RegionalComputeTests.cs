@@ -54,7 +54,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                         model.SSLCert,
                         model.FirstPartyCert);
 
-                    // Check global resource group.
+                    // Check resource group.
                     {
                         var rg = await client.GetResourceGroupAsync(scope.ResourceGroupName);
                         Assert.Equal(scope.ResourceGroupName, rg.Name);

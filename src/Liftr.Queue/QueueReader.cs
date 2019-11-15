@@ -2,21 +2,25 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Storage.Queue;
+using Azure.Storage.Queues;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Logging;
 using Serilog.Events;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Queue.Tests")]
 
 namespace Microsoft.Liftr.Queue
 {
     public sealed class QueueReader : IQueueReader
     {
-        private readonly CloudQueue _queue;
+        private readonly QueueClient _queue;
         private readonly QueueReaderOptions _options;
         private readonly ITimeSource _timeSource;
         private readonly Serilog.ILogger _logger;
@@ -27,7 +31,7 @@ namespace Microsoft.Liftr.Queue
         private TimeSpan _waitTime = s_minWaitTime;
 
         public QueueReader(
-            CloudQueue queue,
+            QueueClient queue,
             QueueReaderOptions options,
             ITimeSource timeSource,
             Serilog.ILogger logger)
@@ -39,6 +43,8 @@ namespace Microsoft.Liftr.Queue
 
             options.CheckValues();
         }
+
+        internal Exception ReaderException { get; private set; }
 
         public async Task StartListeningAsync(Func<LiftrQueueMessage, QueueMessageProcessingResult, CancellationToken, Task> messageProcessingCallback, CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -56,12 +62,13 @@ namespace Microsoft.Liftr.Queue
                     TimeSpan waitTime = _waitTime;
                     try
                     {
-                        var queueMessage = await _queue.GetMessageAsync(cancellationToken);
+                        var messages = (await _queue.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromSeconds(40), cancellationToken: cancellationToken)).Value;
+                        var queueMessage = messages?.FirstOrDefault();
 
                         if (queueMessage != null)
                         {
                             waitTime = GetWaitTime(true);
-                            var message = queueMessage.AsString.FromJson<LiftrQueueMessage>();
+                            var message = queueMessage.MessageText.FromJson<LiftrQueueMessage>();
 
                             LogEventLevel? overrideLevel = null;
                             if (message.MsgTelemetryContext != null)
@@ -81,7 +88,7 @@ namespace Microsoft.Liftr.Queue
 
                             try
                             {
-                                using (new QueueMessageLeaseScope(_queue, queueMessage, _logger))
+                                using (var lease = new QueueMessageLeaseScope(_queue, queueMessage.MessageId, queueMessage.PopReceipt, _logger))
                                 using (var logFilterOverrideScope = new LogFilterOverrideScope(overrideLevel))
                                 using (new LogContextPropertyScope("LiftrTrackingId", message.MsgTelemetryContext?.ARMRequestTrackingId))
                                 using (new LogContextPropertyScope("LiftrCorrelationId", message.MsgTelemetryContext?.CorrelationId))
@@ -108,7 +115,15 @@ namespace Microsoft.Liftr.Queue
                                             var endTme = _timeSource.UtcNow;
                                             var duration = endTme - message.CreatedAt.ParseZuluDateTime();
                                             _logger.Information("Finished processing queue message. MsgId: {MsgId}, DurationInSeconds: {DurationInSeconds}, CreatedAt:{CreatedAt}, FinishedAt: {FinishedAt}", message.MsgId, duration.TotalSeconds, message.CreatedAt, endTme.ToZuluString());
-                                            await _queue.DeleteMessageAsync(queueMessage, cancellationToken);
+                                            try
+                                            {
+                                                await lease.SyncMutex.WaitAsync(cancellationToken);
+                                                await _queue.DeleteMessageAsync(queueMessage.MessageId, lease.PopReceipt);
+                                            }
+                                            finally
+                                            {
+                                                lease.SyncMutex.Release();
+                                            }
                                         }
                                         else
                                         {
@@ -135,6 +150,7 @@ namespace Microsoft.Liftr.Queue
 #pragma warning restore CA1031 // Do not catch general exception types
                     {
                         _logger.Error(ex, "Issue happend at processing essage from queue.");
+                        ReaderException = ex;
                     }
 
                     await Task.Delay(waitTime, cancellationToken);

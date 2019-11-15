@@ -10,6 +10,7 @@
     <EmbeddedResource Include="**\*.json"></EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="$(PackageVersion_Azure_Identity)" />
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="$(PackageVersion_Microsoft_Azure_KeyVault)" />
     <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="$(PackageVersion_Microsoft_Azure_Services_AppAuthentication)" />
     <PackageReference Include="Microsoft.CSharp" Version="$(PackageVersion_Microsoft_CSharp)" />

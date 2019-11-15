@@ -5,6 +5,7 @@
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Auth;
 using Microsoft.Liftr.Fluent;
@@ -26,14 +27,14 @@ namespace Microsoft.Liftr
         public TestResourceGroupScope(string resourceGroupName, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "")
         {
             GenerateLogger(filePath, memberName);
-            AzFactory = new LiftrAzureFactory(Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.GetAzureCredentials);
+            AzFactory = new LiftrAzureFactory(Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
             ResourceGroupName = resourceGroupName;
         }
 
         public TestResourceGroupScope(string baseName, ITestOutputHelper output, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "")
         {
             GenerateLogger(filePath, memberName, output);
-            AzFactory = new LiftrAzureFactory(Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.GetAzureCredentials);
+            AzFactory = new LiftrAzureFactory(Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
             ResourceGroupName = SdkContext.RandomResourceName(baseName, 25);
         }
 
@@ -45,7 +46,7 @@ namespace Microsoft.Liftr
             }
 
             GenerateLogger(filePath, memberName, output);
-            AzFactory = new LiftrAzureFactory(Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.GetAzureCredentials);
+            AzFactory = new LiftrAzureFactory(Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
             ResourceGroupName = namingContext.ResourceGroupName(baseName);
             TestCommon.AddCommonTags(namingContext.Tags);
         }
@@ -66,16 +67,12 @@ namespace Microsoft.Liftr
 
         public string ResourceGroupName { get; }
 
-        public async Task<CloudStorageAccount> GetTestStorageAccountAsync()
+        public async Task<IStorageAccount> GetTestStorageAccountAsync()
         {
-            var name = SdkContext.RandomResourceName("ut", 15);
+            var storageAccountName = SdkContext.RandomResourceName("ut", 15);
             var az = AzFactory.GenerateLiftrAzure();
-            var rg = await az.GetOrCreateResourceGroupAsync(TestCommon.Location, ResourceGroupName, TestCommon.Tags);
-            var stor = await az.GetOrCreateStorageAccountAsync(TestCommon.Location, ResourceGroupName, name, TestCommon.Tags);
-            var keys = await stor.GetKeysAsync();
-            var key = keys[0];
-            var cred = new StorageCredentials(name, key.Value, key.KeyName);
-            return new CloudStorageAccount(cred, useHttps: true);
+            await az.GetOrCreateResourceGroupAsync(TestCommon.Location, ResourceGroupName, TestCommon.Tags);
+            return await az.GetOrCreateStorageAccountAsync(TestCommon.Location, ResourceGroupName, storageAccountName, TestCommon.Tags);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]

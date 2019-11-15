@@ -1,0 +1,8 @@
+{
+  "partnerName": "IncrediBuild",
+  "shortPartnerName": "ib",
+  "environment": "Test",
+  "locationStr": "eastus",
+  "DataBaseName": "data1910",
+  "DataPlaneStorageCount": 3
+}

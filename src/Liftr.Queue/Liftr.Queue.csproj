@@ -7,7 +7,7 @@
     <RootNamespace>Microsoft.Liftr.Queue</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.Storage.Queue" Version="$(PackageVersion_Microsoft_Azure_Storage_Queue)" />
+    <PackageReference Include="Azure.Storage.Queues" Version="$(PackageVersion_Azure_Storage_Queues)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />

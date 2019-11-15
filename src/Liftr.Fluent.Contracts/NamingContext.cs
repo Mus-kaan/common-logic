@@ -82,7 +82,7 @@ namespace Microsoft.Liftr.Fluent.Contracts
             => GenerateCommonName(baseName, "msi");
 
         public string KeyVaultName(string baseName)
-            => GenerateCommonName(baseName, "kv");
+            => GenerateCommonName(baseName, "kv", delimiter: string.Empty);
 
         public string WebAppName(string baseName)
             => GenerateCommonName(baseName);

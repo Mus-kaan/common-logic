@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Azure.Core;
 using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Fluent;
@@ -26,6 +27,8 @@ namespace Microsoft.Liftr.Fluent
 
         IAuthenticated Authenticated { get; }
 
+        TokenCredential TokenCredential { get; }
+
         AzureCredentials AzureCredentials { get; }
 
         string TenantId { get; }
@@ -39,7 +42,7 @@ namespace Microsoft.Liftr.Fluent
 
         Task<IResourceGroup> GetResourceGroupAsync(string rgName);
 
-        Task DeleteResourceGroupAsync(string rgName);
+        Task DeleteResourceGroupAsync(string rgName, bool noThrow = false);
 
         Task DeleteResourceGroupWithTagAsync(string tagName, string tagValue, Func<IReadOnlyDictionary<string, string>, bool> tagsFilter = null);
         #endregion Resource Group
@@ -66,6 +69,12 @@ namespace Microsoft.Liftr.Fluent
         Task GrantBlobContainerReaderAsync(IStorageAccount storageAccount, string containerName, IIdentity msi);
 
         Task GrantQueueContributorAsync(IStorageAccount storageAccount, IIdentity msi);
+
+        Task GrantQueueContributorAsync(IStorageAccount storageAccount, string objectId);
+
+        Task DelegateStorageKeyOperationToKeyVaultAsync(IStorageAccount storageAccount);
+
+        Task DelegateStorageKeyOperationToKeyVaultAsync(IResourceGroup rg);
         #endregion Storage Account
 
         #region Network

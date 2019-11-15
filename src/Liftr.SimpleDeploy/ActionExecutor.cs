@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Azure.Core;
+using Azure.Identity;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
@@ -77,6 +79,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 _logger.Information("ActionExecutor Action:{ExeAction}", _options.Action);
                 _logger.Information("RunnerCommandOptions: {@RunnerCommandOptions}", _options);
 
+                TokenCredential tokenCredential = null;
                 Func<AzureCredentials> azureCredentialsProvider = null;
                 KeyVaultClient kvClient = null;
                 if (!string.IsNullOrEmpty(_options.AuthFile))
@@ -86,6 +89,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     kvClient = KeyVaultClientFactory.FromClientIdAndSecret(authContract.ClientId, authContract.ClientSecret);
 
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory.FromFile(_options.AuthFile);
+                    tokenCredential = new ClientSecretCredential(authContract.TenantId, authContract.ClientId, authContract.ClientSecret);
                 }
                 else
                 {
@@ -95,6 +99,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory
                     .FromMSI(new MSILoginInformation(MSIResourceType.VirtualMachine), AzureEnvironment.AzureGlobalCloud, _envOptions.TenantId)
                     .WithDefaultSubscription(_options.SubscriptionId);
+                    tokenCredential = new ManagedIdentityCredential();
                 }
 
                 if (_options.Action == ActionType.UpdateAKSPublicIpInTrafficManager)
@@ -105,7 +110,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     }
                 }
 
-                LiftrAzureFactory azFactory = new LiftrAzureFactory(_logger, _envOptions.TenantId, _envOptions.SPNObjectId, _options.SubscriptionId, azureCredentialsProvider);
+                LiftrAzureFactory azFactory = new LiftrAzureFactory(_logger, _envOptions.TenantId, _envOptions.SPNObjectId, _options.SubscriptionId, tokenCredential, azureCredentialsProvider, _envOptions.LiftrAzureOptions);
 
                 _ = RunActionAsync(kvClient, azFactory);
             }
@@ -204,7 +209,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     }
                     else if (_options.Action == ActionType.CreateOrUpdateRegionalData)
                     {
-                        await infra.CreateOrUpdateRegionalDataRGAsync(dataOptions.DataBaseName, namingContext, dataOptions.DataPlaneStorageCount);
+                        await infra.CreateOrUpdateRegionalDataRGAsync(dataOptions.DataBaseName, namingContext, LoadDataPlaneSubscriptions(), dataOptions.DataPlaneStorageCount);
                         _logger.Information("Successfully managed regional data resources.");
                     }
                     else if (_options.Action == ActionType.CreateOrUpdateRegionalCompute)
@@ -215,7 +220,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                             ComputeBaseName = computeOptions.ComputeBaseName,
                             SecretPrefix = computeOptions.SecretPrefix,
                             CopyKVSecretsWithPrefix = namingContext.PartnerName,
-                            DataPlaneSubscriptions = computeOptions.DataPlaneSubscriptions,
+                            DataPlaneSubscriptions = LoadDataPlaneSubscriptions(),
                         };
 
                         if (!string.IsNullOrEmpty(computeOptions.GlobalBaseName))
@@ -313,6 +318,28 @@ namespace Microsoft.Liftr.SimpleDeploy
                     _appLifetime.StopApplication();
                 }
             }
+        }
+
+        private IEnumerable<string> LoadDataPlaneSubscriptions()
+        {
+            List<string> result = new List<string>();
+            if (!string.IsNullOrEmpty(_options.DataPlaneSubscriptionsFile))
+            {
+                string line;
+                var file = new StreamReader(_options.DataPlaneSubscriptionsFile);
+                while ((line = file.ReadLine()) != null)
+                {
+                    if (Guid.TryParse(line, out var subId))
+                    {
+                        result.Add(subId.ToString());
+                    }
+                }
+
+                file.Close();
+            }
+
+            _logger.Information("Data plane subscriptions:{@daSubscriptions}", result);
+            return result;
         }
     }
 }

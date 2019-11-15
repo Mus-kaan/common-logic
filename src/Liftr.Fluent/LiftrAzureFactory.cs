@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Azure.Core;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Serilog;
@@ -13,11 +14,19 @@ namespace Microsoft.Liftr.Fluent
     {
         private readonly ILogger _logger;
         private readonly Func<AzureCredentials> _credentialsProvider;
+        private readonly LiftrAzureOptions _options;
         private readonly string _tenantId;
         private readonly string _spnObjectId;
         private readonly string _subscriptionId;
 
-        public LiftrAzureFactory(ILogger logger, string tenantId, string spnObjectId, string subscriptionId, Func<AzureCredentials> credentialsProvider)
+        public LiftrAzureFactory(
+            ILogger logger,
+            string tenantId,
+            string spnObjectId,
+            string subscriptionId,
+            TokenCredential tokenCredential,
+            Func<AzureCredentials> credentialsProvider,
+            LiftrAzureOptions options = null)
         {
             if (string.IsNullOrEmpty(spnObjectId))
             {
@@ -38,8 +47,12 @@ namespace Microsoft.Liftr.Fluent
             _spnObjectId = spnObjectId;
             _subscriptionId = subscriptionId;
             _logger = logger;
+            TokenCredential = tokenCredential ?? throw new ArgumentNullException(nameof(tokenCredential));
             _credentialsProvider = credentialsProvider ?? throw new ArgumentNullException(nameof(credentialsProvider));
+            _options = options ?? new LiftrAzureOptions();
         }
+
+        public TokenCredential TokenCredential { get; }
 
         public ILiftrAzure GenerateLiftrAzure(string subscriptionId = null, HttpLoggingDelegatingHandler.Level logLevel = HttpLoggingDelegatingHandler.Level.Basic)
         {
@@ -55,7 +68,7 @@ namespace Microsoft.Liftr.Fluent
 
             var azure = authenticated.WithSubscription(subscriptionId);
 
-            var client = new LiftrAzure(_tenantId, _spnObjectId, _credentialsProvider.Invoke(), azure, authenticated, _logger);
+            var client = new LiftrAzure(_tenantId, _spnObjectId, TokenCredential, _credentialsProvider.Invoke(), azure, authenticated, _options, _logger);
 
             return client;
         }

@@ -3,7 +3,7 @@
   "shortPartnerName": "ngx",
   "environment": "Test",
   "locationStr": "eastus",
-  "GalleryBaseName": "sbi0920",
+  "GalleryBaseName": "sbi191101",
   "ImageName": "NgxDataPlane",
-  "ImageVersionTTLInDays": 3
+  "ImageVersionTTLInDays": 12
 }

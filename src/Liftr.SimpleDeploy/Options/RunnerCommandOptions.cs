@@ -29,6 +29,9 @@ namespace Microsoft.Liftr.SimpleDeploy
         [Option("authFile", Required = false, HelpText = "Use auth file to login instead of managed identity.")]
         public string AuthFile { get; set; }
 
+        [Option("dpFile", Required = false, HelpText = "File of listing all the data plane subscriptions.")]
+        public string DataPlaneSubscriptionsFile { get; set; }
+
         [Option('l', "svcLabel", Required = false, HelpText = "The AKS service label that we will try to get the IP address of.")]
         public string AKSAppSvcLabel { get; set; }
     }

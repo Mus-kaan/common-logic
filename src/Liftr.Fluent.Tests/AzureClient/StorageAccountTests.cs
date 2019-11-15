@@ -35,6 +35,9 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var st = await az.GetOrCreateStorageAccountAsync(TestCommon.Location, scope.ResourceGroupName, name, TestCommon.Tags);
                     var containerName1 = "test-containername1";
 
+                    await az.DelegateStorageKeyOperationToKeyVaultAsync(rg);
+                    await az.DelegateStorageKeyOperationToKeyVaultAsync(st);
+
                     var connectionStr = await st.GetPrimaryConnectionStringAsync();
                     var stor = CloudStorageAccount.Parse(connectionStr);
                     CloudBlobClient blobClient = stor.CreateCloudBlobClient();

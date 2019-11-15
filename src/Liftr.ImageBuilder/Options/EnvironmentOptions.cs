@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.Fluent;
 
 namespace Microsoft.Liftr.ImageBuilder
 {
@@ -15,5 +16,7 @@ namespace Microsoft.Liftr.ImageBuilder
         public ArtifactStoreOptions ArtifactOptions { get; set; }
 
         public SBIMoverOptions SBIMoverOptions { get; set; }
+
+        public LiftrAzureOptions LiftrAzureOptions { get; set; }
     }
 }

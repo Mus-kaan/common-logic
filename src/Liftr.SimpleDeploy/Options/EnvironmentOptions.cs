@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
 
@@ -15,5 +16,7 @@ namespace Microsoft.Liftr.SimpleDeploy
         public CertificateOptions FirstPartyCert { get; set; }
 
         public AKSInfo AKSInfo { get; set; }
+
+        public LiftrAzureOptions LiftrAzureOptions { get; set; }
     }
 }

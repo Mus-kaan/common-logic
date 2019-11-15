@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Azure.Identity;
+using Azure.Storage.Blobs;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Azure.Storage;
@@ -29,12 +31,12 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
         [Fact]
         public async Task VerifyArtifactsCleanUpAsync()
         {
-            MockTimeSource ts = new MockTimeSource();
+            MockTimeSource timeSource = new MockTimeSource();
             var namingContext = new NamingContext("ArtifactStore", "arti", EnvironmentType.Test, TestCommon.Location);
             TestCommon.AddCommonTags(namingContext.Tags);
             var baseName = SdkContext.RandomResourceName(string.Empty, 20).Substring(0, 8);
 
-            var ops = new ArtifactStoreOptions()
+            var artifactOptions = new ArtifactStoreOptions()
             {
                 ContainerName = "artifacts",
                 OldArtifactTTLInDays = 7,
@@ -44,21 +46,30 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
             {
                 try
                 {
-                    var az = scope.AzFactory.GenerateLiftrAzure();
-                    await az.CreateResourceGroupAsync(namingContext.Location, namingContext.ResourceGroupName(baseName), namingContext.Tags);
-                    var stor = await az.CreateStorageAccountAsync(namingContext.Location, namingContext.ResourceGroupName(baseName), namingContext.StorageAccountName(baseName), namingContext.Tags);
-                    var storageAccount = await GetAccountAsync(stor);
+                    var storageAccount = await scope.GetTestStorageAccountAsync();
 
-                    var store = new ArtifactStore(ops, ts, scope.Logger);
+                    string blobEndpoint = $"https://{storageAccount.Name}.blob.core.windows.net";
+                    var cred = new ClientSecretCredential(TestCredentials.TenantId, TestCredentials.ClientId, TestCredentials.ClientSecret);
+                    BlobServiceClient blobClient = new BlobServiceClient(new Uri(blobEndpoint), cred);
+                    var containerClient = (await blobClient.CreateBlobContainerAsync(artifactOptions.ContainerName)).Value;
+                    var key = (await blobClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(7))).Value;
+
+                    var store = new ArtifactStore(
+                        storageAccount.Name,
+                        key,
+                        containerClient,
+                        artifactOptions,
+                        timeSource,
+                        scope.Logger);
 
                     for (int i = 0; i < 5; i++)
                     {
-                        await store.UploadBuildArtifactsAndGenerateReadSASAsync(storageAccount, "packer.tar");
-                        ts.Add(TimeSpan.FromSeconds(123));
+                        await store.UploadBuildArtifactsAndGenerateReadSASAsync("packer.tar");
+                        timeSource.Add(TimeSpan.FromSeconds(123));
                     }
 
-                    ts.Add(TimeSpan.FromDays(40));
-                    var deletedCount = await store.CleanUpOldArtifactsAsync(storageAccount);
+                    timeSource.Add(TimeSpan.FromDays(40));
+                    var deletedCount = await store.CleanUpOldArtifactsAsync();
 
                     Assert.Equal(5, deletedCount);
                 }
@@ -68,14 +79,6 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                     throw;
                 }
             }
-        }
-
-        private async Task<CloudStorageAccount> GetAccountAsync(IStorageAccount storageAccount)
-        {
-            var keys = await storageAccount.GetKeysAsync();
-            var key = keys[0];
-            var cred = new StorageCredentials(storageAccount.Name, key.Value, key.KeyName);
-            return new CloudStorageAccount(cred, useHttps: true);
         }
     }
 }

@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Storage.Queue;
+using Azure.Storage.Queues;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DiagnosticSource;
 using System;
@@ -13,13 +13,13 @@ namespace Microsoft.Liftr.Queue
 {
     public sealed class QueueWriter : IQueueWriter
     {
-        private readonly CloudQueue _queue;
+        private readonly QueueClient _queue;
         private readonly ITimeSource _timeSource;
         private readonly Serilog.ILogger _logger;
         private readonly string _msgIdPrefix;
         private int _msgCount = 0;
 
-        public QueueWriter(CloudQueue queue, ITimeSource timeSource, Serilog.ILogger logger)
+        public QueueWriter(QueueClient queue, ITimeSource timeSource, Serilog.ILogger logger)
         {
             _queue = queue ?? throw new ArgumentNullException(nameof(queue));
             _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
@@ -43,8 +43,7 @@ namespace Microsoft.Liftr.Queue
                 CreatedAt = _timeSource.UtcNow.ToZuluString(),
             };
 
-            var qMsg = new CloudQueueMessage(msg.ToJson());
-            await _queue.AddMessageAsync(qMsg, cancellationToken);
+            await _queue.SendMessageAsync(msg.ToJson(), timeToLive: TimeSpan.FromMinutes(60));
             _logger.Debug("Added message with Id 'MsgId' in queue.", msg.MsgId);
         }
     }

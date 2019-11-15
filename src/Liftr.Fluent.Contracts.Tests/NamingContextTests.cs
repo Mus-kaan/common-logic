@@ -21,7 +21,7 @@ namespace Microsoft.Liftr.Fluent.Contracts.Tests
 
             {
                 var name = context.KeyVaultName("kvmoniker");
-                Assert.Equal("pnyc-df-kvmoniker-cus-kv", name);
+                Assert.Equal("pnycdfkvmonikercuskv", name);
             }
 
             {

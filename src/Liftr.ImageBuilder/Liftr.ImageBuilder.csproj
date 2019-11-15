@@ -8,8 +8,10 @@
     <RootNamespace>Microsoft.Liftr.ImageBuilder</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="$(PackageVersion_CommandLineParser)" />
+    <PackageReference Include="Azure.Identity" Version="$(PackageVersion_Azure_Identity)" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="$(PackageVersion_Azure_Storage_Blobs)" />
     <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="$(PackageVersion_Microsoft_Azure_Storage_Blob)" />
+    <PackageReference Include="CommandLineParser" Version="$(PackageVersion_CommandLineParser)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />

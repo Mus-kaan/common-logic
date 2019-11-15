@@ -7,6 +7,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -30,6 +31,8 @@ namespace Microsoft.Liftr.Fluent.Tests
             var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USWest);
             TestCommon.AddCommonTags(context.Tags);
 
+            var dps = new List<string> { TestCredentials.SubscriptionId };
+
             var baseName = "data";
             var rgName = context.ResourceGroupName(baseName);
 
@@ -41,7 +44,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var client = globalScope.Client;
 
                     // This will take a long time. Be patient. About 6 minutes.
-                    (_, _, var db, var tm, var kv, _) = await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, 5);
+                    (_, _, var db, var tm, var kv) = await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dps, 5);
 
                     // Check global resource group.
                     {
@@ -58,7 +61,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     }
 
                     // Same deployment will not throw exception.
-                    await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, 5);
+                    await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dps, 5);
                 }
                 catch (Exception ex)
                 {

@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Azure.Core;
+using Azure.Storage.Blobs;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.Compute.Fluent;
 using Microsoft.Azure.Management.Compute.Fluent.Models;
@@ -11,8 +13,6 @@ using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.Storage.Fluent;
-using Microsoft.Azure.Storage;
-using Microsoft.Azure.Storage.Auth;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
@@ -24,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -52,14 +51,15 @@ namespace Microsoft.Liftr.ImageBuilder
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<(IResourceGroup, IStorageAccount, IVault, IGallery, IGalleryImage)> CreateOrUpdateInfraAsync(ImageBuilderOptions imgOptions, string azureVMImageBuilderObjectId, string kvName)
+        public async Task<(IResourceGroup, IStorageAccount, IVault, IGallery, IGalleryImage)> CreateOrUpdateInfraAsync(
+            ImageBuilderOptions imgOptions,
+            string azureVMImageBuilderObjectId,
+            string kvName)
         {
             if (imgOptions == null)
             {
                 throw new ArgumentNullException(nameof(imgOptions));
             }
-
-            imgOptions.CheckValid();
 
             var liftrAzure = _azFactory.GenerateLiftrAzure();
 
@@ -67,6 +67,7 @@ namespace Microsoft.Liftr.ImageBuilder
             var storageAccount = await liftrAzure.GetOrCreateStorageAccountAsync(imgOptions.Location, imgOptions.ResourceGroupName, imgOptions.StorageAccountName, imgOptions.Tags);
             var kv = await liftrAzure.GetOrCreateKeyVaultAsync(imgOptions.Location, imgOptions.ResourceGroupName, kvName, imgOptions.Tags);
             await liftrAzure.GrantSelfKeyVaultAdminAccessAsync(kv);
+            await liftrAzure.DelegateStorageKeyOperationToKeyVaultAsync(storageAccount);
 
             try
             {
@@ -95,12 +96,11 @@ namespace Microsoft.Liftr.ImageBuilder
 
         public async Task MoveSBIToOurStorageAsync(ImageBuilderOptions imgOptions, SBIMoverOptions moverOptions, string kvId, KeyVaultClient kvClient)
         {
+            // TODO: remove this code path, after SBI gallery is supported in AME.
             if (imgOptions == null)
             {
                 throw new ArgumentNullException(nameof(imgOptions));
             }
-
-            imgOptions.CheckValid();
 
             var liftrAzure = _azFactory.GenerateLiftrAzure();
             var kv = await liftrAzure.GetKeyVaultByIdAsync(kvId);
@@ -124,7 +124,12 @@ namespace Microsoft.Liftr.ImageBuilder
                     throw;
                 }
 
-                var artifactStorageAcct = await GetArtifactStorageAccountAsync(imgOptions);
+                var stor = await GetArtifactStorageAccountAsync(imgOptions);
+                var keys = await stor.GetKeysAsync();
+                var key = keys[0];
+                var cred = new Azure.Storage.Auth.StorageCredentials(imgOptions.StorageAccountName, key.Value, key.KeyName);
+                var artifactStorageAcct = new Azure.Storage.CloudStorageAccount(cred, useHttps: true);
+
                 var mover = new SBIVHDMover(_logger);
                 var vhds = await mover.CopyRegistryInfoAsync(sbiRegistryDownloadToken, moverOptions, artifactStorageAcct);
 
@@ -152,8 +157,6 @@ namespace Microsoft.Liftr.ImageBuilder
                 throw new ArgumentNullException(nameof(imgOptions));
             }
 
-            imgOptions.CheckValid();
-
             ImageGalleryClient galleryClient = new ImageGalleryClient(_logger);
             var imgVersion = await galleryClient.GetImageVersionAsync(_azFactory.GenerateLiftrAzure().FluentClient, imgOptions.ResourceGroupName, imgOptions.GalleryName, sbiVersion);
             if (imgVersion == null)
@@ -172,8 +175,6 @@ namespace Microsoft.Liftr.ImageBuilder
             {
                 throw new ArgumentNullException(nameof(imgOptions));
             }
-
-            imgOptions.CheckValid();
 
             if (storeOptions == null)
             {
@@ -206,19 +207,15 @@ namespace Microsoft.Liftr.ImageBuilder
 
             _logger.Information("Corresponding docker image info: {@imageMeta}", imageMeta);
 
-            var store = new ArtifactStore(storeOptions, _timeSource, _logger);
-
-            var storageAccount = await GetArtifactStorageAccountAsync(imgOptions);
-            _logger.Information("retrieved the storage account with name {storageAccountName}", imgOptions.StorageAccountName);
-
-            var cleanupCount = await store.CleanUpOldArtifactsAsync(storageAccount);
+            var store = await GetArtifactStoreAsync(imgOptions, storeOptions);
+            var cleanupCount = await store.CleanUpOldArtifactsAsync();
             _logger.Information("Removed old artifacts count: {cleanupCount}", cleanupCount);
 
-            var artifactUrlWithSAS = await store.UploadBuildArtifactsAndGenerateReadSASAsync(storageAccount, artifactPath);
+            var artifactUrlWithSAS = await store.UploadBuildArtifactsAndGenerateReadSASAsync(artifactPath);
             _logger.Information("uploaded the file {filePath} and generated the url with the SAS token.", artifactPath);
 
             var templateName = imageMeta.BuildTag;
-            var generatedTemplate = GenerateImageTemplate(imgOptions, artifactUrlWithSAS, imageMeta, srcImgVersionId, imgOptions.Location, templateName);
+            var generatedTemplate = GenerateImageTemplate(imgOptions, artifactUrlWithSAS.ToString(), imageMeta, srcImgVersionId, imgOptions.Location, templateName);
 
             ImageGalleryClient galleryClient = new ImageGalleryClient(_logger);
             var az = _azFactory.GenerateLiftrAzure();
@@ -268,7 +265,7 @@ namespace Microsoft.Liftr.ImageBuilder
             }
         }
 
-        private async Task<CloudStorageAccount> GetArtifactStorageAccountAsync(ImageBuilderOptions imgOptions)
+        private async Task<IStorageAccount> GetArtifactStorageAccountAsync(ImageBuilderOptions imgOptions)
         {
             var liftrAzure = _azFactory.GenerateLiftrAzure();
             _logger.Information("Getting storage account with name {storageAccountName}", imgOptions.StorageAccountName);
@@ -281,10 +278,27 @@ namespace Microsoft.Liftr.ImageBuilder
                 throw new InvalidOperationException("Cannot find storage account with name: " + imgOptions.StorageAccountName);
             }
 
-            var keys = await storageAccount.GetKeysAsync();
-            var key = keys[0];
-            var cred = new StorageCredentials(imgOptions.StorageAccountName, key.Value, key.KeyName);
-            return new CloudStorageAccount(cred, useHttps: true);
+            return storageAccount;
+        }
+
+        private async Task<ArtifactStore> GetArtifactStoreAsync(ImageBuilderOptions imgOptions, ArtifactStoreOptions storeOptions)
+        {
+            var storageAccount = await GetArtifactStorageAccountAsync(imgOptions);
+
+            var blobUri = new Uri($"https://{storageAccount.Name}.blob.core.windows.net");
+            BlobServiceClient blobClient = new BlobServiceClient(blobUri, _azFactory.TokenCredential);
+            var containerClient = (await blobClient.CreateBlobContainerAsync(storeOptions.ContainerName)).Value;
+            var key = (await blobClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(1))).Value;
+
+            var store = new ArtifactStore(
+                        storageAccount.Name,
+                        key,
+                        containerClient,
+                        storeOptions,
+                        _timeSource,
+                        _logger);
+
+            return store;
         }
 
         private string GenerateImageTemplate(ImageBuilderOptions imgOptions, string artifactUrlWithSAS, ImageMetaInfo imageMeta, string srcImgVersionId, Region location, string imageTemplateName)

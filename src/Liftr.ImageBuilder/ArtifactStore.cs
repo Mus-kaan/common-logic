@@ -2,37 +2,49 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Storage;
-using Microsoft.Azure.Storage.Blob;
+using Azure;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Azure.Storage.Sas;
 using Microsoft.Liftr.Contracts;
+using Microsoft.WindowsAzure.Storage.Blob;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.ImageBuilder
 {
     public class ArtifactStore
     {
+        private readonly string _storageAccountName;
+        private readonly UserDelegationKey _blobDelegationKey;
+        private readonly BlobContainerClient _blobContainer;
         private readonly ArtifactStoreOptions _storeOptions;
         private readonly ITimeSource _timeSource;
         private readonly Serilog.ILogger _logger;
 
-        public ArtifactStore(ArtifactStoreOptions storeOptions, ITimeSource timeSource, Serilog.ILogger logger)
+        public ArtifactStore(
+            string storageAccountName,
+            UserDelegationKey blobDelegationKey,
+            BlobContainerClient blobContainer,
+            ArtifactStoreOptions storeOptions,
+            ITimeSource timeSource,
+            Serilog.ILogger logger)
         {
+            _storageAccountName = storageAccountName;
+            _blobDelegationKey = blobDelegationKey ?? throw new ArgumentNullException(nameof(blobDelegationKey));
+            _blobContainer = blobContainer ?? throw new ArgumentNullException(nameof(blobContainer));
             _storeOptions = storeOptions ?? throw new ArgumentNullException(nameof(storeOptions));
             _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<string> UploadBuildArtifactsAndGenerateReadSASAsync(CloudStorageAccount storageAccount, string filePath)
+        public async Task<Uri> UploadBuildArtifactsAndGenerateReadSASAsync(string filePath)
         {
-            if (storageAccount == null)
-            {
-                throw new ArgumentNullException(nameof(storageAccount));
-            }
-
             if (!File.Exists(filePath))
             {
                 var errMsg = $"Cannot find the file located at path: {filePath}";
@@ -40,15 +52,11 @@ namespace Microsoft.Liftr.ImageBuilder
                 throw new InvalidOperationException(errMsg);
             }
 
-            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-            CloudBlobContainer blobContainer = blobClient.GetContainerReference(_storeOptions.ContainerName);
-            await blobContainer.CreateIfNotExistsAsync();
-
             var fileName = Path.GetFileName(filePath);
-            var blob = blobContainer.GetBlockBlobReference(GetBlobName(fileName));
+            var blob = _blobContainer.GetBlobClient(GetBlobName(fileName));
 
             _logger.Information("Start uploading local file at path '{filePath}' to cloud blob {@blobUri}", filePath, blob.Uri);
-            await blob.UploadFromFileAsync(filePath);
+            await blob.UploadAsync(filePath);
 
             _logger.Information("Generating read only SAS token to cloud blob {@blobUri}", blob.Uri);
             SharedAccessBlobPolicy policy = new SharedAccessBlobPolicy()
@@ -57,36 +65,66 @@ namespace Microsoft.Liftr.ImageBuilder
                 SharedAccessStartTime = DateTime.UtcNow.AddMinutes(-10),
                 SharedAccessExpiryTime = DateTime.UtcNow.AddMinutes(_storeOptions.SASTTLInMinutes),
             };
-            var sas = blob.GetSharedAccessSignature(policy);
 
-            return blob.Uri.ToString() + sas;
+            // Create a SAS token that's valid a short interval.
+            BlobSasBuilder sasBuilder = new BlobSasBuilder()
+            {
+                Protocol = SasProtocol.Https,
+                BlobContainerName = _blobContainer.Name,
+                BlobName = blob.Name,
+                StartsOn = DateTimeOffset.UtcNow.AddMinutes(-10),
+                ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(_storeOptions.SASTTLInMinutes),
+            };
+            sasBuilder.SetPermissions(BlobAccountSasPermissions.Read);
+
+            // Use the key to get the SAS token.
+            string sasToken = sasBuilder.ToSasQueryParameters(_blobDelegationKey, _storageAccountName).ToString();
+
+            // Construct the full URI, including the SAS token.
+            UriBuilder fullUri = new UriBuilder()
+            {
+                Scheme = "https",
+                Host = $"{_storageAccountName}.blob.core.windows.net",
+                Path = $"{_blobContainer.Name}/{blob.Name}",
+                Query = sasToken,
+            };
+
+            return fullUri.Uri;
         }
 
-        public async Task<int> CleanUpOldArtifactsAsync(CloudStorageAccount storageAccount)
+        public async Task<int> CleanUpOldArtifactsAsync()
         {
             int deletedCount = 0;
 
-            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-            CloudBlobContainer blobContainer = blobClient.GetContainerReference(_storeOptions.ContainerName);
-            await blobContainer.CreateIfNotExistsAsync();
+            // TODO: update CDPx to VS2019 and switch to async api.
+            var dateFolders = _blobContainer.GetBlobsByHierarchy(prefix: "drop/", delimiter: "/").ToList();
 
-            var directory = blobContainer.GetDirectoryReference("drop");
-            var folders = directory.ListBlobs().Where(b => b as CloudBlobDirectory != null).ToList();
-            foreach (var folder in folders)
+            foreach (var dateFolder in dateFolders)
             {
-                var timeStamp = DateTime.Parse(folder.Uri.LocalPath.Split('/')[3], CultureInfo.InvariantCulture);
-                var cutOffTime = _timeSource.UtcNow.AddDays(-1 * _storeOptions.OldArtifactTTLInDays);
-                if (timeStamp < cutOffTime)
+                if (dateFolder.IsBlob)
                 {
-                    var toDeletes = blobContainer.ListBlobs(prefix: GetBlobName(folder), useFlatBlobListing: true);
+                    continue;
+                }
 
-                    foreach (var toDelete in toDeletes)
+                var timeStamp = DateTime.Parse(dateFolder.Prefix.Split('/')[1], CultureInfo.InvariantCulture);
+                var cutOffTime = _timeSource.UtcNow.AddDays(-1 * _storeOptions.OldArtifactTTLInDays);
+                if (timeStamp >= cutOffTime)
+                {
+                    continue;
+                }
+
+                var toDeletes = _blobContainer.GetBlobsByHierarchy(prefix: dateFolder.Prefix).ToList();
+
+                foreach (var toDelete in toDeletes)
+                {
+                    if (!toDelete.IsBlob)
                     {
-                        var blob = blobContainer.GetBlockBlobReference(GetBlobName(toDelete));
-                        await blob.DeleteAsync();
-                        _logger.Information("Deleted blob with name {blobUri}", toDelete.Uri.AbsoluteUri);
-                        deletedCount++;
+                        continue;
                     }
+
+                    await _blobContainer.DeleteBlobAsync(toDelete.Blob.Name);
+                    _logger.Information("Deleted blob with name {blobName}", toDelete.Blob.Name);
+                    deletedCount++;
                 }
             }
 

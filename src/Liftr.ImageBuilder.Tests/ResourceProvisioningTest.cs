@@ -25,14 +25,14 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
         [Fact]
         public async Task VerifyResourcesProvisioningAsync()
         {
-            MockTimeSource ts = new MockTimeSource();
+            MockTimeSource timeSource = new MockTimeSource();
             var namingContext = new NamingContext("ImageBuilder", "img", EnvironmentType.Test, TestCommon.Location);
             TestCommon.AddCommonTags(namingContext.Tags);
             var baseName = SdkContext.RandomResourceName(string.Empty, 20).Substring(0, 8);
 
             using (var scope = new TestResourceGroupScope(baseName, _output))
             {
-                var orchestrator = new ImageBuilderOrchestrator(scope.AzFactory, ts, scope.Logger);
+                var orchestrator = new ImageBuilderOrchestrator(scope.AzFactory, timeSource, scope.Logger);
 
                 ImageBuilderOptions imgOptions = new ImageBuilderOptions()
                 {
