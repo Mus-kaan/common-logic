@@ -181,7 +181,16 @@ namespace Microsoft.Liftr.ImageBuilder
                         await orchestrator.CreateOrUpdateInfraAsync(
                             imgOptions,
                             _envOptions.AzureVMImageBuilderObjectId,
-                            kvName);
+                            kvName,
+                            true);
+                    }
+                    else if (_options.Action == ActionType.CreateOrUpdateWindowsImageGalleryResources)
+                    {
+                        await orchestrator.CreateOrUpdateInfraAsync(
+                            imgOptions,
+                            _envOptions.AzureVMImageBuilderObjectId,
+                            kvName,
+                            false);
                     }
                     else if (_options.Action == ActionType.GenerateCustomizedSBI)
                     {
@@ -191,6 +200,21 @@ namespace Microsoft.Liftr.ImageBuilder
                             _options.ArtifactPath,
                             _options.ImageMetaPath,
                             _envOptions.BaseSBIVerion,
+                            true,
+                            cancellationToken);
+
+                        File.WriteAllText("AIB-template.json", generatedBuilderTemplate);
+                        _logger.Information("Wrote the generated template in file: AIB-template.json");
+                    }
+                    else if (_options.Action == ActionType.GenerateCustomizedWindowsBaseImage)
+                    {
+                        var generatedBuilderTemplate = await orchestrator.BuildCustomizedSBIAsync(
+                            imgOptions,
+                            _envOptions.ArtifactOptions,
+                            _options.ArtifactPath,
+                            _options.ImageMetaPath,
+                            _envOptions.BaseSBIVerion,
+                            false,
                             cancellationToken);
 
                         File.WriteAllText("AIB-template.json", generatedBuilderTemplate);

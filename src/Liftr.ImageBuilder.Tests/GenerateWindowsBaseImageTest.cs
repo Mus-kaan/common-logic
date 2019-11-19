@@ -14,18 +14,17 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.ImageBuilder.Tests
 {
-    public class GenerateSBITest
+    public class GenerateWindowsBaseImageTest
     {
-        private const string c_srcSBIImg = "/subscriptions/60fad35b-3a47-4ca0-b691-4a789f737cea/resourceGroups/img-test-36946824-eus-rg/providers/Microsoft.Compute/galleries/img_test_36946824_eus_sig/images/U1804LTS_Vb-4/versions/0.1.118044";
         private readonly ITestOutputHelper _output;
 
-        public GenerateSBITest(ITestOutputHelper output)
+        public GenerateWindowsBaseImageTest(ITestOutputHelper output)
         {
             _output = output;
         }
 
         [Fact]
-        public async Task VerifySBIGenerationAsync()
+        public async Task VerifyWindowsBaseImageGenerationAsync()
         {
             MockTimeSource timeSource = new MockTimeSource();
             var namingContext = new NamingContext("ImageBuilder", "www", EnvironmentType.Test, TestCommon.Location);
@@ -58,15 +57,15 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                                     imgOptions,
                                     TestCredentials.AzureVMImageBuilderObjectIdAME,
                                     namingContext.KeyVaultName(baseName),
-                                    true);
+                                    false);
 
                     var result = await orchestrator.BuildCustomizedSBIImplAsync(
                                     imgOptions,
                                     artifactOptions,
-                                    "packer.tar",
+                                    "packer-windows.zip",
                                     "sample-image-meta.json",
-                                    c_srcSBIImg,
-                                    true,
+                                    "WindowsServer2019",
+                                    false,
                                     CancellationToken.None);
                 }
                 catch (Exception ex)

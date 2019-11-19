@@ -51,10 +51,11 @@ namespace Microsoft.Liftr.ImageBuilder
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<(IResourceGroup, IStorageAccount, IVault, IGallery, IGalleryImage)> CreateOrUpdateInfraAsync(
+        public async Task CreateOrUpdateInfraAsync(
             ImageBuilderOptions imgOptions,
             string azureVMImageBuilderObjectId,
-            string kvName)
+            string kvName,
+            bool isLinux)
         {
             if (imgOptions == null)
             {
@@ -65,6 +66,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
             var rg = await liftrAzure.GetOrCreateResourceGroupAsync(imgOptions.Location, imgOptions.ResourceGroupName, imgOptions.Tags);
             var storageAccount = await liftrAzure.GetOrCreateStorageAccountAsync(imgOptions.Location, imgOptions.ResourceGroupName, imgOptions.StorageAccountName, imgOptions.Tags);
+
             var kv = await liftrAzure.GetOrCreateKeyVaultAsync(imgOptions.Location, imgOptions.ResourceGroupName, kvName, imgOptions.Tags);
             await liftrAzure.GrantSelfKeyVaultAdminAccessAsync(kv);
             await liftrAzure.DelegateStorageKeyOperationToKeyVaultAsync(storageAccount);
@@ -88,10 +90,16 @@ namespace Microsoft.Liftr.ImageBuilder
             ImageGalleryClient galleryClient = new ImageGalleryClient(_logger);
             var gallery = await galleryClient.CreateGalleryAsync(liftrAzure.FluentClient, imgOptions.Location, imgOptions.ResourceGroupName, imgOptions.GalleryName, imgOptions.Tags);
 
-            var galleryImageDefinition = await galleryClient.CreateImageDefinitionAsync(liftrAzure.FluentClient, imgOptions.Location, imgOptions.ResourceGroupName, imgOptions.GalleryName, imgOptions.ImageDefinitionName, imgOptions.Tags);
+            var galleryImageDefinition = await galleryClient.CreateImageDefinitionAsync(
+                liftrAzure.FluentClient,
+                imgOptions.Location,
+                imgOptions.ResourceGroupName,
+                imgOptions.GalleryName,
+                imgOptions.ImageDefinitionName,
+                imgOptions.Tags,
+                isLinux);
 
             _logger.Information("Successfully finished CreateOrUpdateInfraAsync.");
-            return (rg, storageAccount, kv, gallery, galleryImageDefinition);
         }
 
         public async Task MoveSBIToOurStorageAsync(ImageBuilderOptions imgOptions, SBIMoverOptions moverOptions, string kvId, KeyVaultClient kvClient)
@@ -140,17 +148,37 @@ namespace Microsoft.Liftr.ImageBuilder
 
                     var customImage = await CreateCustomImageAsync(imgOptions, sbiVersionName, vhdUrl);
                     ImageGalleryClient galleryClient = new ImageGalleryClient(_logger);
-                    var sbiImgDefinition = await galleryClient.CreateImageDefinitionAsync(liftrAzure.FluentClient, imgOptions.Location, imgOptions.ResourceGroupName, imgOptions.GalleryName, sbiVersionName, imgOptions.Tags);
+                    var sbiImgDefinition = await galleryClient.CreateImageDefinitionAsync(
+                        liftrAzure.FluentClient,
+                        imgOptions.Location,
+                        imgOptions.ResourceGroupName,
+                        imgOptions.GalleryName,
+                        sbiVersionName,
+                        imgOptions.Tags);
 
                     var tags = new Dictionary<string, string>(imgOptions.Tags);
                     tags["srcVersion"] = sbiVersionName;
                     tags["imgCreatedAt"] = DateTime.UtcNow.ToZuluString();
-                    await galleryClient.CreateImageVersionAsync(liftrAzure.FluentClient, imgOptions.Location.ToString(), imgOptions.ResourceGroupName, imgOptions.GalleryName, sbiVersionName, customImage, tags);
+                    await galleryClient.CreateImageVersionAsync(
+                        liftrAzure.FluentClient,
+                        imgOptions.Location.ToString(),
+                        imgOptions.ResourceGroupName,
+                        imgOptions.GalleryName,
+                        sbiVersionName,
+                        customImage,
+                        tags);
                 }
             }
         }
 
-        public async Task<string> BuildCustomizedSBIAsync(ImageBuilderOptions imgOptions, ArtifactStoreOptions storeOptions, string artifactPath, string imageMetaPath, string sbiVersion, CancellationToken cancellationToken)
+        public async Task<string> BuildCustomizedSBIAsync(
+            ImageBuilderOptions imgOptions,
+            ArtifactStoreOptions storeOptions,
+            string artifactPath,
+            string imageMetaPath,
+            string sbiVersion,
+            bool isLinux,
+            CancellationToken cancellationToken)
         {
             if (imgOptions == null)
             {
@@ -166,10 +194,17 @@ namespace Microsoft.Liftr.ImageBuilder
                 throw new InvalidOperationException(errMsg);
             }
 
-            return await BuildCustomizedSBIImplAsync(imgOptions, storeOptions, artifactPath, imageMetaPath, imgVersion.Id, cancellationToken);
+            return await BuildCustomizedSBIImplAsync(imgOptions, storeOptions, artifactPath, imageMetaPath, imgVersion.Id, isLinux, cancellationToken);
         }
 
-        internal async Task<string> BuildCustomizedSBIImplAsync(ImageBuilderOptions imgOptions, ArtifactStoreOptions storeOptions, string artifactPath, string imageMetaPath, string srcImgVersionId, CancellationToken cancellationToken)
+        internal async Task<string> BuildCustomizedSBIImplAsync(
+            ImageBuilderOptions imgOptions,
+            ArtifactStoreOptions storeOptions,
+            string artifactPath,
+            string imageMetaPath,
+            string srcImgVersionId,
+            bool isLinux,
+            CancellationToken cancellationToken)
         {
             if (imgOptions == null)
             {
@@ -215,7 +250,16 @@ namespace Microsoft.Liftr.ImageBuilder
             _logger.Information("uploaded the file {filePath} and generated the url with the SAS token.", artifactPath);
 
             var templateName = imageMeta.BuildTag;
-            var generatedTemplate = GenerateImageTemplate(imgOptions, artifactUrlWithSAS.ToString(), imageMeta, srcImgVersionId, imgOptions.Location, templateName);
+            var templateDllName = isLinux ? "Microsoft.Liftr.ImageBuilder.aib.template.base.json" : "Microsoft.Liftr.ImageBuilder.aibWindows.template.base.json";
+
+            var generatedTemplate = GenerateImageTemplate(
+                imgOptions,
+                artifactUrlWithSAS.ToString(),
+                imageMeta,
+                srcImgVersionId,
+                imgOptions.Location,
+                templateName,
+                templateDllName);
 
             ImageGalleryClient galleryClient = new ImageGalleryClient(_logger);
             var az = _azFactory.GenerateLiftrAzure();
@@ -301,9 +345,9 @@ namespace Microsoft.Liftr.ImageBuilder
             return store;
         }
 
-        private string GenerateImageTemplate(ImageBuilderOptions imgOptions, string artifactUrlWithSAS, ImageMetaInfo imageMeta, string srcImgVersionId, Region location, string imageTemplateName)
+        private string GenerateImageTemplate(ImageBuilderOptions imgOptions, string artifactUrlWithSAS, ImageMetaInfo imageMeta, string srcImgVersionId, Region location, string imageTemplateName, string templateDllName)
         {
-            var templateContent = EmbeddedContentReader.GetContent(Assembly.GetExecutingAssembly(), "Microsoft.Liftr.ImageBuilder.aib.template.base.json");
+            var templateContent = EmbeddedContentReader.GetContent(Assembly.GetExecutingAssembly(), templateDllName);
             templateContent = templateContent.Replace("ARTIFACT_URI_PLACEHOLDER", artifactUrlWithSAS, StringComparison.OrdinalIgnoreCase);
             dynamic templateObj = JObject.Parse(templateContent);
             var obj = templateObj.resources[0];

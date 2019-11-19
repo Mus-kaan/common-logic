@@ -29,8 +29,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="aib.template.base.json" />
+    <None Remove="aibWindows.template.base.json" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="aib.template.base.json" />
+    <EmbeddedResource Include="aibWindows.template.base.json" />
   </ItemGroup>
 </Project>

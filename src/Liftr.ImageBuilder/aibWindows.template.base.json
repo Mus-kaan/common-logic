@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "resources": [
+    {
+      "type": "Microsoft.VirtualMachineImages/imageTemplates",
+      "apiVersion": "2019-05-01-preview",
+      "location": "eastus",
+      "dependsOn": [],
+      "properties": {
+        "source": {
+          "type": "PlatformImage",
+          "publisher": "MicrosoftWindowsServer",
+          "offer": "WindowsServer",
+          "sku": "2019-Datacenter",
+          "version": "2019.0.20190214"
+
+        },
+        "customize": [
+          {
+            "type": "PowerShell",
+            "name": "CustomizeWindowsVm",
+            "inline": [
+              "mkdir c:\\Monitoring",
+              "cd c:\\Monitoring",
+              "Invoke-WebRequest 'ARTIFACT_URI_PLACEHOLDER' -OutFile c:\\Monitoring\\packer.zip",
+              "expand-archive -path '.\\packer.zip' -destinationpath 'c:\\Monitoring\\packer'",
+              "cd c:\\Monitoring\\packer",
+              ".\\SetMonAgentScheduledTask.ps1",
+              "cd c:\\Monitoring",
+              "rm packer.zip",
+              "rm packer -Recurse -Force"
+            ]
+          }
+        ],
+        "distribute": [
+          {
+            "type": "SharedImage",
+            "galleryImageId": "/subscriptions/73543923-8c67-42cf-b9b2-cb816bb61581/resourceGroups/aibwinsig/providers/Microsoft.Compute/galleries/my22stSIG/images/winSvrimages",
+            "runOutputName": "liftr-windows-vm-bi",
+            "artifactTags": {
+              "source": "azureVmImageBuilder",
+              "baseosimg": "windows2019"
+            },
+            "replicationRegions": [
+              "eastus",
+              "westus"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

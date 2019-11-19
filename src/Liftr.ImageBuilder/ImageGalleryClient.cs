@@ -128,7 +128,7 @@ namespace Microsoft.Liftr.ImageBuilder
             }
         }
 
-        public async Task<IGalleryImage> CreateImageDefinitionAsync(IAzure fluentClient, Region location, string rgName, string sigName, string imageName, IDictionary<string, string> tags)
+        public async Task<IGalleryImage> CreateImageDefinitionAsync(IAzure fluentClient, Region location, string rgName, string sigName, string imageName, IDictionary<string, string> tags, bool isLinux = true)
         {
             if (fluentClient == null)
             {
@@ -142,15 +142,30 @@ namespace Microsoft.Liftr.ImageBuilder
                 return image;
             }
 
-            _logger.Information("Creating a Gallery Image Definition with name {imageName} ...", imageName);
-            image = await fluentClient.GalleryImages
-                .Define(imageName)
-                .WithExistingGallery(rgName, sigName)
-                .WithLocation(location)
-                .WithIdentifier(publisher: "AzureLiftr", offer: "UbuntuSecureBaseImage", sku: imageName)
-                .WithGeneralizedLinux()
-                .WithTags(tags)
-                .CreateAsync();
+            if (isLinux)
+            {
+                _logger.Information("Creating a Gallery Image Definition for Linux with name {imageName} ...", imageName);
+                image = await fluentClient.GalleryImages
+                    .Define(imageName)
+                    .WithExistingGallery(rgName, sigName)
+                    .WithLocation(location)
+                    .WithIdentifier(publisher: "AzureLiftr", offer: "UbuntuSecureBaseImage", sku: imageName)
+                    .WithGeneralizedLinux()
+                    .WithTags(tags)
+                    .CreateAsync();
+            }
+            else
+            {
+                _logger.Information("Creating a Gallery Image Definition for Windows with name {imageName} ...", imageName);
+                image = await fluentClient.GalleryImages
+                    .Define(imageName)
+                    .WithExistingGallery(rgName, sigName)
+                    .WithLocation(location)
+                    .WithIdentifier(publisher: "AzureLiftr", offer: "WindowsServerBaseImage", sku: imageName)
+                    .WithGeneralizedWindows()
+                    .WithTags(tags)
+                    .CreateAsync();
+            }
 
             _logger.Information("Created a Gallery image with resourceId {resourceId}", image.Id);
 

@@ -50,13 +50,15 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                     await orchestrator.CreateOrUpdateInfraAsync(
                                     imgOptions,
                                     TestCredentials.AzureVMImageBuilderObjectIdAME,
-                                    namingContext.KeyVaultName(baseName));
+                                    namingContext.KeyVaultName(baseName),
+                                    true);
 
                     // Run another time will not fail.
                     await orchestrator.CreateOrUpdateInfraAsync(
                                     imgOptions,
                                     TestCredentials.AzureVMImageBuilderObjectIdAME,
-                                    namingContext.KeyVaultName(baseName));
+                                    namingContext.KeyVaultName(baseName),
+                                    true);
                 }
                 catch (Exception ex)
                 {

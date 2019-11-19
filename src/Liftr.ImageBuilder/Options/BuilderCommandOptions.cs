@@ -11,11 +11,13 @@ namespace Microsoft.Liftr.ImageBuilder
         CreateOrUpdateImageGalleryResources,
         MoveSBIToOurStorage,
         GenerateCustomizedSBI,
+        GenerateCustomizedWindowsBaseImage,
+        CreateOrUpdateWindowsImageGalleryResources,
     }
 
     public class BuilderCommandOptions
     {
-        [Option('a', "action", Required = true, HelpText = "Action type, one of: [ CreateOrUpdateImageGalleryResources, MoveSBIToOurStorage, GenerateCustomizedSBI ]")]
+        [Option('a', "action", Required = true, HelpText = "Action type, one of: [ CreateOrUpdateImageGalleryResources, MoveSBIToOurStorage, GenerateCustomizedSBI, GenerateCustomizedWindowsBaseImage, CreateOrUpdateWindowsImageGalleryResources ]")]
         public ActionType Action { get; set; }
 
         [Option('f', "file", Required = true, HelpText = "Path to the configuration file.")]
