@@ -18,7 +18,6 @@ using Microsoft.Rest.Azure;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -44,27 +43,15 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             try
             {
-                IVault kv = null;
-
                 var rgName = namingContext.ResourceGroupName(baseName);
                 var kvName = namingContext.KeyVaultName(baseName);
 
-                var client = _azureClientFactory.GenerateLiftrAzure();
+                var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
 
-                _logger.Information("Creating Resource Group ...");
-                try
-                {
-                    var rg = await client.CreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
-                    _logger.Information("Created Resource Group with Id {ResourceId}", rg.Id);
-                }
-                catch (DuplicateNameException ex)
-                {
-                    _logger.Information("There exist a RG with the same name. Reuse it. {ExceptionDetail}", ex);
-                }
+                var rg = await liftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
+                var kv = await liftrAzure.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
 
-                kv = await client.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
-
-                await client.GrantSelfKeyVaultAdminAccessAsync(kv);
+                await liftrAzure.GrantSelfKeyVaultAdminAccessAsync(kv);
 
                 return kv;
             }
@@ -78,21 +65,22 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         public async Task<(IResourceGroup rg, IIdentity msi, ICosmosDBAccount db, ITrafficManagerProfile tm, IVault kv)> CreateOrUpdateRegionalDataRGAsync(
             string baseName,
             NamingContext namingContext,
-            IEnumerable<string> dataPlaneSubscriptions = null,
-            int dataPlaneStorageCountPerSubscription = 0)
+            RegionalDataOptions dataOptions,
+            KeyVaultClient kvClient)
         {
             if (namingContext == null)
             {
                 throw new ArgumentNullException(nameof(namingContext));
             }
 
-            if (dataPlaneStorageCountPerSubscription > 0)
+            if (dataOptions == null)
             {
-                if (dataPlaneSubscriptions == null || !dataPlaneSubscriptions.Any())
-                {
-                    throw new ArgumentException("data plane Subscriptions cannot be empty.", nameof(dataPlaneSubscriptions));
-                }
+                throw new ArgumentNullException(nameof(dataOptions));
             }
+
+            dataOptions.CheckValid();
+
+            var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
 
             ICosmosDBAccount db = null;
             ITrafficManagerProfile tm = null;
@@ -104,19 +92,18 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var kvName = namingContext.KeyVaultName(baseName);
             var cosmosName = namingContext.CosmosDBName(baseName);
             var msiName = namingContext.MSIName(baseName);
-
-            var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
+            var acrName = namingContext.ACRName(baseName);
 
             var rg = await liftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
-
-            var stor = await liftrAzure.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, storageName, namingContext.Tags);
-            await liftrAzure.DelegateStorageKeyOperationToKeyVaultAsync(stor);
-
+            var acr = await liftrAzure.GetOrCreateACRAsync(namingContext.Location, rgName, acrName, namingContext.Tags);
             var msi = await liftrAzure.GetOrCreateMSIAsync(namingContext.Location, rgName, msiName, namingContext.Tags);
+            var storageAccount = await liftrAzure.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, storageName, namingContext.Tags);
+            await liftrAzure.DelegateStorageKeyOperationToKeyVaultAsync(storageAccount);
+            await liftrAzure.GrantQueueContributorAsync(storageAccount, msi);
 
-            if (dataPlaneSubscriptions != null)
+            if (dataOptions.DataPlaneSubscriptions != null)
             {
-                foreach (var subscrptionId in dataPlaneSubscriptions)
+                foreach (var subscrptionId in dataOptions.DataPlaneSubscriptions)
                 {
                     try
                     {
@@ -130,25 +117,13 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     }
                     catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
                     {
-                        _logger.Information("There exists the same role assignment for the MSI {MSIReourceId} to the subscription {subscrptionId}.", msi.Id, subscrptionId);
                     }
                 }
             }
 
-            _logger.Information("Creating Traffic Manager ...");
-            var targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.Network/trafficmanagerprofiles/{trafficManagerName}";
-            tm = await liftrAzure.GetTrafficManagerAsync(targetResourceId);
-            if (tm == null)
-            {
-                tm = await liftrAzure.CreateTrafficManagerAsync(rgName, trafficManagerName, namingContext.Tags);
-                _logger.Information("Created Traffic Manager with Id {ResourceId}", tm.Id);
-            }
-            else
-            {
-                _logger.Information("There has an existing Traffic Manager with the same {ResourceId}. Stop creating a new one.", tm.Id);
-            }
-
+            tm = await liftrAzure.GetOrCreateTrafficManagerAsync(rgName, trafficManagerName, namingContext.Tags);
             kv = await liftrAzure.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
+            await liftrAzure.GrantSelfKeyVaultAdminAccessAsync(kv);
 
             _logger.Information("Start adding access policy for msi to regional kv.");
             await kv.Update()
@@ -161,7 +136,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             _logger.Information("Added access policy for msi to regional kv.");
 
             _logger.Information("Creating CosmosDB ...");
-            targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.DocumentDB/databaseAccounts/{cosmosName}";
+            var targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.DocumentDB/databaseAccounts/{cosmosName}";
             db = await liftrAzure.GetCosmosDBAsync(targetResourceId);
             if (db == null)
             {
@@ -169,14 +144,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 db = createdDb;
                 _logger.Information("Created CosmosDB with Id {ResourceId}", db.Id);
             }
-            else
-            {
-                _logger.Information("There has an existing CosmosDB with the same {ResourceId}. Stop creating a new one.", db.Id);
-            }
 
-            if (dataPlaneStorageCountPerSubscription > 0 && dataPlaneSubscriptions != null)
+            if (dataOptions.DataPlaneStorageCountPerSubscription > 0 && dataOptions.DataPlaneSubscriptions != null)
             {
-                foreach (var dpSubscription in dataPlaneSubscriptions)
+                foreach (var dpSubscription in dataOptions.DataPlaneSubscriptions)
                 {
                     var dataPlaneLiftrAzure = _azureClientFactory.GenerateLiftrAzure(dpSubscription);
                     IResourceGroup dataPlaneStorageRG = await dataPlaneLiftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, namingContext.ResourceGroupName(baseName + "-dp"), namingContext.Tags);
@@ -184,7 +155,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
                     var existingStorageAccountCount = (await dataPlaneLiftrAzure.ListStorageAccountAsync(dataPlaneStorageRG.Name)).Count();
 
-                    for (int i = existingStorageAccountCount; i < dataPlaneStorageCountPerSubscription; i++)
+                    for (int i = existingStorageAccountCount; i < dataOptions.DataPlaneStorageCountPerSubscription; i++)
                     {
                         var storageAccountName = SdkContext.RandomResourceName(baseName, 24);
                         await dataPlaneLiftrAzure.GetOrCreateStorageAccountAsync(namingContext.Location, dataPlaneStorageRG.Name, storageAccountName, namingContext.Tags);
@@ -192,33 +163,85 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 }
             }
 
-            return (rg, msi, db, tm, kv);
-        }
-
-        public async Task<IVault> GetKeyVaultAsync(string baseName, NamingContext namingContext)
-        {
-            if (namingContext == null)
+            using (var regionalKVValet = new KeyVaultConcierge(kv.VaultUri, kvClient, _logger))
             {
-                throw new ArgumentNullException(nameof(namingContext));
+                var rpAssets = new RPAssetOptions();
+                var dbConnectionStrings = await db.ListConnectionStringsAsync();
+                rpAssets.CosmosDBConnectionStrings = dbConnectionStrings.ConnectionStrings.Select(c => new CosmosDBConnectionString()
+                {
+                    ConnectionString = c.ConnectionString,
+                    Description = c.Description,
+                });
+
+                rpAssets.StorageAccountName = storageAccount.Name;
+
+                if (dataOptions.DataPlaneSubscriptions != null)
+                {
+                    var dataPlaneSubscriptionInfos = new List<DataPlaneSubscriptionInfo>();
+
+                    foreach (var dataPlaneSubscriptionId in dataOptions.DataPlaneSubscriptions)
+                    {
+                        var dpSubInfo = new DataPlaneSubscriptionInfo()
+                        {
+                            SubscriptionId = dataPlaneSubscriptionId,
+                        };
+
+                        var dataPlaneSubscription = _azureClientFactory.GenerateLiftrAzure(dataPlaneSubscriptionId);
+                        var stors = await dataPlaneSubscription.ListStorageAccountAsync(namingContext.ResourceGroupName(baseName + "-dp"));
+                        dpSubInfo.StorageAccountIds = stors.Select(st => st.Id);
+                        dataPlaneSubscriptionInfos.Add(dpSubInfo);
+                    }
+
+                    rpAssets.DataPlaneSubscriptions = dataPlaneSubscriptionInfos;
+                }
+
+                _logger.Information("Puting the RPAssetOptions in the key vault ...");
+                await regionalKVValet.SetSecretAsync($"{dataOptions.SecretPrefix}-{nameof(RPAssetOptions)}", rpAssets.ToJson(), namingContext.Tags);
+
+                var envOptions = new RunningEnvironmentOptions()
+                {
+                    TenantId = msi.TenantId,
+                    SPNObjectId = msi.GetObjectId(),
+                };
+
+                _logger.Information($"Puting the {nameof(RunningEnvironmentOptions)} in the key vault ...");
+                await regionalKVValet.SetSecretAsync($"{dataOptions.SecretPrefix}-{nameof(RunningEnvironmentOptions)}--{nameof(envOptions.TenantId)}", envOptions.TenantId, namingContext.Tags);
+                await regionalKVValet.SetSecretAsync($"{dataOptions.SecretPrefix}-{nameof(RunningEnvironmentOptions)}--{nameof(envOptions.SPNObjectId)}", envOptions.SPNObjectId, namingContext.Tags);
+
+                var certIssuerName = "one-cert-issuer";
+                if (dataOptions.GenevaCert != null)
+                {
+                    _logger.Information("Creating AME Geneva certificate in Key Vault with name {@certName} ...", dataOptions.GenevaCert.CertificateName);
+                    await regionalKVValet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
+                    await regionalKVValet.CreateCertificateAsync(dataOptions.GenevaCert.CertificateName, certIssuerName, dataOptions.GenevaCert.SubjectName, dataOptions.GenevaCert.SubjectAlternativeNames, namingContext.Tags);
+                    _logger.Information("Finished creating AME Geneva certificate in Key Vault with name {@certName}", dataOptions.GenevaCert.CertificateName);
+                }
+
+                if (dataOptions.SSLCert != null)
+                {
+                    _logger.Information("Creating SSL certificate in Key Vault with name {@certName} ...", dataOptions.SSLCert.CertificateName);
+                    await regionalKVValet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
+                    await regionalKVValet.CreateCertificateAsync(dataOptions.SSLCert.CertificateName, certIssuerName, dataOptions.SSLCert.SubjectName, dataOptions.SSLCert.SubjectAlternativeNames, namingContext.Tags);
+                    _logger.Information("Finished creating SSL certificate in Key Vault with name {@certName}", dataOptions.SSLCert.CertificateName);
+                }
+
+                if (dataOptions.FirstPartyCert != null)
+                {
+                    _logger.Information("Creating First Party certificate in Key Vault with name {@certName} ...", dataOptions.FirstPartyCert.CertificateName);
+                    await regionalKVValet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
+                    await regionalKVValet.CreateCertificateAsync(dataOptions.FirstPartyCert.CertificateName, certIssuerName, dataOptions.FirstPartyCert.SubjectName, dataOptions.FirstPartyCert.SubjectAlternativeNames, namingContext.Tags);
+                    _logger.Information("Finished creating First Party certificate in Key Vault with name {@certName}", dataOptions.FirstPartyCert.CertificateName);
+                }
             }
 
-            var rgName = namingContext.ResourceGroupName(baseName);
-            var kvName = namingContext.KeyVaultName(baseName);
-
-            var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
-            var targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.KeyVault/vaults/{kvName}";
-            var kv = await liftrAzure.GetKeyVaultByIdAsync(targetResourceId);
-            return kv;
+            return (rg, msi, db, tm, kv);
         }
 
         public async Task<(IVault kv, IIdentity msi, IKubernetesCluster aks)> CreateOrUpdateRegionalComputeRGAsync(
             NamingContext namingContext,
-            InfraV2RegionalComputeOptions computeOptions,
+            RegionalComputeOptions computeOptions,
             AKSInfo aksInfo,
-            KeyVaultClient kvClient,
-            CertificateOptions genevaCert,
-            CertificateOptions sslCert,
-            CertificateOptions firstPartyCert)
+            KeyVaultClient kvClient)
         {
             if (namingContext == null)
             {
@@ -243,198 +266,112 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             _logger.Information("AKS machine type: {AKSMachineType}", aksInfo.AKSMachineTypeStr);
             _logger.Information("AKS machine count: {AKSMachineCount}", aksInfo.AKSMachineCount);
 
-            IVault kv = null;
-            IKubernetesCluster aks = null;
-
             var rgName = namingContext.ResourceGroupName(computeOptions.ComputeBaseName);
-            var dataRGName = namingContext.ResourceGroupName(computeOptions.DataBaseName);
-            var kvName = namingContext.KeyVaultName(computeOptions.ComputeBaseName);
             var aksName = namingContext.AKSName(computeOptions.ComputeBaseName);
 
             var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
 
             var msiName = namingContext.MSIName(computeOptions.DataBaseName);
-            var regionalMsi = await liftrAzure.GetMSIAsync(namingContext.ResourceGroupName(computeOptions.DataBaseName), msiName);
-            if (regionalMsi == null)
+            var msi = await liftrAzure.GetMSIAsync(namingContext.ResourceGroupName(computeOptions.DataBaseName), msiName);
+            if (msi == null)
             {
                 var ex = new InvalidOperationException("Cannot find regional MSI with resource name: " + msiName);
                 _logger.Error("Cannot find regional MSI with resource name: {ResourceName}", msiName);
                 throw ex;
             }
 
-            var dbId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{namingContext.ResourceGroupName(computeOptions.DataBaseName)}/providers/Microsoft.DocumentDB/databaseAccounts/{namingContext.CosmosDBName(computeOptions.DataBaseName)}";
-            var db = await liftrAzure.GetCosmosDBAsync(dbId);
-            if (db == null)
+            var kvName = namingContext.KeyVaultName(computeOptions.DataBaseName);
+            var kv = await liftrAzure.GetKeyVaultAsync(namingContext.ResourceGroupName(computeOptions.DataBaseName), kvName);
+            if (kv == null)
             {
-                var ex = new InvalidOperationException("Cannot find cosmos DB with resource Id: " + dbId);
-                _logger.Error("Cannot find cosmos DB with resource Id: {ResourceId}", dbId);
+                var ex = new InvalidOperationException("Cannot find regional key vault with resource name: " + kvName);
+                _logger.Error("Cannot find regional key vault with resource name: {ResourceName}", kvName);
                 throw ex;
             }
 
-            var storageAccount = await liftrAzure.GetStorageAccountAsync(dataRGName, namingContext.StorageAccountName(computeOptions.DataBaseName));
-            if (storageAccount == null)
+            try
             {
-                var errMsg = $"Cannot find the storage with name {namingContext.StorageAccountName(computeOptions.DataBaseName)} in RG {dataRGName}.";
-                var ex = new InvalidOperationException(errMsg);
-                _logger.Error(ex, errMsg);
+                _logger.Information("Granting the identity binding access for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId} ...", msi.Id, aksInfo.AKSSPNObjectId);
+                await liftrAzure.Authenticated.RoleAssignments
+                    .Define(SdkContext.RandomGuid())
+                    .ForObjectId(aksInfo.AKSSPNObjectId)
+                    .WithBuiltInRole(BuiltInRole.Contributor)
+                    .WithResourceScope(msi)
+                    .CreateAsync();
+                _logger.Information("Granted the identity binding access for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId}.", msi.Id, aksInfo.AKSSPNObjectId);
+            }
+            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            {
+            }
+
+            try
+            {
+                // ACR Pull
+                var roleDefinitionId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d";
+                _logger.Information("Granting ACR pull role to the AKS SPN {AKSSPNObjectId} for the subscription {subscrptionId} ...", aksInfo.AKSSPNObjectId, liftrAzure.FluentClient.SubscriptionId);
+                await liftrAzure.Authenticated.RoleAssignments
+                    .Define(SdkContext.RandomGuid())
+                    .ForObjectId(aksInfo.AKSSPNObjectId)
+                    .WithRoleDefinition(roleDefinitionId)
+                    .WithSubscriptionScope(liftrAzure.FluentClient.SubscriptionId)
+                    .CreateAsync();
+            }
+            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            {
+            }
+
+            var globalKv = await liftrAzure.GetKeyVaultByIdAsync(computeOptions.GlobalKeyVaultResourceId);
+            if (globalKv == null)
+            {
+                var ex = new InvalidOperationException("Cannot find central key vault with resource Id: " + computeOptions.GlobalKeyVaultResourceId);
+                _logger.Error("Cannot find central key vault with resource Id: {ResourceId}", computeOptions.GlobalKeyVaultResourceId);
                 throw ex;
             }
 
-            var centralKv = await liftrAzure.GetKeyVaultByIdAsync(computeOptions.CentralKeyVaultResourceId);
-            if (centralKv == null)
+            string aksSPNClientSecret = null;
+            using (var globalKVValet = new KeyVaultConcierge(globalKv.VaultUri, kvClient, _logger))
             {
-                var ex = new InvalidOperationException("Cannot find central key vault with resource Id: " + computeOptions.CentralKeyVaultResourceId);
-                _logger.Error("Cannot find central key vault with resource Id: {ResourceId}", computeOptions.CentralKeyVaultResourceId);
-                throw ex;
-            }
-
-            using (var centralKVValet = new KeyVaultConcierge(centralKv.VaultUri, kvClient, _logger))
-            {
-                var aksSPNClientSecret = await centralKVValet.GetSecretAsync(aksInfo.AKSSPNClientSecretName);
+                aksSPNClientSecret = (await globalKVValet.GetSecretAsync(aksInfo.AKSSPNClientSecretName))?.Value;
                 if (aksSPNClientSecret == null)
                 {
                     var errorMsg = $"Cannot find the AKS SPN client secret in key vault with secret name: {aksInfo.AKSSPNClientSecretName}";
                     _logger.Error(errorMsg);
                     throw new InvalidOperationException(errorMsg);
                 }
-
-                _logger.Information("Creating Resource Group ...");
-                try
-                {
-                    var rg = await liftrAzure.CreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
-                    _logger.Information("Created Resource Group with Id {ResourceId}", rg.Id);
-                }
-                catch (DuplicateNameException ex)
-                {
-                    _logger.Information("There exist a RG with the same name. Reuse it. {ExceptionDetail}", ex);
-                }
-
-                try
-                {
-                    _logger.Information("Granting the identity binding access for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId} ...", regionalMsi.Id, aksInfo.AKSSPNObjectId);
-                    await liftrAzure.Authenticated.RoleAssignments
-                        .Define(SdkContext.RandomGuid())
-                        .ForObjectId(aksInfo.AKSSPNObjectId)
-                        .WithBuiltInRole(BuiltInRole.Contributor)
-                        .WithResourceScope(regionalMsi)
-                        .CreateAsync();
-                    _logger.Information("Granted the identity binding access for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId}.", regionalMsi.Id, aksInfo.AKSSPNObjectId);
-                }
-                catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
-                {
-                    _logger.Information("There exists the same role assignment for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId}.", regionalMsi.Id, aksInfo.AKSSPNObjectId);
-                }
-
-                kv = await liftrAzure.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
-
-                await liftrAzure.GrantSelfKeyVaultAdminAccessAsync(kv);
-                await liftrAzure.GrantQueueContributorAsync(storageAccount, regionalMsi);
-
-                _logger.Information("Start adding access policy for msi to local kv.");
-                await kv.Update()
-                    .DefineAccessPolicy()
-                    .ForObjectId(regionalMsi.GetObjectId())
-                    .AllowSecretPermissions(SecretPermissions.List, SecretPermissions.Get)
-                    .AllowCertificatePermissions(CertificatePermissions.Get, CertificatePermissions.Getissuers, CertificatePermissions.List)
-                    .Attach()
-                    .ApplyAsync();
-                _logger.Information("Added access policy for msi to local kv.");
-
-                using (var valet = new KeyVaultConcierge(kv.VaultUri, kvClient, _logger))
-                {
-                    _logger.Information($"Start copying the secrets in central key vault with prefix {computeOptions.CopyKVSecretsWithPrefix}...");
-                    int cnt = 0;
-                    var toCopy = await centralKVValet.ListSecretsAsync(computeOptions.CopyKVSecretsWithPrefix);
-                    foreach (var secret in toCopy)
-                    {
-                        var secretBundle = await centralKVValet.GetSecretAsync(secret.Identifier.Name);
-                        await valet.SetSecretAsync(secret.Identifier.Name, secretBundle.Value, namingContext.Tags);
-                        cnt++;
-                    }
-
-                    _logger.Information($"Copied {cnt} secrets from central key vault to local key vault.");
-
-                    var rpAssets = new RPAssetOptions();
-                    var dbConnectionStrings = await db.ListConnectionStringsAsync();
-                    rpAssets.CosmosDBConnectionString = dbConnectionStrings.ConnectionStrings[0].ConnectionString;
-                    rpAssets.StorageAccountName = storageAccount.Name;
-
-                    if (computeOptions.DataPlaneSubscriptions != null)
-                    {
-                        var dpSubs = new List<DataPlaneSubscriptionInfo>();
-
-                        foreach (var dpSub in computeOptions.DataPlaneSubscriptions)
-                        {
-                            var dpSubInfo = new DataPlaneSubscriptionInfo()
-                            {
-                                SubscriptionId = dpSub,
-                            };
-
-                            var az = _azureClientFactory.GenerateLiftrAzure(dpSub);
-                            var stors = await az.ListStorageAccountAsync(namingContext.ResourceGroupName(computeOptions.DataBaseName + "-dp"));
-                            dpSubInfo.StorageAccountIds = stors.Select(st => st.Id);
-                            dpSubs.Add(dpSubInfo);
-                        }
-
-                        rpAssets.DataPlaneSubscriptions = dpSubs;
-                    }
-
-                    _logger.Information("Puting the RPAssetOptions in the key vault ...");
-                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RPAssetOptions)}", rpAssets.ToJson(), namingContext.Tags);
-
-                    _logger.Information($"Puting the {nameof(RunningEnvironmentOptions)} in the key vault ...");
-                    var envOptions = new RunningEnvironmentOptions()
-                    {
-                        TenantId = regionalMsi.TenantId,
-                        SPNObjectId = regionalMsi.GetObjectId(),
-                    };
-
-                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RunningEnvironmentOptions)}-{nameof(envOptions.TenantId)}", envOptions.TenantId, namingContext.Tags);
-                    await valet.SetSecretAsync($"{computeOptions.SecretPrefix}-{nameof(RunningEnvironmentOptions)}-{nameof(envOptions.SPNObjectId)}", envOptions.SPNObjectId, namingContext.Tags);
-
-                    if (genevaCert != null)
-                    {
-                        _logger.Information("Creating AME Geneva certificate in Key Vault with name {@certName} ...", genevaCert.CertificateName);
-                        var certIssuerName = "one-cert-issuer";
-                        await valet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
-                        await valet.CreateCertificateAsync(genevaCert.CertificateName, certIssuerName, genevaCert.SubjectName, genevaCert.SubjectAlternativeNames, namingContext.Tags);
-                        _logger.Information("Finished creating AME Geneva certificate in Key Vault with name {@certName}", genevaCert.CertificateName);
-                    }
-
-                    if (sslCert != null)
-                    {
-                        _logger.Information("Creating SSL certificate in Key Vault with name {@certName} ...", sslCert.CertificateName);
-                        var certIssuerName = "one-cert-issuer";
-                        await valet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
-                        await valet.CreateCertificateAsync(sslCert.CertificateName, certIssuerName, sslCert.SubjectName, sslCert.SubjectAlternativeNames, namingContext.Tags);
-                        _logger.Information("Finished creating SSL certificate in Key Vault with name {@certName}", sslCert.CertificateName);
-                    }
-
-                    if (firstPartyCert != null)
-                    {
-                        _logger.Information("Creating First Party certificate in Key Vault with name {@certName} ...", firstPartyCert.CertificateName);
-                        var certIssuerName = "one-cert-issuer";
-                        await valet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
-                        await valet.CreateCertificateAsync(firstPartyCert.CertificateName, certIssuerName, firstPartyCert.SubjectName, firstPartyCert.SubjectAlternativeNames, namingContext.Tags);
-                        _logger.Information("Finished creating First Party certificate in Key Vault with name {@certName}", firstPartyCert.CertificateName);
-                    }
-                }
-
-                var targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.ContainerService/managedClusters/{aksName}";
-                aks = await liftrAzure.GetAksClusterAsync(targetResourceId);
-                if (aks == null)
-                {
-                    _logger.Information("Creating AKS cluster ...");
-                    aks = await liftrAzure.CreateAksClusterAsync(namingContext.Location, rgName, aksName, aksInfo.AKSRootUserName, aksInfo.AKSSSHPublicKey, aksInfo.AKSSPNClientId, aksSPNClientSecret.Value, aksInfo.AKSMachineType, aksInfo.AKSMachineCount, namingContext.Tags);
-                    _logger.Information("Created AKS cluster with Id {ResourceId}", aks.Id);
-                }
-                else
-                {
-                    _logger.Information("Use existing AKS cluster with Id {ResourceId}.", aks.Id);
-                }
             }
 
-            return (kv, regionalMsi, aks);
+            await liftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
+
+            var targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.ContainerService/managedClusters/{aksName}";
+            var aks = await liftrAzure.GetAksClusterAsync(targetResourceId);
+            if (aks == null)
+            {
+                _logger.Information("Creating AKS cluster ...");
+                aks = await liftrAzure.CreateAksClusterAsync(namingContext.Location, rgName, aksName, aksInfo.AKSRootUserName, aksInfo.AKSSSHPublicKey, aksInfo.AKSSPNClientId, aksSPNClientSecret, aksInfo.AKSMachineType, aksInfo.AKSMachineCount, namingContext.Tags);
+                _logger.Information("Created AKS cluster with Id {ResourceId}", aks.Id);
+            }
+            else
+            {
+                _logger.Information("Use existing AKS cluster with Id {ResourceId}.", aks.Id);
+            }
+
+            return (kv, msi, aks);
+        }
+
+        public async Task<IVault> GetKeyVaultAsync(string baseName, NamingContext namingContext)
+        {
+            if (namingContext == null)
+            {
+                throw new ArgumentNullException(nameof(namingContext));
+            }
+
+            var rgName = namingContext.ResourceGroupName(baseName);
+            var kvName = namingContext.KeyVaultName(baseName);
+
+            var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
+            var targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.KeyVault/vaults/{kvName}";
+            var kv = await liftrAzure.GetKeyVaultByIdAsync(targetResourceId);
+            return kv;
         }
     }
 }

@@ -59,16 +59,6 @@ namespace Microsoft.Liftr.SimpleDeploy
                 throw new InvalidOperationException(errMsg);
             }
 
-            if (!string.IsNullOrEmpty(options.DataPlaneSubscriptionsFile))
-            {
-                if (!File.Exists(options.DataPlaneSubscriptionsFile))
-                {
-                    var errMsg = $"DataPlaneSubscriptionsFile file doesn't exist at the path: {options.DataPlaneSubscriptionsFile}";
-                    Console.Error.WriteLine(errMsg);
-                    throw new InvalidOperationException(errMsg);
-                }
-            }
-
             var host = new HostBuilder()
                 .UseDefaultAppConfig()
                 .UseLiftrLogger()

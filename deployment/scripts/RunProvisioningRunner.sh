@@ -18,6 +18,10 @@ case $i in
     ConfigFilePath="${i#*=}"
     shift # past argument=value
     ;;
+    --ActiveKey=*)
+    ActiveKey="${i#*=}"
+    shift # past argument=value
+    ;;
     --AKSSvcLabel=*)
     AKSSvcLabel="${i#*=}"
     shift # past argument=value
@@ -44,6 +48,10 @@ if [ -z ${ConfigFilePath+x} ]; then
     exit 1
 fi
 
+if [ -z ${ActiveKey+x} ]; then
+    ActiveKey="Primary MongoDB Connection String"
+fi
+
 if [ "$ProvisionAction" = "UpdateAKSPublicIpInTrafficManager" ]; then
     if [ -z ${AKSSvcLabel+x} ]; then
         echo "AKSSvcLabel is blank."
@@ -65,13 +73,15 @@ if [ "$AKSSvcLabel" = "" ]; then
     dotnet Deployment.Runner.dll \
     -a "$ProvisionAction" \
     -f "$ConfigFilePath" \
-    -s "$DeploymentSubscriptionId"
+    -s "$DeploymentSubscriptionId" \
+    --activeKey "$ActiveKey"
 else
     dotnet Deployment.Runner.dll \
     -a "$ProvisionAction" \
     -f "$ConfigFilePath" \
     -s "$DeploymentSubscriptionId" \
-    -l "$AKSSvcLabel"
+    -l "$AKSSvcLabel" \
+    --activeKey "$ActiveKey"
 fi
 
 exit_code=$?

@@ -69,6 +69,9 @@ namespace Microsoft.Liftr.Queue
                         {
                             waitTime = GetWaitTime(true);
                             var message = queueMessage.MessageText.FromJson<LiftrQueueMessage>();
+                            message.InsertedOn = queueMessage.InsertedOn;
+                            message.ExpiresOn = queueMessage.ExpiresOn;
+                            message.DequeueCount = queueMessage.DequeueCount;
 
                             LogEventLevel? overrideLevel = null;
                             if (message.MsgTelemetryContext != null)

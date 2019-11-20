@@ -99,6 +99,9 @@ namespace Microsoft.Liftr.Fluent.Contracts
         public string SharedImageGalleryName(string baseName)
            => GenerateCommonName(baseName, "sig", noRegion: false, delimiter: "_");
 
+        public string ACRName(string baseName)
+            => GenerateCommonName(baseName, "acr", delimiter: string.Empty);
+
         public static string DiskName(string baseName, int number)
             => $"{baseName}-disk{number}";
 

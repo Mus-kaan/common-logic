@@ -9,8 +9,11 @@ namespace Microsoft.Liftr.Contracts
 {
     public class RPAssetOptions
     {
-        [JsonProperty("dbConn")]
-        public string CosmosDBConnectionString { get; set; }
+        [JsonProperty("dbConns")]
+        public IEnumerable<CosmosDBConnectionString> CosmosDBConnectionStrings { get; set; }
+
+        [JsonProperty("activeKey")]
+        public string ActiveKeyName { get; set; }
 
         [JsonProperty("storName")]
         public string StorageAccountName { get; set; }

@@ -47,14 +47,14 @@ namespace Microsoft.Liftr.DataSource.Mongo
             {
                 mongoClientSettings.ClusterConfigurator = clusterConfigurator =>
                 {
-                    clusterConfigurator.Subscribe<CommandSucceededEvent>(e =>
+                    clusterConfigurator.Subscribe<CommandSucceededEvent>(eventData =>
                     {
-                        _logger.Verbose("[Mongo | CommandSucceeded] Event :{@CommandSucceededEvent}, Start at UTC: " + DateTime.Now.Subtract(e.Duration).ToZuluString(), e);
+                        _logger.Debug("[ Mongo | CommandSucceeded ] StartTime: {StartTime}, Event:{@CommandSucceededEvent}.", DateTime.Now.Subtract(eventData.Duration).ToZuluString(), eventData);
                     });
 
-                    clusterConfigurator.Subscribe<CommandFailedEvent>(e =>
+                    clusterConfigurator.Subscribe<CommandFailedEvent>(eventData =>
                     {
-                        _logger.Verbose("[Mongo | CommandFailed] Event :{@CommandFailedEvent}, Start at UTC: " + DateTime.Now.Subtract(e.Duration).ToZuluString(), e);
+                        _logger.Information("[ Mongo | CommandFailed ] StartTime: {StartTime}, Event:{@CommandFailedEvent}.", DateTime.Now.Subtract(eventData.Duration).ToZuluString(), eventData);
                     });
                 };
             }

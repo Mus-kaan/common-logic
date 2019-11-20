@@ -10,10 +10,6 @@ namespace Microsoft.Liftr.SimpleDeploy
 {
     public abstract class BaseResourceOptions
     {
-        public string PartnerName { get; set; }
-
-        public string ShortPartnerName { get; set; }
-
         public EnvironmentType Environment { get; set; }
 
         public string LocationStr { get; set; }

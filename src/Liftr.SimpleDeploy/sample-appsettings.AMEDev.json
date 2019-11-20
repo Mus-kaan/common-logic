@@ -1,7 +1,10 @@
 {
   "EnvironmentOptions": {
+    "PartnerName": "TestPartnerName",
+    "ShortPartnerName": "ttt",
     "TenantId": "33e01921-4d64-4f8c-a055-5bdaffd5e33d", // ame
-    "SPNObjectId": "fbc51763-3a47-471f-a93f-b648b146b401", // /subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/ev2-df-shell-extension-wus-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ev2-shell-msi
+    "SPNObjectId": "bd571494-17b0-4ac1-abb7-9eb64b64e145",
+    "SecretPrefix": "PartnetNameRP",
     "AKSInfo": {
       "AKSSPNClientId": "e715ee55-84df-44a2-a29c-a4cd9e9b2feb",
       "AKSSPNObjectId": "8b64659c-3d42-4727-8efb-e41aabe7a4d7"

@@ -9,7 +9,7 @@ namespace Microsoft.Liftr.Fluent.Tests
 {
     public class ComputeTestModel
     {
-        public InfraV2RegionalComputeOptions Options { get; set; }
+        public RegionalComputeOptions Options { get; set; }
 
         public AKSInfo AKS { get; set; }
 

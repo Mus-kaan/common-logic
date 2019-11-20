@@ -15,8 +15,6 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public string ComputeBaseName { get; set; }
 
-        public string SecretPrefix { get; set; }
-
         public string HostName { get; set; }
 
         public string GlobalLocationStr { get; set; }

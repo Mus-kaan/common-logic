@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Azure.Core;
+using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Fluent;
@@ -90,9 +91,13 @@ namespace Microsoft.Liftr.Fluent
 
         Task<IPublicIPAddress> GetPublicIPAsync(string rgName, string pipName);
 
+        Task<ITrafficManagerProfile> GetOrCreateTrafficManagerAsync(string rgName, string tmName, IDictionary<string, string> tags);
+
         Task<ITrafficManagerProfile> CreateTrafficManagerAsync(string rgName, string tmName, IDictionary<string, string> tags);
 
         Task<ITrafficManagerProfile> GetTrafficManagerAsync(string tmId);
+
+        Task<ITrafficManagerProfile> GetTrafficManagerAsync(string rgName, string tmName);
         #endregion
 
         #region CosmosDB
@@ -145,6 +150,10 @@ namespace Microsoft.Liftr.Fluent
         Task<IIdentity> CreateMSIAsync(Region location, string rgName, string msiName, IDictionary<string, string> tags);
 
         Task<IIdentity> GetMSIAsync(string rgName, string msiName);
+        #endregion
+
+        #region ACR
+        Task<IRegistry> GetOrCreateACRAsync(Region location, string rgName, string acrName, IDictionary<string, string> tags);
         #endregion
 
         #region Deployments

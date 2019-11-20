@@ -38,11 +38,6 @@ namespace Microsoft.Liftr.Fluent
                 throw new ArgumentNullException(nameof(tenantId));
             }
 
-            if (string.IsNullOrEmpty(subscriptionId))
-            {
-                throw new ArgumentNullException(nameof(subscriptionId));
-            }
-
             _tenantId = tenantId;
             _spnObjectId = spnObjectId;
             _subscriptionId = subscriptionId;
@@ -59,6 +54,11 @@ namespace Microsoft.Liftr.Fluent
             if (string.IsNullOrEmpty(subscriptionId))
             {
                 subscriptionId = _subscriptionId;
+            }
+
+            if (string.IsNullOrEmpty(subscriptionId))
+            {
+                throw new ArgumentNullException(nameof(subscriptionId));
             }
 
             var authenticated = Azure.Management.Fluent.Azure

@@ -9,7 +9,6 @@ using Microsoft.Liftr.Fluent.Provisioning;
 using Newtonsoft.Json;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -45,14 +44,11 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var client = scope.Client;
 
                     // This will take a long time. Be patient.
-                    (var kv, var msi, var aks) = await infra.CreateOrUpdateRegionalComputeRGAsync(
+                    await infra.CreateOrUpdateRegionalComputeRGAsync(
                         context,
                         model.Options,
                         model.AKS,
-                        TestCredentials.KeyVaultClient,
-                        model.GenevaCert,
-                        model.SSLCert,
-                        model.FirstPartyCert);
+                        TestCredentials.KeyVaultClient);
 
                     // Check resource group.
                     {
@@ -66,10 +62,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                         context,
                         model.Options,
                         model.AKS,
-                        TestCredentials.KeyVaultClient,
-                        model.GenevaCert,
-                        model.SSLCert,
-                        model.FirstPartyCert);
+                        TestCredentials.KeyVaultClient);
                 }
                 catch (Exception ex)
                 {

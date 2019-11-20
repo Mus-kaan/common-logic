@@ -6,8 +6,10 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -36,6 +38,10 @@ namespace Microsoft.Liftr.Fluent.Tests
             var baseName = "data";
             var rgName = context.ResourceGroupName(baseName);
 
+            var dataOptions = JsonConvert.DeserializeObject<RegionalDataOptions>(File.ReadAllText("TestDataOptions.json"));
+            dataOptions.SSLCert = null;
+            dataOptions.FirstPartyCert = null;
+
             using (var globalScope = new TestResourceGroupScope(rgName))
             {
                 try
@@ -43,8 +49,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var infra = new InftrastructureV2(globalScope.AzFactory, globalScope.Logger);
                     var client = globalScope.Client;
 
-                    // This will take a long time. Be patient. About 6 minutes.
-                    (_, _, var db, var tm, var kv) = await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dps, 5);
+                    (_, _, var db, var tm, var kv) = await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dataOptions, TestCredentials.KeyVaultClient);
 
                     // Check global resource group.
                     {
@@ -61,7 +66,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     }
 
                     // Same deployment will not throw exception.
-                    await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dps, 5);
+                    await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dataOptions, TestCredentials.KeyVaultClient);
                 }
                 catch (Exception ex)
                 {

@@ -1,6 +1,7 @@
 {
   "environment": "Test",
-  "locationStr": "eastus",
+  "locationStr": "westcentralus",
   "DataBaseName": "data191001",
+  "HostName": "ib-rp-web-wcus.azliftr-test.io",
   "DataPlaneSubscriptions": [ "eebfbfdb-4167-49f6-be43-466a6709609f" ]
 }

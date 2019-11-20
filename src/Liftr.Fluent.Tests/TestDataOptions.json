@@ -1,0 +1,31 @@
+{
+  "ActiveDBKeyName": "Primary MongoDB Connection String",
+  "GlobalKeyVaultResourceId": "/subscriptions/60fad35b-3a47-4ca0-b691-4a789f737cea/resourceGroups/ib-test-gbl1910-cus-rg/providers/Microsoft.KeyVault/vaults/ibtestgbl1910cuskv",
+  "CopyKVSecretsWithPrefix": "Nginx",
+  "SecretPrefix": "NginxRP",
+  "GenevaCert": {
+    "CertificateName": "GenevaAMEClientCert",
+    "SubjectName": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
+    "SubjectAlternativeNames": [
+      "antares-mds-agent.geneva.keyvault.liftr-dev.net"
+    ]
+  },
+  "SSLCert": {
+    "CertificateName": "SSLCert",
+    "SubjectName": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
+    "SubjectAlternativeNames": [
+      "antares-mds-agent.geneva.keyvault.liftr-dev.net"
+    ]
+  },
+  "FirstPartyCert": {
+    "CertificateName": "ClientCert",
+    "SubjectName": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
+    "SubjectAlternativeNames": [
+      "antares-mds-agent.geneva.keyvault.liftr-dev.net"
+    ]
+  },
+  "DataPlaneSubscriptions": [
+    "60fad35b-3a47-4ca0-b691-4a789f737cea"
+  ],
+  "DataPlaneStorageCountPerSubscription": 3
+}

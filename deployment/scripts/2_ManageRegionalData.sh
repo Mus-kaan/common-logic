@@ -14,6 +14,10 @@ if [ "$ConfigFilePath" = "" ]; then
     exit 1 # terminate and indicate error
 fi
 
+if [ "$ActiveKey" = "" ]; then
+    ActiveKey="Primary MongoDB Connection String"
+fi
+
 ./RunProvisioningRunner.sh \
 --ProvisionAction="CreateOrUpdateRegionalData" \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId" \

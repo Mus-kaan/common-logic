@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Azure.Core;
+using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Fluent;
@@ -417,15 +418,24 @@ namespace Microsoft.Liftr.Fluent
             return pip;
         }
 
-        public async Task<IPublicIPAddress> GetPublicIPAsync(string rgName, string pipName)
+        public Task<IPublicIPAddress> GetPublicIPAsync(string rgName, string pipName)
         {
             _logger.Information("Start getting Public IP with name: {pipName} ...", pipName);
 
-            var pip = await FluentClient
+            return FluentClient
                 .PublicIPAddresses
                 .GetByResourceGroupAsync(rgName, pipName);
+        }
 
-            return pip;
+        public async Task<ITrafficManagerProfile> GetOrCreateTrafficManagerAsync(string rgName, string tmName, IDictionary<string, string> tags)
+        {
+            var tm = await GetTrafficManagerAsync(rgName, tmName);
+            if (tm == null)
+            {
+                tm = await CreateTrafficManagerAsync(rgName, tmName, tags);
+            }
+
+            return tm;
         }
 
         public async Task<ITrafficManagerProfile> CreateTrafficManagerAsync(string rgName, string tmName, IDictionary<string, string> tags)
@@ -458,6 +468,14 @@ namespace Microsoft.Liftr.Fluent
                 .GetByIdAsync(tmId);
 
             return tm;
+        }
+
+        public Task<ITrafficManagerProfile> GetTrafficManagerAsync(string rgName, string tmName)
+        {
+            _logger.Information("Start getting Traffic Manager with name: {tmName} in RG {rgName} ...", tmName, rgName);
+            return FluentClient
+                .TrafficManagerProfiles
+                .GetByResourceGroupAsync(rgName, tmName);
         }
         #endregion
 
@@ -698,6 +716,30 @@ namespace Microsoft.Liftr.Fluent
         {
             _logger.Information("Getting MSI with name {msiName} in RG {rgName} ...", msiName, rgName);
             return FluentClient.Identities.GetByResourceGroupAsync(rgName, msiName);
+        }
+        #endregion
+
+        #region ACR
+        public async Task<IRegistry> GetOrCreateACRAsync(Region location, string rgName, string acrName, IDictionary<string, string> tags)
+        {
+            _logger.Information("Getting a ACR {acrName} in RG {rgName} ...", acrName, rgName);
+            var acr = await FluentClient.ContainerRegistries
+                .GetByResourceGroupAsync(rgName, acrName);
+
+            if (acr == null)
+            {
+                _logger.Information("Creating ACR with name {acrName} in RG {rgName} ...", acrName, rgName);
+                acr = await FluentClient.ContainerRegistries
+                    .Define(acrName)
+                    .WithRegion(location)
+                    .WithExistingResourceGroup(rgName)
+                    .WithPremiumSku()
+                    .WithTags(tags)
+                    .CreateAsync();
+                _logger.Information("Created ACR with Id {resourceId}.", acr.Id);
+            }
+
+            return acr;
         }
         #endregion
 

@@ -136,7 +136,7 @@ namespace Microsoft.Liftr.KeyVault
                 Enabled = true,
             };
 
-            _logger.Information("Start creating certificate with name {@certificateName} and policy: {@certPolicy} ...", certName, certPolicy);
+            _logger.Information("Start creating certificate with name {@certificateName}, subject name {certSubjectName} and policy: {@certPolicy} ...", certName, certPolicy.X509CertificateProperties.Subject, certPolicy);
             var certOperation = await _keyVaultClient.CreateCertificateAsync(_vaultBaseUrl, certName, certPolicy, certificateAttributes, tags);
 
             while (certOperation.Status.OrdinalEquals("InProgress"))
@@ -145,7 +145,7 @@ namespace Microsoft.Liftr.KeyVault
                 certOperation = await _keyVaultClient.GetCertificateOperationAsync(_vaultBaseUrl, certName);
             }
 
-            _logger.Information("Finished cert cration with name {@certificateName}. Operation result: {@certOperation}", certName, certOperation);
+            _logger.Information("Finished cert cration with name {@certificateName}, subject name {certSubjectName}. Operation result: {@certOperation}", certName, certPolicy.X509CertificateProperties.Subject, certOperation);
 
             if (!certOperation.Status.OrdinalEquals("Completed"))
             {

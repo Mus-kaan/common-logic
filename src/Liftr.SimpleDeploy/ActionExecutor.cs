@@ -13,7 +13,6 @@ using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
 using Microsoft.Liftr.KeyVault;
-using Microsoft.Liftr.Logging;
 using Serilog.Context;
 using System;
 using System.Collections.Generic;
@@ -138,7 +137,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     var content = File.ReadAllText(_options.ConfigPath);
                     BaseResourceOptions config = null;
                     GlobalResourceOptions gblOptions = null;
-                    DataResourceOptions dataOptions = null;
+                    DataResourceOptions runnerDataOptions = null;
                     ComputeResourceOptions computeOptions = null;
 
                     switch (_options.Action)
@@ -153,9 +152,14 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                         case ActionType.CreateOrUpdateRegionalData:
                             {
-                                dataOptions = content.FromJson<DataResourceOptions>();
-                                operation.SetContextProperty(nameof(dataOptions.DataBaseName), dataOptions.DataBaseName);
-                                config = dataOptions;
+                                if (string.IsNullOrEmpty(_options.ActiveKeyName))
+                                {
+                                    throw new InvalidOperationException($"{nameof(_options.ActiveKeyName)} must be specified.");
+                                }
+
+                                runnerDataOptions = content.FromJson<DataResourceOptions>();
+                                operation.SetContextProperty(nameof(runnerDataOptions.DataBaseName), runnerDataOptions.DataBaseName);
+                                config = runnerDataOptions;
                                 break;
                             }
 
@@ -188,7 +192,7 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                     _logger.Information("Parsed config file: {@config}", config);
 
-                    operation.SetContextProperty(nameof(config.PartnerName), config.PartnerName);
+                    operation.SetContextProperty(nameof(_envOptions.PartnerName), _envOptions.PartnerName);
                     operation.SetContextProperty(nameof(config.Environment), config.Environment.ToString());
                     if (_options.Action == ActionType.CreateOrUpdateGlobal)
                     {
@@ -200,7 +204,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     }
 
                     var infra = new InftrastructureV2(azFactory, _logger);
-                    var namingContext = new NamingContext(config.PartnerName, config.ShortPartnerName, config.Environment, config.Location);
+                    var namingContext = new NamingContext(_envOptions.PartnerName, _envOptions.ShortPartnerName, config.Environment, config.Location);
 
                     if (_options.Action == ActionType.CreateOrUpdateGlobal)
                     {
@@ -209,41 +213,50 @@ namespace Microsoft.Liftr.SimpleDeploy
                     }
                     else if (_options.Action == ActionType.CreateOrUpdateRegionalData)
                     {
-                        await infra.CreateOrUpdateRegionalDataRGAsync(dataOptions.DataBaseName, namingContext, LoadDataPlaneSubscriptions(), dataOptions.DataPlaneStorageCount);
+                        CertificateOptions sslCert = null;
+                        if (!string.IsNullOrEmpty(runnerDataOptions.HostName))
+                        {
+                            sslCert = new CertificateOptions()
+                            {
+                                CertificateName = "ssl-cert",
+                                SubjectName = runnerDataOptions.HostName,
+                                SubjectAlternativeNames = new List<string>() { runnerDataOptions.HostName },
+                            };
+                        }
+
+                        var dataOptions = new RegionalDataOptions()
+                        {
+                            ActiveDBKeyName = _options.ActiveKeyName,
+                            SecretPrefix = _envOptions.SecretPrefix,
+                            GenevaCert = _envOptions.GenevaCert,
+                            SSLCert = sslCert,
+                            FirstPartyCert = _envOptions.FirstPartyCert,
+                            DataPlaneSubscriptions = runnerDataOptions.DataPlaneSubscriptions,
+                            DataPlaneStorageCountPerSubscription = _envOptions.StorageCountPerDataPlaneSubscription,
+                        };
+
+                        await infra.CreateOrUpdateRegionalDataRGAsync(runnerDataOptions.DataBaseName, namingContext, dataOptions, kvClient);
                         _logger.Information("Successfully managed regional data resources.");
                     }
                     else if (_options.Action == ActionType.CreateOrUpdateRegionalCompute)
                     {
-                        InfraV2RegionalComputeOptions v2Options = new InfraV2RegionalComputeOptions()
+                        RegionalComputeOptions regionalComputeOptions = new RegionalComputeOptions()
                         {
                             DataBaseName = computeOptions.DataBaseName,
                             ComputeBaseName = computeOptions.ComputeBaseName,
-                            SecretPrefix = computeOptions.SecretPrefix,
-                            CopyKVSecretsWithPrefix = namingContext.PartnerName,
-                            DataPlaneSubscriptions = LoadDataPlaneSubscriptions(),
                         };
 
                         if (!string.IsNullOrEmpty(computeOptions.GlobalBaseName))
                         {
                             var gblNamingContext = new NamingContext(namingContext.PartnerName, namingContext.ShortPartnerName, namingContext.Environment, computeOptions.GlobalLocation);
-                            v2Options.CentralKeyVaultResourceId = $"subscriptions/{_options.SubscriptionId}/resourceGroups/{gblNamingContext.ResourceGroupName(computeOptions.GlobalBaseName)}/providers/Microsoft.KeyVault/vaults/{gblNamingContext.KeyVaultName(computeOptions.GlobalBaseName)}";
+                            regionalComputeOptions.GlobalKeyVaultResourceId = $"subscriptions/{_options.SubscriptionId}/resourceGroups/{gblNamingContext.ResourceGroupName(computeOptions.GlobalBaseName)}/providers/Microsoft.KeyVault/vaults/{gblNamingContext.KeyVaultName(computeOptions.GlobalBaseName)}";
                         }
-
-                        var sslCert = new CertificateOptions()
-                        {
-                            CertificateName = "ssl-cert",
-                            SubjectName = computeOptions.HostName,
-                            SubjectAlternativeNames = new List<string>() { computeOptions.HostName },
-                        };
 
                         (var kv, var msi, var aks) = await infra.CreateOrUpdateRegionalComputeRGAsync(
                             namingContext,
-                            v2Options,
+                            regionalComputeOptions,
                             _envOptions.AKSInfo,
-                            kvClient,
-                            genevaCert: _envOptions.GenevaCert,
-                            sslCert: sslCert,
-                            firstPartyCert: _envOptions.FirstPartyCert);
+                            kvClient);
 
                         File.WriteAllText("vault-name.txt", kv.Name);
                         File.WriteAllText("aks-name.txt", aks.Name);
@@ -264,7 +277,11 @@ namespace Microsoft.Liftr.SimpleDeploy
                             throw new InvalidOperationException(errMsg);
                         }
 
-                        File.WriteAllText("rp-hostname.txt", computeOptions.HostName);
+                        if (!string.IsNullOrEmpty(computeOptions.HostName))
+                        {
+                            File.WriteAllText("rp-hostname.txt", computeOptions.HostName);
+                        }
+
                         File.WriteAllText("aks-name.txt", aksName);
                         File.WriteAllText("aks-rg.txt", aksRGName);
                         File.WriteAllText("aks-kv.txt", kv.VaultUri);
@@ -302,6 +319,20 @@ namespace Microsoft.Liftr.SimpleDeploy
                         _logger.Information("Successfully updated AKS public IP in the traffic manager.");
                     }
 
+                    if (SimpleDeployExtension.AfterRunAsync != null)
+                    {
+                        using (_logger.StartTimedOperation("Run extension action"))
+                        {
+                            var extensionTask = SimpleDeployExtension.AfterRunAsync.Invoke(
+                                azFactory,
+                                kvClient,
+                                _options,
+                                _envOptions,
+                                _logger);
+                            await extensionTask;
+                        }
+                    }
+
                     _logger.Information("----------------------------------------------------------------------");
                     _logger.Information("Finished successfully!");
                     _logger.Information("----------------------------------------------------------------------");
@@ -318,28 +349,6 @@ namespace Microsoft.Liftr.SimpleDeploy
                     _appLifetime.StopApplication();
                 }
             }
-        }
-
-        private IEnumerable<string> LoadDataPlaneSubscriptions()
-        {
-            List<string> result = new List<string>();
-            if (!string.IsNullOrEmpty(_options.DataPlaneSubscriptionsFile))
-            {
-                string line;
-                var file = new StreamReader(_options.DataPlaneSubscriptionsFile);
-                while ((line = file.ReadLine()) != null)
-                {
-                    if (Guid.TryParse(line, out var subId))
-                    {
-                        result.Add(subId.ToString());
-                    }
-                }
-
-                file.Close();
-            }
-
-            _logger.Information("Data plane subscriptions:{@daSubscriptions}", result);
-            return result;
         }
     }
 }
