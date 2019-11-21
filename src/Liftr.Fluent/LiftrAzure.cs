@@ -229,7 +229,6 @@ namespace Microsoft.Liftr.Fluent
             }
             catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
             {
-                _logger.Information("There exists the same role assignment.");
             }
         }
 
@@ -253,7 +252,6 @@ namespace Microsoft.Liftr.Fluent
             }
             catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
             {
-                _logger.Information("There exists the same role assignment.");
             }
         }
 
@@ -277,7 +275,6 @@ namespace Microsoft.Liftr.Fluent
             }
             catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
             {
-                _logger.Information("There exists the same role assignment.");
             }
         }
 
@@ -303,7 +300,6 @@ namespace Microsoft.Liftr.Fluent
             }
             catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
             {
-                _logger.Information("There exists the same role assignment.");
             }
         }
 
@@ -324,7 +320,6 @@ namespace Microsoft.Liftr.Fluent
             }
             catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
             {
-                _logger.Information("There exists the same role assignment.");
             }
         }
 
@@ -345,7 +340,6 @@ namespace Microsoft.Liftr.Fluent
             }
             catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
             {
-                _logger.Information("There exists the same role assignment.");
             }
         }
         #endregion Storage Account

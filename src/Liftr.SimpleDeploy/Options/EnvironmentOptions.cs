@@ -17,7 +17,7 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public string SecretPrefix { get; set; }
 
-        public int StorageCountPerDataPlaneSubscription { get; set; } = 1;
+        public int StorageCountPerDataPlaneSubscription { get; set; }
 
         public CertificateOptions GenevaCert { get; set; }
 

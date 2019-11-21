@@ -100,6 +100,11 @@ namespace Microsoft.Liftr.KeyVault
 
         public async Task<CertificateOperation> CreateCertificateAsync(string certName, string issuerName, string certificateSubject, IList<string> subjectAlternativeNames, IDictionary<string, string> tags = null)
         {
+            if (string.IsNullOrEmpty(certificateSubject))
+            {
+                throw new ArgumentNullException(nameof(certificateSubject));
+            }
+
             CertificatePolicy certPolicy = new CertificatePolicy()
             {
                 IssuerParameters = new IssuerParameters

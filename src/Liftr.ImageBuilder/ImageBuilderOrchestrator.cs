@@ -84,7 +84,6 @@ namespace Microsoft.Liftr.ImageBuilder
             }
             catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists", StringComparison.OrdinalIgnoreCase))
             {
-                _logger.Information("There exists the same role assignment.");
             }
 
             ImageGalleryClient galleryClient = new ImageGalleryClient(_logger);
