@@ -96,8 +96,7 @@ namespace Microsoft.Liftr.ImageBuilder
         {
             int deletedCount = 0;
 
-            // TODO: update CDPx to VS2019 and switch to async api.
-            var dateFolders = _blobContainer.GetBlobsByHierarchy(prefix: "drop/", delimiter: "/").ToList();
+            var dateFolders = await ToListAsync(_blobContainer.GetBlobsByHierarchyAsync(prefix: "drop/", delimiter: "/"));
 
             foreach (var dateFolder in dateFolders)
             {
@@ -113,7 +112,7 @@ namespace Microsoft.Liftr.ImageBuilder
                     continue;
                 }
 
-                var toDeletes = _blobContainer.GetBlobsByHierarchy(prefix: dateFolder.Prefix).ToList();
+                var toDeletes = await ToListAsync(_blobContainer.GetBlobsByHierarchyAsync(prefix: dateFolder.Prefix));
 
                 foreach (var toDelete in toDeletes)
                 {
@@ -131,7 +130,29 @@ namespace Microsoft.Liftr.ImageBuilder
             return deletedCount;
         }
 
-        internal string GetBlobName(string fileName)
+        private static async Task<List<T>> ToListAsync<T>(AsyncPageable<T> source, CancellationToken cancellationToken = default)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            List<T> results = new List<T>();
+
+            await foreach (var page in source)
+            {
+                results.Add(page);
+            }
+
+            return results;
+        }
+
+        private static Task<List<BlobHierarchyItem>> ToListAsync(AsyncPageable<BlobHierarchyItem> source, CancellationToken cancellationToken = default)
+        {
+            return ToListAsync<BlobHierarchyItem>(source);
+        }
+
+        private string GetBlobName(string fileName)
         {
             var timeStamp = _timeSource.UtcNow;
             return $"drop/{timeStamp.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}/{timeStamp.ToZuluString()}/{fileName}";

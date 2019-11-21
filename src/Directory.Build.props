@@ -43,5 +43,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+ <PropertyGroup>
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+
   <Import Project="$(MSBuildThisFileDirectory)\PackageVersions.props"/>
 </Project>

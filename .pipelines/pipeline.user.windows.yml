@@ -4,11 +4,9 @@
 environment:
   host:
     os: 'windows'
-    flavor: "server"
-    version: "2016"
   runtime:
     provider: 'appcontainer'
-    image: 'cdpxwin.azurecr.io/global/vse2017u5-external-azsdk-ext-win14393.1884:4.2'
+    image: 'cdpxwinrs5.azurecr.io/global/vse2019/16.3.7:latest'
 
 signing_options:
   profile: 'internal_azure_service'   # This service deploys to Azure!
