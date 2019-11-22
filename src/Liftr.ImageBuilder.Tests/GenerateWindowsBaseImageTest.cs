@@ -62,7 +62,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                     var result = await orchestrator.BuildCustomizedSBIImplAsync(
                                     imgOptions,
                                     artifactOptions,
-                                    "packer-windows.zip",
+                                    "packer-windows.tar.gz",
                                     "sample-image-meta.json",
                                     "WindowsServer2019",
                                     false,

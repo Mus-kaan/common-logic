@@ -23,13 +23,13 @@
             "inline": [
               "mkdir c:\\Monitoring",
               "cd c:\\Monitoring",
-              "Invoke-WebRequest 'ARTIFACT_URI_PLACEHOLDER' -OutFile c:\\Monitoring\\packer.zip",
-              "expand-archive -path '.\\packer.zip' -destinationpath 'c:\\Monitoring\\packer'",
-              "cd c:\\Monitoring\\packer",
-              ".\\SetMonAgentScheduledTask.ps1",
+              "Invoke-WebRequest 'ARTIFACT_URI_PLACEHOLDER' -OutFile c:\\Monitoring\\packer.tar.gz",
+              "tar -C 'c:\\Monitoring' -zxvf c:\\Monitoring\\packer.tar.gz",
+              "cd c:\\Monitoring\\packer-files",
+              ".\\bakeImage.ps1",
               "cd c:\\Monitoring",
-              "rm packer.zip",
-              "rm packer -Recurse -Force"
+              "rm packer.tar.gz",
+              "rm packer-files -Recurse -Force"
             ]
           }
         ],

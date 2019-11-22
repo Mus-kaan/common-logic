@@ -26,7 +26,7 @@
     <None Update="packer.tar">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="packer-windows.zip">
+    <None Update="packer-windows.tar.gz">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
