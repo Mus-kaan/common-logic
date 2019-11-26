@@ -77,10 +77,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.SimpleDeploy", "Liftr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fluent", "Fluent", "{E4958D13-B767-451D-8C50-629C1805BD9A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Billing.Web", "Liftr.Billing.Web\Liftr.Billing.Web.csproj", "{95FE21AE-F4EE-4FC9-B305-8DA04E2CA27A}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Billing.Web.Tests", "Liftr.Billing.Web.Tests\Liftr.Billing.Web.Tests.csproj", "{5FE04DEE-5869-4056-9A3D-3F7CF792E365}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Tests.Common", "Liftr.Tests.Common\Liftr.Tests.Common.csproj", "{C33A3C82-369A-4864-B8DF-5D3B45BD0E24}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.ImageBuilder", "Liftr.ImageBuilder\Liftr.ImageBuilder.csproj", "{59FCEAD2-6D14-404D-B0E2-0F8E22621DDF}"
@@ -89,11 +85,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.ImageBuilder.Tests", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.KeyVault", "Liftr.KeyVault\Liftr.KeyVault.csproj", "{28E45D28-1AEF-4489-893F-A9C71F64242C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Queue", "Liftr.Queue\Liftr.Queue.csproj", "{05C29794-2077-4A1A-BC4C-7AF871C0BBF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Queue", "Liftr.Queue\Liftr.Queue.csproj", "{05C29794-2077-4A1A-BC4C-7AF871C0BBF1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Queue.Abstractions", "Liftr.Queue.Abstractions\Liftr.Queue.Abstractions.csproj", "{35E9C211-BAB8-434C-8666-FABA33163F58}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Queue.Abstractions", "Liftr.Queue.Abstractions\Liftr.Queue.Abstractions.csproj", "{35E9C211-BAB8-434C-8666-FABA33163F58}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Queue.Tests", "Liftr.Queue.Tests\Liftr.Queue.Tests.csproj", "{63D7CBAF-DD3C-4EB2-96ED-042345D6CD4D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Queue.Tests", "Liftr.Queue.Tests\Liftr.Queue.Tests.csproj", "{63D7CBAF-DD3C-4EB2-96ED-042345D6CD4D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -225,14 +221,6 @@ Global
 		{671C5D08-6E65-43C8-82B3-7C805C79CFB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{671C5D08-6E65-43C8-82B3-7C805C79CFB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{671C5D08-6E65-43C8-82B3-7C805C79CFB9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{95FE21AE-F4EE-4FC9-B305-8DA04E2CA27A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{95FE21AE-F4EE-4FC9-B305-8DA04E2CA27A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{95FE21AE-F4EE-4FC9-B305-8DA04E2CA27A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{95FE21AE-F4EE-4FC9-B305-8DA04E2CA27A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5FE04DEE-5869-4056-9A3D-3F7CF792E365}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5FE04DEE-5869-4056-9A3D-3F7CF792E365}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5FE04DEE-5869-4056-9A3D-3F7CF792E365}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5FE04DEE-5869-4056-9A3D-3F7CF792E365}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C33A3C82-369A-4864-B8DF-5D3B45BD0E24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C33A3C82-369A-4864-B8DF-5D3B45BD0E24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C33A3C82-369A-4864-B8DF-5D3B45BD0E24}.Release|Any CPU.ActiveCfg = Release|Any CPU
