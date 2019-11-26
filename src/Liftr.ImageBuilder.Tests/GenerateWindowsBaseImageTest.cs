@@ -59,12 +59,12 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                                     namingContext.KeyVaultName(baseName),
                                     false);
 
-                    var result = await orchestrator.BuildCustomizedSBIImplAsync(
+                    var result = await orchestrator.BuildCustomizedSBIAsync(
                                     imgOptions,
                                     artifactOptions,
                                     "packer-windows.tar.gz",
                                     "sample-image-meta.json",
-                                    "WindowsServer2019",
+                                    "2019.0.20190214",
                                     false,
                                     CancellationToken.None);
                 }

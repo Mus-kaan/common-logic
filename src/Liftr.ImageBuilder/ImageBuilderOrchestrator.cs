@@ -184,16 +184,26 @@ namespace Microsoft.Liftr.ImageBuilder
                 throw new ArgumentNullException(nameof(imgOptions));
             }
 
-            ImageGalleryClient galleryClient = new ImageGalleryClient(_logger);
-            var imgVersion = await galleryClient.GetImageVersionAsync(_azFactory.GenerateLiftrAzure().FluentClient, imgOptions.ResourceGroupName, imgOptions.GalleryName, sbiVersion);
-            if (imgVersion == null)
+            string sourceImageVersion;
+            if (isLinux)
             {
-                var errMsg = "Cannot find the source SBI image version.";
-                _logger.Error(errMsg);
-                throw new InvalidOperationException(errMsg);
+                ImageGalleryClient galleryClient = new ImageGalleryClient(_logger);
+                var imgVersion = await galleryClient.GetImageVersionAsync(_azFactory.GenerateLiftrAzure().FluentClient, imgOptions.ResourceGroupName, imgOptions.GalleryName, sbiVersion);
+                if (imgVersion == null)
+                {
+                    var errMsg = "Cannot find the source SBI image version.";
+                    _logger.Error(errMsg);
+                    throw new InvalidOperationException(errMsg);
+                }
+
+                sourceImageVersion = imgVersion.Id;
+            }
+            else
+            {
+                sourceImageVersion = sbiVersion;
             }
 
-            return await BuildCustomizedSBIImplAsync(imgOptions, storeOptions, artifactPath, imageMetaPath, imgVersion.Id, isLinux, cancellationToken);
+            return await BuildCustomizedSBIImplAsync(imgOptions, storeOptions, artifactPath, imageMetaPath, sourceImageVersion, isLinux, cancellationToken);
         }
 
         internal async Task<string> BuildCustomizedSBIImplAsync(
