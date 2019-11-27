@@ -23,6 +23,7 @@ if [ "$GenevaParametersFile" = "" ]; then
     echo "Please set the file path to the Geneva parameters using variable 'GenevaParametersFile' ..."
     exit 1 # terminate and indicate error
 fi
+
 echo "GenevaParametersFile: $GenevaParametersFile"
 
 ./RunProvisioningRunner.sh \

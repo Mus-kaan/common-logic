@@ -164,7 +164,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                             }
 
                         case ActionType.CreateOrUpdateRegionalCompute:
-                        case ActionType.GetComputeKeyVaultEndpoint:
+                        case ActionType.GetKeyVaultEndpoint:
                         case ActionType.UpdateAKSPublicIpInTrafficManager:
                             {
                                 computeOptions = content.FromJson<ComputeResourceOptions>();
@@ -208,7 +208,9 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                     if (_options.Action == ActionType.CreateOrUpdateGlobal)
                     {
-                        await infra.CreateOrUpdateGlobalRGAsync(gblOptions.GlobalBaseName, namingContext);
+                        (var kv, var acr) = await infra.CreateOrUpdateGlobalRGAsync(gblOptions.GlobalBaseName, namingContext);
+                        File.WriteAllText("acr-name.txt", acr.Name);
+                        File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
                         _logger.Information("Successfully managed global resources.");
                     }
                     else if (_options.Action == ActionType.CreateOrUpdateRegionalData)
@@ -246,11 +248,8 @@ namespace Microsoft.Liftr.SimpleDeploy
                             ComputeBaseName = computeOptions.ComputeBaseName,
                         };
 
-                        if (!string.IsNullOrEmpty(computeOptions.GlobalBaseName))
-                        {
-                            var gblNamingContext = new NamingContext(namingContext.PartnerName, namingContext.ShortPartnerName, namingContext.Environment, computeOptions.GlobalLocation);
-                            regionalComputeOptions.GlobalKeyVaultResourceId = $"subscriptions/{_options.SubscriptionId}/resourceGroups/{gblNamingContext.ResourceGroupName(computeOptions.GlobalBaseName)}/providers/Microsoft.KeyVault/vaults/{gblNamingContext.KeyVaultName(computeOptions.GlobalBaseName)}";
-                        }
+                        var gblNamingContext = new NamingContext(namingContext.PartnerName, namingContext.ShortPartnerName, namingContext.Environment, computeOptions.GlobalLocation);
+                        regionalComputeOptions.GlobalKeyVaultResourceId = $"subscriptions/{_options.SubscriptionId}/resourceGroups/{gblNamingContext.ResourceGroupName(computeOptions.GlobalBaseName)}/providers/Microsoft.KeyVault/vaults/{gblNamingContext.KeyVaultName(computeOptions.GlobalBaseName)}";
 
                         (var kv, var msi, var aks) = await infra.CreateOrUpdateRegionalComputeRGAsync(
                             namingContext,
@@ -265,17 +264,30 @@ namespace Microsoft.Liftr.SimpleDeploy
                         File.WriteAllText("msi-clientId.txt", msi.ClientId);
                         _logger.Information("Successfully managed regional compute resources.");
                     }
-                    else if (_options.Action == ActionType.GetComputeKeyVaultEndpoint)
+                    else if (_options.Action == ActionType.GetKeyVaultEndpoint)
                     {
                         var aksRGName = namingContext.ResourceGroupName(computeOptions.ComputeBaseName);
                         var aksName = namingContext.AKSName(computeOptions.ComputeBaseName);
-                        var kv = await infra.GetKeyVaultAsync(computeOptions.ComputeBaseName, namingContext);
+                        var kv = await infra.GetKeyVaultAsync(computeOptions.DataBaseName, namingContext);
                         if (kv == null)
                         {
-                            var errMsg = "Cannot find key vault in the compute rg";
+                            var errMsg = "Cannot find key vault in the regional data resource group.";
                             _logger.Fatal(errMsg);
                             throw new InvalidOperationException(errMsg);
                         }
+
+                        var gblNamingContext = new NamingContext(namingContext.PartnerName, namingContext.ShortPartnerName, namingContext.Environment, computeOptions.GlobalLocation);
+
+                        var acr = await infra.GetACRAsync(computeOptions.GlobalBaseName, gblNamingContext);
+                        if (acr == null)
+                        {
+                            var errMsg = "Cannot find the global ACR.";
+                            _logger.Fatal(errMsg);
+                            throw new InvalidOperationException(errMsg);
+                        }
+
+                        File.WriteAllText("acr-name.txt", acr.Name);
+                        File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
 
                         if (!string.IsNullOrEmpty(computeOptions.HostName))
                         {

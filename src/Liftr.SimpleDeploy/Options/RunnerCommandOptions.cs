@@ -11,13 +11,13 @@ namespace Microsoft.Liftr.SimpleDeploy
         CreateOrUpdateGlobal,
         CreateOrUpdateRegionalData,
         CreateOrUpdateRegionalCompute,
-        GetComputeKeyVaultEndpoint,
+        GetKeyVaultEndpoint,
         UpdateAKSPublicIpInTrafficManager,
     }
 
     public class RunnerCommandOptions
     {
-        [Option('a', "action", Required = true, HelpText = "Action type, e.g. CreateOrUpdateGlobal, CreateOrUpdateRegionalData, CreateOrUpdateRegionalCompute, GetComputeKeyVaultEndpoint, UpdateAKSPublicIpInTrafficManager.")]
+        [Option('a', "action", Required = true, HelpText = "Action type, e.g. CreateOrUpdateGlobal, CreateOrUpdateRegionalData, CreateOrUpdateRegionalCompute, GetKeyVaultEndpoint, UpdateAKSPublicIpInTrafficManager.")]
         public ActionType Action { get; set; }
 
         [Option('f', "file", Required = true, HelpText = "Path to the configuration file.")]

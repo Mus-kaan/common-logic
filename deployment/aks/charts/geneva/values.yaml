@@ -2,6 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+linuxgenevaACR:
+  endpoint: linuxgeneva-microsoft.azurecr.io
+
 mdsd:
   dockerTag: master_236
 
@@ -18,7 +21,7 @@ promMdmConverter:
   name: prom-mdm-converter
   promConverterImagePullPolicy:
   image:
-    name: genevatest.azurecr.io/prom-mdm-converter
+    name: prom-mdm-converter
     tag: latest
 
   metrics: # Metrics below with a suffix "_named" or "_rate" are likely defined in the Prometheus configuration

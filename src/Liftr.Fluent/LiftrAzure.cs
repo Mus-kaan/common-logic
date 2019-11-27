@@ -716,9 +716,7 @@ namespace Microsoft.Liftr.Fluent
         #region ACR
         public async Task<IRegistry> GetOrCreateACRAsync(Region location, string rgName, string acrName, IDictionary<string, string> tags)
         {
-            _logger.Information("Getting a ACR {acrName} in RG {rgName} ...", acrName, rgName);
-            var acr = await FluentClient.ContainerRegistries
-                .GetByResourceGroupAsync(rgName, acrName);
+            var acr = await GetACRAsync(rgName, acrName);
 
             if (acr == null)
             {
@@ -734,6 +732,12 @@ namespace Microsoft.Liftr.Fluent
             }
 
             return acr;
+        }
+
+        public Task<IRegistry> GetACRAsync(string rgName, string acrName)
+        {
+            _logger.Information("Getting the ACR {acrName} in RG {rgName} ...", acrName, rgName);
+            return FluentClient.ContainerRegistries.GetByResourceGroupAsync(rgName, acrName);
         }
         #endregion
 

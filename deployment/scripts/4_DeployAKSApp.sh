@@ -19,13 +19,17 @@ APP_ASPNETCORE_ENVIRONMENT="Development"
 fi
 
 AKSSvcLabel="nginx-ingress-controller"
-AKSAppChartPackage="liftr-rp-web-*.tgz"
+AKSAppChartPackage="liftr-rp-*.tgz"
 
 echo "Get Key Vault endpoint and save on disk."
 ./RunProvisioningRunner.sh \
---ProvisionAction="GetComputeKeyVaultEndpoint" \
+--ProvisionAction="GetKeyVaultEndpoint" \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId" \
 --ConfigFilePath="$ConfigFilePath"
+
+./ImportCDPxImages.sh \
+--DeploymentSubscriptionId="$DeploymentSubscriptionId" \
+--ImageMetadataPath="image-meta.json"
 
 ./DeployAKSApp.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId" \

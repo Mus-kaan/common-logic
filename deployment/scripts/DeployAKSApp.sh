@@ -18,6 +18,10 @@ case $i in
     APP_ASPNETCORE_ENVIRONMENT="${i#*=}"
     shift # past argument=value
     ;;
+    --liftrACRURI=*)
+    liftrACRURI="${i#*=}"
+    shift # past argument=value
+    ;;
     *)
     echo "Not matched option '${i#*=}' passed in."
     exit 1
@@ -34,6 +38,7 @@ if [ -z ${AKSAppChartPackage+x} ]; then
     echo "AKSAppChartPackage is blank."
     exit 1
 fi
+
 echo "AKSAppChartPackage: $AKSAppChartPackage"
 
 if [ -z ${APP_ASPNETCORE_ENVIRONMENT+x} ]; then
@@ -47,6 +52,16 @@ echo "************************************************************"
 
 Helm="./helm"
 echo "DeploymentSubscriptionId: $DeploymentSubscriptionId"
+
+if [ "$liftrACRURI" = "" ]; then
+echo "Read liftrACRURI from file 'bin/acr-endpoint.txt'."
+liftrACRURI=$(<bin/acr-endpoint.txt)
+    if [ "$liftrACRURI" = "" ]; then
+        echo "Please set 'liftrACRURI' ..."
+        exit 1 # terminate and indicate error
+    fi
+fi
+echo "liftrACRURI: $liftrACRURI"
 
 if [ "$KeyVaultEndpoint" = "" ]; then
 echo "Read KeyVaultEndpoint from file 'bin/aks-kv.txt'."
@@ -145,7 +160,7 @@ rm -f ssl_key.pem
 # Connect with Aks
 echo "az aks get-credentials -g $AKSRGName -n $AKSName"
 az aks get-credentials -g "$AKSRGName" -n "$AKSName"
-$Helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+# $Helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 
 # Deploy the helm chart.
 HelmReleaseName="liftr-rp-web-release"
@@ -158,6 +173,9 @@ $Helm upgrade $HelmReleaseName --install --recreate-pods \
 --set controller.service.omitClusterIP=true \
 --set defaultBackend.service.omitClusterIP=true \
 --set APP_ASPNETCORE_ENVIRONMENT="$APP_ASPNETCORE_ENVIRONMENT" \
+--set imageRegistry="$liftrACRURI" \
+--set nginx-ingress.controller.image.repository="$liftrACRURI/kubernetes-ingress-controller/nginx-ingress-controller" \
+--set nginx-ingress.defaultBackend.image.repository="$liftrACRURI/defaultbackend-amd64" \
 --namespace default $AKSAppChartPackage
 
 # Wait and check Helm deployment status

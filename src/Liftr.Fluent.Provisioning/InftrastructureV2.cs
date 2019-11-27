@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.KeyVault;
+using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent;
@@ -34,7 +35,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<IVault> CreateOrUpdateGlobalRGAsync(string baseName, NamingContext namingContext)
+        public async Task<(IVault, IRegistry)> CreateOrUpdateGlobalRGAsync(string baseName, NamingContext namingContext)
         {
             if (namingContext == null)
             {
@@ -45,15 +46,17 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             {
                 var rgName = namingContext.ResourceGroupName(baseName);
                 var kvName = namingContext.KeyVaultName(baseName);
+                var acrName = namingContext.ACRName(baseName);
 
                 var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
 
                 var rg = await liftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
                 var kv = await liftrAzure.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
-
                 await liftrAzure.GrantSelfKeyVaultAdminAccessAsync(kv);
 
-                return kv;
+                var acr = await liftrAzure.GetOrCreateACRAsync(namingContext.Location, rgName, acrName, namingContext.Tags);
+
+                return (kv, acr);
             }
             catch (Exception ex)
             {
@@ -92,10 +95,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var kvName = namingContext.KeyVaultName(baseName);
             var cosmosName = namingContext.CosmosDBName(baseName);
             var msiName = namingContext.MSIName(baseName);
-            var acrName = namingContext.ACRName(baseName);
 
             var rg = await liftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
-            var acr = await liftrAzure.GetOrCreateACRAsync(namingContext.Location, rgName, acrName, namingContext.Tags);
             var msi = await liftrAzure.GetOrCreateMSIAsync(namingContext.Location, rgName, msiName, namingContext.Tags);
             var storageAccount = await liftrAzure.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, storageName, namingContext.Tags);
             await liftrAzure.DelegateStorageKeyOperationToKeyVaultAsync(storageAccount);
@@ -372,6 +373,31 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.KeyVault/vaults/{kvName}";
             var kv = await liftrAzure.GetKeyVaultByIdAsync(targetResourceId);
             return kv;
+        }
+
+        public async Task<IRegistry> GetACRAsync(string baseName, NamingContext namingContext)
+        {
+            if (namingContext == null)
+            {
+                throw new ArgumentNullException(nameof(namingContext));
+            }
+
+            try
+            {
+                var rgName = namingContext.ResourceGroupName(baseName);
+                var acrName = namingContext.ACRName(baseName);
+
+                var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
+
+                var acr = await liftrAzure.GetACRAsync(rgName, acrName);
+
+                return acr;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"{nameof(GetACRAsync)} failed.");
+                throw;
+            }
         }
     }
 }

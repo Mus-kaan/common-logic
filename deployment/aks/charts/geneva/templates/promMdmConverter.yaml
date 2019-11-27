@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
         - name: prom-mdm-converter
-          image: "{{ .Values.promMdmConverter.image.name }}:{{ .Values.promMdmConverter.image.tag }}"
+          image: "{{ .Values.linuxgenevaACR.endpoint }}/{{ .Values.promMdmConverter.image.name }}:{{ .Values.promMdmConverter.image.tag }}"
           imagePullPolicy: {{ .Values.promMdmConverter.promConverterImagePullPolicy }}
           imagePullSecrets:
             - name: prom-mdm-converter

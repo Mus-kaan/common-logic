@@ -19,6 +19,10 @@ case $i in
     gcs_region="${i#*=}"
     shift # past argument=value
     ;;
+    --liftrACRURI=*)
+    liftrACRURI="${i#*=}"
+    shift # past argument=value
+    ;;
     *)
     echo "Not matched option '${i#*=}' passed in."
     exit 1
@@ -50,6 +54,16 @@ echo "************************************************************"
 echo "DeploymentSubscriptionId: $DeploymentSubscriptionId"
 echo "GenevaParametersFile: $GenevaParametersFile"
 echo "gcs_region: $gcs_region"
+
+if [ "$liftrACRURI" = "" ]; then
+echo "Read liftrACRURI from file 'bin/acr-endpoint.txt'."
+liftrACRURI=$(<bin/acr-endpoint.txt)
+    if [ "$liftrACRURI" = "" ]; then
+        echo "Please set 'liftrACRURI' ..."
+        exit 1 # terminate and indicate error
+    fi
+fi
+echo "liftrACRURI: $liftrACRURI"
 
 if [ "$AKSRGName" = "" ]; then
 echo "Read AKSRGName from file 'bin/aks-rg.txt'."
@@ -124,15 +138,22 @@ rm -f geneva_key.pem
 # Connect with Aks
 echo "az aks get-credentials -g $AKSRGName -n $AKSName"
 az aks get-credentials -g "$AKSRGName" -n "$AKSName"
-$Helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+# $Helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 
 # Deploy geneva daemonset to default namespace
 echo "start deploy geneva helm chart."
 $Helm upgrade aks-geneva --install --recreate-pods \
 --values "$GenevaParametersFile" \
+--set gcskeyb64="$genevaServiceKey" \
 --set gcs_region="$gcs_region" \
 --set gcscertb64="$genevaServiceCert" \
 --set gcskeyb64="$genevaServiceKey" \
+--set linuxgenevaACR.endpoint="$liftrACRURI" \
+--set prometheus.configmapReload.image.repository="$liftrACRURI/configmap-reload" \
+--set prometheus.initChownData.image.repository="$liftrACRURI/library/busybox" \
+--set prometheus.kubeStateMetrics.image.repository="$liftrACRURI/coreos/kube-state-metrics" \
+--set prometheus.server.image.repository="$liftrACRURI/prom/prometheus" \
+--set prometheus.nodeExporter.image.repository="$liftrACRURI/prom/node-exporter" \
 --namespace default geneva-*.tgz
 
 kubectl rollout status daemonset/geneva-services

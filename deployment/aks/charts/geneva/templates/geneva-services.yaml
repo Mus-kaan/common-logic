@@ -55,7 +55,7 @@ spec:
       containers:        
         # MDSD
         - name: mdsd
-          image: linuxgeneva-microsoft.azurecr.io/genevamdsd:{{ .Values.mdsd.dockerTag }}
+          image: {{ .Values.linuxgenevaACR.endpoint }}/genevamdsd:{{ .Values.mdsd.dockerTag }}
           env:
           - name: TENANT
             value: {{ .Values.gcs_region | quote }}
@@ -86,7 +86,7 @@ spec:
               mountPath: /var/run/mdsd
         # FluentD
         - name: fluentd
-          image: linuxgeneva-microsoft.azurecr.io/genevafluentd_td-agent:{{ .Values.fluentd.dockerTag }}
+          image: {{ .Values.linuxgenevaACR.endpoint }}/genevafluentd_td-agent:{{ .Values.fluentd.dockerTag }}
           env:
             - name: FLUENTD_CONF
               value: /etc/fluentd/fluentd.conf
@@ -107,7 +107,7 @@ spec:
               readOnly: true
         # MDM
         - name: mdm
-          image: linuxgeneva-microsoft.azurecr.io/genevamdm:{{ .Values.mdm.dockerTag }}
+          image: {{ .Values.linuxgenevaACR.endpoint }}/genevamdm:{{ .Values.mdm.dockerTag }}
           env:
           - name: MDM_ACCOUNT
             value: {{ .Values.mdm_account | quote }}
@@ -126,7 +126,7 @@ spec:
         # on the host machine and validate that it is running.  It will fail
         # if it can not run correctly
         - name: azsecpack-initializer
-          image: linuxgeneva-microsoft.azurecr.io/genevasecpackinstall:{{ .Values.secpack.dockerTag }}
+          image: {{ .Values.linuxgenevaACR.endpoint }}/genevasecpackinstall:{{ .Values.secpack.dockerTag }}
           imagePullPolicy: Always
           env:
             - name: AzSecPack_GCS_cert

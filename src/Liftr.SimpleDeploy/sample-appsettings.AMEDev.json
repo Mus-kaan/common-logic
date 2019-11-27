@@ -1,7 +1,5 @@
 {
   "EnvironmentOptions": {
-    "PartnerName": "TestPartnerName",
-    "ShortPartnerName": "ttt",
     "TenantId": "33e01921-4d64-4f8c-a055-5bdaffd5e33d", // ame
     "SPNObjectId": "bd571494-17b0-4ac1-abb7-9eb64b64e145",
     "SecretPrefix": "PartnetNameRP",

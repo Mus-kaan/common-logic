@@ -18,3 +18,6 @@ fi
 --ProvisionAction="CreateOrUpdateGlobal" \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId" \
 --ConfigFilePath="$ConfigFilePath"
+
+./ImportDependencyImages.sh \
+--DeploymentSubscriptionId="$DeploymentSubscriptionId"
