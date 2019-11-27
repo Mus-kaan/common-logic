@@ -149,7 +149,7 @@ $Helm upgrade aks-geneva --install --recreate-pods \
 --set gcscertb64="$genevaServiceCert" \
 --set gcskeyb64="$genevaServiceKey" \
 --set linuxgenevaACR.endpoint="$liftrACRURI" \
---set prometheus.configmapReload.image.repository="$liftrACRURI/configmap-reload" \
+--set prometheus.configmapReload.image.repository="$liftrACRURI/jimmidyson/configmap-reload" \
 --set prometheus.initChownData.image.repository="$liftrACRURI/library/busybox" \
 --set prometheus.kubeStateMetrics.image.repository="$liftrACRURI/coreos/kube-state-metrics" \
 --set prometheus.server.image.repository="$liftrACRURI/prom/prometheus" \
