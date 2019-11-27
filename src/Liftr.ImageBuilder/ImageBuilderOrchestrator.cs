@@ -340,7 +340,8 @@ namespace Microsoft.Liftr.ImageBuilder
 
             var blobUri = new Uri($"https://{storageAccount.Name}.blob.core.windows.net");
             BlobServiceClient blobClient = new BlobServiceClient(blobUri, _azFactory.TokenCredential);
-            var containerClient = (await blobClient.CreateBlobContainerAsync(storeOptions.ContainerName)).Value;
+            BlobContainerClient containerClient = blobClient.GetBlobContainerClient(storeOptions.ContainerName);
+            await containerClient.CreateIfNotExistsAsync();
             var key = (await blobClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(1))).Value;
 
             var store = new ArtifactStore(
