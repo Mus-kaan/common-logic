@@ -93,7 +93,7 @@ namespace Microsoft.Liftr.Fluent.Contracts.Tests
                 i++;
             }
 
-            Assert.Equal(32, i);
+            Assert.Equal(46, i);
         }
 
         private static void VerifyRegionToTextAndBack(Region location)

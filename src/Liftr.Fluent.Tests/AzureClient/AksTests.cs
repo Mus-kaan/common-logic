@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Management.ContainerService.Fluent;
+using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using System.Linq;
 using System.Threading.Tasks;
@@ -43,7 +43,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     sshPublicKey,
                     TestCredentials.ClientId,
                     TestCredentials.ClientSecret,
-                    ContainerServiceVirtualMachineSizeTypes.StandardDS2V2,
+                    ContainerServiceVMSizeTypes.StandardDS2,
                     vmCount,
                     TestCommon.Tags);
 

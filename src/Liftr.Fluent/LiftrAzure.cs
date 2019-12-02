@@ -5,6 +5,7 @@
 using Azure.Core;
 using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent;
+using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
@@ -638,7 +639,7 @@ namespace Microsoft.Liftr.Fluent
             string sshPublicKey,
             string servicePrincipalClientId,
             string servicePrincipalSecret,
-            ContainerServiceVirtualMachineSizeTypes vmSizeType,
+            ContainerServiceVMSizeTypes vmSizeType,
             int vmCount,
             IDictionary<string, string> tags)
         {

@@ -166,15 +166,18 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             using (var regionalKVValet = new KeyVaultConcierge(kv.VaultUri, kvClient, _logger))
             {
-                var rpAssets = new RPAssetOptions();
+                var rpAssets = new RPAssetOptions()
+                {
+                    StorageAccountName = storageAccount.Name,
+                    ActiveKeyName = dataOptions.ActiveDBKeyName,
+                };
+
                 var dbConnectionStrings = await db.ListConnectionStringsAsync();
                 rpAssets.CosmosDBConnectionStrings = dbConnectionStrings.ConnectionStrings.Select(c => new CosmosDBConnectionString()
                 {
                     ConnectionString = c.ConnectionString,
                     Description = c.Description,
                 });
-
-                rpAssets.StorageAccountName = storageAccount.Name;
 
                 if (dataOptions.DataPlaneSubscriptions != null)
                 {

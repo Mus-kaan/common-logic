@@ -36,7 +36,6 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             LogContext.PushProperty("ProcessStartTime", DateTime.UtcNow.ToZuluString());
 
             webHostBuilder
-                .UseApplicationInsights() // Cross tier correlation is added here.
                 .UseSerilog((host, config) =>
                 {
                     (var allowOverride, var defaultLevel) = GetOverrideOptions(host);
@@ -51,6 +50,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 })
                 .ConfigureServices((host, services) =>
                 {
+                    services.AddApplicationInsightsTelemetry();
+
                     services.AddSingleton<HttpCoreDiagnosticSourceSubscriber>(sp => new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener()));
 
                     services.AddSingleton<IStartupFilter, LoggingMiddlewareStartupFilter>();

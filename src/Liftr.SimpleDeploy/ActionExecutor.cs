@@ -242,14 +242,25 @@ namespace Microsoft.Liftr.SimpleDeploy
                     }
                     else if (_options.Action == ActionType.CreateOrUpdateRegionalCompute)
                     {
+                        var gblNamingContext = new NamingContext(namingContext.PartnerName, namingContext.ShortPartnerName, namingContext.Environment, computeOptions.GlobalLocation);
+
+                        var acr = await infra.GetACRAsync(computeOptions.GlobalBaseName, gblNamingContext);
+                        if (acr == null)
+                        {
+                            var errMsg = "Cannot find the global ACR.";
+                            _logger.Fatal(errMsg);
+                            throw new InvalidOperationException(errMsg);
+                        }
+
+                        File.WriteAllText("acr-name.txt", acr.Name);
+                        File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
+
                         RegionalComputeOptions regionalComputeOptions = new RegionalComputeOptions()
                         {
                             DataBaseName = computeOptions.DataBaseName,
                             ComputeBaseName = computeOptions.ComputeBaseName,
+                            GlobalKeyVaultResourceId = $"subscriptions/{_options.SubscriptionId}/resourceGroups/{gblNamingContext.ResourceGroupName(computeOptions.GlobalBaseName)}/providers/Microsoft.KeyVault/vaults/{gblNamingContext.KeyVaultName(computeOptions.GlobalBaseName)}",
                         };
-
-                        var gblNamingContext = new NamingContext(namingContext.PartnerName, namingContext.ShortPartnerName, namingContext.Environment, computeOptions.GlobalLocation);
-                        regionalComputeOptions.GlobalKeyVaultResourceId = $"subscriptions/{_options.SubscriptionId}/resourceGroups/{gblNamingContext.ResourceGroupName(computeOptions.GlobalBaseName)}/providers/Microsoft.KeyVault/vaults/{gblNamingContext.KeyVaultName(computeOptions.GlobalBaseName)}";
 
                         (var kv, var msi, var aks) = await infra.CreateOrUpdateRegionalComputeRGAsync(
                             namingContext,

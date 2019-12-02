@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Management.ContainerService.Fluent;
+using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Newtonsoft.Json;
 using System;
 
@@ -25,7 +25,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         public string AKSMachineTypeStr { get; set; }
 
         [JsonIgnore]
-        public ContainerServiceVirtualMachineSizeTypes AKSMachineType => ContainerServiceVirtualMachineSizeTypes.Parse(AKSMachineTypeStr);
+        public ContainerServiceVMSizeTypes AKSMachineType => ContainerServiceVMSizeTypes.Parse(AKSMachineTypeStr);
 
         public void CheckValues()
         {

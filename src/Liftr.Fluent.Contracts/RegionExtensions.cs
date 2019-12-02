@@ -72,6 +72,38 @@ namespace Microsoft.Liftr.Fluent.Contracts
             {
                 return "wuk";
             }
+            else if (region == Region.FranceCentral)
+            {
+                return "cfr";
+            }
+            else if (region == Region.FranceSouth)
+            {
+                return "sfr";
+            }
+            else if (region == Region.SwitzerlandNorth)
+            {
+                return "nch";
+            }
+            else if (region == Region.SwitzerlandWest)
+            {
+                return "wch";
+            }
+            else if (region == Region.GermanyNorth)
+            {
+                return "nde";
+            }
+            else if (region == Region.GermanyWestCentral)
+            {
+                return "wcde";
+            }
+            else if (region == Region.NorwayWest)
+            {
+                return "wno";
+            }
+            else if (region == Region.NorwayEast)
+            {
+                return "eno";
+            }
             else if (region == Region.AsiaEast)
             {
                 return "hk";
@@ -124,6 +156,22 @@ namespace Microsoft.Liftr.Fluent.Contracts
             {
                 return "sel";
             }
+            else if (region == Region.UAECentral)
+            {
+                return "cuae";
+            }
+            else if (region == Region.UAENorth)
+            {
+                return "nuae";
+            }
+            else if (region == Region.SouthAfricaNorth)
+            {
+                return "nza";
+            }
+            else if (region == Region.SouthAfricaWest)
+            {
+                return "wza";
+            }
             else if (region == Region.ChinaNorth)
             {
                 return "bj";
@@ -131,6 +179,14 @@ namespace Microsoft.Liftr.Fluent.Contracts
             else if (region == Region.ChinaEast)
             {
                 return "sha";
+            }
+            else if (region == Region.ChinaNorth2)
+            {
+                return "bj2";
+            }
+            else if (region == Region.ChinaEast2)
+            {
+                return "sha2";
             }
             else if (region == Region.GermanyCentral)
             {
@@ -206,6 +262,38 @@ namespace Microsoft.Liftr.Fluent.Contracts
             {
                 return Region.UKWest;
             }
+            else if (location.OrdinalEquals("cfr"))
+            {
+                return Region.FranceCentral;
+            }
+            else if (location.OrdinalEquals("sfr"))
+            {
+                return Region.FranceSouth;
+            }
+            else if (location.OrdinalEquals("nch"))
+            {
+                return Region.SwitzerlandNorth;
+            }
+            else if (location.OrdinalEquals("wch"))
+            {
+                return Region.SwitzerlandWest;
+            }
+            else if (location.OrdinalEquals("nde"))
+            {
+                return Region.GermanyNorth;
+            }
+            else if (location.OrdinalEquals("wcde"))
+            {
+                return Region.GermanyWestCentral;
+            }
+            else if (location.OrdinalEquals("wno"))
+            {
+                return Region.NorwayWest;
+            }
+            else if (location.OrdinalEquals("eno"))
+            {
+                return Region.NorwayEast;
+            }
             else if (location.OrdinalEquals("hk"))
             {
                 return Region.AsiaEast;
@@ -258,6 +346,22 @@ namespace Microsoft.Liftr.Fluent.Contracts
             {
                 return Region.KoreaCentral;
             }
+            else if (location.OrdinalEquals("cuae"))
+            {
+                return Region.UAECentral;
+            }
+            else if (location.OrdinalEquals("nuae"))
+            {
+                return Region.UAENorth;
+            }
+            else if (location.OrdinalEquals("nza"))
+            {
+                return Region.SouthAfricaNorth;
+            }
+            else if (location.OrdinalEquals("wza"))
+            {
+                return Region.SouthAfricaWest;
+            }
             else if (location.OrdinalEquals("bj"))
             {
                 return Region.ChinaNorth;
@@ -265,6 +369,14 @@ namespace Microsoft.Liftr.Fluent.Contracts
             else if (location.OrdinalEquals("sha"))
             {
                 return Region.ChinaEast;
+            }
+            else if (location.OrdinalEquals("bj2"))
+            {
+                return Region.ChinaNorth2;
+            }
+            else if (location.OrdinalEquals("sha2"))
+            {
+                return Region.ChinaEast2;
             }
             else if (location.OrdinalEquals("cde"))
             {

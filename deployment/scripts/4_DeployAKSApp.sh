@@ -15,7 +15,7 @@ if [ "$ConfigFilePath" = "" ]; then
 fi
 
 if [ "$APP_ASPNETCORE_ENVIRONMENT" = "" ]; then
-APP_ASPNETCORE_ENVIRONMENT="Development"
+APP_ASPNETCORE_ENVIRONMENT="Production"
 fi
 
 AKSSvcLabel="nginx-ingress-controller"
