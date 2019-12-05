@@ -182,10 +182,21 @@ $Helm upgrade $HelmReleaseName --install --recreate-pods \
 # Reasons:
 # 1. If the helm upgrade failed, we want the EV2 deployment to fail.
 # 2. After the app is successfully deployed to AKS cluster, it will generate a public IP address. We can retrieve the IP and put it in TM in the next step.
-echo "kubectl rollout status deployment/rp-web"
-kubectl rollout status deployment/rp-web
 
-echo "Wait for extra 120 seconds"
+echo "Getting names of the current deployments in Kubernetes"
+deploymentNames=$(kubectl get deployments -o=jsonpath='{.items[*].metadata.name}' |tr -s '[[:space:]]' '\n')
+
+echo "Name of the deployments are":
+echo $deploymentNames
+
+for name in $deploymentNames
+do
+    ROLLOUT_STATUS_CMD="kubectl rollout status deployment/$name --timeout=600s" #wait for 10 minutes for the deployment to succeed
+    echo "Checking rollout status for deployment $name"
+    $ROLLOUT_STATUS_CMD || exit 1 #exit statement will only be executed when the command returns a non zero which implies a failure
+done
+
+echo "Wait for extra 120 seconds to make sure the Public IP address is provisioned"
 sleep 120s
 
 echo "-----------------------------------------------------------------"
