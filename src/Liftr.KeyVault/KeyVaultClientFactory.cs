@@ -16,7 +16,7 @@ namespace Microsoft.Liftr.KeyVault
             return new KeyVaultClient(
                 new KeyVaultClient.AuthenticationCallback(async (authority, resource, scope) =>
                 {
-                    var authContext = new AuthenticationContext(authority, TokenCache.DefaultShared);
+                    var authContext = new AuthenticationContext(authority);
                     var result = await authContext.AcquireTokenAsync(resource, new ClientCredential(clientId, clientSecret));
                     return result.AccessToken;
 #pragma warning disable CA2000 // Dispose objects before losing scope

@@ -57,9 +57,7 @@ namespace Microsoft.Liftr.GenericHosting
         /// <param name="builder">generic host builder</param>
         /// <param name="keyVaultPrefix">The prefix of the key vault secrets. This will be removed when load to application.</param>
         /// <param name="environmentVariablePrefix">The prefix of the environment variables. This will be removed when load to application.</param>
-        /// <param name="useManagedIdentity"></param>
-        /// <returns></returns>
-        public static IHostBuilder UseDefaultAppConfigWithKeyVault(this IHostBuilder builder, string keyVaultPrefix, string environmentVariablePrefix = null, bool useManagedIdentity = true)
+        public static IHostBuilder UseDefaultAppConfigWithKeyVault(this IHostBuilder builder, string keyVaultPrefix, string environmentVariablePrefix = null)
         {
             if (builder == null)
             {
@@ -76,7 +74,7 @@ namespace Microsoft.Liftr.GenericHosting
                 config.AddJsonFile("appsettings.json", optional: false);
                 config.AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true);
 
-                config.AddKeyVaultConfigurations(keyVaultPrefix, useManagedIdentity: useManagedIdentity);
+                config.AddKeyVaultConfigurations(keyVaultPrefix);
 
                 if (string.IsNullOrEmpty(environmentVariablePrefix))
                 {
@@ -92,7 +90,7 @@ namespace Microsoft.Liftr.GenericHosting
         /// <summary>
         /// This will load all the secrets start with 'secretsPrefix'. Sample secret name: "prefix-Logging--LogLevel--Default".
         /// </summary>
-        public static IHostBuilder UseManagedIdentityAndKeyVault(this IHostBuilder builder, string secretsPrefix, bool useManagedIdentity = true)
+        public static IHostBuilder UseManagedIdentityAndKeyVault(this IHostBuilder builder, string secretsPrefix)
         {
             if (builder == null)
             {
@@ -101,7 +99,7 @@ namespace Microsoft.Liftr.GenericHosting
 
             return builder.ConfigureAppConfiguration((context, config) =>
             {
-                config.AddKeyVaultConfigurations(secretsPrefix, useManagedIdentity: useManagedIdentity);
+                config.AddKeyVaultConfigurations(secretsPrefix);
             });
         }
     }

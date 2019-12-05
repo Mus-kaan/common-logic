@@ -2,9 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.KeyVault;
-using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Liftr.KeyVault;
 using System;
 
 namespace Microsoft.Liftr.Configuration
@@ -14,7 +13,7 @@ namespace Microsoft.Liftr.Configuration
         /// <summary>
         /// This will load all the secrets start with 'secretsPrefix', the prefix will be removed when load in memory. Sample secret name: "prefix-Logging--LogLevel--Default".
         /// </summary>
-        public static void AddKeyVaultConfigurations(this IConfigurationBuilder config, string secretsPrefix, bool useManagedIdentity = true)
+        public static void AddKeyVaultConfigurations(this IConfigurationBuilder config, string secretsPrefix)
         {
             if (config == null)
             {
@@ -27,40 +26,21 @@ namespace Microsoft.Liftr.Configuration
             if (!string.IsNullOrEmpty(vaultEndpoint))
             {
                 Console.WriteLine($"Start loading secrets from vault '{vaultEndpoint}' into configuration.");
-                if (useManagedIdentity)
+
+                string clientId = builtConfig["ClientId"];
+                string clientSecret = builtConfig["ClientSecret"];
+
+                if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
                 {
-                    // https://docs.microsoft.com/en-us/azure/app-service/overview-managed-identity#obtaining-tokens-for-azure-resources
-                    var azureServiceTokenProvider = new AzureServiceTokenProvider();
-#pragma warning disable CA2000 // Dispose objects before losing scope
-                    var kv = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
-#pragma warning restore CA2000 // Dispose objects before losing scope
-                    config.AddAzureKeyVault(vaultEndpoint, kv, new PrefixKeyVaultSecretManager(secretsPrefix));
+                    Console.WriteLine("Using MSI to authenticate against KeyVault.");
+                    var kvClient = KeyVaultClientFactory.FromMSI();
+                    config.AddAzureKeyVault(vaultEndpoint, kvClient, new PrefixKeyVaultSecretManager(secretsPrefix));
                 }
                 else
                 {
-                    string clientId = builtConfig["ClientId"] ?? throw new InvalidOperationException("Please provide AAD ClientId using 'ClientId'");
-                    string clientSecret = builtConfig["ClientSecret"] ?? throw new InvalidOperationException("Please provide AAD ClientSecret using 'ClientSecret'");
+                    Console.WriteLine("Using client Id and client secret to authenticate against KeyVault. ClientId: " + clientId);
                     config.AddAzureKeyVault(vaultEndpoint, clientId, clientSecret, new PrefixKeyVaultSecretManager(secretsPrefix));
                 }
-            }
-        }
-
-        /// <summary>
-        /// This will load all the secrets start with 'secretsPrefix', the prefix will be removed when load in memory. Sample secret name: "prefix-Logging--LogLevel--Default".
-        /// </summary>
-        public static void AddKeyVaultConfigurations(this IConfigurationBuilder config, KeyVaultClient keyVaultClient, string secretsPrefix)
-        {
-            if (config == null)
-            {
-                throw new ArgumentNullException(nameof(config));
-            }
-
-            var builtConfig = config.Build();
-
-            string vaultEndpoint = builtConfig["VaultEndpoint"];
-            if (!string.IsNullOrEmpty(vaultEndpoint))
-            {
-                config.AddAzureKeyVault(vaultEndpoint, keyVaultClient, new PrefixKeyVaultSecretManager(secretsPrefix));
             }
         }
     }

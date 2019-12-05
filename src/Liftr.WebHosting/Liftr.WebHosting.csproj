@@ -11,5 +11,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Configuration\Liftr.Configuration.csproj" />
+    <ProjectReference Include="..\Liftr.KeyVault\Liftr.KeyVault.csproj" />
   </ItemGroup>
 </Project>

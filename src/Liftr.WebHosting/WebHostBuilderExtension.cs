@@ -4,12 +4,10 @@
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Azure.KeyVault;
-using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Liftr.Configuration;
+using Microsoft.Liftr.KeyVault;
 using System;
-using System.Net.Http;
 
 namespace Microsoft.Liftr.WebHosting
 {
@@ -33,25 +31,17 @@ namespace Microsoft.Liftr.WebHosting
                 KeyVaultClient kvClient = null;
                 if (useManagedIdentity)
                 {
-                    var tokenProvider = new AzureServiceTokenProvider();
-                    var callback = new KeyVaultClient.AuthenticationCallback(tokenProvider.KeyVaultTokenCallback);
-                    kvClient = new KeyVaultClient(callback);
+                    kvClient = KeyVaultClientFactory.FromMSI();
                 }
                 else
                 {
                     string clientId = context.Configuration["ClientId"] ??
                         throw new InvalidOperationException("Please provide AAD ClientId using 'ClientId'");
+
                     string clientSecret = context.Configuration["ClientSecret"] ??
                         throw new InvalidOperationException("Please provide AAD ClientSecret using 'ClientSecret'");
-                    kvClient = new KeyVaultClient(
-                        new KeyVaultClient.AuthenticationCallback(async (authority, resource, scope) =>
-                        {
-                            var authContext = new AuthenticationContext(authority, TokenCache.DefaultShared);
-                            var result = await authContext.AcquireTokenAsync(resource, new ClientCredential(clientId, clientSecret));
-                            return result.AccessToken;
-#pragma warning disable CA2000 // Dispose objects before losing scope
-                        }), new HttpClient());
-#pragma warning restore CA2000 // Dispose objects before losing scope
+
+                    kvClient = KeyVaultClientFactory.FromClientIdAndSecret(clientId, clientSecret);
                 }
 
                 services.AddSingleton<IKeyVaultClient, KeyVaultClient>((sp) => kvClient);
@@ -63,9 +53,8 @@ namespace Microsoft.Liftr.WebHosting
         /// </summary>
         /// <param name="builder">web host builder</param>
         /// <param name="secretsPrefix">The prefix filter value</param>
-        /// <param name="useManagedIdentity">use managed identity to authenticate with key vault</param>
         /// <returns></returns>
-        public static IWebHostBuilder UseKeyVaultProvider(this IWebHostBuilder builder, string secretsPrefix, bool useManagedIdentity = true)
+        public static IWebHostBuilder UseKeyVaultProvider(this IWebHostBuilder builder, string secretsPrefix)
         {
             if (builder == null)
             {
@@ -74,7 +63,7 @@ namespace Microsoft.Liftr.WebHosting
 
             return builder.ConfigureAppConfiguration((context, config) =>
             {
-                config.AddKeyVaultConfigurations(secretsPrefix, useManagedIdentity);
+                config.AddKeyVaultConfigurations(secretsPrefix);
             });
         }
     }
