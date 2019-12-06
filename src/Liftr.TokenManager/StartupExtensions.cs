@@ -10,7 +10,7 @@ namespace Microsoft.Liftr.TokenManager
 {
     public static class StartupExtensions
     {
-        public static void UseTokenManager(this IServiceCollection services, IConfiguration configuration)
+        public static void AddTokenManager(this IServiceCollection services, IConfiguration configuration)
         {
             if (configuration == null)
             {

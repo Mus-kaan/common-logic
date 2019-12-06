@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <AssemblyName>Microsoft.Liftr.RPaaS.Hosting</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.RPaaS.Hosting</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.KeyVault" Version="$(PackageVersion_Microsoft_Azure_KeyVault)" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="$(PackageVersion_Microsoft_Extensions_Http)" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="$(PackageVersion_Microsoft_Extensions_Http_Polly)" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
+    <ProjectReference Include="..\Liftr.RPaaS\Liftr.RPaaS.csproj" />
+    <ProjectReference Include="..\Liftr.TokenManager\Liftr.TokenManager.csproj" />
+  </ItemGroup>
+</Project>

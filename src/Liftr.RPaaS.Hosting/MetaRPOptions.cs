@@ -2,16 +2,16 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-namespace Microsoft.Liftr.RPaaS
+namespace Microsoft.Liftr.RPaaS.Hosting
 {
-    public class RPaaSConfiguration
+    public class MetaRPOptions
     {
         public string MetaRPEndpoint { get; set; }
 
-        public string MetaRPAccessorClientId { get; set; }
+        public string KeyVaultEndpoint { get; set; }
 
-        public string MetaRPAccessorVaultEndpoint { get; set; }
+        public string AccessorClientId { get; set; }
 
-        public string MetaRPAccessorCertificateName { get; set; }
+        public string AccessorCertificateName { get; set; }
     }
 }

@@ -16,7 +16,6 @@ namespace SampleWebApp
             WebHost
                 .CreateDefaultBuilder(args)
                 .UseLiftrLogger()
-                .UseKeyVaultClient()
                 .UseKeyVaultProvider("IncrediBuildRP")
                 .UseStartup<Startup>()
                 .Build()

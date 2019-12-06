@@ -14,7 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Hosting.Swagger\Liftr.Hosting.Swagger.csproj" />
     <ProjectReference Include="..\Liftr.Logging.AspNetCore\Liftr.Logging.AspNetCore.csproj" />
-    <ProjectReference Include="..\Liftr.RPaaS\Liftr.RPaaS.csproj" />
+    <ProjectReference Include="..\Liftr.RPaaS.Hosting\Liftr.RPaaS.Hosting.csproj" />
     <ProjectReference Include="..\Liftr.TokenManager\Liftr.TokenManager.csproj" />
     <ProjectReference Include="..\Liftr.WebHosting\Liftr.WebHosting.csproj" />
   </ItemGroup>

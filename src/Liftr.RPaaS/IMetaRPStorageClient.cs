@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts.ARM;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.RPaaS
@@ -27,6 +28,6 @@ namespace Microsoft.Liftr.RPaaS
         /// <param name="resource"></param>
         /// <param name="apiVersion"></param>
         /// <returns></returns>
-        Task UpdateResourceAsync<T>(T resource, string apiVersion) where T : ARMResource;
+        Task<HttpResponseMessage> UpdateResourceAsync<T>(T resource, string apiVersion) where T : ARMResource;
     }
 }

@@ -2,9 +2,12 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Azure.KeyVault;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Configuration;
+using Microsoft.Liftr.KeyVault;
 using System;
 
 namespace Microsoft.Liftr.GenericHosting
@@ -68,7 +71,7 @@ namespace Microsoft.Liftr.GenericHosting
             // https://github.com/aspnet/AspNetCore/issues/4150
             builder.UseEnvironment(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production");
 
-            return builder.ConfigureAppConfiguration((context, config) =>
+            builder = builder.ConfigureAppConfiguration((context, config) =>
             {
                 config.SetBasePath(Environment.CurrentDirectory);
                 config.AddJsonFile("appsettings.json", optional: false);
@@ -85,6 +88,25 @@ namespace Microsoft.Liftr.GenericHosting
                     config.AddEnvironmentVariables(prefix: environmentVariablePrefix);
                 }
             });
+
+            return builder.ConfigureServices((context, services) =>
+            {
+                KeyVaultClient kvClient = null;
+
+                string clientId = context.Configuration["ClientId"];
+                string clientSecret = context.Configuration["ClientSecret"];
+
+                if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
+                {
+                    kvClient = KeyVaultClientFactory.FromMSI();
+                }
+                else
+                {
+                    kvClient = KeyVaultClientFactory.FromClientIdAndSecret(clientId, clientSecret);
+                }
+
+                services.AddSingleton<IKeyVaultClient, KeyVaultClient>((sp) => kvClient);
+            });
         }
 
         /// <summary>
@@ -97,9 +119,28 @@ namespace Microsoft.Liftr.GenericHosting
                 throw new ArgumentNullException(nameof(builder));
             }
 
-            return builder.ConfigureAppConfiguration((context, config) =>
+            builder = builder.ConfigureAppConfiguration((context, config) =>
             {
                 config.AddKeyVaultConfigurations(secretsPrefix);
+            });
+
+            return builder.ConfigureServices((context, services) =>
+            {
+                KeyVaultClient kvClient = null;
+
+                string clientId = context.Configuration["ClientId"];
+                string clientSecret = context.Configuration["ClientSecret"];
+
+                if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
+                {
+                    kvClient = KeyVaultClientFactory.FromMSI();
+                }
+                else
+                {
+                    kvClient = KeyVaultClientFactory.FromClientIdAndSecret(clientId, clientSecret);
+                }
+
+                services.AddSingleton<IKeyVaultClient, KeyVaultClient>((sp) => kvClient);
             });
         }
     }

@@ -14,7 +14,6 @@ namespace Microsoft.Liftr.TokenManager
     {
         private readonly TokenManagerConfiguration _tokenManagerConfiguration;
         private readonly AuthenticationContext _authContext;
-        private readonly ITokenCache _cache;
 
         public TokenManager(IOptions<TokenManagerConfiguration> tokenConfiguration)
         {
@@ -25,34 +24,19 @@ namespace Microsoft.Liftr.TokenManager
 
             _tokenManagerConfiguration = tokenConfiguration.Value;
             _authContext = new AuthenticationContext($"{_tokenManagerConfiguration.AadEndpoint}/{_tokenManagerConfiguration.TenantId}");
-            _cache = new TokenCache(TimeSpan.FromMinutes(10));
         }
 
         public async Task<string> GetTokenAsync(string clientId, string clientSecret)
         {
-            var token = _cache.GetTokenItem(clientId);
-            if (token == null)
-            {
-                token = await _authContext
-                            .AcquireTokenAsync(
-                                _tokenManagerConfiguration.ArmEndpoint,
-                                new ClientCredential(clientId, clientSecret));
-                _cache.SetTokenItem(clientId, token);
-            }
+            var token = await _authContext.AcquireTokenAsync(_tokenManagerConfiguration.ArmEndpoint, new ClientCredential(clientId, clientSecret));
 
             return token.AccessToken;
         }
 
         public async Task<string> GetTokenAsync(string clientId, X509Certificate2 certificate)
         {
-            var token = _cache.GetTokenItem(clientId);
-
-            if (token == null)
-            {
-                var clientAssertion = new ClientAssertionCertificate(clientId, certificate);
-                token = await _authContext.AcquireTokenAsync(_tokenManagerConfiguration.ArmEndpoint, clientAssertion);
-                _cache.SetTokenItem(clientId, token);
-            }
+            var clientAssertion = new ClientAssertionCertificate(clientId, certificate);
+            var token = await _authContext.AcquireTokenAsync(_tokenManagerConfiguration.ArmEndpoint, clientAssertion);
 
             return token.AccessToken;
         }

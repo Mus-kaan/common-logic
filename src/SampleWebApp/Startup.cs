@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Liftr.Hosting.Swagger;
-using Microsoft.Liftr.RPaaS;
+using Microsoft.Liftr.RPaaS.Hosting;
 using Microsoft.Liftr.TokenManager;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
@@ -32,8 +32,18 @@ namespace SampleWebApp
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            services.UseTokenManager(Configuration);
-            services.UseMetaRPStorageClient(Configuration);
+            services.AddHttpClient();
+
+            services.Configure<MetaRPOptions>(Configuration.GetSection(nameof(MetaRPOptions)));
+
+            services.Configure<MetaRPOptions>((metaRPOptions) =>
+            {
+                metaRPOptions.KeyVaultEndpoint = Configuration["VaultEndpoint"];
+            });
+
+            services.AddTokenManager(Configuration);
+
+            services.AddMetaRPClient(Configuration);
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>

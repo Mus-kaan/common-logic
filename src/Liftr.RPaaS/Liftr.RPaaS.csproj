@@ -9,14 +9,6 @@
     <PackageProjectUrl>https://msazure.visualstudio.com/Liftr/_git/Liftr.Common?path=%2Fsrc%2FLiftr.RPaaS%2FReadMe.md&amp;version=GBmaster</PackageProjectUrl>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.KeyVault" Version="$(PackageVersion_Microsoft_Azure_KeyVault)" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="$(PackageVersion_Microsoft_Extensions_Http)" />
-    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="$(PackageVersion_Microsoft_Extensions_Http_Polly)" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(PackageVersion_Newtonsoft_Json)" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
-    <ProjectReference Include="..\Liftr.TokenManager\Liftr.TokenManager.csproj" />
   </ItemGroup>
 </Project>

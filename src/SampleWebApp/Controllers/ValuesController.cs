@@ -5,15 +5,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Liftr;
 using Microsoft.Liftr.Contracts.ARM;
-using Microsoft.Liftr.Logging.AspNetCore;
 using Microsoft.Liftr.RPaaS;
 using Newtonsoft.Json;
 using Serilog;
-using Serilog.Events;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -39,17 +36,16 @@ namespace SampleWebApp.Controllers
         // GET api/values
         [HttpGet]
         [SwaggerOperation(OperationId = "List")]
-        public ActionResult<IEnumerable<string>> GetList()
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2234:Pass system uri objects instead of strings", Justification = "<Pending>")]
+        public async Task<IEnumerable<string>> GetListAsync()
         {
+            _logger.Information($"{nameof(GetListAsync)} start");
+
             Log();
             Log();
             var client = new HttpClient();
-#pragma warning disable Liftr1005 // Avoid calling System.Threading.Tasks.Task.Wait()
-#pragma warning disable CA2234 // Pass system uri objects instead of strings
-            client.GetAsync("https://msazure.visualstudio.com").Wait();
-            DoWorkAsync().Wait();
-#pragma warning restore CA2234 // Pass system uri objects instead of strings
-#pragma warning restore Liftr1005 // Avoid calling System.Threading.Tasks.Task.Wait()
+            await client.GetAsync("https://msazure.visualstudio.com");
+            await DoWorkAsync();
 
             return new string[] { "value1", "value2" };
         }
@@ -76,8 +72,17 @@ namespace SampleWebApp.Controllers
         {
             var resourceId = "/subscriptions/f9aed45d-b9e6-462a-a3f5-6ab34857bc17/resourceGroups/myrg/providers/Microsoft.Nginx/frontends/frontend";
             var apiVersion = "2019-11-01-preview";
-            var resource = await _metaRPStorageClient.GetResourceAsync<ARMResource>(resourceId, apiVersion);
-            Console.WriteLine(JsonConvert.SerializeObject(resource));
+            try
+            {
+                var resource = await _metaRPStorageClient.GetResourceAsync<ARMResource>(resourceId, apiVersion);
+                Console.WriteLine(JsonConvert.SerializeObject(resource));
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, ex.Message);
+                throw;
+            }
+
             return req;
         }
 
