@@ -3,11 +3,9 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.Compute.Fluent;
-using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent;
-using Microsoft.Liftr.Logging;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

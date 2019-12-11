@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
-using Microsoft.Liftr.Fluent.Contracts;
 using Newtonsoft.Json;
 
 namespace Microsoft.Liftr.ImageBuilder

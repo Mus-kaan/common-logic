@@ -7,6 +7,7 @@ using Azure.Identity;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
+using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.Liftr.Fluent;
@@ -17,6 +18,7 @@ using Serilog.Context;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -44,9 +46,6 @@ namespace Microsoft.Liftr.SimpleDeploy
             _appLifetime = appLifetime ?? throw new ArgumentNullException(nameof(appLifetime));
             _options = runnerOptions ?? throw new ArgumentNullException(nameof(runnerOptions));
             _envOptions = envOptions.Value;
-
-            LogContext.PushProperty("TargetSubscriptionId", runnerOptions.SubscriptionId);
-            LogContext.PushProperty("ExeAction", runnerOptions.Action);
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -60,12 +59,8 @@ namespace Microsoft.Liftr.SimpleDeploy
                     throw new InvalidOperationException($"{nameof(_envOptions.GenevaCert)} is null.");
                 }
 
-                if (string.IsNullOrEmpty(_options.SubscriptionId))
-                {
-                    throw new InvalidOperationException("Please sepcify a valid Subscription Id.");
-                }
-
-                LogContext.PushProperty("TargetSubscriptionId", _options.SubscriptionId);
+                LogContext.PushProperty(nameof(_options.EnvName), _options.EnvName);
+                LogContext.PushProperty(nameof(_options.Region), _options.Region);
                 LogContext.PushProperty("ExeAction", _options.Action);
 
                 if (!File.Exists(_options.ConfigPath))
@@ -74,6 +69,18 @@ namespace Microsoft.Liftr.SimpleDeploy
                     _logger.Fatal(errMsg);
                     throw new InvalidOperationException(errMsg);
                 }
+
+                var hostingOptions = File.ReadAllText(_options.ConfigPath).FromJson<HostingOptions>();
+                var hostingEnvironmentOptions = hostingOptions.Environments.Where(env => env.EnvironmentName.ToString().OrdinalEquals(_options.EnvName)).FirstOrDefault();
+
+                if (hostingEnvironmentOptions == null)
+                {
+                    var ex = new InvalidOperationException($"Cannot find the hosting environment with name '{_options.EnvName}' in the configuration file: {_options.ConfigPath}");
+                    _logger.Fatal(ex, ex.Message);
+                    throw ex;
+                }
+
+                LogContext.PushProperty("TargetSubscriptionId", hostingEnvironmentOptions.AzureSubscription);
 
                 _logger.Information("ActionExecutor Action:{ExeAction}", _options.Action);
                 _logger.Information("RunnerCommandOptions: {@RunnerCommandOptions}", _options);
@@ -97,7 +104,7 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory
                     .FromMSI(new MSILoginInformation(MSIResourceType.VirtualMachine), AzureEnvironment.AzureGlobalCloud, _envOptions.TenantId)
-                    .WithDefaultSubscription(_options.SubscriptionId);
+                    .WithDefaultSubscription(hostingEnvironmentOptions.AzureSubscription.ToString());
                     tokenCredential = new ManagedIdentityCredential();
                 }
 
@@ -105,13 +112,22 @@ namespace Microsoft.Liftr.SimpleDeploy
                 {
                     if (string.IsNullOrEmpty(_options.AKSAppSvcLabel))
                     {
-                        throw new InvalidOperationException("Must provide an AKS svc label to get the IP address.");
+                        var ex = new InvalidOperationException("Must provide an AKS svc label to get the IP address.");
+                        _logger.Fatal(ex, ex.Message);
+                        throw ex;
                     }
                 }
 
-                LiftrAzureFactory azFactory = new LiftrAzureFactory(_logger, _envOptions.TenantId, _envOptions.SPNObjectId, _options.SubscriptionId, tokenCredential, azureCredentialsProvider, _envOptions.LiftrAzureOptions);
+                LiftrAzureFactory azFactory = new LiftrAzureFactory(
+                    _logger,
+                    _envOptions.TenantId,
+                    _envOptions.SPNObjectId,
+                    hostingEnvironmentOptions.AzureSubscription.ToString(),
+                    tokenCredential,
+                    azureCredentialsProvider,
+                    _envOptions.LiftrAzureOptions);
 
-                _ = RunActionAsync(kvClient, azFactory);
+                _ = RunActionAsync(hostingEnvironmentOptions, kvClient, azFactory);
             }
             catch (Exception ex)
             {
@@ -128,218 +144,155 @@ namespace Microsoft.Liftr.SimpleDeploy
             return Task.CompletedTask;
         }
 
-        private async Task RunActionAsync(KeyVaultClient kvClient, LiftrAzureFactory azFactory)
+        private async Task RunActionAsync(HostingEnvironmentOptions targetOptions, KeyVaultClient kvClient, LiftrAzureFactory azFactory)
         {
+            _logger.Information("Target environment options: {@targetOptions}", targetOptions);
+
             using (var operation = _logger.StartTimedOperation(_options.Action.ToString()))
             {
                 try
                 {
-                    var content = File.ReadAllText(_options.ConfigPath);
-                    BaseResourceOptions config = null;
-                    GlobalResourceOptions gblOptions = null;
-                    DataResourceOptions runnerDataOptions = null;
-                    ComputeResourceOptions computeOptions = null;
-
-                    switch (_options.Action)
-                    {
-                        case ActionType.CreateOrUpdateGlobal:
-                            {
-                                gblOptions = content.FromJson<GlobalResourceOptions>();
-                                operation.SetContextProperty(nameof(gblOptions.GlobalBaseName), gblOptions.GlobalBaseName);
-                                config = gblOptions;
-                                break;
-                            }
-
-                        case ActionType.CreateOrUpdateRegionalData:
-                            {
-                                if (string.IsNullOrEmpty(_options.ActiveKeyName))
-                                {
-                                    throw new InvalidOperationException($"{nameof(_options.ActiveKeyName)} must be specified.");
-                                }
-
-                                runnerDataOptions = content.FromJson<DataResourceOptions>();
-                                operation.SetContextProperty(nameof(runnerDataOptions.DataBaseName), runnerDataOptions.DataBaseName);
-                                config = runnerDataOptions;
-                                break;
-                            }
-
-                        case ActionType.CreateOrUpdateRegionalCompute:
-                        case ActionType.GetKeyVaultEndpoint:
-                        case ActionType.UpdateAKSPublicIpInTrafficManager:
-                            {
-                                computeOptions = content.FromJson<ComputeResourceOptions>();
-                                if (!string.IsNullOrEmpty(computeOptions.GlobalBaseName))
-                                {
-                                    operation.SetContextProperty(nameof(computeOptions.GlobalBaseName), computeOptions.GlobalBaseName);
-                                }
-
-                                if (!string.IsNullOrEmpty(computeOptions.DataBaseName))
-                                {
-                                    operation.SetContextProperty(nameof(computeOptions.DataBaseName), computeOptions.DataBaseName);
-                                }
-
-                                operation.SetContextProperty(nameof(computeOptions.ComputeBaseName), computeOptions.ComputeBaseName);
-
-                                config = computeOptions;
-                                break;
-                            }
-
-                        default:
-                            {
-                                throw new InvalidOperationException("Unsupported action: " + _options.Action);
-                            }
-                    }
-
-                    _logger.Information("Parsed config file: {@config}", config);
-
                     operation.SetContextProperty(nameof(_envOptions.PartnerName), _envOptions.PartnerName);
-                    operation.SetContextProperty(nameof(config.Environment), config.Environment.ToString());
-                    if (_options.Action == ActionType.CreateOrUpdateGlobal)
-                    {
-                        operation.SetContextProperty("DeploymentLocation", "global");
-                    }
-                    else
-                    {
-                        operation.SetContextProperty("DeploymentLocation", config.LocationStr);
-                    }
 
                     var infra = new InftrastructureV2(azFactory, _logger);
-                    var namingContext = new NamingContext(_envOptions.PartnerName, _envOptions.ShortPartnerName, config.Environment, config.Location);
+
+                    var globalNamingContext = new NamingContext(_envOptions.PartnerName, _envOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
+
+                    File.WriteAllText("subscription-id.txt", targetOptions.AzureSubscription.ToString());
 
                     if (_options.Action == ActionType.CreateOrUpdateGlobal)
                     {
-                        (var kv, var acr) = await infra.CreateOrUpdateGlobalRGAsync(gblOptions.GlobalBaseName, namingContext);
+                        (var kv, var acr) = await infra.CreateOrUpdateGlobalRGAsync(targetOptions.Global.BaseName, globalNamingContext);
                         File.WriteAllText("acr-name.txt", acr.Name);
                         File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
                         _logger.Information("Successfully managed global resources.");
                     }
-                    else if (_options.Action == ActionType.CreateOrUpdateRegionalData)
+                    else
                     {
-                        CertificateOptions sslCert = null;
-                        if (!string.IsNullOrEmpty(runnerDataOptions.HostName))
+                        (var regionOptions, var regionalNamingContext) = GetRegionalOptions(targetOptions);
+                        var aksRGName = regionalNamingContext.ResourceGroupName(regionOptions.ComputeBaseName);
+                        var aksName = regionalNamingContext.AKSName(regionOptions.ComputeBaseName);
+
+                        if (_options.Action == ActionType.CreateOrUpdateRegionalData)
                         {
-                            sslCert = new CertificateOptions()
+                            CertificateOptions sslCert = null;
+                            if (!string.IsNullOrEmpty(regionOptions.HostName))
                             {
-                                CertificateName = "ssl-cert",
-                                SubjectName = runnerDataOptions.HostName,
-                                SubjectAlternativeNames = new List<string>() { runnerDataOptions.HostName },
+                                sslCert = new CertificateOptions()
+                                {
+                                    CertificateName = "ssl-cert",
+                                    SubjectName = regionOptions.HostName,
+                                    SubjectAlternativeNames = new List<string>() { regionOptions.HostName },
+                                };
+                            }
+
+                            var dataOptions = new RegionalDataOptions()
+                            {
+                                ActiveDBKeyName = _options.ActiveKeyName,
+                                SecretPrefix = _envOptions.SecretPrefix,
+                                GenevaCert = _envOptions.GenevaCert,
+                                SSLCert = sslCert,
+                                FirstPartyCert = _envOptions.FirstPartyCert,
+                                DataPlaneSubscriptions = regionOptions.DataPlaneSubscriptions,
+                                DataPlaneStorageCountPerSubscription = _envOptions.StorageCountPerDataPlaneSubscription,
                             };
+
+                            await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions, kvClient);
+                            _logger.Information("Successfully managed regional data resources.");
                         }
-
-                        var dataOptions = new RegionalDataOptions()
+                        else if (_options.Action == ActionType.CreateOrUpdateRegionalCompute)
                         {
-                            ActiveDBKeyName = _options.ActiveKeyName,
-                            SecretPrefix = _envOptions.SecretPrefix,
-                            GenevaCert = _envOptions.GenevaCert,
-                            SSLCert = sslCert,
-                            FirstPartyCert = _envOptions.FirstPartyCert,
-                            DataPlaneSubscriptions = runnerDataOptions.DataPlaneSubscriptions,
-                            DataPlaneStorageCountPerSubscription = _envOptions.StorageCountPerDataPlaneSubscription,
-                        };
+                            var acr = await infra.GetACRAsync(targetOptions.Global.BaseName, globalNamingContext);
+                            if (acr == null)
+                            {
+                                var errMsg = "Cannot find the global ACR.";
+                                _logger.Fatal(errMsg);
+                                throw new InvalidOperationException(errMsg);
+                            }
 
-                        await infra.CreateOrUpdateRegionalDataRGAsync(runnerDataOptions.DataBaseName, namingContext, dataOptions, kvClient);
-                        _logger.Information("Successfully managed regional data resources.");
-                    }
-                    else if (_options.Action == ActionType.CreateOrUpdateRegionalCompute)
-                    {
-                        var gblNamingContext = new NamingContext(namingContext.PartnerName, namingContext.ShortPartnerName, namingContext.Environment, computeOptions.GlobalLocation);
+                            File.WriteAllText("acr-name.txt", acr.Name);
+                            File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
 
-                        var acr = await infra.GetACRAsync(computeOptions.GlobalBaseName, gblNamingContext);
-                        if (acr == null)
-                        {
-                            var errMsg = "Cannot find the global ACR.";
-                            _logger.Fatal(errMsg);
-                            throw new InvalidOperationException(errMsg);
+                            RegionalComputeOptions regionalComputeOptions = new RegionalComputeOptions()
+                            {
+                                DataBaseName = regionOptions.DataBaseName,
+                                ComputeBaseName = regionOptions.ComputeBaseName,
+                                GlobalKeyVaultResourceId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName)}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
+                            };
+
+                            (var kv, var msi, var aks) = await infra.CreateOrUpdateRegionalComputeRGAsync(
+                                regionalNamingContext,
+                                regionalComputeOptions,
+                                _envOptions.AKSInfo,
+                                kvClient);
+
+                            File.WriteAllText("vault-name.txt", kv.Name);
+                            File.WriteAllText("aks-name.txt", aks.Name);
+                            File.WriteAllText("aks-rg.txt", aks.ResourceGroupName);
+                            File.WriteAllText("msi-resourceId.txt", msi.Id);
+                            File.WriteAllText("msi-clientId.txt", msi.ClientId);
+                            _logger.Information("Successfully managed regional compute resources.");
                         }
-
-                        File.WriteAllText("acr-name.txt", acr.Name);
-                        File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
-
-                        RegionalComputeOptions regionalComputeOptions = new RegionalComputeOptions()
+                        else if (_options.Action == ActionType.GetKeyVaultEndpoint)
                         {
-                            DataBaseName = computeOptions.DataBaseName,
-                            ComputeBaseName = computeOptions.ComputeBaseName,
-                            GlobalKeyVaultResourceId = $"subscriptions/{_options.SubscriptionId}/resourceGroups/{gblNamingContext.ResourceGroupName(computeOptions.GlobalBaseName)}/providers/Microsoft.KeyVault/vaults/{gblNamingContext.KeyVaultName(computeOptions.GlobalBaseName)}",
-                        };
+                            var kv = await infra.GetKeyVaultAsync(regionOptions.DataBaseName, regionalNamingContext);
+                            if (kv == null)
+                            {
+                                var errMsg = "Cannot find key vault in the regional data resource group.";
+                                _logger.Fatal(errMsg);
+                                throw new InvalidOperationException(errMsg);
+                            }
 
-                        (var kv, var msi, var aks) = await infra.CreateOrUpdateRegionalComputeRGAsync(
-                            namingContext,
-                            regionalComputeOptions,
-                            _envOptions.AKSInfo,
-                            kvClient);
+                            var acr = await infra.GetACRAsync(targetOptions.Global.BaseName, globalNamingContext);
+                            if (acr == null)
+                            {
+                                var errMsg = "Cannot find the global ACR.";
+                                _logger.Fatal(errMsg);
+                                throw new InvalidOperationException(errMsg);
+                            }
 
-                        File.WriteAllText("vault-name.txt", kv.Name);
-                        File.WriteAllText("aks-name.txt", aks.Name);
-                        File.WriteAllText("aks-rg.txt", aks.ResourceGroupName);
-                        File.WriteAllText("msi-resourceId.txt", msi.Id);
-                        File.WriteAllText("msi-clientId.txt", msi.ClientId);
-                        _logger.Information("Successfully managed regional compute resources.");
-                    }
-                    else if (_options.Action == ActionType.GetKeyVaultEndpoint)
-                    {
-                        var aksRGName = namingContext.ResourceGroupName(computeOptions.ComputeBaseName);
-                        var aksName = namingContext.AKSName(computeOptions.ComputeBaseName);
-                        var kv = await infra.GetKeyVaultAsync(computeOptions.DataBaseName, namingContext);
-                        if (kv == null)
-                        {
-                            var errMsg = "Cannot find key vault in the regional data resource group.";
-                            _logger.Fatal(errMsg);
-                            throw new InvalidOperationException(errMsg);
+                            File.WriteAllText("acr-name.txt", acr.Name);
+                            File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
+
+                            if (!string.IsNullOrEmpty(regionOptions.HostName))
+                            {
+                                File.WriteAllText("rp-hostname.txt", regionOptions.HostName);
+                            }
+
+                            File.WriteAllText("aks-name.txt", aksName);
+                            File.WriteAllText("aks-rg.txt", aksRGName);
+                            File.WriteAllText("aks-kv.txt", kv.VaultUri);
+                            File.WriteAllText("vault-name.txt", kv.Name);
+                            _logger.Information("Successfully retrieved Key Vault endpoint.");
                         }
-
-                        var gblNamingContext = new NamingContext(namingContext.PartnerName, namingContext.ShortPartnerName, namingContext.Environment, computeOptions.GlobalLocation);
-
-                        var acr = await infra.GetACRAsync(computeOptions.GlobalBaseName, gblNamingContext);
-                        if (acr == null)
+                        else if (_options.Action == ActionType.UpdateAKSPublicIpInTrafficManager)
                         {
-                            var errMsg = "Cannot find the global ACR.";
-                            _logger.Fatal(errMsg);
-                            throw new InvalidOperationException(errMsg);
+                            var az = azFactory.GenerateLiftrAzure().FluentClient;
+                            var aksHelper = new AKSHelper(_logger);
+                            var tmId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{regionalNamingContext.ResourceGroupName(regionOptions.DataBaseName)}/providers/Microsoft.Network/trafficmanagerprofiles/{regionalNamingContext.TrafficManagerName(regionOptions.DataBaseName)}";
+
+                            var pip = await aksHelper.GetAppPublicIpAsync(az, aksRGName, aksName, regionalNamingContext.Location, _options.AKSAppSvcLabel);
+                            if (pip == null)
+                            {
+                                var errMsg = $"Cannot find the public Ip address for the AKS cluster. aksRGName:{aksRGName}, aksName:{aksName}, region:{regionalNamingContext.Location}, aksSvcLabel:{_options.AKSAppSvcLabel}.";
+                                _logger.Error(errMsg);
+                                throw new InvalidOperationException(errMsg);
+                            }
+
+                            _logger.Information("Find the IP of the AKS is: {IPAddress}", pip.IPAddress);
+
+                            if (string.IsNullOrEmpty(pip.IPAddress))
+                            {
+                                _logger.Error("The IP address is null of the created Pulic IP with Id {PipResourceId}", pip.Id);
+                                throw new InvalidOperationException($"The IP address is null of the created Pulic IP with Id {pip.Id}");
+                            }
+
+                            var epName = $"{aksRGName}-{SdkContext.RandomResourceName(string.Empty, 5).Substring(0, 3)}";
+                            _logger.Information("New endpoint name: {epName}", epName);
+                            await aksHelper.AddPulicIpToTrafficManagerAsync(az, tmId, epName, pip.IPAddress, enabled: true);
+
+                            _logger.Information("Successfully updated AKS public IP in the traffic manager.");
                         }
-
-                        File.WriteAllText("acr-name.txt", acr.Name);
-                        File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
-
-                        if (!string.IsNullOrEmpty(computeOptions.HostName))
-                        {
-                            File.WriteAllText("rp-hostname.txt", computeOptions.HostName);
-                        }
-
-                        File.WriteAllText("aks-name.txt", aksName);
-                        File.WriteAllText("aks-rg.txt", aksRGName);
-                        File.WriteAllText("aks-kv.txt", kv.VaultUri);
-                        File.WriteAllText("vault-name.txt", kv.Name);
-                        _logger.Information("Successfully retrieved Key Vault endpoint.");
-                    }
-                    else if (_options.Action == ActionType.UpdateAKSPublicIpInTrafficManager)
-                    {
-                        var az = azFactory.GenerateLiftrAzure().FluentClient;
-                        var aksHelper = new AKSHelper(_logger);
-                        var aksRGName = namingContext.ResourceGroupName(computeOptions.ComputeBaseName);
-                        var aksName = namingContext.AKSName(computeOptions.ComputeBaseName);
-                        var tmId = $"subscriptions/{_options.SubscriptionId}/resourceGroups/{namingContext.ResourceGroupName(computeOptions.DataBaseName)}/providers/Microsoft.Network/trafficmanagerprofiles/{namingContext.TrafficManagerName(computeOptions.DataBaseName)}";
-
-                        var pip = await aksHelper.GetAppPublicIpAsync(az, aksRGName, aksName, namingContext.Location, _options.AKSAppSvcLabel);
-                        if (pip == null)
-                        {
-                            var errMsg = $"Cannot find the public Ip address for the AKS cluster. aksRGName:{aksRGName}, aksName:{aksName}, region:{namingContext.Location}, aksSvcLabel:{_options.AKSAppSvcLabel}.";
-                            _logger.Error(errMsg);
-                            throw new InvalidOperationException(errMsg);
-                        }
-
-                        _logger.Information("Find the IP of the AKS is: {IPAddress}", pip.IPAddress);
-
-                        if (string.IsNullOrEmpty(pip.IPAddress))
-                        {
-                            _logger.Error("The IP address is null of the created Pulic IP with Id {PipResourceId}", pip.Id);
-                            throw new InvalidOperationException($"The IP address is null of the created Pulic IP with Id {pip.Id}");
-                        }
-
-                        var epName = $"{aksRGName}-{SdkContext.RandomResourceName(string.Empty, 5).Substring(0, 3)}";
-                        _logger.Information("New endpoint name: {epName}", epName);
-                        await aksHelper.AddPulicIpToTrafficManagerAsync(az, tmId, epName, pip.IPAddress, enabled: true);
-
-                        _logger.Information("Successfully updated AKS public IP in the traffic manager.");
                     }
 
                     if (SimpleDeployExtension.AfterRunAsync != null)
@@ -372,6 +325,22 @@ namespace Microsoft.Liftr.SimpleDeploy
                     _appLifetime.StopApplication();
                 }
             }
+        }
+
+        private (RegionOptions, NamingContext) GetRegionalOptions(HostingEnvironmentOptions targetOptions)
+        {
+            var location = Region.Create(_options.Region);
+            var regionOptions = targetOptions.Regions.Where(r => r.Location.Name.OrdinalEquals(location.Name)).FirstOrDefault();
+            if (regionOptions == null)
+            {
+                var ex = new InvalidOperationException($"Cannot find the '{_options.Region}' region configurations.");
+                _logger.Fatal(ex, ex.Message);
+                throw ex;
+            }
+
+            var regionalNamingContext = new NamingContext(_envOptions.PartnerName, _envOptions.ShortPartnerName, targetOptions.EnvironmentName, regionOptions.Location);
+
+            return (regionOptions, regionalNamingContext);
         }
     }
 }

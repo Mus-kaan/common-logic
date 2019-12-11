@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Project>
+
+  <PropertyGroup>
+    <LiftrEV2GeneratorExe Condition=" '$(OS)' == 'Windows_NT' ">dotnet "$(MSBuildThisFileDirectory)..\tools\netcoreapp2.2\Microsoft.Liftr.EV2.dll"</LiftrEV2GeneratorExe>
+    <LiftrEV2GeneratorExe Condition=" '$(OS)' != 'Windows_NT' ">dotnet "$(MSBuildThisFileDirectory)../tools/netcoreapp2.2/Microsoft.Liftr.EV2.dll"</LiftrEV2GeneratorExe>
+    <LiftrEV2OptionsPath Condition=" '$(OS)' == 'Windows_NT' ">$(MSBuildProjectDirectory)\ev2-options.json</LiftrEV2OptionsPath>
+    <LiftrEV2OptionsPath Condition=" '$(OS)' != 'Windows_NT' ">$(MSBuildProjectDirectory)/ev2-options.json</LiftrEV2OptionsPath>
+  </PropertyGroup>
+
+  <Target Name="GenerateLiftrEV2Artifacts" AfterTargets="Build">
+    <Exec Command="$(LiftrEV2GeneratorExe) -i $(LiftrEV2OptionsPath) -o $(OutputPath)generated-ev2" />
+  </Target>
+
+  <Target Name="CopyGeneratedEV2Artifacts" BeforeTargets="Publish">
+    <ItemGroup>
+      <EV2Artifact Include="$(OutputPath)generated-ev2/**/*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(EV2Artifact)" DestinationFolder="$(PublishDir)/generated-ev2/%(RecursiveDir)" ContinueOnError="false" />
+  </Target>
+  
+</Project>

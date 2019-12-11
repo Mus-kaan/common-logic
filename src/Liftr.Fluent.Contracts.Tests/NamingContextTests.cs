@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
-using System;
 using Xunit;
 
 namespace Microsoft.Liftr.Fluent.Contracts.Tests

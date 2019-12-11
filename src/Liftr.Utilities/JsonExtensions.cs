@@ -16,33 +16,41 @@ namespace Microsoft.Liftr
 {
     public static class JsonExtensions
     {
-        public static JsonSerializerSettings DefaultFormatterSettings => new JsonSerializerSettings
+        public static JsonSerializerSettings DefaultFormatterSettings => GetDefaultFormatterSettings(indented: false);
+
+        public static JsonSerializerSettings DefaultIndentedFormatterSettings => GetDefaultFormatterSettings(indented: true);
+
+        public static JsonSerializer JsonSerializer => JsonSerializer.Create(DefaultFormatterSettings);
+
+        public static JsonSerializerSettings GetDefaultFormatterSettings(bool indented)
         {
-            NullValueHandling = NullValueHandling.Ignore,
-            TypeNameHandling = TypeNameHandling.None,
-            MissingMemberHandling = MissingMemberHandling.Ignore,
-            ContractResolver = new CamelCasePropertyNamesContractResolver()
+            return new JsonSerializerSettings
             {
-                NamingStrategy = new CamelCaseNamingStrategy() { ProcessDictionaryKeys = false },
-            },
-            Converters = new List<JsonConverter>
+                Formatting = indented ? Newtonsoft.Json.Formatting.Indented : Newtonsoft.Json.Formatting.None,
+                NullValueHandling = NullValueHandling.Ignore,
+                TypeNameHandling = TypeNameHandling.None,
+                MissingMemberHandling = MissingMemberHandling.Ignore,
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+                {
+                    NamingStrategy = new CamelCaseNamingStrategy() { ProcessDictionaryKeys = false },
+                },
+                Converters = new List<JsonConverter>
                 {
                     new TimeSpanConverter(),
                     new StringEnumConverter(),
                     new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal },
                 },
-        };
-
-        public static JsonSerializer JsonSerializer => JsonSerializer.Create(DefaultFormatterSettings);
-
-        public static string ToJsonString(this object self)
-        {
-            return ToJson(self, DefaultFormatterSettings);
+            };
         }
 
-        public static string ToJson(this object self)
+        public static string ToJsonString(this object self, bool indented = false)
         {
-            return ToJson(self, DefaultFormatterSettings);
+            return indented ? ToJson(self, DefaultIndentedFormatterSettings) : ToJson(self, DefaultFormatterSettings);
+        }
+
+        public static string ToJson(this object self, bool indented = false)
+        {
+            return indented ? ToJson(self, DefaultIndentedFormatterSettings) : ToJson(self, DefaultFormatterSettings);
         }
 
         public static JObject ToJObject(this object self)

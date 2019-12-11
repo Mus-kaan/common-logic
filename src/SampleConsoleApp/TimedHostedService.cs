@@ -4,9 +4,7 @@
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr;
-using Microsoft.Liftr.Logging;
 using System;
-using System.Globalization;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;

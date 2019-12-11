@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Liftr.EV2": {
+      "commandName": "Project",
+      "commandLineArgs": "-i ev2-options.json.json -o ev2"
+    }
+  }
+}

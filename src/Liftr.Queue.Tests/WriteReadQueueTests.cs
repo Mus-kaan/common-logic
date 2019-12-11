@@ -2,12 +2,9 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Azure.Identity;
 using Azure.Storage.Queues;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.Azure.Storage.Queue;
 using Microsoft.Liftr.Contracts;
-using Microsoft.Liftr.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;

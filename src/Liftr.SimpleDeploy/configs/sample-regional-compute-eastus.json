@@ -1,9 +1,0 @@
-{
-  "environment": "Test",
-  "locationStr": "eastus",
-  "GlobalBaseName": "gbl191001",
-  "GlobalLocationStr": "centralus",
-  "DataBaseName": "data191001",
-  "ComputeBaseName": "com191001",
-  "HostName": "ib-rp-web-eus.azliftr-test.io"
-}

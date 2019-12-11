@@ -47,11 +47,6 @@ namespace Microsoft.Liftr.SimpleDeploy
                 throw new ArgumentNullException(nameof(options));
             }
 
-            if (string.IsNullOrEmpty(options.SubscriptionId))
-            {
-                throw new InvalidOperationException("Please sepcify a valid Subscription Id.");
-            }
-
             if (!File.Exists(options.ConfigPath))
             {
                 var errMsg = $"Config json file doesn't exist at the path: {options.ConfigPath}";

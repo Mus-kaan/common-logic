@@ -4,7 +4,7 @@
     <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
     <IsPackable>true</IsPackable>
     <AssemblyName>Microsoft.Liftr.Utilities</AssemblyName>
-    <RootNamespace>Microsoft.Liftr.Utilities</RootNamespace>
+    <RootNamespace>Microsoft.Liftr</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="$(PackageVersion_Newtonsoft_Json)" />

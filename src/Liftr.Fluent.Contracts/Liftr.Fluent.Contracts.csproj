@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="$(PackageVersion_Microsoft_Azure_Management_Fluent)" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
   </ItemGroup>
 </Project>

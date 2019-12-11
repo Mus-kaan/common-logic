@@ -9,15 +9,6 @@ using System.Collections.Generic;
 
 namespace Microsoft.Liftr.Fluent.Contracts
 {
-    public enum EnvironmentType
-    {
-        Production,
-        PPE,
-        DogFood,
-        Dev,
-        Test,
-    }
-
     /// <summary>
     /// This class implemented some recommended naming conventions.
     /// https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions

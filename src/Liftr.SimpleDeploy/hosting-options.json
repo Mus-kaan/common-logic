@@ -1,0 +1,32 @@
+{
+  "Environments": [
+    {
+      "EnvironmentName": "Test",
+      "AzureSubscription": "d21a525e-7c86-486d-a79e-a4f3622f639a",
+      "Global": {
+        "Location": "centralus",
+        "BaseName": "gbl191001"
+      },
+      "Regions": [
+        {
+          "Location": "eastus",
+          "DataBaseName": "data191001",
+          "ComputeBaseName": "com191001",
+          "HostName": "ib-rp-web-eus.azliftr-test.io",
+          "DataPlaneSubscriptions": [
+            "eebfbfdb-4167-49f6-be43-466a6709609f"
+          ]
+        },
+        {
+          "Location": "westcentralus",
+          "DataBaseName": "data191001",
+          "ComputeBaseName": "com191001",
+          "HostName": "ib-rp-web-wcus.azliftr-test.io",
+          "DataPlaneSubscriptions": [
+            "eebfbfdb-4167-49f6-be43-466a6709609f"
+          ]
+        }
+      ]
+    }
+  ]
+}
