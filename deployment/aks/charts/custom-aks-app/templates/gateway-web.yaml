@@ -11,23 +11,23 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rp-web
+  name: liftr-gateway-web
   labels:
-    app: rp-web
+    app: liftr-gateway-web
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: rp-web
+      app: liftr-gateway-web
   template:
     metadata:
       labels:
-        app: rp-web
+        app: liftr-gateway-web
         aadpodidbinding: liftr-aad-pod-identity
     spec:
       containers:
-      - name: rp-web-container
-        image: {{ required "The imageRegistry parameter must be provided." .Values.imageRegistry }}/{{ required "The imageName parameter must be provided." .Values.imageName }}
+      - name: liftr-gateway-web-container
+        image: {{ required "The imageRegistry parameter must be provided." .Values.imageRegistry }}/{{ required "The gatewayWeb.imageName parameter must be provided." .Values.gatewayWeb.imageName }}
         ports:
           - containerPort: 5000
         env:
@@ -41,14 +41,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-    name: "rp-web-svc"
+    name: "liftr-gateway-web-svc"
 spec:
     ports:
         - port: 80
           protocol: TCP
           targetPort: 5000
     selector:
-        app: rp-web
+        app: liftr-gateway-web
     type: ClusterIP
 ---
 apiVersion: extensions/v1beta1
@@ -56,7 +56,7 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
-  name: rp-web-ingress
+  name: liftr-gateway-web-ingress
   namespace: {{ .Release.Namespace }}
 spec:
   rules:
@@ -64,7 +64,7 @@ spec:
       http:
           paths:
           - backend:
-              serviceName: "rp-web-svc"
+              serviceName: "liftr-gateway-web-svc"
               servicePort: 80
             path: /
   # This section is only required if TLS is to be enabled for the Ingress

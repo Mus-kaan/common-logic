@@ -10,12 +10,16 @@ case $i in
     ProvisionAction="${i#*=}"
     shift # past argument=value
     ;;
-    --DeploymentSubscriptionId=*)
-    DeploymentSubscriptionId="${i#*=}"
-    shift # past argument=value
-    ;;
     --ConfigFilePath=*)
     ConfigFilePath="${i#*=}"
+    shift # past argument=value
+    ;;
+    --EnvName=*)
+    EnvName="${i#*=}"
+    shift # past argument=value
+    ;;
+    --Region=*)
+    Region="${i#*=}"
     shift # past argument=value
     ;;
     --ActiveKey=*)
@@ -33,18 +37,23 @@ case $i in
 esac
 done
 
-if [ -z ${DeploymentSubscriptionId+x} ]; then
-    echo "DeploymentSubscriptionId is blank."
-    exit 1
-fi
-
 if [ -z ${ProvisionAction+x} ]; then
     echo "ProvisionAction is blank."
     exit 1
 fi
 
 if [ -z ${ConfigFilePath+x} ]; then
-    echo "ConfigFilePath is blank."
+    echo "ConfigFilePath is blank. Use 'hosting-options.json'."
+    ConfigFilePath="hosting-options.json"
+fi
+
+if [ -z ${EnvName+x} ]; then
+    echo "EnvName is blank."
+    exit 1
+fi
+
+if [ -z ${Region+x} ]; then
+    echo "Region is blank."
     exit 1
 fi
 
@@ -59,12 +68,12 @@ if [ "$ProvisionAction" = "UpdateAKSPublicIpInTrafficManager" ]; then
     fi
 fi
 
-echo "Start deployment against subscription Id: $DeploymentSubscriptionId"
-echo "Config file path: $ConfigFilePath"
+echo "Use configuration file from path: $ConfigFilePath"
 
 cd bin
 echo "----------------------------------------------------------------------------------------------"
 echo "Configration file content: "
+echo
 cat $ConfigFilePath
 echo
 echo "----------------------------------------------------------------------------------------------"
@@ -73,23 +82,25 @@ if [ "$AKSSvcLabel" = "" ]; then
     dotnet Deployment.Runner.dll \
     -a "$ProvisionAction" \
     -f "$ConfigFilePath" \
-    -s "$DeploymentSubscriptionId" \
+    -e "$EnvName" \
+    -r "$Region" \
     --activeKey "$ActiveKey"
 else
     dotnet Deployment.Runner.dll \
     -a "$ProvisionAction" \
     -f "$ConfigFilePath" \
-    -s "$DeploymentSubscriptionId" \
+    -e "$EnvName" \
+    -r "$Region" \
     -l "$AKSSvcLabel" \
     --activeKey "$ActiveKey"
 fi
 
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
-    echo "Failed to run provisioning runner."
+    echo "Failed to run deployment runner."
     exit $exit_code
 fi
 
 echo "----------------------------------------------------------------------------------------------"
-echo "Finished running the provisioning runner."
+echo "Finished running the deployment runner."
 echo "----------------------------------------------------------------------------------------------"

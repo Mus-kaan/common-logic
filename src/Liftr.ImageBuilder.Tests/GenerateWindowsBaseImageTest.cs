@@ -63,7 +63,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                                     imgOptions,
                                     artifactOptions,
                                     "packer-windows.tar.gz",
-                                    "sample-image-meta.json",
+                                    "0.9.01018.0002-3678b756",
                                     "2019.0.20190214",
                                     false,
                                     CancellationToken.None);

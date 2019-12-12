@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # ------------------------------------------------------------
 
-# Prometheus converter deployment depends on statsD daemon set. Since 
-# helm will install daemon sets before deployments. No need to specify any 
+# Prometheus converter deployment depends on statsD daemon set. Since
+# helm will install daemon sets before deployments. No need to specify any
 # dependencies here.
 #
 # The prom-mdm-converter relies on Prometheus' remote_write module, which can be used to pipe ALL metrics Prometheus receives to an HTTP endpoint.
@@ -35,8 +35,6 @@ spec:
         - name: prom-mdm-converter
           image: "{{ .Values.linuxgenevaACR.endpoint }}/{{ .Values.promMdmConverter.image.name }}:{{ .Values.promMdmConverter.image.tag }}"
           imagePullPolicy: {{ .Values.promMdmConverter.promConverterImagePullPolicy }}
-          imagePullSecrets:
-            - name: prom-mdm-converter
           env:
             - name: STATSD_ENDPOINT
               value: "localhost"
@@ -74,8 +72,6 @@ spec:
         - name: config
           configMap:
             name: "prom-mdm-converter-conf"
-      imagePullSecrets:
-        - name: linuxgenevaregistry
 ---
 apiVersion: v1
 kind: Service

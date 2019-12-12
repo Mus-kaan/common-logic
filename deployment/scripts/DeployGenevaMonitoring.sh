@@ -138,11 +138,10 @@ rm -f geneva_key.pem
 # Connect with Aks
 echo "az aks get-credentials -g $AKSRGName -n $AKSName"
 az aks get-credentials -g "$AKSRGName" -n "$AKSName"
-# $Helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 
 # Deploy geneva daemonset to default namespace
 echo "start deploy geneva helm chart."
-$Helm upgrade aks-geneva --install --recreate-pods \
+$Helm upgrade aks-geneva --install \
 --values "$GenevaParametersFile" \
 --set gcskeyb64="$genevaServiceKey" \
 --set gcs_region="$gcs_region" \

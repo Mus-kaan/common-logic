@@ -1,18 +1,7 @@
 #!/bin/bash
-
 # Stop on error.
 set -e
-
-
-if [ "$DeploymentSubscriptionId" = "" ]; then
-    echo "Please set the deployment subscription Id using variable 'DeploymentSubscriptionId' ..."
-    exit 1 # terminate and indicate error
-fi
-
-if [ "$ConfigFilePath" = "" ]; then
-    echo "Please set a path to the config file using variable 'ConfigFilePath' ..."
-    exit 1 # terminate and indicate error
-fi
+currentScriptName=`basename "$0"`
 
 if [ "$gcs_region" = "" ]; then
     echo "Please set GCS region using variable 'gcs_region' ..."
@@ -26,10 +15,19 @@ fi
 
 echo "GenevaParametersFile: $GenevaParametersFile"
 
-./RunProvisioningRunner.sh \
+./ExecuteDeploymentRunner.sh \
 --ProvisionAction="CreateOrUpdateRegionalCompute" \
---DeploymentSubscriptionId="$DeploymentSubscriptionId" \
---ConfigFilePath="$ConfigFilePath"
+--EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
+--Region="$REGION"
+
+if [ "$DeploymentSubscriptionId" = "" ]; then
+echo "Read DeploymentSubscriptionId from file 'bin/subscription-id.txt'."
+DeploymentSubscriptionId=$(<bin/subscription-id.txt)
+    if [ "$DeploymentSubscriptionId" = "" ]; then
+        echo "Please set 'DeploymentSubscriptionId' ..."
+        exit 1 # terminate and indicate error
+    fi
+fi
 
 ./DeployAKSPodIdentity.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId"
@@ -38,3 +36,6 @@ echo "GenevaParametersFile: $GenevaParametersFile"
 --DeploymentSubscriptionId="$DeploymentSubscriptionId" \
 --GenevaParametersFile="$GenevaParametersFile" \
 --gcs_region="$gcs_region"
+
+echo "Successfully finished running: $currentScriptName"
+echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"

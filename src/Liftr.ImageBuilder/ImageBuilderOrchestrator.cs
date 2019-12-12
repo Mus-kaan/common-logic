@@ -172,7 +172,7 @@ namespace Microsoft.Liftr.ImageBuilder
             ImageBuilderOptions imgOptions,
             ArtifactStoreOptions storeOptions,
             string artifactPath,
-            string imageMetaPath,
+            string buildTag,
             string sbiVersion,
             bool isLinux,
             CancellationToken cancellationToken)
@@ -201,14 +201,14 @@ namespace Microsoft.Liftr.ImageBuilder
                 sourceImageVersion = sbiVersion;
             }
 
-            return await BuildCustomizedSBIImplAsync(imgOptions, storeOptions, artifactPath, imageMetaPath, sourceImageVersion, isLinux, cancellationToken);
+            return await BuildCustomizedSBIImplAsync(imgOptions, storeOptions, artifactPath, buildTag, sourceImageVersion, isLinux, cancellationToken);
         }
 
         internal async Task<string> BuildCustomizedSBIImplAsync(
             ImageBuilderOptions imgOptions,
             ArtifactStoreOptions storeOptions,
             string artifactPath,
-            string imageMetaPath,
+            string buildTag,
             string srcImgVersionId,
             bool isLinux,
             CancellationToken cancellationToken)
@@ -230,24 +230,12 @@ namespace Microsoft.Liftr.ImageBuilder
                 throw new FileNotFoundException(errMsg);
             }
 
-            if (!File.Exists(imageMetaPath))
+            if (string.IsNullOrEmpty(buildTag))
             {
-                var errMsg = $"Cannot find 'image-meta.json' file located at {imageMetaPath}";
-                _logger.Error(errMsg);
-                throw new FileNotFoundException(errMsg);
+                throw new ArgumentNullException(nameof(buildTag));
             }
 
-            var imageMetaContent = File.ReadAllText(imageMetaPath);
-            var imageMeta = JsonConvert.DeserializeObject<ImageMetaInfo>(imageMetaContent);
-
-            if (string.IsNullOrEmpty(imageMeta.BuildTag))
-            {
-                var errMsg = $"Cannot parse the content of the {imageMetaPath}";
-                _logger.Error(errMsg);
-                throw new InvalidOperationException(errMsg);
-            }
-
-            _logger.Information("Corresponding docker image info: {@imageMeta}", imageMeta);
+            _logger.Information("Corresponding buid tag: {@buildTag}", buildTag);
 
             var store = await GetArtifactStoreAsync(imgOptions, storeOptions);
             var cleanupCount = await store.CleanUpOldArtifactsAsync();
@@ -256,13 +244,13 @@ namespace Microsoft.Liftr.ImageBuilder
             var artifactUrlWithSAS = await store.UploadBuildArtifactsAndGenerateReadSASAsync(artifactPath);
             _logger.Information("uploaded the file {filePath} and generated the url with the SAS token.", artifactPath);
 
-            var templateName = imageMeta.BuildTag;
+            var templateName = buildTag;
             var templateDllName = isLinux ? "Microsoft.Liftr.ImageBuilder.aib.template.base.json" : "Microsoft.Liftr.ImageBuilder.aibWindows.template.base.json";
 
             var generatedTemplate = GenerateImageTemplate(
                 imgOptions,
                 artifactUrlWithSAS.ToString(),
-                imageMeta,
+                buildTag,
                 srcImgVersionId,
                 imgOptions.Location,
                 templateName,
@@ -353,7 +341,7 @@ namespace Microsoft.Liftr.ImageBuilder
             return store;
         }
 
-        private string GenerateImageTemplate(ImageBuilderOptions imgOptions, string artifactUrlWithSAS, ImageMetaInfo imageMeta, string srcImgVersionId, Region location, string imageTemplateName, string templateDllName)
+        private string GenerateImageTemplate(ImageBuilderOptions imgOptions, string artifactUrlWithSAS, string buildTag, string srcImgVersionId, Region location, string imageTemplateName, string templateDllName)
         {
             var templateContent = EmbeddedContentReader.GetContent(Assembly.GetExecutingAssembly(), templateDllName);
             templateContent = templateContent.Replace("ARTIFACT_URI_PLACEHOLDER", artifactUrlWithSAS, StringComparison.OrdinalIgnoreCase);
@@ -372,10 +360,7 @@ namespace Microsoft.Liftr.ImageBuilder
             galleryTarget.galleryImageId = galleryImageResourceId;
 
             var artifactTags = galleryTarget.artifactTags;
-            artifactTags[nameof(imageMeta.CommitId)] = imageMeta.CommitId;
-            artifactTags["CDPx" + nameof(imageMeta.TimeStamp)] = imageMeta.TimeStamp;
-            artifactTags["CDPx" + nameof(imageMeta.ImageId)] = imageMeta.ImageId;
-            artifactTags["CDPx" + nameof(imageMeta.BuildTag)] = imageMeta.BuildTag;
+            artifactTags["CDPxBuildTag"] = buildTag;
 
             foreach (var kvp in imgOptions.Tags)
             {

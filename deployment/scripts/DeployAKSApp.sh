@@ -163,9 +163,9 @@ az aks get-credentials -g "$AKSRGName" -n "$AKSName"
 # $Helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 
 # Deploy the helm chart.
-HelmReleaseName="liftr-rp-web-release"
+HelmReleaseName="liftr-custom-aks-app"
 echo "start deploy helm chart."
-$Helm upgrade $HelmReleaseName --install --recreate-pods \
+$Helm upgrade $HelmReleaseName --install \
 --set vaultEndpoint="$KeyVaultEndpoint" \
 --set hostname="$RPWebHostname" \
 --set sslcertb64="$sslCertB64Content" \

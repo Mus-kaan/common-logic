@@ -32,7 +32,7 @@ namespace Microsoft.Liftr.ImageBuilder
         [Option("artifactPath", Required = false, HelpText = "Path to the artifact package file. The artifact must be packed in a tar file. We will call 'bake-image.sh' in the package.")]
         public string ArtifactPath { get; set; }
 
-        [Option("imageMetaPath", Required = false, HelpText = "Path to the 'image-meta.json'.")]
-        public string ImageMetaPath { get; set; }
+        [Option("buildTag", Required = false, HelpText = "CDPx build tag, e.g. '0.9.01018.0002-3678b756'")]
+        public string ArtifactBuildTag { get; set; }
     }
 }

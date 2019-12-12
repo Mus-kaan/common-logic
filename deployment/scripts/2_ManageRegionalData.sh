@@ -1,24 +1,16 @@
 #!/bin/bash
-
 # Stop on error.
 set -e
-
-
-if [ "$DeploymentSubscriptionId" = "" ]; then
-    echo "Please set the deployment subscription Id using variable 'DeploymentSubscriptionId' ..."
-    exit 1 # terminate and indicate error
-fi
-
-if [ "$ConfigFilePath" = "" ]; then
-    echo "Please set a path to the config file using variable 'ConfigFilePath' ..."
-    exit 1 # terminate and indicate error
-fi
+currentScriptName=`basename "$0"`
 
 if [ "$ActiveKey" = "" ]; then
     ActiveKey="Primary MongoDB Connection String"
 fi
 
-./RunProvisioningRunner.sh \
+./ExecuteDeploymentRunner.sh \
 --ProvisionAction="CreateOrUpdateRegionalData" \
---DeploymentSubscriptionId="$DeploymentSubscriptionId" \
---ConfigFilePath="$ConfigFilePath"
+--EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
+--Region="$REGION"
+
+echo "Successfully finished running: $currentScriptName"
+echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"

@@ -87,13 +87,6 @@ namespace Microsoft.Liftr.ImageBuilder
                         _logger.Error(errMsg);
                         throw new InvalidOperationException(errMsg);
                     }
-
-                    if (!File.Exists(_options.ImageMetaPath))
-                    {
-                        var errMsg = $"Cannot find the 'image-meta.json' at the location : {_options.ImageMetaPath}";
-                        _logger.Error(errMsg);
-                        throw new InvalidOperationException(errMsg);
-                    }
                 }
 
                 TokenCredential tokenCredential = null;
@@ -198,7 +191,7 @@ namespace Microsoft.Liftr.ImageBuilder
                             imgOptions,
                             _envOptions.ArtifactOptions,
                             _options.ArtifactPath,
-                            _options.ImageMetaPath,
+                            _options.ArtifactBuildTag,
                             _envOptions.BaseSBIVerion,
                             true,
                             cancellationToken);
@@ -212,7 +205,7 @@ namespace Microsoft.Liftr.ImageBuilder
                             imgOptions,
                             _envOptions.ArtifactOptions,
                             _options.ArtifactPath,
-                            _options.ImageMetaPath,
+                            _options.ArtifactBuildTag,
                             _envOptions.BaseSBIVerion,
                             false,
                             cancellationToken);

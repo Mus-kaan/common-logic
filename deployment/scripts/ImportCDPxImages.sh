@@ -1,7 +1,7 @@
 #!/bin/bash
-
 # Stop on error.
 set -e
+CurrentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 for i in "$@"
 do
@@ -14,8 +14,8 @@ case $i in
     DeploymentSubscriptionId="${i#*=}"
     shift # past argument=value
     ;;
-    --ImageMetadataPath=*)
-    ImageMetadataPath="${i#*=}"
+    --ImageMetadataDir=*)
+    ImageMetadataDir="${i#*=}"
     shift # past argument=value
     ;;
     *)
@@ -35,9 +35,10 @@ ACRName=$(<bin/acr-name.txt)
 fi
 echo "ACRName: $ACRName"
 
-if [ -z ${ImageMetadataPath+x} ]; then
-    ImageMetadataPath="image-meta.json"
+if [ -z ${ImageMetadataDir+x} ]; then
+    ImageMetadataDir="$CurrentDir/cdpx-images"
 fi
+echo "CDPx images meta data folder: $ImageMetadataDir"
 
 if [ -z ${DeploymentSubscriptionId+x} ]; then
     echo "DeploymentSubscriptionId is blank."
@@ -60,14 +61,15 @@ if [ $exit_code -ne 0 ]; then
     exit $exit_code
 fi
 
-set +e
-# Get the name of the docker image that is tagged with the build number.
-if [ -f "$ImageMetadataPath" ]; then
-    echo "Using docker build metadata at '$ImageMetadataPath'."
+for imgMetaData in $ImageMetadataDir/*.json
+do
+    fileName="$(basename $imgMetaData)"
+    fileName=$(echo "$fileName" | cut -f 1 -d '.')
+    echo "Parsing image meta data file: $imgMetaData"
 
     # Use grep magic to parse JSON since jq isn't installed on the CDPx build image.
     # See https://aka.ms/cdpx/yaml/dockerbuildcommand for the metadata file schema.
-    DockerImageNameWithRegistry=$(cat $ImageMetadataPath | grep -Po '"ame_build_image_name": "\K[^"]*')
+    DockerImageNameWithRegistry=$(cat $imgMetaData | grep -Po '"ame_build_image_name": "\K[^"]*')
 
     DockerRegistry=$(echo $DockerImageNameWithRegistry | cut -d '/' -f1 | cut -d '.' -f1)
     DockerImageName=$(echo $DockerImageNameWithRegistry | cut -d '/' -f1 --complement)
@@ -76,10 +78,5 @@ if [ -f "$ImageMetadataPath" ]; then
     echo "DockerImageName: $DockerImageName"
 
     echo "import $DockerImageName"
-    az acr import --name "$ACRName" --source $DockerImageName --registry /subscriptions/e9d570ed-cf13-4347-83e3-3938b8d65a41/resourceGroups/cdpx-acr-ame-wus/providers/Microsoft.ContainerRegistry/registries/$DockerRegistry
-else
-    echo "No docker build metadata file found at '$ImageMetadataPath'. Docker image name will not be injected into the Helm chart."
-    exit 1
-fi
-
-exit 0
+    az acr import --name "$ACRName" --source $DockerImageName --registry /subscriptions/e9d570ed-cf13-4347-83e3-3938b8d65a41/resourceGroups/cdpx-acr-ame-wus/providers/Microsoft.ContainerRegistry/registries/$DockerRegistry --force
+done

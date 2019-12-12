@@ -93,7 +93,7 @@ $Helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 
 # Deploy identity infrastructure daemonset to default namespace
 echo "helm upgrade aks-pod-identity-infra"
-$Helm upgrade aks-pod-identity-infra --install --recreate-pods --namespace default aad-pod-identity-infra-*.tgz
+$Helm upgrade aks-pod-identity-infra --install --namespace default aad-pod-identity-infra-*.tgz
 
 echo "Start waiting for aks-pod-identity-infra deployment to finish ..."
 kubectl rollout status daemonset/nmi
@@ -104,7 +104,8 @@ sleep 240s
 
 # Deploy azure identity binding components to default namespace
 echo "helm upgrade aks-pod-identity-binding"
-$Helm upgrade aks-pod-identity-binding --install --recreate-pods \
+echo "If this part failed with 'cannot find aad pod api, please retry the release.'"
+$Helm upgrade aks-pod-identity-binding --install \
 --values "aad-pod-identity.values.yaml" \
 --set azureIdentity.resourceID=$MSIResourceId \
 --set azureIdentity.clientID=$MSIClientId \

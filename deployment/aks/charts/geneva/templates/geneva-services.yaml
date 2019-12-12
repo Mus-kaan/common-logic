@@ -52,7 +52,7 @@ spec:
         name: geneva-services
     spec:
       hostNetwork: true
-      containers:        
+      containers:
         # MDSD
         - name: mdsd
           image: {{ .Values.linuxgenevaACR.endpoint }}/genevamdsd:{{ .Values.mdsd.dockerTag }}
@@ -76,10 +76,10 @@ spec:
           - name: MONITORING_CONFIG_VERSION
             value: {{ .Values.gcs_config_version | quote }}
           - name: MDSD_DEBUG_LOG_FLAGS
-            value: {{ .Values.mdsd_debug_log_flags | quote }}                       
+            value: {{ .Values.mdsd_debug_log_flags | quote }}
           volumeMounts:
             - name: mdsd-auth-vol
-              mountPath: /geneva/geneva_auth            
+              mountPath: /geneva/geneva_auth
             - name: var-log-vol
               mountPath: /geneva/geneva_logs
             - name: mdsd-run-vol
@@ -94,16 +94,16 @@ spec:
             - name: fluentd-conf-vol
               mountPath: /etc/fluentd
             - name: fluentd-buffer-vol
-              mountPath: /var/log/td-agent            
+              mountPath: /var/log/td-agent
             - name: mdsd-run-vol
-              mountPath: /var/run/mdsd          
+              mountPath: /var/run/mdsd
             - name: docker-log-vol
               mountPath: /var/lib/docker/containers
               readOnly: true
             - name: var-log-vol
               mountPath: /var/log
             - name: run-journal-vol
-              mountPath: /run/log/journal                      
+              mountPath: /run/log/journal
               readOnly: true
         # MDM
         - name: mdm
@@ -169,7 +169,7 @@ spec:
               name: azsecpack-auth-vol
       volumes:
         - name: mdsd-run-vol
-          emptyDir: {}      
+          emptyDir: {}
         - name: mdsd-auth-vol
           secret:
             secretName: mdsd-auth
@@ -177,13 +177,13 @@ spec:
           configMap:
             name: fluentd-conf
         - name: fluentd-buffer-vol
-          emptyDir: {}          
+          emptyDir: {}
         - name: mdm-auth-vol
           secret:
-            secretName: mdm-auth        
+            secretName: mdm-auth
         - name: azsecpack-host
           hostPath:
-            path: /            
+            path: /
         - name: azsecpack-auth-vol
           secret:
             secretName: azsecpack-auth
@@ -192,14 +192,12 @@ spec:
             path: /var/lib/docker/containers
         - name: run-journal-vol
           hostPath:
-            path: /run/log/journal            
+            path: /run/log/journal
         - name: var-log-vol
           hostPath:
             path: /var/log
         - name: etw-vol
           emptyDir: {}
-      imagePullSecrets:
-        - name: linuxgenevaregistry
 ---
 apiVersion: v1
 kind: Service
