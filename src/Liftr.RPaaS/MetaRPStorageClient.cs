@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.ARM;
 using Microsoft.Liftr.Contracts.Exceptions;
 using Newtonsoft.Json;
@@ -63,7 +64,6 @@ namespace Microsoft.Liftr.RPaaS
                 var url = GetMetaRPResourceUrl(resource.Id, apiVersion);
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();
                 var response = await _httpClient.PutAsync(url, content);
-
                 if (!response.IsSuccessStatusCode)
                 {
                     throw HttpResponseException.Create(response, resource.Id);
@@ -73,7 +73,66 @@ namespace Microsoft.Liftr.RPaaS
             }
         }
 
-        private string GetMetaRPResourceUrl(string resourceId, string apiVersion)
+        public async Task<HttpResponseMessage> PatchOperationAsync<T>(T operation, string apiVersion) where T : OperationResource
+        {
+            if (operation == null)
+            {
+                throw new ArgumentNullException(nameof(operation));
+            }
+
+            using (var content = new StringContent(JsonConvert.SerializeObject(operation), Encoding.UTF8, "application/json"))
+            {
+                var url = GetMetaRPResourceUrl(operation.Id, apiVersion);
+                _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();
+                var method = new HttpMethod("PATCH");
+                using (var request = new HttpRequestMessage(method, url)
+                {
+                    Content = content,
+                })
+                {
+                    var response = await _httpClient.SendAsync(request);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        throw HttpResponseException.Create(response, operation.Id);
+                    }
+
+                    return response;
+                }
+            }
+        }
+
+        public async Task<HttpResponseMessage> PatchOperationStatusAsync(
+            string operationStatusId,
+            ProvisioningState state,
+            string errorCode,
+            string errorMessage,
+            string apiVersion)
+        {
+            if (string.IsNullOrEmpty(operationStatusId))
+            {
+                throw new ArgumentNullException(nameof(operationStatusId));
+            }
+
+            if (string.IsNullOrEmpty(apiVersion))
+            {
+                throw new ArgumentNullException(nameof(apiVersion));
+            }
+
+            var operation = new OperationResource()
+            {
+                Id = operationStatusId,
+                Status = state,
+                Error = new OperationError()
+                {
+                    Code = errorCode,
+                    Message = errorMessage,
+                },
+            };
+            return await PatchOperationAsync(operation, apiVersion);
+        }
+
+        private static string GetMetaRPResourceUrl(string resourceId, string apiVersion)
         {
             return resourceId + "?api-version=" + apiVersion;
         }
