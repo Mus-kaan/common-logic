@@ -99,7 +99,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var rg = await liftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
             var msi = await liftrAzure.GetOrCreateMSIAsync(namingContext.Location, rgName, msiName, namingContext.Tags);
             var storageAccount = await liftrAzure.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, storageName, namingContext.Tags);
-            await liftrAzure.DelegateStorageKeyOperationToKeyVaultAsync(storageAccount);
             await liftrAzure.GrantQueueContributorAsync(storageAccount, msi);
 
             if (dataOptions.DataPlaneSubscriptions != null)
@@ -152,7 +151,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 {
                     var dataPlaneLiftrAzure = _azureClientFactory.GenerateLiftrAzure(dpSubscription);
                     IResourceGroup dataPlaneStorageRG = await dataPlaneLiftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, namingContext.ResourceGroupName(baseName + "-dp"), namingContext.Tags);
-                    await dataPlaneLiftrAzure.DelegateStorageKeyOperationToKeyVaultAsync(dataPlaneStorageRG);
 
                     var existingStorageAccountCount = (await dataPlaneLiftrAzure.ListStorageAccountAsync(dataPlaneStorageRG.Name)).Count();
 
@@ -267,7 +265,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             computeOptions.CheckValues();
             aksInfo.CheckValues();
 
-            _logger.Information("AKS machine type: {AKSMachineType}", aksInfo.AKSMachineTypeStr);
+            _logger.Information("AKS machine type: {AKSMachineType}", aksInfo.AKSMachineType.Value);
             _logger.Information("AKS machine count: {AKSMachineCount}", aksInfo.AKSMachineCount);
 
             var rgName = namingContext.ResourceGroupName(computeOptions.ComputeBaseName);

@@ -36,26 +36,57 @@ namespace Microsoft.Liftr.EV2
                     throw new ArgumentNullException(nameof(options));
                 }
 
-                logger.Information("Start generating EV2 artifacts ...");
-                logger.Information("Load EV2 options file from: {InputFile}", options.InputFile);
-                logger.Information("Output directory: {OutputPath}", options.OuputDir);
+                logger.Information("Start generating EV2 rollout artifacts ...");
 
-                using (var op = logger.StartTimedOperation("GenerateEV2Artifacts"))
+                if (!File.Exists(options.HostingEV2OptionsFile) && !File.Exists(options.ImageBuilderEV2OptionsFile))
                 {
-                    if (!File.Exists(options.InputFile))
+                    var errMsg = $"Cannot find the EV2 artifact options file located at file path: {options.HostingEV2OptionsFile}. Also cannot find the image builder options file at: {options.ImageBuilderEV2OptionsFile}.";
+                    logger.Fatal(errMsg);
+                    throw new InvalidOperationException(errMsg);
+                }
+
+                var generator = new EV2ArtifactsGenerator(logger);
+
+                if (File.Exists(options.HostingEV2OptionsFile))
+                {
+                    logger.Information("Load EV2 options file from: {InputFile}", options.HostingEV2OptionsFile);
+
+                    using (var op = logger.StartTimedOperation("GenerateEV2Artifacts"))
                     {
-                        var errMsg = "Cannot find the EV2 arififacts options file located at file path: " + options.InputFile;
-                        logger.Error(errMsg);
-                        op.FailOperation(errMsg);
-                        throw new InvalidOperationException(errMsg);
+                        try
+                        {
+                            var ev2Options = File.ReadAllText(options.HostingEV2OptionsFile).FromJson<EV2HostingOptions>();
+                            ev2Options.CheckValid();
+                            generator.GenerateArtifacts(ev2Options, options.OuputDir);
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.Error(ex, ex.Message);
+                            op.FailOperation();
+                            throw;
+                        }
                     }
+                }
 
-                    var ev2Options = File.ReadAllText(options.InputFile).FromJson<EV2Options>();
-                    ev2Options.CheckValid();
+                if (File.Exists(options.ImageBuilderEV2OptionsFile))
+                {
+                    logger.Information("Load Image Builder EV2 options file from: {ImageInputFile}", options.ImageBuilderEV2OptionsFile);
 
-                    var generator = new EV2ArtifactsGenerator(logger);
-
-                    generator.GenerateArtifacts(ev2Options, options.OuputDir);
+                    using (var op = logger.StartTimedOperation("GenerateEV2ImageBuilderArtifacts"))
+                    {
+                        try
+                        {
+                            var ev2Options = File.ReadAllText(options.ImageBuilderEV2OptionsFile).FromJson<EV2ImageBuilderOptions>();
+                            ev2Options.CheckValid();
+                            generator.GenerateImageBuilderArtifacts(ev2Options, options.OuputDir);
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.Error(ex, ex.Message);
+                            op.FailOperation();
+                            throw;
+                        }
+                    }
                 }
             }
             catch (Exception ex)

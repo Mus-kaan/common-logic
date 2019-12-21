@@ -3,12 +3,12 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.Compute.Fluent;
+using Microsoft.Azure.Management.Compute.Fluent.Models;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -26,114 +26,74 @@ namespace Microsoft.Liftr.ImageBuilder
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<IGalleryImageVersion> CreateImageVersionAsync(IAzure fluentClient, string location, string rgName, string sigName, string imageName, IVirtualMachineCustomImage customImage, IDictionary<string, string> tags)
+        #region Gallery operations
+        public async Task<IGallery> CreateGalleryAsync(
+            IAzure fluentClient,
+            Region location,
+            string rgName,
+            string galleryName,
+            IDictionary<string, string> tags)
         {
             if (fluentClient == null)
             {
                 throw new ArgumentNullException(nameof(fluentClient));
             }
 
-            if (imageName == null)
+            _logger.Information("Creating a Shared Image Gallery with name {galleryName} ...", galleryName);
+
+            var gallery = await GetGalleryAsync(fluentClient, rgName, galleryName);
+            if (gallery != null)
             {
-                throw new ArgumentNullException(nameof(imageName));
+                _logger.Information("Using existing Shared Image Gallery with Id {resourceId} ...", gallery.Id);
+                return gallery;
             }
 
-            var imgVersionName = GetImageVersion(imageName);
+            gallery = await fluentClient.Galleries
+                .Define(galleryName)
+                .WithRegion(location)
+                .WithExistingResourceGroup(rgName)
+                .WithTags(tags)
+                .CreateAsync();
 
-            var galleryImageVersion = await GetImageVersionAsync(fluentClient, rgName, sigName, imageName);
+            _logger.Information("Created Shared Image Gallery with resourceId {resourceId}", gallery.Id);
 
-            if (galleryImageVersion != null)
-            {
-                _logger.Information("Using existing Gallery Image Version with Id {resourceId} ...", galleryImageVersion.Id);
-            }
-            else
-            {
-                _logger.Information("Creating a new verion of Shared Gallery Image. imgVersionName:{imgVersionName}, sigName: {sigName}, imageName: {imageName}", imgVersionName, sigName, imageName);
-
-                using (var operation = _logger.StartTimedOperation("CreateNewGalleryImageVersionFromCustomImage"))
-                {
-                    galleryImageVersion = await fluentClient.GalleryImageVersions
-                    .Define(imgVersionName)
-                    .WithExistingImage(rgName, sigName, imageName)
-                    .WithLocation(location)
-                    .WithSourceCustomImage(customImage)
-                    .WithTags(tags)
-                    .CreateAsync();
-                }
-
-                _logger.Information("Created Shared Gallery Image Verion with resourceId {resourceId}", galleryImageVersion.Id);
-            }
-
-            return galleryImageVersion;
+            return gallery;
         }
 
-        public async Task<IEnumerable<IGalleryImageVersion>> ListImageVersionsAsync(IAzure fluentClient, string rgName, string sigName, string imageName)
+        public async Task<IGallery> GetGalleryAsync(
+            IAzure fluentClient,
+            string rgName,
+            string galleryName)
         {
             if (fluentClient == null)
             {
                 throw new ArgumentNullException(nameof(fluentClient));
             }
 
-            _logger.Information("Listing image versions. rgName:{rgName}, sigName: {sigName}, imageName: {imageName}", rgName, sigName, imageName);
-            var imgs = (await fluentClient.GalleryImageVersions
-                .ListByGalleryImageAsync(rgName, sigName, imageName)).ToList();
-            _logger.Information("Found {versionCount} image verions. rgName:{rgName}, sigName: {sigName}, imageName: {imageName}", imgs.Count, rgName, sigName, imageName);
+            _logger.Information("Getting Shared Image Gallery with name {galleryName} in RG {rgName} ...", galleryName, rgName);
+            var gallery = await fluentClient.Galleries
+                .GetByResourceGroupAsync(rgName, galleryName);
 
-            return imgs;
+            return gallery;
         }
+        #endregion
 
-        public async Task DeleteImageVersionAsync(IAzure fluentClient, string rgName, string galleryName, string galleryImageName, string galleryImageVersionName)
+        #region Image Definition operations
+        public async Task<IGalleryImage> CreateImageDefinitionAsync(
+            IAzure fluentClient,
+            Region location,
+            string rgName,
+            string galleryName,
+            string imageName,
+            IDictionary<string, string> tags,
+            bool isLinux = true)
         {
             if (fluentClient == null)
             {
                 throw new ArgumentNullException(nameof(fluentClient));
             }
 
-            _logger.Information("Deleting image version. rgName:{rgName}, sigName: {sigName}, imageName: {imageName}, galleryImageVersionName: {galleryImageVersionName}", rgName, galleryName, galleryImageName, galleryImageVersionName);
-            await fluentClient.GalleryImageVersions
-                .DeleteByGalleryImageAsync(rgName, galleryName, galleryImageName, galleryImageVersionName);
-            _logger.Information("Finished deleting image version. rgName:{rgName}, sigName: {sigName}, imageName: {imageName}, galleryImageVersionName: {galleryImageVersionName}", rgName, galleryName, galleryImageName, galleryImageVersionName);
-        }
-
-        public async Task<IGalleryImageVersion> GetImageVersionAsync(IAzure fluentClient, string rgName, string sigName, string imageName)
-        {
-            if (fluentClient == null)
-            {
-                throw new ArgumentNullException(nameof(fluentClient));
-            }
-
-            if (imageName == null)
-            {
-                throw new ArgumentNullException(nameof(imageName));
-            }
-
-            var imgVersionName = GetImageVersion(imageName);
-
-            _logger.Information("Getting image verion. imgVersionName:{imgVersionName}, sigName: {sigName}, imageName: {imageName}", imgVersionName, sigName, imageName);
-
-            try
-            {
-                var galleryImageVersion = await fluentClient.GalleryImageVersions
-                .GetByGalleryImageAsync(rgName, sigName, imageName, imgVersionName);
-                return galleryImageVersion;
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                _logger.Warning(ex, "Cannot get image verion.");
-                return null;
-            }
-        }
-
-        public async Task<IGalleryImage> CreateImageDefinitionAsync(IAzure fluentClient, Region location, string rgName, string sigName, string imageName, IDictionary<string, string> tags, bool isLinux = true)
-        {
-            if (fluentClient == null)
-            {
-                throw new ArgumentNullException(nameof(fluentClient));
-            }
-
-            var image = await GetImageDefinitionAsync(fluentClient, rgName, sigName, imageName);
+            var image = await GetImageDefinitionAsync(fluentClient, rgName, galleryName, imageName);
             if (image != null)
             {
                 _logger.Information("Using existing Gallery Image Definition with Id {resourceId} ...", image.Id);
@@ -145,7 +105,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 _logger.Information("Creating a Gallery Image Definition for Linux with name {imageName} ...", imageName);
                 image = await fluentClient.GalleryImages
                     .Define(imageName)
-                    .WithExistingGallery(rgName, sigName)
+                    .WithExistingGallery(rgName, galleryName)
                     .WithLocation(location)
                     .WithIdentifier(publisher: "AzureLiftr", offer: "UbuntuSecureBaseImage", sku: imageName)
                     .WithGeneralizedLinux()
@@ -157,7 +117,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 _logger.Information("Creating a Gallery Image Definition for Windows with name {imageName} ...", imageName);
                 image = await fluentClient.GalleryImages
                     .Define(imageName)
-                    .WithExistingGallery(rgName, sigName)
+                    .WithExistingGallery(rgName, galleryName)
                     .WithLocation(location)
                     .WithIdentifier(publisher: "AzureLiftr", offer: "WindowsServerBaseImage", sku: imageName)
                     .WithGeneralizedWindows()
@@ -170,18 +130,22 @@ namespace Microsoft.Liftr.ImageBuilder
             return image;
         }
 
-        public async Task<IGalleryImage> GetImageDefinitionAsync(IAzure fluentClient, string rgName, string sigName, string imageName)
+        public async Task<IGalleryImage> GetImageDefinitionAsync(
+            IAzure fluentClient,
+            string rgName,
+            string galleryName,
+            string imageName)
         {
             if (fluentClient == null)
             {
                 throw new ArgumentNullException(nameof(fluentClient));
             }
 
-            _logger.Information("Getting Gallery image Definition with image name {imageName} in gallery {sigName} in RG {rgName} ...", imageName, sigName, rgName);
+            _logger.Information("Getting Gallery image Definition with image name {imageName} in gallery {galleryName} in RG {rgName} ...", imageName, galleryName, rgName);
             try
             {
                 var img = await fluentClient.GalleryImages
-                    .GetByGalleryAsync(rgName, sigName, imageName);
+                    .GetByGalleryAsync(rgName, galleryName, imageName);
                 return img;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -192,84 +156,167 @@ namespace Microsoft.Liftr.ImageBuilder
                 return null;
             }
         }
+        #endregion
 
-        public async Task<IGallery> CreateGalleryAsync(IAzure fluentClient, Region location, string rgName, string sigName, IDictionary<string, string> tags)
+        #region Image Version operations
+        public async Task<IGalleryImageVersion> GetImageVersionAsync(
+            IAzure fluentClient,
+            string rgName,
+            string galleryName,
+            string imageName,
+            string imageVersionName)
         {
             if (fluentClient == null)
             {
                 throw new ArgumentNullException(nameof(fluentClient));
             }
 
-            _logger.Information("Creating a Shared Image Gallery with name {sigName} ...", sigName);
-
-            var gallery = await GetGalleryAsync(fluentClient, rgName, sigName);
-            if (gallery != null)
+            if (imageName == null)
             {
-                _logger.Information("Using existing Shared Image Gallery with Id {resourceId} ...", gallery.Id);
-                return gallery;
+                throw new ArgumentNullException(nameof(imageName));
             }
 
-            gallery = await fluentClient.Galleries
-                .Define(sigName)
-                .WithRegion(location)
-                .WithExistingResourceGroup(rgName)
-                .WithTags(tags)
-                .CreateAsync();
+            _logger.Information("Getting image verion. imageVersionName:{imageVersionName}, galleryName: {galleryName}, imageName: {imageName}", imageVersionName, galleryName, imageName);
 
-            _logger.Information("Created Shared Image Gallery with resourceId {resourceId}", gallery.Id);
-
-            return gallery;
+            try
+            {
+                var galleryImageVersion = await fluentClient.GalleryImageVersions
+                .GetByGalleryImageAsync(rgName, galleryName, imageName, imageVersionName);
+                return galleryImageVersion;
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                _logger.Warning(ex, "Cannot get image verion.");
+                return null;
+            }
         }
 
-        public async Task<IGallery> GetGalleryAsync(IAzure fluentClient, string rgName, string sigName)
+        public async Task<IEnumerable<IGalleryImageVersion>> ListImageVersionsAsync(
+            IAzure fluentClient,
+            string rgName,
+            string galleryName,
+            string imageName)
         {
             if (fluentClient == null)
             {
                 throw new ArgumentNullException(nameof(fluentClient));
             }
 
-            _logger.Information("Getting Shared Image Gallery with name {sigName} in RG {rgName} ...", sigName, rgName);
-            var gallery = await fluentClient.Galleries
-                .GetByResourceGroupAsync(rgName, sigName);
+            _logger.Information("Listing image versions. rgName:{rgName}, galleryName: {galleryName}, imageName: {imageName}", rgName, galleryName, imageName);
+            var imgs = (await fluentClient.GalleryImageVersions
+                .ListByGalleryImageAsync(rgName, galleryName, imageName)).ToList();
+            _logger.Information("Found {versionCount} image verions. rgName:{rgName}, galleryName: {galleryName}, imageName: {imageName}", imgs.Count, rgName, galleryName, imageName);
 
-            return gallery;
+            return imgs;
         }
 
-        public async Task CreateVMImageBuilderTemplateAsync(ILiftrAzure client, Region location, string rgName, string template)
+        public async Task DeleteImageVersionAsync(
+            IAzure fluentClient,
+            string rgName,
+            string galleryName,
+            string imageName,
+            string imageVersionName)
+        {
+            if (fluentClient == null)
+            {
+                throw new ArgumentNullException(nameof(fluentClient));
+            }
+
+            _logger.Information("Deleting image version. rgName:{rgName}, galleryName: {galleryName}, imageName: {imageName}, imageVersionName: {imageVersionName}", rgName, galleryName, imageName, imageVersionName);
+            await fluentClient.GalleryImageVersions
+                .DeleteByGalleryImageAsync(rgName, galleryName, imageName, imageVersionName);
+            _logger.Information("Finished deleting image version. rgName:{rgName}, galleryName: {galleryName}, imageName: {imageName}, imageVersionName: {imageVersionName}", rgName, galleryName, imageName, imageVersionName);
+        }
+
+        public async Task<IGalleryImageVersion> CreateImageVersionFromCustomImageAsync(
+            IAzure fluentClient,
+            string location,
+            string rgName,
+            string galleryName,
+            string imageName,
+            string imageVersionName,
+            IVirtualMachineCustomImage customImage,
+            IDictionary<string, string> tags,
+            IList<TargetRegion> regions = null)
+        {
+            if (fluentClient == null)
+            {
+                throw new ArgumentNullException(nameof(fluentClient));
+            }
+
+            if (imageName == null)
+            {
+                throw new ArgumentNullException(nameof(imageName));
+            }
+
+            var galleryImageVersion = await GetImageVersionAsync(fluentClient, rgName, galleryName, imageName, imageVersionName);
+
+            if (galleryImageVersion != null)
+            {
+                _logger.Information("Using existing Gallery Image Version with Id {resourceId} ...", galleryImageVersion.Id);
+            }
+            else
+            {
+                _logger.Information("Creating a new verion of Shared Gallery Image. imageVersionName:{imageVersionName}, galleryName: {galleryName}, imageName: {imageName}", imageVersionName, galleryName, imageName);
+
+                using (var operation = _logger.StartTimedOperation("CreateNewGalleryImageVersionFromCustomImage"))
+                {
+                    var galleryImageVersionCratable = fluentClient.GalleryImageVersions
+                    .Define(imageVersionName)
+                    .WithExistingImage(rgName, galleryName, imageName)
+                    .WithLocation(location)
+                    .WithSourceCustomImage(customImage)
+                    .WithTags(tags);
+
+                    if (regions != null)
+                    {
+                        galleryImageVersionCratable = galleryImageVersionCratable.WithRegionAvailability(regions);
+                    }
+
+                    galleryImageVersion = await galleryImageVersionCratable.CreateAsync();
+                }
+
+                _logger.Information("Created Shared Gallery Image Verion with resourceId {resourceId}", galleryImageVersion.Id);
+            }
+
+            return galleryImageVersion;
+        }
+
+        public async Task<string> CreateImageVersionByAzureImageBuilderAsync(
+            ILiftrAzure client,
+            Region location,
+            string rgName,
+            string templateName,
+            string templateContent,
+            CancellationToken cancellationToken)
         {
             if (client == null)
             {
                 throw new ArgumentNullException(nameof(client));
             }
 
-            _logger.Information("Start creating AIB template in RG {rgName} ...", rgName);
+            _logger.Information("Start uploading AIB template in RG {rgName} ...", rgName);
             try
             {
-                var deployment = await client.CreateDeploymentAsync(location, rgName, template);
+                var deployment = await client.CreateDeploymentAsync(location, rgName, templateContent);
                 _logger.Information("Created AIB template in RG {rgName}. Deployment CorrelationId: {DeploymentCorrelationId}", rgName, deployment.CorrelationId);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed at creating AIB template. ");
+                _logger.Error(ex, "Failed at uploading AIB template. ");
                 throw;
-            }
-        }
-
-        public async Task<string> RunVMImageBuilderTemplateAsync(ILiftrAzure client, string rgName, string templateName, CancellationToken cancellationToken)
-        {
-            if (client == null)
-            {
-                throw new ArgumentNullException(nameof(client));
             }
 
             // https://github.com/Azure/azure-rest-api-specs-pr/blob/87dbc20106afce8c615113d654c14359a3356486/specification/imagebuilder/resource-manager/Microsoft.VirtualMachineImages/preview/2019-05-01-preview/imagebuilder.json#L328
             // https://github.com/Azure/azure-rest-api-specs-pr/blob/87dbc20106afce8c615113d654c14359a3356486/specification/imagebuilder/resource-manager/Microsoft.VirtualMachineImages/preview/2019-05-01-preview/examples/RunImageTemplate.json
-            using (var operation = _logger.StartTimedOperation(nameof(RunVMImageBuilderTemplateAsync)))
+            using (var operation = _logger.StartTimedOperation(nameof(CreateImageVersionByAzureImageBuilderAsync)))
             using (var handler = new AzureApiAuthHandler(client.AzureCredentials))
             using (var httpClient = new HttpClient(handler))
             {
                 _logger.Information("Run AIB template. rgName: {rgName}. templateName: {templateName}", rgName, templateName);
-                var uriBuilder = new UriBuilder("https://management.azure.com");
+                var uriBuilder = new UriBuilder(client.AzureCredentials.Environment.ResourceManagerEndpoint);
                 uriBuilder.Path =
                     $"/subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{templateName}/run";
                 uriBuilder.Query = "api-version=2019-05-01-preview";
@@ -297,7 +344,11 @@ namespace Microsoft.Liftr.ImageBuilder
             }
         }
 
-        public async Task<HttpResponseMessage> DeleteVMImageBuilderTemplateAsync(ILiftrAzure client, string rgName, string templateName, CancellationToken cancellationToken)
+        public async Task<HttpResponseMessage> DeleteVMImageBuilderTemplateAsync(
+            ILiftrAzure client,
+            string rgName,
+            string templateName,
+            CancellationToken cancellationToken)
         {
             if (client == null)
             {
@@ -309,7 +360,7 @@ namespace Microsoft.Liftr.ImageBuilder
             using (var httpClient = new HttpClient(handler))
             {
                 _logger.Information("Delete AIB template. rgName: {rgName}. templateName: {templateName}", rgName, templateName);
-                var uriBuilder = new UriBuilder("https://management.azure.com");
+                var uriBuilder = new UriBuilder(client.AzureCredentials.Environment.ResourceManagerEndpoint);
                 uriBuilder.Path =
                     $"/subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{templateName}";
                 uriBuilder.Query = "api-version=2019-05-01-preview";
@@ -328,23 +379,10 @@ namespace Microsoft.Liftr.ImageBuilder
             }
         }
 
-        private static string GetImageVersion(string imageName)
-        {
-            string digitPart = "1";
-            foreach (var c in imageName)
-            {
-                if (char.IsDigit(c))
-                {
-                    digitPart += c;
-                }
-            }
-
-            int buildVersion = int.Parse(digitPart, CultureInfo.InvariantCulture);
-            Version ver = new Version(0, 1, buildVersion);
-            return ver.ToString();
-        }
-
-        private async Task<string> WaitAsyncOperationAsync(HttpClient client, HttpResponseMessage startOperationResponse, CancellationToken cancellationToken)
+        private async Task<string> WaitAsyncOperationAsync(
+            HttpClient client,
+            HttpResponseMessage startOperationResponse,
+            CancellationToken cancellationToken)
         {
             string statusUrl = string.Empty;
 
@@ -368,5 +406,6 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
             }
         }
+        #endregion
     }
 }

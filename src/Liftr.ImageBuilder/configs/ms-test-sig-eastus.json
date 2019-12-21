@@ -1,0 +1,11 @@
+{
+  "SubscriptionId": "d21a525e-7c86-486d-a79e-a4f3622f639a",
+  "Location": "westus",
+  "ResourceGroupName": "LFTestRG",
+  "ImageGalleryName": "LiftrSBiTestSIG",
+  "RegionalReplicaCount": 1,
+  "ImageReplicationRegions": [
+    "westus",
+    "westus2"
+  ]
+}

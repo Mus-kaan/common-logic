@@ -1,0 +1,25 @@
+{
+  "Serilog": {
+    "Using": [
+      "Serilog.Sinks.Console"
+    ],
+    "MinimumLevel": {
+      "Default": "Information"
+    },
+    "WriteTo": [
+      {
+        "Name": "Console"
+      }
+    ],
+    "Enrich": [
+      "FromLogContext",
+      "WithMachineName"
+    ],
+    "Properties": {
+      "Application": "SimpleDeploy"
+    }
+  },
+  "ApplicationInsights": {
+    "InstrumentationKey": "14b26785-c70d-4a54-8656-9da973cb21b0" // 'liftr-ev2-prod-ai' in 'Liftr - TEST'
+  }
+}

@@ -4,7 +4,7 @@
   "CopyKVSecretsWithPrefix": "Nginx",
   "SecretPrefix": "NginxRP",
   "GenevaCert": {
-    "CertificateName": "GenevaAMEClientCert",
+    "CertificateName": "GenevaClientCert",
     "SubjectName": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
     "SubjectAlternativeNames": [
       "antares-mds-agent.geneva.keyvault.liftr-dev.net"

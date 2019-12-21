@@ -1,0 +1,18 @@
+{
+  "ServiceTreeName": "Sample Service Tree Name",
+  "ServiceTreeId": "c40f3dd2-9bf7-4d98-a2e3-48bcdc77dcd6",
+  "NotificationEmail": "asddsa@microsoft.com",
+  "Images": [
+    {
+      "RunnerInformation": {
+        "Location": "West US",
+        "SubscriptionId": "0e8673f6-fc02-42b2-b5ce-1b1bf81329d9",
+        "UserAssignedManagedIdentityResourceId": "/subscriptions/0e8673f6-fc02-42b2-b5ce-1b1bf81329d9/resourceGroups/ev2-wus-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ev2-prod-shell-wus-msi",
+        "UserAssignedManagedIdentityObjectId": "0e8673f6-fc02-42b2-b5ce-1b1bf81329d9"
+      },
+      "ImageName": "TestBaseImage",
+      "SourceImage": "U1804LTS",
+      "ConfigurationPath": "config.json"
+    }
+  ]
+}

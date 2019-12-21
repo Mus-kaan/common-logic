@@ -23,7 +23,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
             _output = output;
         }
 
-        [Fact]
+        [SkipInOfficialBuild]
         public async Task VerifyArtifactsCleanUpAsync()
         {
             MockTimeSource timeSource = new MockTimeSource();

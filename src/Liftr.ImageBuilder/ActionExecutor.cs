@@ -8,7 +8,6 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
@@ -27,29 +26,21 @@ namespace Microsoft.Liftr.ImageBuilder
         private readonly Serilog.ILogger _logger;
         private readonly IApplicationLifetime _appLifetime;
         private readonly BuilderCommandOptions _options;
-        private readonly EnvironmentOptions _envOptions;
         private readonly ITimeSource _timeSource;
 
         public ActionExecutor(
             Serilog.ILogger logger,
             IApplicationLifetime appLifetime,
             BuilderCommandOptions options,
-            IOptions<EnvironmentOptions> envOptions,
             ITimeSource timeSource)
         {
-            if (envOptions == null)
-            {
-                throw new ArgumentNullException(nameof(envOptions));
-            }
-
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _appLifetime = appLifetime ?? throw new ArgumentNullException(nameof(appLifetime));
             _options = options ?? throw new ArgumentNullException(nameof(options));
-            _envOptions = envOptions.Value;
             _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
 
-            LogContext.PushProperty("TargetSubscriptionId", options.SubscriptionId);
-            LogContext.PushProperty("ExeAction", options.Action);
+            LogContext.PushProperty(nameof(options.SourceImage), options.SourceImage.ToString());
+            logger.LogProcessStart();
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -59,45 +50,72 @@ namespace Microsoft.Liftr.ImageBuilder
 
             try
             {
-                if (_envOptions.ArtifactOptions == null)
+                _logger.Information("BuilderCommandOptions: {@BuilderCommandOptions}", _options);
+
+                var content = File.ReadAllText(_options.ConfigPath);
+                BuilderOptions config = content.FromJson<BuilderOptions>();
+
+                File.WriteAllText("subscription-id.txt", config.SubscriptionId.ToString());
+                if (_options.OutputSubscriptionIdOnly)
                 {
-                    throw new InvalidOperationException("Please sepcify ArtifactOptions.");
+                    _appLifetime.StopApplication();
+                    return;
                 }
 
-                if (string.IsNullOrEmpty(_options.SubscriptionId))
-                {
-                    throw new InvalidOperationException("Please sepcify a valid Subscription Id.");
-                }
+                LogContext.PushProperty(nameof(config.Tenant), config.Tenant.ToString());
+                LogContext.PushProperty(nameof(config.SubscriptionId), config.SubscriptionId.ToString());
+                LogContext.PushProperty(nameof(config.Location), config.Location.Name);
+                LogContext.PushProperty(nameof(config.ResourceGroupName), config.ResourceGroupName);
+                LogContext.PushProperty(nameof(config.ImageGalleryName), config.ImageGalleryName);
 
-                if (!File.Exists(_options.ConfigPath))
+                _logger.Information("Parsed config file: {BuilderOptions}", config);
+
+                if (!File.Exists(_options.ArtifactPath))
                 {
-                    var errMsg = $"Config json file doesn't exist at the path: {_options.ConfigPath}";
-                    _logger.Fatal(errMsg);
+                    var errMsg = $"Cannot find the artifact package in the location : {_options.ArtifactPath}";
+                    _logger.Error(errMsg);
                     throw new InvalidOperationException(errMsg);
                 }
 
-                _logger.Information("ActionExecutor Action:{ExeAction}", _options.Action);
-                _logger.Information("BuilderCommandOptions: {@BuilderCommandOptions}", _options);
-
-                if (_options.Action == ActionType.GenerateCustomizedSBI)
+                string tenantId = null;
+                string azureVMImageBuilderObjectId = null;
+                switch (config.Tenant)
                 {
-                    if (!File.Exists(_options.ArtifactPath))
-                    {
-                        var errMsg = $"Cannot find the artifact package in the location : {_options.ArtifactPath}";
-                        _logger.Error(errMsg);
-                        throw new InvalidOperationException(errMsg);
-                    }
+                    case TenantType.MS:
+                        {
+                            tenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
+                            azureVMImageBuilderObjectId = "ef511139-6170-438e-a6e1-763dc31bdf74";
+                            break;
+                        }
+
+                    case TenantType.AME:
+                        {
+                            tenantId = "33e01921-4d64-4f8c-a055-5bdaffd5e33d";
+                            azureVMImageBuilderObjectId = "cc22e29d-20f4-457d-87dd-aea1bdcce16a";
+                            break;
+                        }
+
+                    default:
+                        throw new InvalidOperationException($"Does not support tenant: {config.Tenant.ToString()}");
+                }
+
+                if (!string.IsNullOrEmpty(_options.RunnerSPNObjectId))
+                {
+                    config.ExecutorSPNObjectId = _options.RunnerSPNObjectId;
                 }
 
                 TokenCredential tokenCredential = null;
                 Func<AzureCredentials> azureCredentialsProvider = null;
                 KeyVaultClient kvClient = null;
+
                 if (!string.IsNullOrEmpty(_options.AuthFile))
                 {
                     _logger.Information("Use auth json file to authenticate against Azure.");
                     var authContract = AuthFileContract.FromFile(_options.AuthFile);
-                    kvClient = KeyVaultClientFactory.FromClientIdAndSecret(authContract.ClientId, authContract.ClientSecret);
 
+                    config.ExecutorSPNObjectId = authContract.ServicePrincipalObjectId;
+                    config.SubscriptionId = Guid.Parse(authContract.SubscriptionId);
+                    kvClient = KeyVaultClientFactory.FromClientIdAndSecret(authContract.ClientId, authContract.ClientSecret);
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory.FromFile(_options.AuthFile);
                     tokenCredential = new ClientSecretCredential(authContract.TenantId, authContract.ClientId, authContract.ClientSecret);
                 }
@@ -107,14 +125,21 @@ namespace Microsoft.Liftr.ImageBuilder
                     kvClient = KeyVaultClientFactory.FromMSI();
 
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory
-                    .FromMSI(new MSILoginInformation(MSIResourceType.VirtualMachine), AzureEnvironment.AzureGlobalCloud, _envOptions.TenantId)
-                    .WithDefaultSubscription(_options.SubscriptionId);
+                    .FromMSI(new MSILoginInformation(MSIResourceType.VirtualMachine), AzureEnvironment.AzureGlobalCloud, tenantId)
+                    .WithDefaultSubscription(config.SubscriptionId.ToString());
                     tokenCredential = new ManagedIdentityCredential();
                 }
 
-                LiftrAzureFactory azFactory = new LiftrAzureFactory(_logger, _envOptions.TenantId, _envOptions.SPNObjectId, _options.SubscriptionId, tokenCredential, azureCredentialsProvider, _envOptions.LiftrAzureOptions);
+                LiftrAzureFactory azFactory = new LiftrAzureFactory(
+                    _logger,
+                    tenantId,
+                    config.ExecutorSPNObjectId,
+                    config.SubscriptionId.ToString(),
+                    tokenCredential,
+                    azureCredentialsProvider);
 
-                _ = RunActionAsync(kvClient, azFactory, cancellationToken);
+                // fire and forget.
+                _ = RunActionAsync(azureVMImageBuilderObjectId, kvClient, config, azFactory, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -129,104 +154,34 @@ namespace Microsoft.Liftr.ImageBuilder
             return Task.CompletedTask;
         }
 
-        private async Task RunActionAsync(KeyVaultClient kvClient, LiftrAzureFactory azFactory, CancellationToken cancellationToken)
+        private async Task RunActionAsync(string azureVMImageBuilderObjectId, KeyVaultClient kvClient, BuilderOptions config, LiftrAzureFactory azFactory, CancellationToken cancellationToken)
         {
             await Task.Yield();
-            using (var operation = _logger.StartTimedOperation(_options.Action.ToString()))
+            using (var operation = _logger.StartTimedOperation("RunImageBuilder"))
             {
                 try
                 {
-                    var content = File.ReadAllText(_options.ConfigPath);
-                    GalleryOptions config = content.FromJson<GalleryOptions>();
-
-                    operation.SetContextProperty(nameof(config.PartnerName), config.PartnerName);
-                    operation.SetContextProperty(nameof(config.Environment), config.Environment.ToString());
-                    operation.SetContextProperty(nameof(config.Location), config.LocationStr);
-                    operation.SetContextProperty(nameof(config.GalleryBaseName), config.GalleryBaseName);
-
-                    _logger.Information("Parsed config file: {@config}", config);
-
-                    var namingContext = new NamingContext(config.PartnerName, config.ShortPartnerName, config.Environment, config.Location);
-
-                    var rgName = namingContext.ResourceGroupName(config.GalleryBaseName);
-                    var galleryName = namingContext.SharedImageGalleryName(config.GalleryBaseName);
-                    var storageAccountName = namingContext.StorageAccountName(config.GalleryBaseName);
-                    var kvName = namingContext.KeyVaultName(config.GalleryBaseName);
-                    ImageBuilderOptions imgOptions = new ImageBuilderOptions()
+                    var tags = new Dictionary<string, string>()
                     {
-                        ResourceGroupName = rgName,
-                        GalleryName = galleryName,
-                        ImageDefinitionName = config.ImageName,
-                        StorageAccountName = storageAccountName,
-                        Location = namingContext.Location,
-                        Tags = new Dictionary<string, string>(namingContext.Tags),
-                        ImageVersionTTLInDays = config.ImageVersionTTLInDays,
+                        [NamingContext.c_createdAtTagName] = _timeSource.UtcNow.ToZuluString(),
                     };
-                    _logger.Information("ImageBuilderOptions: {@ImageBuilderOptions}", imgOptions);
 
                     ImageBuilderOrchestrator orchestrator = new ImageBuilderOrchestrator(
+                        config,
                         azFactory,
+                        kvClient,
                         _timeSource,
                         _logger);
 
-                    if (_options.Action == ActionType.CreateOrUpdateImageGalleryResources)
-                    {
-                        await orchestrator.CreateOrUpdateInfraAsync(
-                            imgOptions,
-                            _envOptions.AzureVMImageBuilderObjectId,
-                            kvName,
-                            true);
-                    }
-                    else if (_options.Action == ActionType.CreateOrUpdateWindowsImageGalleryResources)
-                    {
-                        await orchestrator.CreateOrUpdateInfraAsync(
-                            imgOptions,
-                            _envOptions.AzureVMImageBuilderObjectId,
-                            kvName,
-                            false);
-                    }
-                    else if (_options.Action == ActionType.GenerateCustomizedSBI)
-                    {
-                        var generatedBuilderTemplate = await orchestrator.BuildCustomizedSBIAsync(
-                            imgOptions,
-                            _envOptions.ArtifactOptions,
-                            _options.ArtifactPath,
-                            _options.ArtifactBuildTag,
-                            _envOptions.BaseSBIVerion,
-                            true,
-                            cancellationToken);
+                    await orchestrator.CreateOrUpdateInfraAsync(azureVMImageBuilderObjectId, tags);
 
-                        File.WriteAllText("AIB-template.json", generatedBuilderTemplate);
-                        _logger.Information("Wrote the generated template in file: AIB-template.json");
-                    }
-                    else if (_options.Action == ActionType.GenerateCustomizedWindowsBaseImage)
-                    {
-                        var generatedBuilderTemplate = await orchestrator.BuildCustomizedSBIAsync(
-                            imgOptions,
-                            _envOptions.ArtifactOptions,
-                            _options.ArtifactPath,
-                            _options.ArtifactBuildTag,
-                            _envOptions.BaseSBIVerion,
-                            false,
-                            cancellationToken);
-
-                        File.WriteAllText("AIB-template.json", generatedBuilderTemplate);
-                        _logger.Information("Wrote the generated template in file: AIB-template.json");
-                    }
-                    else if (_options.Action == ActionType.MoveSBIToOurStorage)
-                    {
-                        var kvId = $"subscriptions/{azFactory.GenerateLiftrAzure().FluentClient.SubscriptionId}/resourceGroups/{imgOptions.ResourceGroupName}/providers/Microsoft.KeyVault/vaults/{kvName}";
-
-                        await orchestrator.MoveSBIToOurStorageAsync(
-                            imgOptions,
-                            _envOptions.SBIMoverOptions,
-                            kvId,
-                            kvClient);
-                    }
-
-                    File.WriteAllText("ImageBuilderResourceGroupName.txt", rgName);
-                    File.WriteAllText("ImageBuilderGalleryName.txt", galleryName);
-                    File.WriteAllText("ImageBuilderStorageAccountName.txt", storageAccountName);
+                    var generatedBuilderTemplate = await orchestrator.BuildCustomizedSBIAsync(
+                        _options.ImageName,
+                        _options.ImageVersionTag,
+                        _options.SourceImage,
+                        _options.ArtifactPath,
+                        tags,
+                        cancellationToken);
 
                     _logger.Information("----------------------------------------------------------------------");
                     _logger.Information("Finished successfully!");

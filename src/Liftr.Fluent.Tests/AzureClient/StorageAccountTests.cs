@@ -7,7 +7,6 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using System;
 using System.Threading.Tasks;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Fluent.Tests
@@ -21,7 +20,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [Fact]
+        [SkipInOfficialBuild]
         public async Task CanStorageAccountAsync()
         {
             // This test will normally take about 12 minutes.

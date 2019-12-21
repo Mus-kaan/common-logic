@@ -22,7 +22,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [Fact]
+        [SkipInOfficialBuild]
         public async Task CanCreateKeyVaultAsync()
         {
             using (var scope = new TestResourceGroupScope("unittest-kv-", _output))

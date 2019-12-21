@@ -5,11 +5,13 @@
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.GenericHosting;
 using Microsoft.Liftr.Logging.GenericHosting;
 using Serilog.Context;
 using System;
 using System.IO;
+using System.Reflection;
 
 namespace Microsoft.Liftr.SimpleDeploy
 {
@@ -19,6 +21,9 @@ namespace Microsoft.Liftr.SimpleDeploy
         {
             try
             {
+                var settingsContent = EmbeddedContentReader.GetContent(Assembly.GetExecutingAssembly(), "Microsoft.Liftr.SimpleDeploy.embedded-appsettings.json");
+                File.WriteAllText("embedded-appsettings.json", settingsContent);
+
                 var rollOutId = Environment.GetEnvironmentVariable("RolloutId");
                 if (!string.IsNullOrEmpty(rollOutId))
                 {
@@ -59,9 +64,22 @@ namespace Microsoft.Liftr.SimpleDeploy
                 .UseLiftrLogger()
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.Configure<EnvironmentOptions>(hostContext.Configuration.GetSection(nameof(EnvironmentOptions)));
-
                     services.AddSingleton<RunnerCommandOptions>(options);
+
+                    services.AddSingleton<HostingOptions>((sp) =>
+                    {
+                        var logger = sp.GetService<Serilog.ILogger>();
+                        try
+                        {
+                            var hostingOptions = File.ReadAllText(options.ConfigPath).FromJson<HostingOptions>();
+                            return hostingOptions;
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.Error(ex, "Failed at configuring HostingOptions");
+                            throw;
+                        }
+                    });
 
                     services.AddHostedService<ActionExecutor>();
                 })

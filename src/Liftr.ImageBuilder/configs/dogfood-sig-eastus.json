@@ -1,9 +1,0 @@
-{
-  "partnerName": "Nginx",
-  "shortPartnerName": "ngx",
-  "environment": "DogFood",
-  "locationStr": "eastus",
-  "GalleryBaseName": "sbi0915",
-  "ImageName": "NgxDataPlane",
-  "ImageVersionTTLInDays": 30
-}

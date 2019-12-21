@@ -13,15 +13,19 @@ namespace Microsoft.Liftr.SimpleDeploy
         CreateOrUpdateRegionalCompute,
         GetKeyVaultEndpoint,
         UpdateAKSPublicIpInTrafficManager,
+        OutputSubscriptionId,
     }
 
     public class RunnerCommandOptions
     {
-        [Option('a', "action", Required = true, HelpText = "Action type, e.g. CreateOrUpdateGlobal, CreateOrUpdateRegionalData, CreateOrUpdateRegionalCompute, GetKeyVaultEndpoint, UpdateAKSPublicIpInTrafficManager.")]
+        [Option('a', "action", Required = true, HelpText = "Action type, e.g. CreateOrUpdateGlobal, CreateOrUpdateRegionalData, CreateOrUpdateRegionalCompute, GetKeyVaultEndpoint, UpdateAKSPublicIpInTrafficManager, OutputSubscriptionId.")]
         public ActionType Action { get; set; }
 
         [Option('f', "file", Required = false, HelpText = "Path to the configuration file.")]
         public string ConfigPath { get; set; } = "hosting-options.json";
+
+        [Option("spnObjectId", Required = false, HelpText = "The executing spn object Id.")]
+        public string ExecutingSPNObjectId { get; set; }
 
         [Option('e', "envName", Required = true, HelpText = "Environment name.")]
         public string EnvName { get; set; }

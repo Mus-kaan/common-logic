@@ -19,7 +19,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [Fact]
+        [SkipInOfficialBuild]
         public async Task CanCreateTrafficManagerAsync()
         {
             // This test will normally take about 12 minutes.

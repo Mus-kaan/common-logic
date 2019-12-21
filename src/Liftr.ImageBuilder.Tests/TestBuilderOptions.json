@@ -1,0 +1,10 @@
+{
+  "SubscriptionId": "03b9236f-5849-43b4-8c67-4c4d5235dc10",
+  "Location": "westus",
+  "ResourceGroupName": "test-rg",
+  "ImageGalleryName": "test-sig",
+  "ImageReplicationRegions": [
+    "westus",
+    "westus2"
+  ]
+}

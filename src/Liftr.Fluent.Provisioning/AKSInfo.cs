@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ContainerService.Fluent.Models;
+using Microsoft.Liftr.Fluent.Contracts;
 using Newtonsoft.Json;
 using System;
 
@@ -10,6 +11,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 {
     public class AKSInfo
     {
+        public int AKSMachineCount { get; set; } = 3;
+
+        [JsonConverter(typeof(ContainerServiceVMSizeTypesConverter))]
+        public ContainerServiceVMSizeTypes AKSMachineType { get; set; }
+
         public string AKSRootUserName { get; set; }
 
         public string AKSSSHPublicKey { get; set; }
@@ -18,14 +24,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string AKSSPNObjectId { get; set; }
 
-        public string AKSSPNClientSecretName { get; set; }
-
-        public int AKSMachineCount { get; set; }
-
-        public string AKSMachineTypeStr { get; set; }
-
-        [JsonIgnore]
-        public ContainerServiceVMSizeTypes AKSMachineType => ContainerServiceVMSizeTypes.Parse(AKSMachineTypeStr);
+        public string AKSSPNClientSecretName { get; set; } = "AKSSPClientSecret";
 
         public void CheckValues()
         {
@@ -57,11 +56,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             if (AKSMachineCount < 3)
             {
                 throw new InvalidOperationException($"{nameof(AKSMachineCount)} should >= 3.");
-            }
-
-            if (string.IsNullOrEmpty(AKSMachineTypeStr))
-            {
-                throw new InvalidOperationException($"{nameof(AKSMachineTypeStr)} is not valid.");
             }
 
             if (AKSMachineType == null)

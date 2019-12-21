@@ -27,8 +27,21 @@ namespace Microsoft.Liftr.Fluent
             TokenCredential tokenCredential,
             Func<AzureCredentials> credentialsProvider,
             LiftrAzureOptions options = null)
+        : this(logger, tenantId, spnObjectId, subscriptionId, tokenCredential, credentialsProvider, options, checkSpn: true)
         {
-            if (string.IsNullOrEmpty(spnObjectId))
+        }
+
+        private LiftrAzureFactory(
+            ILogger logger,
+            string tenantId,
+            string spnObjectId,
+            string subscriptionId,
+            TokenCredential tokenCredential,
+            Func<AzureCredentials> credentialsProvider,
+            LiftrAzureOptions options = null,
+            bool checkSpn = true)
+        {
+            if (checkSpn && string.IsNullOrEmpty(spnObjectId))
             {
                 throw new ArgumentNullException(nameof(spnObjectId));
             }

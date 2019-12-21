@@ -11,6 +11,6 @@ namespace Microsoft.Liftr.SimpleDeploy
 {
     public static class SimpleDeployExtension
     {
-        public static Func<LiftrAzureFactory, KeyVaultClient, RunnerCommandOptions, EnvironmentOptions, Serilog.ILogger, Task> AfterRunAsync { get; set; }
+        public static Func<LiftrAzureFactory, KeyVaultClient, RunnerCommandOptions, HostingOptions, Serilog.ILogger, Task> AfterRunAsync { get; set; }
     }
 }

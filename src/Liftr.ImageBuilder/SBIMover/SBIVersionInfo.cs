@@ -2,16 +2,14 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Microsoft.Liftr.ImageBuilder
+namespace Microsoft.Liftr.SBI.Mover
 {
-    public class SBIMoverOptions
+    public class SBIVersionInfo
     {
-        public IEnumerable<string> Versions { get; set; }
-
-        public string Region { get; set; }
-
-        public string SBIContainerName { get; set; } = "sbi-source-images";
+        [JsonProperty(PropertyName = "vhds")]
+        public Dictionary<string, string> VHDS { get; set; }
     }
 }

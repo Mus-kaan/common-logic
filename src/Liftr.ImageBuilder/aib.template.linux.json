@@ -9,10 +9,7 @@
       "location": "WILL_BE_REPLACED westus",
       "dependsOn": [],
       "properties": {
-        "source": {
-          "type": "SharedImageVersion",
-          "imageVersionId": "WILL_BE_REPLACED /subscriptions/0a42ab2e-d069-4b1a-930a-6714872ee80a/resourceGroups/SecureBaseImage/providers/Microsoft.Compute/galleries/SecureBaseImage/images/U1804LTS/versions/0.23677.19267"
-        },
+        "source": "SOURCE_IMG_PLACEHOLDER",
         "customize": [
           {
             "type": "Shell",
@@ -43,16 +40,13 @@
           {
             "type": "SharedImage",
             "galleryImageId": "WILL_BE_REPLACED /subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/5e-image-builder-wus-rg/providers/Microsoft.Compute/galleries/wuwengSharedImageGalleryWUS/images/ubuntu1804images",
-            "runOutputName": "liftr-data-palne-sbi",
+            "runOutputName": "liftr-linux-base-image",
             "artifactTags": {
               "source": "azureVmImageBuilder",
               "baseOS": "ubuntu1804",
               "srcSBIVersion": "0.23677.19267"
             },
-            "replicationRegions": [
-              "westus",
-              "eastus"
-            ]
+            "replicationRegions": [ "REPLICATION_REGIONS_PLACEHOLDER" ]
           }
         ]
       }

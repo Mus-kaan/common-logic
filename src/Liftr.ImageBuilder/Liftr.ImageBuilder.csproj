@@ -10,8 +10,8 @@
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="$(PackageVersion_Azure_Identity)" />
     <PackageReference Include="Azure.Storage.Blobs" Version="$(PackageVersion_Azure_Storage_Blobs)" />
-    <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="$(PackageVersion_Microsoft_Azure_Storage_Blob)" />
     <PackageReference Include="CommandLineParser" Version="$(PackageVersion_CommandLineParser)" />
+    <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="$(PackageVersion_Microsoft_Azure_Storage_Blob)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
@@ -20,19 +20,16 @@
     <ProjectReference Include="..\Liftr.Logging.GenericHosting\Liftr.Logging.GenericHosting.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="*.json">
+    <EmbeddedResource Include="aib.template.linux.json" />
+    <EmbeddedResource Include="aib.template.windows.json" />
+    <EmbeddedResource Include="embedded-appsettings.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="configs\**\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <Content Include="configs\**\*">
+    <None Update="*.auth.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="aib.template.base.json" />
-    <None Remove="aibWindows.template.base.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="aib.template.base.json" />
-    <EmbeddedResource Include="aibWindows.template.base.json" />
+    </None>
   </ItemGroup>
 </Project>

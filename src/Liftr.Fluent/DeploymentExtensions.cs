@@ -19,7 +19,7 @@ namespace Microsoft.Liftr.Fluent
             using (var handler = new AzureApiAuthHandler(credentials))
             using (var httpClient = new HttpClient(handler))
             {
-                var uriBuilder = new UriBuilder("https://management.azure.com");
+                var uriBuilder = new UriBuilder(credentials.Environment.ResourceManagerEndpoint);
                 uriBuilder.Path =
                     $"subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/Microsoft.Resources/deployments/{deploymentName}";
                 uriBuilder.Query = "api-version=2018-05-01";

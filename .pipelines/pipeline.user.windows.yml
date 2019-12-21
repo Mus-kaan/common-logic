@@ -38,7 +38,7 @@ restore:
       
 build:
   commands:
-    - !!buildcommand
+    - !!defaultcommand
       name: 'Build Windows'
       command: 'run-windows-build.cmd'
 

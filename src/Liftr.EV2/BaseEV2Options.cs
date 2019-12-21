@@ -2,14 +2,16 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Newtonsoft.Json;
-using System.Collections.Generic;
+using System;
 
-namespace Microsoft.Liftr.ImageBuilder
+namespace Microsoft.Liftr.EV2
 {
-    public class SBIVersionInfo
+    public abstract class BaseEV2Options
     {
-        [JsonProperty(PropertyName = "vhds")]
-        public Dictionary<string, string> VHDS { get; set; }
+        public string ServiceTreeName { get; set; }
+
+        public Guid ServiceTreeId { get; set; }
+
+        public string NotificationEmail { get; set; }
     }
 }

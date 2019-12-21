@@ -1,12 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
     <IsPackable>true</IsPackable>
     <AssemblyName>Microsoft.Liftr.Tests.Common</AssemblyName>
     <RootNamespace>Microsoft.Liftr.Tests.Common</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="xunit" Version="$(PackageVersion_xunit)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(PackageVersion_xunit_runner_visualstudio)" />
     <PackageReference Include="Serilog.Sinks.Xunit2" Version="$(PackageVersion_Serilog_Sinks_Xunit2)" />
     <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="$(PackageVersion_Serilog_Sinks_ApplicationInsights)" />
     <PackageReference Include="Microsoft.Azure.Storage.Queue" Version="$(PackageVersion_Microsoft_Azure_Storage_Queue)" />

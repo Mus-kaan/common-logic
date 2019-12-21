@@ -6,11 +6,13 @@ using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.GenericHosting;
 using Microsoft.Liftr.Logging.GenericHosting;
 using Serilog.Context;
 using System;
 using System.IO;
+using System.Reflection;
 
 namespace Microsoft.Liftr.ImageBuilder
 {
@@ -20,6 +22,9 @@ namespace Microsoft.Liftr.ImageBuilder
         {
             try
             {
+                var settingsContent = EmbeddedContentReader.GetContent(Assembly.GetExecutingAssembly(), "Microsoft.Liftr.ImageBuilder.embedded-appsettings.json");
+                File.WriteAllText("embedded-appsettings.json", settingsContent);
+
                 var rollOutId = Environment.GetEnvironmentVariable("RolloutId");
                 if (!string.IsNullOrEmpty(rollOutId))
                 {
@@ -48,11 +53,6 @@ namespace Microsoft.Liftr.ImageBuilder
                 throw new ArgumentNullException(nameof(options));
             }
 
-            if (string.IsNullOrEmpty(options.SubscriptionId))
-            {
-                throw new InvalidOperationException("Please sepcify a valid Subscription Id.");
-            }
-
             if (!File.Exists(options.ConfigPath))
             {
                 var errMsg = $"Config json file doesn't exist at the path: {options.ConfigPath}";
@@ -65,8 +65,6 @@ namespace Microsoft.Liftr.ImageBuilder
                 .UseLiftrLogger()
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.Configure<EnvironmentOptions>(hostContext.Configuration.GetSection(nameof(EnvironmentOptions)));
-
                     services.AddSingleton<BuilderCommandOptions>(options);
 
                     services.AddSingleton<ITimeSource, SystemTimeSource>();

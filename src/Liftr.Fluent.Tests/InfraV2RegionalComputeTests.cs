@@ -24,7 +24,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [Fact]
+        [SkipInOfficialBuild]
         public async Task VerifyRegionalComputeResourceCreationAsync()
         {
             var context = new NamingContext("IncrediBuild", "ib", EnvironmentType.Test, Region.USEast);

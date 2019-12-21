@@ -68,15 +68,12 @@ if [ "$ProvisionAction" = "UpdateAKSPublicIpInTrafficManager" ]; then
     fi
 fi
 
-echo "Use configuration file from path: $ConfigFilePath"
+if [ "$RunnerSPNObjectId" = "" ]; then
+    echo "Please set the object Id of the executing service principal using variable 'RunnerSPNObjectId' ..."
+    exit 1 # terminate and indicate error
+fi
 
 cd bin
-echo "----------------------------------------------------------------------------------------------"
-echo "Configration file content: "
-echo
-cat $ConfigFilePath
-echo
-echo "----------------------------------------------------------------------------------------------"
 
 if [ "$AKSSvcLabel" = "" ]; then
     dotnet Deployment.Runner.dll \
@@ -84,6 +81,7 @@ if [ "$AKSSvcLabel" = "" ]; then
     -f "$ConfigFilePath" \
     -e "$EnvName" \
     -r "$Region" \
+    --spnObjectId "$RunnerSPNObjectId" \
     --activeKey "$ActiveKey"
 else
     dotnet Deployment.Runner.dll \
@@ -92,6 +90,7 @@ else
     -e "$EnvName" \
     -r "$Region" \
     -l "$AKSSvcLabel" \
+    --spnObjectId "$RunnerSPNObjectId" \
     --activeKey "$ActiveKey"
 fi
 

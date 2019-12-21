@@ -20,7 +20,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [Fact]
+        [SkipInOfficialBuild]
         public async Task CanCreateAksAsync()
         {
             using (var scope = new TestResourceGroupScope("unittest-aks-", _output))

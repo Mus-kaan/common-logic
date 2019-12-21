@@ -3,13 +3,12 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Contracts;
-using Microsoft.Liftr.Fluent.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.ImageBuilder.Tests
@@ -23,49 +22,40 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
             _output = output;
         }
 
-        [Fact]
+        [SkipInOfficialBuild]
         public async Task VerifyWindowsBaseImageGenerationAsync()
         {
             MockTimeSource timeSource = new MockTimeSource();
-            var namingContext = new NamingContext("ImageBuilder", "www", EnvironmentType.Test, TestCommon.Location);
-            TestCommon.AddCommonTags(namingContext.Tags);
+            var tags = new Dictionary<string, string>();
+            TestCommon.AddCommonTags(tags);
             var baseName = SdkContext.RandomResourceName(string.Empty, 20).Substring(0, 8);
 
             using (var scope = new TestResourceGroupScope(baseName, _output))
             {
-                var orchestrator = new ImageBuilderOrchestrator(scope.AzFactory, timeSource, scope.Logger);
-
-                ImageBuilderOptions imgOptions = new ImageBuilderOptions()
+                var options = new BuilderOptions()
                 {
-                    ResourceGroupName = namingContext.ResourceGroupName(baseName),
-                    GalleryName = namingContext.SharedImageGalleryName(baseName),
-                    ImageDefinitionName = "TestImageDefinition",
-                    StorageAccountName = namingContext.StorageAccountName(baseName),
-                    Location = namingContext.Location,
-                    Tags = new Dictionary<string, string>(namingContext.Tags),
-                    ImageVersionTTLInDays = 15,
+                    SubscriptionId = new Guid(TestCredentials.SubscriptionId),
+                    Location = TestCommon.Location,
+                    ResourceGroupName = scope.ResourceGroupName,
+                    ImageGalleryName = "testsig" + baseName,
+                    ImageReplicationRegions = new List<Region>()
+                    {
+                        Region.USEast,
+                    },
                 };
 
-                ArtifactStoreOptions artifactOptions = new ArtifactStoreOptions()
-                {
-                    ContainerName = "artifacts",
-                };
+                var orchestrator = new ImageBuilderOrchestrator(options, scope.AzFactory, TestCredentials.KeyVaultClient, timeSource, scope.Logger);
 
                 try
                 {
-                    await orchestrator.CreateOrUpdateInfraAsync(
-                                    imgOptions,
-                                    TestCredentials.AzureVMImageBuilderObjectIdAME,
-                                    namingContext.KeyVaultName(baseName),
-                                    false);
+                    await orchestrator.CreateOrUpdateInfraAsync(TestCredentials.AzureVMImageBuilderObjectIdAME, tags);
 
                     var result = await orchestrator.BuildCustomizedSBIAsync(
-                                    imgOptions,
-                                    artifactOptions,
-                                    "packer-windows.tar.gz",
+                                    "img" + baseName,
                                     "0.9.01018.0002-3678b756",
-                                    "2019.0.20190214",
-                                    false,
+                                    SourceImageType.WindowsServer2019DatacenterCore,
+                                    "packer-windows.tar.gz",
+                                    tags,
                                     CancellationToken.None);
                 }
                 catch (Exception ex)

@@ -17,12 +17,15 @@ echo Nuget version: %NUGET_VERSION%
 
 echo "Remove old contentFiles"
 rmdir /s /q %~dp0tools\pack-deployment\contentFiles
+rmdir /s /q %~dp0tools\pack-img-builder-files\contentFiles
 
 echo "Copy deployment folder to contentFiles"
 REM https://devblogs.microsoft.com/nuget/nuget-contentFiles-demystified/
 xcopy %~dp0deployment %~dp0tools\pack-deployment\contentFiles\any\any\deployment\ /s/h/e/k/f/c
+xcopy %~dp0image-builder %~dp0tools\pack-img-builder-files\contentFiles\any\any\supporting-files\ /s/h/e/k/f/c
 
-%~dp0tools\pack-deployment\.nuget\nuget.exe pack %~dp0tools\pack-deployment\Liftr.Deployment.nuspec -Version %NUGET_VERSION% -OutputDirectory %~dp0nupkgs
+%~dp0tools\.nuget\nuget.exe pack %~dp0tools\pack-deployment\Liftr.Deployment.nuspec -Version %NUGET_VERSION% -OutputDirectory %~dp0nupkgs
+%~dp0tools\.nuget\nuget.exe pack %~dp0tools\pack-img-builder-files\Liftr.ImageBuilder.Scripts.nuspec -Version %NUGET_VERSION% -OutputDirectory %~dp0nupkgs
 
 echo "Finished packing nugets successfully"
 goto :EOF

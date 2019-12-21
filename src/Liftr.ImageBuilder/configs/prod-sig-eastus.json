@@ -1,9 +1,0 @@
-{
-  "partnerName": "Nginx",
-  "shortPartnerName": "ngx",
-  "environment": "Production",
-  "locationStr": "eastus",
-  "GalleryBaseName": "sbi1015",
-  "ImageName": "NgxDataPlane",
-  "ImageVersionTTLInDays": 60
-}

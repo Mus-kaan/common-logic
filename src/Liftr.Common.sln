@@ -99,7 +99,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.EV2", "Liftr.EV2\Lift
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deployment.Runner", "Deployment.Runner\Deployment.Runner.csproj", "{F8A62179-A595-493D-8AA9-D52CC0736B1B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.EV2.Tests", "Liftr.EV2.Tests\Liftr.EV2.Tests.csproj", "{FC1079A0-2DC6-4276-BC8A-8487B830C483}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.EV2.Tests", "Liftr.EV2.Tests\Liftr.EV2.Tests.csproj", "{FC1079A0-2DC6-4276-BC8A-8487B830C483}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

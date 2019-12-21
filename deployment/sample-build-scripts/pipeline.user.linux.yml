@@ -76,7 +76,7 @@ package:
       name: 'Pack EV2 base image shell extension'
       command: 'build/liftr-run-linux-pack-baseimage.sh'
       artifacts:
-        - from: 'out-base-image'
+        - from: 'out-ev2-base-image'
           to: 'ev2-base-image'
           include:
             - '**/*'

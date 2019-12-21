@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -13,24 +14,25 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
         [Fact]
         public void ImageBuilderOptionsJsonTest()
         {
-            var original = new ImageBuilderOptions()
+            var options = new BuilderOptions()
             {
+                SubscriptionId = new Guid(TestCredentials.SubscriptionId),
+                Location = TestCommon.Location,
                 ResourceGroupName = "testRGName",
-                GalleryName = "galleryName",
-                ImageDefinitionName = "imgDef",
-                StorageAccountName = "storageAccountName",
-                Location = Region.AsiaEast,
-                ImageVersionTTLInDays = 10,
+                ImageGalleryName = "testsig",
+                ImageReplicationRegions = new List<Region>()
+                    {
+                        Region.USEast,
+                    },
             };
 
-            original.Tags = new Dictionary<string, string>()
-            {
-                ["asdasd"] = "asdasd",
-                ["sdfsdf"] = "fdgdf",
-            };
+            options.CheckValid();
 
-            var originalText = original.ToJson();
-            var recovered = originalText.FromJson<ImageBuilderOptions>();
+            var originalText = options.ToJson();
+            var recovered = originalText.FromJson<BuilderOptions>();
+
+            recovered.CheckValid();
+
             var recoveredText = recovered.ToJson();
 
             Assert.Equal(originalText, recoveredText);

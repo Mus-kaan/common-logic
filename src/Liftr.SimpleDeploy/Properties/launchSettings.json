@@ -28,6 +28,13 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
+    "0_output-subscription": {
+      "commandName": "Project",
+      "commandLineArgs": "-a OutputSubscriptionId -e Test -r global --authFile my.azureauth-ms.auth.json",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
     "ut_1_global-resource": {
       "commandName": "Project",
       "commandLineArgs": "-a CreateOrUpdateGlobal -f unit-test-hosting-options.json -e Test -r global --authFile liftr-unit-test-20191001-ame.auth.json",

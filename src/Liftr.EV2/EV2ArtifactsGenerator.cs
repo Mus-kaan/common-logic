@@ -19,7 +19,7 @@ namespace Microsoft.Liftr.EV2
             _logger = logger;
         }
 
-        public void GenerateArtifacts(EV2Options ev2Options, string outputDirectory)
+        public void GenerateArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
         {
             if (ev2Options == null)
             {
@@ -29,22 +29,78 @@ namespace Microsoft.Liftr.EV2
             try
             {
                 ev2Options.CheckValid();
+
+                Directory.CreateDirectory(outputDirectory);
+
+                GenerateGlobalArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_GlobalFolderName));
+                GenerateRegionDataArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_RegionalDataFolderName));
+                GenerateRegionComputeArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_RegionalComputeFolderName));
+                GenerateAKSAppArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_ApplicationFolderName));
+
+                _logger.Information("Generated EV2 rollout artifacts and stored in directory: {outputDirectory}", outputDirectory);
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, ex.Message);
                 throw;
             }
-
-            Directory.CreateDirectory(outputDirectory);
-
-            GenerateGlobalArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_GlobalFolderName));
-            GenerateRegionDataArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_RegionalDataFolderName));
-            GenerateRegionComputeArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_RegionalComputeFolderName));
-            GenerateAKSAppArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_ApplicationFolderName));
         }
 
-        public void GenerateGlobalArtifacts(EV2Options ev2Options, string outputDirectory)
+        public void GenerateImageBuilderArtifacts(EV2ImageBuilderOptions imageBuilderOptions, string outputDirectory)
+        {
+            if (imageBuilderOptions == null)
+            {
+                throw new ArgumentNullException(nameof(imageBuilderOptions));
+            }
+
+            try
+            {
+                imageBuilderOptions.CheckValid();
+
+                outputDirectory = Path.Combine(outputDirectory, ArtifactConstants.c_ImageBuilderFolderName);
+                Directory.CreateDirectory(outputDirectory);
+
+                var regions = new List<string>() { "Global" };
+
+                foreach (var image in imageBuilderOptions.Images)
+                {
+                    var serviceModel = AssembleServiceModel(
+                        "Production", // hard code the env name for image builder artifacts.
+                        regions,
+                        imageBuilderOptions.ServiceTreeName,
+                        imageBuilderOptions.ServiceTreeId,
+                        image.RunnerInformation.Location,
+                        image.RunnerInformation.SubscriptionId,
+                        (_, region) => ArtifactConstants.RolloutParametersFileName(image.ImageName));
+
+                    File.WriteAllText(Path.Combine(outputDirectory, ArtifactConstants.ServiceModelFileName(image.ImageName)), serviceModel.ToJsonString(indented: true));
+
+                    var rollputSpec = AssembleRolloutSpec(
+                        image.ImageName,
+                        "global",
+                        description: $"[{image.ImageName}] Run Liftr Image Builder to generate base image in Shared Image Gallery",
+                        imageBuilderOptions.NotificationEmail);
+                    File.WriteAllText(Path.Combine(outputDirectory, ArtifactConstants.RolloutSpecFileName(image.ImageName)), rollputSpec.ToJsonString(indented: true));
+
+                    var parameterFileName = ArtifactConstants.RolloutParametersFileName(image.ImageName);
+                    var parameterFilePath = Path.Combine(outputDirectory, parameterFileName);
+                    var parameters = AssembleImageBuilderRolloutParameters(
+                        image,
+                        "1_BuildSharedImageGalleryImage.sh",
+                        image.RunnerInformation.UserAssignedManagedIdentityResourceId);
+                    File.WriteAllText(parameterFilePath, parameters.ToJsonString(indented: true));
+                }
+
+                _logger.Information("Generated EV2 image builder artifacts and stored in directory: {outputDirectory}", outputDirectory);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, ex.Message);
+                throw;
+            }
+        }
+
+        private static void GenerateGlobalArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
         {
             if (ev2Options == null)
             {
@@ -70,11 +126,9 @@ namespace Microsoft.Liftr.EV2
                     description: "Create or update global resources",
                     entryScript: "1_ManageGlobalResources.sh");
             }
-
-            _logger.Information("Generated EV2 global deployment artifacts and stored in directory: {outputDirectory}", outputDirectory);
         }
 
-        public void GenerateRegionDataArtifacts(EV2Options ev2Options, string outputDirectory)
+        private static void GenerateRegionDataArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
         {
             if (ev2Options == null)
             {
@@ -90,11 +144,9 @@ namespace Microsoft.Liftr.EV2
                     description: "Create or update regional data resources",
                     entryScript: "2_ManageRegionalData.sh");
             }
-
-            _logger.Information("Generated EV2 regional data deployment artifacts and stored in directory: {outputDirectory}", outputDirectory);
         }
 
-        public void GenerateRegionComputeArtifacts(EV2Options ev2Options, string outputDirectory)
+        private static void GenerateRegionComputeArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
         {
             if (ev2Options == null)
             {
@@ -110,11 +162,9 @@ namespace Microsoft.Liftr.EV2
                     description: "Create or update regional AKS and deploy infrastructure AKS applications (Geneva, Pod identity, Nginx Ingress)",
                     entryScript: "3_ManageRegionalCompute.sh");
             }
-
-            _logger.Information("Generated EV2 regional compute deployment artifacts and stored in directory: {outputDirectory}", outputDirectory);
         }
 
-        public void GenerateAKSAppArtifacts(EV2Options ev2Options, string outputDirectory)
+        private static void GenerateAKSAppArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
         {
             if (ev2Options == null)
             {
@@ -130,12 +180,10 @@ namespace Microsoft.Liftr.EV2
                     description: "Deploy AKS applications using helm charts",
                     entryScript: "4_DeployAKSApp.sh");
             }
-
-            _logger.Information("Generated EV2 AKS application deployment artifacts and stored in directory: {outputDirectory}", outputDirectory);
         }
 
-        public void GenerateEnvironmentArtifacts(
-            EV2Options ev2Options,
+        private static void GenerateEnvironmentArtifacts(
+            EV2HostingOptions ev2Options,
             TargetEnvironment targetEnvironment,
             string outputDirectory,
             string description,
@@ -155,15 +203,14 @@ namespace Microsoft.Liftr.EV2
 
             var envName = targetEnvironment.EnvironmentName.ToString();
 
-            _logger.Information("Generating EV2 artifacts for environment {envName} and regions: {@regions}", envName, targetEnvironment.Regions);
-
             var serviceModel = AssembleServiceModel(
                 envName,
                 targetEnvironment.Regions,
                 ev2Options.ServiceTreeName,
                 ev2Options.ServiceTreeId,
                 targetEnvironment.RunnerInformation.Location,
-                targetEnvironment.RunnerInformation.SubscriptionId);
+                targetEnvironment.RunnerInformation.SubscriptionId,
+                ArtifactConstants.RolloutParametersPath);
             File.WriteAllText(Path.Combine(outputDirectory, ArtifactConstants.ServiceModelFileName(targetEnvironment.EnvironmentName)), serviceModel.ToJsonString(indented: true));
 
             foreach (var region in targetEnvironment.Regions)
@@ -184,18 +231,20 @@ namespace Microsoft.Liftr.EV2
                     envName,
                     region,
                     entryScript,
-                    targetEnvironment.RunnerInformation.UserAssignedManagedIdentityResourceId);
+                    targetEnvironment.RunnerInformation.UserAssignedManagedIdentityResourceId,
+                    targetEnvironment.RunnerInformation.UserAssignedManagedIdentityObjectId.ToString());
                 File.WriteAllText(parameterFilePath, parameters.ToJsonString(indented: true));
             }
         }
 
-        public static ServiceModel AssembleServiceModel(
+        private static ServiceModel AssembleServiceModel(
             string envName,
             IEnumerable<string> regions,
             string serviceTreeName,
             Guid serviceTreeId,
             string ev2ShellLocation,
-            Guid ev2ShellSubscriptionId)
+            Guid ev2ShellSubscriptionId,
+            Func<string, string, string> rolloutParameterPathGenerator)
         {
             regions = regions.Select(r => ToSimpleName(r));
 
@@ -251,7 +300,7 @@ namespace Microsoft.Liftr.EV2
                             {
                                 Name = "ShellExt" + r,
                                 InstanceOf = "ShellExtension",
-                                RolloutParametersPath = ArtifactConstants.RolloutParametersPath(envName, r),
+                                RolloutParametersPath = rolloutParameterPathGenerator(envName, r),
                             }),
                         },
                     },
@@ -260,7 +309,7 @@ namespace Microsoft.Liftr.EV2
             return serviceModel;
         }
 
-        public static RolloutSpecification AssembleRolloutSpec(
+        private static RolloutSpecification AssembleRolloutSpec(
             string envName,
             string region,
             string description,
@@ -306,11 +355,12 @@ namespace Microsoft.Liftr.EV2
             return spec;
         }
 
-        public static RolloutParameters AssemblyRolloutParameters(
+        private static RolloutParameters AssemblyRolloutParameters(
             string envName,
             string region,
             string entryScript,
-            string runnerManagedIdentityId)
+            string runnerManagedIdentityId,
+            string runnerManagedIdentityObjectId)
         {
             if (string.IsNullOrEmpty(envName))
             {
@@ -332,7 +382,7 @@ namespace Microsoft.Liftr.EV2
                         Type = ArtifactConstants.c_EV2ShellExtensionType,
                         Properties = new ShellProperties()
                         {
-                            MaxExecutionTime = "PT70M",
+                            MaxExecutionTime = "PT40M",
                         },
                         Package = new ShellPackage()
                         {
@@ -373,6 +423,85 @@ namespace Microsoft.Liftr.EV2
                                 {
                                     Name = "GenevaParametersFile",
                                     Value = $"geneva.{ToSimpleName(envName)}.values.yaml",
+                                },
+                                new ShellEnvironmentVariable()
+                                {
+                                    Name = "RunnerSPNObjectId",
+                                    Value = runnerManagedIdentityObjectId,
+                                },
+                            },
+                            Identity = new ShellIdentity()
+                            {
+                                Type = "UserAssigned",
+                                UserAssignedIdentities = new List<string>()
+                                {
+                                    runnerManagedIdentityId,
+                                },
+                            },
+                        },
+                    },
+                },
+            };
+
+            return parameters;
+        }
+
+        private static RolloutParameters AssembleImageBuilderRolloutParameters(
+            ImageOptions options,
+            string entryScript,
+            string runnerManagedIdentityId)
+        {
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            var parameters = new RolloutParameters()
+            {
+                ShellExtensions = new List<Shell>()
+                {
+                    new Shell()
+                    {
+                        Name = "liftr-shell-action",
+                        Type = ArtifactConstants.c_EV2ShellExtensionType,
+                        Properties = new ShellProperties()
+                        {
+                            MaxExecutionTime = "PT120M",
+                        },
+                        Package = new ShellPackage()
+                        {
+                            Reference = new ParameterReference()
+                            {
+                                Path = "ev2-extension.tar",
+                            },
+                        },
+                        Launch = new ShellLaunch()
+                        {
+                            Command = new List<string>()
+                            {
+                                entryScript,
+                            },
+                            EnvironmentVariables = new List<ShellEnvironmentVariable>()
+                            {
+                                new ShellEnvironmentVariable()
+                                {
+                                    Name = "ImageName",
+                                    Value = options.ImageName,
+                                },
+                                new ShellEnvironmentVariable()
+                                {
+                                    Name = "SourceImage",
+                                    Value = options.SourceImage.ToString(),
+                                },
+                                new ShellEnvironmentVariable()
+                                {
+                                    Name = "ConfigurationPath",
+                                    Value = options.ConfigurationPath,
+                                },
+                                new ShellEnvironmentVariable()
+                                {
+                                    Name = "RunnerSPNObjectId",
+                                    Value = options.RunnerInformation.UserAssignedManagedIdentityObjectId.ToString(),
                                 },
                             },
                             Identity = new ShellIdentity()

@@ -14,7 +14,7 @@ echo "Source root folder: $SrcRoot"
 echo "CDP_FILE_VERSION_NUMERIC : $CDP_FILE_VERSION_NUMERIC"
 echo "CDP_PACKAGE_VERSION_NUMERIC: $CDP_PACKAGE_VERSION_NUMERIC"
 
-ServiceChartName="aks-rp-web-svc"
+ServiceChartName="custom-aks-app"
 
 Helm="$SrcRoot/buildtools/helm/linux-amd64/helm"
 GenerateDockerImageMetadataDir="$SrcRoot/.docker-images"
@@ -48,7 +48,7 @@ else
     # Use a fake version when building locally.
     ChartVersion="9.9.9999-localdev"
 fi
-echo "Chart version as: $ChartVersion"
+echo "Chart version is: $ChartVersion"
 
 # Create directories.
 mkdir --parent "$ChartsOutDir"

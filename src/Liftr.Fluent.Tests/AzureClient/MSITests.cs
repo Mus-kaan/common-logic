@@ -18,7 +18,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [Fact]
+        [SkipInOfficialBuild]
         public async Task CanCreateAsync()
         {
             using (var scope = new TestResourceGroupScope("unittest-msi-", _output))

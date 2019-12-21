@@ -37,7 +37,8 @@ namespace Microsoft.Liftr.GenericHosting
             return builder.ConfigureAppConfiguration((context, config) =>
             {
                 config.SetBasePath(Environment.CurrentDirectory);
-                config.AddJsonFile("appsettings.json", optional: false);
+                config.AddJsonFile("embedded-appsettings.json", optional: true);
+                config.AddJsonFile("appsettings.json", optional: true);
                 config.AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true);
                 if (string.IsNullOrEmpty(environmentVariablePrefix))
                 {

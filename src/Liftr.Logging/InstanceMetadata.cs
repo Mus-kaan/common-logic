@@ -49,9 +49,9 @@ namespace Microsoft.Liftr.Logging
                     logger.Debug("Metadata content: instanceMetadata: {@instanceMetadata}", instanceMetadata);
                     return instanceMetadata;
                 }
-                catch (Exception ex)
+                catch
                 {
-                    logger.Warning(ex, "Call to Azure Instance Metadata Service failed. This is excepted in non-Azure environments.");
+                    logger.Information("Call to Azure Instance Metadata Service failed. This is excepted in non-Azure environments.");
                     return null;
                 }
             }

@@ -8,14 +8,8 @@ using System.Linq;
 
 namespace Microsoft.Liftr.EV2
 {
-    public class EV2Options
+    public class EV2HostingOptions : BaseEV2Options
     {
-        public string ServiceTreeName { get; set; }
-
-        public Guid ServiceTreeId { get; set; }
-
-        public string NotificationEmail { get; set; }
-
         public IEnumerable<TargetEnvironment> TargetEnvironments { get; set; }
 
         public void CheckValid()
@@ -28,17 +22,13 @@ namespace Microsoft.Liftr.EV2
 
             foreach (var targetEnvironment in TargetEnvironments)
             {
-                if (targetEnvironment.Regions == null || !targetEnvironment.Regions.Any())
-                {
-                    var ex = new InvalidOperationException($"Please make sure {nameof(targetEnvironment.Regions)} is not empty for environment {targetEnvironment.EnvironmentName}.");
-                    throw ex;
-                }
+                targetEnvironment.CheckValid();
             }
         }
 
-        public EV2Options Clone()
+        public EV2HostingOptions Clone()
         {
-            return this.ToJson().FromJson<EV2Options>();
+            return this.ToJson().FromJson<EV2HostingOptions>();
         }
     }
 
@@ -46,17 +36,25 @@ namespace Microsoft.Liftr.EV2
     {
         public EnvironmentType EnvironmentName { get; set; }
 
-        public ReleaseRunner RunnerInformation { get; set; }
+        public EV2RunnerInfomation RunnerInformation { get; set; }
 
         public IEnumerable<string> Regions { get; set; }
-    }
 
-    public class ReleaseRunner
-    {
-        public string Location { get; set; }
+        public void CheckValid()
+        {
+            if (Regions == null || !Regions.Any())
+            {
+                var ex = new InvalidOperationException($"Please make sure {nameof(Regions)} is not empty for environment {EnvironmentName}.");
+                throw ex;
+            }
 
-        public Guid SubscriptionId { get; set; }
+            if (RunnerInformation == null)
+            {
+                var ex = new InvalidOperationException($"Please make sure '{nameof(RunnerInformation)}' is not empty for environment {EnvironmentName}.");
+                throw ex;
+            }
 
-        public string UserAssignedManagedIdentityResourceId { get; set; }
+            RunnerInformation.CheckValid();
+        }
     }
 }

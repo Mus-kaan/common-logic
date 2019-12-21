@@ -8,12 +8,10 @@
     <AssemblyName>Microsoft.Liftr.SimpleDeploy</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="sample-*.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="configs\sample-*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="sample-hosting-options.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="embedded-appsettings.json" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="$(PackageVersion_CommandLineParser)" />
@@ -24,9 +22,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="*.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="configs\**\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

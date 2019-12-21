@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "resources": [
+    {
+      "type": "Microsoft.VirtualMachineImages/imageTemplates",
+      "apiVersion": "2019-05-01-preview",
+      "name": "WILL_BE_CHANGED 0.2.0123",
+      "location": "WILL_BE_REPLACED eastus",
+      "dependsOn": [],
+      "properties": {
+        "source": "SOURCE_IMG_PLACEHOLDER",
+        "customize": [
+          {
+            "type": "PowerShell",
+            "name": "CustomizeWindowsVm",
+            "inline": [
+              "mkdir c:\\packer-tmp",
+              "mkdir c:\\packer-tmp\\packer-files",
+              "cd c:\\packer-tmp",
+              "Invoke-WebRequest 'ARTIFACT_URI_PLACEHOLDER' -OutFile c:\\packer-tmp\\packer-files.tar.gz",
+              "tar -C 'c:\\packer-tmp' -zxvf c:\\packer-tmp\\packer-files.tar.gz",
+              "cd c:\\packer-tmp\\packer-files",
+              ".\\bakeImage.ps1",
+              "cd c:\\packer-tmp",
+              "rm packer-files.tar.gz",
+              "rm packer-files -Recurse -Force"
+            ]
+          }
+        ],
+        "distribute": [
+          {
+            "type": "SharedImage",
+            "galleryImageId": "WILL_BE_REPLACED /subscriptions/73543923-8c67-42cf-b9b2-cb816bb61581/resourceGroups/aibwinsig/providers/Microsoft.Compute/galleries/my22stSIG/images/winSvrimages",
+            "runOutputName": "liftr-windows-base-image",
+            "artifactTags": {
+              "source": "azureVmImageBuilder",
+              "baseosimg": "windows2019"
+            },
+            "replicationRegions": [ "REPLICATION_REGIONS_PLACEHOLDER" ]
+          }
+        ]
+      }
+    }
+  ]
+}

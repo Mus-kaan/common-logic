@@ -1,59 +1,13 @@
 # For full annotated example, please visit
 # https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki?pagePath=%2FCDPx%20%252D%20Cross%252DPlatform%20Cloud%20Delivery%20Pipeline%2FUsage%2FPipeline%20Spec%20YAML%20Concepts%2FAnnotated%20Example&wikiVersion=GBwikiMaster&pageId=302
 
-environment:
-  host:
-    os: 'windows'
-  runtime:
-    provider: 'appcontainer'
-    image: 'cdpxwinrs5.azurecr.io/global/vse2019/16.3.7:latest'
-
-signing_options:
-  profile: 'internal_azure_service'   # This service deploys to Azure!
-
-workspace_options:
-  enable_legacy_networking: true    # Default is false. If false, only the Restore stage enables network connectivity to the user build container. 
-                                    # If true, all stages enable network connectivity to user build container.
-
 version:
   name: 'Liftr.Common'                                              
   major: 0                                                              # The major version number.
   minor: 5                                                              # The minor version number
   system: 'buildrevision'                                               
 
-versioning:
-  commands:
-
-package_sources:
-  nuget:
-    config_files:                               # A list of glob patterns specifying the configuration files. Use this if you already have NuGet.Config files in your repository.
-      - include:                                # Configuration files to include for automatic inference.
-        - "src/NuGet.Config"
-
-restore:
-  commands:
-    - !!defaultcommand
-      name: 'Restore Windows'
-      command: 'run-windows-restore.cmd'
-      
-build:
-  commands:
-    - !!buildcommand
-      name: 'Build Windows'
-      command: 'run-windows-build.cmd'
-
 test:
   commands:
-
-package:
-  commands:
-    - !!buildcommand
-      name: 'Package'
-      command: 'run-windows-pack.cmd'
-      artifacts:
-        - from: 'nupkgs'
-          to: 'nupkgs'
-          include:
-            - '**/*'
 
 static_analysis_options: # OPTIONAL: If you wish to add options to FxCop, ModernCop, PoliCheck, or BinSkim

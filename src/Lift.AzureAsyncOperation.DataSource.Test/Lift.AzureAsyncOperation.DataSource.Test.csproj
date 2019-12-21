@@ -13,5 +13,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Liftr.AzureAsyncOperation.DataSource\Liftr.AzureAsyncOperation.DataSource.csproj" />
     <ProjectReference Include="..\Liftr.DataSource.Mongo.Tests.Common\Liftr.DataSource.Mongo.Tests.Common.csproj" />
+    <ProjectReference Include="..\Liftr.Tests.Common\Liftr.Tests.Common.csproj" />
   </ItemGroup>
 </Project>
