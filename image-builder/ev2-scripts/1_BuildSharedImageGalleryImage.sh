@@ -26,8 +26,6 @@ fi
 
 imageVersionTag=$(<semantic.fileversion.info)
 
-az login --identity
-
 ./RunImageBuilder.sh \
 --ConfigurationPath="$ConfigurationPath" \
 --ImageName="$ImageName" \
