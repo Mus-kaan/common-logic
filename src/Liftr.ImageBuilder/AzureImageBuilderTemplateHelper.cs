@@ -39,7 +39,8 @@ namespace Microsoft.Liftr.ImageBuilder
             string imageName,
             string artifactLinkWithSAS,
             string srcImgVersionId,
-            IDictionary<string, string> tags = null)
+            IDictionary<string, string> tags = null,
+            bool formatJson = true)
         {
             if (location == null)
             {
@@ -58,6 +59,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 imageTemplateName,
                 imageName,
                 artifactLinkWithSAS,
+                formatJson,
                 srcImg,
                 tags);
         }
@@ -68,7 +70,8 @@ namespace Microsoft.Liftr.ImageBuilder
             string imageName,
             string artifactLinkWithSAS,
             PlatformImageIdentifier sourceImage,
-            IDictionary<string, string> tags = null)
+            IDictionary<string, string> tags = null,
+            bool formatJson = true)
         {
             if (location == null)
             {
@@ -95,6 +98,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 imageTemplateName,
                 imageName,
                 artifactLinkWithSAS,
+                formatJson,
                 srcImg,
                 tags);
         }
@@ -105,6 +109,7 @@ namespace Microsoft.Liftr.ImageBuilder
             string imageTemplateName,
             string imageName,
             string artifactUrlWithSAS,
+            bool formatJson,
             IDictionary<string, string> source,
             IDictionary<string, string> tags)
         {
@@ -144,7 +149,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
             }
 
-            return JsonConvert.SerializeObject(templateObj, Formatting.Indented);
+            return JsonConvert.SerializeObject(templateObj, formatJson ? Formatting.Indented : Formatting.None);
         }
     }
 }

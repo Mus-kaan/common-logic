@@ -34,19 +34,19 @@ restore:
   commands:
     - !!defaultcommand
       name: 'Restore Windows'
-      command: 'run-windows-restore.cmd'
+      command: 'build/run-windows-restore.cmd'
       
 build:
   commands:
     - !!defaultcommand
       name: 'Build Windows'
-      command: 'run-windows-build.cmd'
+      command: 'build/run-windows-build.cmd'
 
 test:
   commands:
     - !!testcommand
       name: 'Run Windows Tests'
-      command: 'run-windows-tests.cmd'
+      command: 'build/run-windows-tests.cmd'
       fail_on_stderr: true
       testresults:
         - title: 'Windows Tests'
@@ -61,7 +61,7 @@ package:
   commands:
     - !!buildcommand
       name: 'Package'
-      command: 'run-windows-pack.cmd'
+      command: 'build/run-windows-pack.cmd'
       artifacts:
         - from: 'nupkgs'
           to: 'nupkgs'

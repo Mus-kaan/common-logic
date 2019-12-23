@@ -33,9 +33,20 @@ namespace Microsoft.Liftr.EV2.Tests
             var folders = Directory.GetDirectories(dir);
 
             Assert.Equal(4, folders.Length);
-            Assert.True(File.Exists(Path.Combine(dir, "1_global", "ServiceModel.DogFood.json")));
-            Assert.True(File.Exists(Path.Combine(dir, "1_global", "RolloutSpec.DogFood.Global.json")));
-            Assert.True(File.Exists(Path.Combine(dir, "1_global", "parameters", "DogFood", "RolloutParameters.DogFood.global.json")));
+            {
+                var filePath = Path.Combine(dir, "1_global", "ServiceModel.DogFood.json");
+                Assert.True(File.Exists(filePath), $"'{filePath}' should exist.");
+            }
+
+            {
+                var filePath = Path.Combine(dir, "1_global", "RolloutSpec.DogFood.global.json");
+                Assert.True(File.Exists(filePath), $"'{filePath}' should exist.");
+            }
+
+            {
+                var filePath = Path.Combine(dir, "1_global", "parameters", "DogFood", "RolloutParameters.DogFood.global.json");
+                Assert.True(File.Exists(filePath), $"'{filePath}' should exist.");
+            }
         }
 
         [Fact]

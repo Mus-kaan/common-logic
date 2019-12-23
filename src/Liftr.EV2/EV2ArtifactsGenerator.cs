@@ -278,7 +278,7 @@ namespace Microsoft.Liftr.EV2
                                                     Properties = new Dictionary<string, string>()
                                                     {
                                                         ["ImageName"] = "adm-ubuntu-1804-l",
-                                                        ["ImageVersion"] = "v2",
+                                                        ["ImageVersion"] = "v7",
                                                     },
                                                 },
                                             },

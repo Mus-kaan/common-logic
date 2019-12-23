@@ -13,9 +13,9 @@ workspace_options:
                                     # If true, all stages enable network connectivity to user build container.
 
 version:
-  name: 'Liftr.IncrediBuild'
-  major: 0                                                              # The major version number.
-  minor: 9                                                              # The minor version number
+  name: 'Liftr.Common'
+  major: 1                                                              # The major version number.
+  minor: 1                                                              # The minor version number
   system: 'buildrevision'
 
 package_sources:
@@ -54,30 +54,13 @@ package:
     - !!buildcommand
       name: 'Package nugests and web projects'
       command: 'build/liftr-run-linux-pack.sh'
-    - !!dockerbuildcommand
-      name: 'Build docker image'
-      context_folder: 'src/Liftr.IncrediBuild.RP.Web'
-      repository_name: 'ibuild-rp-web'
-      latest: false # Don't push the :latest tag since every deployment should refer to a build number.
-      publish_build_tag: true
-      metadata_file:
-        local_path: '.docker-images/gatewayWeb.json'  # folder name '.docker-images' cannot be changed
-                                                  # 'gatewayWeb' match the chart parameter name
-        artifact_path: 'docker-images/gatewayWeb.json'
-    - !!buildcommand
-      name: 'Pack EV2 shell extension'
-      command: 'build/liftr-run-linux-pack-ev2-ext.sh'
       artifacts:
-        - from: 'out-ev2'
-          to: 'ev2'
+        - from: 'nupkgs'
+          to: 'nupkgs'
           include:
             - '**/*'
-    - !!buildcommand
-      name: 'Pack EV2 base image shell extension'
-      command: 'build/liftr-run-linux-pack-baseimage.sh'
-      artifacts:
-        - from: 'out-ev2-base-image'
-          to: 'ev2-base-image'
+        - from: 'exes'
+          to: 'exes'
           include:
             - '**/*'
 

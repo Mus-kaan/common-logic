@@ -292,3 +292,4 @@ exes
 contentFiles
 
 *.auth.json
+buildtools/
