@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Stop on error.
 set -e
 
@@ -89,8 +88,6 @@ fi
 echo "az aks get-credentials -g $AKSRGName -n $AKSName"
 az aks get-credentials -g "$AKSRGName" -n "$AKSName"
 
-$Helm repo add stable https://kubernetes-charts.storage.googleapis.com/
-
 # Deploy identity infrastructure daemonset to default namespace
 echo "helm upgrade aks-pod-identity-infra"
 $Helm upgrade aks-pod-identity-infra --install --namespace default aad-pod-identity-infra-*.tgz
@@ -98,9 +95,6 @@ $Helm upgrade aks-pod-identity-infra --install --namespace default aad-pod-ident
 echo "Start waiting for aks-pod-identity-infra deployment to finish ..."
 kubectl rollout status daemonset/nmi
 kubectl rollout status deployment/mic
-
-echo "Wait for extra 240 seconds to let the custom resource controller be available."
-sleep 240s
 
 # Deploy azure identity binding components to default namespace
 echo "helm upgrade aks-pod-identity-binding"

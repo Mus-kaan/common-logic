@@ -35,6 +35,8 @@ fi
 ./DeployGenevaMonitoring.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId" \
 --GenevaParametersFile="$GenevaParametersFile" \
+--EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
+--Region="$REGION" \
 --gcs_region="$gcs_region"
 
 echo "Successfully finished running: $currentScriptName"

@@ -1,18 +1,30 @@
 #!/bin/bash
 
-# Script used to deploy geneva servics to Aks
+namespace="monitoring"
+set +e
+echo "kubectl create namespace $namespace"
+kubectl create namespace "$namespace"
+
 # Stop on error.
 set -e
 
 for i in "$@"
 do
 case $i in
+    --EnvName=*)
+    EnvName="${i#*=}"
+    shift # past argument=value
+    ;;
     --DeploymentSubscriptionId=*)
     DeploymentSubscriptionId="${i#*=}"
     shift # past argument=value
     ;;
     --GenevaParametersFile=*)
     GenevaParametersFile="${i#*=}"
+    shift # past argument=value
+    ;;
+    --Region=*)
+    Region="${i#*=}"
     shift # past argument=value
     ;;
     --gcs_region=*)
@@ -30,6 +42,11 @@ case $i in
 esac
 done
 
+if [ -z ${EnvName+x} ]; then
+    echo "EnvName is blank."
+    exit 1
+fi
+
 if [ -z ${DeploymentSubscriptionId+x} ]; then
     echo "DeploymentSubscriptionId is blank."
     exit 1
@@ -37,6 +54,11 @@ fi
 
 if [ -z ${GenevaParametersFile+x} ]; then
     echo "GenevaParametersFile is blank."
+    exit 1
+fi
+
+if [ -z ${Region+x} ]; then
+    echo "Region is blank."
     exit 1
 fi
 
@@ -54,6 +76,16 @@ echo "************************************************************"
 echo "DeploymentSubscriptionId: $DeploymentSubscriptionId"
 echo "GenevaParametersFile: $GenevaParametersFile"
 echo "gcs_region: $gcs_region"
+
+if [ "$PartnerName" = "" ]; then
+echo "Read PartnerName from file 'bin/partner-name.txt'."
+PartnerName=$(<bin/partner-name.txt)
+    if [ "$PartnerName" = "" ]; then
+        echo "Please set the name of the partner using variable 'PartnerName' ..."
+        exit 1 # terminate and indicate error
+    fi
+fi
+echo "PartnerName: $PartnerName"
 
 if [ "$liftrACRURI" = "" ]; then
 echo "Read liftrACRURI from file 'bin/acr-endpoint.txt'."
@@ -139,10 +171,16 @@ rm -f geneva_key.pem
 echo "az aks get-credentials -g $AKSRGName -n $AKSName"
 az aks get-credentials -g "$AKSRGName" -n "$AKSName"
 
-# Deploy geneva daemonset to default namespace
+# Deploy geneva daemonset
 echo "start deploy geneva helm chart."
 $Helm upgrade aks-geneva --install \
 --values "$GenevaParametersFile" \
+--set genevaTenant="$PartnerName" \
+--set genevaRole="$AKSName" \
+--set partnerName="$PartnerName" \
+--set hostResourceGroup="$AKSRGName" \
+--set hostAKS="$AKSName" \
+--set hostRegion="$Region" \
 --set gcskeyb64="$genevaServiceKey" \
 --set gcs_region="$gcs_region" \
 --set gcscertb64="$genevaServiceCert" \
@@ -153,13 +191,13 @@ $Helm upgrade aks-geneva --install \
 --set prometheus.kubeStateMetrics.image.repository="$liftrACRURI/coreos/kube-state-metrics" \
 --set prometheus.server.image.repository="$liftrACRURI/prom/prometheus" \
 --set prometheus.nodeExporter.image.repository="$liftrACRURI/prom/node-exporter" \
---namespace default geneva-*.tgz
+--namespace "$namespace" geneva-*.tgz
 
-kubectl rollout status daemonset/geneva-services
+kubectl rollout status daemonset/geneva-services -n "$namespace"
 
 # kubectl rollout status deployment/prom-mdm-converter
 # kubectl rollout status deployment/aks-geneva-prometheus-server
-kubectl rollout status deployment/aks-geneva-prometheus-kube-state-metrics
+kubectl rollout status deployment/aks-geneva-prometheus-kube-state-metrics -n "$namespace"
 
 echo "-------------------------------------"
 echo "Finished helm upgrade geneva chart"

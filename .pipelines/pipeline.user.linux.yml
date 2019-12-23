@@ -63,6 +63,32 @@ package:
           to: 'exes'
           include:
             - '**/*'
+    # - !!dockerbuildcommand
+    #   name: 'Build docker image'
+    #   context_folder: 'src/Liftr.IncrediBuild.RP.Web'
+    #   repository_name: 'ibuild-rp-web'
+    #   latest: false # Don't push the :latest tag since every deployment should refer to a build number.
+    #   publish_build_tag: true
+    #   metadata_file:
+    #     local_path: '.docker-images/gatewayWeb.json'  # folder name '.docker-images' cannot be changed
+    #                                               # 'gatewayWeb' match the chart parameter name
+    #     artifact_path: 'docker-images/gatewayWeb.json'
+    # - !!buildcommand
+    #   name: 'Pack EV2 shell extension'
+    #   command: 'build/liftr-run-linux-pack-ev2-ext.sh'
+    #   artifacts:
+    #     - from: 'out-ev2'
+    #       to: 'ev2'
+    #       include:
+    #         - '**/*'
+    # - !!buildcommand
+    #   name: 'Pack EV2 base image shell extension'
+    #   command: 'build/liftr-run-linux-pack-baseimage.sh'
+    #   artifacts:
+    #     - from: 'out-ev2-base-image'
+    #       to: 'ev2-base-image'
+    #       include:
+    #         - '**/*'
 
 static_analysis_options: # OPTIONAL: If you wish to add options to FxCop, ModernCop, PoliCheck, or BinSkim
   binskim_options:       # OPTIONAL: If you want to add options for BinSkim.

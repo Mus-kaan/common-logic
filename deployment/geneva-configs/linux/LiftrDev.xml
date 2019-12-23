@@ -1,0 +1,152 @@
+<MonitoringManagement version="1.0" namespace="LiftrDev" timestamp="2019-01-28T00:00:00Z" eventVersion="12">
+  <Accounts>
+    <Account moniker="liftrdevaudit" alias="AuditStore" />
+    <Account moniker="liftrdevdiag" isDefault="true" />
+    <Account moniker="liftrdevsecurity" alias="AzSecurityStore" />
+  </Accounts>
+  <Management defaultRetentionInDays="29" eventVolume="Medium">
+    <Identity>
+      <IdentityComponent name="Tenant" envariable="TENANT" />
+      <IdentityComponent name="Role" envariable="ROLE" />
+      <IdentityComponent name="RoleInstance" envariable="ROLEINSTANCE" />
+      <IdentityComponent name="GenevaPodName" useComputerName="true" />
+      <IdentityComponent name="PartnerName" envariable="GENEVA_PARTNER_NAME" />
+      <IdentityComponent name="HostResourceGroup" envariable="GENEVA_HOST_RESOURCE_GROUP" />
+      <IdentityComponent name="HostAKS" envariable="GENEVA_HOST_AKS" />
+      <IdentityComponent name="HostRegion" envariable="GENEVA_HOST_REGION" />
+    </Identity>
+    <AgentResourceUsage diskQuotaInMB="8000" />
+    <AgentMetrics mdmMonitoringAccount="LiftrDevHot" />
+  </Management>
+  <Schemas>
+    <Schema name="taggedSyslog">
+      <Column type="str" name="FacilityAndTag" mdstype="mt:wstr" />
+      <Column type="str" name="Facility" mdstype="mt:wstr" />
+      <Column type="str" name="Severity" mdstype="mt:int32" />
+      <Column type="str-rfc3339" name="EventTime" mdstype="mt:utc" />
+      <Column type="str" name="SendingHost" mdstype="mt:wstr" />
+      <Column type="str" name="Msg" mdstype="mt:wstr" />
+      <Column type="str" name="SyslogTag" mdstype="mt:wstr" />
+    </Schema>
+    <Schema name="syslog">
+      <Column type="str" name="Facility" mdstype="mt:wstr" />
+      <Column type="str" name="Severity" mdstype="mt:int32" />
+      <Column type="str-rfc3339" name="EventTime" mdstype="mt:utc" />
+      <Column type="str" name="SendingHost" mdstype="mt:wstr" />
+      <Column type="str" name="Msg" mdstype="mt:wstr" />
+    </Schema>
+    <Schema name="azsecv1">
+      <Column type="str" name="Facility" mdstype="mt:wstr" />
+      <Column type="str" name="Severity" mdstype="mt:int32" />
+      <Column type="str-rfc3339" name="EventTime" mdstype="mt:utc" />
+      <Column type="str" name="SendingHost" mdstype="mt:wstr" />
+      <Column type="str" name="Msg" mdstype="mt:wstr" />
+    </Schema>
+    <Schema name="azsecv2">
+      <Column type="str" name="AzSecID" mdstype="mt:wstr" />
+      <Column type="str" name="ScanName" mdstype="mt:wstr" />
+      <Column type="str-rfc3339" name="EventTime" mdstype="mt:utc" />
+      <Column type="str" name="Data" mdstype="mt:wstr" />
+      <Column type="str" name="PartCount" mdstype="mt:int32" />
+      <Column type="str" name="PartIndex" mdstype="mt:int32" />
+    </Schema>
+  </Schemas>
+  <Sources>
+    <Source name="liftr" dynamic_schema="true" />
+    <Source name="k8scontainers" dynamic_schema="true" />
+    <Source name="kern" schema="syslog" />
+    <Source name="auth" schema="syslog" />
+    <Source name="authpriv" schema="syslog" />
+    <Source name="cron" schema="syslog" />
+    <Source name="user" schema="syslog" />
+    <Source name="daemon" schema="syslog" />
+    <Source name="syslog" schema="syslog" />
+    <Source name="heartbeat" schema="azsecv1" />
+    <Source name="baseline" schema="azsecv1" />
+    <Source name="software" schema="azsecv1" />
+    <Source name="clamav" schema="azsecv1" />
+    <Source name="scan_event" schema="azsecv2" />
+    <Source name="audit" dynamic_schema="true" />
+    <!-- Create ifxaudit event names depending on the audit type -->
+    <!-- the source names should be exactly as below -->
+    <Source name="local5-ifxauditappl" schema="taggedSyslog" />
+    <!-- application logs -->
+    <Source name="local5-ifxauditmgmt" schema="taggedSyslog" />
+    <!-- management logs -->
+    <Source name="local5-ifxauditfail" schema="taggedSyslog" />
+    <!-- error logs -->
+  </Sources>
+  <Events>
+    <MdsdEvents>
+      <MdsdEventSource source="liftr">
+        <RouteEvent account="liftrdevdiag" priority="Normal" storeType="CentralBond" eventName="liftrAksApp" />
+      </MdsdEventSource>
+      <MdsdEventSource source="k8scontainers">
+        <RouteEvent account="liftrdevdiag" priority="Normal" storeType="CentralBond" eventName="KubernetesContainers" />
+      </MdsdEventSource>
+      <MdsdEventSource source="kern">
+        <RouteEvent account="AzSecurityStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmSecurity" duration="PT1M" />
+      </MdsdEventSource>
+      <MdsdEventSource source="auth">
+        <RouteEvent account="AzSecurityStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmSecurity" duration="PT1M" />
+      </MdsdEventSource>
+      <MdsdEventSource source="authpriv">
+        <RouteEvent account="AzSecurityStore" priority="High" storeType="CentralBond" eventName="LinuxAsmSecurity" duration="PT1M" />
+      </MdsdEventSource>
+      <MdsdEventSource source="cron">
+        <RouteEvent account="AzSecurityStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmSyslog" duration="PT1M" />
+      </MdsdEventSource>
+      <MdsdEventSource source="user">
+        <RouteEvent account="AzSecurityStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmSyslog" duration="PT1M" />
+      </MdsdEventSource>
+      <MdsdEventSource source="daemon">
+        <RouteEvent account="AzSecurityStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmSyslog" duration="PT1M" />
+      </MdsdEventSource>
+      <MdsdEventSource source="syslog">
+        <RouteEvent account="liftrdevdiag" priority="Normal" storeType="CentralBond" eventName="LinuxAsmSyslog" duration="PT1M" />
+      </MdsdEventSource>
+      <MdsdEventSource source="heartbeat">
+        <RouteEvent account="AzSecurityStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmHeartbeat" duration="PT1M" />
+      </MdsdEventSource>
+      <MdsdEventSource source="baseline">
+        <RouteEvent account="AzSecurityStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmBaseline" duration="PT1M" />
+      </MdsdEventSource>
+      <MdsdEventSource source="software">
+        <RouteEvent account="AzSecurityStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmSoftware" duration="PT1M" />
+      </MdsdEventSource>
+      <MdsdEventSource source="clamav">
+        <RouteEvent account="AzSecurityStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmClamav" duration="PT1M" />
+      </MdsdEventSource>
+      <MdsdEventSource source="scan_event">
+        <RouteEvent account="AzSecurityStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmScanEvent" duration="PT1M" />
+      </MdsdEventSource>
+      <MdsdEventSource source="audit">
+        <RouteEvent account="AuditStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmAudit" duration="PT1M" />
+      </MdsdEventSource>
+      <!-- route ifxaudit application log -->
+      <MdsdEventSource source="local5-ifxauditappl">
+        <RouteEvent priority="Normal" storeType="CentralBond" eventName="LinuxAsmIfxAuditApplication" duration="PT1M" />
+      </MdsdEventSource>
+      <!-- route ifxaudit management log -->
+      <MdsdEventSource source="local5-ifxauditmgmt">
+        <RouteEvent priority="Normal" storeType="CentralBond" eventName="LinuxAsmIfxAuditManagement" duration="PT1M" />
+      </MdsdEventSource>
+      <!-- route ifxaudit error log -->
+      <MdsdEventSource source="local5-ifxauditfail">
+        <RouteEvent priority="Normal" storeType="CentralBond" eventName="LinuxAsmIfxAuditError" duration="PT1M" />
+      </MdsdEventSource>
+    </MdsdEvents>
+  </Events>
+  <EventStreamingAnnotations>
+    <EventStreamingAnnotation name="^KubernetesContainers$">
+      <LogAnalytics>
+        <Content>LogAnalyticsContent</Content>
+      </LogAnalytics>
+    </EventStreamingAnnotation>
+    <EventStreamingAnnotation name="^liftrRp$">
+      <LogAnalytics>
+        <Content>LogAnalyticsContent</Content>
+      </LogAnalytics>
+    </EventStreamingAnnotation>
+  </EventStreamingAnnotations>
+</MonitoringManagement>

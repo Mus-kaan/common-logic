@@ -68,6 +68,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     throw ex;
                 }
 
+                File.WriteAllText("partner-name.txt", _hostingOptions.PartnerName);
                 LogContext.PushProperty("TargetSubscriptionId", hostingEnvironmentOptions.AzureSubscription);
                 File.WriteAllText("subscription-id.txt", hostingEnvironmentOptions.AzureSubscription.ToString());
 

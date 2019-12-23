@@ -58,13 +58,21 @@ spec:
           image: {{ .Values.linuxgenevaACR.endpoint }}/genevamdsd:{{ .Values.mdsd.dockerTag }}
           env:
           - name: TENANT
-            value: {{ .Values.gcs_region | quote }}
+            value: {{ required "genevaTenant must be provided." .Values.genevaTenant | quote }}
           - name: ROLE
-            value: {{ .Values.gcs_account | quote }}
+            value: {{ required "genevaRole must be provided." .Values.genevaRole | quote }}
           - name: ROLEINSTANCE
             valueFrom:
               fieldRef:
                 fieldPath: spec.nodeName
+          - name: GENEVA_PARTNER_NAME
+            value: {{ required "partnerName must be provided." .Values.partnerName | quote }}
+          - name: GENEVA_HOST_RESOURCE_GROUP
+            value: {{ required "hostResourceGroup must be provided." .Values.hostResourceGroup | quote }}
+          - name: GENEVA_HOST_AKS
+            value: {{ required "hostAKS must be provided." .Values.hostAKS | quote }}
+          - name: GENEVA_HOST_REGION
+            value: {{ required "hostRegion must be provided." .Values.hostRegion | quote }}
           - name: MONITORING_GCS_ENVIRONMENT
             value: {{ .Values.gcs_environment | quote }}
           - name: MONITORING_GCS_ACCOUNT
