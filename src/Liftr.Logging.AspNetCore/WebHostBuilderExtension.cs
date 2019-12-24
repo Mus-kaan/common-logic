@@ -5,6 +5,7 @@
 using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Liftr.Configuration;
 using Microsoft.Liftr.DiagnosticSource;
 using Serilog;
 using Serilog.Context;
@@ -49,7 +50,10 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                         config.ReadFrom.Configuration(host.Configuration).Enrich.FromLogContext();
                     }
 
-                    config = config.WriteTo.Console(new JsonFormatter(renderMessage: true));
+                    if (!host.Configuration.ContainsSerilogWriteToConsole())
+                    {
+                        config = config.WriteTo.Console(new JsonFormatter(renderMessage: true));
+                    }
                 })
                 .ConfigureServices((host, services) =>
                 {

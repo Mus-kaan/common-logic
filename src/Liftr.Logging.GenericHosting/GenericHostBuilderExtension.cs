@@ -7,6 +7,7 @@ using Microsoft.ApplicationInsights.DependencyCollector;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Liftr.Configuration;
 using Microsoft.Liftr.DiagnosticSource;
 using Serilog;
 using Serilog.Context;
@@ -56,7 +57,10 @@ namespace Microsoft.Liftr.Logging.GenericHosting
                         services.AddHostedService<AppInsightsFlushService>();
                     }
 
-                    serilogConfig = serilogConfig.WriteTo.Console(new JsonFormatter(renderMessage: true));
+                    if (!hostContext.Configuration.ContainsSerilogWriteToConsole())
+                    {
+                        serilogConfig = serilogConfig.WriteTo.Console(new JsonFormatter(renderMessage: true));
+                    }
 
                     serilogConfig = serilogConfig.Enrich.FromLogContext();
                     var logger = serilogConfig.CreateLogger();

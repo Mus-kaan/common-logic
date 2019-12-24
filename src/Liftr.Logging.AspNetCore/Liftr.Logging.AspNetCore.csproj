@@ -7,7 +7,6 @@
     <RootNamespace>Microsoft.Liftr.Logging.AspNetCore</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="$(PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions)" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="$(PackageVersion_Microsoft_ApplicationInsights_AspNetCore)" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(PackageVersion_Microsoft_Extensions_Configuration_Json)" />
     <PackageReference Include="Serilog.AspNetCore" Version="$(PackageVersion_Serilog_AspNetCore)" />
@@ -16,5 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
+    <ProjectReference Include="..\Liftr.WebHosting\Liftr.WebHosting.csproj" />
   </ItemGroup>
 </Project>

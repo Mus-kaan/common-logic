@@ -10,7 +10,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Liftr.SimpleDeploy\Liftr.SimpleDeploy.csproj" />
   </ItemGroup>
-    
   <ItemGroup>
     <None Update="*.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
