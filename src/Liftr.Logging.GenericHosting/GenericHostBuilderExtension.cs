@@ -11,6 +11,7 @@ using Microsoft.Liftr.DiagnosticSource;
 using Serilog;
 using Serilog.Context;
 using Serilog.Events;
+using Serilog.Formatting.Json;
 using System;
 
 namespace Microsoft.Liftr.Logging.GenericHosting
@@ -54,6 +55,8 @@ namespace Microsoft.Liftr.Logging.GenericHosting
                         services.AddSingleton(sp => appInsightsClient);
                         services.AddHostedService<AppInsightsFlushService>();
                     }
+
+                    serilogConfig = serilogConfig.WriteTo.Console(new JsonFormatter(renderMessage: true));
 
                     serilogConfig = serilogConfig.Enrich.FromLogContext();
                     var logger = serilogConfig.CreateLogger();
