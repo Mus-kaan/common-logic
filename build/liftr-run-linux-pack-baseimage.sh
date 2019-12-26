@@ -65,6 +65,7 @@ rm -rf "$EV2ExtensionFilesDir/bin/Monitoring"
 rm -rf "$EV2ExtensionFilesDir/bin/supporting-files"
 rm -rf "$EV2ExtensionFilesDir/bin/generated-ev2"
 cp $PackerTarFile "$EV2ExtensionFilesDir/bin"
+echo -n "$EV2ArtifactVersion" > "$EV2ExtensionFilesDir/bin/version.txt"
 
 echo -n "$ImageVerionTag" > "$EV2ExtensionFilesDir/bin/semantic.fileversion.info"
 echo -n "$ImageVerionTag" > "$EV2ExtensionFilesDir/semantic.fileversion.info"

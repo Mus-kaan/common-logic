@@ -7,6 +7,7 @@ using Microsoft.Liftr.DiagnosticSource;
 using Serilog.Events;
 using System;
 using System.Linq;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -18,10 +19,12 @@ namespace Microsoft.Liftr.Logging.AspNetCore
     {
         private const string s_logLevelOverwriteQueryName = "LiftrLogFilterOverwrite";
         private readonly RequestDelegate _next;
+        private readonly Serilog.ILogger _logger;
 
-        public LoggingMiddleware(RequestDelegate next)
+        public LoggingMiddleware(RequestDelegate next, Serilog.ILogger logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Middleware should fail silently.")]
@@ -103,6 +106,12 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             using (new LogContextPropertyScope("LiftrCorrelationId", crrelationtId))
             {
                 await _next(httpContext);
+                if (httpContext.Response?.StatusCode == (int)HttpStatusCode.NotFound && httpContext.Request?.Path.Value?.OrdinalStartsWith("/api/liveness-probe") == true)
+                {
+                    var meta = await _logger.GetMetaInfoAsync();
+                    httpContext.Response.StatusCode = (int)HttpStatusCode.OK;
+                    await httpContext.Response.WriteAsync(meta.ToJson(indented: true));
+                }
             }
         }
 

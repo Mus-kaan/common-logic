@@ -92,6 +92,16 @@ AKSName=$(<bin/aks-name.txt)
 fi
 echo "AKSName: $AKSName"
 
+if [ "$AppVersion" = "" ]; then
+echo "Read AppVersion from file 'bin/version.txt'."
+AppVersion=$(<bin/version.txt)
+    if [ "$AppVersion" = "" ]; then
+        echo "Please set the application version using variable 'AppVersion' ..."
+        exit 1 # terminate and indicate error
+    fi
+fi
+echo "AppVersion: $AppVersion"
+
 if [ "$RPWebHostname" = "" ]; then
 echo "Read RPWebHostname from file 'bin/rp-hostname.txt'."
 RPWebHostname=$(<bin/rp-hostname.txt)
@@ -111,22 +121,6 @@ VaultName=$(<bin/vault-name.txt)
     fi
 fi
 echo "VaultName: $VaultName"
-
-echo "az login --identity"
-az login --identity
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az login failed."
-    exit $exit_code
-fi
-
-echo "az account set -s $DeploymentSubscriptionId"
-az account set -s "$DeploymentSubscriptionId"
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az account set failed."
-    exit $exit_code
-fi
 
 echo "az keyvault secret download --subscription "$DeploymentSubscriptionId" --vault-name "$VaultName" --name ssl-cert --file ssl-cert-pfx"
 rm -f ssl-cert-pfx
@@ -163,8 +157,9 @@ az aks get-credentials -g "$AKSRGName" -n "$AKSName"
 
 # Deploy the helm chart.
 HelmReleaseName="liftr-custom-aks-app"
-echo "start deploy helm chart."
+echo "start deploy $HelmReleaseName helm chart."
 $Helm upgrade $HelmReleaseName --install \
+--set appVersion="$AppVersion" \
 --set vaultEndpoint="$KeyVaultEndpoint" \
 --set hostname="$RPWebHostname" \
 --set sslcertb64="$sslCertB64Content" \

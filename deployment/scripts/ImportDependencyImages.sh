@@ -21,15 +21,6 @@ case $i in
 esac
 done
 
-if [ "$ACRName" = "" ]; then
-echo "Read ACRName from file 'bin/acr-name.txt'."
-ACRName=$(<bin/acr-name.txt)
-    if [ "$ACRName" = "" ]; then
-        echo "Please set 'ACRName' ..."
-        exit 1 # terminate and indicate error
-    fi
-fi
-
 if [ "$DeploymentSubscriptionId" = "" ]; then
 echo "Read DeploymentSubscriptionId from file 'bin/subscription-id.txt'."
 DeploymentSubscriptionId=$(<bin/subscription-id.txt)
@@ -39,20 +30,13 @@ DeploymentSubscriptionId=$(<bin/subscription-id.txt)
     fi
 fi
 
-echo "az login --identity"
-az login --identity
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az login failed."
-    exit $exit_code
-fi
-
-echo "az account set -s $DeploymentSubscriptionId"
-az account set -s "$DeploymentSubscriptionId"
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az account set failed."
-    exit $exit_code
+if [ "$ACRName" = "" ]; then
+echo "Read ACRName from file 'bin/acr-name.txt'."
+ACRName=$(<bin/acr-name.txt)
+    if [ "$ACRName" = "" ]; then
+        echo "Please set 'ACRName' ..."
+        exit 1 # terminate and indicate error
+    fi
 fi
 
 echo "import prometheus images"
@@ -72,9 +56,6 @@ az acr import --name "$ACRName" --source docker.io/prom/node-exporter:v0.16.0 --
 echo "import quay.io/coreos/kube-state-metrics:v1.4.0"
 az acr import --name "$ACRName" --source quay.io/coreos/kube-state-metrics:v1.4.0 --force
 
-echo "import liftrcr.azurecr.io/prom-mdm-converter:latest"
-az acr import --name "$ACRName" --source prom-mdm-converter:latest --registry /subscriptions/d8f298fb-60f5-4676-a7d3-25442ec5ce1e/resourceGroups/liftr-images-wus-rg/providers/Microsoft.ContainerRegistry/registries/liftrcr --force
-
 echo "import k8s.gcr.io/defaultbackend-amd64:1.5"
 az acr import --name "$ACRName" --source k8s.gcr.io/defaultbackend-amd64:1.5 --force
 
@@ -89,5 +70,8 @@ az acr import --name "$ACRName" --source genevamdsd:master_236 --registry /subsc
 az acr import --name "$ACRName" --source genevafluentd_td-agent:master_110 --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
 az acr import --name "$ACRName" --source genevamdm:master_14 --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
 az acr import --name "$ACRName" --source genevasecpackinstall:master_17 --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
+
+echo "import liftrcr.azurecr.io/prom-mdm-converter:latest"
+az acr import --name "$ACRName" --source prom-mdm-converter:latest --registry /subscriptions/d8f298fb-60f5-4676-a7d3-25442ec5ce1e/resourceGroups/liftr-images-wus-rg/providers/Microsoft.ContainerRegistry/registries/liftrcr --force
 
 echo "ACRName: $ACRName"

@@ -35,22 +35,6 @@ if [ -z ${DeploymentSubscriptionId+x} ]; then
     exit 1
 fi
 
-echo "az login --identity"
-az login --identity
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az login failed."
-    exit $exit_code
-fi
-
-echo "az account set -s $DeploymentSubscriptionId"
-az account set -s "$DeploymentSubscriptionId"
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az account set failed."
-    exit $exit_code
-fi
-
 az feature register --namespace Microsoft.VirtualMachineImages --name VirtualMachineTemplatePreview
 az feature show --namespace Microsoft.VirtualMachineImages --name VirtualMachineTemplatePreview | grep state
 

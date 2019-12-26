@@ -25,6 +25,8 @@ DeploymentSubscriptionId=$(<bin/subscription-id.txt)
     fi
 fi
 
+./AzLogin.sh
+
 ./ImportCDPxImages.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId"
 

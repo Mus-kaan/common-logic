@@ -29,6 +29,8 @@ DeploymentSubscriptionId=$(<bin/subscription-id.txt)
     fi
 fi
 
+./AzLogin.sh
+
 ./DeployAKSPodIdentity.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId"
 

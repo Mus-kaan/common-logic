@@ -44,9 +44,11 @@ ServiceGroupRootApp="$OutDir/4_ServiceGroupRootApp"
 # Set chart version based on build number.
 if [ -v CDP_PACKAGE_VERSION_NUMERIC ]; then
     ChartVersion="$CDP_PACKAGE_VERSION_NUMERIC"
+    mkdir --parent "$TarTmpDir/bin/version-files"
+    cp -a "$SrcRoot/.version/." "$TarTmpDir/bin/version-files"
 else
     # Use a fake version when building locally.
-    ChartVersion="9.9.9999-localdev"
+    ChartVersion="0.9.010870002"
 fi
 echo "Chart version is: $ChartVersion"
 
@@ -60,6 +62,7 @@ echo
 
 AppChartValueFile="$ChartsTmpDir/$ServiceChartName/values.yaml"
 rm -f "$AppChartValueFile"
+echo -n "$ChartVersion" > "$TarTmpDir/bin/version.txt"
 
 # Package each helm chart.
 for ChartDir in $ChartsDir/*; do

@@ -1,4 +1,4 @@
-<MonitoringManagement version="1.0" namespace="LiftrDev" timestamp="2019-01-28T00:00:00Z" eventVersion="12">
+<MonitoringManagement version="1.0" namespace="LiftrDev" timestamp="2019-01-28T00:00:00Z" eventVersion="13">
   <Accounts>
     <Account moniker="liftrdevaudit" alias="AuditStore" />
     <Account moniker="liftrdevdiag" isDefault="true" />
@@ -143,7 +143,7 @@
         <Content>LogAnalyticsContent</Content>
       </LogAnalytics>
     </EventStreamingAnnotation>
-    <EventStreamingAnnotation name="^liftrRp$">
+    <EventStreamingAnnotation name="^liftrAksApp$">
       <LogAnalytics>
         <Content>LogAnalyticsContent</Content>
       </LogAnalytics>

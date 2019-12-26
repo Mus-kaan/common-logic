@@ -71,6 +71,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 File.WriteAllText("partner-name.txt", _hostingOptions.PartnerName);
                 LogContext.PushProperty("TargetSubscriptionId", hostingEnvironmentOptions.AzureSubscription);
                 File.WriteAllText("subscription-id.txt", hostingEnvironmentOptions.AzureSubscription.ToString());
+                File.WriteAllText("tenant-id.txt", hostingEnvironmentOptions.TenantId.ToString());
 
                 _logger.Information("ActionExecutor Action:{ExeAction}", _commandOptions.Action);
                 _logger.Information("RunnerCommandOptions: {@RunnerCommandOptions}", _commandOptions);
@@ -179,9 +180,12 @@ namespace Microsoft.Liftr.SimpleDeploy
                         (var regionOptions, var regionalNamingContext) = GetRegionalOptions(targetOptions);
                         var aksRGName = regionalNamingContext.ResourceGroupName(regionOptions.ComputeBaseName);
                         var aksName = regionalNamingContext.AKSName(regionOptions.ComputeBaseName);
+                        regionalNamingContext.Tags["GlobalRG"] = globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
 
                         if (_commandOptions.Action == ActionType.CreateOrUpdateRegionalData)
                         {
+                            regionalNamingContext.Tags["DataRG"] = regionalNamingContext.ResourceGroupName(regionOptions.DataBaseName);
+
                             CertificateOptions sslCert = null, genevaCert = null, firstPartyCert = null;
                             if (!string.IsNullOrEmpty(regionOptions.HostName))
                             {
@@ -226,6 +230,9 @@ namespace Microsoft.Liftr.SimpleDeploy
                         }
                         else if (_commandOptions.Action == ActionType.CreateOrUpdateRegionalCompute)
                         {
+                            regionalNamingContext.Tags["DataRG"] = regionalNamingContext.ResourceGroupName(regionOptions.DataBaseName);
+                            regionalNamingContext.Tags["ComputeRG"] = regionalNamingContext.ResourceGroupName(regionOptions.ComputeBaseName);
+
                             var acr = await infra.GetACRAsync(targetOptions.Global.BaseName, globalNamingContext);
                             if (acr == null)
                             {

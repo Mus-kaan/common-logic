@@ -17,6 +17,8 @@ DeploymentSubscriptionId=$(<bin/subscription-id.txt)
     fi
 fi
 
+./AzLogin.sh
+
 ./RegisterFeatureAndProvider.sh --DeploymentSubscriptionId="$DeploymentSubscriptionId"
 
 ./ExecuteDeploymentRunner.sh \

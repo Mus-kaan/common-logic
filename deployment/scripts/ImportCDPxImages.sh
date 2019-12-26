@@ -35,6 +35,16 @@ ACRName=$(<bin/acr-name.txt)
 fi
 echo "ACRName: $ACRName"
 
+if [ "$TenantId" = "" ]; then
+echo "Read TenantId from file 'bin/tenant-id.txt'."
+TenantId=$(<bin/tenant-id.txt)
+    if [ "$TenantId" = "" ]; then
+        echo "Please set 'TenantId' ..."
+        exit 1 # terminate and indicate error
+    fi
+fi
+echo "TenantId: $TenantId"
+
 if [ -z ${ImageMetadataDir+x} ]; then
     ImageMetadataDir="$CurrentDir/cdpx-images"
 fi
@@ -45,20 +55,12 @@ if [ -z ${DeploymentSubscriptionId+x} ]; then
     exit 1
 fi
 
-echo "az login --identity"
-az login --identity
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az login failed."
-    exit $exit_code
-fi
-
-echo "az account set -s $DeploymentSubscriptionId"
-az account set -s "$DeploymentSubscriptionId"
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az account set failed."
-    exit $exit_code
+if [ "$TenantId" == "72f988bf-86f1-41af-91ab-2d7cd011db47" ]; then
+    echo "Microsoft Tenant"
+    CDPXACRResourceId="/subscriptions/fb0fee9c-b18a-4d61-887c-eb59b04a2b02/resourceGroups/cxprod-acr/providers/Microsoft.ContainerRegistry/registries/cdpxlinux"
+else
+    echo "AME Tenant"
+    CDPXACRResourceId="/subscriptions/e9d570ed-cf13-4347-83e3-3938b8d65a41/resourceGroups/cdpx-acr-ame-wus/providers/Microsoft.ContainerRegistry/registries/cdpxlinuxame"
 fi
 
 for imgMetaData in $ImageMetadataDir/*.json
@@ -69,7 +71,12 @@ do
 
     # Use grep magic to parse JSON since jq isn't installed on the CDPx build image.
     # See https://aka.ms/cdpx/yaml/dockerbuildcommand for the metadata file schema.
-    DockerImageNameWithRegistry=$(cat $imgMetaData | grep -Po '"ame_build_image_name": "\K[^"]*')
+
+    if [ "$TenantId" == "72f988bf-86f1-41af-91ab-2d7cd011db47" ]; then
+        DockerImageNameWithRegistry=$(cat $imgMetaData | grep -Po '"build_image_name": "\K[^"]*')
+    else
+        DockerImageNameWithRegistry=$(cat $imgMetaData | grep -Po '"ame_build_image_name": "\K[^"]*')
+    fi
 
     DockerRegistry=$(echo $DockerImageNameWithRegistry | cut -d '/' -f1 | cut -d '.' -f1)
     DockerImageName=$(echo $DockerImageNameWithRegistry | cut -d '/' -f1 --complement)
@@ -78,5 +85,6 @@ do
     echo "DockerImageName: $DockerImageName"
 
     echo "import $DockerImageName"
-    az acr import --name "$ACRName" --source $DockerImageName --registry /subscriptions/e9d570ed-cf13-4347-83e3-3938b8d65a41/resourceGroups/cdpx-acr-ame-wus/providers/Microsoft.ContainerRegistry/registries/$DockerRegistry --force
+    echo "az acr import --name $ACRName --source $DockerImageName --registry $CDPXACRResourceId --force"
+    az acr import --name "$ACRName" --source $DockerImageName --registry "$CDPXACRResourceId" --force
 done

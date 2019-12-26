@@ -69,22 +69,6 @@ MSIClientId=$(<bin/msi-clientId.txt)
 fi
 echo "MSIClientId: $MSIClientId"
 
-echo "az login --identity"
-az login --identity
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az login failed."
-    exit $exit_code
-fi
-
-echo "az account set -s $DeploymentSubscriptionId"
-az account set -s "$DeploymentSubscriptionId"
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az account set failed."
-    exit $exit_code
-fi
-
 echo "az aks get-credentials -g $AKSRGName -n $AKSName"
 az aks get-credentials -g "$AKSRGName" -n "$AKSName"
 

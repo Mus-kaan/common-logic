@@ -11,37 +11,54 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace Microsoft.Liftr
 {
     public static class LoggerExtensions
     {
+        private static MetaInfo s_metaInfo;
         private static bool s_metaInitialized;
-        private static bool s_assemblyInfoInitialized;
-        private static InstanceMetadata s_instanceMeta;
         private static List<IDisposable> s_disposablesHolder = new List<IDisposable>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "Liftr1004:Avoid calling System.Threading.Tasks.Task<TResult>.Result", Justification = "<Pending>")]
-        public static InstanceMetadata GetInstanceMetadata(this ILogger logger)
+        public static async Task<MetaInfo> GetMetaInfoAsync(this ILogger logger, Assembly callingAssembly = null)
         {
             if (!s_metaInitialized)
             {
                 s_metaInitialized = true;
-                s_instanceMeta = InstanceMetadata.LoadAsync(logger).Result;
 
-                if (s_instanceMeta != null)
+                if (callingAssembly == null)
                 {
-                    s_disposablesHolder.Add(LogContext.PushProperty(nameof(s_instanceMeta.MachineNameEnv), s_instanceMeta.MachineNameEnv));
-                    s_disposablesHolder.Add(LogContext.PushProperty("Meta" + nameof(s_instanceMeta.Compute.AzEnvironment), s_instanceMeta.Compute.AzEnvironment));
-                    s_disposablesHolder.Add(LogContext.PushProperty("Meta" + nameof(s_instanceMeta.Compute.Location), s_instanceMeta.Compute.Location));
-                    s_disposablesHolder.Add(LogContext.PushProperty("MetaVM" + nameof(s_instanceMeta.Compute.Name), s_instanceMeta.Compute.Name));
-                    s_disposablesHolder.Add(LogContext.PushProperty("MetaResourceGroup", s_instanceMeta.Compute.ResourceGroupName));
-                    s_disposablesHolder.Add(LogContext.PushProperty("Meta" + nameof(s_instanceMeta.Compute.Sku), s_instanceMeta.Compute.Sku));
-                    s_disposablesHolder.Add(LogContext.PushProperty("Meta" + nameof(s_instanceMeta.Compute.VmSize), s_instanceMeta.Compute.VmSize));
+                    callingAssembly = Assembly.GetEntryAssembly();
                 }
+
+                var assemblyName = callingAssembly.GetName().Name;
+                var assemblyProductVersion = FileVersionInfo.GetVersionInfo(callingAssembly.Location).ProductVersion;
+                s_disposablesHolder.Add(LogContext.PushProperty("AssemblyName", assemblyName));
+                s_disposablesHolder.Add(LogContext.PushProperty("AssemblyVersion", assemblyProductVersion));
+
+                var instanceMeta = await InstanceMetadata.LoadAsync(logger);
+
+                if (instanceMeta != null)
+                {
+                    s_disposablesHolder.Add(LogContext.PushProperty(nameof(instanceMeta.MachineNameEnv), instanceMeta.MachineNameEnv));
+                    s_disposablesHolder.Add(LogContext.PushProperty("Meta" + nameof(instanceMeta.Compute.AzEnvironment), instanceMeta.Compute.AzEnvironment));
+                    s_disposablesHolder.Add(LogContext.PushProperty("Meta" + nameof(instanceMeta.Compute.Location), instanceMeta.Compute.Location));
+                    s_disposablesHolder.Add(LogContext.PushProperty("MetaVM" + nameof(instanceMeta.Compute.Name), instanceMeta.Compute.Name));
+                    s_disposablesHolder.Add(LogContext.PushProperty("MetaResourceGroup", instanceMeta.Compute.ResourceGroupName));
+                    s_disposablesHolder.Add(LogContext.PushProperty("Meta" + nameof(instanceMeta.Compute.Sku), instanceMeta.Compute.Sku));
+                    s_disposablesHolder.Add(LogContext.PushProperty("Meta" + nameof(instanceMeta.Compute.VmSize), instanceMeta.Compute.VmSize));
+                }
+
+                s_metaInfo = new MetaInfo()
+                {
+                    InstanceMeta = instanceMeta,
+                    AssemblyName = assemblyName,
+                    Version = assemblyProductVersion,
+                };
             }
 
-            return s_instanceMeta;
+            return s_metaInfo;
         }
 
         public static ITimedOperation StartTimedOperation(this ILogger logger, string operationName, string operationId = null)
@@ -54,6 +71,7 @@ namespace Microsoft.Liftr
             return new TimedOperation(logger, operationName, operationId);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "Liftr1004:Avoid calling System.Threading.Tasks.Task<TResult>.Result", Justification = "<Pending>")]
         public static void LogProcessStart(this ILogger logger)
         {
             if (logger == null)
@@ -61,29 +79,18 @@ namespace Microsoft.Liftr
                 throw new ArgumentNullException(nameof(logger));
             }
 
-            var callingAssembly = Assembly.GetCallingAssembly();
-            var assemblyName = callingAssembly.GetName().Name;
-            var assemblyProductVersion = FileVersionInfo.GetVersionInfo(callingAssembly.Location).ProductVersion;
-
-            if (!s_assemblyInfoInitialized)
-            {
-                s_assemblyInfoInitialized = true;
-
-                s_disposablesHolder.Add(LogContext.PushProperty("AssemblyName", assemblyName));
-                s_disposablesHolder.Add(LogContext.PushProperty("AssemblyVersion", assemblyProductVersion));
-            }
-
-            var meta = logger.GetInstanceMetadata();
+            var meta = logger.GetMetaInfoAsync(Assembly.GetEntryAssembly()).Result;
+            var instanceMeta = meta.InstanceMeta;
 
             logger.Information("***********************************************************************************");
 
-            logger.Information("Process start. Assembly info: {assemblyName}, version: {assemblyProductVersion}, machine name: {machineName}", assemblyName, assemblyProductVersion, Environment.MachineName);
+            logger.Information("Process start. Assembly info: {assemblyName}, version: {assemblyProductVersion}, machine name: {machineName}", meta.AssemblyName, meta.Version, Environment.MachineName);
 
-            if (meta != null && meta.Compute != null)
+            if (instanceMeta != null && instanceMeta.Compute != null)
             {
-                string vmLocation = meta.Compute.Location;
-                string vmName = meta.Compute.Name;
-                string vmSize = meta.Compute.VmSize;
+                string vmLocation = instanceMeta.Compute.Location;
+                string vmName = instanceMeta.Compute.Name;
+                string vmSize = instanceMeta.Compute.VmSize;
                 logger.Information("Process start Azure Compute Info: vmLocation: {vmLocation}, vmName: {vmName}, vmSize: {vmSize}", vmLocation, vmName, vmSize);
             }
 

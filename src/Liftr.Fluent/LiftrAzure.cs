@@ -447,6 +447,7 @@ namespace Microsoft.Liftr.Fluent
                     .FromRegion(Region.USWest)
                     .WithTrafficDisabled()
                     .Attach()
+                .WithHttpMonitoring(80, "/api/liveness-probe")
                 .WithTags(tags)
                 .CreateAsync();
 

@@ -127,22 +127,6 @@ VaultName=$(<bin/vault-name.txt)
 fi
 echo "VaultName: $VaultName"
 
-echo "az login --identity"
-az login --identity
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az login failed."
-    exit $exit_code
-fi
-
-echo "az account set -s $DeploymentSubscriptionId"
-az account set -s "$DeploymentSubscriptionId"
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az account set failed."
-    exit $exit_code
-fi
-
 echo "az keyvault secret download --subscription "$DeploymentSubscriptionId" --vault-name "$VaultName" --name GenevaClientCert --file encodedGenevaPfx"
 az keyvault secret download --subscription "$DeploymentSubscriptionId" --vault-name "$VaultName" --name GenevaClientCert --file encodedGenevaPfx
 exit_code=$?

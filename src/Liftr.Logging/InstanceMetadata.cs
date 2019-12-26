@@ -94,9 +94,6 @@ namespace Microsoft.Liftr.Logging
         public string Provider { get; private set; }
 
         [JsonProperty]
-        public PublicKeyMetadata[] PublicKeys { get; private set; }
-
-        [JsonProperty]
         public string Publisher { get; private set; }
 
         [JsonProperty]
@@ -140,15 +137,6 @@ namespace Microsoft.Liftr.Logging
 
         [JsonProperty]
         public string Publisher { get; private set; }
-    }
-
-    public class PublicKeyMetadata
-    {
-        [JsonProperty]
-        public string KeyData { get; private set; }
-
-        [JsonProperty]
-        public string Path { get; private set; }
     }
 
     public class NetworkMetadata
