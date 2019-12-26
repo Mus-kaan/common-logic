@@ -12,6 +12,9 @@ namespace Microsoft.Liftr
         public static string ToZuluString(this DateTime value)
             => value.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture);
 
+        public static string ToZuluString(this DateTimeOffset value)
+            => value.UtcDateTime.ToString("o", CultureInfo.InvariantCulture);
+
         public static string ToDateString(this DateTime value)
             => value.ToUniversalTime().ToString("yyyyMMdd", CultureInfo.InvariantCulture);
 
@@ -24,5 +27,11 @@ namespace Microsoft.Liftr
 
             return DateTime.Parse(value, CultureInfo.InvariantCulture).ToUniversalTime();
         }
+
+        public static DateTimeOffset Min(DateTimeOffset first, DateTimeOffset second) =>
+            first <= second ? first : second;
+
+        public static DateTimeOffset Max(DateTimeOffset first, DateTimeOffset second) =>
+            first > second ? first : second;
     }
 }
