@@ -5,17 +5,18 @@
 linuxgenevaACR:
   endpoint: linuxgeneva-microsoft.azurecr.io
 
+# Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/environments/linuxcontainers.html
 mdsd:
-  dockerTag: master_236
-
-fluentd:
-  dockerTag: master_110
+  dockerTag: master_246
 
 mdm:
-  dockerTag: master_14
+  dockerTag: master_28
+
+fluentd:
+  dockerTag: master_124
 
 secpack:
-  dockerTag: master_17
+  dockerTag: master_30
 
 promMdmConverter:
   name: prom-mdm-converter

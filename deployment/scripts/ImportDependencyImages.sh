@@ -65,11 +65,12 @@ az acr import --name "$ACRName" --source docker.io/jettech/kube-webhook-certgen:
 echo "import quay.io/kubernetes-ingress-controller/nginx-ingress-controller"
 az acr import --name "$ACRName" --source quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1 --force
 
+echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/environments/linuxcontainers.html"
 echo "import geneva images"
-az acr import --name "$ACRName" --source genevamdsd:master_236 --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
-az acr import --name "$ACRName" --source genevafluentd_td-agent:master_110 --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
-az acr import --name "$ACRName" --source genevamdm:master_14 --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
-az acr import --name "$ACRName" --source genevasecpackinstall:master_17 --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
+az acr import --name "$ACRName" --source genevamdsd:master_246 --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
+az acr import --name "$ACRName" --source genevamdm:master_28 --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
+az acr import --name "$ACRName" --source genevafluentd_td-agent:master_124 --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
+az acr import --name "$ACRName" --source genevasecpackinstall:master_30 --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
 
 echo "import liftrcr.azurecr.io/prom-mdm-converter:latest"
 az acr import --name "$ACRName" --source prom-mdm-converter:latest --registry /subscriptions/d8f298fb-60f5-4676-a7d3-25442ec5ce1e/resourceGroups/liftr-images-wus-rg/providers/Microsoft.ContainerRegistry/registries/liftrcr --force
