@@ -27,8 +27,10 @@ namespace Microsoft.Liftr.Fluent.Tests
             {
                 var client = scope.Client;
                 var rg = await client.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
+                var vnet = await client.GetOrCreateVNetAsync(TestCommon.Location, scope.ResourceGroupName, SdkContext.RandomResourceName("test-vnet", 15), TestCommon.Tags);
+                var subnet = vnet.Subnets[client.DefaultSubnetName];
                 var dbName = SdkContext.RandomResourceName("test-db", 15);
-                var created = await client.CreateCosmosDBAsync(TestCommon.Location, scope.ResourceGroupName, dbName, TestCommon.Tags);
+                var created = await client.CreateCosmosDBAsync(TestCommon.Location, scope.ResourceGroupName, dbName, TestCommon.Tags, subnet);
 
                 // Second deployment will not fail.
                 await client.CreateCosmosDBAsync(TestCommon.Location, scope.ResourceGroupName, dbName, TestCommon.Tags);

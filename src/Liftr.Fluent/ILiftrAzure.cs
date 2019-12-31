@@ -37,6 +37,8 @@ namespace Microsoft.Liftr.Fluent
 
         string SPNObjectId { get; }
 
+        string DefaultSubnetName { get; }
+
         #region Resource Group
         Task<IResourceGroup> GetOrCreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags);
 
@@ -50,9 +52,9 @@ namespace Microsoft.Liftr.Fluent
         #endregion Resource Group
 
         #region Storage Account
-        Task<IStorageAccount> GetOrCreateStorageAccountAsync(Region location, string rgName, string storageAccountName, IDictionary<string, string> tags);
+        Task<IStorageAccount> GetOrCreateStorageAccountAsync(Region location, string rgName, string storageAccountName, IDictionary<string, string> tags, string accessFromSubnetId = null);
 
-        Task<IStorageAccount> CreateStorageAccountAsync(Region location, string rgName, string storageAccountName, IDictionary<string, string> tags);
+        Task<IStorageAccount> CreateStorageAccountAsync(Region location, string rgName, string storageAccountName, IDictionary<string, string> tags, string accessFromSubnetId = null);
 
         Task<IStorageAccount> GetStorageAccountAsync(string rgName, string storageAccountName);
 
@@ -80,11 +82,17 @@ namespace Microsoft.Liftr.Fluent
         #endregion Storage Account
 
         #region Network
-        Task<INetwork> GetOrCreateVNetAsync(Region location, string rgName, string vnetName, string addressSpaceCIDR, IDictionary<string, string> tags);
+        Task<INetworkSecurityGroup> GetNSGAsync(string rgName, string nsgName);
 
-        Task<INetwork> CreateVNetAsync(Region location, string rgName, string vnetName, string addressSpaceCIDR, IDictionary<string, string> tags);
+        Task<INetworkSecurityGroup> GetOrCreateDefaultNSGAsync(Region location, string rgName, string nsgName, IDictionary<string, string> tags);
+
+        Task<INetwork> GetOrCreateVNetAsync(Region location, string rgName, string vnetName, IDictionary<string, string> tags, string nsgId = null);
+
+        Task<INetwork> CreateVNetAsync(Region location, string rgName, string vnetName, IDictionary<string, string> tags, string nsgId = null);
 
         Task<INetwork> GetVNetAsync(string rgName, string vnetName);
+
+        Task<ISubnet> CreateNewSubnetAsync(INetwork vnet, string subnetName, string nsgId = null);
 
         Task<IPublicIPAddress> GetOrCreatePublicIPAsync(Region location, string rgName, string pipName, IDictionary<string, string> tags);
 
@@ -102,15 +110,24 @@ namespace Microsoft.Liftr.Fluent
         #endregion
 
         #region CosmosDB
-        Task<(ICosmosDBAccount cosmosDBAccount, string mongoConnectionString)> CreateCosmosDBAsync(Region location, string rgName, string cosmosDBName, IDictionary<string, string> tags);
+        Task<(ICosmosDBAccount cosmosDBAccount, string mongoConnectionString)> CreateCosmosDBAsync(
+            Region location,
+            string rgName,
+            string cosmosDBName,
+            IDictionary<string, string> tags,
+            ISubnet subnet = null);
 
         Task<ICosmosDBAccount> GetCosmosDBAsync(string dbResourceId);
+
+        Task<ICosmosDBAccount> GetCosmosDBAsync(string rgName, string cosmosDBName);
 
         Task<IEnumerable<ICosmosDBAccount>> ListCosmosDBAsync(string rgName);
         #endregion CosmosDB
 
         #region Key Vault
         Task<IVault> GetOrCreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags);
+
+        Task<IVault> GetOrCreateKeyVaultAsync(Region location, string rgName, string vaultName, string accessibleFromIP, IDictionary<string, string> tags);
 
         Task<IVault> CreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags);
 
@@ -120,6 +137,8 @@ namespace Microsoft.Liftr.Fluent
 
         Task<IEnumerable<IVault>> ListKeyVaultAsync(string rgName);
 
+        Task WithKeyVaultAccessFromNetworkAsync(IVault vault, string ipAddress, string subnetId);
+
         Task RemoveAccessPolicyAsync(string kvResourceId, string servicePrincipalObjectId);
 
         Task GrantSelfKeyVaultAdminAccessAsync(IVault kv);
@@ -127,23 +146,24 @@ namespace Microsoft.Liftr.Fluent
         Task RemoveSelfKeyVaultAccessAsync(IVault kv);
         #endregion Key Vault
 
-        #region Aks Cluster
+        #region AKS
         Task<IKubernetesCluster> CreateAksClusterAsync(
-            Region region,
-            string rgName,
-            string aksName,
-            string rootUserName,
-            string sshPublicKey,
-            string servicePrincipalClientId,
-            string servicePrincipalSecret,
-            ContainerServiceVMSizeTypes vmSizeType,
-            int vmCount,
-            IDictionary<string, string> tags);
+                   Region region,
+                   string rgName,
+                   string aksName,
+                   string rootUserName,
+                   string sshPublicKey,
+                   string servicePrincipalClientId,
+                   string servicePrincipalSecret,
+                   ContainerServiceVMSizeTypes vmSizeType,
+                   int vmCount,
+                   IDictionary<string, string> tags,
+                   ISubnet subnet = null);
 
         Task<IKubernetesCluster> GetAksClusterAsync(string aksResourceId);
 
         Task<IEnumerable<IKubernetesCluster>> ListAksClusterAsync(string rgName);
-        #endregion Aks Cluster
+        #endregion AKS
 
         #region Identity
         Task<IIdentity> GetOrCreateMSIAsync(Region location, string rgName, string msiName, IDictionary<string, string> tags);

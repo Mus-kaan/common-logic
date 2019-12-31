@@ -35,7 +35,7 @@ namespace Microsoft.Liftr.Fluent.Contracts.Tests
 
             {
                 var tags = context.Tags.ToJson();
-                Assert.True(tags.OrdinalContains("{\"PartnerName\":\"TestPartnerCompanyInNYC\",\"Environment\":\"DogFood\",\"InfraVersion\":\"v2\",\"RegionTag\":\"centralus\",\"FirstCreatedAt\":"));
+                Assert.True(tags.OrdinalContains("{\"PartnerName\":\"TestPartnerCompanyInNYC\",\"Environment\":\"DogFood\",\"RegionTag\":\"centralus\",\"FirstCreatedAt\":"));
             }
         }
 

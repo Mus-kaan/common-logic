@@ -86,8 +86,7 @@ namespace Microsoft.Liftr.EV2
                     var parameterFilePath = Path.Combine(outputDirectory, parameterFileName);
                     var parameters = AssembleImageBuilderRolloutParameters(
                         image,
-                        "1_BuildSharedImageGalleryImage.sh",
-                        image.RunnerInformation.UserAssignedManagedIdentityResourceId);
+                        "1_BuildSharedImageGalleryImage.sh");
                     File.WriteAllText(parameterFilePath, parameters.ToJsonString(indented: true));
                 }
 
@@ -231,8 +230,7 @@ namespace Microsoft.Liftr.EV2
                     envName,
                     region,
                     entryScript,
-                    targetEnvironment.RunnerInformation.UserAssignedManagedIdentityResourceId,
-                    targetEnvironment.RunnerInformation.UserAssignedManagedIdentityObjectId.ToString());
+                    targetEnvironment.RunnerInformation);
                 File.WriteAllText(parameterFilePath, parameters.ToJsonString(indented: true));
             }
         }
@@ -359,8 +357,7 @@ namespace Microsoft.Liftr.EV2
             string envName,
             string region,
             string entryScript,
-            string runnerManagedIdentityId,
-            string runnerManagedIdentityObjectId)
+            EV2RunnerInfomation runnerInfo)
         {
             if (string.IsNullOrEmpty(envName))
             {
@@ -372,6 +369,57 @@ namespace Microsoft.Liftr.EV2
                 throw new ArgumentNullException(nameof(region));
             }
 
+            var envVariables = new List<ShellEnvironmentVariable>()
+            {
+                new ShellEnvironmentVariable()
+                {
+                    Name = "ASPNETCORE_ENVIRONMENT",
+                    Value = envName,
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "APP_ASPNETCORE_ENVIRONMENT",
+                    Value = envName,
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "REGION",
+                    Value = region,
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "gcs_region",
+                    Value = ToSimpleName(region),
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "GenevaParametersFile",
+                    Value = $"geneva.{ToSimpleName(envName)}.values.yaml",
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "RunnerSPNObjectId",
+                    Value = runnerInfo.UserAssignedManagedIdentityObjectId.ToString(),
+                },
+            };
+
+            var shellLaunch = new ShellLaunch()
+            {
+                Command = new List<string>()
+                {
+                    entryScript,
+                },
+                Identity = new ShellIdentity()
+                {
+                    Type = "UserAssigned",
+                    UserAssignedIdentities = new List<string>()
+                    {
+                        runnerInfo.UserAssignedManagedIdentityResourceId,
+                    },
+                },
+            };
+
+            shellLaunch.EnvironmentVariables = envVariables;
             var parameters = new RolloutParameters()
             {
                 ShellExtensions = new List<Shell>()
@@ -391,54 +439,7 @@ namespace Microsoft.Liftr.EV2
                                 Path = "liftr-deployment.tar",
                             },
                         },
-                        Launch = new ShellLaunch()
-                        {
-                            Command = new List<string>()
-                            {
-                                entryScript,
-                            },
-                            EnvironmentVariables = new List<ShellEnvironmentVariable>()
-                            {
-                                new ShellEnvironmentVariable()
-                                {
-                                    Name = "ASPNETCORE_ENVIRONMENT",
-                                    Value = envName,
-                                },
-                                new ShellEnvironmentVariable()
-                                {
-                                    Name = "APP_ASPNETCORE_ENVIRONMENT",
-                                    Value = envName,
-                                },
-                                new ShellEnvironmentVariable()
-                                {
-                                    Name = "REGION",
-                                    Value = region,
-                                },
-                                new ShellEnvironmentVariable()
-                                {
-                                    Name = "gcs_region",
-                                    Value = ToSimpleName(region),
-                                },
-                                new ShellEnvironmentVariable()
-                                {
-                                    Name = "GenevaParametersFile",
-                                    Value = $"geneva.{ToSimpleName(envName)}.values.yaml",
-                                },
-                                new ShellEnvironmentVariable()
-                                {
-                                    Name = "RunnerSPNObjectId",
-                                    Value = runnerManagedIdentityObjectId,
-                                },
-                            },
-                            Identity = new ShellIdentity()
-                            {
-                                Type = "UserAssigned",
-                                UserAssignedIdentities = new List<string>()
-                                {
-                                    runnerManagedIdentityId,
-                                },
-                            },
-                        },
+                        Launch = shellLaunch,
                     },
                 },
             };
@@ -446,15 +447,54 @@ namespace Microsoft.Liftr.EV2
             return parameters;
         }
 
-        private static RolloutParameters AssembleImageBuilderRolloutParameters(
-            ImageOptions options,
-            string entryScript,
-            string runnerManagedIdentityId)
+        private static RolloutParameters AssembleImageBuilderRolloutParameters(ImageOptions options, string entryScript)
         {
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options));
             }
+
+            var envVariables = new List<ShellEnvironmentVariable>()
+            {
+                new ShellEnvironmentVariable()
+                {
+                    Name = "ImageName",
+                    Value = options.ImageName,
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "SourceImage",
+                    Value = options.SourceImage.ToString(),
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "ConfigurationPath",
+                    Value = options.ConfigurationPath,
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "RunnerSPNObjectId",
+                    Value = options.RunnerInformation.UserAssignedManagedIdentityObjectId.ToString(),
+                },
+            };
+
+            var shellLaunch = new ShellLaunch()
+            {
+                Command = new List<string>()
+                {
+                    entryScript,
+                },
+                Identity = new ShellIdentity()
+                {
+                    Type = "UserAssigned",
+                    UserAssignedIdentities = new List<string>()
+                    {
+                        options.RunnerInformation.UserAssignedManagedIdentityResourceId,
+                    },
+                },
+            };
+
+            shellLaunch.EnvironmentVariables = envVariables;
 
             var parameters = new RolloutParameters()
             {
@@ -475,44 +515,7 @@ namespace Microsoft.Liftr.EV2
                                 Path = "ev2-extension.tar",
                             },
                         },
-                        Launch = new ShellLaunch()
-                        {
-                            Command = new List<string>()
-                            {
-                                entryScript,
-                            },
-                            EnvironmentVariables = new List<ShellEnvironmentVariable>()
-                            {
-                                new ShellEnvironmentVariable()
-                                {
-                                    Name = "ImageName",
-                                    Value = options.ImageName,
-                                },
-                                new ShellEnvironmentVariable()
-                                {
-                                    Name = "SourceImage",
-                                    Value = options.SourceImage.ToString(),
-                                },
-                                new ShellEnvironmentVariable()
-                                {
-                                    Name = "ConfigurationPath",
-                                    Value = options.ConfigurationPath,
-                                },
-                                new ShellEnvironmentVariable()
-                                {
-                                    Name = "RunnerSPNObjectId",
-                                    Value = options.RunnerInformation.UserAssignedManagedIdentityObjectId.ToString(),
-                                },
-                            },
-                            Identity = new ShellIdentity()
-                            {
-                                Type = "UserAssigned",
-                                UserAssignedIdentities = new List<string>()
-                                {
-                                    runnerManagedIdentityId,
-                                },
-                            },
-                        },
+                        Launch = shellLaunch,
                     },
                 },
             };

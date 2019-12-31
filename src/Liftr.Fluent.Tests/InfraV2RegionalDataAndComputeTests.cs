@@ -8,7 +8,6 @@ using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,40 +16,44 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Fluent.Tests
 {
-    public sealed class InfraV2RegionalDataRGTests
+    public sealed class InfraV2RegionalDataAndComputeTests
     {
         private readonly ITestOutputHelper _output;
 
-        public InfraV2RegionalDataRGTests(ITestOutputHelper output)
+        public InfraV2RegionalDataAndComputeTests(ITestOutputHelper output)
         {
             _output = output;
         }
 
         [SkipInOfficialBuild]
-        public async Task VerifyRegionalDataResourceCreationAsync()
+        public async Task VerifyRegionalDataAndComputeCreationAsync()
         {
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);
-            var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USWest);
+            var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USEast);
             TestCommon.AddCommonTags(context.Tags);
 
-            var dps = new List<string> { TestCredentials.SubscriptionId };
+            var dataBaseName = "data";
+            var dataRGName = context.ResourceGroupName(dataBaseName);
+            var computeBaseName = "comp";
+            var computeRGName = context.ResourceGroupName(computeBaseName);
 
-            var baseName = "data";
-            var rgName = context.ResourceGroupName(baseName);
+            var model = JsonConvert.DeserializeObject<ComputeTestModel>(File.ReadAllText("ComputeTestModel.json"));
+            model.Options.DataBaseName = dataBaseName;
+            model.Options.ComputeBaseName = computeBaseName;
 
             var dataOptions = JsonConvert.DeserializeObject<RegionalDataOptions>(File.ReadAllText("TestDataOptions.json"));
-            dataOptions.SSLCert = null;
-            dataOptions.FirstPartyCert = null;
             dataOptions.EnableVNet = true;
 
-            using (var regionalDataScope = new TestResourceGroupScope(rgName))
+            using (var regionalDataScope = new TestResourceGroupScope(dataRGName))
+            using (var regionalComputeScope = new TestResourceGroupScope(computeRGName))
             {
+                var logger = regionalDataScope.Logger;
                 try
                 {
                     var infra = new InfrastructureV2(regionalDataScope.AzFactory, regionalDataScope.Logger);
                     var client = regionalDataScope.Client;
 
-                    (_, _, _, var tm, var kv) = await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dataOptions, TestCredentials.KeyVaultClient);
+                    (_, _, _, var tm, _) = await infra.CreateOrUpdateRegionalDataRGAsync(dataBaseName, context, dataOptions, TestCredentials.KeyVaultClient);
 
                     // Check regional data resources.
                     {
@@ -67,12 +70,23 @@ namespace Microsoft.Liftr.Fluent.Tests
                         TestCommon.CheckCommonTags(retrievedTM.Inner.Tags);
                     }
 
+                    // This will take a long time. Be patient.
+                    await infra.CreateOrUpdateRegionalComputeRGAsync(
+                        context,
+                        model.Options,
+                        model.AKS,
+                        TestCredentials.KeyVaultClient);
+
                     // Same deployment will not throw exception.
-                    await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dataOptions, TestCredentials.KeyVaultClient);
+                    await infra.CreateOrUpdateRegionalComputeRGAsync(
+                        context,
+                        model.Options,
+                        model.AKS,
+                        TestCredentials.KeyVaultClient);
                 }
                 catch (Exception ex)
                 {
-                    regionalDataScope.Logger.Error(ex, $"{nameof(VerifyRegionalDataResourceCreationAsync)} failed.");
+                    logger.Error(ex, $"{nameof(VerifyRegionalDataAndComputeCreationAsync)} failed.");
                     throw;
                 }
             }

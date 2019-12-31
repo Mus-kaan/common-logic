@@ -25,6 +25,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public int DataPlaneStorageCountPerSubscription { get; set; }
 
+        public bool EnableVNet { get; set; }
+
         public void CheckValid()
         {
             if (string.IsNullOrEmpty(ActiveDBKeyName))
@@ -51,9 +53,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
 
             if (ActiveDBKeyName.OrdinalEquals("Primary MongoDB Connection String")
-                || ActiveDBKeyName.OrdinalEquals("Secondary MongoDB Connection String")
-                || ActiveDBKeyName.OrdinalEquals("Primary Read-Only MongoDB Connection String")
-                || ActiveDBKeyName.OrdinalEquals("Secondary Read-Only MongoDB Connection String"))
+            || ActiveDBKeyName.OrdinalEquals("Secondary MongoDB Connection String")
+            || ActiveDBKeyName.OrdinalEquals("Primary Read-Only MongoDB Connection String")
+            || ActiveDBKeyName.OrdinalEquals("Secondary Read-Only MongoDB Connection String"))
             {
                 return;
             }

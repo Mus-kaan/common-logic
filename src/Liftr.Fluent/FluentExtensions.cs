@@ -56,7 +56,7 @@ namespace Microsoft.Liftr.Fluent
                     .AllowInbound()
                     .FromAnyAddress()
                     .FromAnyPort()
-                    .ToAddress("VirtualNetwork")
+                    .ToAnyAddress()
                     .ToPort(80)
                     .WithAnyProtocol()
                     .WithPriority(priority)
@@ -74,8 +74,26 @@ namespace Microsoft.Liftr.Fluent
                     .AllowInbound()
                     .FromAnyAddress()
                     .FromAnyPort()
-                    .ToAddress("VirtualNetwork")
+                    .ToAnyAddress()
                     .ToPort(443)
+                    .WithAnyProtocol()
+                    .WithPriority(priority)
+                    .Attach();
+        }
+
+        public static NSG.IWithCreate AllowAny5000InBound(this NSG.IWithCreate nsgDefWithCreate, int priority = 3500)
+        {
+            if (nsgDefWithCreate == null)
+            {
+                throw new ArgumentNullException(nameof(nsgDefWithCreate));
+            }
+
+            return nsgDefWithCreate.DefineRule("AllowAny5000InBound")
+                    .AllowInbound()
+                    .FromAnyAddress()
+                    .FromAnyPort()
+                    .ToAnyAddress()
+                    .ToPort(5000)
                     .WithAnyProtocol()
                     .WithPriority(priority)
                     .Attach();

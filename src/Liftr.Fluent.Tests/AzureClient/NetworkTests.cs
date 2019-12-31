@@ -22,7 +22,6 @@ namespace Microsoft.Liftr.Fluent.Tests
         [SkipInOfficialBuild]
         public async Task CanCreateTrafficManagerAsync()
         {
-            // This test will normally take about 12 minutes.
             using (var scope = new TestResourceGroupScope("ut-network-", _output))
             {
                 var client = scope.Client;
@@ -49,11 +48,21 @@ namespace Microsoft.Liftr.Fluent.Tests
                 await helper.AddPulicIpToTrafficManagerAsync(scope.Client.FluentClient, created.Id, "endpoint2", "40.76.4.150", enabled: true);
                 await helper.AddPulicIpToTrafficManagerAsync(scope.Client.FluentClient, created.Id, "endpoint2", "40.76.4.150", enabled: false);
 
-                Assert.NotNull(await client.GetOrCreateVNetAsync(TestCommon.Location, scope.ResourceGroupName, vnetName, "10.197.0.0/16", TestCommon.Tags));
-                Assert.NotNull(await client.GetOrCreateVNetAsync(TestCommon.Location, scope.ResourceGroupName, vnetName, "10.197.0.0/16", TestCommon.Tags));
+                var vnet = await client.GetOrCreateVNetAsync(TestCommon.Location, scope.ResourceGroupName, vnetName, TestCommon.Tags);
+                Assert.NotNull(vnet);
+                Assert.NotNull(await client.GetOrCreateVNetAsync(TestCommon.Location, scope.ResourceGroupName, vnetName, TestCommon.Tags));
 
                 Assert.NotNull(await client.GetOrCreatePublicIPAsync(TestCommon.Location, scope.ResourceGroupName, pipName, TestCommon.Tags));
                 Assert.NotNull(await client.GetOrCreatePublicIPAsync(TestCommon.Location, scope.ResourceGroupName, pipName, TestCommon.Tags));
+
+                var subnet1 = await client.CreateNewSubnetAsync(vnet, "subnet1");
+                Assert.Equal("10.66.1.0/24", subnet1.AddressPrefix);
+
+                var subnet2 = await client.CreateNewSubnetAsync(vnet, "subnet2");
+                Assert.Equal("10.66.2.0/24", subnet2.AddressPrefix);
+
+                var subnet3 = await client.CreateNewSubnetAsync(vnet, "subnet3");
+                Assert.Equal("10.66.3.0/24", subnet3.AddressPrefix);
             }
         }
     }

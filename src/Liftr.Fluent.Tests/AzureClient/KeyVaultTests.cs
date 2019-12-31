@@ -108,5 +108,52 @@ namespace Microsoft.Liftr.Fluent.Tests
                 }
             }
         }
+
+        [SkipInOfficialBuild]
+        public async Task CanCreateKeyVaultInVNetAsync()
+        {
+            using (var scope = new TestResourceGroupScope("unittest-kv-", _output))
+            {
+                try
+                {
+                    var ip = await MetadataHelper.GetPublicIPAddressAsync();
+
+                    var azure = scope.Client;
+                    var rg = await azure.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
+
+                    var vnet = await azure.GetOrCreateVNetAsync(TestCommon.Location, scope.ResourceGroupName, SdkContext.RandomResourceName("vnet", 9), TestCommon.Tags);
+                    var subnet = vnet.Subnets.FirstOrDefault().Value;
+                    var name = SdkContext.RandomResourceName("test-vault-", 15);
+
+                    var kv = await azure.GetOrCreateKeyVaultAsync(TestCommon.Location, scope.ResourceGroupName, name, ip, TestCommon.Tags);
+                    Assert.Equal(0, kv.AccessPolicies.Count);
+
+                    await azure.GrantSelfKeyVaultAdminAccessAsync(kv);
+                    Assert.Equal(1, kv.AccessPolicies.Count);
+                    Assert.Equal(0, kv.Inner.Properties.NetworkAcls.VirtualNetworkRules.Count);
+                    Assert.Equal(1, kv.Inner.Properties.NetworkAcls.IpRules.Count);
+
+                    var newSubnet = await azure.CreateNewSubnetAsync(vnet, "new-subnet");
+
+                    await azure.WithKeyVaultAccessFromNetworkAsync(kv, ip, newSubnet.Inner.Id);
+                    kv = await kv.RefreshAsync();
+                    Assert.Equal(1, kv.Inner.Properties.NetworkAcls.VirtualNetworkRules.Count);
+
+                    await azure.WithKeyVaultAccessFromNetworkAsync(kv, ip, newSubnet.Inner.Id);
+                    kv = await kv.RefreshAsync();
+                    Assert.Equal(1, kv.Inner.Properties.NetworkAcls.VirtualNetworkRules.Count);
+
+                    await azure.WithKeyVaultAccessFromNetworkAsync(kv, ip, subnet.Inner.Id);
+                    kv = await kv.RefreshAsync();
+                    Assert.Equal(2, kv.Inner.Properties.NetworkAcls.VirtualNetworkRules.Count);
+                    Assert.Equal(1, kv.AccessPolicies.Count);
+                }
+                catch (Exception ex)
+                {
+                    scope.Logger.Error(ex, "Failed");
+                    throw;
+                }
+            }
+        }
     }
 }

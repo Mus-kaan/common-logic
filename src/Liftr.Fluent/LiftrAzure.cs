@@ -11,6 +11,7 @@ using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
+using Microsoft.Azure.Management.Network.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
@@ -21,6 +22,7 @@ using Microsoft.Rest.Azure;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using static Microsoft.Azure.Management.Fluent.Azure;
@@ -34,6 +36,8 @@ namespace Microsoft.Liftr.Fluent
     /// </summary>
     internal class LiftrAzure : ILiftrAzure
     {
+        public const string c_vnetAddressSpace = "10.66.0.0/16";                // 10.66.0.0 - 10.66.255.255 (65536 addresses)
+        public const string c_defaultSubnetAddressSpace = "10.66.255.0/24";     // 10.66.255.0 - 10.66.255.255 (256 addresses)
         public const string c_AspEnv = "ASPNETCORE_ENVIRONMENT";
         private readonly LiftrAzureOptions _options;
         private readonly ILogger _logger;
@@ -61,6 +65,8 @@ namespace Microsoft.Liftr.Fluent
         public string TenantId { get; }
 
         public string SPNObjectId { get; }
+
+        public string DefaultSubnetName { get; } = "default";
 
         public IAzure FluentClient { get; }
 
@@ -159,29 +165,37 @@ namespace Microsoft.Liftr.Fluent
         #endregion Resource Group
 
         #region Storage Account
-        public async Task<IStorageAccount> GetOrCreateStorageAccountAsync(Region location, string rgName, string storageAccountName, IDictionary<string, string> tags)
+        public async Task<IStorageAccount> GetOrCreateStorageAccountAsync(Region location, string rgName, string storageAccountName, IDictionary<string, string> tags, string accessFromSubnetId = null)
         {
             var stor = await GetStorageAccountAsync(rgName, storageAccountName);
 
             if (stor == null)
             {
-                stor = await CreateStorageAccountAsync(location, rgName, storageAccountName, tags);
+                stor = await CreateStorageAccountAsync(location, rgName, storageAccountName, tags, accessFromSubnetId);
             }
 
             return stor;
         }
 
-        public async Task<IStorageAccount> CreateStorageAccountAsync(Region location, string rgName, string storageAccountName, IDictionary<string, string> tags)
+        public async Task<IStorageAccount> CreateStorageAccountAsync(Region location, string rgName, string storageAccountName, IDictionary<string, string> tags, string accessFromSubnetId = null)
         {
             _logger.Information("Creating storage account with name {storageAccountName} in {rgName}", storageAccountName, rgName);
 
-            var storageAccount = await FluentClient.StorageAccounts
+            var storageAccountCreatable = FluentClient.StorageAccounts
                 .Define(storageAccountName)
                 .WithRegion(location)
                 .WithExistingResourceGroup(rgName)
                 .WithOnlyHttpsTraffic()
-                .WithTags(tags)
-                .CreateAsync();
+                .WithTags(tags);
+
+            if (!string.IsNullOrEmpty(accessFromSubnetId))
+            {
+                storageAccountCreatable = storageAccountCreatable
+                    .WithAccessFromSelectedNetworks()
+                    .WithAccessFromNetworkSubnet(accessFromSubnetId);
+            }
+
+            var storageAccount = await storageAccountCreatable.CreateAsync();
 
             _logger.Information("Created storage account with {resourceId}", storageAccount.Id);
             return storageAccount;
@@ -346,43 +360,139 @@ namespace Microsoft.Liftr.Fluent
         #endregion Storage Account
 
         #region Network
-        public async Task<INetwork> GetOrCreateVNetAsync(Region location, string rgName, string vnetName, string addressSpaceCIDR, IDictionary<string, string> tags)
+        public async Task<INetworkSecurityGroup> GetOrCreateDefaultNSGAsync(Region location, string rgName, string nsgName, IDictionary<string, string> tags)
+        {
+            var nsg = await GetNSGAsync(rgName, nsgName);
+
+            if (nsg != null)
+            {
+                _logger.Information("Using existing nsg with id '{nsgId}'.", nsg.Id);
+                return nsg;
+            }
+
+            nsg = await FluentClient.NetworkSecurityGroups
+                .Define(nsgName)
+                .WithRegion(location)
+                .WithExistingResourceGroup(rgName)
+                .AllowAny80InBound()
+                .AllowAny443InBound()
+                .WithTags(tags)
+                .CreateAsync();
+
+            _logger.Information("Created default nsg with id '{nsgId}'.", nsg.Id);
+            return nsg;
+        }
+
+        public Task<INetworkSecurityGroup> GetNSGAsync(string rgName, string nsgName)
+        {
+            return FluentClient.NetworkSecurityGroups
+                .GetByResourceGroupAsync(rgName, nsgName);
+        }
+
+        public async Task<INetwork> GetOrCreateVNetAsync(Region location, string rgName, string vnetName, IDictionary<string, string> tags, string nsgId = null)
         {
             var vnet = await GetVNetAsync(rgName, vnetName);
+
             if (vnet == null)
             {
-                vnet = await CreateVNetAsync(location, rgName, vnetName, addressSpaceCIDR, tags);
+                vnet = await CreateVNetAsync(location, rgName, vnetName, tags, nsgId);
             }
 
             return vnet;
         }
 
-        public async Task<INetwork> CreateVNetAsync(Region location, string rgName, string vnetName, string addressSpaceCIDR, IDictionary<string, string> tags)
-        {
-            _logger.Information("Start creating VNet with name: {vnetName} in RG: {rgName} with Addresses: {addressSpaceCIDR} ...", vnetName, rgName, addressSpaceCIDR);
-
-            var vnet = await FluentClient
-                .Networks
-                .Define(vnetName)
-                .WithRegion(location)
-                .WithExistingResourceGroup(rgName)
-                .WithTags(tags)
-                .WithAddressSpace(addressSpaceCIDR)
-                .CreateAsync();
-
-            _logger.Information("Created VNet with resourceId: {resourceId}", vnet.Id);
-            return vnet;
-        }
-
         public async Task<INetwork> GetVNetAsync(string rgName, string vnetName)
         {
-            _logger.Information("Start getting VNet with name: {vnetName} in RG: {rgName} ...", vnetName, rgName);
-
+            _logger.Information("Getting VNet. rgName: {rgName}, vnetName: {vnetName} ...", rgName, vnetName);
             var vnet = await FluentClient
                 .Networks
                 .GetByResourceGroupAsync(rgName, vnetName);
 
+            if (vnet == null)
+            {
+                _logger.Information("Cannot find VNet. rgName: {rgName}, vnetName: {vnetName} ...", rgName, vnetName);
+            }
+
             return vnet;
+        }
+
+        public async Task<INetwork> CreateVNetAsync(Region location, string rgName, string vnetName, IDictionary<string, string> tags, string nsgId = null)
+        {
+            _logger.Information("Creating vnet with name {vnetName} in {rgName}", vnetName, rgName);
+
+            var temp = FluentClient.Networks
+                .Define(vnetName)
+                .WithRegion(location)
+                .WithExistingResourceGroup(rgName)
+                .WithAddressSpace(c_vnetAddressSpace)
+                .DefineSubnet(DefaultSubnetName)
+                .WithAddressPrefix(c_defaultSubnetAddressSpace)
+                .WithAccessFromService(ServiceEndpointType.MicrosoftStorage)
+                .WithAccessFromService(ServiceEndpointType.MicrosoftAzureCosmosDB)
+                .WithAccessFromService(LiftrServiceEndpointType.MicrosoftKeyVault);
+
+            if (!string.IsNullOrEmpty(nsgId))
+            {
+                temp = temp.WithExistingNetworkSecurityGroup(nsgId);
+            }
+
+            var vnet = await temp.Attach().WithTags(tags).CreateAsync();
+
+            _logger.Information("Created VNet with {resourceId}", vnet.Id);
+            return vnet;
+        }
+
+        public async Task<ISubnet> CreateNewSubnetAsync(INetwork vnet, string subnetName, string nsgId = null)
+        {
+            if (vnet == null)
+            {
+                return null;
+            }
+
+            var existingSubnets = vnet.Subnets;
+
+            if (existingSubnets == null || existingSubnets.Count == 0)
+            {
+                var ex = new InvalidOperationException($"To create a new subnet similar to the existing subnets, please make sure there is at least one subnet in the existing vnet '{vnet.Id}'.");
+                _logger.Error(ex, ex.Message);
+                throw ex;
+            }
+
+            _logger.Information("There exist {subnetCount} subnets in the vnet '{vnetId}'.", existingSubnets.Count(), vnet.Id);
+            if (existingSubnets.ContainsKey(subnetName))
+            {
+                return existingSubnets[subnetName];
+            }
+
+            var oneSubnetPrefix = existingSubnets.FirstOrDefault().Value.AddressPrefix;
+            var nonDefaultSubnets = existingSubnets.Where(kvp => !kvp.Key.OrdinalEquals(DefaultSubnetName)).Select(kvp => kvp.Value);
+            var largestValue = nonDefaultSubnets
+                .Select(subnet => int.Parse(subnet.AddressPrefix.Split('.')[2], CultureInfo.InvariantCulture))
+                .OrderByDescending(i => i)
+                .FirstOrDefault();
+
+            var newIPPart = largestValue + 1;
+            var parts = oneSubnetPrefix.Split('.');
+            parts[2] = newIPPart.ToString(CultureInfo.InvariantCulture);
+            var newCIDR = string.Join(".", parts);
+
+            _logger.Information("Adding a new subnet with name {subnetName} and CIDR {subnetCIDR} to vnet '{vnetId}'.", subnetName, newCIDR, vnet.Id);
+
+            var temp = vnet.Update()
+                .DefineSubnet(subnetName)
+                .WithAddressPrefix(newCIDR)
+                .WithAccessFromService(ServiceEndpointType.MicrosoftStorage)
+                .WithAccessFromService(ServiceEndpointType.MicrosoftAzureCosmosDB)
+                .WithAccessFromService(LiftrServiceEndpointType.MicrosoftKeyVault);
+
+            if (!string.IsNullOrEmpty(nsgId))
+            {
+                temp = temp.WithExistingNetworkSecurityGroup(nsgId);
+            }
+
+            await temp.Attach().ApplyAsync();
+            await vnet.RefreshAsync();
+            return vnet.Subnets[subnetName];
         }
 
         public async Task<IPublicIPAddress> GetOrCreatePublicIPAsync(Region location, string rgName, string pipName, IDictionary<string, string> tags)
@@ -476,19 +586,29 @@ namespace Microsoft.Liftr.Fluent
         #endregion
 
         #region CosmosDB
-        public async Task<(ICosmosDBAccount cosmosDBAccount, string mongoConnectionString)> CreateCosmosDBAsync(Region location, string rgName, string cosmosDBName, IDictionary<string, string> tags)
+        public async Task<(ICosmosDBAccount cosmosDBAccount, string mongoConnectionString)> CreateCosmosDBAsync(
+            Region location,
+            string rgName,
+            string cosmosDBName,
+            IDictionary<string, string> tags,
+            ISubnet subnet = null)
         {
             _logger.Information($"Creating a CosmosDB with name {cosmosDBName} ...");
-            ICosmosDBAccount cosmosDBAccount = await FluentClient
-                .CosmosDBAccounts
-                .Define(cosmosDBName)
-                .WithRegion(location)
-                .WithExistingResourceGroup(rgName)
-                .WithDataModelMongoDB()
-                .WithStrongConsistency()
-                .WithTags(tags)
-                .CreateAsync();
+            var creatable = FluentClient
+               .CosmosDBAccounts
+               .Define(cosmosDBName)
+               .WithRegion(location)
+               .WithExistingResourceGroup(rgName)
+               .WithDataModelMongoDB()
+               .WithStrongConsistency()
+               .WithTags(tags);
 
+            if (subnet != null)
+            {
+                creatable = creatable.WithVirtualNetwork(subnet.Parent.Id, subnet.Name);
+            }
+
+            ICosmosDBAccount cosmosDBAccount = await creatable.CreateAsync();
             _logger.Information($"Created CosmosDB with name {cosmosDBName}");
 
             _logger.Information("Get the MongoDB connection string");
@@ -498,11 +618,18 @@ namespace Microsoft.Liftr.Fluent
             return (cosmosDBAccount, mongoConnectionString);
         }
 
-        public async Task<ICosmosDBAccount> GetCosmosDBAsync(string dbResourceId)
+        public Task<ICosmosDBAccount> GetCosmosDBAsync(string dbResourceId)
         {
-            return await FluentClient
+            return FluentClient
                 .CosmosDBAccounts
                 .GetByIdAsync(dbResourceId);
+        }
+
+        public Task<ICosmosDBAccount> GetCosmosDBAsync(string rgName, string cosmosDBName)
+        {
+            return FluentClient
+                .CosmosDBAccounts
+                .GetByResourceGroupAsync(rgName, cosmosDBName);
         }
 
         public async Task<IEnumerable<ICosmosDBAccount>> ListCosmosDBAsync(string rgName)
@@ -525,6 +652,25 @@ namespace Microsoft.Liftr.Fluent
             }
 
             return kv;
+        }
+
+        public async Task<IVault> GetOrCreateKeyVaultAsync(Region location, string rgName, string vaultName, string accessibleFromIP, IDictionary<string, string> tags)
+        {
+            var kv = await GetKeyVaultAsync(rgName, vaultName);
+
+            if (kv == null)
+            {
+                var helper = new KeyVaultHelper(_logger);
+                kv = await helper.CreateKeyVaultAsync(this, location, rgName, vaultName, accessibleFromIP, tags);
+            }
+
+            return kv;
+        }
+
+        public async Task WithKeyVaultAccessFromNetworkAsync(IVault vault, string ipAddress, string subnetId)
+        {
+            var helper = new KeyVaultHelper(_logger);
+            await helper.WithAccessFromNetworkAsync(vault, this, ipAddress, subnetId);
         }
 
         public async Task<IVault> CreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags)
@@ -631,7 +777,7 @@ namespace Microsoft.Liftr.Fluent
 
         #endregion Key Vault
 
-        #region Aks Cluster
+        #region AKS
         public async Task<IKubernetesCluster> CreateAksClusterAsync(
             Region region,
             string rgName,
@@ -642,11 +788,12 @@ namespace Microsoft.Liftr.Fluent
             string servicePrincipalSecret,
             ContainerServiceVMSizeTypes vmSizeType,
             int vmCount,
-            IDictionary<string, string> tags)
+            IDictionary<string, string> tags,
+            ISubnet subnet = null)
         {
-            _logger.Information($"Creating a Kubernetes cluster with name {aksName} ...");
+            _logger.Information("Creating a Kubernetes cluster with name {aksName} ...", aksName);
 
-            var k8sCluster = await FluentClient.KubernetesClusters
+            var creatable = FluentClient.KubernetesClusters
                              .Define(aksName)
                              .WithRegion(region)
                              .WithExistingResourceGroup(rgName)
@@ -655,16 +802,32 @@ namespace Microsoft.Liftr.Fluent
                              .WithSshKey(sshPublicKey)
                              .WithServicePrincipalClientId(servicePrincipalClientId)
                              .WithServicePrincipalSecret(servicePrincipalSecret)
-                             .DefineAgentPool("pool1")
-                                 .WithVirtualMachineSize(vmSizeType)
-                                 .WithAgentPoolVirtualMachineCount(vmCount)
-                                 .Attach()
-                             .WithDnsPrefix(aksName)
-                             .WithTags(tags)
-                             .CreateAsync();
+                             .DefineAgentPool("ap")
+                             .WithVirtualMachineSize(vmSizeType)
+                             .WithAgentPoolVirtualMachineCount(vmCount);
 
-            _logger.Information($"Created Kubernetes cluster with name {aksName}");
-            return k8sCluster;
+            IKubernetesCluster k8s = null;
+            if (subnet == null)
+            {
+                k8s = await creatable
+                    .Attach()
+                    .WithDnsPrefix(aksName)
+                    .WithTags(tags)
+                    .CreateAsync();
+            }
+            else
+            {
+                _logger.Information("Restrict the AKS agent pool in subnet '{subnetName}' of VNet '{vnetId}'", subnet.Name, subnet.Parent.Id);
+                k8s = await creatable
+                    .WithVirtualNetwork(subnet.Parent.Id, subnet.Name)
+                    .Attach()
+                    .WithDnsPrefix(aksName)
+                    .WithTags(tags)
+                    .CreateAsync();
+            }
+
+            _logger.Information("Created Kubernetes cluster with resource Id {resourceId}", k8s.Id);
+            return k8s;
         }
 
         public async Task<IKubernetesCluster> GetAksClusterAsync(string aksResourceId)
@@ -681,7 +844,7 @@ namespace Microsoft.Liftr.Fluent
                 .KubernetesClusters
                 .ListByResourceGroupAsync(rgName);
         }
-        #endregion Aks Cluster
+        #endregion AKS
 
         #region Identity
         public async Task<IIdentity> GetOrCreateMSIAsync(Region location, string rgName, string msiName, IDictionary<string, string> tags)

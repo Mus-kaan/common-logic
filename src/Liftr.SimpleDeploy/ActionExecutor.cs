@@ -164,7 +164,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 {
                     operation.SetContextProperty(nameof(_hostingOptions.PartnerName), _hostingOptions.PartnerName);
 
-                    var infra = new InftrastructureV2(azFactory, _logger);
+                    var infra = new InfrastructureV2(azFactory, _logger);
 
                     var globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
 
@@ -223,6 +223,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 FirstPartyCert = firstPartyCert,
                                 DataPlaneSubscriptions = regionOptions.DataPlaneSubscriptions,
                                 DataPlaneStorageCountPerSubscription = _hostingOptions.StorageCountPerDataPlaneSubscription,
+                                EnableVNet = targetOptions.EnableVNet,
                             };
 
                             await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions, kvClient);

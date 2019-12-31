@@ -35,7 +35,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             {
                 var clientFactory = new LiftrAzureFactory(globalScope.Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
                 var client = clientFactory.GenerateLiftrAzure();
-                var infra = new InftrastructureV2(clientFactory, globalScope.Logger);
+                var infra = new InfrastructureV2(clientFactory, globalScope.Logger);
 
                 // This will take a long time. Be patient.
                 var kv = await infra.CreateOrUpdateGlobalRGAsync(globalCoreName, context);

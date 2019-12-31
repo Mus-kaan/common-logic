@@ -6,6 +6,8 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace Microsoft.Liftr.Fluent.Contracts
 {
@@ -18,9 +20,9 @@ namespace Microsoft.Liftr.Fluent.Contracts
     /// </summary>
     public class NamingContext
     {
-        public const string c_infraVersionTagName = "InfraVersion";
         public const string c_RegionTagName = "RegionTag";
         public const string c_createdAtTagName = "FirstCreatedAt";
+        public const string c_versionTagName = "LiftrFluentLibraryVersion";
 
         public NamingContext(string partnerName, string shortPartnerName, EnvironmentType environment, Region location)
         {
@@ -29,13 +31,15 @@ namespace Microsoft.Liftr.Fluent.Contracts
             Environment = environment;
             Location = location ?? throw new ArgumentNullException(nameof(location));
 
+            var version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
+
             Tags = new Dictionary<string, string>()
             {
                 [nameof(PartnerName)] = PartnerName,
                 [nameof(Environment)] = Environment.ToString(),
-                [c_infraVersionTagName] = "v2",
                 [c_RegionTagName] = location.ToString(),
                 [c_createdAtTagName] = DateTime.UtcNow.ToZuluString(),
+                [c_versionTagName] = version,
             };
         }
 
@@ -68,6 +72,12 @@ namespace Microsoft.Liftr.Fluent.Contracts
 
             return name;
         }
+
+        public string NetworkName(string baseName)
+            => GenerateCommonName(baseName, "vnet");
+
+        public string SubnetName(string baseName)
+            => GenerateCommonName(baseName, delimiter: string.Empty);
 
         public string MSIName(string baseName)
             => GenerateCommonName(baseName, "msi");

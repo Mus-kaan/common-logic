@@ -1,0 +1,32 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "resources": [
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "name": "WILL_BE_CHANGED [parameters('keyVaultName')]",
+      "apiVersion": "2018-02-14",
+      "location": "WILL_BE_CHANGED [parameters('location')]",
+      "tags": {
+        "WILL_BE_CHANGED_displayName": "Key Vault with logging"
+      },
+      "properties": {
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "enabledForDeployment": false,
+        "enabledForTemplateDeployment": false,
+        "enabledForDiskEncryption": false,
+        "tenantId": "WILL_BE_CHANGED_displayName 00000000-0000-0000-0000-000000000000",
+        "networkAcls": {
+          "defaultAction": "Deny",
+          "bypass": "AzureServices",
+          "ipRules": "PLACE_HOLDER_IP_RULES",
+          "virtualNetworkRules": "PLACE_HOLDER_VNET_RULES"
+        },
+        "accessPolicies": "PLACE_HOLDER_ACCESS_POLICIES"
+      }
+    }
+  ]
+}

@@ -30,6 +30,8 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public AKSInfo AKSConfigurations { get; set; } = new AKSInfo();
 
+        public bool EnableVNet { get; set; } = true;
+
         public void CheckValid()
         {
             if (string.IsNullOrEmpty(GenevaCertificateSubjectName))
