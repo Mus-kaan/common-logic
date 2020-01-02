@@ -13,9 +13,7 @@
         "AKSMachineCount": 3,
         "AKSMachineType": "Standard_DS2_v2",
         "AKSSPNClientId": "16735b89-eb3b-483c-b8bd-3e33e89ba1a4", // liftr-test-rp-aks-ms
-        "AKSSPNObjectId": "e3403f25-cf71-4bb1-a390-ffeb5f57fd75",
-        "AKSRootUserName": "liftraksvmuser",
-        "AKSSSHPublicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDiAVw6gNipzMfXUD/DAj0CwahIMJNYucOrzXxw4O+4gBDSAkRh+uyT5tAE0Ctohpl40fEfJcjwn96upUpgWtcEWCWjWMq1tRRuClw03GcUTMs0T5A9nUfK58+nebdD/YFEWB8meTknK3R4FI7IGdC212N/nm25GcQOKdZmEb8VOXfylVn7dzmqkbR7GdASdvhBF9MkG7YjhGznidkh2f5qmqpYc9oDS8lO/NtuSvSO6sgSHiP9F6D25Dfj5/NywiJAWF8iaoyIayEO0CWGHtM+ou6P/MO6YjNnDVX6HJptbIyQ8epkxQUmyWvf9pYQ8ALX40uGfj5CCUaQN32tUKVF weng5e@5e-box"
+        "AKSSPNObjectId": "e3403f25-cf71-4bb1-a390-ffeb5f57fd75"
       },
       "Global": {
         "Location": "centralus",

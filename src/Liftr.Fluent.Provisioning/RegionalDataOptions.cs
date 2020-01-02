@@ -15,6 +15,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string SecretPrefix { get; set; }
 
+        public string LogAnalyticsWorkspaceId { get; set; }
+
         public CertificateOptions GenevaCert { get; set; }
 
         public CertificateOptions SSLCert { get; set; }
@@ -37,6 +39,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             if (string.IsNullOrEmpty(SecretPrefix))
             {
                 throw new InvalidOperationException($"{nameof(SecretPrefix)} should not be null.");
+            }
+
+            if (string.IsNullOrEmpty(LogAnalyticsWorkspaceId))
+            {
+                throw new InvalidOperationException($"{nameof(LogAnalyticsWorkspaceId)} should not be null.");
             }
 
             if (DataPlaneStorageCountPerSubscription < 0)

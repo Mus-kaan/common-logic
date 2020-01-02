@@ -23,6 +23,14 @@
     <Content Include="buildMultiTargeting\*" PackagePath="buildMultiTargeting\" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="sample-ev2-options.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="sample-ev2-options.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.EV2.Contracts\Liftr.EV2.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />

@@ -24,5 +24,8 @@
       "antares-mds-agent.geneva.keyvault.liftr-dev.net"
     ]
   },
-  "DataPlaneStorageCountPerSubscription": 0
+  "DataPlaneStorageCountPerSubscription": 2,
+  "DataPlaneSubscriptions": [
+    "60fad35b-3a47-4ca0-b691-4a789f737cea"
+  ]
 }

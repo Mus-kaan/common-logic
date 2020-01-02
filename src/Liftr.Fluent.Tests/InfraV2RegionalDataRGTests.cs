@@ -47,10 +47,14 @@ namespace Microsoft.Liftr.Fluent.Tests
             {
                 try
                 {
-                    var infra = new InfrastructureV2(regionalDataScope.AzFactory, regionalDataScope.Logger);
+                    var infra = new InfrastructureV2(regionalDataScope.AzFactory, TestCredentials.KeyVaultClient, regionalDataScope.Logger);
                     var client = regionalDataScope.Client;
 
-                    (_, _, _, var tm, var kv) = await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dataOptions, TestCredentials.KeyVaultClient);
+                    await client.GetOrCreateResourceGroupAsync(context.Location, rgName, context.Tags);
+                    var logAnalytics = await client.GetOrCreateLogAnalyticsWorkspaceAsync(context.Location, rgName, context.LogAnalyticsName("gbl001"), context.Tags);
+                    dataOptions.LogAnalyticsWorkspaceId = logAnalytics.Id;
+
+                    (_, _, _, var tm, var kv) = await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dataOptions);
 
                     // Check regional data resources.
                     {
@@ -68,7 +72,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     }
 
                     // Same deployment will not throw exception.
-                    await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dataOptions, TestCredentials.KeyVaultClient);
+                    await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dataOptions);
                 }
                 catch (Exception ex)
                 {

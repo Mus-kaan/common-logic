@@ -5,6 +5,7 @@
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent;
+using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
@@ -20,6 +21,7 @@ using Microsoft.Rest.Azure;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -27,12 +29,17 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 {
     public class InfrastructureV2
     {
+        private const string SSHUserNameSecretName = "SSHUserName";
+        private const string SSHPublicKeySecretName = "SSHPublicKey";
+        private const string SSHPrivateKeySecretName = "SSHPrivateKey";
         private readonly ILiftrAzureFactory _azureClientFactory;
+        private readonly KeyVaultClient _kvClient;
         private readonly ILogger _logger;
 
-        public InfrastructureV2(ILiftrAzureFactory azureClientFactory, ILogger logger)
+        public InfrastructureV2(ILiftrAzureFactory azureClientFactory, KeyVaultClient kvClient, ILogger logger)
         {
             _azureClientFactory = azureClientFactory ?? throw new ArgumentNullException(nameof(azureClientFactory));
+            _kvClient = kvClient ?? throw new ArgumentNullException(nameof(kvClient));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -48,14 +55,45 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 var rgName = namingContext.ResourceGroupName(baseName);
                 var kvName = namingContext.KeyVaultName(baseName);
                 var acrName = namingContext.ACRName(baseName);
+                var logAnalyticsName = namingContext.LogAnalyticsName(baseName);
 
                 var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
 
                 var rg = await liftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
+                var logAnalytics = await liftrAzure.GetOrCreateLogAnalyticsWorkspaceAsync(namingContext.Location, rgName, logAnalyticsName, namingContext.Tags);
+
                 var kv = await liftrAzure.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
+
+                _logger.Information("Export Key Vault '{kvId}' diagnostics to Log Analytics '{logId}'.", kv.Id, logAnalytics.Id);
+                await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(kv, logAnalytics.Id);
                 await liftrAzure.GrantSelfKeyVaultAdminAccessAsync(kv);
 
                 var acr = await liftrAzure.GetOrCreateACRAsync(namingContext.Location, rgName, acrName, namingContext.Tags);
+                _logger.Information("Export ACR '{acrId}' diagnostics to Log Analytics '{logId}'.", acr.Id, logAnalytics.Id);
+                await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(acr, logAnalytics.Id);
+
+                using (var kvValet = new KeyVaultConcierge(kv.VaultUri, _kvClient, _logger))
+                {
+                    if (!await kvValet.ContainsSecretAsync(SSHUserNameSecretName))
+                    {
+                        _logger.Information("Storing SSH user name in global key vault.");
+                        await kvValet.SetSecretAsync(SSHUserNameSecretName, "liftraksvmuser", namingContext.Tags);
+                    }
+
+                    if (File.Exists("liftr_ssh_key") && !await kvValet.ContainsSecretAsync(SSHPrivateKeySecretName))
+                    {
+                        _logger.Information("Storing SSH private key in global key vault.");
+                        var sshPrivateKey = File.ReadAllText("liftr_ssh_key");
+                        await kvValet.SetSecretAsync(SSHPrivateKeySecretName, sshPrivateKey, namingContext.Tags);
+                    }
+
+                    if (File.Exists("liftr_ssh_key.pub") && !await kvValet.ContainsSecretAsync(SSHPublicKeySecretName))
+                    {
+                        _logger.Information("Storing SSH public key in global key vault.");
+                        var sshPublicKey = File.ReadAllText("liftr_ssh_key.pub");
+                        await kvValet.SetSecretAsync(SSHPublicKeySecretName, sshPublicKey, namingContext.Tags);
+                    }
+                }
 
                 return (kv, acr);
             }
@@ -69,8 +107,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         public async Task<(IResourceGroup rg, IIdentity msi, ICosmosDBAccount db, ITrafficManagerProfile tm, IVault kv)> CreateOrUpdateRegionalDataRGAsync(
             string baseName,
             NamingContext namingContext,
-            RegionalDataOptions dataOptions,
-            KeyVaultClient kvClient)
+            RegionalDataOptions dataOptions)
         {
             if (namingContext == null)
             {
@@ -88,7 +125,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             ICosmosDBAccount db = null;
             ITrafficManagerProfile tm = null;
-            IVault kv = null;
+            IVault regionalKeyVault = null;
 
             var rgName = namingContext.ResourceGroupName(baseName);
             var storageName = namingContext.StorageAccountName(baseName);
@@ -108,15 +145,28 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 var nsgName = $"{vnetName}-default-nsg";
                 var nsg = await liftrAzure.GetOrCreateDefaultNSGAsync(namingContext.Location, rgName, nsgName, namingContext.Tags);
                 var vnet = await liftrAzure.GetOrCreateVNetAsync(namingContext.Location, rgName, vnetName, namingContext.Tags, nsg.Id);
+                await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(vnet, dataOptions.LogAnalyticsWorkspaceId);
                 subnet = vnet.Subnets[liftrAzure.DefaultSubnetName];
-                kv = await liftrAzure.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, currentPublicIP, namingContext.Tags);
+                regionalKeyVault = await liftrAzure.GetKeyVaultAsync(rgName, kvName);
+                if (regionalKeyVault == null)
+                {
+                    regionalKeyVault = await liftrAzure.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, currentPublicIP, namingContext.Tags);
+                }
+                else
+                {
+                    _logger.Information("Make sure the Key Vault '{kvId}' can be accessed from current IP '{currentPublicIP}'.", regionalKeyVault.Id, currentPublicIP);
+                    await liftrAzure.WithKeyVaultAccessFromNetworkAsync(regionalKeyVault, currentPublicIP, subnet?.Inner?.Id);
+                    regionalKeyVault = await regionalKeyVault.RefreshAsync();
+                }
             }
             else
             {
-                kv = await liftrAzure.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
+                regionalKeyVault = await liftrAzure.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
             }
 
-            await liftrAzure.GrantSelfKeyVaultAdminAccessAsync(kv);
+            await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(regionalKeyVault, dataOptions.LogAnalyticsWorkspaceId);
+            await liftrAzure.GrantSelfKeyVaultAdminAccessAsync(regionalKeyVault);
+            regionalKeyVault = await regionalKeyVault.RefreshAsync();
             var storageAccount = await liftrAzure.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, storageName, namingContext.Tags, subnet?.Inner?.Id);
             await liftrAzure.GrantQueueContributorAsync(storageAccount, msi);
 
@@ -141,15 +191,17 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
 
             tm = await liftrAzure.GetOrCreateTrafficManagerAsync(rgName, trafficManagerName, namingContext.Tags);
+            await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(tm, dataOptions.LogAnalyticsWorkspaceId);
 
             _logger.Information("Start adding access policy for msi to regional kv.");
-            await kv.Update()
+            await regionalKeyVault.Update()
                 .DefineAccessPolicy()
                 .ForObjectId(msi.GetObjectId())
                 .AllowSecretPermissions(SecretPermissions.List, SecretPermissions.Get)
                 .AllowCertificatePermissions(CertificatePermissions.Get, CertificatePermissions.Getissuers, CertificatePermissions.List)
                 .Attach()
                 .ApplyAsync();
+            regionalKeyVault = await regionalKeyVault.RefreshAsync();
             _logger.Information("Added access policy for msi to regional kv.");
 
             _logger.Information("Creating CosmosDB ...");
@@ -159,6 +211,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             {
                 (var createdDb, _) = await liftrAzure.CreateCosmosDBAsync(namingContext.Location, rgName, cosmosName, namingContext.Tags, subnet);
                 db = createdDb;
+                await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(db, dataOptions.LogAnalyticsWorkspaceId);
                 _logger.Information("Created CosmosDB with Id {ResourceId}", db.Id);
             }
 
@@ -167,8 +220,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 foreach (var dpSubscription in dataOptions.DataPlaneSubscriptions)
                 {
                     var dataPlaneLiftrAzure = _azureClientFactory.GenerateLiftrAzure(dpSubscription);
-                    IResourceGroup dataPlaneStorageRG = await dataPlaneLiftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, namingContext.ResourceGroupName(baseName + "-dp"), namingContext.Tags);
-
+                    var dataPlaneStorageRG = await dataPlaneLiftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, namingContext.ResourceGroupName(baseName + "-dp"), namingContext.Tags);
                     var existingStorageAccountCount = (await dataPlaneLiftrAzure.ListStorageAccountAsync(dataPlaneStorageRG.Name)).Count();
 
                     for (int i = existingStorageAccountCount; i < dataOptions.DataPlaneStorageCountPerSubscription; i++)
@@ -179,7 +231,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 }
             }
 
-            using (var regionalKVValet = new KeyVaultConcierge(kv.VaultUri, kvClient, _logger))
+            using (var regionalKVValet = new KeyVaultConcierge(regionalKeyVault.VaultUri, _kvClient, _logger))
             {
                 var rpAssets = new RPAssetOptions()
                 {
@@ -205,9 +257,13 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                             SubscriptionId = dataPlaneSubscriptionId,
                         };
 
-                        var dataPlaneSubscription = _azureClientFactory.GenerateLiftrAzure(dataPlaneSubscriptionId);
-                        var stors = await dataPlaneSubscription.ListStorageAccountAsync(namingContext.ResourceGroupName(baseName + "-dp"));
-                        dpSubInfo.StorageAccountIds = stors.Select(st => st.Id);
+                        if (dataOptions.DataPlaneStorageCountPerSubscription > 0)
+                        {
+                            var dataPlaneLiftrAzure = _azureClientFactory.GenerateLiftrAzure(dataPlaneSubscriptionId);
+                            var stors = await dataPlaneLiftrAzure.ListStorageAccountAsync(namingContext.ResourceGroupName(baseName + "-dp"));
+                            dpSubInfo.StorageAccountIds = stors.Select(st => st.Id);
+                        }
+
                         dataPlaneSubscriptionInfos.Add(dpSubInfo);
                     }
 
@@ -253,14 +309,14 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 }
             }
 
-            return (rg, msi, db, tm, kv);
+            return (rg, msi, db, tm, regionalKeyVault);
         }
 
         public async Task<(IVault kv, IIdentity msi, IKubernetesCluster aks)> CreateOrUpdateRegionalComputeRGAsync(
             NamingContext namingContext,
             RegionalComputeOptions computeOptions,
             AKSInfo aksInfo,
-            KeyVaultClient kvClient)
+            KeyVaultClient _kvClient)
         {
             if (namingContext == null)
             {
@@ -365,7 +421,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
 
             string aksSPNClientSecret = null;
-            using (var globalKVValet = new KeyVaultConcierge(globalKeyVault.VaultUri, kvClient, _logger))
+            string sshUserName = null;
+            string sshPublicKey = null;
+            using (var globalKVValet = new KeyVaultConcierge(globalKeyVault.VaultUri, _kvClient, _logger))
             {
                 aksSPNClientSecret = (await globalKVValet.GetSecretAsync(aksInfo.AKSSPNClientSecretName))?.Value;
                 if (aksSPNClientSecret == null)
@@ -374,6 +432,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     _logger.Error(errorMsg);
                     throw new InvalidOperationException(errorMsg);
                 }
+
+                sshUserName = (await globalKVValet.GetSecretAsync(SSHUserNameSecretName))?.Value ?? throw new InvalidOperationException("Cannot find ssh user name in key vault");
+                sshPublicKey = (await globalKVValet.GetSecretAsync(SSHPublicKeySecretName))?.Value ?? throw new InvalidOperationException("Cannot find ssh public key in key vault");
             }
 
             var aksId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.ContainerService/managedClusters/{aksName}";
@@ -433,8 +494,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     namingContext.Location,
                     rgName,
                     aksName,
-                    aksInfo.AKSRootUserName,
-                    aksInfo.AKSSSHPublicKey,
+                    sshUserName,
+                    sshPublicKey,
                     aksInfo.AKSSPNClientId,
                     aksSPNClientSecret,
                     aksInfo.AKSMachineType,
@@ -443,6 +504,18 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     subnet);
 
                 _logger.Information("Created AKS cluster with Id {ResourceId}", aks.Id);
+
+                if (!string.IsNullOrEmpty(computeOptions.LogAnalyticsWorkspaceResourceId))
+                {
+                    var aksAddOns = new Dictionary<string, ManagedClusterAddonProfile>()
+                    {
+                        ["omsagent"] = new ManagedClusterAddonProfile(true, new Dictionary<string, string>()
+                        {
+                            ["logAnalyticsWorkspaceResourceID"] = computeOptions.LogAnalyticsWorkspaceResourceId,
+                        }),
+                    };
+                    await aks.Update().WithAddOnProfiles(aksAddOns).ApplyAsync();
+                }
             }
             else
             {

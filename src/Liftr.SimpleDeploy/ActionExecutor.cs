@@ -164,9 +164,10 @@ namespace Microsoft.Liftr.SimpleDeploy
                 {
                     operation.SetContextProperty(nameof(_hostingOptions.PartnerName), _hostingOptions.PartnerName);
 
-                    var infra = new InfrastructureV2(azFactory, _logger);
+                    var infra = new InfrastructureV2(azFactory, kvClient, _logger);
 
                     var globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
+                    var logAnalyticsWorkspaceId = $"/subscriptions/{azFactory.GenerateLiftrAzure().FluentClient.SubscriptionId}/resourcegroups/{globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName)}/providers/microsoft.operationalinsights/workspaces/{globalNamingContext.LogAnalyticsName(targetOptions.Global.BaseName)}";
 
                     if (_commandOptions.Action == ActionType.CreateOrUpdateGlobal)
                     {
@@ -224,9 +225,10 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 DataPlaneSubscriptions = regionOptions.DataPlaneSubscriptions,
                                 DataPlaneStorageCountPerSubscription = _hostingOptions.StorageCountPerDataPlaneSubscription,
                                 EnableVNet = targetOptions.EnableVNet,
+                                LogAnalyticsWorkspaceId = logAnalyticsWorkspaceId,
                             };
 
-                            await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions, kvClient);
+                            await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions);
                             _logger.Information("Successfully managed regional data resources.");
                         }
                         else if (_commandOptions.Action == ActionType.CreateOrUpdateRegionalCompute)
@@ -250,6 +252,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 DataBaseName = regionOptions.DataBaseName,
                                 ComputeBaseName = regionOptions.ComputeBaseName,
                                 GlobalKeyVaultResourceId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName)}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
+                                LogAnalyticsWorkspaceResourceId = logAnalyticsWorkspaceId,
                             };
 
                             (var kv, var msi, var aks) = await infra.CreateOrUpdateRegionalComputeRGAsync(

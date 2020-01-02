@@ -17,6 +17,8 @@ DeploymentSubscriptionId=$(<bin/subscription-id.txt)
     fi
 fi
 
+ssh-keygen -m PEM -t rsa -b 4096 -f bin/liftr_ssh_key -N ""
+
 ./AzLogin.sh
 
 ./RegisterFeatureAndProvider.sh --DeploymentSubscriptionId="$DeploymentSubscriptionId"

@@ -39,6 +39,8 @@ namespace Microsoft.Liftr.Fluent
 
         string DefaultSubnetName { get; }
 
+        Task<ResourceGetResponse> GetResourceAsync(string resourceId, string apiVersion);
+
         #region Resource Group
         Task<IResourceGroup> GetOrCreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags);
 
@@ -181,6 +183,12 @@ namespace Microsoft.Liftr.Fluent
 
         #region Deployments
         Task<IDeployment> CreateDeploymentAsync(Region location, string rgName, string template, string templateParameters = null, bool noLogging = false);
+        #endregion
+
+        #region Monitoring
+        Task<ResourceGetResponse> GetOrCreateLogAnalyticsWorkspaceAsync(Region location, string rgName, string name, IDictionary<string, string> tags);
+
+        Task<ResourceGetResponse> GetLogAnalyticsWorkspaceAsync(string rgName, string name);
         #endregion
     }
 }

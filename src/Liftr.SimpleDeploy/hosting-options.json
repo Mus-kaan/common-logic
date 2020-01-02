@@ -1,21 +1,20 @@
 {
-  "PartnerName": "IncrediBuild",
-  "ShortPartnerName": "ib",
-  "SecretPrefix": "IncrediBuildRP",
+  "PartnerName": "SamplePartner",
+  "ShortPartnerName": "sp",
+  "SecretPrefix": "SamplePartner",
   "StorageCountPerDataPlaneSubscription": 1,
   "Environments": [
     {
       "EnvironmentName": "Test",
       "TenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", // ms
       "AzureSubscription": "d21a525e-7c86-486d-a79e-a4f3622f639a",
+      "EnableVNet": true,
       "GenevaCertificateSubjectName": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
       "FirstPartyAppCertificateSubjectName": "test-first-party-certificate.liftr-dev.net",
       "AKSConfigurations": {
         "AKSMachineType": "Standard_DS2_v2",
         "AKSSPNClientId": "935ea9b7-b232-417a-96b8-b2a51d88b2f5",
-        "AKSSPNObjectId": "77413952-924e-4098-8318-2c9f46b10b2f",
-        "AKSRootUserName": "liftraksvmuser",
-        "AKSSSHPublicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDiAVw6gNipzMfXUD/DAj0CwahIMJNYucOrzXxw4O+4gBDSAkRh+uyT5tAE0Ctohpl40fEfJcjwn96upUpgWtcEWCWjWMq1tRRuClw03GcUTMs0T5A9nUfK58+nebdD/YFEWB8meTknK3R4FI7IGdC212N/nm25GcQOKdZmEb8VOXfylVn7dzmqkbR7GdASdvhBF9MkG7YjhGznidkh2f5qmqpYc9oDS8lO/NtuSvSO6sgSHiP9F6D25Dfj5/NywiJAWF8iaoyIayEO0CWGHtM+ou6P/MO6YjNnDVX6HJptbIyQ8epkxQUmyWvf9pYQ8ALX40uGfj5CCUaQN32tUKVF weng5e@5e-box"
+        "AKSSPNObjectId": "77413952-924e-4098-8318-2c9f46b10b2f"
       },
       "Global": {
         "Location": "centralus",
@@ -26,7 +25,7 @@
           "Location": "eastus",
           "DataBaseName": "data191002",
           "ComputeBaseName": "com191002",
-          "HostName": "ib-rp-web-eus.azliftr-test.io",
+          "HostName": "sample-partner-eus.azliftr-test.io",
           "DataPlaneSubscriptions": [
             "eebfbfdb-4167-49f6-be43-466a6709609f"
           ]
@@ -35,7 +34,7 @@
           "Location": "westcentralus",
           "DataBaseName": "data191002",
           "ComputeBaseName": "com191002",
-          "HostName": "ib-rp-web-wcus.azliftr-test.io",
+          "HostName": "sample-partner-wcus.azliftr-test.io",
           "DataPlaneSubscriptions": [
             "eebfbfdb-4167-49f6-be43-466a6709609f"
           ]

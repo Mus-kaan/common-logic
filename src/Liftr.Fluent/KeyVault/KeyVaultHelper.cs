@@ -60,7 +60,7 @@ namespace Microsoft.Liftr.Fluent
                 subnets,
                 tags);
 
-            await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent);
+            await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true);
 
             IVault vault = await liftrAzure.GetKeyVaultAsync(rgName, vaultName);
 
@@ -122,7 +122,7 @@ namespace Microsoft.Liftr.Fluent
                 subnets,
                 tags);
 
-            await liftrAzure.CreateDeploymentAsync(vault.Region, vault.ResourceGroupName, templateContent);
+            await liftrAzure.CreateDeploymentAsync(vault.Region, vault.ResourceGroupName, templateContent, noLogging: true);
             _logger.Information("Key Vault '{kvId}' is accessible from IPs : '{@allowedIPs}', and subnets: '{@allowedSubnets}'.", vault.Id, ips, subnets);
         }
 

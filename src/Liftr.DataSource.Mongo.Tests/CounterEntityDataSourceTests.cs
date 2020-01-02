@@ -47,6 +47,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
                 var counterName = $"{prefix}{prefixCount}{prefixCount}{prefixCount}-{i}";
                 {
                     await s.IncreaseCounterAsync(counterName, 0);
+                    await Task.Delay(1000);
                     var val = await s.GetCounterAsync(counterName);
                     Assert.Equal(0, val);
                 }

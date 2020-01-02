@@ -97,6 +97,9 @@ namespace Microsoft.Liftr.Fluent.Contracts
         public string CosmosDBName(string baseName)
             => GenerateCommonName(baseName, "db");
 
+        public string LogAnalyticsName(string baseName)
+            => GenerateCommonName(baseName, "log");
+
         public string SharedImageGalleryName(string baseName)
            => GenerateCommonName(baseName, "sig", noRegion: false, delimiter: "_");
 

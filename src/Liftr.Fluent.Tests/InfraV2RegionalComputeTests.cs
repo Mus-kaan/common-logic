@@ -40,7 +40,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             {
                 try
                 {
-                    var infra = new InfrastructureV2(scope.AzFactory, scope.Logger);
+                    var infra = new InfrastructureV2(scope.AzFactory, TestCredentials.KeyVaultClient, scope.Logger);
                     var client = scope.Client;
 
                     // This will take a long time. Be patient.

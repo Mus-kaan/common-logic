@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using static Microsoft.Azure.Management.Fluent.Azure;
 
@@ -450,7 +451,6 @@ namespace Microsoft.Liftr.Fluent
             }
 
             var existingSubnets = vnet.Subnets;
-
             if (existingSubnets == null || existingSubnets.Count == 0)
             {
                 var ex = new InvalidOperationException($"To create a new subnet similar to the existing subnets, please make sure there is at least one subnet in the existing vnet '{vnet.Id}'.");
@@ -947,6 +947,59 @@ namespace Microsoft.Liftr.Fluent
                 _logger.Error("ARM deployment with name {@deploymentName} Failed with Error: {@DeploymentError}", deploymentName, error);
                 throw new ARMDeploymentFailureException("ARM deployment failed", ex) { Details = error };
             }
+        }
+        #endregion
+
+        public async Task<ResourceGetResponse> GetResourceAsync(string resourceId, string apiVersion)
+        {
+            using (var handler = new AzureApiAuthHandler(AzureCredentials))
+            using (var httpClient = new HttpClient(handler))
+            {
+                var uriBuilder = new UriBuilder(AzureCredentials.Environment.ResourceManagerEndpoint);
+                uriBuilder.Path = resourceId;
+                uriBuilder.Query = $"api-version={apiVersion}";
+
+                try
+                {
+                    var response = await httpClient.GetStringAsync(uriBuilder.Uri);
+                    return new ResourceGetResponse()
+                    {
+                        Id = resourceId,
+                        Details = response,
+                    };
+                }
+                catch (Exception ex)
+                {
+                    if (ex.Message.OrdinalContains("Response status code does not indicate success: 404 (Not Found)"))
+                    {
+                        return null;
+                    }
+
+                    _logger.Error(ex, $"{nameof(GetResourceAsync)} failed.");
+                    throw;
+                }
+            }
+        }
+
+        #region Monitoring
+        public async Task<ResourceGetResponse> GetOrCreateLogAnalyticsWorkspaceAsync(Region location, string rgName, string name, IDictionary<string, string> tags)
+        {
+            var logAnalytics = await GetLogAnalyticsWorkspaceAsync(rgName, name);
+            if (logAnalytics == null)
+            {
+                var helper = new LogAnalyticsHelper(_logger);
+                await helper.CreateLogAnalyticsWorkspaceAsync(this, location, rgName, name, tags);
+                logAnalytics = await GetLogAnalyticsWorkspaceAsync(rgName, name);
+                _logger.Information("Created a new Log Analytics Workspace with resource Id: '{logAnalyticsId}'.", logAnalytics.Id);
+            }
+
+            return logAnalytics;
+        }
+
+        public Task<ResourceGetResponse> GetLogAnalyticsWorkspaceAsync(string rgName, string name)
+        {
+            var helper = new LogAnalyticsHelper(_logger);
+            return helper.GetLogAnalyticsWorkspaceAsync(this, rgName, name);
         }
         #endregion
     }

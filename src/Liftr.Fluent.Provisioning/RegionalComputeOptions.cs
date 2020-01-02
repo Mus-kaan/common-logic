@@ -10,6 +10,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
     {
         public string GlobalKeyVaultResourceId { get; set; }
 
+        public string LogAnalyticsWorkspaceResourceId { get; set; }
+
         public string DataBaseName { get; set; }
 
         public string ComputeBaseName { get; set; }

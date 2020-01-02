@@ -26,7 +26,7 @@ namespace Microsoft.Liftr.EV2
 
             if (UserAssignedManagedIdentityObjectId.Equals(Guid.Empty))
             {
-                var ex = new InvalidOperationException($"Please make sure '{nameof(SubscriptionId)}' in the '{nameof(EV2RunnerInfomation)}' section is not empty.");
+                var ex = new InvalidOperationException($"Please make sure '{nameof(UserAssignedManagedIdentityObjectId)}' in the '{nameof(EV2RunnerInfomation)}' section is not empty.");
                 throw ex;
             }
         }

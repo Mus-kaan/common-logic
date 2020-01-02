@@ -25,7 +25,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild]
+        [Fact(Skip = "This test is flaky due to cosmos db trasition time after creation is variable.")]
         public async Task VerifyRegionalDataAndComputeCreationAsync()
         {
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);
@@ -50,10 +50,14 @@ namespace Microsoft.Liftr.Fluent.Tests
                 var logger = regionalDataScope.Logger;
                 try
                 {
-                    var infra = new InfrastructureV2(regionalDataScope.AzFactory, regionalDataScope.Logger);
+                    var infra = new InfrastructureV2(regionalDataScope.AzFactory, TestCredentials.KeyVaultClient, regionalDataScope.Logger);
                     var client = regionalDataScope.Client;
 
-                    (_, _, _, var tm, _) = await infra.CreateOrUpdateRegionalDataRGAsync(dataBaseName, context, dataOptions, TestCredentials.KeyVaultClient);
+                    await client.GetOrCreateResourceGroupAsync(context.Location, dataRGName, context.Tags);
+                    var logAnalytics = await client.GetOrCreateLogAnalyticsWorkspaceAsync(context.Location, dataRGName, context.LogAnalyticsName("gbl001"), context.Tags);
+                    dataOptions.LogAnalyticsWorkspaceId = logAnalytics.Id;
+
+                    (_, _, _, var tm, _) = await infra.CreateOrUpdateRegionalDataRGAsync(dataBaseName, context, dataOptions);
 
                     // Check regional data resources.
                     {

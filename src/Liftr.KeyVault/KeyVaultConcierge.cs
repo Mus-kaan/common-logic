@@ -10,15 +10,15 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.KeyVault
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1054:Uri parameters should not be strings", Justification = "<Pending>")]
     public sealed class KeyVaultConcierge : IDisposable
     {
+        private readonly bool _needDispose = false;
         private readonly string _vaultBaseUrl;
         private readonly KeyVaultClient _keyVaultClient;
         private readonly Serilog.ILogger _logger;
 
-#pragma warning disable CA1054 // Uri parameters should not be strings
         public KeyVaultConcierge(string vaultBaseUrl, string clientId, string clientSecret, Serilog.ILogger logger)
-#pragma warning restore CA1054 // Uri parameters should not be strings
         {
             if (string.IsNullOrEmpty(clientId))
             {
@@ -32,12 +32,11 @@ namespace Microsoft.Liftr.KeyVault
 
             _vaultBaseUrl = vaultBaseUrl;
             _keyVaultClient = KeyVaultClientFactory.FromClientIdAndSecret(clientId, clientSecret);
-            _logger = logger;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _needDispose = true;
         }
 
-#pragma warning disable CA1054 // Uri parameters should not be strings
         public KeyVaultConcierge(string vaultBaseUrl, KeyVaultClient kvClient, Serilog.ILogger logger)
-#pragma warning restore CA1054 // Uri parameters should not be strings
         {
             if (string.IsNullOrEmpty(vaultBaseUrl))
             {
@@ -45,8 +44,22 @@ namespace Microsoft.Liftr.KeyVault
             }
 
             _vaultBaseUrl = vaultBaseUrl;
-            _keyVaultClient = kvClient;
-            _logger = logger;
+            _keyVaultClient = kvClient ?? throw new ArgumentNullException(nameof(kvClient));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "By Design.")]
+        public async Task<bool> ContainsSecretAsync(string secretName)
+        {
+            try
+            {
+                var result = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, secretName);
+                return result != null;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task<SecretBundle> GetSecretAsync(string secretName)
@@ -175,7 +188,10 @@ namespace Microsoft.Liftr.KeyVault
 
         public void Dispose()
         {
-            _keyVaultClient.Dispose();
+            if (_needDispose)
+            {
+                _keyVaultClient.Dispose();
+            }
         }
     }
 }

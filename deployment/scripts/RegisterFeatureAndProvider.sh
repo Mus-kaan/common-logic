@@ -41,6 +41,8 @@ az feature show --namespace Microsoft.VirtualMachineImages --name VirtualMachine
 checkAndRegisterProvider "Microsoft.Storage"
 checkAndRegisterProvider "Microsoft.Compute"
 checkAndRegisterProvider "Microsoft.VirtualMachineImages"
+checkAndRegisterProvider "microsoft.insights"
+checkAndRegisterProvider "Microsoft.OperationalInsights"
 
 # register and enable for shared image gallery
 az feature register --namespace Microsoft.Compute --name GalleryPreview

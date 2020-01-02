@@ -1,0 +1,21 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "resources": [
+    {
+      "type": "microsoft.operationalinsights/workspaces",
+      "apiVersion": "2015-11-01-preview",
+      "name": "WILL_BE_CHANGED [parameters('workspaces_wuweng_test_log_ana_name')]",
+      "location": "WILL_BE_CHANGED westus",
+      "tags": {
+        "WILL_BE_CHANGED_displayName": "tag value"
+      },
+      "properties": {
+        "sku": {
+          "name": "pergb2018"
+        },
+        "retentionInDays": 90
+      }
+    }
+  ]
+}

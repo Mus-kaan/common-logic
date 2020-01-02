@@ -16,10 +16,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         [JsonConverter(typeof(ContainerServiceVMSizeTypesConverter))]
         public ContainerServiceVMSizeTypes AKSMachineType { get; set; }
 
-        public string AKSRootUserName { get; set; }
-
-        public string AKSSSHPublicKey { get; set; }
-
         public string AKSSPNClientId { get; set; }
 
         public string AKSSPNObjectId { get; set; }
@@ -28,16 +24,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public void CheckValues()
         {
-            if (string.IsNullOrEmpty(AKSRootUserName))
-            {
-                throw new InvalidOperationException($"{nameof(AKSRootUserName)} is not valid.");
-            }
-
-            if (string.IsNullOrEmpty(AKSSSHPublicKey))
-            {
-                throw new InvalidOperationException($"{nameof(AKSSSHPublicKey)} is not valid.");
-            }
-
             if (string.IsNullOrEmpty(AKSSPNClientId))
             {
                 throw new InvalidOperationException($"{nameof(AKSSPNClientId)} is not valid.");
