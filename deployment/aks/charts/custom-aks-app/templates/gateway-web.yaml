@@ -19,6 +19,9 @@ metadata:
     app.kubernetes.io/component: web-server
     app.kubernetes.io/part-of: gateway
     app.kubernetes.io/managed-by: helm
+    environmentName: {{ required "The APP_ASPNETCORE_ENVIRONMENT must be provided." .Values.APP_ASPNETCORE_ENVIRONMENT }}
+    region: {{ required "The compactRegion must be provided." .Values.compactRegion }}
+    appVersion: {{ required "The appVersion must be provided." .Values.appVersion }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -29,6 +32,9 @@ spec:
       labels:
         app: liftr-gateway-web
         aadpodidbinding: liftr-aad-pod-identity
+        environmentName: {{ .Values.APP_ASPNETCORE_ENVIRONMENT }}
+        region: {{ .Values.compactRegion }}
+        appVersion: {{ .Values.appVersion }}
     spec:
       containers:
       - name: liftr-gateway-web-container
@@ -42,6 +48,12 @@ spec:
             value: {{ required "The Key Vault endpoint for the app to load secrets must be provided." .Values.vaultEndpoint }}
           - name: ASPNETCORE_ENVIRONMENT
             value: {{ required "The APP_ASPNETCORE_ENVIRONMENT must be provided." .Values.APP_ASPNETCORE_ENVIRONMENT }}
+          - name: environmentName
+            value: {{ .Values.APP_ASPNETCORE_ENVIRONMENT }}
+          - name: region
+            value: {{ .Values.compactRegion }}
+          - name: appVersion
+            value: {{ .Values.appVersion }}
         livenessProbe:
           httpGet:
             path: /api/liveness-probe
@@ -60,6 +72,9 @@ metadata:
       app.kubernetes.io/component: web-server-svc
       app.kubernetes.io/part-of: gateway
       app.kubernetes.io/managed-by: helm
+      environmentName: {{ .Values.APP_ASPNETCORE_ENVIRONMENT }}
+      region: {{ .Values.compactRegion }}
+      appVersion: {{ .Values.appVersion }}
 spec:
     ports:
         - port: 80
@@ -82,6 +97,9 @@ metadata:
     app.kubernetes.io/component: web-server-ingress-controller
     app.kubernetes.io/part-of: gateway
     app.kubernetes.io/managed-by: helm
+    environmentName: {{ .Values.APP_ASPNETCORE_ENVIRONMENT }}
+    region: {{ .Values.compactRegion }}
+    appVersion: {{ .Values.appVersion }}
 spec:
   rules:
     - host:  {{ required "The hostname must be provided." .Values.hostname }}

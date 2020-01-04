@@ -9,6 +9,14 @@ case $i in
     DeploymentSubscriptionId="${i#*=}"
     shift # past argument=value
     ;;
+    --Region=*)
+    Region="${i#*=}"
+    shift # past argument=value
+    ;;
+    --APP_ASPNETCORE_ENVIRONMENT=*)
+    APP_ASPNETCORE_ENVIRONMENT="${i#*=}"
+    shift # past argument=value
+    ;;
     *)
     echo "Not matched option '${i#*=}' passed in."
     exit 1
@@ -74,7 +82,10 @@ az aks get-credentials -g "$AKSRGName" -n "$AKSName"
 
 # Deploy identity infrastructure daemonset to default namespace
 echo "helm upgrade aks-pod-identity-infra"
-$Helm upgrade aks-pod-identity-infra --install --namespace default aad-pod-identity-infra-*.tgz
+$Helm upgrade aks-pod-identity-infra --install \
+--set region="$Region" \
+--set APP_ASPNETCORE_ENVIRONMENT="$APP_ASPNETCORE_ENVIRONMENT" \
+--namespace default aad-pod-identity-infra-*.tgz
 
 echo "Start waiting for aks-pod-identity-infra deployment to finish ..."
 kubectl rollout status daemonset/nmi
@@ -85,6 +96,8 @@ echo "helm upgrade aks-pod-identity-binding"
 echo "If this part failed with 'cannot find aad pod api, please retry the release.'"
 $Helm upgrade aks-pod-identity-binding --install \
 --values "aad-pod-identity.values.yaml" \
+--set region="$Region" \
+--set APP_ASPNETCORE_ENVIRONMENT="$APP_ASPNETCORE_ENVIRONMENT" \
 --set azureIdentity.resourceID=$MSIResourceId \
 --set azureIdentity.clientID=$MSIClientId \
 --namespace default aad-pod-identity-binding-*.tgz

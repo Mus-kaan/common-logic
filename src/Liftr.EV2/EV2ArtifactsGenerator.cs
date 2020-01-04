@@ -393,6 +393,11 @@ namespace Microsoft.Liftr.EV2
                 },
                 new ShellEnvironmentVariable()
                 {
+                    Name = "compactRegion",
+                    Value = ToSimpleName(region),
+                },
+                new ShellEnvironmentVariable()
+                {
                     Name = "GenevaParametersFile",
                     Value = $"geneva.{ToSimpleName(envName)}.values.yaml",
                 },

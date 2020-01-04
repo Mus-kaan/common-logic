@@ -13,6 +13,10 @@ case $i in
     AKSAppChartPackage="${i#*=}"
     shift # past argument=value
     ;;
+    --compactRegion=*)
+    compactRegion="${i#*=}"
+    shift # past argument=value
+    ;;
     --APP_ASPNETCORE_ENVIRONMENT=*)
     APP_ASPNETCORE_ENVIRONMENT="${i#*=}"
     shift # past argument=value
@@ -38,11 +42,12 @@ if [ -z ${AKSAppChartPackage+x} ]; then
     exit 1
 fi
 
-echo "AKSAppChartPackage: $AKSAppChartPackage"
-
-if [ -z ${APP_ASPNETCORE_ENVIRONMENT+x} ]; then
-APP_ASPNETCORE_ENVIRONMENT="Production"
+if [ -z ${compactRegion+x} ]; then
+    echo "compactRegion is blank."
+    exit 1
 fi
+
+echo "AKSAppChartPackage: $AKSAppChartPackage"
 echo "APP_ASPNETCORE_ENVIRONMENT: $APP_ASPNETCORE_ENVIRONMENT"
 
 echo "************************************************************"
@@ -166,6 +171,7 @@ $Helm upgrade $HelmReleaseName --install \
 --set sslkeyb64="$sslKeyB64Content" \
 --set controller.service.omitClusterIP=true \
 --set defaultBackend.service.omitClusterIP=true \
+--set compactRegion="$compactRegion" \
 --set APP_ASPNETCORE_ENVIRONMENT="$APP_ASPNETCORE_ENVIRONMENT" \
 --set imageRegistry="$liftrACRURI" \
 --set nginx-ingress.controller.image.repository="$liftrACRURI/kubernetes-ingress-controller/nginx-ingress-controller" \
