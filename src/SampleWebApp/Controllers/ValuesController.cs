@@ -34,20 +34,23 @@ namespace SampleWebApp.Controllers
         }
 
         // GET api/values
-        [HttpGet]
+        [HttpGet("ListAllResources")]
         [SwaggerOperation(OperationId = "List")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2234:Pass system uri objects instead of strings", Justification = "<Pending>")]
-        public async Task<IEnumerable<string>> GetListAsync()
+        public async Task<IEnumerable<ARMResource>> GetListAsync()
         {
             _logger.Information($"{nameof(GetListAsync)} start");
 
-            Log();
-            Log();
-            var client = new HttpClient();
-            await client.GetAsync("https://msazure.visualstudio.com");
-            await DoWorkAsync();
-
-            return new string[] { "value1", "value2" };
+            try
+            {
+                var apiVersion = "2019-11-01-preview";
+                return await _metaRPStorageClient.ListAllResourcesOfTypeAsync<TestResource>(Guid.Parse("60d3e394-7bbe-4744-a115-363c94f9a209"), "Microsoft.Incredibuild", "clusters", apiVersion);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, ex.Message);
+                throw;
+            }
         }
 
         // GET api/values/5
@@ -148,5 +151,10 @@ namespace SampleWebApp.Controllers
                 }
             }
         }
+    }
+
+    public class TestResource : ARMResource
+    {
+        public override string Type { get; set; }
     }
 }

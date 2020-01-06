@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>Microsoft.Liftr.RPaaS.Tests</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.RPaas.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(PackageVersion_Microsoft_NET_Test_Sdk)" />
+    <PackageReference Include="Moq" Version="$(PackageVersion_Moq)" />
+    <PackageReference Include="xunit" Version="$(PackageVersion_xunit)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(PackageVersion_xunit_runner_visualstudio)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.RPaaS\Liftr.RPaaS.csproj" />
+    <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
+  </ItemGroup>
+</Project>

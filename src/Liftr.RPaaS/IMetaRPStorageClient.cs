@@ -4,6 +4,9 @@
 
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.ARM;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -30,6 +33,16 @@ namespace Microsoft.Liftr.RPaaS
         /// <param name="apiVersion"></param>
         /// <returns></returns>
         Task<HttpResponseMessage> UpdateResourceAsync<T>(T resource, string apiVersion) where T : ARMResource;
+
+        /// <summary>
+        /// Get all resources of a particular type in the provider namespace
+        /// </summary>
+        /// <param name="userRpSubscriptionId">This is the subscription id that is present for te user RP in the arm manifest</param>
+        /// <param name="providerNamespace"></param>
+        /// <param name="resourceType"></param>
+        /// <param name="apiVersion"></param>
+        /// <returns></returns>
+        Task<IEnumerable<T>> ListAllResourcesOfTypeAsync<T>(Guid userRpSubscriptionId, string providerNamespace, string resourceType, string apiVersion) where T : ARMResource;
 
         /// <summary>
         /// Patch operation for given api version

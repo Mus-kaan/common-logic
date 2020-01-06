@@ -7,6 +7,8 @@ using Microsoft.Liftr.Contracts.ARM;
 using Microsoft.Liftr.Contracts.Exceptions;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -71,6 +73,21 @@ namespace Microsoft.Liftr.RPaaS
 
                 return response;
             }
+        }
+
+        public async Task<IEnumerable<T>> ListAllResourcesOfTypeAsync<T>(Guid userRpSubscriptionId, string providerNamespace, string resourceType, string apiVersion) where T : ARMResource
+        {
+            // ToDo: Implement paging support here
+            var url = $"/subscriptions/{userRpSubscriptionId.ToString()}/providers/{providerNamespace}/{resourceType}?api-version={apiVersion}&$expand=crossPartitionQuery";
+            _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();
+            var response = await _httpClient.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw HttpResponseException.Create(response, nameof(ListAllResourcesOfTypeAsync));
+            }
+
+            return (await response.Content.ReadAsStringAsync()).FromJson<ListResponse<T>>().Value;
         }
 
         public async Task<HttpResponseMessage> PatchOperationAsync<T>(T operation, string apiVersion) where T : OperationResource
@@ -155,5 +172,10 @@ namespace Microsoft.Liftr.RPaaS
                         await _tokenCallback());
             return authenticationHeader;
         }
+    }
+
+    public class ListResponse<T> where T : ARMResource
+    {
+        public List<T> Value { get; set; }
     }
 }
