@@ -3,6 +3,14 @@
 # Stop on error.
 set -e
 
+# The version are referenced at three places. You need to update all of them. Please search for this sentence.
+echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/environments/linuxcontainers.html"
+IMG_mdsd="genevamdsd:master_246"
+IMG_mdm="genevamdm:master_28"
+IMG_fluentd="genevafluentd_td-agent:master_124"
+IMG_azsecpack="genevasecpackinstall:master_30"
+IMG_prommdm="shared/prom-mdm-converter:2.0.master.20200106.5"
+
 for i in "$@"
 do
 case $i in
@@ -39,6 +47,24 @@ ACRName=$(<bin/acr-name.txt)
     fi
 fi
 
+if [ "$TenantId" = "" ]; then
+echo "Read TenantId from file 'bin/tenant-id.txt'."
+TenantId=$(<bin/tenant-id.txt)
+    if [ "$TenantId" = "" ]; then
+        echo "Please set 'TenantId' ..."
+        exit 1 # terminate and indicate error
+    fi
+fi
+echo "TenantId: $TenantId"
+
+if [ "$TenantId" == "72f988bf-86f1-41af-91ab-2d7cd011db47" ]; then
+    echo "Microsoft Tenant"
+    LiftrACRResourceId="/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-acr-rg/providers/Microsoft.ContainerRegistry/registries/liftrmsacr"
+else
+    echo "AME Tenant"
+    LiftrACRResourceId="/subscriptions/d8f298fb-60f5-4676-a7d3-25442ec5ce1e/resourceGroups/liftr-acr-rg/providers/Microsoft.ContainerRegistry/registries/LiftrAMEACR"
+fi
+
 echo "import prometheus images"
 
 echo "import docker.io/library/busybox:latest"
@@ -67,12 +93,12 @@ az acr import --name "$ACRName" --source quay.io/kubernetes-ingress-controller/n
 
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/environments/linuxcontainers.html"
 echo "import geneva images"
-az acr import --name "$ACRName" --source genevamdsd:master_246 --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
-az acr import --name "$ACRName" --source genevamdm:master_28 --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
-az acr import --name "$ACRName" --source genevafluentd_td-agent:master_124 --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
-az acr import --name "$ACRName" --source genevasecpackinstall:master_30 --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
+az acr import --name "$ACRName" --source $IMG_mdsd --registry $LiftrACRResourceId --force
+az acr import --name "$ACRName" --source $IMG_mdm --registry $LiftrACRResourceId --force
+az acr import --name "$ACRName" --source $IMG_fluentd --registry $LiftrACRResourceId --force
+az acr import --name "$ACRName" --source $IMG_azsecpack --registry $LiftrACRResourceId --force
 
-echo "import liftrcr.azurecr.io/prom-mdm-converter:latest"
-az acr import --name "$ACRName" --source prom-mdm-converter:latest --registry /subscriptions/d8f298fb-60f5-4676-a7d3-25442ec5ce1e/resourceGroups/liftr-images-wus-rg/providers/Microsoft.ContainerRegistry/registries/liftrcr --force
+echo "import prom-mdm-converter"
+az acr import --name "$ACRName" --source $IMG_prommdm --registry $LiftrACRResourceId --force
 
-echo "ACRName: $ACRName"
+echo "Imported all the dependency images"

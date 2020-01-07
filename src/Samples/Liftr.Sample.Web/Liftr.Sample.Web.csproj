@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <UserSecretsId>a230081a-dccc-49c9-ba47-651d22e0bd9a</UserSecretsId>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DisableLiftrCodeAnalysis>true</DisableLiftrCodeAnalysis>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="$(PackageVersion_Microsoft_AspNetCore_Razor_Design)" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Liftr.Contracts\Liftr.Contracts.csproj" />
+    <ProjectReference Include="..\..\Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj" />
+    <ProjectReference Include="..\..\Liftr.Logging.AspNetCore\Liftr.Logging.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\Liftr.WebHosting\Liftr.WebHosting.csproj" />
+  </ItemGroup>
+</Project>

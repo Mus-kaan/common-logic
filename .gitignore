@@ -293,3 +293,6 @@ contentFiles
 
 *.auth.json
 buildtools/
+out-ev2/
+.docker-images/
+.vscode/

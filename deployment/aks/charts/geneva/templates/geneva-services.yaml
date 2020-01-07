@@ -50,6 +50,11 @@ spec:
     metadata:
       labels:
         name: geneva-services
+        environmentName: {{ required "environmentName must be provided." .Values.environmentName }}
+        region: {{ required "compactRegion must be provided." .Values.compactRegion }}
+        partnerName: {{ required "partnerName must be provided." .Values.partnerName }}
+        hostAKS: {{ required "hostAKS must be provided." .Values.hostAKS }}
+        hostResourceGroup: {{ required "hostResourceGroup must be provided." .Values.hostResourceGroup }}
     spec:
       hostNetwork: true
       containers:

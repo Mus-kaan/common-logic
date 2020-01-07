@@ -1,26 +1,24 @@
 #!/bin/bash
-
-namespace="monitoring"
-set +e
-echo "kubectl create namespace $namespace"
-kubectl create namespace "$namespace"
-
 # Stop on error.
 set -e
 
 for i in "$@"
 do
 case $i in
-    --EnvName=*)
-    EnvName="${i#*=}"
-    shift # past argument=value
-    ;;
     --DeploymentSubscriptionId=*)
     DeploymentSubscriptionId="${i#*=}"
     shift # past argument=value
     ;;
     --GenevaParametersFile=*)
     GenevaParametersFile="${i#*=}"
+    shift # past argument=value
+    ;;
+    --environmentName=*)
+    environmentName="${i#*=}"
+    shift # past argument=value
+    ;;
+    --compactRegion=*)
+    compactRegion="${i#*=}"
     shift # past argument=value
     ;;
     --Region=*)
@@ -31,10 +29,6 @@ case $i in
     gcs_region="${i#*=}"
     shift # past argument=value
     ;;
-    --liftrACRURI=*)
-    liftrACRURI="${i#*=}"
-    shift # past argument=value
-    ;;
     *)
     echo "Not matched option '${i#*=}' passed in."
     exit 1
@@ -42,8 +36,8 @@ case $i in
 esac
 done
 
-if [ -z ${EnvName+x} ]; then
-    echo "EnvName is blank."
+if [ -z ${environmentName+x} ]; then
+    echo "environmentName is blank."
     exit 1
 fi
 
@@ -59,6 +53,11 @@ fi
 
 if [ -z ${Region+x} ]; then
     echo "Region is blank."
+    exit 1
+fi
+
+if [ -z ${compactRegion+x} ]; then
+    echo "compactRegion is blank."
     exit 1
 fi
 
@@ -155,6 +154,12 @@ rm -f geneva_key.pem
 echo "az aks get-credentials -g $AKSRGName -n $AKSName"
 az aks get-credentials -g "$AKSRGName" -n "$AKSName"
 
+set +e
+namespace="monitoring"
+echo "kubectl create namespace $namespace"
+kubectl create namespace "$namespace"
+set -e
+
 # Deploy geneva daemonset
 echo "start deploy geneva helm chart."
 $Helm upgrade aks-geneva --install \
@@ -165,6 +170,8 @@ $Helm upgrade aks-geneva --install \
 --set hostResourceGroup="$AKSRGName" \
 --set hostAKS="$AKSName" \
 --set hostRegion="$Region" \
+--set compactRegion="$compactRegion" \
+--set environmentName="$environmentName" \
 --set gcskeyb64="$genevaServiceKey" \
 --set gcs_region="$gcs_region" \
 --set gcscertb64="$genevaServiceCert" \

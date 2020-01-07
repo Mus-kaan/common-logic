@@ -1,6 +1,22 @@
 #!/bin/bash
 set -e
 
+publishProject(){
+  csproj=$1
+  csprojFolder="$(dirname "$csproj")"
+  if grep -q "<OutputType>Exe</OutputType>" "$csproj"; then
+    echo "Found console project to publish: $csproj"
+    dotnet publish $csproj -c Release --no-build --no-restore -o $csprojFolder/bin/publish /p:MajorVersion=$CDP_MAJOR_NUMBER_ONLY /p:MinorVersion=$CDP_MINOR_NUMBER_ONLY /p:PatchVersion=$CDP_BUILD_NUMBER /p:BuildMetadata=$CDP_DEFINITION_BUILD_COUNT
+    echo "- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - "
+  else
+    if grep -q "Microsoft.NET.Sdk.Web" "$csproj"; then
+        echo "Found web project to publish: $csproj"
+        dotnet publish $csproj -c Release --no-build --no-restore -o $csprojFolder/bin/publish /p:MajorVersion=$CDP_MAJOR_NUMBER_ONLY /p:MinorVersion=$CDP_MINOR_NUMBER_ONLY /p:PatchVersion=$CDP_BUILD_NUMBER /p:BuildMetadata=$CDP_DEFINITION_BUILD_COUNT
+        echo "- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - "
+    fi
+  fi
+}
+
 echo "Packing ..."
 SrcRoot="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 echo "SrcRoot: $SrcRoot"
@@ -40,18 +56,12 @@ done
 
 for csproj in $SrcRoot/src/*/*.csproj
 do
-  csprojFolder="$(dirname "$csproj")"
-  if grep -q "<OutputType>Exe</OutputType>" "$csproj"; then
-    echo "Found console project to publish: $csproj"
-    dotnet publish $csproj -c Release --no-build --no-restore -o $csprojFolder/bin/publish /p:MajorVersion=$CDP_MAJOR_NUMBER_ONLY /p:MinorVersion=$CDP_MINOR_NUMBER_ONLY /p:PatchVersion=$CDP_BUILD_NUMBER /p:BuildMetadata=$CDP_DEFINITION_BUILD_COUNT
-    echo "- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - "
-  else
-    if grep -q "Microsoft.NET.Sdk.Web" "$csproj"; then
-        echo "Found web project to publish: $csproj"
-        dotnet publish $csproj -c Release --no-build --no-restore -o $csprojFolder/bin/publish /p:MajorVersion=$CDP_MAJOR_NUMBER_ONLY /p:MinorVersion=$CDP_MINOR_NUMBER_ONLY /p:PatchVersion=$CDP_BUILD_NUMBER /p:BuildMetadata=$CDP_DEFINITION_BUILD_COUNT
-        echo "- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - "
-    fi
-  fi
+  publishProject $csproj
+done
+
+for csproj in $SrcRoot/src/*/*/*.csproj
+do
+  publishProject $csproj
 done
 
 exit_code=$?

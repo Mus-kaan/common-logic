@@ -5,7 +5,11 @@
     <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Liftr.Deployment" Version="$(PackageVersion_Microsoft_Liftr_Deployment)" />
+    <Content Include="..\..\deployment\**\*" LinkBase="deployment">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.Liftr.EV2" Version="$(PackageVersion_Microsoft_Liftr_EV2)" />
   </ItemGroup>
   <ItemGroup>

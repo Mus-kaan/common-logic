@@ -1,0 +1,34 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: liftr-sample-console
+  labels:
+    app: liftr-sample-console
+    app.kubernetes.io/name: liftr-sample-console
+    app.kubernetes.io/managed-by: helm
+    appVersion: {{ required "The appVersion must be provided." .Values.appVersion }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: liftr-sample-console
+  template:
+    metadata:
+      labels:
+        app: liftr-sample-console
+        aadpodidbinding: liftr-aad-pod-identity
+        appVersion: {{ .Values.appVersion }}
+    spec:
+      containers:
+      - name: liftr-sample-console-container
+        image: {{ required "The imageRegistry parameter must be provided." .Values.imageRegistry }}/{{ required "The sampleConsole.imageName parameter must be provided." .Values.sampleConsole.imageName }}
+        ports:
+          - containerPort: 5000
+        env:
+          - name: STATSD_HOST
+            value: geneva-services
+          - name: VaultEndpoint
+            value: {{ required "The Key Vault endpoint for the app to load secrets must be provided." .Values.vaultEndpoint }}
+          - name: ASPNETCORE_ENVIRONMENT
+            value: {{ required "The APP_ASPNETCORE_ENVIRONMENT must be provided." .Values.APP_ASPNETCORE_ENVIRONMENT }}

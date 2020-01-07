@@ -63,24 +63,34 @@ package:
           to: 'exes'
           include:
             - '**/*'
-    # - !!dockerbuildcommand
-    #   name: 'Build docker image'
-    #   context_folder: 'src/Liftr.IncrediBuild.RP.Web'
-    #   repository_name: 'ibuild-rp-web'
-    #   latest: false # Don't push the :latest tag since every deployment should refer to a build number.
-    #   publish_build_tag: true
-    #   metadata_file:
-    #     local_path: '.docker-images/gatewayWeb.json'  # folder name '.docker-images' cannot be changed
-    #                                               # 'gatewayWeb' match the chart parameter name
-    #     artifact_path: 'docker-images/gatewayWeb.json'
-    # - !!buildcommand
-    #   name: 'Pack EV2 shell extension'
-    #   command: 'build/liftr-run-linux-pack-ev2-ext.sh'
-    #   artifacts:
-    #     - from: 'out-ev2'
-    #       to: 'ev2'
-    #       include:
-    #         - '**/*'
+    - !!dockerbuildcommand
+      name: 'Build sample web docker image'
+      context_folder: 'src/Samples/Liftr.Sample.Web'
+      repository_name: 'sample-web-common-repo'
+      latest: false # Don't push the :latest tag since every deployment should refer to a build number.
+      publish_build_tag: true
+      metadata_file:
+        local_path: '.docker-images/gatewayWeb.json'  # folder name '.docker-images' cannot be changed
+                                                      # 'gatewayWeb' match the chart parameter name
+        artifact_path: 'docker-images/gatewayWeb.json'
+    - !!dockerbuildcommand
+        name: 'Build sample console docker image'
+        context_folder: 'src/Samples/SampleConsoleApp'
+        repository_name: 'sample-console-common-repo'
+        latest: false # Don't push the :latest tag since every deployment should refer to a build number.
+        publish_build_tag: true
+        metadata_file:
+          local_path: '.docker-images/sampleConsole.json'   # folder name '.docker-images' cannot be changed
+                                                            # 'sampleConsole' match the chart parameter name
+          artifact_path: 'docker-images/sampleConsole.json'
+    - !!buildcommand
+      name: 'Pack EV2 shell extension'
+      command: 'build/liftr-run-linux-pack-ev2-ext.sh'
+      artifacts:
+        - from: 'out-ev2'
+          to: 'ev2'
+          include:
+            - '**/*'
     # - !!buildcommand
     #   name: 'Pack EV2 base image shell extension'
     #   command: 'build/liftr-run-linux-pack-baseimage.sh'

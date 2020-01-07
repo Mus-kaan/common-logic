@@ -32,6 +32,8 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public bool EnableVNet { get; set; } = true;
 
+        public string LogAnalyticsWorkspaceId { get; set; }
+
         public void CheckValid()
         {
             if (string.IsNullOrEmpty(GenevaCertificateSubjectName))

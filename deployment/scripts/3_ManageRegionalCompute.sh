@@ -32,12 +32,15 @@ fi
 ./AzLogin.sh
 
 ./DeployAKSPodIdentity.sh \
+--environmentName="$APP_ASPNETCORE_ENVIRONMENT" \
+--compactRegion="$compactRegion" \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId"
 
 ./DeployGenevaMonitoring.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId" \
 --GenevaParametersFile="$GenevaParametersFile" \
---EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
+--environmentName="$APP_ASPNETCORE_ENVIRONMENT" \
+--compactRegion="$compactRegion" \
 --Region="$REGION" \
 --gcs_region="$gcs_region"
 

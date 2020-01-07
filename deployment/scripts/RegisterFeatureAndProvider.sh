@@ -8,10 +8,9 @@ checkAndRegisterProvider()
     providerName=$1
     echo "Start checking provider registration of '$providerName'"
     registrationState=$(az provider show -n $providerName | grep registrationState)
-    if [[ $registrationState == *"Registered"* ]]; then
-    echo "$providerName is Registered"
-    else
-        echo "$providerName $registrationState"
+    echo "$providerName: $registrationState"
+    if [[ $registrationState == *"NotRegistered"* ]]; then
+        echo "Registering provider: $providerName"
         az provider register -n "$providerName"
     fi
 }
@@ -41,7 +40,6 @@ az feature show --namespace Microsoft.VirtualMachineImages --name VirtualMachine
 checkAndRegisterProvider "Microsoft.Storage"
 checkAndRegisterProvider "Microsoft.Compute"
 checkAndRegisterProvider "Microsoft.VirtualMachineImages"
-checkAndRegisterProvider "microsoft.insights"
 checkAndRegisterProvider "Microsoft.Insights"
 checkAndRegisterProvider "Microsoft.OperationalInsights"
 checkAndRegisterProvider "Microsoft.OperationsManagement"

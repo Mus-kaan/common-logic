@@ -122,7 +122,7 @@ namespace Microsoft.Liftr.EV2
                     ev2Options,
                     targetEnvironment,
                     outputDirectory,
-                    description: "Create or update global resources",
+                    description: "Global resources",
                     entryScript: "1_ManageGlobalResources.sh");
             }
         }
@@ -140,7 +140,7 @@ namespace Microsoft.Liftr.EV2
                     ev2Options,
                     targetEnvironment,
                     outputDirectory,
-                    description: "Create or update regional data resources",
+                    description: "Regional data resources",
                     entryScript: "2_ManageRegionalData.sh");
             }
         }
@@ -158,7 +158,7 @@ namespace Microsoft.Liftr.EV2
                     ev2Options,
                     targetEnvironment,
                     outputDirectory,
-                    description: "Create or update regional AKS and deploy infrastructure AKS applications (Geneva, Pod identity, Nginx Ingress)",
+                    description: "Regional compute resources (AKS, Geneva, Pod identity, Nginx Ingress)",
                     entryScript: "3_ManageRegionalCompute.sh");
             }
         }
@@ -176,7 +176,7 @@ namespace Microsoft.Liftr.EV2
                     ev2Options,
                     targetEnvironment,
                     outputDirectory,
-                    description: "Deploy AKS applications using helm charts",
+                    description: "Deploy AKS applications",
                     entryScript: "4_DeployAKSApp.sh");
             }
         }
@@ -218,7 +218,7 @@ namespace Microsoft.Liftr.EV2
                 var rollputSpec = AssembleRolloutSpec(
                     envName,
                     simplifiedRegion,
-                    description: $"[{region}] {description}",
+                    description: $"[{envName}][{region}] {description}",
                     ev2Options.NotificationEmail);
                 File.WriteAllText(Path.Combine(outputDirectory, ArtifactConstants.RolloutSpecFileName(targetEnvironment.EnvironmentName, simplifiedRegion)), rollputSpec.ToJsonString(indented: true));
 

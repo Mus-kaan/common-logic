@@ -30,6 +30,8 @@ spec:
     metadata:
       labels:
         component: {{ .Chart.Name }}-prommdmconv
+        environmentName: {{ required "environmentName must be provided." .Values.environmentName }}
+        region: {{ required "compactRegion must be provided." .Values.compactRegion }}
     spec:
       containers:
         - name: prom-mdm-converter

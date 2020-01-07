@@ -43,7 +43,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<(IVault, IRegistry)> CreateOrUpdateGlobalRGAsync(string baseName, NamingContext namingContext)
+        public async Task<(IVault, IRegistry)> CreateOrUpdateGlobalRGAsync(string baseName, NamingContext namingContext, string logAnalyticsWorkspaceId = null)
         {
             if (namingContext == null)
             {
@@ -55,22 +55,26 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 var rgName = namingContext.ResourceGroupName(baseName);
                 var kvName = namingContext.KeyVaultName(baseName);
                 var acrName = namingContext.ACRName(baseName);
-                var logAnalyticsName = namingContext.LogAnalyticsName(baseName);
 
                 var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
 
                 var rg = await liftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
-                var logAnalytics = await liftrAzure.GetOrCreateLogAnalyticsWorkspaceAsync(namingContext.Location, rgName, logAnalyticsName, namingContext.Tags);
+                if (string.IsNullOrEmpty(logAnalyticsWorkspaceId))
+                {
+                    var logAnalyticsName = namingContext.LogAnalyticsName(baseName);
+                    var logAnalytics = await liftrAzure.GetOrCreateLogAnalyticsWorkspaceAsync(namingContext.Location, rgName, logAnalyticsName, namingContext.Tags);
+                    logAnalyticsWorkspaceId = logAnalytics.Id;
+                }
 
                 var kv = await liftrAzure.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
 
-                _logger.Information("Export Key Vault '{kvId}' diagnostics to Log Analytics '{logId}'.", kv.Id, logAnalytics.Id);
-                await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(kv, logAnalytics.Id);
+                _logger.Information("Export Key Vault '{kvId}' diagnostics to Log Analytics '{logId}'.", kv.Id, logAnalyticsWorkspaceId);
+                await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(kv, logAnalyticsWorkspaceId);
                 await liftrAzure.GrantSelfKeyVaultAdminAccessAsync(kv);
 
                 var acr = await liftrAzure.GetOrCreateACRAsync(namingContext.Location, rgName, acrName, namingContext.Tags);
-                _logger.Information("Export ACR '{acrId}' diagnostics to Log Analytics '{logId}'.", acr.Id, logAnalytics.Id);
-                await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(acr, logAnalytics.Id);
+                _logger.Information("Export ACR '{acrId}' diagnostics to Log Analytics '{logId}'.", acr.Id, logAnalyticsWorkspaceId);
+                await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(acr, logAnalyticsWorkspaceId);
 
                 using (var kvValet = new KeyVaultConcierge(kv.VaultUri, _kvClient, _logger))
                 {
@@ -134,6 +138,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var cosmosName = namingContext.CosmosDBName(baseName);
             var msiName = namingContext.MSIName(baseName);
             var currentPublicIP = await MetadataHelper.GetPublicIPAddressAsync();
+            _logger.Information("Current public IP address: {currentPublicIP}", currentPublicIP);
 
             var rg = await liftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
             var msi = await liftrAzure.GetOrCreateMSIAsync(namingContext.Location, rgName, msiName, namingContext.Tags);
@@ -156,7 +161,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 {
                     _logger.Information("Make sure the Key Vault '{kvId}' can be accessed from current IP '{currentPublicIP}'.", regionalKeyVault.Id, currentPublicIP);
                     await liftrAzure.WithKeyVaultAccessFromNetworkAsync(regionalKeyVault, currentPublicIP, subnet?.Inner?.Id);
-                    regionalKeyVault = await regionalKeyVault.RefreshAsync();
                 }
             }
             else
@@ -164,9 +168,12 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 regionalKeyVault = await liftrAzure.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
             }
 
-            await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(regionalKeyVault, dataOptions.LogAnalyticsWorkspaceId);
-            await liftrAzure.GrantSelfKeyVaultAdminAccessAsync(regionalKeyVault);
             regionalKeyVault = await regionalKeyVault.RefreshAsync();
+            await liftrAzure.GrantSelfKeyVaultAdminAccessAsync(regionalKeyVault);
+
+            regionalKeyVault = await regionalKeyVault.RefreshAsync();
+            await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(regionalKeyVault, dataOptions.LogAnalyticsWorkspaceId);
+
             var storageAccount = await liftrAzure.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, storageName, namingContext.Tags, subnet?.Inner?.Id);
             await liftrAzure.GrantQueueContributorAsync(storageAccount, msi);
 
@@ -194,6 +201,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(tm, dataOptions.LogAnalyticsWorkspaceId);
 
             _logger.Information("Start adding access policy for msi to regional kv.");
+            regionalKeyVault = await regionalKeyVault.RefreshAsync();
             await regionalKeyVault.Update()
                 .DefineAccessPolicy()
                 .ForObjectId(msi.GetObjectId())
@@ -201,7 +209,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 .AllowCertificatePermissions(CertificatePermissions.Get, CertificatePermissions.Getissuers, CertificatePermissions.List)
                 .Attach()
                 .ApplyAsync();
-            regionalKeyVault = await regionalKeyVault.RefreshAsync();
             _logger.Information("Added access policy for msi to regional kv.");
 
             _logger.Information("Creating CosmosDB ...");
@@ -344,6 +351,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var rgName = namingContext.ResourceGroupName(computeOptions.ComputeBaseName);
             var aksName = namingContext.AKSName(computeOptions.ComputeBaseName);
             var currentPublicIP = await MetadataHelper.GetPublicIPAddressAsync();
+            _logger.Information("Current public IP address: {currentPublicIP}", currentPublicIP);
 
             var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
 
@@ -461,11 +469,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     throw ex;
                 }
 
-                _logger.Information("Restrict the Key Vault '{kvId}' to IP '{currentPublicIP}' and subnet '{subnetId}'.", regionalKeyVault.Id, currentPublicIP, subnet?.Inner?.Id);
-                await liftrAzure.WithKeyVaultAccessFromNetworkAsync(regionalKeyVault, currentPublicIP, subnet?.Inner?.Id);
-
                 if (subnet != null)
                 {
+                    _logger.Information("Restrict the Key Vault '{kvId}' to IP '{currentPublicIP}' and subnet '{subnetId}'.", regionalKeyVault.Id, currentPublicIP, subnet?.Inner?.Id);
+                    await liftrAzure.WithKeyVaultAccessFromNetworkAsync(regionalKeyVault, currentPublicIP, subnet?.Inner?.Id);
+
                     _logger.Information("Restrict access to storage account with Id {storId} to subnet {subnetId}.", stor.Id, subnet.Inner.Id);
                     await stor.Update().WithAccessFromNetworkSubnet(subnet.Inner.Id).ApplyAsync();
 
@@ -519,13 +527,13 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
             else
             {
+                _logger.Information("Use existing AKS cluster (ProvisioningState: {ProvisioningState}) with Id '{ResourceId}'.", aks.ProvisioningState, aks.Id);
+
                 if (vnet != null)
                 {
                     _logger.Information("Restrict the Key Vault '{kvId}' to IP '{currentPublicIP}'.", regionalKeyVault.Id, currentPublicIP);
                     await liftrAzure.WithKeyVaultAccessFromNetworkAsync(regionalKeyVault, currentPublicIP, null);
                 }
-
-                _logger.Information("Use existing AKS cluster with Id {ResourceId}.", aks.Id);
             }
 
             return (regionalKeyVault, msi, aks);

@@ -3,6 +3,8 @@
 set -e
 currentScriptName=`basename "$0"`
 
+ssh-keygen -m PEM -t rsa -b 4096 -f bin/liftr_ssh_key -N ""
+
 ./ExecuteDeploymentRunner.sh \
 --ProvisionAction="OutputSubscriptionId" \
 --EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
@@ -16,8 +18,6 @@ DeploymentSubscriptionId=$(<bin/subscription-id.txt)
         exit 1 # terminate and indicate error
     fi
 fi
-
-ssh-keygen -m PEM -t rsa -b 4096 -f bin/liftr_ssh_key -N ""
 
 ./AzLogin.sh
 

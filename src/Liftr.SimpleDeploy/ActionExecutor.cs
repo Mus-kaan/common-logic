@@ -163,21 +163,23 @@ namespace Microsoft.Liftr.SimpleDeploy
                 try
                 {
                     operation.SetContextProperty(nameof(_hostingOptions.PartnerName), _hostingOptions.PartnerName);
-
                     var infra = new InfrastructureV2(azFactory, kvClient, _logger);
-
                     var globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
-                    var logAnalyticsWorkspaceId = $"/subscriptions/{azFactory.GenerateLiftrAzure().FluentClient.SubscriptionId}/resourcegroups/{globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName)}/providers/microsoft.operationalinsights/workspaces/{globalNamingContext.LogAnalyticsName(targetOptions.Global.BaseName)}";
 
                     if (_commandOptions.Action == ActionType.CreateOrUpdateGlobal)
                     {
-                        (var kv, var acr) = await infra.CreateOrUpdateGlobalRGAsync(targetOptions.Global.BaseName, globalNamingContext);
+                        (var kv, var acr) = await infra.CreateOrUpdateGlobalRGAsync(targetOptions.Global.BaseName, globalNamingContext, targetOptions.LogAnalyticsWorkspaceId);
                         File.WriteAllText("acr-name.txt", acr.Name);
                         File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
                         _logger.Information("Successfully managed global resources.");
                     }
                     else
                     {
+                        if (string.IsNullOrEmpty(targetOptions.LogAnalyticsWorkspaceId))
+                        {
+                            targetOptions.LogAnalyticsWorkspaceId = $"/subscriptions/{azFactory.GenerateLiftrAzure().FluentClient.SubscriptionId}/resourcegroups/{globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName)}/providers/microsoft.operationalinsights/workspaces/{globalNamingContext.LogAnalyticsName(targetOptions.Global.BaseName)}";
+                        }
+
                         (var regionOptions, var regionalNamingContext) = GetRegionalOptions(targetOptions);
                         var aksRGName = regionalNamingContext.ResourceGroupName(regionOptions.ComputeBaseName);
                         var aksName = regionalNamingContext.AKSName(regionOptions.ComputeBaseName);
@@ -225,7 +227,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 DataPlaneSubscriptions = regionOptions.DataPlaneSubscriptions,
                                 DataPlaneStorageCountPerSubscription = _hostingOptions.StorageCountPerDataPlaneSubscription,
                                 EnableVNet = targetOptions.EnableVNet,
-                                LogAnalyticsWorkspaceId = logAnalyticsWorkspaceId,
+                                LogAnalyticsWorkspaceId = targetOptions.LogAnalyticsWorkspaceId,
                             };
 
                             await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions);
@@ -252,7 +254,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 DataBaseName = regionOptions.DataBaseName,
                                 ComputeBaseName = regionOptions.ComputeBaseName,
                                 GlobalKeyVaultResourceId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName)}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
-                                LogAnalyticsWorkspaceResourceId = logAnalyticsWorkspaceId,
+                                LogAnalyticsWorkspaceResourceId = targetOptions.LogAnalyticsWorkspaceId,
                             };
 
                             (var kv, var msi, var aks) = await infra.CreateOrUpdateRegionalComputeRGAsync(

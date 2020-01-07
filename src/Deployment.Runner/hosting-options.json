@@ -1,13 +1,14 @@
 {
-  "PartnerName": "SampleInfrastructure",
-  "ShortPartnerName": "si",
-  "SecretPrefix": "SampleInfra",
+  "PartnerName": "SamplePartner",
+  "ShortPartnerName": "sp",
+  "SecretPrefix": "SampleRP",
   "Environments": [
     {
-      "EnvironmentName": "DogFood",
+      "EnvironmentName": "Dev",
       "TenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", // ms
-      "AzureSubscription": "d21a525e-7c86-486d-a79e-a4f3622f639a",
-      "EnableVNet": true,
+      "AzureSubscription": "eebfbfdb-4167-49f6-be43-466a6709609f", // 'Liftr - TEST'
+      "EnableVNet": false,
+      "LogAnalyticsWorkspaceId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.OperationalInsights/workspaces/sample-partner-log",
       "GenevaCertificateSubjectName": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net",
       "AKSConfigurations": {
         "AKSMachineCount": 3,
@@ -17,14 +18,52 @@
       },
       "Global": {
         "Location": "centralus",
-        "BaseName": "gbl191220"
+        "BaseName": "gbl202001001"
       },
       "Regions": [
         {
-          "Location": "westus",
-          "DataBaseName": "data19120101",
-          "ComputeBaseName": "com19120101",
-          "HostName": "sample-infra-wus.azliftr-test.io"
+          "Location": "westus2",
+          "DataBaseName": "data20200101",
+          "ComputeBaseName": "com20200103",
+          "HostName": "sample-dev-wus2.azliftr-test.io"
+        },
+        {
+          "Location": "eastus",
+          "DataBaseName": "data20200101",
+          "ComputeBaseName": "com20200103",
+          "HostName": "sample-dev-eus.azliftr-test.io"
+        }
+      ]
+    },
+    {
+      "EnvironmentName": "Test",
+      "TenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", // ms
+      "AzureSubscription": "eebfbfdb-4167-49f6-be43-466a6709609f", // 'Liftr - TEST'
+      "EnableVNet": true,
+      "LogAnalyticsWorkspaceId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.OperationalInsights/workspaces/sample-partner-log",
+      "GenevaCertificateSubjectName": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net",
+      "AKSConfigurations": {
+        "AKSMachineCount": 3,
+        "AKSMachineType": "Standard_DS2_v2",
+        "AKSSPNClientId": "16735b89-eb3b-483c-b8bd-3e33e89ba1a4", // liftr-test-rp-aks-ms
+        "AKSSPNObjectId": "e3403f25-cf71-4bb1-a390-ffeb5f57fd75"
+      },
+      "Global": {
+        "Location": "centralus",
+        "BaseName": "gbl202001001"
+      },
+      "Regions": [
+        {
+          "Location": "westus2",
+          "DataBaseName": "data20200101",
+          "ComputeBaseName": "com20200103",
+          "HostName": "sample-test-wus2.azliftr-test.io"
+        },
+        {
+          "Location": "eastus",
+          "DataBaseName": "data20200101",
+          "ComputeBaseName": "com20200103",
+          "HostName": "sample-test-eus.azliftr-test.io"
         }
       ]
     }

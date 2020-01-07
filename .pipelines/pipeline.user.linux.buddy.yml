@@ -1,0 +1,13 @@
+# For full annotated example, please visit
+# https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki?pagePath=%2FCDPx%20%252D%20Cross%252DPlatform%20Cloud%20Delivery%20Pipeline%2FUsage%2FPipeline%20Spec%20YAML%20Concepts%2FAnnotated%20Example&wikiVersion=GBwikiMaster&pageId=302
+
+version:
+  name: 'Liftr.Common'
+  major: 0                                                              # The major version number.
+  minor: 6                                                              # The minor version number
+  system: 'buildrevision'
+
+test:
+  commands:
+
+static_analysis_options: # OPTIONAL: If you wish to add options to FxCop, ModernCop, PoliCheck, or BinSkim
