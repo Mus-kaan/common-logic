@@ -1,7 +1,11 @@
 #!/bin/bash
 # Stop on error.
 set -e
+CurrentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 currentScriptName=`basename "$0"`
+
+echo "CurrentDir: $CurrentDir"
+echo "currentScriptName: $currentScriptName"
 
 ssh-keygen -m PEM -t rsa -b 4096 -f bin/liftr_ssh_key -N ""
 
@@ -30,6 +34,17 @@ fi
 
 ./ImportDependencyImages.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId"
+
+for script in "$CurrentDir"/1_*.sh
+do
+  if [[ "$script" != *"$currentScriptName"* ]]; then
+    echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
+    echo "Executing extension script '$script' :"
+    $script
+    echo "Finished Executing extension script '$script'."
+    echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
+  fi
+done
 
 echo "Successfully finished running: $currentScriptName"
 echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"
