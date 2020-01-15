@@ -35,6 +35,15 @@ fi
 
 ./AzLogin.sh
 
+./ConnectAKS.sh
+
+./DeployNginx.sh
+
+./DeployPrometheusOperator.sh \
+--environmentName="$APP_ASPNETCORE_ENVIRONMENT" \
+--compactRegion="$compactRegion" \
+--DeploymentSubscriptionId="$DeploymentSubscriptionId"
+
 ./DeployAKSPodIdentity.sh \
 --environmentName="$APP_ASPNETCORE_ENVIRONMENT" \
 --compactRegion="$compactRegion" \

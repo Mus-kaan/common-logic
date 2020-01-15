@@ -43,7 +43,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<(IVault, IRegistry)> CreateOrUpdateGlobalRGAsync(string baseName, NamingContext namingContext, string logAnalyticsWorkspaceId = null)
+        public async Task<(IVault, IRegistry)> CreateOrUpdateGlobalRGAsync(
+            string baseName,
+            NamingContext namingContext,
+            string dnsName,
+            string logAnalyticsWorkspaceId = null)
         {
             if (namingContext == null)
             {
@@ -66,6 +70,12 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     logAnalyticsWorkspaceId = logAnalytics.Id;
                 }
 
+                var dns = await liftrAzure.GetDNSZoneAsync(rgName, dnsName);
+                if (dns == null)
+                {
+                    dns = await liftrAzure.CreateDNSZoneAsync(rgName, dnsName, namingContext.Tags);
+                }
+
                 var kv = await liftrAzure.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
 
                 _logger.Information("Export Key Vault '{kvId}' diagnostics to Log Analytics '{logId}'.", kv.Id, logAnalyticsWorkspaceId);
@@ -75,6 +85,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 var acr = await liftrAzure.GetOrCreateACRAsync(namingContext.Location, rgName, acrName, namingContext.Tags);
                 _logger.Information("Export ACR '{acrId}' diagnostics to Log Analytics '{logId}'.", acr.Id, logAnalyticsWorkspaceId);
                 await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(acr, logAnalyticsWorkspaceId);
+
+                var diagnosticsStorName = namingContext.StorageAccountName(baseName);
+                var stor = await liftrAzure.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, diagnosticsStorName, namingContext.Tags);
 
                 using (var kvValet = new KeyVaultConcierge(kv.VaultUri, _kvClient, _logger))
                 {
@@ -140,6 +153,13 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var currentPublicIP = await MetadataHelper.GetPublicIPAddressAsync();
             _logger.Information("Current public IP address: {currentPublicIP}", currentPublicIP);
 
+            var dnsZoneId = new ResourceId(dataOptions.DNSZoneId);
+            var dnsZone = await liftrAzure.GetDNSZoneAsync(dnsZoneId.ResourceGroup, dnsZoneId.ResourceName);
+            if (dnsZone == null)
+            {
+                dnsZone = await liftrAzure.CreateDNSZoneAsync(dnsZoneId.ResourceGroup, dnsZoneId.ResourceName, namingContext.Tags);
+            }
+
             var rg = await liftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
             var msi = await liftrAzure.GetOrCreateMSIAsync(namingContext.Location, rgName, msiName, namingContext.Tags);
 
@@ -199,6 +219,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             tm = await liftrAzure.GetOrCreateTrafficManagerAsync(rgName, trafficManagerName, namingContext.Tags);
             await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(tm, dataOptions.LogAnalyticsWorkspaceId);
+
+            _logger.Information("Set DNS zone '{dnsZone}' CNAME '{cname}' to Traffic Manager 'tm'.", dnsZone.Id, namingContext.Location.ShortName(), tm.Fqdn);
+            await dnsZone.Update().DefineCNameRecordSet(namingContext.Location.ShortName()).WithAlias(tm.Fqdn).WithTimeToLive(600).Attach().ApplyAsync();
 
             _logger.Information("Start adding access policy for msi to regional kv.");
             regionalKeyVault = await regionalKeyVault.RefreshAsync();
@@ -522,6 +545,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                             ["logAnalyticsWorkspaceResourceID"] = computeOptions.LogAnalyticsWorkspaceResourceId,
                         }),
                     };
+                    _logger.Information("Enable AKS Azure Monitor and send the diagnostics data to Log Analytics with Id 'logAnalyticsWorkspaceResourceId'", computeOptions.LogAnalyticsWorkspaceResourceId);
                     await aks.Update().WithAddOnProfiles(aksAddOns).ApplyAsync();
                 }
             }

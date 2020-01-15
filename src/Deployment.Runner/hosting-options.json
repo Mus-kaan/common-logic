@@ -5,10 +5,12 @@
   "Environments": [
     {
       "EnvironmentName": "Dev",
+      "DomainName": "sp-dev.azliftr-test.io",
       "TenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", // ms
       "AzureSubscription": "eebfbfdb-4167-49f6-be43-466a6709609f", // 'Liftr - TEST'
       "EnableVNet": false,
       "LogAnalyticsWorkspaceId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.OperationalInsights/workspaces/sample-partner-log",
+      "DiagnosticsStorageId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.Storage/storageAccounts/liftrdiagonstics",
       "GenevaCertificateSubjectName": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net",
       "AKSConfigurations": {
         "AKSMachineCount": 3,
@@ -23,24 +25,24 @@
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "data20200101",
-          "ComputeBaseName": "com20200103",
-          "HostName": "sample-dev-wus2.azliftr-test.io"
+          "DataBaseName": "data20200102",
+          "ComputeBaseName": "com20200118"
         },
         {
           "Location": "eastus",
-          "DataBaseName": "data20200101",
-          "ComputeBaseName": "com20200103",
-          "HostName": "sample-dev-eus.azliftr-test.io"
+          "DataBaseName": "data20200102",
+          "ComputeBaseName": "com20200118"
         }
       ]
     },
     {
       "EnvironmentName": "Test",
+      "DomainName": "sp-test.azliftr-test.io",
       "TenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", // ms
       "AzureSubscription": "eebfbfdb-4167-49f6-be43-466a6709609f", // 'Liftr - TEST'
       "EnableVNet": true,
       "LogAnalyticsWorkspaceId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.OperationalInsights/workspaces/sample-partner-log",
+      "DiagnosticsStorageId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.Storage/storageAccounts/liftrdiagonstics",
       "GenevaCertificateSubjectName": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net",
       "AKSConfigurations": {
         "AKSMachineCount": 3,
@@ -55,15 +57,13 @@
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "data20200101",
-          "ComputeBaseName": "com20200103",
-          "HostName": "sample-test-wus2.azliftr-test.io"
+          "DataBaseName": "data20200102",
+          "ComputeBaseName": "com20200118"
         },
         {
           "Location": "eastus",
-          "DataBaseName": "data20200101",
-          "ComputeBaseName": "com20200103",
-          "HostName": "sample-test-eus.azliftr-test.io"
+          "DataBaseName": "data20200102",
+          "ComputeBaseName": "com20200118"
         }
       ]
     }

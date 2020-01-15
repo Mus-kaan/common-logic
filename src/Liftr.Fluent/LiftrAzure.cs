@@ -7,6 +7,7 @@ using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
+using Microsoft.Azure.Management.Dns.Fluent;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
@@ -583,6 +584,28 @@ namespace Microsoft.Liftr.Fluent
                 .TrafficManagerProfiles
                 .GetByResourceGroupAsync(rgName, tmName);
         }
+
+        public Task<IDnsZone> GetDNSZoneAsync(string rgName, string dnsName)
+        {
+            _logger.Information("Getting DNS zone with dnsName '{dnsName}' in RG '{resourceGroup}'.", dnsName, rgName);
+            return FluentClient
+                .DnsZones
+                .GetByResourceGroupAsync(rgName, dnsName);
+        }
+
+        public async Task<IDnsZone> CreateDNSZoneAsync(string rgName, string dnsName, IDictionary<string, string> tags)
+        {
+            var dns = await FluentClient
+                .DnsZones
+                .Define(dnsName)
+                .WithExistingResourceGroup(rgName)
+                .WithTags(tags)
+                .CreateAsync();
+
+            _logger.Information("Created DNS zone with id '{resourceId}'.", dns);
+            return dns;
+        }
+
         #endregion
 
         #region CosmosDB
@@ -797,7 +820,7 @@ namespace Microsoft.Liftr.Fluent
                              .Define(aksName)
                              .WithRegion(region)
                              .WithExistingResourceGroup(rgName)
-                             .WithLatestVersion()
+                             .WithVersion("1.15.7")
                              .WithRootUsername(rootUserName)
                              .WithSshKey(sshPublicKey)
                              .WithServicePrincipalClientId(servicePrincipalClientId)

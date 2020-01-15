@@ -77,26 +77,6 @@ KeyVaultEndpoint=$(<bin/aks-kv.txt)
 fi
 echo "KeyVaultEndpoint: $KeyVaultEndpoint"
 
-if [ "$AKSRGName" = "" ]; then
-echo "Read AKSRGName from file 'bin/aks-rg.txt'."
-AKSRGName=$(<bin/aks-rg.txt)
-    if [ "$AKSRGName" = "" ]; then
-        echo "Please set the name of the AKS cluster Resource Group using variable 'AKSRGName' ..."
-        exit 1 # terminate and indicate error
-    fi
-fi
-echo "AKSRGName: $AKSRGName"
-
-if [ "$AKSName" = "" ]; then
-echo "Read AKSName from file 'bin/aks-name.txt'."
-AKSName=$(<bin/aks-name.txt)
-    if [ "$AKSName" = "" ]; then
-        echo "Please set the name of the AKS cluster using variable 'AKSName' ..."
-        exit 1 # terminate and indicate error
-    fi
-fi
-echo "AKSName: $AKSName"
-
 if [ "$AppVersion" = "" ]; then
 echo "Read AppVersion from file 'bin/version.txt'."
 AppVersion=$(<bin/version.txt)
@@ -154,11 +134,6 @@ rm -f ssl-cert-pfx
 rm -f ssl-cert-pfx.pfx
 rm -f ssl_cert.pem
 rm -f ssl_key.pem
-
-# Connect with Aks
-echo "az aks get-credentials -g $AKSRGName -n $AKSName"
-az aks get-credentials -g "$AKSRGName" -n "$AKSName"
-# $Helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 
 # Deploy the helm chart.
 HelmReleaseName="liftr-custom-aks-app"

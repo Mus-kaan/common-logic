@@ -7,6 +7,7 @@ using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
+using Microsoft.Azure.Management.Dns.Fluent;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
@@ -109,6 +110,10 @@ namespace Microsoft.Liftr.Fluent
         Task<ITrafficManagerProfile> GetTrafficManagerAsync(string tmId);
 
         Task<ITrafficManagerProfile> GetTrafficManagerAsync(string rgName, string tmName);
+
+        Task<IDnsZone> GetDNSZoneAsync(string rgName, string dnsName);
+
+        Task<IDnsZone> CreateDNSZoneAsync(string rgName, string dnsName, IDictionary<string, string> tags);
         #endregion
 
         #region CosmosDB

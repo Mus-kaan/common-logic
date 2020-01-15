@@ -12,7 +12,7 @@ DeploymentSubscriptionId=$(<bin/subscription-id.txt)
 fi
 
 echo "az login --identity"
-az login --identity
+az login --identity > azLoginResult.txt
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
     echo "az login failed."

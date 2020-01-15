@@ -1,0 +1,5 @@
+type: AZURE
+config:
+  storage_account: "STOR_NAME_PLACEHOLDER"
+  storage_account_key: "STOR_KEY_PLACEHOLDER"
+  container: "thanos"

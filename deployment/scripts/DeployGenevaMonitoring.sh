@@ -150,10 +150,6 @@ rm -f geneva.pfx
 rm -f geneva_cert.pem
 rm -f geneva_key.pem
 
-# Connect with Aks
-echo "az aks get-credentials -g $AKSRGName -n $AKSName"
-az aks get-credentials -g "$AKSRGName" -n "$AKSName"
-
 set +e
 namespace="monitoring"
 echo "kubectl create namespace $namespace"
@@ -185,10 +181,6 @@ $Helm upgrade aks-geneva --install \
 --namespace "$namespace" geneva-*.tgz
 
 kubectl rollout status daemonset/geneva-services -n "$namespace"
-
-# kubectl rollout status deployment/prom-mdm-converter
-# kubectl rollout status deployment/aks-geneva-prometheus-server
-kubectl rollout status deployment/aks-geneva-prometheus-kube-state-metrics -n "$namespace"
 
 echo "-------------------------------------"
 echo "Finished helm upgrade geneva chart"

@@ -15,6 +15,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string SecretPrefix { get; set; }
 
+        public string DNSZoneId { get; set; }
+
         public string LogAnalyticsWorkspaceId { get; set; }
 
         public CertificateOptions GenevaCert { get; set; }
@@ -34,6 +36,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             if (string.IsNullOrEmpty(ActiveDBKeyName))
             {
                 throw new InvalidOperationException($"{nameof(ActiveDBKeyName)} should not be null.");
+            }
+
+            if (string.IsNullOrEmpty(DNSZoneId))
+            {
+                throw new InvalidOperationException($"{nameof(DNSZoneId)} should not be null.");
             }
 
             if (string.IsNullOrEmpty(SecretPrefix))

@@ -32,13 +32,22 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public bool EnableVNet { get; set; } = true;
 
+        public string DomainName { get; set; }
+
         public string LogAnalyticsWorkspaceId { get; set; }
+
+        public string DiagnosticsStorageId { get; set; }
 
         public void CheckValid()
         {
             if (string.IsNullOrEmpty(GenevaCertificateSubjectName))
             {
                 throw new InvalidOperationException($"{nameof(GenevaCertificateSubjectName)} cannot be null or empty.");
+            }
+
+            if (string.IsNullOrEmpty(DomainName))
+            {
+                throw new InvalidOperationException($"{nameof(DomainName)} cannot be null or empty.");
             }
 
             if (Global == null)
@@ -90,8 +99,6 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public string ComputeBaseName { get; set; }
 
-        public string HostName { get; set; }
-
         public IEnumerable<string> DataPlaneSubscriptions { get; set; }
 
         public void CheckValid()
@@ -104,11 +111,6 @@ namespace Microsoft.Liftr.SimpleDeploy
             if (string.IsNullOrEmpty(ComputeBaseName))
             {
                 throw new InvalidOperationException($"{nameof(ComputeBaseName)} cannot be null or empty.");
-            }
-
-            if (string.IsNullOrEmpty(HostName))
-            {
-                throw new InvalidOperationException($"{nameof(HostName)} cannot be null or empty.");
             }
         }
     }

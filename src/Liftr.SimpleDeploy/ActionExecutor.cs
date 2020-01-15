@@ -8,6 +8,7 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
@@ -157,6 +158,7 @@ namespace Microsoft.Liftr.SimpleDeploy
         private async Task RunActionAsync(HostingEnvironmentOptions targetOptions, KeyVaultClient kvClient, LiftrAzureFactory azFactory)
         {
             _logger.Information("Target environment options: {@targetOptions}", targetOptions);
+            var liftrAzure = azFactory.GenerateLiftrAzure();
 
             using (var operation = _logger.StartTimedOperation(_commandOptions.Action.ToString()))
             {
@@ -165,10 +167,15 @@ namespace Microsoft.Liftr.SimpleDeploy
                     operation.SetContextProperty(nameof(_hostingOptions.PartnerName), _hostingOptions.PartnerName);
                     var infra = new InfrastructureV2(azFactory, kvClient, _logger);
                     var globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
+                    var globalRGName = globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
 
                     if (_commandOptions.Action == ActionType.CreateOrUpdateGlobal)
                     {
-                        (var kv, var acr) = await infra.CreateOrUpdateGlobalRGAsync(targetOptions.Global.BaseName, globalNamingContext, targetOptions.LogAnalyticsWorkspaceId);
+                        (var kv, var acr) = await infra.CreateOrUpdateGlobalRGAsync(
+                            targetOptions.Global.BaseName,
+                            globalNamingContext,
+                            targetOptions.DomainName,
+                            targetOptions.LogAnalyticsWorkspaceId);
                         File.WriteAllText("acr-name.txt", acr.Name);
                         File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
                         _logger.Information("Successfully managed global resources.");
@@ -177,28 +184,33 @@ namespace Microsoft.Liftr.SimpleDeploy
                     {
                         if (string.IsNullOrEmpty(targetOptions.LogAnalyticsWorkspaceId))
                         {
-                            targetOptions.LogAnalyticsWorkspaceId = $"/subscriptions/{azFactory.GenerateLiftrAzure().FluentClient.SubscriptionId}/resourcegroups/{globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName)}/providers/microsoft.operationalinsights/workspaces/{globalNamingContext.LogAnalyticsName(targetOptions.Global.BaseName)}";
+                            targetOptions.LogAnalyticsWorkspaceId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourcegroups/{globalRGName}/providers/microsoft.operationalinsights/workspaces/{globalNamingContext.LogAnalyticsName(targetOptions.Global.BaseName)}";
                         }
 
                         (var regionOptions, var regionalNamingContext) = GetRegionalOptions(targetOptions);
                         var aksRGName = regionalNamingContext.ResourceGroupName(regionOptions.ComputeBaseName);
                         var aksName = regionalNamingContext.AKSName(regionOptions.ComputeBaseName);
-                        regionalNamingContext.Tags["GlobalRG"] = globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
+                        regionalNamingContext.Tags["GlobalRG"] = globalRGName;
 
                         if (_commandOptions.Action == ActionType.CreateOrUpdateRegionalData)
                         {
                             regionalNamingContext.Tags["DataRG"] = regionalNamingContext.ResourceGroupName(regionOptions.DataBaseName);
 
                             CertificateOptions sslCert = null, genevaCert = null, firstPartyCert = null;
-                            if (!string.IsNullOrEmpty(regionOptions.HostName))
+
+                            var hostName = $"{regionalNamingContext.Location.ShortName()}.{targetOptions.DomainName}";
+                            sslCert = new CertificateOptions()
                             {
-                                sslCert = new CertificateOptions()
-                                {
-                                    CertificateName = "ssl-cert",
-                                    SubjectName = regionOptions.HostName,
-                                    SubjectAlternativeNames = new List<string>() { regionOptions.HostName },
-                                };
-                            }
+                                CertificateName = "ssl-cert",
+                                SubjectName = hostName,
+                                SubjectAlternativeNames = new List<string>()
+                                    {
+                                        hostName,
+                                        $"*.{hostName}",
+                                        targetOptions.DomainName,
+                                        $"*.{targetOptions.DomainName}",
+                                    },
+                            };
 
                             genevaCert = new CertificateOptions()
                             {
@@ -228,6 +240,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 DataPlaneStorageCountPerSubscription = _hostingOptions.StorageCountPerDataPlaneSubscription,
                                 EnableVNet = targetOptions.EnableVNet,
                                 LogAnalyticsWorkspaceId = targetOptions.LogAnalyticsWorkspaceId,
+                                DNSZoneId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{globalRGName}/providers/Microsoft.Network/dnszones/{targetOptions.DomainName}",
                             };
 
                             await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions);
@@ -249,11 +262,18 @@ namespace Microsoft.Liftr.SimpleDeploy
                             File.WriteAllText("acr-name.txt", acr.Name);
                             File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
 
+                            if (string.IsNullOrEmpty(targetOptions.DiagnosticsStorageId))
+                            {
+                                targetOptions.DiagnosticsStorageId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}";
+                            }
+
+                            await GetDiagnosticsStorageAccountAsync(azFactory, targetOptions.DiagnosticsStorageId);
+
                             RegionalComputeOptions regionalComputeOptions = new RegionalComputeOptions()
                             {
                                 DataBaseName = regionOptions.DataBaseName,
                                 ComputeBaseName = regionOptions.ComputeBaseName,
-                                GlobalKeyVaultResourceId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName)}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
+                                GlobalKeyVaultResourceId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
                                 LogAnalyticsWorkspaceResourceId = targetOptions.LogAnalyticsWorkspaceId,
                             };
 
@@ -264,6 +284,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 kvClient);
 
                             File.WriteAllText("vault-name.txt", kv.Name);
+                            File.WriteAllText("aks-domain.txt", $"{aks.Name}.{targetOptions.DomainName}");
                             File.WriteAllText("aks-name.txt", aks.Name);
                             File.WriteAllText("aks-rg.txt", aks.ResourceGroupName);
                             File.WriteAllText("msi-resourceId.txt", msi.Id);
@@ -291,22 +312,36 @@ namespace Microsoft.Liftr.SimpleDeploy
                             File.WriteAllText("acr-name.txt", acr.Name);
                             File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
 
-                            if (!string.IsNullOrEmpty(regionOptions.HostName))
-                            {
-                                File.WriteAllText("rp-hostname.txt", regionOptions.HostName);
-                            }
-
+                            var hostName = $"{regionalNamingContext.Location.ShortName()}.{targetOptions.DomainName}";
+                            File.WriteAllText("rp-hostname.txt", hostName);
+                            File.WriteAllText("aks-domain.txt", $"{aksName}.{targetOptions.DomainName}");
                             File.WriteAllText("aks-name.txt", aksName);
                             File.WriteAllText("aks-rg.txt", aksRGName);
                             File.WriteAllText("aks-kv.txt", kv.VaultUri);
                             File.WriteAllText("vault-name.txt", kv.Name);
+
+                            if (string.IsNullOrEmpty(targetOptions.DiagnosticsStorageId))
+                            {
+                                targetOptions.DiagnosticsStorageId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}";
+                            }
+
+                            await GetDiagnosticsStorageAccountAsync(azFactory, targetOptions.DiagnosticsStorageId);
+
                             _logger.Information("Successfully retrieved Key Vault endpoint.");
                         }
                         else if (_commandOptions.Action == ActionType.UpdateAKSPublicIpInTrafficManager)
                         {
-                            var az = azFactory.GenerateLiftrAzure().FluentClient;
+                            var az = liftrAzure.FluentClient;
                             var aksHelper = new AKSHelper(_logger);
                             var tmId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{regionalNamingContext.ResourceGroupName(regionOptions.DataBaseName)}/providers/Microsoft.Network/trafficmanagerprofiles/{regionalNamingContext.TrafficManagerName(regionOptions.DataBaseName)}";
+
+                            var dnsZone = await liftrAzure.GetDNSZoneAsync(globalRGName, targetOptions.DomainName);
+                            if (dnsZone == null)
+                            {
+                                var errMsg = $"Cannot find the DNS zone for domina '{targetOptions.DomainName}' in RG '{globalRGName}'.";
+                                _logger.Error(errMsg);
+                                throw new InvalidOperationException(errMsg);
+                            }
 
                             var pip = await aksHelper.GetAppPublicIpAsync(az, aksRGName, aksName, regionalNamingContext.Location, _commandOptions.AKSAppSvcLabel);
                             if (pip == null)
@@ -327,8 +362,10 @@ namespace Microsoft.Liftr.SimpleDeploy
                             var epName = $"{aksRGName}-{SdkContext.RandomResourceName(string.Empty, 5).Substring(0, 3)}";
                             _logger.Information("New endpoint name: {epName}", epName);
                             await aksHelper.AddPulicIpToTrafficManagerAsync(az, tmId, epName, pip.IPAddress, enabled: true);
-
                             _logger.Information("Successfully updated AKS public IP in the traffic manager.");
+
+                            await dnsZone.Update().DefineARecordSet(aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
+                            _logger.Information("Successfully DNS A record '{recordName}' to IP '{ipAddress}'.", aksName, pip.IPAddress);
                         }
                     }
 
@@ -378,6 +415,25 @@ namespace Microsoft.Liftr.SimpleDeploy
             var regionalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, regionOptions.Location);
 
             return (regionOptions, regionalNamingContext);
+        }
+
+        private async Task GetDiagnosticsStorageAccountAsync(LiftrAzureFactory azFactory, string diagnosticsStorageId)
+        {
+            IStorageAccount diagStor = null;
+            var rid = new Liftr.Contracts.ResourceId(diagnosticsStorageId);
+            diagStor = await azFactory.GenerateLiftrAzure(rid.SubscriptionId).FluentClient.StorageAccounts.GetByIdAsync(diagnosticsStorageId);
+
+            if (diagStor == null)
+            {
+                var errMsg = "Cannot find the global diagnostics storage account.";
+                _logger.Fatal(errMsg);
+                throw new InvalidOperationException(errMsg);
+            }
+
+            var storKey = await diagStor.GetPrimaryStorageKeyAsync();
+
+            File.WriteAllText("diag-stor-name.txt", diagStor.Name);
+            File.WriteAllText("diag-stor-key.txt", storKey.Value);
         }
     }
 }

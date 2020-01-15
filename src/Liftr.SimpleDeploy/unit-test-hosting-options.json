@@ -2,6 +2,7 @@
   "Environments": [
     {
       "EnvironmentName": "Test",
+      "DomainName": "sample-partner-test-ame.azliftr-test.io",
       "AzureSubscription": "60fad35b-3a47-4ca0-b691-4a789f737cea",
       "Global": {
         "Location": "centralus",
@@ -12,7 +13,6 @@
           "Location": "eastus",
           "DataBaseName": "data1910",
           "ComputeBaseName": "com1910",
-          "HostName": "ib-rp-web-eus.azliftr-test.io",
           "DataPlaneSubscriptions": [
             "60fad35b-3a47-4ca0-b691-4a789f737cea"
           ]

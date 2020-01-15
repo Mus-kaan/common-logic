@@ -31,6 +31,8 @@ fi
 
 ./AzLogin.sh
 
+./ConnectAKS.sh
+
 ./ImportCDPxImages.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId"
 
