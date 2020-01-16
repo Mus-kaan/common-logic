@@ -8,11 +8,11 @@ spec:
   ports:
     - port: 10901
       protocol: TCP
-      targetPort: 10901
+      targetPort: grpc
       name: grpc
   selector:
     statefulset.kubernetes.io/pod-name: prometheus-prom-rel-prometheus-operat-prometheus-0
-  type: LoadBalancer
+  type: ClusterIP
 ---
 apiVersion: v1
 kind: Service
@@ -24,56 +24,56 @@ spec:
   ports:
     - port: 10901
       protocol: TCP
-      targetPort: 10901
+      targetPort: grpc
       name: grpc
   selector:
     statefulset.kubernetes.io/pod-name: prometheus-prom-rel-prometheus-operat-prometheus-1
-  type: LoadBalancer
-# ---
-# apiVersion: extensions/v1beta1
-# kind: Ingress
-# metadata:
-#   annotations:
-#     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-#     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
-#     # nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
-#     # nginx.ingress.kubernetes.io/auth-tls-secret: "monitoring/thanos-ca-secret"
-#   labels:
-#     app: prometheus
-#   name: thanos-sidecar-0
-# spec:
-#   rules:
-#   - host: thanos-0.sample-dev-wus2.azliftr-test.io
-#     http:
-#       paths:
-#       - backend:
-#           serviceName: thanos-sidecar-0
-#           servicePort: grpc
-#   tls:
-#   - hosts:
-#     - thanos-0.sample-dev-wus2.azliftr-test.io
-#     secretName: thanos-ingress-secret
-# ---
-# apiVersion: extensions/v1beta1
-# kind: Ingress
-# metadata:
-#   annotations:
-#     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-#     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
-#     # nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
-#     # nginx.ingress.kubernetes.io/auth-tls-secret: "monitoring/thanos-ca-secret"
-#   labels:
-#     app: prometheus
-#   name: thanos-sidecar-1
-# spec:
-#   rules:
-#   - host: thanos-1.sample-dev-wus2.azliftr-test.io
-#     http:
-#       paths:
-#       - backend:
-#           serviceName: thanos-sidecar-1
-#           servicePort: grpc
-#   tls:
-#   - hosts:
-#     - thanos-1.sample-dev-wus2.azliftr-test.io
-#     secretName: thanos-ingress-secret
+  type: ClusterIP
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+    nginx.ingress.kubernetes.io/auth-tls-secret: "prometheus/thanos-ca-secret"
+  labels:
+    app: prometheus
+  name: thanos-sidecar-0
+spec:
+  rules:
+  - host: thanos-0-PLACE_HOLDER_AKS_DOMAIN
+    http:
+      paths:
+      - backend:
+          serviceName: thanos-sidecar-0
+          servicePort: grpc
+  tls:
+  - hosts:
+    - thanos-0-PLACE_HOLDER_AKS_DOMAIN
+    secretName: thanos-ingress-secret
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+    nginx.ingress.kubernetes.io/auth-tls-secret: "prometheus/thanos-ca-secret"
+  labels:
+    app: prometheus
+  name: thanos-sidecar-1
+spec:
+  rules:
+  - host: thanos-1-PLACE_HOLDER_AKS_DOMAIN
+    http:
+      paths:
+      - backend:
+          serviceName: thanos-sidecar-1
+          servicePort: grpc
+  tls:
+  - hosts:
+    - thanos-1-PLACE_HOLDER_AKS_DOMAIN
+    secretName: thanos-ingress-secret

@@ -11,7 +11,6 @@ if [ "$APP_ASPNETCORE_ENVIRONMENT" = "" ]; then
 APP_ASPNETCORE_ENVIRONMENT="Production"
 fi
 
-AKSSvcLabel="nginx-ingress-controller"
 AKSAppChartPackage="liftr-*.tgz"
 
 echo "Get Key Vault endpoint and save on disk."
@@ -42,12 +41,6 @@ fi
 --APP_ASPNETCORE_ENVIRONMENT="$APP_ASPNETCORE_ENVIRONMENT" \
 --AKSAppChartPackage="$AKSAppChartPackage"
 
-./ExecuteDeploymentRunner.sh \
---ProvisionAction="UpdateAKSPublicIpInTrafficManager" \
---EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
---Region="$REGION" \
---AKSSvcLabel="$AKSSvcLabel"
-
 for script in "$CurrentDir"/4_*.sh
 do
   if [[ "$script" != *"$currentScriptName"* ]]; then
@@ -58,6 +51,14 @@ do
     echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
   fi
 done
+
+if [ "$NoCleanUp" = "" ]; then
+  rm -f *.pfx
+  rm -f *.key
+  rm -f *.cer
+  rm -f bin/*.txt
+  rm -f thanos-storage-config.yaml
+fi
 
 echo "Successfully finished running: $currentScriptName"
 echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"

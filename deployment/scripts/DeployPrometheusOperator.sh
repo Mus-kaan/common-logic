@@ -87,6 +87,17 @@ VaultName=$(<bin/vault-name.txt)
 fi
 echo "VaultName: $VaultName"
 
+if [ "$AKSDomain" = "" ]; then
+echo "Read AKSDomain from file 'bin/aks-domain.txt'."
+AKSDomain=$(<bin/aks-domain.txt)
+    if [ "$AKSDomain" = "" ]; then
+        echo "Please set aks host name using variable 'AKSDomain' ..."
+        exit 1 # terminate and indicate error
+    fi
+fi
+echo "AKSDomain: $AKSDomain"
+sed -i "s|PLACE_HOLDER_AKS_DOMAIN|$AKSDomain|g" thanos-sidecar-ingress.yaml
+
 echo "************************************************************"
 echo "Start helm upgrade Prometheus chart ..."
 echo "************************************************************"
@@ -110,7 +121,7 @@ sleep 5s
 sed -i "s|STOR_NAME_PLACEHOLDER|$DiagStorName|g" thanos-storage-config.yaml
 sed -i "s|STOR_KEY_PLACEHOLDER|$DiagStorKey|g" thanos-storage-config.yaml
 
-echo "create thanos secret"
+echo "Create thanos secret 'thanos-objstore-config'"
 kubectl -n $namespace create secret generic thanos-objstore-config --from-file=thanos.yaml=thanos-storage-config.yaml
 
 rm thanos-storage-config.yaml
@@ -120,7 +131,8 @@ rm bin/diag-stor-key.txt
 --DeploymentSubscriptionId=$DeploymentSubscriptionId \
 --VaultName=$VaultName \
 --KeyVaultSecretName="ssl-cert" \
---k8sSecretName="thanos-ingress-secret" \
+--tlsSecretName="thanos-ingress-secret" \
+--caSecretName="thanos-ca-secret" \
 --Namespace=$namespace
 
 # https://itnext.io/monitoring-kubernetes-workloads-with-prometheus-and-thanos-4ddb394b32c

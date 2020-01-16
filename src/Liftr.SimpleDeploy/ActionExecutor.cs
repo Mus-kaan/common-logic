@@ -365,6 +365,9 @@ namespace Microsoft.Liftr.SimpleDeploy
                             _logger.Information("Successfully updated AKS public IP in the traffic manager.");
 
                             await dnsZone.Update().DefineARecordSet(aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
+                            await dnsZone.Update().DefineARecordSet("*." + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
+                            await dnsZone.Update().DefineARecordSet("thanos-0-" + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
+                            await dnsZone.Update().DefineARecordSet("thanos-1-" + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
                             _logger.Information("Successfully DNS A record '{recordName}' to IP '{ipAddress}'.", aksName, pip.IPAddress);
                         }
                     }

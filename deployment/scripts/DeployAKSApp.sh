@@ -171,11 +171,6 @@ do
     $ROLLOUT_STATUS_CMD || exit 1 #exit statement will only be executed when the command returns a non zero which implies a failure
 done
 
-if [ "$NoWait" = "" ]; then
-    echo "Wait for extra 120 seconds to make sure the Public IP address is provisioned"
-    sleep 120s
-fi
-
 echo "-----------------------------------------------------------------"
 echo "Finished helm upgrade AKS APP chart"
 echo "-----------------------------------------------------------------"
