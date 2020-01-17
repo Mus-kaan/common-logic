@@ -168,6 +168,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     var infra = new InfrastructureV2(azFactory, kvClient, _logger);
                     var globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
                     var globalRGName = globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
+                    File.WriteAllText("global-vault-name.txt", globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
 
                     if (_commandOptions.Action == ActionType.CreateOrUpdateGlobal)
                     {

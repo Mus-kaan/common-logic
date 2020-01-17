@@ -67,24 +67,46 @@ if [ -z ${Namespace+x} ]; then
 fi
 
 
-echo "az keyvault secret download --subscription "$DeploymentSubscriptionId" --vault-name "$VaultName" --name $KeyVaultSecretName --file cert-pfx-encoded"
-rm -f cert-pfx-encoded
-az keyvault secret download --subscription "$DeploymentSubscriptionId" --vault-name "$VaultName" --name "$KeyVaultSecretName" --file cert-pfx-encoded
+rm -f "$KeyVaultSecretName.txt"
+echo "az keyvault secret download --subscription $DeploymentSubscriptionId --vault-name $VaultName --name $KeyVaultSecretName --file $KeyVaultSecretName.txt"
+az keyvault secret download --subscription "$DeploymentSubscriptionId" --vault-name "$VaultName" --name "$KeyVaultSecretName" --file "$KeyVaultSecretName.txt"
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
-    echo "az keyvault secret download failed."
+    echo "az keyvault secret '$KeyVaultSecretName' download failed."
     exit $exit_code
 fi
 
-echo "(cat cert-pfx-encoded | base64 --decode) > cert-pfx.pfx"
-rm -f cert-pfx.pfx
-(cat cert-pfx-encoded | base64 --decode) > "$KeyVaultSecretName.pfx"
-rm -f cert-pfx-encoded
+rm -f "$KeyVaultSecretName.pfx"
+echo "(cat $KeyVaultSecretName.txt | base64 --decode) > $KeyVaultSecretName.pfx"
+(cat "$KeyVaultSecretName.txt" | base64 --decode) > "$KeyVaultSecretName.pfx"
 
 openssl pkcs12 -in "$KeyVaultSecretName.pfx" -out "$KeyVaultSecretName.key" -nodes -nocerts -password pass:
-openssl pkcs12 -in "$KeyVaultSecretName.pfx" -out "$KeyVaultSecretName.cer" -nodes -clcerts -nokeys -password pass:
+openssl pkcs12 -in "$KeyVaultSecretName.pfx" -out "$KeyVaultSecretName.reverse.cer" -nodes -clcerts -nokeys -password pass:
 openssl pkcs12 -in "$KeyVaultSecretName.pfx" -out "$KeyVaultSecretName.full.cer" -nodes -nokeys -password pass:
 openssl pkcs12 -in "$KeyVaultSecretName.pfx" -out "$KeyVaultSecretName.cacerts.cer" -nodes -cacerts -chain -nokeys -password pass:
+
+# The "$KeyVaultSecretName.reverse.cer" file has the cert chain in it. However, since it is from pfx file, the first one is its own cert.
+# Nginx requires the first cert to be the CA's cert and self cert to be in the last. We need to reverse the cert below.
+tlsCert="$KeyVaultSecretName.temp.cer"
+pattern="$KeyVaultSecretName-splited-temp-cert-"
+chainedCert="$KeyVaultSecretName.cer"
+
+rm -f "$tlsCert"
+rm -f *splited-temp-cert*
+rm -f "$chainedCert"
+
+openssl pkcs12 -in "$KeyVaultSecretName.pfx" -nokeys -password pass: | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > "$tlsCert"
+
+# Split individual cert to a separate file.
+csplit -f $pattern -z $tlsCert '/-----BEGIN CERTIFICATE-----/' '{*}'
+numCerts="$( ls -1q ${pattern}* | wc -l )"
+echo "The cert chain has ${numCerts} certs."
+
+# Merge the cert chain (assume the cert chain has no more than 10 certs)
+for ((i=numCerts-1; i>=0; i--))
+do
+    cat "${pattern}0${i}" >>$chainedCert
+done
 
 set +e
 kubectl delete secret -n "$Namespace" "$tlsSecretName"

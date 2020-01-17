@@ -85,7 +85,15 @@ VaultName=$(<bin/vault-name.txt)
         exit 1 # terminate and indicate error
     fi
 fi
-echo "VaultName: $VaultName"
+
+if [ "$GlobalVaultName" = "" ]; then
+echo "Read GlobalVaultName from file 'bin/vault-name.txt'."
+GlobalVaultName=$(<bin/global-vault-name.txt)
+    if [ "$GlobalVaultName" = "" ]; then
+        echo "Please set the name of the Key Vault with certificates using variable 'GlobalVaultName' ..."
+        exit 1 # terminate and indicate error
+    fi
+fi
 
 if [ "$AKSDomain" = "" ]; then
 echo "Read AKSDomain from file 'bin/aks-domain.txt'."
@@ -98,13 +106,35 @@ fi
 echo "AKSDomain: $AKSDomain"
 sed -i "s|PLACE_HOLDER_AKS_DOMAIN|$AKSDomain|g" thanos-sidecar-ingress.yaml
 
+
+set +e
+echo "kubectl create namespace $namespace"
+kubectl create namespace "$namespace"
+
+./CreateCertificateSecret.sh \
+--DeploymentSubscriptionId=$DeploymentSubscriptionId \
+--VaultName=$GlobalVaultName \
+--KeyVaultSecretName="thanos-api" \
+--tlsSecretName="dummy-tls-secret" \
+--caSecretName="thanos-ca-secret" \
+--Namespace=$namespace
+set -e
+
+./CreateCertificateSecret.sh \
+--DeploymentSubscriptionId=$DeploymentSubscriptionId \
+--VaultName=$VaultName \
+--KeyVaultSecretName="ssl-cert" \
+--tlsSecretName="thanos-ingress-secret" \
+--caSecretName="dummy-ca-secret" \
+--Namespace=$namespace
+
+
+
 echo "************************************************************"
 echo "Start helm upgrade Prometheus chart ..."
 echo "************************************************************"
 
 set +e
-echo "kubectl create namespace $namespace"
-kubectl create namespace "$namespace"
 kubectl -n $namespace delete secret thanos-objstore-config
 $Helm uninstall $helmReleaseName -n $namespace
 set -e
@@ -124,20 +154,10 @@ sed -i "s|STOR_KEY_PLACEHOLDER|$DiagStorKey|g" thanos-storage-config.yaml
 echo "Create thanos secret 'thanos-objstore-config'"
 kubectl -n $namespace create secret generic thanos-objstore-config --from-file=thanos.yaml=thanos-storage-config.yaml
 
-rm thanos-storage-config.yaml
-rm bin/diag-stor-key.txt
-
-./CreateCertificateSecret.sh \
---DeploymentSubscriptionId=$DeploymentSubscriptionId \
---VaultName=$VaultName \
---KeyVaultSecretName="ssl-cert" \
---tlsSecretName="thanos-ingress-secret" \
---caSecretName="thanos-ca-secret" \
---Namespace=$namespace
-
 # https://itnext.io/monitoring-kubernetes-workloads-with-prometheus-and-thanos-4ddb394b32c
 echo "helm upgrade $helmReleaseName ..."
 $Helm upgrade $helmReleaseName prometheus-operator-*.tgz --install \
+--namespace $namespace \
 --set alertmanager.enabled=false \
 --set grafana.enabled=false \
 --set kubeEtcd.enabled=false \
@@ -154,13 +174,17 @@ $Helm upgrade $helmReleaseName prometheus-operator-*.tgz --install \
 --set prometheus.prometheusSpec.thanos.tag=v0.3.1 \
 --set prometheus.prometheusSpec.thanos.objectStorageConfig.key=thanos.yaml \
 --set prometheus.prometheusSpec.thanos.objectStorageConfig.name=thanos-objstore-config \
---namespace $namespace
 
 echo "Wait for the helm release '$helmReleaseName' ..."
 kubectl rollout status deployment.apps/prom-rel-kube-state-metrics -n "$namespace"
 kubectl rollout status deployment.apps/prom-rel-prometheus-operat-operator -n "$namespace"
 
-kubectl apply -n "$namespace" -f thanos-sidecar-ingress.yaml
+if [ ! -f thanos-api.cer ]; then
+    echo "Cannot find the api secret for Thanos. Skip deploying Thanos ingress"
+else
+    echo "Configuring Thanos ingress"
+    kubectl apply -n "$namespace" -f thanos-sidecar-ingress.yaml
+fi
 
 echo "------------------------------------------------------------"
 echo "Finished helm upgrade Prometheus chart"

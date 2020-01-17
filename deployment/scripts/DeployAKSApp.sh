@@ -2,6 +2,8 @@
 # Stop on error.
 set -e
 
+namespace=default
+
 for i in "$@"
 do
 case $i in
@@ -107,33 +109,16 @@ VaultName=$(<bin/vault-name.txt)
 fi
 echo "VaultName: $VaultName"
 
-echo "az keyvault secret download --subscription "$DeploymentSubscriptionId" --vault-name "$VaultName" --name ssl-cert --file ssl-cert-pfx"
-rm -f ssl-cert-pfx
-az keyvault secret download --subscription "$DeploymentSubscriptionId" --vault-name "$VaultName" --name ssl-cert --file ssl-cert-pfx
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az keyvault secret download failed."
-    exit $exit_code
-fi
+./CreateCertificateSecret.sh \
+--DeploymentSubscriptionId=$DeploymentSubscriptionId \
+--VaultName=$VaultName \
+--KeyVaultSecretName="ssl-cert" \
+--tlsSecretName="aks-app-tls-secret" \
+--caSecretName="aks-app-tls-ca-secret" \
+--Namespace=$namespace
 
-echo "(cat ssl-cert-pfx | base64 --decode) > ssl-cert-pfx.pfx"
-rm -f ssl-cert-pfx.pfx
-(cat ssl-cert-pfx | base64 --decode) > ssl-cert-pfx.pfx
-
-# Note: Since use CA issued certificate, need to exclude CA. As https://nam06.safelinks.protection.outlook.com/?url=https%3A%2F%2Fmsazure.visualstudio.com%2FOne%2F_git%2FCompute-Runtime-Tux-GenevaContainers%3Fpath%3D%252Fdocker_geneva_mdsd_finalize%252Fstart_mdsd.sh%26version%3DGBmaster%26line%3D25%26lineStyle%3Dplain%26lineEnd%3D36%26lineStartColumn%3D1%26lineEndColumn%3D2&data=02%7C01%7CYiming.Jia%40microsoft.com%7C89c14642297342476e9e08d6b752b83e%7C72f988bf86f141af91ab2d7cd011db47%7C1%7C0%7C636897963293490981&sdata=lVisF0aQqR6NTczakYL0Uze0VWklIj9fKsGS%2FjgZicU%3D&reserved=0
-# It checks mds of private key and certificate.
-rm -f ssl_cert.pem
-rm -f ssl_key.pem
-openssl pkcs12 -in ssl-cert-pfx.pfx -out ssl_cert.pem -nodes -clcerts -nokeys -password pass:
-openssl pkcs12 -in ssl-cert-pfx.pfx -out ssl_key.pem -nodes -nocerts -password pass:
-
-sslCertB64Content=$(cat ssl_cert.pem | base64 -w 0)
-sslKeyB64Content=$(cat ssl_key.pem | base64 -w 0)
-
-rm -f ssl-cert-pfx
-rm -f ssl-cert-pfx.pfx
-rm -f ssl_cert.pem
-rm -f ssl_key.pem
+sslCertB64Content=$(cat ssl-cert.cer | base64 -w 0)
+sslKeyB64Content=$(cat ssl-cert.key | base64 -w 0)
 
 # Deploy the helm chart.
 HelmReleaseName="liftr-custom-aks-app"
@@ -151,7 +136,7 @@ $Helm upgrade $HelmReleaseName --install \
 --set imageRegistry="$liftrACRURI" \
 --set nginx-ingress.controller.image.repository="$liftrACRURI/kubernetes-ingress-controller/nginx-ingress-controller" \
 --set nginx-ingress.defaultBackend.image.repository="$liftrACRURI/defaultbackend-amd64" \
---namespace default $AKSAppChartPackage
+--namespace $namespace $AKSAppChartPackage
 
 # Wait and check Helm deployment status
 # Reasons:

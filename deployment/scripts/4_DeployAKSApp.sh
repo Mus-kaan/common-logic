@@ -58,6 +58,7 @@ if [ "$NoCleanUp" = "" ]; then
   rm -f *.cer
   rm -f bin/*.txt
   rm -f thanos-storage-config.yaml
+  rm -f *splited-temp-cert*
 fi
 
 echo "Successfully finished running: $currentScriptName"
