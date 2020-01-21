@@ -49,10 +49,6 @@ namespace Microsoft.Liftr.SimpleDeploy
 
             try
             {
-                LogContext.PushProperty(nameof(_commandOptions.EnvName), _commandOptions.EnvName);
-                LogContext.PushProperty(nameof(_commandOptions.Region), _commandOptions.Region);
-                LogContext.PushProperty("ExeAction", _commandOptions.Action);
-
                 if (!File.Exists(_commandOptions.ConfigPath))
                 {
                     var errMsg = $"Config json file doesn't exist at the path: {_commandOptions.ConfigPath}";
@@ -165,6 +161,10 @@ namespace Microsoft.Liftr.SimpleDeploy
                 try
                 {
                     operation.SetContextProperty(nameof(_hostingOptions.PartnerName), _hostingOptions.PartnerName);
+                    operation.SetContextProperty("Environment", _commandOptions.EnvName);
+                    operation.SetContextProperty("Location", ToSimpleName(_commandOptions.Region)); // the simple name has a geo coordinate mapping.
+                    operation.SetContextProperty("ExeAction", _commandOptions.Action.ToString());
+
                     var infra = new InfrastructureV2(azFactory, kvClient, _logger);
                     var globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
                     var globalRGName = globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
@@ -438,6 +438,11 @@ namespace Microsoft.Liftr.SimpleDeploy
 
             File.WriteAllText("diag-stor-name.txt", diagStor.Name);
             File.WriteAllText("diag-stor-key.txt", storKey.Value);
+        }
+
+        private static string ToSimpleName(string region)
+        {
+            return region.Replace(" ", string.Empty, StringComparison.OrdinalIgnoreCase).ToLowerInvariant();
         }
     }
 }
