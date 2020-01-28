@@ -78,8 +78,19 @@ namespace Microsoft.Liftr.GenericHosting
                 config.AddJsonFile("appsettings.json", optional: false);
                 config.AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true);
 
+                // Get the 'ClientId' and 'ClientSecret' to talk to key vault first.
+                if (string.IsNullOrEmpty(environmentVariablePrefix))
+                {
+                    config.AddEnvironmentVariables();
+                }
+                else
+                {
+                    config.AddEnvironmentVariables(prefix: environmentVariablePrefix);
+                }
+
                 config.AddKeyVaultConfigurations(keyVaultPrefix);
 
+                // Add the environment variables again to overwrite the Key Vault Configurations.
                 if (string.IsNullOrEmpty(environmentVariablePrefix))
                 {
                     config.AddEnvironmentVariables();
