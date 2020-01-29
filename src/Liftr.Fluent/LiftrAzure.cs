@@ -247,6 +247,11 @@ namespace Microsoft.Liftr.Fluent
             catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
             {
             }
+            catch (CloudException ex) when (ex.Message.Contains("Principals of type Application cannot validly be used in role assignments"))
+            {
+                _logger.Error("The object Id '{objectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", objectId);
+                throw;
+            }
         }
 
         public Task GrantBlobContributorAsync(IResourceGroup rg, IIdentity msi)
@@ -270,6 +275,11 @@ namespace Microsoft.Liftr.Fluent
             catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
             {
             }
+            catch (CloudException ex) when (ex.Message.Contains("Principals of type Application cannot validly be used in role assignments"))
+            {
+                _logger.Error("The object Id '{objectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", objectId);
+                throw;
+            }
         }
 
         public Task GrantBlobContainerContributorAsync(IStorageAccount storageAccount, string containerName, IIdentity msi)
@@ -292,6 +302,11 @@ namespace Microsoft.Liftr.Fluent
             }
             catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
             {
+            }
+            catch (CloudException ex) when (ex.Message.Contains("Principals of type Application cannot validly be used in role assignments"))
+            {
+                _logger.Error("The object Id '{objectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", objectId);
+                throw;
             }
         }
 
@@ -317,6 +332,11 @@ namespace Microsoft.Liftr.Fluent
             }
             catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
             {
+            }
+            catch (CloudException ex) when (ex.Message.Contains("Principals of type Application cannot validly be used in role assignments"))
+            {
+                _logger.Error("The object Id '{objectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", objectId);
+                throw;
             }
         }
 

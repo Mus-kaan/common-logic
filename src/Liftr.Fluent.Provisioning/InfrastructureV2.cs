@@ -414,17 +414,22 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             try
             {
-                _logger.Information("Granting the identity binding access for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId} ...", msi.Id, aksInfo.AKSSPNObjectId);
+                _logger.Information("Granting the identity binding access for the MSI {MSIResourceId} to the AKS SPN with object Id '{AKSobjectId}' ...", msi.Id, aksInfo.AKSSPNObjectId);
                 await liftrAzure.Authenticated.RoleAssignments
                     .Define(SdkContext.RandomGuid())
                     .ForObjectId(aksInfo.AKSSPNObjectId)
                     .WithBuiltInRole(BuiltInRole.Contributor)
                     .WithResourceScope(msi)
                     .CreateAsync();
-                _logger.Information("Granted the identity binding access for the MSI {MSIResourceId} to the AKS SPN with {AKSobjectId}.", msi.Id, aksInfo.AKSSPNObjectId);
+                _logger.Information("Granted the identity binding access for the MSI {MSIResourceId} to the AKS SPN with object Id '{AKSobjectId}'.", msi.Id, aksInfo.AKSSPNObjectId);
             }
             catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
             {
+            }
+            catch (CloudException ex) when (ex.Message.Contains("Principals of type Application cannot validly be used in role assignments"))
+            {
+                _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", aksInfo.AKSSPNObjectId);
+                throw;
             }
 
             try
@@ -441,6 +446,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
             catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
             {
+            }
+            catch (CloudException ex) when (ex.Message.Contains("Principals of type Application cannot validly be used in role assignments"))
+            {
+                _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", aksInfo.AKSSPNObjectId);
+                throw;
             }
 
             var globalKeyVault = await liftrAzure.GetKeyVaultByIdAsync(computeOptions.GlobalKeyVaultResourceId);
@@ -516,6 +526,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     }
                     catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
                     {
+                    }
+                    catch (CloudException ex) when (ex.Message.Contains("Principals of type Application cannot validly be used in role assignments"))
+                    {
+                        _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", aksInfo.AKSSPNObjectId);
+                        throw;
                     }
                 }
 
