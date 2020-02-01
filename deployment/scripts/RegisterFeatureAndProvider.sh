@@ -43,6 +43,15 @@ checkAndRegisterProvider "Microsoft.VirtualMachineImages"
 checkAndRegisterProvider "Microsoft.Insights"
 checkAndRegisterProvider "Microsoft.OperationalInsights"
 checkAndRegisterProvider "Microsoft.OperationsManagement"
+checkAndRegisterProvider "Microsoft.DocumentDB"
+checkAndRegisterProvider "Microsoft.KeyVault"
+checkAndRegisterProvider "Microsoft.ManagedIdentity"
+checkAndRegisterProvider "Microsoft.DomainRegistration"
+checkAndRegisterProvider "Microsoft.Network"
+checkAndRegisterProvider "Microsoft.EventHub"
+checkAndRegisterProvider "microsoft.insights"
+checkAndRegisterProvider "Microsoft.ContainerService"
+checkAndRegisterProvider "Microsoft.ContainerRegistry"
 
 # register and enable for shared image gallery
 az feature register --namespace Microsoft.Compute --name GalleryPreview
