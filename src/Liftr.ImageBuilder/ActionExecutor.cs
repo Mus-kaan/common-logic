@@ -40,6 +40,8 @@ namespace Microsoft.Liftr.ImageBuilder
             _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
 
             LogContext.PushProperty(nameof(options.SourceImage), options.SourceImage.ToString());
+            LogContext.PushProperty(nameof(options.ImageName), options.ImageName);
+            LogContext.PushProperty("PartnerName", options.ImageName); // ImageBuilder does not have a 'PartnerName' concept, this is for reuse the existing dashboard.
             logger.LogProcessStart();
         }
 
