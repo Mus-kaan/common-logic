@@ -3,6 +3,11 @@
 # Stop on error.
 set -e
 
+if [ "$NoWait" = "true" ]; then
+    echo "Skip import images when 'NoWait' is set"
+    exit 0
+fi
+
 # The version are referenced at three places. You need to update all of them. Please search for this sentence.
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/environments/linuxcontainers.html"
 IMG_mdsd="genevamdsd:master_247"

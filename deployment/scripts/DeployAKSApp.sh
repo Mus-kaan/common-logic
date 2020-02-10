@@ -121,7 +121,11 @@ sslCertB64Content=$(cat ssl-cert.cer | base64 -w 0)
 sslKeyB64Content=$(cat ssl-cert.key | base64 -w 0)
 
 # Deploy the helm chart.
-HelmReleaseName="liftr-custom-aks-app"
+HelmReleaseName=$(<bin/helm-releasename.txt)
+if [ "$HelmReleaseName" = "" ]; then
+    echo "Variable 'HelmReleaseName' is not set. So use the default 'app-rel' ..."
+    HelmReleaseName="app-rel"
+fi
 echo "start deploy $HelmReleaseName helm chart."
 $Helm upgrade $HelmReleaseName --install \
 --set appVersion="$AppVersion" \

@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-gateway-web-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: helm
+spec:
+  rules:
+    - host:  {{ required "The hostname must be provided." .Values.hostname }}
+      http:
+          paths:
+          - backend:
+              serviceName: {{ .Release.Name }}-gateway-web-svc
+              servicePort: 80
+            path: /
+    - http:
+        paths:
+          - path: /api/liveness-probe
+            backend:
+              serviceName: {{ .Release.Name }}-gateway-web-svc
+              servicePort: 80
+  # This section is only required if TLS is to be enabled for the Ingress
+  tls:
+      - hosts:
+          - {{ required "The hostname must be provided." .Values.hostname }}
+        secretName: {{ .Release.Name }}-gateway-tls

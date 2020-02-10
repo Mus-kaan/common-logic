@@ -69,6 +69,10 @@ namespace Microsoft.Liftr.SimpleDeploy
                 LogContext.PushProperty("TargetSubscriptionId", hostingEnvironmentOptions.AzureSubscription);
                 File.WriteAllText("subscription-id.txt", hostingEnvironmentOptions.AzureSubscription.ToString());
                 File.WriteAllText("tenant-id.txt", hostingEnvironmentOptions.TenantId.ToString());
+                if (!string.IsNullOrEmpty(_hostingOptions.HelmReleaseName))
+                {
+                    File.WriteAllText("helm-releasename.txt", _hostingOptions.HelmReleaseName);
+                }
 
                 _logger.Information("ActionExecutor Action:{ExeAction}", _commandOptions.Action);
                 _logger.Information("RunnerCommandOptions: {@RunnerCommandOptions}", _commandOptions);

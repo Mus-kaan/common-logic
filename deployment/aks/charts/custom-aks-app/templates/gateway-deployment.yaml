@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-gateway-web
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}-gateway-web
+    app.kubernetes.io/version: {{ required "The appVersion parameter must be provided." .Values.appVersion | quote }}
+    app.kubernetes.io/managed-by: helm
+    appVersion: {{ required "The appVersion must be provided." .Values.appVersion }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-gateway-web
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-gateway-web
+        aadpodidbinding: liftr-aad-pod-identity
+        region: {{ required "compactRegion must be provided." .Values.compactRegion }}
+        appVersion: {{ .Values.appVersion }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: liftr-gateway-web-container
+        image: {{ required "The imageRegistry parameter must be provided." .Values.imageRegistry }}/{{ required "The gatewayWeb.imageName parameter must be provided." .Values.gatewayWeb.imageName }}
+        ports:
+          - containerPort: 5000
+        env:
+          - name: STATSD_HOST
+            value: geneva-services
+          - name: VaultEndpoint
+            value: {{ required "The Key Vault endpoint for the app to load secrets must be provided." .Values.vaultEndpoint }}
+          - name: ASPNETCORE_ENVIRONMENT
+            value: {{ required "The APP_ASPNETCORE_ENVIRONMENT must be provided." .Values.APP_ASPNETCORE_ENVIRONMENT }}
+        livenessProbe:
+          httpGet:
+            path: /api/liveness-probe
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 6

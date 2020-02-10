@@ -16,6 +16,8 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public string SecretPrefix { get; set; }
 
+        public string HelmReleaseName { get; set; }
+
         public int StorageCountPerDataPlaneSubscription { get; set; }
 
         public IEnumerable<HostingEnvironmentOptions> Environments { get; set; }

@@ -3,6 +3,11 @@
 set -e
 CurrentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+if [ "$NoWait" = "true" ]; then
+    echo "Skip import images when 'NoWait' is set"
+    exit 0
+fi
+
 for i in "$@"
 do
 case $i in
