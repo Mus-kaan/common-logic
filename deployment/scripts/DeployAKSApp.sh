@@ -89,6 +89,16 @@ AppVersion=$(<bin/version.txt)
 fi
 echo "AppVersion: $AppVersion"
 
+if [ "$HelmReleaseName" = "" ]; then
+echo "Read HelmReleaseName from file 'bin/helm-releasename.txt'."
+HelmReleaseName=$(<bin/helm-releasename.txt)
+    if [ "$HelmReleaseName" = "" ]; then
+        echo "Variable 'HelmReleaseName' is not set. So use the default 'app-rel' ..."
+        HelmReleaseName="app-rel"
+    fi
+fi
+echo "HelmReleaseName: $HelmReleaseName"
+
 if [ "$RPWebHostname" = "" ]; then
 echo "Read RPWebHostname from file 'bin/rp-hostname.txt'."
 RPWebHostname=$(<bin/rp-hostname.txt)
@@ -96,6 +106,8 @@ RPWebHostname=$(<bin/rp-hostname.txt)
         echo "Please set svc host name using variable 'RPWebHostname' ..."
         exit 1 # terminate and indicate error
     fi
+echo "expand the existing host name '$RPWebHostname' with the helm release name '$HelmReleaseName' ..."
+RPWebHostname="$HelmReleaseName-$RPWebHostname"
 fi
 echo "RPWebHostname: $RPWebHostname"
 
@@ -121,11 +133,6 @@ sslCertB64Content=$(cat ssl-cert.cer | base64 -w 0)
 sslKeyB64Content=$(cat ssl-cert.key | base64 -w 0)
 
 # Deploy the helm chart.
-HelmReleaseName=$(<bin/helm-releasename.txt)
-if [ "$HelmReleaseName" = "" ]; then
-    echo "Variable 'HelmReleaseName' is not set. So use the default 'app-rel' ..."
-    HelmReleaseName="app-rel"
-fi
 echo "start deploy $HelmReleaseName helm chart."
 $Helm upgrade $HelmReleaseName --install \
 --set appVersion="$AppVersion" \
@@ -162,7 +169,5 @@ done
 
 echo "-----------------------------------------------------------------"
 echo "Finished helm upgrade AKS APP chart"
+echo "The web can be reached at: https://$RPWebHostname"
 echo "-----------------------------------------------------------------"
-
-echo "kubectl get all"
-kubectl get all
