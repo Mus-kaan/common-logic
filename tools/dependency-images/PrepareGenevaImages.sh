@@ -13,10 +13,10 @@ region="westus"
 
 # The version are referenced at three places. You need to update all of them. Please search for this sentence.
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/environments/linuxcontainers.html"
-IMG_mdsd="genevamdsd:master_246"
+IMG_mdsd="genevamdsd:master_247"
 IMG_mdm="genevamdm:master_28"
-IMG_fluentd="genevafluentd_td-agent:master_124"
-IMG_azsecpack="genevasecpackinstall:master_30"
+IMG_fluentd="genevafluentd_td-agent:master_126"
+IMG_azsecpack="genevasecpackinstall:master_31"
 IMG_kubegen="kube-gen:master_12"
 IMG_kubectl="kubectl:master_8"
 IMG_acskv="acskeyvaultagent:master_11"
@@ -57,8 +57,8 @@ docker pull "$ameACR/$IMG_kubegen"
 docker pull "$ameACR/$IMG_kubectl"
 docker pull "$ameACR/$IMG_acskv"
 
-echo "Start manageing the MS ACR ..."
-echo "Please login using your MS corp credentials."
+echo "Start Moving Geneva images to Microsoft tenant ACR ..."
+echo "Please login using your Microsoft corp credentials."
 az login --use-device-code
 
 echo "az account set -s $msSubscriptionId"

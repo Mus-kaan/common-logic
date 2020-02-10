@@ -63,27 +63,19 @@ echo "kubectl create namespace $namespace"
 kubectl create namespace "$namespace"
 set -e
 
-# Deploy identity infrastructure daemonset
-echo "helm upgrade aks-pod-identity-infra"
-$Helm upgrade aks-pod-identity-infra --install \
+echo "helm upgrade aad-pod-id-rel"
+$Helm upgrade aad-pod-id-rel --install \
 --set compactRegion="$compactRegion" \
 --set environmentName="$environmentName" \
---namespace aad-pod-id aad-pod-identity-infra-*.tgz
-
-echo "Start waiting for aks-pod-identity-infra deployment to finish ..."
-kubectl rollout status daemonset/nmi -n aad-pod-id
-kubectl rollout status deployment/mic -n aad-pod-id
-
-# Deploy azure identity binding components
-echo "helm upgrade aks-pod-identity-binding"
-echo "If this part failed with 'cannot find aad pod api, please retry the release.'"
-$Helm upgrade aks-pod-identity-binding --install \
---values "aad-pod-identity.values.yaml" \
---set compactRegion="$compactRegion" \
---set environmentName="$environmentName" \
+--set azureIdentity.enabled=true \
 --set azureIdentity.resourceID=$MSIResourceId \
 --set azureIdentity.clientID=$MSIClientId \
---namespace aad-pod-id aad-pod-identity-binding-*.tgz
+--set azureIdentityBinding.selector="liftr-aad-pod-identity" \
+--namespace $namespace aad-pod-identity-*.tgz
+
+echo "Start waiting for aks-pod-identity-infra deployment to finish ..."
+kubectl rollout status daemonset.apps/aad-pod-identity-nmi -n $namespace
+kubectl rollout status deployment.apps/aad-pod-identity-mic -n $namespace
 
 echo "-------------------------------------"
 echo "Finished helm upgrade aks pod identity chart"

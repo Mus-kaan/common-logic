@@ -5,11 +5,10 @@ set -e
 
 # The version are referenced at three places. You need to update all of them. Please search for this sentence.
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/environments/linuxcontainers.html"
-IMG_mdsd="genevamdsd:master_246"
+IMG_mdsd="genevamdsd:master_247"
 IMG_mdm="genevamdm:master_28"
-IMG_fluentd="genevafluentd_td-agent:master_124"
-IMG_azsecpack="genevasecpackinstall:master_30"
-IMG_prommdm="shared/prom-mdm-converter:2.0.master.20200106.5"
+IMG_fluentd="genevafluentd_td-agent:master_126"
+IMG_azsecpack="genevasecpackinstall:master_31"
 
 for i in "$@"
 do
@@ -93,12 +92,10 @@ az acr import --name "$ACRName" --source quay.io/kubernetes-ingress-controller/n
 
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/environments/linuxcontainers.html"
 echo "import geneva images"
+echo "Please make sure the Geneva images are imported to the shared liftr ACR first: https://msazure.visualstudio.com/Liftr/_git/Liftr.Common?path=%2Ftools%2Fdependency-images%2FPrepareGenevaImages.sh"
 az acr import --name "$ACRName" --source $IMG_mdsd --registry $LiftrACRResourceId --force
 az acr import --name "$ACRName" --source $IMG_mdm --registry $LiftrACRResourceId --force
 az acr import --name "$ACRName" --source $IMG_fluentd --registry $LiftrACRResourceId --force
 az acr import --name "$ACRName" --source $IMG_azsecpack --registry $LiftrACRResourceId --force
-
-echo "import prom-mdm-converter"
-az acr import --name "$ACRName" --source $IMG_prommdm --registry $LiftrACRResourceId --force
 
 echo "Imported all the dependency images"
