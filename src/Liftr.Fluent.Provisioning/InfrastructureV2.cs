@@ -221,7 +221,14 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(tm, dataOptions.LogAnalyticsWorkspaceId);
 
             _logger.Information("Set DNS zone '{dnsZone}' CNAME '{cname}' to Traffic Manager 'tm'.", dnsZone.Id, namingContext.Location.ShortName(), tm.Fqdn);
-            await dnsZone.Update().DefineCNameRecordSet(namingContext.Location.ShortName()).WithAlias(tm.Fqdn).WithTimeToLive(600).Attach().ApplyAsync();
+            await dnsZone.Update()
+                .DefineCNameRecordSet(namingContext.Location.ShortName())
+                .WithAlias(tm.Fqdn).WithTimeToLive(600)
+                .Attach()
+                .DefineCNameRecordSet($"*.{namingContext.Location.ShortName()}")
+                .WithAlias(tm.Fqdn).WithTimeToLive(600)
+                .Attach()
+                .ApplyAsync();
 
             _logger.Information("Start adding access policy for msi to regional kv.");
             regionalKeyVault = await regionalKeyVault.RefreshAsync();

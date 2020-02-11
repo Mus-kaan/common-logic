@@ -90,8 +90,10 @@ fi
 echo "AppVersion: $AppVersion"
 
 if [ "$HelmReleaseName" = "" ]; then
-echo "Read HelmReleaseName from file 'bin/helm-releasename.txt'."
-HelmReleaseName=$(<bin/helm-releasename.txt)
+    if test -f "bin/helm-releasename.txt"; then
+        echo "Read HelmReleaseName from file 'bin/helm-releasename.txt'."
+        HelmReleaseName=$(<bin/helm-releasename.txt)
+    fi
     if [ "$HelmReleaseName" = "" ]; then
         echo "Variable 'HelmReleaseName' is not set. So use the default 'app-rel' ..."
         HelmReleaseName="app-rel"
@@ -107,7 +109,7 @@ RPWebHostname=$(<bin/rp-hostname.txt)
         exit 1 # terminate and indicate error
     fi
 echo "expand the existing host name '$RPWebHostname' with the helm release name '$HelmReleaseName' ..."
-RPWebHostname="$HelmReleaseName-$RPWebHostname"
+RPWebHostname="$HelmReleaseName.$RPWebHostname"
 fi
 echo "RPWebHostname: $RPWebHostname"
 
