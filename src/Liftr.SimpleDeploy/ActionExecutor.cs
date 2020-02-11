@@ -286,7 +286,8 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 regionalNamingContext,
                                 regionalComputeOptions,
                                 targetOptions.AKSConfigurations,
-                                kvClient);
+                                kvClient,
+                                targetOptions.EnableVNet);
 
                             File.WriteAllText("vault-name.txt", kv.Name);
                             File.WriteAllText("aks-domain.txt", $"{aks.Name}.{targetOptions.DomainName}");
@@ -298,7 +299,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                         }
                         else if (_commandOptions.Action == ActionType.GetKeyVaultEndpoint)
                         {
-                            var kv = await infra.GetKeyVaultAsync(regionOptions.DataBaseName, regionalNamingContext);
+                            var kv = await infra.GetKeyVaultAsync(regionOptions.DataBaseName, regionalNamingContext, targetOptions.EnableVNet);
                             if (kv == null)
                             {
                                 var errMsg = "Cannot find key vault in the regional data resource group.";

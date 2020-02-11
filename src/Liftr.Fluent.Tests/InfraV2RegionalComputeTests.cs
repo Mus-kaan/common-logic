@@ -48,7 +48,8 @@ namespace Microsoft.Liftr.Fluent.Tests
                         context,
                         model.Options,
                         model.AKS,
-                        TestCredentials.KeyVaultClient);
+                        TestCredentials.KeyVaultClient,
+                        enableVNet: false);
 
                     // Check resource group.
                     {
@@ -62,7 +63,8 @@ namespace Microsoft.Liftr.Fluent.Tests
                         context,
                         model.Options,
                         model.AKS,
-                        TestCredentials.KeyVaultClient);
+                        TestCredentials.KeyVaultClient,
+                        enableVNet: false);
                 }
                 catch (Exception ex)
                 {

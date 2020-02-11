@@ -353,7 +353,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             NamingContext namingContext,
             RegionalComputeOptions computeOptions,
             AKSInfo aksInfo,
-            KeyVaultClient _kvClient)
+            KeyVaultClient _kvClient,
+            bool enableVNet)
         {
             if (namingContext == null)
             {
@@ -489,7 +490,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var aks = await liftrAzure.GetAksClusterAsync(aksId);
             if (aks == null)
             {
-                var subnet = await liftrAzure.CreateNewSubnetAsync(vnet, namingContext.SubnetName(computeOptions.ComputeBaseName), nsg?.Id);
+                var subnet = enableVNet ? await liftrAzure.CreateNewSubnetAsync(vnet, namingContext.SubnetName(computeOptions.ComputeBaseName), nsg?.Id) : null;
 
                 var storName = namingContext.StorageAccountName(computeOptions.DataBaseName);
                 var stor = await liftrAzure.GetStorageAccountAsync(dataRGName, storName);
@@ -509,7 +510,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     throw ex;
                 }
 
-                if (subnet != null)
+                if (enableVNet)
                 {
                     _logger.Information("Restrict the Key Vault '{kvId}' to IP '{currentPublicIP}' and subnet '{subnetId}'.", regionalKeyVault.Id, currentPublicIP, subnet?.Inner?.Id);
                     await liftrAzure.WithKeyVaultAccessFromNetworkAsync(regionalKeyVault, currentPublicIP, subnet?.Inner?.Id);
@@ -575,7 +576,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             {
                 _logger.Information("Use existing AKS cluster (ProvisioningState: {ProvisioningState}) with Id '{ResourceId}'.", aks.ProvisioningState, aks.Id);
 
-                if (vnet != null)
+                if (enableVNet)
                 {
                     _logger.Information("Restrict the Key Vault '{kvId}' to IP '{currentPublicIP}'.", regionalKeyVault.Id, currentPublicIP);
                     await liftrAzure.WithKeyVaultAccessFromNetworkAsync(regionalKeyVault, currentPublicIP, null);
@@ -585,7 +586,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             return (regionalKeyVault, msi, aks);
         }
 
-        public async Task<IVault> GetKeyVaultAsync(string baseName, NamingContext namingContext)
+        public async Task<IVault> GetKeyVaultAsync(string baseName, NamingContext namingContext, bool enableVNet)
         {
             if (namingContext == null)
             {
@@ -601,9 +602,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             var currentPublicIP = await MetadataHelper.GetPublicIPAddressAsync();
 
-            var vnet = await liftrAzure.GetVNetAsync(rgName, namingContext.NetworkName(baseName));
-            if (vnet != null)
+            if (enableVNet)
             {
+                var vnet = await liftrAzure.GetVNetAsync(rgName, namingContext.NetworkName(baseName));
                 await liftrAzure.WithKeyVaultAccessFromNetworkAsync(kv, currentPublicIP, null);
             }
 

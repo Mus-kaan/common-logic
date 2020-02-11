@@ -79,14 +79,16 @@ namespace Microsoft.Liftr.Fluent.Tests
                         context,
                         model.Options,
                         model.AKS,
-                        TestCredentials.KeyVaultClient);
+                        TestCredentials.KeyVaultClient,
+                        enableVNet: false);
 
                     // Same deployment will not throw exception.
                     await infra.CreateOrUpdateRegionalComputeRGAsync(
                         context,
                         model.Options,
                         model.AKS,
-                        TestCredentials.KeyVaultClient);
+                        TestCredentials.KeyVaultClient,
+                        enableVNet: false);
                 }
                 catch (Exception ex)
                 {
