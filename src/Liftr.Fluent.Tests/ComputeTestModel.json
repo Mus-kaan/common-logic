@@ -2,7 +2,7 @@
   "Options": {
     "GlobalKeyVaultResourceId": "/subscriptions/60fad35b-3a47-4ca0-b691-4a789f737cea/resourceGroups/ib-test-gbl1910-cus-rg/providers/Microsoft.KeyVault/vaults/ibtestgbl1910cuskv",
     "DataBaseName": "data1910",
-    "SecretPrefix": "NginxRP",
+    "SecretPrefix": "UnitTestRP"
   },
   "AKS": {
     "AKSRootUserName": "liftraksvmuser",

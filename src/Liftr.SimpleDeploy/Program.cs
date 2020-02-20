@@ -37,12 +37,20 @@ namespace Microsoft.Liftr.SimpleDeploy
             {
             }
 
-            CommandLine.Parser.Default.ParseArguments<RunnerCommandOptions>(args)
+            try
+            {
+                CommandLine.Parser.Default.ParseArguments<RunnerCommandOptions>(args)
                 .WithParsed<RunnerCommandOptions>(opts => StartHost(opts))
                 .WithNotParsed<RunnerCommandOptions>((errs) =>
                 {
                     Console.Error.WriteLine(errs);
                 });
+            }
+            catch (OperationCanceledException ex)
+            {
+                // swallow operation cancelled operation.
+                Console.WriteLine("OperationCanceledException: " + ex);
+            }
         }
 
         public static void StartHost(RunnerCommandOptions options)

@@ -1,9 +1,15 @@
 {
+  "PartnerName": "UnitTest",
+  "ShortPartnerName": "ut",
+  "SecretPrefix": "UnitTestRP",
   "Environments": [
     {
       "EnvironmentName": "Test",
       "DomainName": "sample-partner-test-ame.azliftr-test.io",
+      "TenantId": "33e01921-4d64-4f8c-a055-5bdaffd5e33d", // ame
       "AzureSubscription": "60fad35b-3a47-4ca0-b691-4a789f737cea",
+      "EnableVNet": false,
+      "GenevaCertificateSubjectName": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net",
       "Global": {
         "Location": "centralus",
         "BaseName": "gbl1910"

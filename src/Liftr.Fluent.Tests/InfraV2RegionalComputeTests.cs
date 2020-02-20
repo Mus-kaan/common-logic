@@ -27,7 +27,7 @@ namespace Microsoft.Liftr.Fluent.Tests
         [SkipInOfficialBuild]
         public async Task VerifyRegionalComputeResourceCreationAsync()
         {
-            var context = new NamingContext("IncrediBuild", "ib", EnvironmentType.Test, Region.USEast);
+            var context = new NamingContext("UnitTest", "ut", EnvironmentType.Test, Region.USEast);
             TestCommon.AddCommonTags(context.Tags);
 
             var baseName = SdkContext.RandomResourceName("e", 6);

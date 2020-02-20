@@ -38,12 +38,20 @@ namespace Microsoft.Liftr.ImageBuilder
             {
             }
 
-            CommandLine.Parser.Default.ParseArguments<BuilderCommandOptions>(args)
-                .WithParsed<BuilderCommandOptions>(opts => StartHost(opts))
-                .WithNotParsed<BuilderCommandOptions>((errs) =>
-                {
-                    Console.Error.WriteLine(errs);
-                });
+            try
+            {
+                CommandLine.Parser.Default.ParseArguments<BuilderCommandOptions>(args)
+                    .WithParsed<BuilderCommandOptions>(opts => StartHost(opts))
+                    .WithNotParsed<BuilderCommandOptions>((errs) =>
+                    {
+                        Console.Error.WriteLine(errs);
+                    });
+            }
+            catch (OperationCanceledException ex)
+            {
+                // swallow operation cancelled operation.
+                Console.WriteLine("OperationCanceledException: " + ex);
+            }
         }
 
         public static void StartHost(BuilderCommandOptions options)
