@@ -220,7 +220,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             tm = await liftrAzure.GetOrCreateTrafficManagerAsync(rgName, trafficManagerName, namingContext.Tags);
             await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(tm, dataOptions.LogAnalyticsWorkspaceId);
 
-            _logger.Information("Set DNS zone '{dnsZone}' CNAME '{cname}' to Traffic Manager 'tm'.", dnsZone.Id, namingContext.Location.ShortName(), tm.Fqdn);
+            _logger.Information("Set DNS zone '{dnsZone}' CNAME '{cname}' to Traffic Manager '{tmFqdn}'.", dnsZone.Id, namingContext.Location.ShortName(), tm.Fqdn);
             await dnsZone.Update()
                 .DefineCNameRecordSet(namingContext.Location.ShortName())
                 .WithAlias(tm.Fqdn).WithTimeToLive(600)
@@ -241,7 +241,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 .ApplyAsync();
             _logger.Information("Added access policy for msi to regional kv.");
 
-            _logger.Information("Creating CosmosDB ...");
             var targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.DocumentDB/databaseAccounts/{cosmosName}";
             db = await liftrAzure.GetCosmosDBAsync(targetResourceId);
             if (db == null)
@@ -326,7 +325,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     _logger.Information("Creating AME Geneva certificate in Key Vault with name {@certName} ...", dataOptions.GenevaCert.CertificateName);
                     await regionalKVValet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
                     await regionalKVValet.CreateCertificateAsync(dataOptions.GenevaCert.CertificateName, certIssuerName, dataOptions.GenevaCert.SubjectName, dataOptions.GenevaCert.SubjectAlternativeNames, namingContext.Tags);
-                    _logger.Information("Finished creating AME Geneva certificate in Key Vault with name {@certName}", dataOptions.GenevaCert.CertificateName);
                 }
 
                 if (dataOptions.SSLCert != null)
@@ -334,7 +332,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     _logger.Information("Creating SSL certificate in Key Vault with name {@certName} ...", dataOptions.SSLCert.CertificateName);
                     await regionalKVValet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
                     await regionalKVValet.CreateCertificateAsync(dataOptions.SSLCert.CertificateName, certIssuerName, dataOptions.SSLCert.SubjectName, dataOptions.SSLCert.SubjectAlternativeNames, namingContext.Tags);
-                    _logger.Information("Finished creating SSL certificate in Key Vault with name {@certName}", dataOptions.SSLCert.CertificateName);
                 }
 
                 if (dataOptions.FirstPartyCert != null)
@@ -342,7 +339,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     _logger.Information("Creating First Party certificate in Key Vault with name {@certName} ...", dataOptions.FirstPartyCert.CertificateName);
                     await regionalKVValet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
                     await regionalKVValet.CreateCertificateAsync(dataOptions.FirstPartyCert.CertificateName, certIssuerName, dataOptions.FirstPartyCert.SubjectName, dataOptions.FirstPartyCert.SubjectAlternativeNames, namingContext.Tags);
-                    _logger.Information("Finished creating First Party certificate in Key Vault with name {@certName}", dataOptions.FirstPartyCert.CertificateName);
                 }
             }
 
@@ -600,10 +596,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.KeyVault/vaults/{kvName}";
             var kv = await liftrAzure.GetKeyVaultByIdAsync(targetResourceId);
 
-            var currentPublicIP = await MetadataHelper.GetPublicIPAddressAsync();
-
             if (enableVNet)
             {
+                var currentPublicIP = await MetadataHelper.GetPublicIPAddressAsync();
+                _logger.Information("Restrict VNet access to public IP: {currentPublicIP}", currentPublicIP);
                 var vnet = await liftrAzure.GetVNetAsync(rgName, namingContext.NetworkName(baseName));
                 await liftrAzure.WithKeyVaultAccessFromNetworkAsync(kv, currentPublicIP, null);
             }

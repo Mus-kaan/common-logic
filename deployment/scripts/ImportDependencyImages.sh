@@ -34,7 +34,6 @@ esac
 done
 
 if [ "$DeploymentSubscriptionId" = "" ]; then
-echo "Read DeploymentSubscriptionId from file 'bin/subscription-id.txt'."
 DeploymentSubscriptionId=$(<bin/subscription-id.txt)
     if [ "$DeploymentSubscriptionId" = "" ]; then
         echo "Please set 'DeploymentSubscriptionId' ..."

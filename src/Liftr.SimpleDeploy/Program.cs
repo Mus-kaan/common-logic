@@ -27,7 +27,6 @@ namespace Microsoft.Liftr.SimpleDeploy
                 var rollOutId = Environment.GetEnvironmentVariable("RolloutId");
                 if (!string.IsNullOrEmpty(rollOutId))
                 {
-                    Console.WriteLine("Current EV2 roll out Id: " + rollOutId);
                     LogContext.PushProperty("EV2RolloutId ", rollOutId);
                 }
             }
@@ -46,10 +45,9 @@ namespace Microsoft.Liftr.SimpleDeploy
                     Console.Error.WriteLine(errs);
                 });
             }
-            catch (OperationCanceledException ex)
+            catch (OperationCanceledException)
             {
                 // swallow operation cancelled operation.
-                Console.WriteLine("OperationCanceledException: " + ex);
             }
         }
 

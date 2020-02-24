@@ -48,7 +48,6 @@ namespace Microsoft.Liftr.ImageBuilder
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             await Task.Yield();
-            _logger.Information("Start ActionExecutor ...");
 
             try
             {
@@ -152,7 +151,6 @@ namespace Microsoft.Liftr.ImageBuilder
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.Information("Stop ActionExecutor ...");
             return Task.CompletedTask;
         }
 
@@ -184,10 +182,6 @@ namespace Microsoft.Liftr.ImageBuilder
                         _options.ArtifactPath,
                         tags,
                         cancellationToken);
-
-                    _logger.Information("----------------------------------------------------------------------");
-                    _logger.Information("Finished successfully!");
-                    _logger.Information("----------------------------------------------------------------------");
                 }
                 catch (Exception ex)
                 {

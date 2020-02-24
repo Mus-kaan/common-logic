@@ -77,7 +77,6 @@ echo "GenevaParametersFile: $GenevaParametersFile"
 echo "gcs_region: $gcs_region"
 
 if [ "$PartnerName" = "" ]; then
-echo "Read PartnerName from file 'bin/partner-name.txt'."
 PartnerName=$(<bin/partner-name.txt)
     if [ "$PartnerName" = "" ]; then
         echo "Please set the name of the partner using variable 'PartnerName' ..."
@@ -87,7 +86,6 @@ fi
 echo "PartnerName: $PartnerName"
 
 if [ "$liftrACRURI" = "" ]; then
-echo "Read liftrACRURI from file 'bin/acr-endpoint.txt'."
 liftrACRURI=$(<bin/acr-endpoint.txt)
     if [ "$liftrACRURI" = "" ]; then
         echo "Please set 'liftrACRURI' ..."
@@ -97,7 +95,6 @@ fi
 echo "liftrACRURI: $liftrACRURI"
 
 if [ "$AKSRGName" = "" ]; then
-echo "Read AKSRGName from file 'bin/aks-rg.txt'."
 AKSRGName=$(<bin/aks-rg.txt)
     if [ "$AKSRGName" = "" ]; then
         echo "Please set the name of the AKS cluster Resource Group using variable 'AKSRGName' ..."
@@ -107,7 +104,6 @@ fi
 echo "AKSRGName: $AKSRGName"
 
 if [ "$AKSName" = "" ]; then
-echo "Read AKSName from file 'bin/aks-name.txt'."
 AKSName=$(<bin/aks-name.txt)
     if [ "$AKSName" = "" ]; then
         echo "Please set the name of the AKS cluster using variable 'AKSName' ..."
@@ -117,7 +113,6 @@ fi
 echo "AKSName: $AKSName"
 
 if [ "$VaultName" = "" ]; then
-echo "Read VaultName from file 'bin/vault-name.txt'."
 VaultName=$(<bin/vault-name.txt)
     if [ "$VaultName" = "" ]; then
         echo "Please set the name of the Key Vault with certificates using variable 'VaultName' ..."

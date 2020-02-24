@@ -34,9 +34,6 @@ if [ -z ${DeploymentSubscriptionId+x} ]; then
     exit 1
 fi
 
-az feature register --namespace Microsoft.VirtualMachineImages --name VirtualMachineTemplatePreview
-az feature show --namespace Microsoft.VirtualMachineImages --name VirtualMachineTemplatePreview | grep state
-
 checkAndRegisterProvider "Microsoft.Storage"
 checkAndRegisterProvider "Microsoft.Compute"
 checkAndRegisterProvider "Microsoft.VirtualMachineImages"
@@ -54,8 +51,12 @@ checkAndRegisterProvider "Microsoft.ContainerService"
 checkAndRegisterProvider "Microsoft.ContainerRegistry"
 
 # register and enable for shared image gallery
+echo "az feature register --namespace Microsoft.VirtualMachineImages --name VirtualMachineTemplatePreview"
+az feature register --namespace Microsoft.VirtualMachineImages --name VirtualMachineTemplatePreview
+
+echo "az feature register --namespace Microsoft.Compute --name GalleryPreview"
 az feature register --namespace Microsoft.Compute --name GalleryPreview
 
 echo "-----------------------------------------------------------------"
-echo "Finished registering Azure Image builder features and providers."
+echo "Finished registering Azure features and providers."
 echo "-----------------------------------------------------------------"

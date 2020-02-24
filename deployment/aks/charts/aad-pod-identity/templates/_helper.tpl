@@ -62,5 +62,5 @@ Common labels.
 app.kubernetes.io/name: {{ template "aad-pod-identity.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-helm.sh/chart: {{ template "aad-pod-identity.chart" . }}
+helm.sh/chart: aad-pod-identity
 {{- end -}}

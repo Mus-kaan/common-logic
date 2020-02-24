@@ -163,7 +163,7 @@ namespace Microsoft.Liftr.KeyVault
                 certOperation = await _keyVaultClient.GetCertificateOperationAsync(_vaultBaseUrl, certName);
             }
 
-            _logger.Information("Finished cert cration with name {@certificateName}, subject name {certSubjectName}. Operation result: {@certOperation}", certName, certPolicy.X509CertificateProperties.Subject, certOperation);
+            _logger.Information("Finished cert cration with name {@certificateName}, subject name {certSubjectName}. Operation result: {certOperation}", certName, certPolicy.X509CertificateProperties.Subject, certOperation);
 
             if (!certOperation.Status.OrdinalEquals("Completed"))
             {

@@ -43,7 +43,6 @@ if [ -z ${ProvisionAction+x} ]; then
 fi
 
 if [ -z ${ConfigFilePath+x} ]; then
-    echo "ConfigFilePath is blank. Use 'hosting-options.json'."
     ConfigFilePath="hosting-options.json"
 fi
 
@@ -99,7 +98,3 @@ if [ $exit_code -ne 0 ]; then
     echo "Failed to run deployment runner."
     exit $exit_code
 fi
-
-echo "----------------------------------------------------------------------------------------------"
-echo "Finished running the deployment runner."
-echo "----------------------------------------------------------------------------------------------"

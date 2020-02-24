@@ -65,11 +65,8 @@ namespace Microsoft.Liftr.Logging.GenericHosting
                     serilogConfig = serilogConfig.Enrich.FromLogContext();
                     var logger = serilogConfig.CreateLogger();
                     Log.Logger = logger;
-                    Log.Information("Created Serilog logger.");
 
-                    services.AddSingleton<Serilog.ILogger>(Log.Logger);
-                    Log.Information("Serilog logger is added to DI container.");
-
+                    services.AddSingleton(Log.Logger);
                     services.AddSingleton(sp => new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener()));
                 })
                 .UseSerilog();

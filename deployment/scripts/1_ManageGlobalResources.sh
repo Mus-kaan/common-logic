@@ -15,7 +15,6 @@ ssh-keygen -m PEM -t rsa -b 4096 -f bin/liftr_ssh_key -N ""
 --Region="$REGION"
 
 if [ "$DeploymentSubscriptionId" = "" ]; then
-echo "Read DeploymentSubscriptionId from file 'bin/subscription-id.txt'."
 DeploymentSubscriptionId=$(<bin/subscription-id.txt)
     if [ "$DeploymentSubscriptionId" = "" ]; then
         echo "Please set 'DeploymentSubscriptionId' ..."

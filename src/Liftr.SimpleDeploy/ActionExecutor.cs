@@ -45,8 +45,6 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.Information("Start ActionExecutor ...");
-
             try
             {
                 if (!File.Exists(_commandOptions.ConfigPath))
@@ -151,7 +149,6 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.Information("Stop ActionExecutor ...");
             return Task.CompletedTask;
         }
 
@@ -299,7 +296,11 @@ namespace Microsoft.Liftr.SimpleDeploy
                         }
                         else if (_commandOptions.Action == ActionType.GetKeyVaultEndpoint)
                         {
-                            var kv = await infra.GetKeyVaultAsync(regionOptions.DataBaseName, regionalNamingContext, targetOptions.EnableVNet);
+                            var kv = await infra.GetKeyVaultAsync(
+                                regionOptions.DataBaseName,
+                                regionalNamingContext,
+                                targetOptions.EnableVNet);
+
                             if (kv == null)
                             {
                                 var errMsg = "Cannot find key vault in the regional data resource group.";
@@ -391,10 +392,6 @@ namespace Microsoft.Liftr.SimpleDeploy
                             await extensionTask;
                         }
                     }
-
-                    _logger.Information("----------------------------------------------------------------------");
-                    _logger.Information("Finished successfully!");
-                    _logger.Information("----------------------------------------------------------------------");
                 }
                 catch (Exception ex)
                 {
