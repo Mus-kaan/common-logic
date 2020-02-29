@@ -21,66 +21,17 @@ namespace Microsoft.Liftr.RPaaS.Tests
 {
     public class MetaRPStorageClientTests
     {
-        private const string providerNamespace = "Microsoft.Nginx";
-        private const string resourceType = "frontend";
-        private const string apiVersion = "2019-11-01-preview";
-        private const string metaRpEndpoint = "https://metarp.com";
-
         [Fact]
         public async Task Returns_all_resources_in_provider_namespace_Async()
         {
-            var resource1 = new TestResource()
-            {
-                Type = "Microsoft.Nginx/frontends",
-                Id = "/subscriptions/f9aed45d-b9e6-462a-a3f5-6ab34857bc17/resourceGroups/myrg/providers/Microsoft.Nginx/frontends/frontend",
-                Name = "frontend",
-                Location = "eastus",
-            };
+            using var httpClient = new HttpClient(new MockHttpMessageHandler(), false);
 
-            var resource2 = new TestResource()
-            {
-                Type = "Microsoft.Nginx/frontends",
-                Id = "/subscriptions/f9aed45d-b9e6-462a-a3f5-6ab34857bc17/resourceGroups/myrg/providers/Microsoft.Nginx/frontends/frontend2",
-                Name = "frontend2",
-                Location = "eastus",
-            };
-
-            using var responseMessage = new HttpResponseMessage()
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent($@"{{ ""value"" : {new List<TestResource>() { resource1, resource2 }.ToJson()} }}"),
-            };
-
-            var requestMethod = HttpMethod.Get;
-            var userRpSubscriptionId = Guid.NewGuid();
-            var requestUri = new Uri($"{metaRpEndpoint}/subscriptions/{userRpSubscriptionId.ToString()}/providers/{providerNamespace}/{resourceType}?api-version={apiVersion}&$expand=crossPartitionQuery");
-            using var httpclient = new HttpClient(GetMockHttpClient(requestMethod, requestUri, responseMessage).Object, false);
-
-            var metaRpClient = new MetaRPStorageClient(metaRpEndpoint, httpclient, () => Task.FromResult("authToken"));
-            var resources = await metaRpClient.ListAllResourcesOfTypeAsync<TestResource>(userRpSubscriptionId, providerNamespace, resourceType, apiVersion);
+            var metaRpClient = new MetaRPStorageClient(Constants.MetaRpEndpoint, httpClient, () => Task.FromResult("authToken"));
+            var resources = await metaRpClient.ListResourcesAsync<TestResource>(Constants.RequestPath, Constants.ApiVersion);
 
             Assert.Equal(2, resources.Count());
-            Assert.Equal(resource1.Id, resources.ElementAt(0).Id);
-            Assert.Equal(resource2.Id, resources.ElementAt(1).Id);
+            Assert.Equal(Constants.Resource1().Id, resources.ElementAt(0).Id);
+            Assert.Equal(Constants.Resource2().Id, resources.ElementAt(1).Id);
         }
-
-        private Mock<HttpMessageHandler> GetMockHttpClient(HttpMethod requestMethod, Uri requestUri, HttpResponseMessage responseMessage)
-        {
-            var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Default);
-            var httpRequestMessage = ItExpr.Is<HttpRequestMessage>(req => req.Method == requestMethod && req.RequestUri == requestUri);
-
-            handlerMock
-           .Protected()
-           .Setup<Task<HttpResponseMessage>>("SendAsync", httpRequestMessage, ItExpr.IsAny<CancellationToken>())
-           .ReturnsAsync(responseMessage)
-           .Verifiable();
-
-            return handlerMock;
-        }
-    }
-
-    internal class TestResource : ARMResource
-    {
-        public override string Type { get; set; }
     }
 }

@@ -23,26 +23,28 @@ namespace Microsoft.Liftr.RPaaS
         /// <param name="resourceId"></param>
         /// <param name="apiVersion"></param>
         /// <returns></returns>
-        Task<T> GetResourceAsync<T>(string resourceId, string apiVersion) where T : ARMResource;
+        Task<T> GetResourceAsync<T>(string resourceId, string apiVersion);
 
         /// <summary>
         /// Updates ARM resource for given api version
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="resource"></param>
+        /// <param name="resourceId"></param>
         /// <param name="apiVersion"></param>
         /// <returns></returns>
-        Task<HttpResponseMessage> UpdateResourceAsync<T>(T resource, string apiVersion) where T : ARMResource;
+        Task<HttpResponseMessage> UpdateResourceAsync<T>(T resource, string resourceId, string apiVersion);
 
         /// <summary>
-        /// Get all resources of a particular type in the provider namespace
+        /// Gets a list of resources.
+        /// To get top-level resource, resourcePath should be /{userRpSubscriptionId}/providers/{providerNamespace}/{resourceType}.
+        /// To get sub-resources, resourcePath should be /{resourceId}/{subResourcesType}.
         /// </summary>
-        /// <param name="userRpSubscriptionId">This is the subscription id that is present for te user RP in the arm manifest</param>
-        /// <param name="providerNamespace"></param>
-        /// <param name="resourceType"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="resourcePath"></param>
         /// <param name="apiVersion"></param>
         /// <returns></returns>
-        Task<IEnumerable<T>> ListAllResourcesOfTypeAsync<T>(Guid userRpSubscriptionId, string providerNamespace, string resourceType, string apiVersion) where T : ARMResource;
+        Task<IEnumerable<T>> ListResourcesAsync<T>(string resourcePath, string apiVersion);
 
         /// <summary>
         /// Patch operation for given api version

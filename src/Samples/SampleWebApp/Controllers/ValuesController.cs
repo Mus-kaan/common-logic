@@ -33,7 +33,7 @@ namespace SampleWebApp.Controllers
             _metaRPStorageClient = metaRPStorageClient;
         }
 
-        // GET api/values
+        // GET api/values/ListAllResources
         [HttpGet("ListAllResources")]
         [SwaggerOperation(OperationId = "List")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2234:Pass system uri objects instead of strings", Justification = "<Pending>")]
@@ -44,7 +44,29 @@ namespace SampleWebApp.Controllers
             try
             {
                 var apiVersion = "2019-11-01-preview";
-                return await _metaRPStorageClient.ListAllResourcesOfTypeAsync<TestResource>(Guid.Parse("60d3e394-7bbe-4744-a115-363c94f9a209"), "Microsoft.Incredibuild", "clusters", apiVersion);
+                var requestPath = "/subscriptions/60d3e394-7bbe-4744-a115-363c94f9a209/providers/Microsoft.IncrediBuild/clusters";
+                return await _metaRPStorageClient.ListResourcesAsync<TestResource>(requestPath, apiVersion);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, ex.Message);
+                throw;
+            }
+        }
+
+        // GET api/values/ListAllSubResources
+        [HttpGet("ListAllSubResources")]
+        [SwaggerOperation(OperationId = "ListSubResources")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2234:Pass system uri objects instead of strings", Justification = "<Pending>")]
+        public async Task<IEnumerable<ARMResource>> GetMultiListAsync()
+        {
+            _logger.Information($"{nameof(GetListAsync)} start");
+
+            try
+            {
+                var apiVersion = "2020-02-01-preview";
+                var requestPath = "/subscriptions/f9d7ebed-adbd-4cb4-b973-aaf82c136138/resourceGroups/limgurg/providers/Microsoft.Datadog/monitors/testdf12/filters";
+                return await _metaRPStorageClient.ListResourcesAsync<TestResource>(requestPath, apiVersion);
             }
             catch (Exception ex)
             {

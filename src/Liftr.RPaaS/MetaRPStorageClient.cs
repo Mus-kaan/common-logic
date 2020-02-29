@@ -38,7 +38,7 @@ namespace Microsoft.Liftr.RPaaS
 
         public delegate Task<string> AuthenticationTokenCallback();
 
-        public async Task<T> GetResourceAsync<T>(string resourceId, string apiVersion) where T : ARMResource
+        public async Task<T> GetResourceAsync<T>(string resourceId, string apiVersion)
         {
             var url = GetMetaRPResourceUrl(resourceId, apiVersion);
             _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();
@@ -54,7 +54,7 @@ namespace Microsoft.Liftr.RPaaS
             }
         }
 
-        public async Task<HttpResponseMessage> UpdateResourceAsync<T>(T resource, string apiVersion) where T : ARMResource
+        public async Task<HttpResponseMessage> UpdateResourceAsync<T>(T resource, string resourceId, string apiVersion)
         {
             if (resource == null)
             {
@@ -63,31 +63,48 @@ namespace Microsoft.Liftr.RPaaS
 
             using (var content = new StringContent(JsonConvert.SerializeObject(resource), Encoding.UTF8, "application/json"))
             {
-                var url = GetMetaRPResourceUrl(resource.Id, apiVersion);
+                var url = GetMetaRPResourceUrl(resourceId, apiVersion);
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();
                 var response = await _httpClient.PutAsync(url, content);
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw HttpResponseException.Create(response, resource.Id);
+                    throw HttpResponseException.Create(response, resourceId);
                 }
 
                 return response;
             }
         }
 
-        public async Task<IEnumerable<T>> ListAllResourcesOfTypeAsync<T>(Guid userRpSubscriptionId, string providerNamespace, string resourceType, string apiVersion) where T : ARMResource
+        /// <summary>
+        /// To get all resources of type, resourcePath should be /{userRpSubscriptionId}/providers/{providerNamespace}/{resourceType}.
+        /// To get all sub-resources, resourcePath should be /{resourceId}/{subResourcesType}.
+        /// </summary>
+        public async Task<IEnumerable<T>> ListResourcesAsync<T>(string resourcePath, string apiVersion)
         {
-            // ToDo: Implement paging support here
-            var url = $"/subscriptions/{userRpSubscriptionId.ToString()}/providers/{providerNamespace}/{resourceType}?api-version={apiVersion}&$expand=crossPartitionQuery";
-            _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();
-            var response = await _httpClient.GetAsync(url);
-
-            if (!response.IsSuccessStatusCode)
+            var resources = new List<T>();
+            var listResponse = new ListResponse<T>()
             {
-                throw HttpResponseException.Create(response, nameof(ListAllResourcesOfTypeAsync));
-            }
+                Value = new List<T>(),
+                NextLink = GetMetaRPResourceUrl(resourcePath, apiVersion) + "&$expand=crossPartitionQuery",
+            };
 
-            return (await response.Content.ReadAsStringAsync()).FromJson<ListResponse<T>>().Value;
+            do
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();
+                var response = await _httpClient.GetAsync(listResponse.NextLink);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw HttpResponseException.Create(response, nameof(ListResourcesAsync));
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                listResponse = content.FromJson<ListResponse<T>>();
+                resources.AddRange(listResponse.Value);
+            }
+            while (listResponse.NextLink != null);
+
+            return resources;
         }
 
         public async Task<HttpResponseMessage> PatchOperationAsync<T>(T operation, string apiVersion) where T : OperationResource
@@ -174,8 +191,10 @@ namespace Microsoft.Liftr.RPaaS
         }
     }
 
-    public class ListResponse<T> where T : ARMResource
+    public class ListResponse<T>
     {
-        public List<T> Value { get; set; }
+        public IEnumerable<T> Value { get; set; }
+
+        public string NextLink { get; set; }
     }
 }
