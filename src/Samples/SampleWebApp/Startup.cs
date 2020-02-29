@@ -41,8 +41,6 @@ namespace SampleWebApp
                 metaRPOptions.KeyVaultEndpoint = Configuration["VaultEndpoint"];
             });
 
-            services.AddTokenManager(Configuration);
-
             services.AddMetaRPClient(Configuration);
 
             // Register the Swagger generator, defining 1 or more Swagger documents

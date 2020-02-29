@@ -49,13 +49,18 @@ namespace Microsoft.Liftr.RPaaS.Hosting
                     throw ex;
                 }
 
-                var tokenManager = sp.GetService<ITokenManager>();
-                if (tokenManager == null)
+                var tokenManagerConfiguration = sp.GetService<IOptions<MetaRPOptions>>().Value.TokenManagerConfiguration;
+                if (tokenManagerConfiguration == null
+                || string.IsNullOrEmpty(tokenManagerConfiguration.AadEndpoint)
+                || string.IsNullOrEmpty(tokenManagerConfiguration.TargetResource)
+                || string.IsNullOrEmpty(tokenManagerConfiguration.TenantId))
                 {
-                    var ex = new InvalidOperationException("[RPaaS Init] Cannot find a token manager instance to initizlize RPaaS client.");
+                    var ex = new InvalidOperationException($"[RPaaS Init] Please make sure '{nameof(MetaRPOptions)}' is set in the configuration.");
                     logger.Fatal(ex, ex.Message);
                     throw ex;
                 }
+
+                var tokenManager = new TokenManager.TokenManager(tokenManagerConfiguration);
 
                 var httpClientFactory = sp.GetService<IHttpClientFactory>();
                 if (httpClientFactory == null)

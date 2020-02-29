@@ -15,20 +15,20 @@ namespace Microsoft.Liftr.TokenManager
         private readonly TokenManagerConfiguration _tokenManagerConfiguration;
         private readonly AuthenticationContext _authContext;
 
-        public TokenManager(IOptions<TokenManagerConfiguration> tokenConfiguration)
+        public TokenManager(TokenManagerConfiguration tokenConfiguration)
         {
             if (tokenConfiguration == null)
             {
                 throw new ArgumentNullException(nameof(tokenConfiguration));
             }
 
-            _tokenManagerConfiguration = tokenConfiguration.Value;
+            _tokenManagerConfiguration = tokenConfiguration;
             _authContext = new AuthenticationContext($"{_tokenManagerConfiguration.AadEndpoint}/{_tokenManagerConfiguration.TenantId}");
         }
 
         public async Task<string> GetTokenAsync(string clientId, string clientSecret)
         {
-            var token = await _authContext.AcquireTokenAsync(_tokenManagerConfiguration.ArmEndpoint, new ClientCredential(clientId, clientSecret));
+            var token = await _authContext.AcquireTokenAsync(_tokenManagerConfiguration.TargetResource, new ClientCredential(clientId, clientSecret));
 
             return token.AccessToken;
         }
@@ -36,7 +36,7 @@ namespace Microsoft.Liftr.TokenManager
         public async Task<string> GetTokenAsync(string clientId, X509Certificate2 certificate)
         {
             var clientAssertion = new ClientAssertionCertificate(clientId, certificate);
-            var token = await _authContext.AcquireTokenAsync(_tokenManagerConfiguration.ArmEndpoint, clientAssertion);
+            var token = await _authContext.AcquireTokenAsync(_tokenManagerConfiguration.TargetResource, clientAssertion);
 
             return token.AccessToken;
         }

@@ -6,7 +6,7 @@ namespace Microsoft.Liftr.TokenManager
 {
     public class TokenManagerConfiguration
     {
-        public string ArmEndpoint { get; set; }
+        public string TargetResource { get; set; }
 
         public string AadEndpoint { get; set; }
 
