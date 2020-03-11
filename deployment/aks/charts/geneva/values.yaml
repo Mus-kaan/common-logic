@@ -8,13 +8,13 @@ linuxgenevaACR:
 # The version are referenced at three places. You need to update all of them. Please search for this sentence.
 # Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/references/linuxcontainers.html
 mdsd:
-  dockerTag: master_249
+  dockerTag: master_260
 
 mdm:
-  dockerTag: master_31
+  dockerTag: master_33
 
 fluentd:
-  dockerTag: master_129
+  dockerTag: master_130
 
 secpack:
-  dockerTag: master_34
+  dockerTag: master_35
