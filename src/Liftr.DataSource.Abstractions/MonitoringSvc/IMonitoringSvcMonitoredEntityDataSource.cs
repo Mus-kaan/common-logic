@@ -21,11 +21,18 @@ namespace Microsoft.Liftr.DataSource.MonitoringSvc
         Task<IMonitoringSvcMonitoredEntity> AddEntityAsync(IMonitoringSvcMonitoredEntity entity);
 
         /// <summary>
-        /// Retiieves monitored entity for given monitored resource id
+        /// Retrieves first monitored entity for given monitored resource id
         /// </summary>
         /// <param name="monitoredResourceId"></param>
         /// <returns></returns>
         Task<IMonitoringSvcMonitoredEntity> GetEntityAsync(string monitoredResourceId);
+
+        /// <summary>
+        /// Retrieves monitored entities for given monitored resource id
+        /// </summary>
+        /// <param name="monitoredResourceId"></param>
+        /// <returns></returns>
+        Task<IEnumerable<IMonitoringSvcMonitoredEntity>> GetEntitiesAsync(string monitoredResourceId);
 
         /// <summary>
         /// Retrieves all monitored entities by given monitoring resource id
