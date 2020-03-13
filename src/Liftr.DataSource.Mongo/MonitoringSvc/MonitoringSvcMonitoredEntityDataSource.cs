@@ -74,7 +74,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
             var filter = Builders<MonitoringSvcMonitoredEntity>.Filter.Eq(u => u.Enabled, true);
             filter &= Builders<MonitoringSvcMonitoredEntity>.Filter.Eq(u => u.MonitoredResourceId, monitoredResourceId);
             var cursor = await _collection.FindAsync(filter);
-            return cursor.ToEnumerable();
+            return await cursor.ToListAsync();
         }
 
         public async Task<IEnumerable<string>> GetAllMonitoringRresourcesAsync()
