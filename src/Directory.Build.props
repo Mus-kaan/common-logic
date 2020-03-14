@@ -24,7 +24,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <PropertyGroup>
     <LiftrClassLibraryTargetFramework>netstandard2.0</LiftrClassLibraryTargetFramework>
-    <LiftrExeTargetFramework>netcoreapp2.2</LiftrExeTargetFramework>
+    <LiftrEv2TargetFramework>netcoreapp2.2</LiftrEv2TargetFramework>
+    <LiftrExeTargetFramework>netcoreapp3.1</LiftrExeTargetFramework>
   </PropertyGroup>
 
   <!-- Enable deterministic build -->

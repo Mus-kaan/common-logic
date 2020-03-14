@@ -6,7 +6,7 @@ environment:
     os: 'windows'
   runtime:
     provider: 'appcontainer'
-    image: 'cdpxwinrs5.azurecr.io/global/vse2019/16.3.7:latest'
+    image: 'cdpxwinrs5.azurecr.io/global/vse2019:latest'
 
 signing_options:
   profile: 'internal_azure_service'   # This service deploys to Azure!

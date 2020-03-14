@@ -24,7 +24,8 @@ namespace Microsoft.Liftr.RPaaS.Tests
         [Fact]
         public async Task Returns_all_resources_in_provider_namespace_Async()
         {
-            using var httpClient = new HttpClient(new MockHttpMessageHandler(), false);
+            using var mockHttpHandler = new MockHttpMessageHandler();
+            using var httpClient = new HttpClient(mockHttpHandler, false);
 
             var metaRpClient = new MetaRPStorageClient(Constants.MetaRpEndpoint, httpClient, () => Task.FromResult("authToken"));
             var resources = await metaRpClient.ListResourcesAsync<TestResource>(Constants.RequestPath, Constants.ApiVersion);

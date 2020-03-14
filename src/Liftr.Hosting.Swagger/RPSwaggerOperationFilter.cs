@@ -2,6 +2,11 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.OpenApi;
+using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Interfaces;
+using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Writers;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
@@ -16,7 +21,7 @@ namespace Microsoft.Liftr.Hosting.Swagger
     /// </summary>
     public class RPSwaggerOperationFilter : IOperationFilter
     {
-        public void Apply(Operation operation, OperationFilterContext context)
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             if (operation == null)
             {
@@ -25,15 +30,15 @@ namespace Microsoft.Liftr.Hosting.Swagger
 
             if (operation.OperationId.Contains("List"))
             {
-                operation.Extensions["x-ms-pageable"] = new Dictionary<string, string>()
+                operation.Extensions.Add("x-ms-pageable", new OpenApiObject()
                 {
-                    { "nextLinkName", "nextLink" },
-                };
+                    ["nextLinkName"] = new OpenApiString("nextLink"),
+                });
             }
 
             if (operation.Responses.ContainsKey("201") || operation.Responses.ContainsKey("202"))
             {
-                operation.Extensions["x-ms-long-running-operation"] = true;
+                operation.Extensions.Add("x-ms-long-running-operation", new OpenApiBoolean(true));
             }
         }
     }

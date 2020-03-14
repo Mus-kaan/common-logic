@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <IsPackable>true</IsPackable>
-    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
+    <TargetFramework>$(LiftrEv2TargetFramework)</TargetFramework>
     <AssemblyName>Microsoft.Liftr.ImageBuilder</AssemblyName>
     <RootNamespace>Microsoft.Liftr.ImageBuilder</RootNamespace>
   </PropertyGroup>

@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
@@ -14,7 +15,7 @@ namespace Microsoft.Liftr.Hosting.Swagger
     /// </summary>
     public class RPSwaggerDocumentFilter : IDocumentFilter
     {
-        public void Apply(SwaggerDocument swaggerDoc, DocumentFilterContext context)
+        public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
         {
             if (swaggerDoc == null)
             {
@@ -26,8 +27,8 @@ namespace Microsoft.Liftr.Hosting.Swagger
                 throw new ArgumentNullException(nameof(context));
             }
 
-            swaggerDoc.Definitions = swaggerDoc.Definitions
-                .Where(def => def.Value.Format != "ShouldRemove").ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            swaggerDoc.Components.Schemas = swaggerDoc.Components.Schemas
+                .Where(schema => schema.Value.Format != "ShouldRemove").ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
     }
 }

@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
@@ -17,7 +18,7 @@ namespace Microsoft.Liftr.Hosting.Swagger
     /// </summary>
     public class RPSwaggerSchemaFilter : ISchemaFilter
     {
-        public void Apply(Schema schema, SchemaFilterContext context)
+        public void Apply(OpenApiSchema schema, SchemaFilterContext context)
         {
             if (schema == null)
             {
@@ -29,9 +30,9 @@ namespace Microsoft.Liftr.Hosting.Swagger
                 throw new ArgumentNullException(nameof(context));
             }
 
-            if (context.SystemType != null)
+            if (context.Type != null)
             {
-                var systemTypeAttributes = context.SystemType.GetCustomAttributes(true);
+                var systemTypeAttributes = context.Type.GetCustomAttributes(true);
 
                 foreach (Attribute attribute in systemTypeAttributes)
                 {
@@ -56,7 +57,7 @@ namespace Microsoft.Liftr.Hosting.Swagger
                     var excludedProperties = new List<string>();
                     var readonlyProperties = new List<string>();
 
-                    context.SystemType.GetProperties().ToList().ForEach(property =>
+                    context.Type.GetProperties().ToList().ForEach(property =>
                     {
                         var shouldExclude = false;
                         var shouldMarkAsReadOnly = false;

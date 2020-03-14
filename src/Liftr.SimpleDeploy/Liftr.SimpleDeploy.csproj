@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <IsPackable>true</IsPackable>
-    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
+    <TargetFramework>$(LiftrEv2TargetFramework)</TargetFramework>
     <RootNamespace>Microsoft.Liftr.SimpleDeploy</RootNamespace>
     <AssemblyName>Microsoft.Liftr.SimpleDeploy</AssemblyName>
   </PropertyGroup>

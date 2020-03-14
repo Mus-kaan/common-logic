@@ -3,9 +3,11 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Microsoft.Liftr.Hosting.Swagger
@@ -17,7 +19,7 @@ namespace Microsoft.Liftr.Hosting.Swagger
     {
         private const string c_default = "default";
 
-        public void Apply(Operation operation, OperationFilterContext context)
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             if (operation == null)
             {
@@ -29,17 +31,23 @@ namespace Microsoft.Liftr.Hosting.Swagger
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var schemaRegistry = context.SchemaRegistry ?? throw new ArgumentException(nameof(context.SchemaRegistry));
-
             var defaultResponseAttributes = context.MethodInfo.GetCustomAttributes(true).OfType<SwaggerDefaultResponseAttribute>();
+
+            var schemaRepository = context.SchemaRepository;
 
             foreach (var attr in defaultResponseAttributes)
             {
-                var defaultResponse = new Response
+                var defaultResponse = new OpenApiResponse()
                 {
                     Description = attr.Description,
-                    Schema = (attr.Type != null) ? schemaRegistry.GetOrRegister(attr.Type) : null,
                 };
+
+                if (attr.Type != null)
+                {
+                    var attrSchema = context.SchemaGenerator.GenerateSchema(attr.Type, schemaRepository);
+                    defaultResponse.Content = new Dictionary<string, OpenApiMediaType>();
+                    defaultResponse.Content["application/json"] = new OpenApiMediaType() { Schema = attrSchema };
+                }
 
                 operation.Responses[c_default] = defaultResponse;
             }
@@ -47,11 +55,17 @@ namespace Microsoft.Liftr.Hosting.Swagger
             // ARM (Auto Rest) requires a default response for each API to handle error cases.
             if (!operation.Responses.ContainsKey(c_default))
             {
-                var defaultResponse = new Response
+                var responseSchema = context.SchemaGenerator.GenerateSchema(
+                    typeof(ResourceProviderDefaultErrorResponse), schemaRepository);
+
+                var defaultResponse = new OpenApiResponse()
                 {
                     Description = "Default error response.",
-                    Schema = schemaRegistry.GetOrRegister(typeof(ResourceProviderDefaultErrorResponse)),
+                    Content = new Dictionary<string, OpenApiMediaType>(),
                 };
+
+                defaultResponse.Content["application/json"] = new OpenApiMediaType() { Schema = responseSchema };
+
                 operation.Responses[c_default] = defaultResponse;
             }
         }

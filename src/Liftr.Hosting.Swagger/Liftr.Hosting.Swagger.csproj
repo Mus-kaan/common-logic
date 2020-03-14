@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="$(PackageVersion_Swashbuckle_AspNetCore)" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="$(PackageVersion_Swashbuckle_AspNetCore_Annotations)" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="$(PackageVersion_Swashbuckle_AspNetCore_Newtonsoft)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />

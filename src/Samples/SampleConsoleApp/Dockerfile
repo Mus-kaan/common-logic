@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/runtime:2.2-stretch-slim AS base
+FROM mcr.microsoft.com/dotnet/core/runtime:3.1.2-buster-slim AS base
 # stretch-slim: https://stackoverflow.com/questions/57501053/asp-net-core-docker-image-aspnet2-2-stretch-slim
 
 ARG SAMPLE_CONSOLE_ID=6171

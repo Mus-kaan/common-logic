@@ -13,14 +13,13 @@ namespace Liftr.Sample.Web
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
-        }
-
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost
-            .CreateDefaultBuilder(args)
-            .UseLiftrLogger()
-            .UseKeyVaultProvider("SampleRP")
-            .UseStartup<Startup>();
+                .CreateDefaultBuilder(args)
+                .UseLiftrLogger()
+                .UseKeyVaultProvider("SampleRP")
+                .UseStartup<Startup>()
+                .Build()
+                .Run();
+        }
     }
 }

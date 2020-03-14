@@ -59,7 +59,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 {
                     services.AddApplicationInsightsTelemetry();
 
-                    services.AddSingleton<HttpCoreDiagnosticSourceSubscriber>(sp => new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener()));
+                    services.AddSingleton(new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener()));
 
                     services.AddSingleton<IStartupFilter, LoggingMiddlewareStartupFilter>();
 
