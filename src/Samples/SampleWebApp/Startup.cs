@@ -4,16 +4,12 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Hosting.Swagger;
 using Microsoft.Liftr.RPaaS.Hosting;
-using Microsoft.Liftr.TokenManager;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Newtonsoft;
-using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
 using System.Reflection;

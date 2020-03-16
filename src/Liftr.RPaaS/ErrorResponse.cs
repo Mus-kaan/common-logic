@@ -5,7 +5,7 @@
 using System;
 using System.Linq;
 
-namespace Microsoft.Liftr.Contracts.Exceptions
+namespace Microsoft.Liftr.RPaaS
 {
     /// <summary>
     /// Error response for non successful requests. As per ARM RPC: https://github.com/Azure/azure-resource-manager-rpc/blob/master/v1.0/common-api-details.md

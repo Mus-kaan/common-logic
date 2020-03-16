@@ -4,8 +4,6 @@
 
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.ARM;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;

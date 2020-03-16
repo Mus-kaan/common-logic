@@ -4,10 +4,8 @@
 
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.ARM;
-using Microsoft.Liftr.Contracts.Exceptions;
 using Newtonsoft.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -50,7 +48,7 @@ namespace Microsoft.Liftr.RPaaS
             }
             else
             {
-                throw HttpResponseException.Create(response, resourceId);
+                throw MetaRPException.Create(response, resourceId);
             }
         }
 
@@ -68,7 +66,7 @@ namespace Microsoft.Liftr.RPaaS
                 var response = await _httpClient.PutAsync(url, content);
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw HttpResponseException.Create(response, resourceId);
+                    throw MetaRPException.Create(response, resourceId);
                 }
 
                 return response;
@@ -95,7 +93,7 @@ namespace Microsoft.Liftr.RPaaS
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw HttpResponseException.Create(response, nameof(ListResourcesAsync));
+                    throw MetaRPException.Create(response, nameof(ListResourcesAsync));
                 }
 
                 var content = await response.Content.ReadAsStringAsync();
@@ -128,7 +126,7 @@ namespace Microsoft.Liftr.RPaaS
 
                     if (!response.IsSuccessStatusCode)
                     {
-                        throw HttpResponseException.Create(response, operation.Id);
+                        throw MetaRPException.Create(response, operation.Id);
                     }
 
                     return response;
