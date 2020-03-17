@@ -27,13 +27,13 @@ namespace Microsoft.Liftr.SimpleDeploy
     public sealed class ActionExecutor : IHostedService
     {
         private readonly Serilog.ILogger _logger;
-        private readonly IApplicationLifetime _appLifetime;
+        private readonly IHostApplicationLifetime _appLifetime;
         private readonly RunnerCommandOptions _commandOptions;
         private readonly HostingOptions _hostingOptions;
 
         public ActionExecutor(
             Serilog.ILogger logger,
-            IApplicationLifetime appLifetime,
+            IHostApplicationLifetime appLifetime,
             RunnerCommandOptions runnerOptions,
             HostingOptions hostingOptions)
         {

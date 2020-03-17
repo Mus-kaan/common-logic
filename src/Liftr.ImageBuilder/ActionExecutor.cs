@@ -24,13 +24,13 @@ namespace Microsoft.Liftr.ImageBuilder
     public sealed class ActionExecutor : IHostedService
     {
         private readonly Serilog.ILogger _logger;
-        private readonly IApplicationLifetime _appLifetime;
+        private readonly IHostApplicationLifetime _appLifetime;
         private readonly BuilderCommandOptions _options;
         private readonly ITimeSource _timeSource;
 
         public ActionExecutor(
             Serilog.ILogger logger,
-            IApplicationLifetime appLifetime,
+            IHostApplicationLifetime appLifetime,
             BuilderCommandOptions options,
             ITimeSource timeSource)
         {
