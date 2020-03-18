@@ -36,6 +36,8 @@ namespace Microsoft.Liftr.RPaaS
 
         public delegate Task<string> AuthenticationTokenCallback();
 
+        #region Resource operations
+
         public async Task<T> GetResourceAsync<T>(string resourceId, string apiVersion)
         {
             var url = GetMetaRPResourceUrl(resourceId, apiVersion);
@@ -105,6 +107,45 @@ namespace Microsoft.Liftr.RPaaS
             return resources;
         }
 
+        #endregion
+
+        #region Subscription operations
+
+        /// <summary>
+        /// Returns the tenant associated to a subscription. In case more details are
+        /// needed, use GetResourceAsync with RegisteredSubscriptionModel class.
+        /// </summary>
+        public async Task<string> GetTenantForSubscriptionAsync(
+            string userRpSubscriptionId, string providerName, string subscriptionId, string apiVersion)
+        {
+            var resourceId = $"/subscriptions/{userRpSubscriptionId}/providers/{providerName}/registeredSubscriptions/{subscriptionId}";
+            var subscription = await GetResourceAsync<RegisteredSubscriptionModel>(resourceId, apiVersion);
+            return subscription.TenantId;
+        }
+
+        /// <summary>
+        /// Returns mapping of subscriptions to their tenants. In case more details are
+        /// needed, use ListResourcesAsync with RegisteredSubscriptionModel class.
+        /// </summary>
+        public async Task<IDictionary<string, string>> GetTenantForAllSubscriptionsAsync(
+            string userRpSubscriptionId, string providerName, string apiVersion)
+        {
+            var resourceId = $"/subscriptions/{userRpSubscriptionId}/providers/{providerName}/registeredSubscriptions";
+            var registeredSubscriptions = await ListResourcesAsync<RegisteredSubscriptionModel>(resourceId, apiVersion);
+            var dictionary = new Dictionary<string, string>();
+
+            foreach (var registration in registeredSubscriptions)
+            {
+                dictionary[registration.SubscriptionId] = registration.TenantId;
+            }
+
+            return dictionary;
+        }
+
+        #endregion
+
+        #region Operation operations
+
         public async Task<HttpResponseMessage> PatchOperationAsync<T>(T operation, string apiVersion) where T : OperationResource
         {
             if (operation == null)
@@ -159,6 +200,8 @@ namespace Microsoft.Liftr.RPaaS
             return await PatchOperationAsync(operation, apiVersion);
         }
 
+        #endregion
+
         private static string GetMetaRPResourceUrl(string resourceId, string apiVersion)
         {
             if (string.IsNullOrEmpty(resourceId))
@@ -187,12 +230,5 @@ namespace Microsoft.Liftr.RPaaS
                         await _tokenCallback());
             return authenticationHeader;
         }
-    }
-
-    public class ListResponse<T>
-    {
-        public IEnumerable<T> Value { get; set; }
-
-        public string NextLink { get; set; }
     }
 }

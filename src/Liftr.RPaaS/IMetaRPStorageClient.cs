@@ -15,6 +15,8 @@ namespace Microsoft.Liftr.RPaaS
     /// </summary>
     public interface IMetaRPStorageClient
     {
+        #region Resource operations
+
         /// <summary>
         /// Retrieves ARM resource for given resource id and api version from MetaRP
         /// </summary>
@@ -44,6 +46,37 @@ namespace Microsoft.Liftr.RPaaS
         /// <returns></returns>
         Task<IEnumerable<T>> ListResourcesAsync<T>(string resourcePath, string apiVersion);
 
+        #endregion
+
+        #region Subscription operations
+
+        /// <summary>
+        /// Returns the tenant associated to a subscription. In case more details are
+        /// needed, use GetResourceAsync with RegisteredSubscriptionModel class.
+        /// </summary>
+        /// <param name="userRpSubscriptionId"></param>
+        /// <param name="providerName"></param>
+        /// <param name="subscriptionId"></param>
+        /// <param name="apiVersion"></param>
+        /// <returns></returns>
+        Task<string> GetTenantForSubscriptionAsync(
+            string userRpSubscriptionId, string providerName, string subscriptionId, string apiVersion);
+
+        /// <summary>
+        /// Returns mapping of subscriptions to their tenants. In case more details are
+        /// needed, use ListResourcesAsync with RegisteredSubscriptionModel class.
+        /// </summary>
+        /// <param name="userRpSubscriptionId"></param>
+        /// <param name="providerName"></param>
+        /// <param name="apiVersion"></param>
+        /// <returns></returns>
+        Task<IDictionary<string, string>> GetTenantForAllSubscriptionsAsync(
+            string userRpSubscriptionId, string providerName, string apiVersion);
+
+        #endregion
+
+        #region Operation operations
+
         /// <summary>
         /// Patch operation for given api version
         /// </summary>
@@ -68,5 +101,7 @@ namespace Microsoft.Liftr.RPaaS
             string errorCode,
             string errorMessage,
             string apiVersion);
+
+        #endregion
     }
 }

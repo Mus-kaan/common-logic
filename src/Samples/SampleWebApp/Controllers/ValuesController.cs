@@ -65,7 +65,13 @@ namespace SampleWebApp.Controllers
             try
             {
                 var apiVersion = "2020-02-01-preview";
-                var requestPath = "/subscriptions/f9d7ebed-adbd-4cb4-b973-aaf82c136138/resourceGroups/limgurg/providers/Microsoft.Datadog/monitors/testdf12/filters";
+                var userRpSubscription = "f9d7ebed-adbd-4cb4-b973-aaf82c136138";
+                var providerName = "Microsoft.Datadog";
+
+                await _metaRPStorageClient.GetTenantForSubscriptionAsync(userRpSubscription, providerName, userRpSubscription, apiVersion);
+                await _metaRPStorageClient.GetTenantForAllSubscriptionsAsync(userRpSubscription, providerName, apiVersion);
+
+                var requestPath = "/subscriptions/f9d7ebed-adbd-4cb4-b973-aaf82c136138/resourceGroups/limgurg/providers/Microsoft.Datadog/monitors/testdf12";
                 return await _metaRPStorageClient.ListResourcesAsync<TestResource>(requestPath, apiVersion);
             }
             catch (Exception ex)
