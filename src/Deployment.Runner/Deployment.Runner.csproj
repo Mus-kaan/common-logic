@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>$(LiftrEv2TargetFramework)</TargetFramework>
+    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="..\..\deployment\**\*" LinkBase="deployment">

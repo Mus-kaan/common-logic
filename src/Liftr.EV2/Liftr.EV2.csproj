@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <IsPackable>true</IsPackable>
-    <TargetFramework>$(LiftrEv2TargetFramework)</TargetFramework>
+    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
     <AssemblyName>Microsoft.Liftr.EV2</AssemblyName>
     <RootNamespace>Microsoft.Liftr.EV2</RootNamespace>
     <!-- forces SDK to copy dependencies into build output to make packing easier -->

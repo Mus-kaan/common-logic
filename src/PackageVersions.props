@@ -32,7 +32,7 @@
     <PackageVersion_Microsoft_Extensions_Logging_Debug>3.1.2</PackageVersion_Microsoft_Extensions_Logging_Debug>
     <PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions>3.1.2</PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions>
     <PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>5.2.1</PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>
-    <PackageVersion_Microsoft_Liftr_EV2>1.2.1145-build164</PackageVersion_Microsoft_Liftr_EV2>
+    <PackageVersion_Microsoft_Liftr_EV2>0.7.1173-build254</PackageVersion_Microsoft_Liftr_EV2>
     <PackageVersion_Microsoft_NET_Test_Sdk>16.0.1</PackageVersion_Microsoft_NET_Test_Sdk>
     <PackageVersion_Microsoft_VisualStudio_Azure_Containers_Tools_Targets>1.9.5</PackageVersion_Microsoft_VisualStudio_Azure_Containers_Tools_Targets>
     <PackageVersion_MongoDB_Driver>2.9.3</PackageVersion_MongoDB_Driver>

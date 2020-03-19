@@ -3,7 +3,7 @@
 <Project TreatAsLocalProperty="LiftrEV2GeneratorExe;LiftrEV2OptionsPath;LiftrEV2ImageOptionsPath">
 
   <PropertyGroup>
-    <LiftrEV2GeneratorExe>dotnet "$(MSBuildThisFileDirectory)../tools/netcoreapp2.2/Microsoft.Liftr.EV2.dll"</LiftrEV2GeneratorExe>
+    <LiftrEV2GeneratorExe>dotnet "$(MSBuildThisFileDirectory)../tools/netcoreapp3.1/Microsoft.Liftr.EV2.dll"</LiftrEV2GeneratorExe>
     <LiftrEV2OptionsPath>$(MSBuildProjectDirectory)/ev2-options.json</LiftrEV2OptionsPath>
     <LiftrEV2ImageOptionsPath>$(MSBuildProjectDirectory)/ev2-image-options.json</LiftrEV2ImageOptionsPath>
   </PropertyGroup>
