@@ -373,18 +373,8 @@ namespace Microsoft.Liftr.ImageBuilder
 
                 var sbiRegistryContent = await response.Content.ReadAsStringAsync();
                 var vhdRegistry = JsonConvert.DeserializeObject<Dictionary<string, SBIVersionInfo>>(sbiRegistryContent);
-
-                var versions = vhdRegistry
-                    .Select(kvp => kvp.Key)
-                    .Where(ver => ver.OrdinalStartsWith(sourceImageType.ToString()))
-                    .Where(ver => !ver.OrdinalContains("latest"));
-                _logger.Information("Listed versions for {sourceImageType}: {@sbiVHDVersions}", sourceImageType.ToString(), versions);
-                _logger.Information("Finding the latest version ...");
-
-                // sample versions: "U1804LTS_Vb-6", "U1804LTS_Vb-5"
-                latestVersion = versions
-                    .OrderByDescending(ver => int.Parse(ver.Split('-').Last(), CultureInfo.InvariantCulture))
-                    .FirstOrDefault();
+                latestVersion = FindLastestSBIVersionTag(vhdRegistry, sourceImageType, _options.Location);
+                _logger.Information("Resolved {region} latest SBI version: {latestVersion}", _options.Location.Name, latestVersion);
 
                 if (string.IsNullOrEmpty(latestVersion))
                 {
@@ -395,7 +385,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
                 vhdSASToken = vhdRegistry[latestVersion].VHDS.Where(kvp => _options.Location.Name.OrdinalEquals(Region.Create(kvp.Key).Name)).FirstOrDefault().Value;
 
-                if (string.IsNullOrEmpty(latestVersion))
+                if (string.IsNullOrEmpty(vhdSASToken))
                 {
                     var ex = new InvalidOperationException($"Cannot find the vhd SAS token for version {latestVersion} in region {_options.Location.Name}.");
                     _logger.Fatal(ex, ex.Message);
@@ -459,6 +449,33 @@ namespace Microsoft.Liftr.ImageBuilder
                         targetRegions);
 
             return imgVersion;
+        }
+
+        private string FindLastestSBIVersionTag(Dictionary<string, SBIVersionInfo> vhdRegistry, SourceImageType sourceImageType, Region region)
+        {
+            // sample versions: "U1804LTS_Vb-6", "U1804LTS_Vb-5", "U1804LTS_Mn-1", "U1804LTS_Mn-2", "U1804LTS_latest"
+            var versions = vhdRegistry
+                    .Select(kvp => kvp.Key)
+                    .Where(ver => ver.OrdinalStartsWith(sourceImageType.ToString()));
+
+            _logger.Information("Listed Azure Linux SBI versions for {sourceImageType}: {@sbiVHDVersions}", sourceImageType.ToString(), versions);
+
+            var latestVersion = versions.FirstOrDefault(ver => ver.OrdinalContains("latest"));
+
+            if (string.IsNullOrEmpty(latestVersion))
+            {
+                var ex = new InvalidOperationException("Cannot list the version of the SBI VHDs with 'latest' tag.");
+                _logger.Fatal(ex, ex.Message);
+                throw ex;
+            }
+
+            var lastestVHDKvp = vhdRegistry[latestVersion].VHDS.FirstOrDefault(vhdKvp => region.Equals(Region.Create(vhdKvp.Key)));
+
+            var sematicVersionObject = vhdRegistry
+                .Where(kvp => !kvp.Key.OrdinalEquals(latestVersion))
+                .FirstOrDefault(kvp => kvp.Value.VHDS.ContainsKey(lastestVHDKvp.Key) && kvp.Value.VHDS[lastestVHDKvp.Key].OrdinalEquals(lastestVHDKvp.Value));
+
+            return sematicVersionObject.Key;
         }
 
         private async Task<IVirtualMachineCustomImage> CreateCustomImageAsync(string name, string vhdUrl)

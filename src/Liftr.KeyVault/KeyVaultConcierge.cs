@@ -64,24 +64,24 @@ namespace Microsoft.Liftr.KeyVault
 
         public async Task<SecretBundle> GetSecretAsync(string secretName)
         {
-            _logger.Information("Start getting secret with name: {@secretName} ...", secretName);
+            _logger.Information("Start getting secret with name '{secretName}' in vault '{vaultBaseUrl}' ...", secretName, _vaultBaseUrl);
             var result = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, secretName);
-            _logger.Information("Finished getting secret with name: {@secretName}.", secretName);
+            _logger.Information("Finished getting secret with name: {secretName}.", secretName);
             return result;
         }
 
         public async Task<SecretBundle> SetSecretAsync(string secretName, string value, IDictionary<string, string> tags = null)
         {
-            _logger.Information("Start setting secret with name: {@secretName} ...", secretName);
+            _logger.Information("Start setting secret with name '{secretName}' in vault '{vaultBaseUrl}' ...", secretName, _vaultBaseUrl);
             var result = await _keyVaultClient.SetSecretAsync(_vaultBaseUrl, secretName, value, tags);
-            _logger.Information("Finished setting secret with name: {@secretName}.", secretName);
+            _logger.Information("Finished setting secret with name: {secretName}.", secretName);
             return result;
         }
 
         public async Task<IEnumerable<SecretItem>> ListSecretsAsync(string prefix = null)
         {
             List<SecretItem> result = new List<SecretItem>();
-            _logger.Information("Start listing secrets with prefix: {@prefix} ...", prefix);
+            _logger.Information("Start listing secrets with prefix '{prefix}' in vault '{vaultBaseUrl}' ...", prefix, _vaultBaseUrl);
             var secrets = await _keyVaultClient.GetSecretsAsync(_vaultBaseUrl);
             foreach (var secret in secrets)
             {
@@ -91,23 +91,23 @@ namespace Microsoft.Liftr.KeyVault
                 }
             }
 
-            _logger.Information("Finished listing secrets with name: {@prefix}.", prefix);
+            _logger.Information("Listed {secretCount} secrets with name: {prefix}.", result.Count, prefix);
             return result;
         }
 
         public async Task<IssuerBundle> GetCertificateIssuerAsync(string issuerName)
         {
-            _logger.Information("Start getting issuer with name: {@issuerName} ...", issuerName);
+            _logger.Information("Start getting issuer with name '{issuerName}' in vault '{vaultBaseUrl}' ...", issuerName, _vaultBaseUrl);
             var issuer = await _keyVaultClient.GetCertificateIssuerAsync(_vaultBaseUrl, issuerName);
-            _logger.Information("Finished getting issuer with name: {@issuerName} .", issuerName);
+            _logger.Information("Finished getting issuer with name: {issuerName} .", issuerName);
             return issuer;
         }
 
         public async Task<IssuerBundle> SetCertificateIssuerAsync(string issuerName, string provider)
         {
-            _logger.Information("Start getting issuer with name: {issuerName}, provider: {provider} ...", issuerName, provider);
+            _logger.Information("Start getting issuer with name: '{issuerName}' provider '{provider}' in vault '{vaultBaseUrl}' ...", issuerName, provider, _vaultBaseUrl);
             var issuer = await _keyVaultClient.SetCertificateIssuerAsync(_vaultBaseUrl, issuerName, provider);
-            _logger.Information("Finished getting issuer with name: {@issuerName} .", issuerName);
+            _logger.Information("Finished getting issuer with name: {issuerName} .", issuerName);
             return issuer;
         }
 
@@ -154,7 +154,7 @@ namespace Microsoft.Liftr.KeyVault
                 Enabled = true,
             };
 
-            _logger.Information("Start creating certificate with name {@certificateName}, subject name {certSubjectName} and policy: {@certPolicy} ...", certName, certPolicy.X509CertificateProperties.Subject, certPolicy);
+            _logger.Information("Start creating certificate with name {@certificateName}, subject name {certSubjectName} and policy: {@certPolicy} in vault '{vaultBaseUrl}' ...", certName, certPolicy.X509CertificateProperties.Subject, certPolicy, _vaultBaseUrl);
             var certOperation = await _keyVaultClient.CreateCertificateAsync(_vaultBaseUrl, certName, certPolicy, certificateAttributes, tags);
 
             while (certOperation.Status.OrdinalEquals("InProgress"))
@@ -180,7 +180,7 @@ namespace Microsoft.Liftr.KeyVault
         /// <returns>Value is base64 encoded pfx data</returns>
         public async Task<SecretBundle> DownloadCertAsync(string certName)
         {
-            _logger.Information("Start getting certificate with name {@certificateName} ...", certName);
+            _logger.Information("Start getting certificate with name {@certificateName} in vault '{vaultBaseUrl}' ...", certName, _vaultBaseUrl);
             SecretBundle secret = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, certName);
             _logger.Information("Finished getting certificate with name {@certificateName} .", certName);
             return secret;
