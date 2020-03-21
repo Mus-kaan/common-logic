@@ -10,7 +10,6 @@ environment:
 
 signing_options:
   profile: 'internal_azure_service'   # This service deploys to Azure!
-  codesign_validation_glob_pattern: 'f|**\Microsoft.Liftr.*.dll'
 
 workspace_options:
   enable_legacy_networking: true    # Default is false. If false, only the Restore stage enables network connectivity to the user build container. 
@@ -39,14 +38,9 @@ restore:
       
 build:
   commands:
-    - !!buildcommand
+    - !!defaultcommand
       name: 'Build Windows'
       command: 'build/run-windows-build.cmd'
-      artifacts:
-        - from: 'src'
-          to: 'bin'
-          include:
-            - '*/bin/*/*/Microsoft.Liftr.*.dll'
 
 test:
   commands:
