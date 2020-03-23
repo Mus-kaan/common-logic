@@ -58,6 +58,15 @@ AKSName=$(<bin/aks-name.txt)
 fi
 echo "AKSName: $AKSName"
 
+if [ "$liftrACRURI" = "" ]; then
+liftrACRURI=$(<bin/acr-endpoint.txt)
+    if [ "$liftrACRURI" = "" ]; then
+        echo "Please set 'liftrACRURI' ..."
+        exit 1 # terminate and indicate error
+    fi
+fi
+echo "liftrACRURI: $liftrACRURI"
+
 if [ "$DiagStorName" = "" ]; then
 echo "Read DiagStorName from file 'bin/diag-stor-name.txt'."
 DiagStorName=$(<bin/diag-stor-name.txt)
@@ -139,15 +148,6 @@ kubectl -n $namespace delete secret thanos-objstore-config
 $Helm uninstall $helmReleaseName -n $namespace
 set -e
 
-kubectl apply -f monitoring.coreos.com_alertmanagers.yaml --validate=false
-kubectl apply -f monitoring.coreos.com_prometheuses.yaml --validate=false
-kubectl apply -f monitoring.coreos.com_prometheusrules.yaml --validate=false
-kubectl apply -f monitoring.coreos.com_servicemonitors.yaml --validate=false
-kubectl apply -f monitoring.coreos.com_podmonitors.yaml --validate=false
-
-echo "Wait several seconds to make sure the CRDs are created ..."
-sleep 5s
-
 sed -i "s|STOR_NAME_PLACEHOLDER|$DiagStorName|g" thanos-storage-config.yaml
 sed -i "s|STOR_KEY_PLACEHOLDER|$DiagStorKey|g" thanos-storage-config.yaml
 
@@ -174,10 +174,21 @@ $Helm upgrade $helmReleaseName prometheus-operator-*.tgz --install \
 --set prometheus.prometheusSpec.thanos.tag=v0.3.1 \
 --set prometheus.prometheusSpec.thanos.objectStorageConfig.key=thanos.yaml \
 --set prometheus.prometheusSpec.thanos.objectStorageConfig.name=thanos-objstore-config \
+--set alertmanager.alertmanagerSpec.image.repository="$liftrACRURI/prometheus/alertmanager" \
+--set prometheusOperator.tlsProxy.image.repository="$liftrACRURI/squareup/ghostunnel" \
+--set prometheusOperator.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
+--set prometheusOperator.image.repository="$liftrACRURI/coreos/prometheus-operator" \
+--set prometheusOperator.configmapReloadImage.repository="$liftrACRURI/coreos/configmap-reload" \
+--set prometheusOperator.prometheusConfigReloaderImage.repository="$liftrACRURI/coreos/prometheus-config-reloader" \
+--set prometheusOperator.hyperkubeImage.repository="$liftrACRURI/hyperkube" \
+--set prometheusOperator.prometheusSpec.image.repository="$liftrACRURI/prometheus/prometheus" \
+--set kube-state-metrics.image.repository="$liftrACRURI/coreos/kube-state-metrics" \
+--set prometheus-node-exporter.image.repository="$liftrACRURI/prometheus/node-exporter" \
 
 echo "Wait for the helm release '$helmReleaseName' ..."
 kubectl rollout status deployment.apps/prom-rel-kube-state-metrics -n "$namespace"
 kubectl rollout status deployment.apps/prom-rel-prometheus-operat-operator -n "$namespace"
+kubectl rollout status daemonset/prom-rel-prometheus-node-exporter -n "$namespace"
 
 if [ ! -f thanos-api.cer ]; then
     echo "Cannot find the api secret for Thanos. Skip deploying Thanos ingress"

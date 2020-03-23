@@ -22,7 +22,7 @@ do
 done
 
 # download helm
-HelmTarUri="https://get.helm.sh/helm-v3.0.2-linux-amd64.tar.gz"
+HelmTarUri="https://get.helm.sh/helm-v3.1.2-linux-amd64.tar.gz"
 HelmDir="$SrcRoot/buildtools/helm"
 Helm="$HelmDir/linux-amd64/helm"
 mkdir --parent "$HelmDir"

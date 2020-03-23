@@ -54,6 +54,7 @@ condition_map = {
     'general.rules': ' .Values.defaultRules.rules.general',
     'k8s.rules': ' .Values.defaultRules.rules.k8s',
     'kube-apiserver.rules': ' .Values.kubeApiServer.enabled .Values.defaultRules.rules.kubeApiserver',
+    'kube-apiserver-error': ' .Values.kubeApiServer.enabled .Values.defaultRules.rules.kubeApiserverError',
     'kube-prometheus-node-alerting.rules': ' .Values.defaultRules.rules.kubePrometheusNodeAlerting',
     'kube-prometheus-node-recording.rules': ' .Values.defaultRules.rules.kubePrometheusNodeRecording',
     'kube-scheduler.rules': ' .Values.kubeScheduler.enabled .Values.defaultRules.rules.kubeScheduler',
@@ -105,12 +106,25 @@ replacement_map = {
     'alertmanager-$1': {
         'replacement': '$1',
         'init': ''},
+    'https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#': {
+        'replacement': '{{ .Values.defaultRules.runbookUrl }}',
+        'init': ''},
+    'job="kube-state-metrics"': {
+        'replacement': 'job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"',
+        'limitGroup': ['kubernetes-apps'],
+        'init': '{{- $targetNamespace := .Values.defaultRules.appNamespacesTarget }}'},
+    'job="kubelet"': {
+        'replacement': 'job="kubelet", namespace=~"{{ $targetNamespace }}"',
+        'limitGroup': ['kubernetes-storage'],
+        'init': '{{- $targetNamespace := .Values.defaultRules.appNamespacesTarget }}'},
 }
 
 # standard header
-header = '''# Generated from '%(name)s' group from %(url)s
-# Do not change in-place! In order to change this file first read following link:
-# https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+header = '''{{- /* 
+Generated from '%(name)s' group from %(url)s
+Do not change in-place! In order to change this file first read following link:
+https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+*/ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and (semverCompare ">=%(min_kubernetes)s" $kubeTargetVersion) (semverCompare "<%(max_kubernetes)s" $kubeTargetVersion) .Values.defaultRules.create%(condition)s }}%(init_line)s
 apiVersion: monitoring.coreos.com/v1
@@ -200,13 +214,14 @@ def add_rules_conditions(rules, indent=4):
 
 def write_group_to_file(group, url, destination, min_kubernetes, max_kubernetes):
     fix_expr(group['rules'])
+    group_name = group['name']
 
     # prepare rules string representation
     rules = yaml_str_repr(group)
     # add replacements of custom variables and include their initialisation in case it's needed
     init_line = ''
     for line in replacement_map:
-        if line in rules:
+        if group_name in replacement_map[line].get('limitGroup', [group_name]) and line in rules:
             rules = rules.replace(line, replacement_map[line]['replacement'])
             if replacement_map[line]['init']:
                 init_line += '\n' + replacement_map[line]['init']

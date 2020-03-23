@@ -840,7 +840,7 @@ namespace Microsoft.Liftr.Fluent
                              .Define(aksName)
                              .WithRegion(region)
                              .WithExistingResourceGroup(rgName)
-                             .WithVersion("1.15.7")
+                             .WithLatestVersion()
                              .WithRootUsername(rootUserName)
                              .WithSshKey(sshPublicKey)
                              .WithServicePrincipalClientId(servicePrincipalClientId)

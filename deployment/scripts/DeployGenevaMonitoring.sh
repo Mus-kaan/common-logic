@@ -168,11 +168,6 @@ $Helm upgrade aks-geneva --install \
 --set gcscertb64="$genevaServiceCert" \
 --set gcskeyb64="$genevaServiceKey" \
 --set linuxgenevaACR.endpoint="$liftrACRURI" \
---set prometheus.configmapReload.image.repository="$liftrACRURI/jimmidyson/configmap-reload" \
---set prometheus.initChownData.image.repository="$liftrACRURI/library/busybox" \
---set prometheus.kubeStateMetrics.image.repository="$liftrACRURI/coreos/kube-state-metrics" \
---set prometheus.server.image.repository="$liftrACRURI/prom/prometheus" \
---set prometheus.nodeExporter.image.repository="$liftrACRURI/prom/node-exporter" \
 --namespace "$namespace" geneva-*.tgz
 
 kubectl rollout status daemonset/geneva-services -n "$namespace"

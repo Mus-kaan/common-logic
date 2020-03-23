@@ -41,6 +41,10 @@ ServiceGroupRootRegionalData="$OutDir/2_ServiceGroupRootRegionalData"
 ServiceGroupRootRegionalCompute="$OutDir/3_ServiceGroupRootRegionalCompute"
 ServiceGroupRootApp="$OutDir/4_ServiceGroupRootApp"
 
+rm -rf $ChartsOutDir
+rm -rf $ChartsTmpDir
+rm -rf $TarTmpDir/*
+
 # Set chart version based on build number.
 if [ -v CDP_PACKAGE_VERSION_NUMERIC ]; then
     ChartVersion="$CDP_PACKAGE_VERSION_NUMERIC"
@@ -48,7 +52,8 @@ if [ -v CDP_PACKAGE_VERSION_NUMERIC ]; then
     cp -a "$SrcRoot/.version/." "$TarTmpDir/bin/version-files"
 else
     # Use a fake version when building locally.
-    ChartVersion="0.9.010870002"
+    CURRENTEPOCTIME=`date +%s`
+    ChartVersion="0.9.$CURRENTEPOCTIME"
 fi
 echo "Chart version is: $ChartVersion"
 
@@ -69,7 +74,6 @@ echo
 
 AppChartValueFile="$ChartsTmpDir/$ServiceChartName/values.yaml"
 rm -f "$AppChartValueFile"
-echo -n "$ChartVersion" > "$TarTmpDir/bin/version.txt"
 
 # Package each helm chart.
 for ChartDir in $ChartsDir/*; do
@@ -121,6 +125,7 @@ cp -a $EV2ScriptsDir/. "$TarTmpDir"
 cp -a $ChartsOutDir/. "$TarTmpDir"
 cp -a $ChartsParametersDir/. "$TarTmpDir"
 cp $Helm "$TarTmpDir"
+echo -n "$ChartVersion" > "$TarTmpDir/bin/version.txt"
 
 if [ -d "$GenerateDockerImageMetadataDir" ]; then
   cp -a $GenerateDockerImageMetadataDir/. "$TarTmpDir/cdpx-images"

@@ -1,18 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <PackageVersion_Azure_Identity>1.1.0</PackageVersion_Azure_Identity>
-    <PackageVersion_Azure_Storage_Blobs>12.0.0</PackageVersion_Azure_Storage_Blobs>
-    <PackageVersion_Azure_Storage_Queues>12.0.0</PackageVersion_Azure_Storage_Queues>
+    <PackageVersion_Azure_Identity>1.1.1</PackageVersion_Azure_Identity>
+    <PackageVersion_Azure_Storage_Blobs>12.4.0</PackageVersion_Azure_Storage_Blobs>
+    <PackageVersion_Azure_Storage_Queues>12.3.0</PackageVersion_Azure_Storage_Queues>
     <PackageVersion_CommandLineParser>2.6.0</PackageVersion_CommandLineParser>
     <PackageVersion_Microsoft_ApplicationInsights>2.11.0</PackageVersion_Microsoft_ApplicationInsights>
     <PackageVersion_Microsoft_ApplicationInsights_AspNetCore>2.8.2</PackageVersion_Microsoft_ApplicationInsights_AspNetCore>
     <PackageVersion_Microsoft_ApplicationInsights_DependencyCollector>2.11.2</PackageVersion_Microsoft_ApplicationInsights_DependencyCollector>
     <PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>2.2.0</PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>
     <PackageVersion_Microsoft_AspNetCore_Mvc_Core>2.2.0</PackageVersion_Microsoft_AspNetCore_Mvc_Core>
-    <PackageVersion_Microsoft_Azure_KeyVault>3.0.4</PackageVersion_Microsoft_Azure_KeyVault>
-    <PackageVersion_Microsoft_Azure_Management_Fluent>1.29.1</PackageVersion_Microsoft_Azure_Management_Fluent>
-    <PackageVersion_Microsoft_Azure_Services_AppAuthentication>1.3.1</PackageVersion_Microsoft_Azure_Services_AppAuthentication>
+    <PackageVersion_Microsoft_Azure_KeyVault>3.0.5</PackageVersion_Microsoft_Azure_KeyVault>
+    <PackageVersion_Microsoft_Azure_Management_Fluent>1.32.0</PackageVersion_Microsoft_Azure_Management_Fluent>
+    <PackageVersion_Microsoft_Azure_Services_AppAuthentication>1.4.0</PackageVersion_Microsoft_Azure_Services_AppAuthentication>
     <PackageVersion_Microsoft_Azure_Storage_Blob>11.1.0</PackageVersion_Microsoft_Azure_Storage_Blob>
     <PackageVersion_Microsoft_Azure_Storage_Queue>11.1.0</PackageVersion_Microsoft_Azure_Storage_Queue>
     <PackageVersion_Microsoft_CSharp>4.5.0</PackageVersion_Microsoft_CSharp>
@@ -35,7 +35,7 @@
     <PackageVersion_Microsoft_Liftr_EV2>1.2.1173-build175</PackageVersion_Microsoft_Liftr_EV2>
     <PackageVersion_Microsoft_NET_Test_Sdk>16.0.1</PackageVersion_Microsoft_NET_Test_Sdk>
     <PackageVersion_Microsoft_VisualStudio_Azure_Containers_Tools_Targets>1.9.5</PackageVersion_Microsoft_VisualStudio_Azure_Containers_Tools_Targets>
-    <PackageVersion_MongoDB_Driver>2.9.3</PackageVersion_MongoDB_Driver>
+    <PackageVersion_MongoDB_Driver>2.10.2</PackageVersion_MongoDB_Driver>
     <PackageVersion_Moq>4.12.0</PackageVersion_Moq>
     <PackageVersion_Newtonsoft_Json>12.0.2</PackageVersion_Newtonsoft_Json>
     <PackageVersion_Serilog>2.9.0</PackageVersion_Serilog>

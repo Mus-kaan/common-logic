@@ -64,16 +64,14 @@ kubectl create namespace "$namespace"
 set -e
 
 echo "helm upgrade aad-pod-id-rel"
-$Helm upgrade aad-pod-id-rel --install \
---set compactRegion="$compactRegion" \
---set environmentName="$environmentName" \
+$Helm upgrade aad-pod-id-rel aad-pod-identity-*.tgz --install \
+--namespace $namespace \
 --set azureIdentity.enabled=true \
 --set azureIdentity.resourceID=$MSIResourceId \
 --set azureIdentity.clientID=$MSIClientId \
---set azureIdentityBinding.selector="liftr-aad-pod-identity" \
---namespace $namespace aad-pod-identity-*.tgz
+--set azureIdentityBinding.selector="liftr-aad-pod-identity"
 
-echo "Start waiting for aks-pod-identity-infra deployment to finish ..."
+echo "Start waiting for aad-pod-id-rel deployment to finish ..."
 kubectl rollout status daemonset.apps/aad-pod-identity-nmi -n $namespace
 kubectl rollout status deployment.apps/aad-pod-identity-mic -n $namespace
 

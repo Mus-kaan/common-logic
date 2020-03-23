@@ -68,32 +68,51 @@ else
     LiftrACRResourceId="/subscriptions/d8f298fb-60f5-4676-a7d3-25442ec5ce1e/resourceGroups/liftr-acr-rg/providers/Microsoft.ContainerRegistry/registries/LiftrAMEACR"
 fi
 
-echo "import prometheus images"
-
-echo "import docker.io/library/busybox:latest"
-az acr import --name "$ACRName" --source docker.io/library/busybox:latest --force
-
-echo "import docker.io/jimmidyson/configmap-reload:v0.2.2"
-az acr import --name "$ACRName" --source docker.io/jimmidyson/configmap-reload:v0.2.2 --force
-
-echo "import docker.io/prom/prometheus:v2.4.3"
-az acr import --name "$ACRName" --source docker.io/prom/prometheus:v2.4.3 --force
-
-echo "import docker.io/prom/node-exporter:v0.16.0"
-az acr import --name "$ACRName" --source docker.io/prom/node-exporter:v0.16.0 --force
-
-echo "import quay.io/coreos/kube-state-metrics:v1.4.0"
-az acr import --name "$ACRName" --source quay.io/coreos/kube-state-metrics:v1.4.0 --force
+echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
+echo "import 'nginx-ingress' chart images"
+echo "import quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0"
+az acr import --name "$ACRName" --source quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0 --force
 
 echo "import k8s.gcr.io/defaultbackend-amd64:1.5"
 az acr import --name "$ACRName" --source k8s.gcr.io/defaultbackend-amd64:1.5 --force
 
+echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
+echo "import 'kube-state-metrics' chart images"
+echo "import quay.io/coreos/kube-state-metrics:v1.9.5"
+az acr import --name "$ACRName" --source quay.io/coreos/kube-state-metrics:v1.9.5 --force
+
+echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
+echo "import 'prometheus-node-exporter' chart images"
+echo "import quay.io/prometheus/node-exporter:v0.18.1"
+az acr import --name "$ACRName" --source quay.io/prometheus/node-exporter:v0.18.1 --force
+
+echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
+echo "import 'prometheus-operator' chart images"
+echo "import quay.io/prometheus/alertmanager:v0.20.0"
+az acr import --name "$ACRName" --source quay.io/prometheus/alertmanager:v0.20.0 --force
+
+echo "import docker.io/squareup/ghostunnel:v1.5.2"
+az acr import --name "$ACRName" --source docker.io/squareup/ghostunnel:v1.5.2 --force
+
 echo "import docker.io/jettech/kube-webhook-certgen:v1.0.0"
 az acr import --name "$ACRName" --source docker.io/jettech/kube-webhook-certgen:v1.0.0 --force
 
-echo "import quay.io/kubernetes-ingress-controller/nginx-ingress-controller"
-az acr import --name "$ACRName" --source quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1 --force
+echo "import quay.io/coreos/prometheus-operator:v0.37.0"
+az acr import --name "$ACRName" --source quay.io/coreos/prometheus-operator:v0.37.0 --force
 
+echo "import quay.io/coreos/configmap-reload:v0.0.1"
+az acr import --name "$ACRName" --source quay.io/coreos/configmap-reload:v0.0.1 --force
+
+echo "import quay.io/coreos/prometheus-config-reloader:v0.37.0"
+az acr import --name "$ACRName" --source quay.io/coreos/prometheus-config-reloader:v0.37.0 --force
+
+echo "import k8s.gcr.io/hyperkube:v1.12.1"
+az acr import --name "$ACRName" --source k8s.gcr.io/hyperkube:v1.12.1 --force
+
+echo "import quay.io/prometheus/prometheus:v2.15.2"
+az acr import --name "$ACRName" --source quay.io/prometheus/prometheus:v2.15.2 --force
+
+echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/environments/linuxcontainers.html"
 echo "import geneva images"
 echo "Please make sure the Geneva images are imported to the shared liftr ACR first: https://msazure.visualstudio.com/Liftr/_git/Liftr.Common?path=%2Ftools%2Fdependency-images%2FPrepareGenevaImages.sh"
