@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Liftr.DiagnosticSource;
 using Serilog.Events;
@@ -108,6 +109,15 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 await _next(httpContext);
                 if (httpContext.Response?.StatusCode == (int)HttpStatusCode.NotFound && httpContext.Request?.Path.Value?.OrdinalStartsWith("/api/liveness-probe") == true)
                 {
+                    try
+                    {
+                        // This is to remove AppInsights logging when it is enabled. If not, this will do nothing.
+                        httpContext?.Features?.Set<RequestTelemetry>(null);
+                    }
+                    catch
+                    {
+                    }
+
                     var meta = await _logger.GetMetaInfoAsync();
                     httpContext.Response.StatusCode = (int)HttpStatusCode.OK;
                     await httpContext.Response.WriteAsync(meta.ToJson(indented: true));
