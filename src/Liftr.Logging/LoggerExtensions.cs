@@ -21,6 +21,24 @@ namespace Microsoft.Liftr
         private static bool s_metaInitialized;
         private static List<IDisposable> s_disposablesHolder = new List<IDisposable>();
 
+        /// <summary>
+        /// Start tracking an <see cref="ITimedOperation"/>, which contains two log events:
+        /// <para> 1. The 'start' event will be logged when call this function.</para>
+        /// <para> 2. The 'finish' event will be logged when the <see cref="ITimedOperation"/> is disposed.</para>
+        /// The 'start' and 'finish' event will contain some common proerpties like 'success', 'duration'.
+        /// You can add more proerties using <see cref="ITimedOperation.SetProperty(string,string)"/> or <see cref="ITimedOperation.SetContextProperty(string,string)"/>
+        /// </summary>
+        /// <returns>The <see cref="ITimedOperation"/> object</returns>
+        public static ITimedOperation StartTimedOperation(this ILogger logger, string operationName, string operationId = null)
+        {
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            return new TimedOperation(logger, operationName, operationId);
+        }
+
         public static async Task<MetaInfo> GetMetaInfoAsync(this ILogger logger, Assembly callingAssembly = null)
         {
             if (!s_metaInitialized)
@@ -59,16 +77,6 @@ namespace Microsoft.Liftr
             }
 
             return s_metaInfo;
-        }
-
-        public static ITimedOperation StartTimedOperation(this ILogger logger, string operationName, string operationId = null)
-        {
-            if (logger == null)
-            {
-                throw new ArgumentNullException(nameof(logger));
-            }
-
-            return new TimedOperation(logger, operationName, operationId);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "Liftr1004:Avoid calling System.Threading.Tasks.Task<TResult>.Result", Justification = "<Pending>")]

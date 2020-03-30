@@ -43,7 +43,7 @@ namespace Microsoft.Liftr.Logging
             _appInsightsOperation = AppInsightsHelper.AppInsightsClient?.StartOperation<RequestTelemetry>(operationName);
             _operationId = operationId;
             SetContextProperty("LiftrTimedOperationId", operationId);
-            _logger.Debug("Start TimedOperation '{TimedOperationName}' with '{TimedOperationId}' at StartTime {StartTime}.", _operationName, _operationId, _startTime);
+            _logger.Information("Start TimedOperation '{TimedOperationName}' with '{TimedOperationId}' at StartTime {StartTime}.", _operationName, _operationId, _startTime);
         }
 
         public void Dispose()
