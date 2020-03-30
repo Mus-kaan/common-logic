@@ -4,6 +4,7 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
 namespace Microsoft.Liftr.RPaaS
@@ -131,6 +132,6 @@ namespace Microsoft.Liftr.RPaaS
         /// <summary>
         /// Additional properties of the registration.
         /// </summary>
-        public IDictionary<string, string> AdditionalProperties { get; set; }
+        public IDictionary<string, JToken> AdditionalProperties { get; set; }
     }
 }

@@ -5,6 +5,7 @@
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.ARM;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -18,6 +19,7 @@ namespace Microsoft.Liftr.RPaaS
     {
         private readonly HttpClient _httpClient;
         private readonly AuthenticationTokenCallback _tokenCallback;
+        private readonly JsonSerializerSettings _camelCaseSettings;
 
         public MetaRPStorageClient(
             string metaRPEndpoint,
@@ -32,6 +34,12 @@ namespace Microsoft.Liftr.RPaaS
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _httpClient.BaseAddress = new Uri(metaRPEndpoint);
             _tokenCallback = tokenCallback ?? throw new ArgumentNullException(nameof(tokenCallback));
+
+            _camelCaseSettings = new JsonSerializerSettings()
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                Formatting = Formatting.None,
+            };
         }
 
         public delegate Task<string> AuthenticationTokenCallback();
@@ -61,7 +69,7 @@ namespace Microsoft.Liftr.RPaaS
                 throw new ArgumentNullException(nameof(resource));
             }
 
-            using (var content = new StringContent(JsonConvert.SerializeObject(resource), Encoding.UTF8, "application/json"))
+            using (var content = new StringContent(JsonConvert.SerializeObject(resource, _camelCaseSettings), Encoding.UTF8, "application/json"))
             {
                 var url = GetMetaRPResourceUrl(resourceId, apiVersion);
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();
@@ -153,7 +161,7 @@ namespace Microsoft.Liftr.RPaaS
                 throw new ArgumentNullException(nameof(operation));
             }
 
-            using (var content = new StringContent(JsonConvert.SerializeObject(operation), Encoding.UTF8, "application/json"))
+            using (var content = new StringContent(JsonConvert.SerializeObject(operation, _camelCaseSettings), Encoding.UTF8, "application/json"))
             {
                 var url = GetMetaRPResourceUrl(operation.Id, apiVersion);
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();

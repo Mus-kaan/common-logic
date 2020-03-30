@@ -72,6 +72,16 @@ namespace SampleWebApp.Controllers
                 await _metaRPStorageClient.GetTenantForAllSubscriptionsAsync(userRpSubscription, providerName, apiVersion);
 
                 var requestPath = "/subscriptions/f9d7ebed-adbd-4cb4-b973-aaf82c136138/resourceGroups/limgurg/providers/Microsoft.Datadog/monitors/testdf12";
+                var resource = new TestResource()
+                {
+                    Id = requestPath,
+                    Location = "West US",
+                    Name = "testdf12",
+                    Type = "Microsoft.Datadog",
+                };
+
+                await _metaRPStorageClient.UpdateResourceAsync(resource, requestPath, apiVersion);
+
                 return await _metaRPStorageClient.ListResourcesAsync<TestResource>(requestPath, apiVersion);
             }
             catch (Exception ex)
