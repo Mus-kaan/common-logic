@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Hosting.Swagger;
 using Microsoft.Liftr.RPaaS.Hosting;
+using Microsoft.Liftr.TokenManager;
 using Microsoft.OpenApi.Models;
 using System;
 using System.IO;
@@ -38,9 +39,10 @@ namespace SampleWebApp
 
             services.Configure<MetaRPOptions>((metaRPOptions) =>
             {
-                metaRPOptions.KeyVaultEndpoint = Configuration["VaultEndpoint"];
+                metaRPOptions.KeyVaultEndpoint = new Uri(Configuration["VaultEndpoint"]);
             });
 
+            services.AddSingleton<CertificateStore>();
             services.AddMetaRPClient(Configuration);
 
             // Register the Swagger generator, defining 1 or more Swagger documents

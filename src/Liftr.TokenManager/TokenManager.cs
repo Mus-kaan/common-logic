@@ -13,16 +13,13 @@ namespace Microsoft.Liftr.TokenManager
     public class TokenManager : ITokenManager
     {
         private readonly TokenManagerConfiguration _tokenManagerConfiguration;
+        private readonly CertificateStore _certificateStore;
         private readonly ConcurrentDictionary<string, AuthenticationContext> _authContexts;
 
-        public TokenManager(TokenManagerConfiguration tokenConfiguration)
+        public TokenManager(TokenManagerConfiguration tokenConfiguration, CertificateStore certificateStore)
         {
-            if (tokenConfiguration == null)
-            {
-                throw new ArgumentNullException(nameof(tokenConfiguration));
-            }
-
-            _tokenManagerConfiguration = tokenConfiguration;
+            _tokenManagerConfiguration = tokenConfiguration ?? throw new ArgumentNullException(nameof(tokenConfiguration));
+            _certificateStore = certificateStore;
             _authContexts = new ConcurrentDictionary<string, AuthenticationContext>();
 
             if (!string.IsNullOrEmpty(_tokenManagerConfiguration.TenantId))
@@ -38,6 +35,19 @@ namespace Microsoft.Liftr.TokenManager
                 .AcquireTokenAsync(_tokenManagerConfiguration.TargetResource, new ClientCredential(clientId, clientSecret));
 
             return token.AccessToken;
+        }
+
+        public async Task<string> GetTokenAsync(Uri keyVaultEndpoint, string clientId, string certificateName, string tenantId = null)
+        {
+            if (_certificateStore == null)
+            {
+                throw new InvalidOperationException($"No {nameof(CertificateStore)} found to retrieve the certificate");
+            }
+
+#pragma warning disable CA2000 // Dispose objects before losing scope
+            var cert = await _certificateStore.GetCertificateAsync(keyVaultEndpoint, certificateName);
+#pragma warning restore CA2000 // Dispose objects before losing scope
+            return await GetTokenAsync(clientId, cert, tenantId);
         }
 
         public async Task<string> GetTokenAsync(string clientId, X509Certificate2 certificate, string tenantId = null)

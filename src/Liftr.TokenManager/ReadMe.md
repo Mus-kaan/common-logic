@@ -33,3 +33,8 @@ And to access the TokenManagerConfiguration we are using,
 ```cs
 var tokenManagerConfiguration = sp.GetService<IOptions<MetaRPOptions>>().Value.TokenManagerConfiguration;
 ```
+
+The TokenManager also needs a `CertificateStore` hence you need to add the following line in the Startup.cs in order to add a CertificateStore to the dependency injection container
+```cs
+services.AddSingleton<CertificateStore>();
+```

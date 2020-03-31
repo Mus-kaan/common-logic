@@ -17,8 +17,6 @@ namespace Microsoft.Liftr.RPaaS.Hosting
 {
     public static class StartupExtensions
     {
-        private static X509Certificate2 s_metaRPAuthCertificate;
-
         public static void AddMetaRPClient(this IServiceCollection services, IConfiguration configuration)
         {
             if (configuration == null)
@@ -60,7 +58,15 @@ namespace Microsoft.Liftr.RPaaS.Hosting
                     throw ex;
                 }
 
-                var tokenManager = new TokenManager.TokenManager(tokenManagerConfiguration);
+                var certStore = sp.GetService<CertificateStore>();
+                if (certStore == null)
+                {
+                    var ex = new InvalidOperationException("[RPaaS Init] Cannot find a certificate store in the dependency injection container to initizlize RPaaS client.");
+                    logger.Fatal(ex, ex.Message);
+                    throw ex;
+                }
+
+                var tokenManager = new TokenManager.TokenManager(tokenManagerConfiguration, certStore);
 
                 var httpClientFactory = sp.GetService<IHttpClientFactory>();
                 if (httpClientFactory == null)
@@ -72,36 +78,11 @@ namespace Microsoft.Liftr.RPaaS.Hosting
 
                 var metaRPClient = new MetaRPStorageClient(metaRPOptions.MetaRPEndpoint, httpClientFactory.CreateClient(), () =>
                 {
-                    return LoadTokenAsync(kvClient, metaRPOptions, tokenManager, logger);
+                    return tokenManager.GetTokenAsync(metaRPOptions.KeyVaultEndpoint, metaRPOptions.AccessorClientId, metaRPOptions.AccessorCertificateName);
                 });
 
                 return metaRPClient;
             });
-        }
-
-        private static async Task<string> LoadTokenAsync(IKeyVaultClient kvClient, MetaRPOptions options, ITokenManager tokenManager, Serilog.ILogger logger)
-        {
-            try
-            {
-                if (s_metaRPAuthCertificate == null)
-                {
-                    logger.Information("[RPaaS Init] Start loading certificate with name {AccessorCertificateName} ...", options.AccessorCertificateName);
-                    var secretBundle = await kvClient.GetSecretAsync(options.KeyVaultEndpoint, options.AccessorCertificateName);
-                    logger.Information("[RPaaS Init] Loaded the certificate with name {AccessorCertificateName} from key vault with endpoint {KeyVaultEndpoint}", options.AccessorCertificateName, options.KeyVaultEndpoint);
-                    var privateKeyBytes = Convert.FromBase64String(secretBundle.Value);
-                    var cert = new X509Certificate2(privateKeyBytes);
-                    Interlocked.Exchange(ref s_metaRPAuthCertificate, cert);
-                }
-
-                var token = await tokenManager.GetTokenAsync(options.AccessorClientId, s_metaRPAuthCertificate);
-
-                return token;
-            }
-            catch (Exception ex)
-            {
-                logger.Fatal(ex, $"[RPaaS Init] '{nameof(LoadTokenAsync)}' failed. MetaRPOptions: {{@MetaRPOptions}}.", options);
-                throw;
-            }
         }
     }
 }
