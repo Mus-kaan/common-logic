@@ -16,7 +16,7 @@ namespace Microsoft.Liftr.TokenManager
         private readonly CertificateStore _certificateStore;
         private readonly ConcurrentDictionary<string, AuthenticationContext> _authContexts;
 
-        public TokenManager(TokenManagerConfiguration tokenConfiguration, CertificateStore certificateStore)
+        public TokenManager(TokenManagerConfiguration tokenConfiguration, CertificateStore certificateStore = null)
         {
             _tokenManagerConfiguration = tokenConfiguration ?? throw new ArgumentNullException(nameof(tokenConfiguration));
             _certificateStore = certificateStore;
