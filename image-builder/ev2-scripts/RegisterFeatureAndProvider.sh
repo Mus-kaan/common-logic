@@ -8,10 +8,9 @@ checkAndRegisterProvider()
     providerName=$1
     echo "Start checking provider registration of '$providerName'"
     registrationState=$(az provider show -n $providerName | grep registrationState)
-    if [[ $registrationState == *"Registered"* ]]; then
-    echo "$providerName is Registered"
-    else
-        echo "$providerName $registrationState"
+    echo "$providerName: $registrationState"
+    if [[ $registrationState == *"NotRegistered"* ]]; then
+        echo "Registering provider: $providerName"
         az provider register -n "$providerName"
     fi
 }
@@ -54,6 +53,13 @@ fi
 checkAndRegisterProvider "Microsoft.VirtualMachineImages"
 checkAndRegisterProvider "Microsoft.Storage"
 checkAndRegisterProvider "Microsoft.Compute"
+
+# register and enable for shared image gallery
+echo "az feature register --namespace Microsoft.VirtualMachineImages --name VirtualMachineTemplatePreview"
+az feature register --namespace Microsoft.VirtualMachineImages --name VirtualMachineTemplatePreview
+
+echo "az feature register --namespace Microsoft.Compute --name GalleryPreview"
+az feature register --namespace Microsoft.Compute --name GalleryPreview
 
 echo "-----------------------------------------------------------------"
 echo "Finished registering Azure Image builder features and providers."
