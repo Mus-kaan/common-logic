@@ -781,7 +781,7 @@ namespace Microsoft.Liftr.Fluent
 
             var vault = await GetKeyVaultByIdAsync(kvResourceId) ?? throw new InvalidOperationException("Cannt find vault with resource Id: " + kvResourceId);
             await vault.Update().WithoutAccessPolicy(servicePrincipalObjectId).ApplyAsync();
-            _logger.Information("Finished removing KeyVault {@kvResourceId} access policy of {@servicePrincipalObjectId}", kvResourceId, servicePrincipalObjectId);
+            _logger.Information("Finished removing KeyVault '{kvResourceId}' access policy of '{servicePrincipalObjectId}'", kvResourceId, servicePrincipalObjectId);
         }
 
         public async Task GrantSelfKeyVaultAdminAccessAsync(IVault kv)
@@ -801,7 +801,7 @@ namespace Microsoft.Liftr.Fluent
                 .Attach()
                 .ApplyAsync();
 
-            _logger.Information("Granted admin access to the excuting SPN with object Id {SPNObjectId} of key vault {kvId}", SPNObjectId, kv.Id);
+            _logger.Information("Granted admin access to the excuting SPN with object Id '{SPNObjectId}' of key vault '{kvId}'", SPNObjectId, kv.Id);
         }
 
         public async Task RemoveSelfKeyVaultAccessAsync(IVault kv)
@@ -815,7 +815,7 @@ namespace Microsoft.Liftr.Fluent
 
             await kv.Update().WithoutAccessPolicy(SPNObjectId).ApplyAsync();
 
-            _logger.Information("Removed access of the excuting SPN with object Id {SPNObjectId} to key vault {kvId}", SPNObjectId, kv.Id);
+            _logger.Information("Removed access of the excuting SPN with object Id '{SPNObjectId}' to key vault '{kvId}'", SPNObjectId, kv.Id);
         }
 
         #endregion Key Vault

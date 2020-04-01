@@ -12,6 +12,7 @@ using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.KeyVault;
+using Microsoft.Rest.Azure;
 using Serilog.Context;
 using System;
 using System.Collections.Generic;
@@ -69,7 +70,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 LogContext.PushProperty(nameof(config.ResourceGroupName), config.ResourceGroupName);
                 LogContext.PushProperty(nameof(config.ImageGalleryName), config.ImageGalleryName);
 
-                _logger.Information("Parsed config file: {BuilderOptions}", config);
+                _logger.Information("Parsed config file: {@BuilderOptions}", config);
 
                 if (!File.Exists(_options.ArtifactPath))
                 {
@@ -185,7 +186,16 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
                 catch (Exception ex)
                 {
-                    _logger.Fatal(ex, "Failed.");
+                    if (ex is CloudException)
+                    {
+                        var cloudEx = ex as CloudException;
+                        _logger.Fatal(ex, "Failed with CloudException. Status code: {statusCode}, Response: {@response}, Request: {@request}", cloudEx.Response.StatusCode, cloudEx.Response, cloudEx.Request);
+                    }
+                    else
+                    {
+                        _logger.Fatal(ex, "Failed.");
+                    }
+
                     Environment.ExitCode = -1;
                     operation.FailOperation();
                     throw;

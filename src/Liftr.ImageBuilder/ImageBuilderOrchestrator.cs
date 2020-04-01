@@ -81,8 +81,13 @@ namespace Microsoft.Liftr.ImageBuilder
                 .CreateAsync();
                 _logger.Information("Granted resource group's contributor role to Azure Image Builder First Party app.");
             }
-            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists", StringComparison.OrdinalIgnoreCase))
+            catch (CloudException ex) when (ex.Message.OrdinalContains("The role assignment already exists"))
             {
+            }
+            catch (CloudException ex) when (ex.Message.OrdinalContains("does not exist in the directory"))
+            {
+                _logger.Fatal("You probably selected a wrong tenant. Please correct the tenant selection in the configuration file. We only support MS tenant and AME tenant for now.");
+                throw;
             }
 
             ImageGalleryClient galleryClient = new ImageGalleryClient(_logger);

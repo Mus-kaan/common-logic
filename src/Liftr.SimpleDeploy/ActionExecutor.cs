@@ -14,6 +14,7 @@ using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
 using Microsoft.Liftr.KeyVault;
+using Microsoft.Rest.Azure;
 using Serilog.Context;
 using System;
 using System.Collections.Generic;
@@ -395,7 +396,16 @@ namespace Microsoft.Liftr.SimpleDeploy
                 }
                 catch (Exception ex)
                 {
-                    _logger.Fatal(ex, "Failed.");
+                    if (ex is CloudException)
+                    {
+                        var cloudEx = ex as CloudException;
+                        _logger.Fatal(ex, "Failed with CloudException. Status code: {statusCode}, Response: {@response}, Request: {@request}", cloudEx.Response.StatusCode, cloudEx.Response, cloudEx.Request);
+                    }
+                    else
+                    {
+                        _logger.Fatal(ex, "Failed.");
+                    }
+
                     Environment.ExitCode = -1;
                     operation.FailOperation();
                     throw;
