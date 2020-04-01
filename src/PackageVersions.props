@@ -46,7 +46,6 @@
     <PackageVersion_Serilog_Sinks_ApplicationInsights>3.0.4</PackageVersion_Serilog_Sinks_ApplicationInsights>
     <PackageVersion_Serilog_Sinks_Console>3.1.1</PackageVersion_Serilog_Sinks_Console>
     <PackageVersion_Serilog_Sinks_Debug>1.0.1</PackageVersion_Serilog_Sinks_Debug>
-    <PackageVersion_Serilog_Sinks_File>4.1.0</PackageVersion_Serilog_Sinks_File>
     <PackageVersion_Serilog_Sinks_Xunit2>1.0.0</PackageVersion_Serilog_Sinks_Xunit2>
     <PackageVersion_Swashbuckle_AspNetCore>5.1.0</PackageVersion_Swashbuckle_AspNetCore>
     <PackageVersion_Swashbuckle_AspNetCore_Annotations>5.1.0</PackageVersion_Swashbuckle_AspNetCore_Annotations>
