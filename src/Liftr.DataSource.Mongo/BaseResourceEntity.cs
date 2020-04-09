@@ -50,5 +50,8 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
         [BsonElement("etag")]
         public string ETag { get; set; }
+
+        [BsonElement("tenantId")]
+        public string TenantId { get; set; }
     }
 }

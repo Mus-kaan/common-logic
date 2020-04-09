@@ -26,7 +26,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild]
+        [SkipInOfficialBuild(Skip = "Skip due to temporary CosmosDB creation restriction")]
         public async Task VerifyRegionalDataResourceCreationAsync()
         {
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);

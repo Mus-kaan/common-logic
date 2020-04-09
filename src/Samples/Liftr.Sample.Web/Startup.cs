@@ -2,6 +2,9 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Liftr.MarketplaceResource.DataSource;
+using Liftr.MarketplaceResource.DataSource.Interfaces;
+using Liftr.MarketplaceResource.DataSource.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -13,9 +16,14 @@ using Microsoft.Liftr;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DataSource;
 using Microsoft.Liftr.DataSource.Mongo;
+using Microsoft.Liftr.Hosting.Swagger;
+using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
+using Serilog;
 using System;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Liftr.Sample.Web
 {
@@ -39,6 +47,21 @@ namespace Liftr.Sample.Web
 
             services.AddHttpClient();
 
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+                c.EnableAnnotations();
+                c.OperationFilter<DefaultResponseOperationFilter>();
+                c.OperationFilter<RPSwaggerOperationFilter>();
+                c.SchemaFilter<RPSwaggerSchemaFilter>();
+                c.DocumentFilter<RPSwaggerDocumentFilter>();
+
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
+
             services.Configure<RPAssetOptions>((rpAssets) =>
             {
                 string rpAssetString = _configuration[nameof(RPAssetOptions)];
@@ -57,11 +80,18 @@ namespace Liftr.Sample.Web
                 }
             });
 
+            services.Configure<MongoOptions>(_configuration.GetSection(nameof(MongoOptions)));
+
             services.AddSingleton<MongoCollectionsFactory, MongoCollectionsFactory>((sp) =>
             {
                 var assetOptions = sp.GetService<IOptions<RPAssetOptions>>().Value;
-                MongoOptions mongoOptions = new MongoOptions();
-                mongoOptions.DatabaseName = "test-db";
+                var mongoOptions = sp.GetService<IOptions<MongoOptions>>().Value;
+
+                if (mongoOptions == null)
+                {
+                    throw new InvalidOperationException($"Could not find {nameof(MongoOptions)} in configuration");
+                }
+
                 mongoOptions.ConnectionString = assetOptions.CosmosDBConnectionStrings.Where(i => i.Description.OrdinalEquals(assetOptions.ActiveKeyName)).FirstOrDefault().ConnectionString;
                 return new MongoCollectionsFactory(mongoOptions, _logger);
             });
@@ -84,6 +114,30 @@ namespace Liftr.Sample.Web
                 }
             });
 
+            services.AddSingleton<IMarketplaceResourceEntityDataSource, MarketplaceResourceEntityDataSource>((sp) =>
+            {
+                var logger = sp.GetService<ILogger>();
+
+                try
+                {
+                    var timeSource = sp.GetService<ITimeSource>();
+                    var factory = sp.GetService<MongoCollectionsFactory>();
+#pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
+                    IMongoCollection<MarketplaceResourceEntity> collection = factory.GetOrCreateEntityCollectionAsync<MarketplaceResourceEntity>("resource-metadata-entity").Result;
+#pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
+
+                    var marketplaceSubscriptionIdx = new CreateIndexModel<MarketplaceResourceEntity>(Builders<MarketplaceResourceEntity>.IndexKeys.Ascending(item => item.MarketplaceSubscription), new CreateIndexOptions<MarketplaceResourceEntity> { Unique = false });
+                    collection.Indexes.CreateOne(marketplaceSubscriptionIdx);
+
+                    return new MarketplaceResourceEntityDataSource(collection, timeSource);
+                }
+                catch (Exception ex)
+                {
+                    logger.Fatal(ex, "Cannot create IResourceMetadataEntityDataSource");
+                    throw;
+                }
+            });
+
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -91,7 +145,7 @@ namespace Liftr.Sample.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-
+            services.AddControllers();
             services.AddRazorPages();
         }
 
@@ -107,12 +161,22 @@ namespace Liftr.Sample.Web
                 app.UseExceptionHandler("/Error");
             }
 
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
+
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapRazorPages();
             });
         }

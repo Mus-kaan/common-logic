@@ -6,6 +6,7 @@
     <AssemblyName>Microsoft.Liftr.Contracts</AssemblyName>
     <RootNamespace>Microsoft.Liftr.Contracts</RootNamespace>
   </PropertyGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
   </ItemGroup>

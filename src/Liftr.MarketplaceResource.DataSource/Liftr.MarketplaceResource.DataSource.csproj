@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <AssemblyName>Microsoft.Liftr.MarketplaceResource.DataSource</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.MarketplaceResource.DataSource</RootNamespace>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.DataSource.Abstractions\Liftr.DataSource.Abstractions.csproj" />
+    <ProjectReference Include="..\Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj" />
+  </ItemGroup>
+
+</Project>
