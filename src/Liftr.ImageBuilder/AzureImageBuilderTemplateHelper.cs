@@ -127,6 +127,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
             resourceObject.name = imageTemplateName;
             resourceObject.location = location.Name;
+            resourceObject.properties.vmProfile.vmSize = _options.PackerVMSize;
             resourceObject.properties.source = source.ToJObject();
 
             var distributeObject = resourceObject.properties.distribute[0];

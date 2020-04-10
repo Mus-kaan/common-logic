@@ -31,6 +31,8 @@ namespace Microsoft.Liftr.ImageBuilder
 
         public string ImageGalleryName { get; set; }
 
+        public string PackerVMSize { get; set; } = "Standard_D2s_v3";
+
         public int ImageVersionRetentionTimeInDays { get; set; } = 15;
 
         [JsonProperty(ItemConverterType = typeof(RegionConverter))]

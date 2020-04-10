@@ -15,6 +15,17 @@ namespace Microsoft.Liftr.DiagnosticSource
     /// </summary>
     internal sealed class HttpCoreDiagnosticSourceListener : IObserver<KeyValuePair<string, object>>
     {
+        private static readonly HashSet<string> s_domainsToAddCorrelationHeader = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            // ARM endpoints
+            // source: https://github.com/Azure/azure-libraries-for-net/blob/4ffeb074323fad078b6ef8823b406afdb06ef654/src/ResourceManagement/ResourceManager/AzureEnvironment.cs
+            "management.azure.com",
+            "api-dogfood.resources.windows-int.net",
+            "management.chinacloudapi.cn",
+            "management.usgovcloudapi.net",
+            "management.microsoftazure.de",
+        };
+
         private readonly PropertyFetcher _startRequestFetcher = new PropertyFetcher("Request");
 
         /// <summary>
@@ -69,6 +80,15 @@ namespace Microsoft.Liftr.DiagnosticSource
                 if (!string.IsNullOrEmpty(CallContextHolder.CorrelationId.Value))
                 {
                     request.Headers.Add(HeaderConstants.LiftrRequestCorrelationId, CallContextHolder.CorrelationId.Value);
+
+                    if (!request.Headers.Contains(HeaderConstants.RequestCorrelationId) &&
+                        s_domainsToAddCorrelationHeader.Contains(request.RequestUri.Host))
+                    {
+                        // We cannot add the 'X-MS-Correlation-Request-Id' to all the outbound requests.
+                        // e.g. storage requests is also using this header, and it will sign the request content (include this header)
+                        // and store a signature in the request to avoid tampering. If we add this header again, the signature will not match.
+                        request.Headers.Add(HeaderConstants.RequestCorrelationId, CallContextHolder.CorrelationId.Value);
+                    }
                 }
             }
 #pragma warning disable CA1031 // Do not catch general exception types. Override this to make sure the injection part is not affecting any application.

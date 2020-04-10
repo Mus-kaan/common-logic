@@ -69,6 +69,8 @@ namespace Microsoft.Liftr.ImageBuilder
                 LogContext.PushProperty(nameof(config.Location), config.Location.Name);
                 LogContext.PushProperty(nameof(config.ResourceGroupName), config.ResourceGroupName);
                 LogContext.PushProperty(nameof(config.ImageGalleryName), config.ImageGalleryName);
+                LogContext.PushProperty(nameof(config.PackerVMSize), config.PackerVMSize);
+                LogContext.PushProperty(nameof(config.ImageReplicationRegions), config.ImageReplicationRegions.ToJson());
 
                 _logger.Information("Parsed config file: {@BuilderOptions}", config);
 

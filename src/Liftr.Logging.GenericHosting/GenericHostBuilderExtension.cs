@@ -67,7 +67,7 @@ namespace Microsoft.Liftr.Logging.GenericHosting
                     Log.Logger = logger;
 
                     services.AddSingleton(Log.Logger);
-                    services.AddSingleton(sp => new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener()));
+                    services.AddSingleton(new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener()));
                 })
                 .UseSerilog();
         }

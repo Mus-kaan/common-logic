@@ -9,6 +9,9 @@
       "location": "WILL_BE_REPLACED westus",
       "dependsOn": [],
       "properties": {
+        "vmProfile": {
+          "vmSize": "WILL_BE_REPLACED <vmSize>"
+        },
         "source": "SOURCE_IMG_PLACEHOLDER",
         "customize": [
           {

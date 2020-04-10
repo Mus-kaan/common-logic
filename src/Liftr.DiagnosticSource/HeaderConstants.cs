@@ -4,7 +4,7 @@
 
 namespace Microsoft.Liftr.DiagnosticSource
 {
-    internal static class HeaderConstants
+    public static class HeaderConstants
     {
         /// <summary>
         /// Contains a unique ID provided by the client to identify the specific request.

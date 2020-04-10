@@ -29,7 +29,7 @@ namespace Microsoft.Liftr.Logging
         {
             if (string.IsNullOrEmpty(operationId))
             {
-                operationId = "liftr-" + Guid.NewGuid().ToString();
+                operationId = Guid.NewGuid().ToString();
             }
 
             if (string.IsNullOrEmpty(CallContextHolder.CorrelationId.Value))

@@ -9,6 +9,9 @@
       "location": "WILL_BE_REPLACED eastus",
       "dependsOn": [],
       "properties": {
+        "vmProfile": {
+          "vmSize": "WILL_BE_REPLACED <vmSize>"
+        },
         "source": "SOURCE_IMG_PLACEHOLDER",
         "customize": [
           {

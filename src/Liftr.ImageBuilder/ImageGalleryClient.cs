@@ -6,6 +6,7 @@ using Microsoft.Azure.Management.Compute.Fluent;
 using Microsoft.Azure.Management.Compute.Fluent.Models;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Fluent;
 using System;
 using System.Collections.Generic;

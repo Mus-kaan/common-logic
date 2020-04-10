@@ -180,7 +180,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
 
             await middleware.InvokeAsync(contextMock.Object);
 
-            Assert.StartsWith("liftr", observeredValue, StringComparison.OrdinalIgnoreCase);
+            Assert.True(Guid.TryParse(observeredValue, out _));
         }
 
         [Fact]
@@ -206,7 +206,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
 
             await middleware.InvokeAsync(contextMock.Object);
 
-            Assert.StartsWith("liftr", observeredValue, StringComparison.OrdinalIgnoreCase);
+            Assert.True(Guid.TryParse(observeredValue, out _));
 
             var content = res.GetContent();
             Assert.Contains("assemblyName", content, StringComparison.OrdinalIgnoreCase);
@@ -236,7 +236,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
 
             await middleware.InvokeAsync(contextMock.Object);
 
-            Assert.StartsWith("liftr", observeredValue, StringComparison.OrdinalIgnoreCase);
+            Assert.True(Guid.TryParse(observeredValue, out _));
             Assert.Equal(0, res.Body.Length);
         }
     }

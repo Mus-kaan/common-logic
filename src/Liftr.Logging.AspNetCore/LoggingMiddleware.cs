@@ -36,7 +36,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             string levelOverwrite = GetHeaderValue(httpContext, HeaderConstants.LiftrLogLevelOverwrite);
             string clientRequestId = GetHeaderValue(httpContext, HeaderConstants.LiftrClientRequestId);
             string armRequestTrackingId = GetHeaderValue(httpContext, HeaderConstants.LiftrARMRequestTrackingId);
-            string crrelationtId = GetHeaderValue(httpContext, HeaderConstants.LiftrRequestCorrelationId);
+            string correlationtId = GetHeaderValue(httpContext, HeaderConstants.LiftrRequestCorrelationId);
 
             if (string.IsNullOrEmpty(clientRequestId))
             {
@@ -48,14 +48,14 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 armRequestTrackingId = GetHeaderValue(httpContext, HeaderConstants.ARMRequestTrackingId);
             }
 
-            if (string.IsNullOrEmpty(crrelationtId))
+            if (string.IsNullOrEmpty(correlationtId))
             {
-                crrelationtId = GetHeaderValue(httpContext, HeaderConstants.RequestCorrelationId);
+                correlationtId = GetHeaderValue(httpContext, HeaderConstants.RequestCorrelationId);
             }
 
-            if (string.IsNullOrEmpty(crrelationtId))
+            if (string.IsNullOrEmpty(correlationtId))
             {
-                crrelationtId = "liftr-" + Guid.NewGuid().ToString();
+                correlationtId = Guid.NewGuid().ToString();
             }
 
             try
@@ -97,14 +97,14 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 CallContextHolder.ARMRequestTrackingId.Value = armRequestTrackingId;
             }
 
-            if (!string.IsNullOrEmpty(crrelationtId))
+            if (!string.IsNullOrEmpty(correlationtId))
             {
-                CallContextHolder.CorrelationId.Value = crrelationtId;
+                CallContextHolder.CorrelationId.Value = correlationtId;
             }
 
             using (var logFilterOverrideScope = new LogFilterOverrideScope(overrideLevel))
             using (new LogContextPropertyScope("LiftrTrackingId", armRequestTrackingId))
-            using (new LogContextPropertyScope("LiftrCorrelationId", crrelationtId))
+            using (new LogContextPropertyScope("LiftrCorrelationId", correlationtId))
             {
                 await _next(httpContext);
                 if (httpContext.Response?.StatusCode == (int)HttpStatusCode.NotFound && httpContext.Request?.Path.Value?.OrdinalStartsWith("/api/liveness-probe") == true)

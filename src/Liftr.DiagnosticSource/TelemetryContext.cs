@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using System;
+
 namespace Microsoft.Liftr.DiagnosticSource
 {
     public class TelemetryContext
@@ -62,6 +64,19 @@ namespace Microsoft.Liftr.DiagnosticSource
             }
 
             return context.IsEmpty() ? null : context;
+        }
+
+        /// <summary>
+        /// Get the current correlation Id if it is set, or return a new GUID.
+        /// </summary>
+        public static string GetOrGenerateCorrelationId()
+        {
+            if (!string.IsNullOrEmpty(CallContextHolder.CorrelationId.Value))
+            {
+                CallContextHolder.CorrelationId.Value = Guid.NewGuid().ToString();
+            }
+
+            return CallContextHolder.CorrelationId.Value;
         }
     }
 }
