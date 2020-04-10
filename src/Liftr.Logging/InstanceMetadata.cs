@@ -41,7 +41,7 @@ namespace Microsoft.Liftr.Logging
 
                 try
                 {
-                    logger.Information("Start loading Azure Instance Metadata ...");
+                    logger.Debug("Start loading Azure Instance Metadata ...");
                     var metaResponse = await httpClient.GetStringAsync(c_imdsUri);
                     var instanceMetadata = JsonConvert.DeserializeObject<InstanceMetadata>(metaResponse);
                     instanceMetadata.MachineNameEnv = Environment.MachineName;
@@ -51,7 +51,7 @@ namespace Microsoft.Liftr.Logging
                 }
                 catch
                 {
-                    logger.Information("Call to Azure Instance Metadata Service failed. This is excepted in non-Azure environments.");
+                    logger.Debug("Call to Azure Instance Metadata Service failed. This is excepted in non-Azure environments.");
                     return null;
                 }
             }

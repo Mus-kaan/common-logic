@@ -96,7 +96,3 @@ if [ $exit_code -ne 0 ]; then
     echo "Failed to run Liftr Image Builder."
     exit $exit_code
 fi
-
-echo "----------------------------------------------------------------------------------------------"
-echo "Finished running the Liftr Image Builder."
-echo "----------------------------------------------------------------------------------------------"

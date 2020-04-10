@@ -42,6 +42,8 @@ DeploymentSubscriptionId=$(<bin/subscription-id.txt)
     fi
 fi
 
+./AzLogin.sh
+
 ./RegisterFeatureAndProvider.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId"
 
@@ -53,5 +55,8 @@ fi
 --RunnerSPNObjectId="$RunnerSPNObjectId" \
 --OnlyOutputSubscriptionId="false"
 
+echo "----------------------------------------------------------------------------------------------"
+echo "Finished running the Liftr Image Builder."
+echo "----------------------------------------------------------------------------------------------"
 echo "Successfully finished running: $currentScriptName"
 echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"

@@ -114,15 +114,14 @@ namespace Microsoft.Liftr.Fluent
                 .GetByNameAsync(rgName);
                 if (rg != null)
                 {
-                    _logger.Information("Retrieved the Resource Group with Id:{resourceId}", rg.Id);
+                    _logger.Information("Retrieved the Resource Group with Id: {resourceId}", rg.Id);
                     return rg;
                 }
             }
-            catch (CloudException ex) when (ex.Message.Contains("could not be found"))
+            catch (CloudException ex) when (ex.IsNotFound())
             {
             }
 
-            _logger.Information("Cannot find resource group with name: {rgName}.", rgName);
             return null;
         }
 
@@ -244,10 +243,10 @@ namespace Microsoft.Liftr.Fluent
                               .CreateAsync();
                 _logger.Information("Granted 'Storage Blob Data Contributor' of Resource Group '{rgId}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}", rg.Id, objectId, roleDefinitionId);
             }
-            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
             }
-            catch (CloudException ex) when (ex.Message.Contains("Principals of type Application cannot validly be used in role assignments"))
+            catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
             {
                 _logger.Error("The object Id '{objectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", objectId);
                 throw;
@@ -272,10 +271,10 @@ namespace Microsoft.Liftr.Fluent
                               .CreateAsync();
                 _logger.Information("Granted 'Storage Blob Data Contributor' of blob container '{containerName}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}, containerId: {containerId}", containerName, objectId, roleDefinitionId, containerId);
             }
-            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
             }
-            catch (CloudException ex) when (ex.Message.Contains("Principals of type Application cannot validly be used in role assignments"))
+            catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
             {
                 _logger.Error("The object Id '{objectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", objectId);
                 throw;
@@ -300,10 +299,10 @@ namespace Microsoft.Liftr.Fluent
                               .CreateAsync();
                 _logger.Information("Granted 'Storage Blob Data Reader' of blob container '{containerName}' to SPN with object Id '{objectId}'. roleDefinitionId: {roleDefinitionId}, containerId: {containerId}", containerName, objectId, roleDefinitionId, containerId);
             }
-            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
             }
-            catch (CloudException ex) when (ex.Message.Contains("Principals of type Application cannot validly be used in role assignments"))
+            catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
             {
                 _logger.Error("The object Id '{objectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", objectId);
                 throw;
@@ -330,10 +329,10 @@ namespace Microsoft.Liftr.Fluent
                               .CreateAsync();
                 _logger.Information("Granted 'Storage Queue Data Contributor' storage account '{resourceId}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}", storageAccount.Id, objectId, roleDefinitionId);
             }
-            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
             }
-            catch (CloudException ex) when (ex.Message.Contains("Principals of type Application cannot validly be used in role assignments"))
+            catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
             {
                 _logger.Error("The object Id '{objectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", objectId);
                 throw;
@@ -355,7 +354,7 @@ namespace Microsoft.Liftr.Fluent
                               .CreateAsync();
                 _logger.Information("Granted 'Storage Account Key Operator Service Role' {roleDefinitionId} to Key Vault's First party App with objectId: {objectId}", roleDefinitionId, _options.AzureKeyVaultObjectId);
             }
-            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
             }
         }
@@ -375,7 +374,7 @@ namespace Microsoft.Liftr.Fluent
                               .CreateAsync();
                 _logger.Information("Granted 'Storage Account Key Operator Service Role' {roleDefinitionId} to Key Vault's First party App with objectId: {objectId} on rg: {rgId}", roleDefinitionId, _options.AzureKeyVaultObjectId, rg.Id);
             }
-            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
             }
         }
@@ -757,9 +756,8 @@ namespace Microsoft.Liftr.Fluent
                 _logger.Information($"Getting KeyVault with resource Id {kvResourceId} ...");
                 return await FluentClient.Vaults.GetByIdAsync(kvResourceId);
             }
-            catch (CloudException ex) when (ex.Message.Contains("could not be found"))
+            catch (CloudException ex) when (ex.IsNotFound())
             {
-                _logger.Information(ex, ex.Message);
                 return null;
             }
         }
@@ -801,7 +799,7 @@ namespace Microsoft.Liftr.Fluent
                 .Attach()
                 .ApplyAsync();
 
-            _logger.Information("Granted admin access to the excuting SPN with object Id '{SPNObjectId}' of key vault '{kvId}'", SPNObjectId, kv.Id);
+            _logger.Information("Granted all secret and certificate permissions (access policy) of key vault '{kvId}' to the excuting SPN with object Id '{SPNObjectId}'.", kv.Id, SPNObjectId);
         }
 
         public async Task RemoveSelfKeyVaultAccessAsync(IVault kv)

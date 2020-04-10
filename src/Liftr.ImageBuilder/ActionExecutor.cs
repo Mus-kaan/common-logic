@@ -9,6 +9,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.KeyVault;
@@ -52,8 +53,6 @@ namespace Microsoft.Liftr.ImageBuilder
 
             try
             {
-                _logger.Information("BuilderCommandOptions: {@BuilderCommandOptions}", _options);
-
                 var content = File.ReadAllText(_options.ConfigPath);
                 BuilderOptions config = content.FromJson<BuilderOptions>();
 
@@ -71,8 +70,6 @@ namespace Microsoft.Liftr.ImageBuilder
                 LogContext.PushProperty(nameof(config.ImageGalleryName), config.ImageGalleryName);
                 LogContext.PushProperty(nameof(config.PackerVMSize), config.PackerVMSize);
                 LogContext.PushProperty(nameof(config.ImageReplicationRegions), config.ImageReplicationRegions.ToJson());
-
-                _logger.Information("Parsed config file: {@BuilderOptions}", config);
 
                 if (!File.Exists(_options.ArtifactPath))
                 {
@@ -125,7 +122,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
                 else
                 {
-                    _logger.Information("Use MSI to authenticate against Azure.");
+                    _logger.Information("Use Managed Identity to authenticate against Azure.");
                     kvClient = KeyVaultClientFactory.FromMSI();
 
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory
@@ -159,9 +156,14 @@ namespace Microsoft.Liftr.ImageBuilder
 
         private async Task RunActionAsync(string azureVMImageBuilderObjectId, KeyVaultClient kvClient, BuilderOptions config, LiftrAzureFactory azFactory, CancellationToken cancellationToken)
         {
-            await Task.Yield();
+            _logger.Information("BuilderCommandOptions: {@BuilderCommandOptions}", _options);
+            _logger.Information("Parsed config file: {@BuilderOptions}", config);
+
             using (var operation = _logger.StartTimedOperation("RunImageBuilder"))
             {
+                _logger.Information("Current correlation Id is: {correlationId}", TelemetryContext.GetOrGenerateCorrelationId());
+                _logger.Information("You can use correlation Id '{correlationId}' to query all the related ARM logs and Azure Image Builder logs.", TelemetryContext.GetOrGenerateCorrelationId());
+
                 try
                 {
                     var tags = new Dictionary<string, string>()
@@ -176,7 +178,7 @@ namespace Microsoft.Liftr.ImageBuilder
                         _timeSource,
                         _logger);
 
-                    await orchestrator.CreateOrUpdateInfraAsync(azureVMImageBuilderObjectId, tags);
+                    await orchestrator.CreateOrUpdateImageBuildInfrastructureAsync(azureVMImageBuilderObjectId, tags);
 
                     var generatedBuilderTemplate = await orchestrator.BuildCustomizedSBIAsync(
                         _options.ImageName,

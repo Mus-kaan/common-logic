@@ -10,6 +10,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
@@ -101,7 +102,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 }
                 else
                 {
-                    _logger.Information("Use MSI to authenticate against Azure.");
+                    _logger.Information("Use Managed Identity to authenticate against Azure.");
                     kvClient = KeyVaultClientFactory.FromMSI();
 
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory
@@ -171,6 +172,9 @@ namespace Microsoft.Liftr.SimpleDeploy
                     var globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
                     var globalRGName = globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
                     File.WriteAllText("global-vault-name.txt", globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
+
+                    _logger.Information("Current correlation Id is: {correlationId}", TelemetryContext.GetOrGenerateCorrelationId());
+                    _logger.Information("You can use correlation Id '{correlationId}' to query all the related ARM logs.", TelemetryContext.GetOrGenerateCorrelationId());
 
                     if (_commandOptions.Action == ActionType.CreateOrUpdateGlobal)
                     {

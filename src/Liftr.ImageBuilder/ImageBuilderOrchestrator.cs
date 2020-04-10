@@ -61,7 +61,7 @@ namespace Microsoft.Liftr.ImageBuilder
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<IVault> CreateOrUpdateInfraAsync(string azureVMImageBuilderObjectId, IDictionary<string, string> tags)
+        public async Task<IVault> CreateOrUpdateImageBuildInfrastructureAsync(string azureVMImageBuilderObjectId, IDictionary<string, string> tags)
         {
             var liftrAzure = _azFactory.GenerateLiftrAzure();
 
@@ -72,16 +72,15 @@ namespace Microsoft.Liftr.ImageBuilder
 
             try
             {
-                _logger.Information("Granting resource group's contributor role to Azure Image Builder First Party app ...");
+                _logger.Information("Granting resource group '{rgId}' contributor role to Azure Image Builder First Party app ...", rg.Id);
                 await liftrAzure.Authenticated.RoleAssignments
                 .Define(SdkContext.RandomGuid())
                 .ForObjectId(azureVMImageBuilderObjectId)
                 .WithBuiltInRole(BuiltInRole.Contributor)
                 .WithResourceGroupScope(rg)
                 .CreateAsync();
-                _logger.Information("Granted resource group's contributor role to Azure Image Builder First Party app.");
             }
-            catch (CloudException ex) when (ex.Message.OrdinalContains("The role assignment already exists"))
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
             }
             catch (CloudException ex) when (ex.Message.OrdinalContains("does not exist in the directory"))
@@ -93,7 +92,7 @@ namespace Microsoft.Liftr.ImageBuilder
             ImageGalleryClient galleryClient = new ImageGalleryClient(_logger);
             var gallery = await galleryClient.CreateGalleryAsync(liftrAzure.FluentClient, _options.Location, _options.ResourceGroupName, _options.ImageGalleryName, tags);
 
-            _logger.Information($"Successfully finished {nameof(CreateOrUpdateInfraAsync)}.");
+            _logger.Information($"Successfully finished {nameof(CreateOrUpdateImageBuildInfrastructureAsync)}.");
 
             return _keyVault;
         }
@@ -153,7 +152,7 @@ namespace Microsoft.Liftr.ImageBuilder
             var artifactUrlWithSAS = await _artifactStore.UploadBuildArtifactsAndGenerateReadSASAsync(artifactPath);
             _logger.Information("uploaded the file {filePath} and generated the url with the SAS token.", artifactPath);
 
-            var templateName = imageVersionTag;
+            var templateName = imageName + imageVersionTag;
             var generatedTemplate = string.Empty;
 
             tags[NamingContext.c_createdAtTagName] = _timeSource.UtcNow.ToZuluString();
@@ -417,7 +416,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
             if (targetingVersion != null)
             {
-                _logger.Information("The lastest SBI VHD is already copied to the local Shared Image Gallery. Use the image version: {@imageVersionId}.", targetingVersion);
+                _logger.Information("The lastest SBI VHD is already copied to the local Shared Image Gallery. Use the existing SBI SIG version: {imageVersionId}", targetingVersion.Id);
                 return targetingVersion;
             }
 
@@ -511,17 +510,21 @@ namespace Microsoft.Liftr.ImageBuilder
 
         private static string GetImageVersion(string imageName)
         {
-            string digitPart = "1";
+            // sample input: 'U1804LTS_Mn-3'
+            int digitVersion = 1;
             foreach (var c in imageName)
             {
                 if (char.IsDigit(c))
                 {
-                    digitPart += c;
+                    digitVersion = (digitVersion * 10) + (c - '0');
+                }
+                else if (char.IsLetter(c))
+                {
+                    digitVersion = (digitVersion * 10) + char.ToLower(c, CultureInfo.InvariantCulture) - 'a';
                 }
             }
 
-            int buildVersion = int.Parse(digitPart, CultureInfo.InvariantCulture);
-            Version ver = new Version(0, 1, buildVersion);
+            Version ver = new Version(0, 1, digitVersion);
             return ver.ToString();
         }
         #endregion

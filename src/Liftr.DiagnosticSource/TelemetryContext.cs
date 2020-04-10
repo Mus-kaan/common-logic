@@ -71,7 +71,7 @@ namespace Microsoft.Liftr.DiagnosticSource
         /// </summary>
         public static string GetOrGenerateCorrelationId()
         {
-            if (!string.IsNullOrEmpty(CallContextHolder.CorrelationId.Value))
+            if (string.IsNullOrEmpty(CallContextHolder.CorrelationId.Value))
             {
                 CallContextHolder.CorrelationId.Value = Guid.NewGuid().ToString();
             }

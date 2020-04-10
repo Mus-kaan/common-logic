@@ -211,7 +211,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                             .WithSubscriptionScope(subscrptionId)
                             .CreateAsync();
                     }
-                    catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+                    catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
                     {
                     }
                 }
@@ -427,10 +427,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     .CreateAsync();
                 _logger.Information("Granted the identity binding access for the MSI {MSIResourceId} to the AKS SPN with object Id '{AKSobjectId}'.", msi.Id, aksInfo.AKSSPNObjectId);
             }
-            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
             }
-            catch (CloudException ex) when (ex.Message.Contains("Principals of type Application cannot validly be used in role assignments"))
+            catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
             {
                 _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", aksInfo.AKSSPNObjectId);
                 throw;
@@ -448,10 +448,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     .WithSubscriptionScope(liftrAzure.FluentClient.SubscriptionId)
                     .CreateAsync();
             }
-            catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
             }
-            catch (CloudException ex) when (ex.Message.Contains("Principals of type Application cannot validly be used in role assignments"))
+            catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
             {
                 _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", aksInfo.AKSSPNObjectId);
                 throw;
@@ -528,10 +528,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                             .CreateAsync();
                         _logger.Information("Network contributor role is assigned to the AKS SPN '{AKSSPNObjectId}' for the subnet '{subnetId}'.", aksInfo.AKSSPNObjectId, subnet.Inner.Id);
                     }
-                    catch (CloudException ex) when (ex.Message.Contains("The role assignment already exists"))
+                    catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
                     {
                     }
-                    catch (CloudException ex) when (ex.Message.Contains("Principals of type Application cannot validly be used in role assignments"))
+                    catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
                     {
                         _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", aksInfo.AKSSPNObjectId);
                         throw;

@@ -48,7 +48,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
 
                 try
                 {
-                    await orchestrator.CreateOrUpdateInfraAsync(TestCredentials.AzureVMImageBuilderObjectIdAME, tags);
+                    await orchestrator.CreateOrUpdateImageBuildInfrastructureAsync(TestCredentials.AzureVMImageBuilderObjectIdAME, tags);
 
                     var result = await orchestrator.BuildCustomizedSBIAsync(
                                     "img" + baseName,

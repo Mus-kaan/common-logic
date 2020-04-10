@@ -6,8 +6,8 @@ using Microsoft.Azure.Management.Compute.Fluent;
 using Microsoft.Azure.Management.Compute.Fluent.Models;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
-using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Fluent;
+using Microsoft.Rest.Azure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,8 +39,6 @@ namespace Microsoft.Liftr.ImageBuilder
             {
                 throw new ArgumentNullException(nameof(fluentClient));
             }
-
-            _logger.Information("Creating a Shared Image Gallery with name {galleryName} ...", galleryName);
 
             var gallery = await GetGalleryAsync(fluentClient, rgName, galleryName);
             if (gallery != null)
@@ -149,11 +147,8 @@ namespace Microsoft.Liftr.ImageBuilder
                     .GetByGalleryAsync(rgName, galleryName, imageName);
                 return img;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
+            catch (CloudException ex) when (ex.IsNotFound())
             {
-                _logger.Warning(ex, "Cannot get image Definition.");
                 return null;
             }
         }
@@ -185,11 +180,8 @@ namespace Microsoft.Liftr.ImageBuilder
                 .GetByGalleryImageAsync(rgName, galleryName, imageName, imageVersionName);
                 return galleryImageVersion;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
+            catch (CloudException ex) when (ex.IsNotFound())
             {
-                _logger.Warning(ex, "Cannot get image verion.");
                 return null;
             }
         }
@@ -323,8 +315,6 @@ namespace Microsoft.Liftr.ImageBuilder
                 uriBuilder.Query = "api-version=2019-05-01-preview";
                 var startRunResponse = await httpClient.PostAsync(uriBuilder.Uri, null);
 
-                _logger.Information("Start Run response: {@startRunResponse}", startRunResponse);
-
                 if (startRunResponse.StatusCode == HttpStatusCode.Accepted)
                 {
                     var asyncOperationResponse = await WaitAsyncOperationAsync(httpClient, startRunResponse, cancellationToken);
@@ -366,8 +356,6 @@ namespace Microsoft.Liftr.ImageBuilder
                     $"/subscriptions/{client.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{templateName}";
                 uriBuilder.Query = "api-version=2019-05-01-preview";
                 var deleteResponse = await httpClient.DeleteAsync(uriBuilder.Uri);
-
-                _logger.Information("Delete AIB template response: {@deleteResponse}", deleteResponse);
 
                 if (!deleteResponse.IsSuccessStatusCode)
                 {

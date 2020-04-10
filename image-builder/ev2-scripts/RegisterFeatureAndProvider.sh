@@ -34,32 +34,16 @@ if [ -z ${DeploymentSubscriptionId+x} ]; then
     exit 1
 fi
 
-echo "az login --identity"
-az login --identity
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az login failed."
-    exit $exit_code
-fi
-
-echo "az account set -s $DeploymentSubscriptionId"
-az account set -s "$DeploymentSubscriptionId"
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az account set failed."
-    exit $exit_code
-fi
-
 checkAndRegisterProvider "Microsoft.VirtualMachineImages"
 checkAndRegisterProvider "Microsoft.Storage"
 checkAndRegisterProvider "Microsoft.Compute"
 
 # register and enable for shared image gallery
 echo "az feature register --namespace Microsoft.VirtualMachineImages --name VirtualMachineTemplatePreview"
-az feature register --namespace Microsoft.VirtualMachineImages --name VirtualMachineTemplatePreview
+az feature register --namespace Microsoft.VirtualMachineImages --name VirtualMachineTemplatePreview > azFeatureVirtualMachineTemplatePreview.txt
 
 echo "az feature register --namespace Microsoft.Compute --name GalleryPreview"
-az feature register --namespace Microsoft.Compute --name GalleryPreview
+az feature register --namespace Microsoft.Compute --name GalleryPreview > azFeatureGalleryPreview.txt
 
 echo "-----------------------------------------------------------------"
 echo "Finished registering Azure Image builder features and providers."
