@@ -2,13 +2,11 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using MongoDB.Bson.Serialization.Attributes;
 using System;
 
 namespace Microsoft.Liftr.Contracts
 {
-    [BsonIgnoreExtraElements]
-    public class ManagedIdentityMetadata
+    public interface IManagedIdentityMetadata
     {
         /// <summary>
         /// The identity URL got from ARM. This is used to query additional detailed metadata from MI dataplane

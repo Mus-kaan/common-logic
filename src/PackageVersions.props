@@ -35,7 +35,6 @@
     <PackageVersion_Microsoft_Liftr_EV2>1.2.1173-build175</PackageVersion_Microsoft_Liftr_EV2>
     <PackageVersion_Microsoft_NET_Test_Sdk>16.0.1</PackageVersion_Microsoft_NET_Test_Sdk>
     <PackageVersion_Microsoft_VisualStudio_Azure_Containers_Tools_Targets>1.9.5</PackageVersion_Microsoft_VisualStudio_Azure_Containers_Tools_Targets>
-    <PackageVersion_MongoDB_Bson>2.10.2</PackageVersion_MongoDB_Bson>
     <PackageVersion_MongoDB_Driver>2.10.2</PackageVersion_MongoDB_Driver>
     <PackageVersion_Moq>4.12.0</PackageVersion_Moq>
     <PackageVersion_Newtonsoft_Json>12.0.2</PackageVersion_Newtonsoft_Json>
