@@ -19,7 +19,7 @@ namespace Liftr.MarketplaceResource.DataSource
         {
         }
 
-        public async Task<MarketplaceResourceEntity> GetEntityForMarketplaceSubscriptionAsync(MarketplaceSubscription marketplaceSubscription)
+        public async Task<IMarketplaceResourceEntity> GetEntityForMarketplaceSubscriptionAsync(MarketplaceSubscription marketplaceSubscription)
         {
             var builder = Builders<MarketplaceResourceEntity>.Filter;
             var filter = builder.Eq(u => u.MarketplaceSubscription, marketplaceSubscription);

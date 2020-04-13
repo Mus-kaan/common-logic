@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DataSource.Mongo;
 using MongoDB.Bson.Serialization.Attributes;
@@ -12,7 +13,8 @@ namespace Liftr.MarketplaceResource.DataSource.Models
     /// This entity will be used to store the Managed Identity and Marketplace metadata for a resource
     /// It will be used by the token server to generate authentication token needed by partner
     /// </summary>
-    public class MarketplaceResourceEntity : BaseResourceEntity
+    [BsonIgnoreExtraElements]
+    public class MarketplaceResourceEntity : BaseResourceEntity, IMarketplaceResourceEntity
     {
         public MarketplaceResourceEntity(MarketplaceSubscription marketplaceSubscription, string saasResourceId, string resourceId, string tenantId)
         {

@@ -27,5 +27,7 @@ namespace Microsoft.Liftr.Contracts
         DateTime LastModifiedUTC { get; set; }
 
         string ETag { get; set; }
+
+        public string TenantId { get; set; }
     }
 }
