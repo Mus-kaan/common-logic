@@ -340,6 +340,37 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     await regionalKVValet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
                     await regionalKVValet.CreateCertificateAsync(dataOptions.FirstPartyCert.CertificateName, certIssuerName, dataOptions.FirstPartyCert.SubjectName, dataOptions.FirstPartyCert.SubjectAlternativeNames, namingContext.Tags);
                 }
+
+                // Move the secrets from global key vault to regional key vault.
+                if (!string.IsNullOrEmpty(dataOptions.GlobalKeyVaultResourceId))
+                {
+                    var globalKv = await liftrAzure.GetKeyVaultByIdAsync(dataOptions.GlobalKeyVaultResourceId);
+                    if (globalKv == null)
+                    {
+                        throw new InvalidOperationException($"Cannot find the global key vault with resource Id '{dataOptions.GlobalKeyVaultResourceId}'");
+                    }
+
+                    using (var globalKVValet = new KeyVaultConcierge(globalKv.VaultUri, _kvClient, _logger))
+                    {
+                        _logger.Information($"Start copying the secrets from global key vault ...");
+                        int cnt = 0;
+                        var secretsToCopy = await globalKVValet.ListSecretsAsync();
+                        foreach (var secret in secretsToCopy)
+                        {
+                            if (s_secretsAvoidCopy.Contains(secret.Identifier.Name))
+                            {
+                                continue;
+                            }
+
+                            var secretBundle = await globalKVValet.GetSecretAsync(secret.Identifier.Name);
+                            await regionalKVValet.SetSecretAsync(secret.Identifier.Name, secretBundle.Value, secretBundle.Tags);
+                            _logger.Information("Copied secert with name: {secretName}", secret.Identifier.Name);
+                            cnt++;
+                        }
+
+                        _logger.Information("Copied {copiedSecretCount} secrets from central key vault to local key vault.", cnt);
+                    }
+                }
             }
 
             return (rg, msi, db, tm, regionalKeyVault);
@@ -631,5 +662,14 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 throw;
             }
         }
+
+        private static readonly HashSet<string> s_secretsAvoidCopy = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "AKSSPClientSecret",
+            "SSHPrivateKey",
+            "SSHPublicKey",
+            "SSHUserName",
+            "thanos-api",
+        };
     }
 }

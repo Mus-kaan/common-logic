@@ -246,6 +246,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 DataPlaneSubscriptions = regionOptions.DataPlaneSubscriptions,
                                 DataPlaneStorageCountPerSubscription = _hostingOptions.StorageCountPerDataPlaneSubscription,
                                 EnableVNet = targetOptions.EnableVNet,
+                                GlobalKeyVaultResourceId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
                                 LogAnalyticsWorkspaceId = targetOptions.LogAnalyticsWorkspaceId,
                                 DNSZoneId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{globalRGName}/providers/Microsoft.Network/dnszones/{targetOptions.DomainName}",
                             };

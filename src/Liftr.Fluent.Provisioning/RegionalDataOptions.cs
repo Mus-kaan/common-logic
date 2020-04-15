@@ -19,6 +19,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string LogAnalyticsWorkspaceId { get; set; }
 
+        public string GlobalKeyVaultResourceId { get; set; }
+
         public CertificateOptions GenevaCert { get; set; }
 
         public CertificateOptions SSLCert { get; set; }
