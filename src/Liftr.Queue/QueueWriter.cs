@@ -24,7 +24,7 @@ namespace Microsoft.Liftr.Queue
             _queue = queue ?? throw new ArgumentNullException(nameof(queue));
             _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _msgIdPrefix = $"{Environment.MachineName}-{timeSource.UtcNow.ToDateString()}-";
+            _msgIdPrefix = $"{Environment.MachineName}-";
         }
 
         public async Task AddMessageAsync(string message, CancellationToken cancellationToken = default(CancellationToken))
@@ -37,14 +37,14 @@ namespace Microsoft.Liftr.Queue
             var i = Interlocked.Increment(ref _msgCount);
             var msg = new LiftrQueueMessage()
             {
-                MsgId = $"{_msgIdPrefix}{i:D8}",
+                MsgId = $"{_msgIdPrefix}{_timeSource.UtcNow.ToDateString()}-{i:D8}",
                 Content = message,
                 MsgTelemetryContext = TelemetryContext.GetCurrent(),
                 CreatedAt = _timeSource.UtcNow.ToZuluString(),
             };
 
             await _queue.SendMessageAsync(msg.ToJson(), timeToLive: TimeSpan.FromMinutes(60));
-            _logger.Debug("Added message with Id 'MsgId' in queue.", msg.MsgId);
+            _logger.Information("Added message with Id '{MsgId}' into queue.", msg.MsgId);
         }
     }
 }

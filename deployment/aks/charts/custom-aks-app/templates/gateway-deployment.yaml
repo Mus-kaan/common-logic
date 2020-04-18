@@ -29,8 +29,6 @@ spec:
         ports:
           - containerPort: 5000
         env:
-          - name: STATSD_HOST
-            value: geneva-services
           - name: VaultEndpoint
             value: {{ required "The Key Vault endpoint for the app to load secrets must be provided." .Values.vaultEndpoint }}
           - name: ASPNETCORE_ENVIRONMENT

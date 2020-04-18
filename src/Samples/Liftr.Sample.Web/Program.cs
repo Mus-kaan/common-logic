@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Liftr.Logging.AspNetCore;
 using Microsoft.Liftr.WebHosting;
 
-namespace Liftr.Sample.Web
+namespace Microsoft.Liftr.Sample.Web
 {
     public class Program
     {

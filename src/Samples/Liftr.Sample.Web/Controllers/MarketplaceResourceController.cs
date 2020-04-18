@@ -1,11 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using Liftr.MarketplaceResource.DataSource.Interfaces;
+﻿using Liftr.MarketplaceResource.DataSource.Interfaces;
 using Liftr.MarketplaceResource.DataSource.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Threading.Tasks;
 
 namespace Liftr.Sample.Web.Controllers
 {

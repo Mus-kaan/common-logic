@@ -82,7 +82,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Middleware should fail silently.")]
         private static (bool allowOverride, LogEventLevel defaultLevel) GetOverrideOptions(WebHostBuilderContext host)
         {
-            bool allowOverride = true;
+            bool allowOverride = false;
             try
             {
                 var allowOverrideStr = host.Configuration.GetSection("Serilog")?.GetSection("AllowFilterDynamicOverride")?.Value;

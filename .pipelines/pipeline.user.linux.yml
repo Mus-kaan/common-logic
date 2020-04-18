@@ -75,7 +75,7 @@ package:
         artifact_path: 'docker-images/gatewayWeb.json'
     - !!dockerbuildcommand
         name: 'Build sample console docker image'
-        context_folder: 'src/Samples/SampleConsoleApp'
+        context_folder: 'src/Samples/Liftr.Sample.WorkerService'
         repository_name: 'sample-console-common-repo'
         latest: false # Don't push the :latest tag since every deployment should refer to a build number.
         publish_build_tag: true

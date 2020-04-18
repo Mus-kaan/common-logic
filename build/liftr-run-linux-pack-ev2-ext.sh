@@ -61,7 +61,8 @@ echo "Chart version is: $ChartVersion"
 if [ ! -d "$GenerateDockerImageMetadataDir" ]; then
   echo "Cannot find the CDPx image directory '$GenerateDockerImageMetadataDir'. Generate a fake value."
   mkdir --parent "$GenerateDockerImageMetadataDir"
-  wget https://aka.ms/liftr/sample-image-meta -O "$GenerateDockerImageMetadataDir/gatewayWeb.json"
+  wget https://liftrfiles.blob.core.windows.net/public/20200415/gatewayWeb.json -O "$GenerateDockerImageMetadataDir/gatewayWeb.json"
+  wget https://liftrfiles.blob.core.windows.net/public/20200415/sampleConsole.json -O "$GenerateDockerImageMetadataDir/sampleConsole.json"
 fi
 
 # Create directories.

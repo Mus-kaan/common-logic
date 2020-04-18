@@ -2,19 +2,24 @@
 set -e
 
 publishProject(){
+  publishOrNot="false"
   csproj=$1
   csprojFolder="$(dirname "$csproj")"
   if grep -q "<OutputType>Exe</OutputType>" "$csproj"; then
     echo "Found console project to publish: $csproj"
-    dotnet publish $csproj -c Release --no-build --no-restore -o $csprojFolder/bin/publish /p:MajorVersion=$CDP_MAJOR_NUMBER_ONLY /p:MinorVersion=$CDP_MINOR_NUMBER_ONLY /p:PatchVersion=$CDP_BUILD_NUMBER /p:BuildMetadata=$CDP_DEFINITION_BUILD_COUNT
-    echo "- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - "
-  else
-    if grep -q "Microsoft.NET.Sdk.Web" "$csproj"; then
-        echo "Found web project to publish: $csproj"
-        dotnet publish $csproj -c Release --no-build --no-restore -o $csprojFolder/bin/publish /p:MajorVersion=$CDP_MAJOR_NUMBER_ONLY /p:MinorVersion=$CDP_MINOR_NUMBER_ONLY /p:PatchVersion=$CDP_BUILD_NUMBER /p:BuildMetadata=$CDP_DEFINITION_BUILD_COUNT
-        echo "- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - "
-    fi
+    publishOrNot="true"
+  elif grep -q "Microsoft.NET.Sdk.Web" "$csproj"; then
+    echo "Found web project to publish: $csproj"
+    publishOrNot="true"
+  elif grep -q "Microsoft.NET.Sdk.Worker" "$csproj"; then
+    echo "Found worker service project to publish: $csproj"
+    publishOrNot="true"
   fi
+
+if [ "$publishOrNot" = "true" ]; then
+  dotnet publish $csproj -c Release --no-build --no-restore -o $csprojFolder/bin/publish /p:MajorVersion=$CDP_MAJOR_NUMBER_ONLY /p:MinorVersion=$CDP_MINOR_NUMBER_ONLY /p:PatchVersion=$CDP_BUILD_NUMBER /p:BuildMetadata=$CDP_DEFINITION_BUILD_COUNT
+  echo "- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - "
+fi
 }
 
 echo "Packing ..."

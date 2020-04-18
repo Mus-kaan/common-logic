@@ -9,4 +9,4 @@ WORKDIR /home/sampleconsole
 COPY bin/publish/ .
 
 USER sampleconsole:sampleconsole
-ENTRYPOINT ["dotnet", "SampleConsoleApp.dll"]
+ENTRYPOINT ["dotnet", "Liftr.Sample.WorkerService.dll"]

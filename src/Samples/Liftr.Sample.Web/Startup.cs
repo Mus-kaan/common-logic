@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Azure.Core;
+using Azure.Storage.Queues;
 using Liftr.MarketplaceResource.DataSource;
 using Liftr.MarketplaceResource.DataSource.Interfaces;
 using Liftr.MarketplaceResource.DataSource.Models;
@@ -12,11 +14,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Microsoft.Liftr;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DataSource;
 using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.Hosting.Swagger;
+using Microsoft.Liftr.Queue;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using Serilog;
@@ -25,7 +27,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Liftr.Sample.Web
+namespace Microsoft.Liftr.Sample.Web
 {
     public class Startup
     {
@@ -45,6 +47,10 @@ namespace Liftr.Sample.Web
         {
             services.AddSingleton<ITimeSource, SystemTimeSource>();
 
+            // 'RPAssetOptions' is loaded from Key Vault by default. This is set at provisioning time.
+            var optionsValue = _configuration.GetSection(nameof(RPAssetOptions)).Value.FromJson<RPAssetOptions>();
+            services.AddSingleton(optionsValue);
+
             services.AddHttpClient();
 
             services.AddSwaggerGen(c =>
@@ -62,29 +68,11 @@ namespace Liftr.Sample.Web
                 c.IncludeXmlComments(xmlPath);
             });
 
-            services.Configure<RPAssetOptions>((rpAssets) =>
-            {
-                string rpAssetString = _configuration[nameof(RPAssetOptions)];
-                if (!string.IsNullOrEmpty(rpAssetString))
-                {
-                    var newAssets = rpAssetString.FromJson<RPAssetOptions>();
-                    rpAssets.ActiveKeyName = newAssets.ActiveKeyName;
-                    rpAssets.StorageAccountName = newAssets.StorageAccountName;
-                    rpAssets.CosmosDBConnectionStrings = newAssets.CosmosDBConnectionStrings;
-                    rpAssets.DataPlaneSubscriptions = newAssets.DataPlaneSubscriptions;
-                }
-                else
-                {
-                    var errMsg = $"Cannot load the content of '{nameof(RPAssetOptions)}' from configuration.";
-                    _logger.Warning(errMsg);
-                }
-            });
-
             services.Configure<MongoOptions>(_configuration.GetSection(nameof(MongoOptions)));
 
             services.AddSingleton<MongoCollectionsFactory, MongoCollectionsFactory>((sp) =>
             {
-                var assetOptions = sp.GetService<IOptions<RPAssetOptions>>().Value;
+                var assetOptions = sp.GetService<RPAssetOptions>();
                 var mongoOptions = sp.GetService<IOptions<MongoOptions>>().Value;
 
                 if (mongoOptions == null)
@@ -138,6 +126,18 @@ namespace Liftr.Sample.Web
                 }
             });
 
+            services.AddSingleton<IQueueWriter, QueueWriter>((sp) =>
+            {
+                var assetOptions = sp.GetService<RPAssetOptions>();
+                var tokenCredentials = sp.GetService<TokenCredential>();
+
+                var queueUri = new Uri($"https://{assetOptions.StorageAccountName}.queue.core.windows.net/sample-queue");
+                QueueClient queue = new QueueClient(queueUri, tokenCredentials);
+                queue.CreateIfNotExists();
+
+                return new QueueWriter(queue, sp.GetService<ITimeSource>(), _logger);
+            });
+
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -152,6 +152,11 @@ namespace Liftr.Sample.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -179,6 +184,10 @@ namespace Liftr.Sample.Web
                 endpoints.MapControllers();
                 endpoints.MapRazorPages();
             });
+
+            // Warm dependency up
+            app.ApplicationServices.GetService<ICounterEntityDataSource>();
+            app.ApplicationServices.GetService<IQueueWriter>();
         }
     }
 }

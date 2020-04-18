@@ -9,9 +9,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.Liftr.TokenManager;
 using System;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.RPaaS.Hosting
 {

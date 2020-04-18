@@ -75,7 +75,7 @@ namespace Microsoft.Liftr.Logging.GenericHosting
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Middleware should fail silently.")]
         private static (bool allowOverride, LogEventLevel defaultLevel) GetOverrideOptions(HostBuilderContext host)
         {
-            bool allowOverride = true;
+            bool allowOverride = false;
             try
             {
                 var allowOverrideStr = host.Configuration.GetSection("Serilog")?.GetSection("AllowFilterDynamicOverride")?.Value;

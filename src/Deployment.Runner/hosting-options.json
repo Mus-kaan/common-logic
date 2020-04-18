@@ -12,6 +12,7 @@
       "LogAnalyticsWorkspaceId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.OperationalInsights/workspaces/sample-partner-log",
       "DiagnosticsStorageId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.Storage/storageAccounts/liftrdiagonstics",
       "GenevaCertificateSubjectName": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net",
+      "FirstPartyAppCertificateSubjectName": "sample-fpa.first-party.liftr-dev.net",
       "AKSConfigurations": {
         "AKSMachineCount": 3,
         "AKSMachineType": "Standard_DS2_v2",
@@ -26,12 +27,12 @@
         {
           "Location": "westus2",
           "DataBaseName": "data20200201",
-          "ComputeBaseName": "com20200310"
+          "ComputeBaseName": "com20200416"
         },
         {
           "Location": "eastus",
           "DataBaseName": "data20200201",
-          "ComputeBaseName": "com20200310"
+          "ComputeBaseName": "com20200416"
         }
       ]
     },
@@ -44,6 +45,7 @@
       "LogAnalyticsWorkspaceId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.OperationalInsights/workspaces/sample-partner-log",
       "DiagnosticsStorageId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.Storage/storageAccounts/liftrdiagonstics",
       "GenevaCertificateSubjectName": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net",
+      "FirstPartyAppCertificateSubjectName": "sample-fpa.first-party.liftr-dev.net",
       "AKSConfigurations": {
         "AKSMachineCount": 3,
         "AKSMachineType": "Standard_DS2_v2",
@@ -58,12 +60,12 @@
         {
           "Location": "westus2",
           "DataBaseName": "data20200201",
-          "ComputeBaseName": "com20200310"
+          "ComputeBaseName": "com20200416"
         },
         {
           "Location": "eastus",
           "DataBaseName": "data20200201",
-          "ComputeBaseName": "com20200310"
+          "ComputeBaseName": "com20200416"
         }
       ]
     }

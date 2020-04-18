@@ -7,6 +7,7 @@
     <RootNamespace>Microsoft.Liftr.WebHosting</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="$(PackageVersion_Azure_Identity)" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="$(PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions)" />
   </ItemGroup>
   <ItemGroup>
