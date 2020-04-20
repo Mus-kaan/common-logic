@@ -4,6 +4,7 @@
 
 using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -35,6 +36,23 @@ namespace Microsoft.Liftr.Fluent.Tests
                 + "/vJSe5tBtZPimTTUKhLYP+ZXdqldLa/TI7e6hkZHQuMOe2xXCqMfJXp4HtBszIua7bM3rQFlGuBe7+Vv+NzL5wJyy"
                 + "y6KnZjoLknnRoeJUSyZE2UtRF6tpkoGu3PhqZBmx7 limingu@Limins-MacBook-Pro.local";
                 var vmCount = 3;
+
+                await Assert.ThrowsAsync<ArgumentException>(async () =>
+                {
+                    await client.CreateAksClusterAsync(
+                    TestCommon.Location,
+                    scope.ResourceGroupName,
+                    name,
+                    rootUserName,
+                    sshPublicKey,
+                    TestCredentials.ClientId,
+                    TestCredentials.ClientSecret,
+                    ContainerServiceVMSizeTypes.StandardDS2,
+                    vmCount,
+                    TestCommon.Tags,
+                    agentPoolProfileName: "sp-dev");
+                });
+
                 var created = await client.CreateAksClusterAsync(
                     TestCommon.Location,
                     scope.ResourceGroupName,
@@ -45,7 +63,8 @@ namespace Microsoft.Liftr.Fluent.Tests
                     TestCredentials.ClientSecret,
                     ContainerServiceVMSizeTypes.StandardDS2,
                     vmCount,
-                    TestCommon.Tags);
+                    TestCommon.Tags,
+                    agentPoolProfileName: "spdev");
 
                 var resources = await client.ListAksClusterAsync(scope.ResourceGroupName);
                 Assert.Single(resources);

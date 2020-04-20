@@ -569,8 +569,15 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     }
                 }
 
-                _logger.Information("Creating AKS cluster ...");
+                var agentPoolName = (namingContext.ShortPartnerName + namingContext.ShortEnvironmentName + namingContext.Location.ShortName()).ToLowerInvariant();
+                if (agentPoolName.Length > 11)
+                {
+                    agentPoolName = agentPoolName.Substring(0, 11);
+                }
 
+                _logger.Information("Computed AKS agent pool profile name: {agentPoolName}", agentPoolName);
+
+                _logger.Information("Creating AKS cluster ...");
                 aks = await liftrAzure.CreateAksClusterAsync(
                     namingContext.Location,
                     rgName,
@@ -582,7 +589,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     aksInfo.AKSMachineType,
                     aksInfo.AKSMachineCount,
                     namingContext.Tags,
-                    subnet);
+                    subnet,
+                    agentPoolProfileName: agentPoolName);
 
                 _logger.Information("Created AKS cluster with Id {ResourceId}", aks.Id);
 

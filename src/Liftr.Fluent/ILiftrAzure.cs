@@ -155,17 +155,18 @@ namespace Microsoft.Liftr.Fluent
 
         #region AKS
         Task<IKubernetesCluster> CreateAksClusterAsync(
-                   Region region,
-                   string rgName,
-                   string aksName,
-                   string rootUserName,
-                   string sshPublicKey,
-                   string servicePrincipalClientId,
-                   string servicePrincipalSecret,
-                   ContainerServiceVMSizeTypes vmSizeType,
-                   int vmCount,
-                   IDictionary<string, string> tags,
-                   ISubnet subnet = null);
+            Region region,
+            string rgName,
+            string aksName,
+            string rootUserName,
+            string sshPublicKey,
+            string servicePrincipalClientId,
+            string servicePrincipalSecret,
+            ContainerServiceVMSizeTypes vmSizeType,
+            int vmCount,
+            IDictionary<string, string> tags,
+            ISubnet subnet = null,
+            string agentPoolProfileName = "ap");
 
         Task<IKubernetesCluster> GetAksClusterAsync(string aksResourceId);
 

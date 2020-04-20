@@ -49,6 +49,8 @@ namespace Microsoft.Liftr.Fluent.Contracts
 
         public EnvironmentType Environment { get; }
 
+        public string ShortEnvironmentName => ShortEnvName(Environment);
+
         public Region Location { get; }
 
         public IDictionary<string, string> Tags { get; }

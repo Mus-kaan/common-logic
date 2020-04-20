@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static Microsoft.Azure.Management.Fluent.Azure;
 
@@ -830,8 +831,15 @@ namespace Microsoft.Liftr.Fluent
             ContainerServiceVMSizeTypes vmSizeType,
             int vmCount,
             IDictionary<string, string> tags,
-            ISubnet subnet = null)
+            ISubnet subnet = null,
+            string agentPoolProfileName = "ap")
         {
+            Regex rx = new Regex(@"^[a-z][a-z0-9]{0,11}$");
+            if (!rx.IsMatch(agentPoolProfileName))
+            {
+                throw new ArgumentException("Agent pool profile name does not match pattern '^[a-z][a-z0-9]{0,11}$'");
+            }
+
             _logger.Information("Creating a Kubernetes cluster with name {aksName} ...", aksName);
 
             var creatable = FluentClient.KubernetesClusters
@@ -843,7 +851,7 @@ namespace Microsoft.Liftr.Fluent
                              .WithSshKey(sshPublicKey)
                              .WithServicePrincipalClientId(servicePrincipalClientId)
                              .WithServicePrincipalSecret(servicePrincipalSecret)
-                             .DefineAgentPool("ap")
+                             .DefineAgentPool(agentPoolProfileName)
                              .WithVirtualMachineSize(vmSizeType)
                              .WithAgentPoolVirtualMachineCount(vmCount);
 

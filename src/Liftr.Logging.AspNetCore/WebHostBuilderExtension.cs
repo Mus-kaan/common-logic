@@ -10,7 +10,7 @@ using Microsoft.Liftr.DiagnosticSource;
 using Serilog;
 using Serilog.Context;
 using Serilog.Events;
-using Serilog.Formatting.Json;
+using Serilog.Formatting.Compact;
 using System;
 
 namespace Microsoft.Liftr.Logging.AspNetCore
@@ -52,7 +52,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
 
                     if (!host.Configuration.ContainsSerilogWriteToConsole())
                     {
-                        config = config.WriteTo.Console(new JsonFormatter(renderMessage: true));
+                        config = config.WriteTo.Console(new CompactJsonFormatter());
                     }
                 })
                 .ConfigureServices((host, services) =>

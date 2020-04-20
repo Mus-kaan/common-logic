@@ -12,7 +12,7 @@ using Microsoft.Liftr.DiagnosticSource;
 using Serilog;
 using Serilog.Context;
 using Serilog.Events;
-using Serilog.Formatting.Json;
+using Serilog.Formatting.Compact;
 using System;
 
 namespace Microsoft.Liftr.Logging.GenericHosting
@@ -59,7 +59,7 @@ namespace Microsoft.Liftr.Logging.GenericHosting
 
                     if (!hostContext.Configuration.ContainsSerilogWriteToConsole())
                     {
-                        serilogConfig = serilogConfig.WriteTo.Console(new JsonFormatter(renderMessage: true));
+                        serilogConfig = serilogConfig.WriteTo.Console(new CompactJsonFormatter());
                     }
 
                     serilogConfig = serilogConfig.Enrich.FromLogContext();
