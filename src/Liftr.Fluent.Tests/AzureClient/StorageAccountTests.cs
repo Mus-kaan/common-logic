@@ -20,7 +20,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild]
+        [SkipInOfficialBuild(skipLinux: true)]
         public async Task CanStorageAccountAsync()
         {
             // This test will normally take about 12 minutes.

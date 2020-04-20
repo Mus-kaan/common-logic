@@ -24,7 +24,7 @@ namespace Microsoft.Liftr.Queue.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild]
+        [SkipInOfficialBuild(skipLinux: true)]
         public async Task CanEnqueueAndDequeueAsync()
         {
             var ts = new MockTimeSource();

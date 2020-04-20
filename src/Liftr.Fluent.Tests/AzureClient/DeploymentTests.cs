@@ -18,7 +18,7 @@ namespace Microsoft.Liftr.Fluent.Tests.AzureClient
             _output = output;
         }
 
-        [SkipInOfficialBuild]
+        [SkipInOfficialBuild(skipLinux: true)]
         public async Task DeploymentFailureWillThrowAsync()
         {
             using (var scope = new TestResourceGroupScope("unittest-deployment-", _output))

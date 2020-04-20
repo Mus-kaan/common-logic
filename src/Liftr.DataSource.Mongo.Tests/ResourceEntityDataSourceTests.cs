@@ -37,7 +37,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
             _collectionScope.Dispose();
         }
 
-        [SkipInOfficialBuild]
+        [SkipInOfficialBuild(skipLinux: true)]
         public async Task BasicDataSourceUsageAsync()
         {
             var ts = new MockTimeSource();

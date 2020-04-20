@@ -22,7 +22,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild]
+        [SkipInOfficialBuild(skipLinux: true)]
         public async Task CanCreateKeyVaultAsync()
         {
             using (var scope = new TestResourceGroupScope("unittest-kv-", _output))
@@ -109,7 +109,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             }
         }
 
-        [SkipInOfficialBuild]
+        [SkipInOfficialBuild(skipLinux: true)]
         public async Task CanCreateKeyVaultInVNetAsync()
         {
             using (var scope = new TestResourceGroupScope("unittest-kv-", _output))

@@ -46,7 +46,6 @@ dlldata.c
 project.lock.json
 project.fragment.lock.json
 artifacts/
-**/Properties/launchSettings.json
 
 *_i.c
 *_p.c
@@ -145,6 +144,7 @@ DocProject/Help/html
 
 # Click-Once directory
 publish/
+Output/
 
 # Publish Web Output
 *.[Pp]ublish.xml
@@ -288,6 +288,15 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
+# Build logs
+*.err
+*.log
+*.wrn
+
+# Portal Extension binaries
+*.azpkg
+_generated
+
 exes
 contentFiles
 
@@ -295,4 +304,3 @@ contentFiles
 buildtools/
 out-ev2/
 .docker-images/
-.vscode/

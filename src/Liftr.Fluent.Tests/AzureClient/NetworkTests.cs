@@ -19,7 +19,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild]
+        [SkipInOfficialBuild(skipLinux: true)]
         public async Task CanCreateTrafficManagerAsync()
         {
             using (var scope = new TestResourceGroupScope("ut-network-", _output))

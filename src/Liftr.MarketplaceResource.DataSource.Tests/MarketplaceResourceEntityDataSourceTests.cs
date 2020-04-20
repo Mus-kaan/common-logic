@@ -40,7 +40,7 @@ namespace Liftr.MarketplaceResource.DataSource.Tests
             _collectionScope.Dispose();
         }
 
-        [SkipInOfficialBuild]
+        [SkipInOfficialBuild(skipLinux: true)]
         public async Task BasicDataSourceUsageAsync()
         {
             var ts = new MockTimeSource();

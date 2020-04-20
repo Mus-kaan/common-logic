@@ -22,7 +22,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild]
+        [SkipInOfficialBuild(skipLinux: true)]
         public async Task VerifyWindowsBaseImageGenerationAsync()
         {
             MockTimeSource timeSource = new MockTimeSource();

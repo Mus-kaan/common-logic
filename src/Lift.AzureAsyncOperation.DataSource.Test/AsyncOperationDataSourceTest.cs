@@ -38,7 +38,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
             _scopedCollection.Dispose();
         }
 
-        [SkipInOfficialBuild]
+        [SkipInOfficialBuild(skipLinux: true)]
         public async Task BasicDataSourceUsageAsync()
         {
             // Initialise dummy input

@@ -3,19 +3,28 @@
 //-----------------------------------------------------------------------------
 
 using System;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace Microsoft.Liftr
 {
     public sealed class SkipInOfficialBuildAttribute : FactAttribute
     {
-        public SkipInOfficialBuildAttribute()
+        public SkipInOfficialBuildAttribute(bool skipLinux = false)
         {
-            if (IsOfficialBuild())
+            SkipLinux = skipLinux;
+
+            if (skipLinux && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Skip = "Ignored for Linux builds";
+            }
+            else if (IsOfficialBuild())
             {
                 Skip = "Ignored for offical builds";
             }
         }
+
+        public bool SkipLinux { get; }
 
         private static bool IsOfficialBuild()
         {
