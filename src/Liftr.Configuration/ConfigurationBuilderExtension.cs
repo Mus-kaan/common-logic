@@ -25,20 +25,18 @@ namespace Microsoft.Liftr.Configuration
             string vaultEndpoint = builtConfig["VaultEndpoint"];
             if (!string.IsNullOrEmpty(vaultEndpoint))
             {
-                Console.WriteLine($"Start loading secrets from vault '{vaultEndpoint}' into configuration.");
-
                 string clientId = builtConfig["ClientId"];
                 string clientSecret = builtConfig["ClientSecret"];
 
                 if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
                 {
-                    Console.WriteLine("Using MSI to authenticate against KeyVault.");
+                    Console.WriteLine($"Using Managed Identity to load key vault '{vaultEndpoint}' secret into configuration.");
                     var kvClient = KeyVaultClientFactory.FromMSI();
                     config.AddAzureKeyVault(vaultEndpoint, kvClient, new PrefixKeyVaultSecretManager(secretsPrefix));
                 }
                 else
                 {
-                    Console.WriteLine("Using client Id and client secret to authenticate against KeyVault. ClientId: " + clientId);
+                    Console.WriteLine($"Using client Id '{clientId}' and client secret to to load key vault '{vaultEndpoint}' secret into configuration.");
                     config.AddAzureKeyVault(vaultEndpoint, clientId, clientSecret, new PrefixKeyVaultSecretManager(secretsPrefix));
                 }
             }

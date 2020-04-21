@@ -48,11 +48,13 @@ namespace Microsoft.Liftr.WebHosting
                 string.IsNullOrEmpty(tenantId) ||
                 string.IsNullOrEmpty(clientSecret))
                 {
+                    Console.WriteLine("Using Managed Identity to initialized key vault client and tokenCredential. Then add them to dependency injection container.");
                     kvClient = KeyVaultClientFactory.FromMSI();
                     tokenCredential = new ManagedIdentityCredential();
                 }
                 else
                 {
+                    Console.WriteLine($"Using client Id '{clientId}' and client secret to initialized key vault client and tokenCredential. Then add them to dependency injection container.");
                     kvClient = KeyVaultClientFactory.FromClientIdAndSecret(clientId, clientSecret);
                     tokenCredential = new ClientSecretCredential(tenantId, clientId, clientSecret);
                 }
