@@ -37,7 +37,7 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
         /// Partner credential to forward logs to partner service
         /// i.e. in case of datadog, it is api key
         /// </summary>
-        string PartnerCredential { get; }
+        string PartnerCredential { get; set; }
 
         /// <summary>
         /// Priority for log/metric entry
@@ -53,5 +53,10 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
         /// The last modified timestamp in UTC
         /// </summary>
         DateTimeOffset TimestampUTC { get; set; }
+
+        /// <summary>
+        /// Encryption meta data
+        /// </summary>
+        IEncryptionMetaData EncryptionMetaData { get; set; }
     }
 }

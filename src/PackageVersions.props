@@ -11,6 +11,7 @@
     <PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>2.2.0</PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>
     <PackageVersion_Microsoft_AspNetCore_Mvc_Core>2.2.0</PackageVersion_Microsoft_AspNetCore_Mvc_Core>
     <PackageVersion_Microsoft_Azure_KeyVault>3.0.5</PackageVersion_Microsoft_Azure_KeyVault>
+    <PackageVersion_Microsoft_Azure_KeyVault_Extension>3.0.5</PackageVersion_Microsoft_Azure_KeyVault_Extension>
     <PackageVersion_Microsoft_Azure_Management_Fluent>1.32.0</PackageVersion_Microsoft_Azure_Management_Fluent>
     <PackageVersion_Microsoft_Azure_Services_AppAuthentication>1.4.0</PackageVersion_Microsoft_Azure_Services_AppAuthentication>
     <PackageVersion_Microsoft_Azure_Storage_Blob>11.1.0</PackageVersion_Microsoft_Azure_Storage_Blob>

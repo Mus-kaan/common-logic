@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.MonitoringSvc;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -53,5 +54,9 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
 
         [BsonElement("timestampUTC")]
         public DateTimeOffset TimestampUTC { get; set; }
+
+        [BsonElement("encryptionMetaData")]
+        [JsonConverter(typeof(IEncryptionMetaData))]
+        public IEncryptionMetaData EncryptionMetaData { get; set; }
     }
 }

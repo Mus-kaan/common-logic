@@ -65,5 +65,10 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
         /// The last modified timestamp in UTC
         /// </summary>
         DateTimeOffset TimestampUTC { get; set; }
+
+        /// <summary>
+        /// Encryption meta data
+        /// </summary>
+        IEncryptionMetaData EncryptionMetaData { get; set; }
     }
 }

@@ -8,6 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="$(PackageVersion_Microsoft_Azure_KeyVault)" />
+    <PackageReference Include="Microsoft.Azure.KeyVault.Extensions" Version="$(PackageVersion_Microsoft_Azure_KeyVault_Extension)" />
     <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="$(PackageVersion_Microsoft_Azure_Services_AppAuthentication)" />
   </ItemGroup>
   <ItemGroup>

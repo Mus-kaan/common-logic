@@ -49,6 +49,13 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             var partnerServiceType = Contracts.MonitoringSvc.MonitoringSvcType.DataDog;
             var resourceType = "mockResourceType";
             uint priority = 1;
+            IEncryptionMetaData encryptionMetaData = new EncryptionMetaData
+            {
+                ContentEncryptionIV = "mockContentEncryptionIV",
+                EncryptionAlgorithm = "mockEncryptionAlgorithm",
+                EncryptionTime = DateTime.UtcNow,
+                KeyResourceId = "mockKeyResourceId",
+            };
 
             var mockEntity = new MonitoringSvcMonitoredEntity()
             {
@@ -59,6 +66,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 ResourceType = resourceType,
                 Priority = priority,
                 Enabled = true,
+                EncryptionMetaData = encryptionMetaData,
             };
 
             // Can add
@@ -74,6 +82,9 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 Assert.Equal(partnerServiceType, retrieved.PartnerServiceType);
                 Assert.Equal(resourceType, retrieved.ResourceType);
                 Assert.Equal(priority, retrieved.Priority);
+                Assert.Equal(encryptionMetaData.ContentEncryptionIV, retrieved.EncryptionMetaData.ContentEncryptionIV);
+                Assert.Equal(encryptionMetaData.EncryptionAlgorithm, retrieved.EncryptionMetaData.EncryptionAlgorithm);
+                Assert.Equal(encryptionMetaData.KeyResourceId, retrieved.EncryptionMetaData.KeyResourceId);
             }
 
             // List entity by monitoring resource id
