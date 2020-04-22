@@ -705,6 +705,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             "SSHPrivateKey",
             "SSHPublicKey",
             "SSHUserName",
+            "ibizaStorageConnectionString",
             "thanos-api",
         };
     }
