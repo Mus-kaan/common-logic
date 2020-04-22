@@ -14,5 +14,8 @@ namespace Microsoft.Liftr
         BlackForest,
         Fairfax,
         Mooncake,
+        USNat,
+        AirGap1,
+        AirGap2,
     }
 }

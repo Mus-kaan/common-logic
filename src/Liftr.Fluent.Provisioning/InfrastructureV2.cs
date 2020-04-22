@@ -32,6 +32,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         private const string SSHUserNameSecretName = "SSHUserName";
         private const string SSHPublicKeySecretName = "SSHPublicKey";
         private const string SSHPrivateKeySecretName = "SSHPrivateKey";
+        private const string OneCertIssuerName = "one-cert-issuer";
+        private const string OneCertProvider = "OneCert";
+
         private readonly ILiftrAzureFactory _azureClientFactory;
         private readonly KeyVaultClient _kvClient;
         private readonly ILogger _logger;
@@ -319,28 +322,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 await regionalKVValet.SetSecretAsync($"{dataOptions.SecretPrefix}-{nameof(RunningEnvironmentOptions)}--{nameof(envOptions.TenantId)}", envOptions.TenantId, namingContext.Tags);
                 await regionalKVValet.SetSecretAsync($"{dataOptions.SecretPrefix}-{nameof(RunningEnvironmentOptions)}--{nameof(envOptions.SPNObjectId)}", envOptions.SPNObjectId, namingContext.Tags);
 
-                var certIssuerName = "one-cert-issuer";
-                if (dataOptions.GenevaCert != null)
-                {
-                    _logger.Information("Creating AME Geneva certificate in Key Vault with name {@certName} ...", dataOptions.GenevaCert.CertificateName);
-                    await regionalKVValet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
-                    await regionalKVValet.CreateCertificateAsync(dataOptions.GenevaCert.CertificateName, certIssuerName, dataOptions.GenevaCert.SubjectName, dataOptions.GenevaCert.SubjectAlternativeNames, namingContext.Tags);
-                }
-
-                if (dataOptions.SSLCert != null)
-                {
-                    _logger.Information("Creating SSL certificate in Key Vault with name {@certName} ...", dataOptions.SSLCert.CertificateName);
-                    await regionalKVValet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
-                    await regionalKVValet.CreateCertificateAsync(dataOptions.SSLCert.CertificateName, certIssuerName, dataOptions.SSLCert.SubjectName, dataOptions.SSLCert.SubjectAlternativeNames, namingContext.Tags);
-                }
-
-                if (dataOptions.FirstPartyCert != null)
-                {
-                    _logger.Information("Creating First Party certificate in Key Vault with name {@certName} ...", dataOptions.FirstPartyCert.CertificateName);
-                    await regionalKVValet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
-                    await regionalKVValet.CreateCertificateAsync(dataOptions.FirstPartyCert.CertificateName, certIssuerName, dataOptions.FirstPartyCert.SubjectName, dataOptions.FirstPartyCert.SubjectAlternativeNames, namingContext.Tags);
-                }
-
                 // Move the secrets from global key vault to regional key vault.
                 if (!string.IsNullOrEmpty(dataOptions.GlobalKeyVaultResourceId))
                 {
@@ -371,6 +352,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                         _logger.Information("Copied {copiedSecretCount} secrets from central key vault to local key vault.", cnt);
                     }
                 }
+
+                await CreateCertificatesAsync(regionalKVValet, dataOptions.OneCertCertificates, namingContext, dataOptions.DomainName);
             }
 
             return (rg, msi, db, tm, regionalKeyVault);
@@ -668,6 +651,51 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             {
                 _logger.Error(ex, $"{nameof(GetACRAsync)} failed.");
                 throw;
+            }
+        }
+
+        private async Task CreateCertificatesAsync(
+            KeyVaultConcierge kvValet,
+            Dictionary<string, string> certificates,
+            NamingContext namingContext,
+            string domainName)
+        {
+            _logger.Information("Creating SSL certificate in Key Vault with name {certName} ...", CertificateName.DefaultSSL);
+            var hostName = $"{namingContext.Location.ShortName()}.{domainName}";
+            var sslCert = new CertificateOptions()
+            {
+                CertificateName = CertificateName.DefaultSSL,
+                SubjectName = hostName,
+                SubjectAlternativeNames = new List<string>()
+                                    {
+                                        hostName,
+                                        $"*.{hostName}",
+                                        domainName,
+                                        $"*.{domainName}",
+                                    },
+            };
+            await kvValet.SetCertificateIssuerAsync(OneCertIssuerName, OneCertProvider);
+            await kvValet.CreateCertificateAsync(sslCert.CertificateName, OneCertIssuerName, sslCert.SubjectName, sslCert.SubjectAlternativeNames, namingContext.Tags);
+
+            foreach (var cert in certificates)
+            {
+                var certName = cert.Key;
+                var certSubject = cert.Value;
+                if (cert.Key.OrdinalEquals(CertificateName.DefaultSSL))
+                {
+                    continue;
+                }
+
+                _logger.Information("Creating OneCert certificate in Key Vault with name '{certName}' and subject '{certSubject}'...", certName, certSubject);
+                var certOptions = new CertificateOptions()
+                {
+                    CertificateName = certName,
+                    SubjectName = certSubject,
+                    SubjectAlternativeNames = new List<string>() { certSubject },
+                };
+
+                await kvValet.SetCertificateIssuerAsync(OneCertIssuerName, OneCertProvider);
+                await kvValet.CreateCertificateAsync(certOptions.CertificateName, OneCertIssuerName, certOptions.SubjectName, certOptions.SubjectAlternativeNames, namingContext.Tags);
             }
         }
 

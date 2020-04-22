@@ -26,7 +26,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(Skip = "Skip due to temporary CosmosDB creation restriction")]
+        [SkipInOfficialBuild(skipLinux: true)]
         public async Task VerifyRegionalDataResourceCreationAsync()
         {
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);
@@ -39,8 +39,6 @@ namespace Microsoft.Liftr.Fluent.Tests
             var rgName = context.ResourceGroupName(baseName);
 
             var dataOptions = JsonConvert.DeserializeObject<RegionalDataOptions>(File.ReadAllText("TestDataOptions.json"));
-            dataOptions.SSLCert = null;
-            dataOptions.FirstPartyCert = null;
             dataOptions.EnableVNet = true;
 
             using (var regionalDataScope = new TestResourceGroupScope(rgName))

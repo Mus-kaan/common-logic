@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Liftr.Fluent.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,17 +14,15 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string SecretPrefix { get; set; }
 
+        public string DomainName { get; set; }
+
         public string DNSZoneId { get; set; }
 
         public string LogAnalyticsWorkspaceId { get; set; }
 
         public string GlobalKeyVaultResourceId { get; set; }
 
-        public CertificateOptions GenevaCert { get; set; }
-
-        public CertificateOptions SSLCert { get; set; }
-
-        public CertificateOptions FirstPartyCert { get; set; }
+        public Dictionary<string, string> OneCertCertificates { get; set; } = new Dictionary<string, string>();
 
         public IEnumerable<string> DataPlaneSubscriptions { get; set; }
 
@@ -38,6 +35,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             if (string.IsNullOrEmpty(ActiveDBKeyName))
             {
                 throw new InvalidOperationException($"{nameof(ActiveDBKeyName)} should not be null.");
+            }
+
+            if (string.IsNullOrEmpty(DomainName))
+            {
+                throw new InvalidOperationException($"{nameof(DomainName)} should not be null.");
             }
 
             if (string.IsNullOrEmpty(DNSZoneId))

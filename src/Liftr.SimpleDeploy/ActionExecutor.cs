@@ -18,7 +18,6 @@ using Microsoft.Liftr.KeyVault;
 using Microsoft.Rest.Azure;
 using Serilog.Context;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -203,51 +202,17 @@ namespace Microsoft.Liftr.SimpleDeploy
                         {
                             regionalNamingContext.Tags["DataRG"] = regionalNamingContext.ResourceGroupName(regionOptions.DataBaseName);
 
-                            CertificateOptions sslCert = null, genevaCert = null, firstPartyCert = null;
-
-                            var hostName = $"{regionalNamingContext.Location.ShortName()}.{targetOptions.DomainName}";
-                            sslCert = new CertificateOptions()
-                            {
-                                CertificateName = "ssl-cert",
-                                SubjectName = hostName,
-                                SubjectAlternativeNames = new List<string>()
-                                    {
-                                        hostName,
-                                        $"*.{hostName}",
-                                        targetOptions.DomainName,
-                                        $"*.{targetOptions.DomainName}",
-                                    },
-                            };
-
-                            genevaCert = new CertificateOptions()
-                            {
-                                CertificateName = "GenevaClientCert",
-                                SubjectName = targetOptions.GenevaCertificateSubjectName,
-                                SubjectAlternativeNames = new List<string>() { targetOptions.GenevaCertificateSubjectName },
-                            };
-
-                            if (!string.IsNullOrEmpty(targetOptions.FirstPartyAppCertificateSubjectName))
-                            {
-                                firstPartyCert = new CertificateOptions()
-                                {
-                                    CertificateName = "FirstPartyAppCert",
-                                    SubjectName = targetOptions.FirstPartyAppCertificateSubjectName,
-                                    SubjectAlternativeNames = new List<string>() { targetOptions.FirstPartyAppCertificateSubjectName },
-                                };
-                            }
-
                             var dataOptions = new RegionalDataOptions()
                             {
                                 ActiveDBKeyName = _commandOptions.ActiveKeyName,
                                 SecretPrefix = _hostingOptions.SecretPrefix,
-                                GenevaCert = genevaCert,
-                                SSLCert = sslCert,
-                                FirstPartyCert = firstPartyCert,
+                                OneCertCertificates = targetOptions.OneCertCertificates,
                                 DataPlaneSubscriptions = regionOptions.DataPlaneSubscriptions,
                                 DataPlaneStorageCountPerSubscription = _hostingOptions.StorageCountPerDataPlaneSubscription,
                                 EnableVNet = targetOptions.EnableVNet,
                                 GlobalKeyVaultResourceId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
                                 LogAnalyticsWorkspaceId = targetOptions.LogAnalyticsWorkspaceId,
+                                DomainName = targetOptions.DomainName,
                                 DNSZoneId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{globalRGName}/providers/Microsoft.Network/dnszones/{targetOptions.DomainName}",
                             };
 
