@@ -17,17 +17,40 @@ namespace Microsoft.Liftr.Queue
         private readonly ITimeSource _timeSource;
         private readonly Serilog.ILogger _logger;
         private readonly string _msgIdPrefix;
+        private readonly TimeSpan _messageTimeToLive;
+        private readonly TimeSpan? _messageVisibilityTimeout;
         private int _msgCount = 0;
 
-        public QueueWriter(QueueClient queue, ITimeSource timeSource, Serilog.ILogger logger)
+        /// <summary>
+        /// Azure message queue writer augmented with Liftr trace context. For more information see https://docs.microsoft.com/en-us/rest/api/storageservices/put-message.
+        /// </summary>
+        /// <param name="queue"></param>
+        /// <param name="timeSource"></param>
+        /// <param name="logger"></param>
+        /// <param name="messageVisibilityTimeout">Message visibility timeout, which will make the message invisible until the visibility timeout expires.
+        /// Optional with a default value of 0. Cannot be larger than 7 days.</param>
+        /// <param name="messageTimeToLive">Specifies the time-to-live interval for the message. Default to 60 minutes.</param>
+        public QueueWriter(
+            QueueClient queue,
+            ITimeSource timeSource,
+            Serilog.ILogger logger,
+            TimeSpan? messageVisibilityTimeout = null,
+            TimeSpan? messageTimeToLive = null)
         {
             _queue = queue ?? throw new ArgumentNullException(nameof(queue));
             _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _msgIdPrefix = $"{Environment.MachineName}-";
+            _messageTimeToLive = messageTimeToLive.HasValue ? messageTimeToLive.Value : TimeSpan.FromMinutes(60);
+            if (messageVisibilityTimeout.HasValue && messageVisibilityTimeout.Value > TimeSpan.FromDays(7))
+            {
+                throw new ArgumentOutOfRangeException(nameof(messageVisibilityTimeout), "Cannot be larger than 7 days");
+            }
+
+            _messageVisibilityTimeout = messageVisibilityTimeout;
         }
 
-        public async Task AddMessageAsync(string message, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task AddMessageAsync(string message, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(message))
             {
@@ -43,8 +66,13 @@ namespace Microsoft.Liftr.Queue
                 CreatedAt = _timeSource.UtcNow.ToZuluString(),
             };
 
-            await _queue.SendMessageAsync(msg.ToJson(), timeToLive: TimeSpan.FromMinutes(60));
-            _logger.Information("Added message with Id '{MsgId}' into queue.", msg.MsgId);
+            await _queue.SendMessageAsync(
+                msg.ToJson(),
+                visibilityTimeout: _messageVisibilityTimeout,
+                timeToLive: _messageTimeToLive,
+                cancellationToken: cancellationToken);
+
+            _logger.Information("Added message with Id '{MsgId}' into queue. TTL: {msgTTL}, visibilityTimeout: {visibilityTimeout}", msg.MsgId, _messageTimeToLive, _messageVisibilityTimeout);
         }
     }
 }

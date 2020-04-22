@@ -135,7 +135,7 @@ namespace Microsoft.Liftr.Sample.Web
                 QueueClient queue = new QueueClient(queueUri, tokenCredentials);
                 queue.CreateIfNotExists();
 
-                return new QueueWriter(queue, sp.GetService<ITimeSource>(), _logger);
+                return new QueueWriter(queue, sp.GetService<ITimeSource>(), _logger, messageVisibilityTimeout: TimeSpan.FromSeconds(5));
             });
 
             services.Configure<CookiePolicyOptions>(options =>
