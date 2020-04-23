@@ -158,6 +158,15 @@ namespace Microsoft.Liftr.SimpleDeploy
             _logger.Information("Target environment options: {@targetOptions}", targetOptions);
             var liftrAzure = azFactory.GenerateLiftrAzure();
 
+            var callBackConfigs = new SimpleDeployConfigurations()
+            {
+                LiftrAzureFactory = azFactory,
+                KeyVaultClient = kvClient,
+                RunnerCommandOptions = _commandOptions,
+                HostingOptions = _hostingOptions,
+                Logger = _logger,
+            };
+
             using (var operation = _logger.StartTimedOperation(_commandOptions.Action.ToString()))
             {
                 try
@@ -177,14 +186,31 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                     if (_commandOptions.Action == ActionType.CreateOrUpdateGlobal)
                     {
-                        (var kv, var acr) = await infra.CreateOrUpdateGlobalRGAsync(
+                        var globalResources = await infra.CreateOrUpdateGlobalRGAsync(
                             targetOptions.Global.BaseName,
                             globalNamingContext,
                             targetOptions.DomainName,
                             targetOptions.LogAnalyticsWorkspaceId);
-                        File.WriteAllText("acr-name.txt", acr.Name);
-                        File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
+
+                        File.WriteAllText("acr-name.txt", globalResources.ContainerRegistry.Name);
+                        File.WriteAllText("acr-endpoint.txt", globalResources.ContainerRegistry.LoginServerUrl);
                         _logger.Information("Successfully managed global resources.");
+
+                        if (SimpleDeployExtension.AfterProvisionGlobalResourcesAsync != null)
+                        {
+                            using (_logger.StartTimedOperation(nameof(SimpleDeployExtension.AfterProvisionGlobalResourcesAsync)))
+                            {
+                                var parameters = new GlobalCallbackParameters()
+                                {
+                                    CallbackConfigurations = callBackConfigs,
+                                    BaseName = targetOptions.Global.BaseName,
+                                    NamingContext = globalNamingContext,
+                                    Resources = globalResources,
+                                };
+
+                                await SimpleDeployExtension.AfterProvisionGlobalResourcesAsync.Invoke(parameters);
+                            }
+                        }
                     }
                     else
                     {
@@ -216,8 +242,25 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 DNSZoneId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{globalRGName}/providers/Microsoft.Network/dnszones/{targetOptions.DomainName}",
                             };
 
-                            await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions);
+                            var dataResources = await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions);
                             _logger.Information("Successfully managed regional data resources.");
+
+                            if (SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync != null)
+                            {
+                                using (_logger.StartTimedOperation(nameof(SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync)))
+                                {
+                                    var parameters = new RegionalDataCallbackParameters()
+                                    {
+                                        CallbackConfigurations = callBackConfigs,
+                                        BaseName = regionOptions.DataBaseName,
+                                        NamingContext = regionalNamingContext,
+                                        DataOptions = dataOptions,
+                                        Resources = dataResources,
+                                    };
+
+                                    await SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync.Invoke(parameters);
+                                }
+                            }
                         }
                         else if (_commandOptions.Action == ActionType.CreateOrUpdateRegionalCompute)
                         {
@@ -354,13 +397,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     {
                         using (_logger.StartTimedOperation("Run extension action"))
                         {
-                            var extensionTask = SimpleDeployExtension.AfterRunAsync.Invoke(
-                                azFactory,
-                                kvClient,
-                                _commandOptions,
-                                _hostingOptions,
-                                _logger);
-                            await extensionTask;
+                            await SimpleDeployExtension.AfterRunAsync.Invoke(callBackConfigs);
                         }
                     }
                 }

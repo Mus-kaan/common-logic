@@ -57,7 +57,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var logAnalytics = await client.GetOrCreateLogAnalyticsWorkspaceAsync(context.Location, dataRGName, context.LogAnalyticsName("gbl001"), context.Tags);
                     dataOptions.LogAnalyticsWorkspaceId = logAnalytics.Id;
 
-                    (_, _, _, var tm, _) = await infra.CreateOrUpdateRegionalDataRGAsync(dataBaseName, context, dataOptions);
+                    var resources = await infra.CreateOrUpdateRegionalDataRGAsync(dataBaseName, context, dataOptions);
 
                     // Check regional data resources.
                     {
@@ -70,7 +70,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                         var db = dbs.First();
                         TestCommon.CheckCommonTags(db.Inner.Tags);
 
-                        var retrievedTM = await client.GetTrafficManagerAsync(tm.Id);
+                        var retrievedTM = await client.GetTrafficManagerAsync(resources.TrafficManager.Id);
                         TestCommon.CheckCommonTags(retrievedTM.Inner.Tags);
                     }
 
