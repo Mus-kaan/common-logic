@@ -37,7 +37,7 @@ namespace Microsoft.Liftr.TokenManager
             return token.AccessToken;
         }
 
-        public async Task<string> GetTokenAsync(Uri keyVaultEndpoint, string clientId, string certificateName, string tenantId = null)
+        public async Task<string> GetTokenAsync(Uri keyVaultEndpoint, string clientId, string certificateName, string tenantId = null, bool sendX5c = false)
         {
             if (_certificateStore == null)
             {
@@ -47,14 +47,14 @@ namespace Microsoft.Liftr.TokenManager
 #pragma warning disable CA2000 // Dispose objects before losing scope
             var cert = await _certificateStore.GetCertificateAsync(keyVaultEndpoint, certificateName);
 #pragma warning restore CA2000 // Dispose objects before losing scope
-            return await GetTokenAsync(clientId, cert, tenantId);
+            return await GetTokenAsync(clientId, cert, tenantId, sendX5c);
         }
 
-        public async Task<string> GetTokenAsync(string clientId, X509Certificate2 certificate, string tenantId = null)
+        public async Task<string> GetTokenAsync(string clientId, X509Certificate2 certificate, string tenantId = null, bool sendX5c = false)
         {
             var clientAssertion = new ClientAssertionCertificate(clientId, certificate);
             var token = await GetAuthContextForTenant(tenantId)
-                .AcquireTokenAsync(_tokenManagerConfiguration.TargetResource, clientAssertion);
+                .AcquireTokenAsync(_tokenManagerConfiguration.TargetResource, clientAssertion, sendX5c: sendX5c);
 
             return token.AccessToken;
         }
