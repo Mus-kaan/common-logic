@@ -85,6 +85,23 @@ namespace Microsoft.Liftr.DataSource.Mongo
             throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
         }
 
+        public async Task<IMongoCollection<T>> GetOrCreateCollectionAsync<T>(string collectionName)
+        {
+            if (!await CollectionExistsAsync(_db, collectionName))
+            {
+                _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
+#pragma warning disable CS0618 // Type or member is obsolete
+                var collection = await CreateCollectionAsync<T>(collectionName);
+#pragma warning restore CS0618 // Type or member is obsolete
+
+                return collection;
+            }
+            else
+            {
+                return await GetCollectionAsync<T>(collectionName);
+            }
+        }
+
         public async Task<IMongoCollection<T>> GetOrCreateEntityCollectionAsync<T>(string collectionName) where T : BaseResourceEntity
         {
             if (!await CollectionExistsAsync(_db, collectionName))

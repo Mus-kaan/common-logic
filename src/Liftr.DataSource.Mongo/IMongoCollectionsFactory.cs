@@ -13,6 +13,8 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
         IMongoCollection<T> GetCollection<T>(string collectionName);
 
+        Task<IMongoCollection<T>> GetOrCreateCollectionAsync<T>(string collectionName);
+
         Task<IMongoCollection<T>> GetOrCreateEntityCollectionAsync<T>(string collectionName) where T : BaseResourceEntity;
     }
 }
