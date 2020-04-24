@@ -8,6 +8,7 @@ using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Dns.Fluent;
+using Microsoft.Azure.Management.Eventhub.Fluent;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
@@ -25,8 +26,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using static Microsoft.Azure.Management.Fluent.Azure;
 
@@ -1049,6 +1052,59 @@ namespace Microsoft.Liftr.Fluent
         {
             var helper = new LogAnalyticsHelper(_logger);
             return helper.GetLogAnalyticsWorkspaceAsync(this, rgName, name);
+        }
+        #endregion
+
+        #region Event Hub
+        public async Task<IEventHubNamespace> GetOrCreateEventHubNamespaceAsync(Region location, string rgName, string name, IDictionary<string, string> tags)
+        {
+            _logger.Information("Getting Event hub namespace. rgName: {rgName}, name: {name} ...", rgName, name);
+            IEventHubNamespace eventHubNamespace = null;
+            try
+            {
+                eventHubNamespace = await FluentClient
+                    .EventHubNamespaces
+                    .GetByResourceGroupAsync(rgName, name);
+            }
+            catch (Azure.Management.EventHub.Fluent.Models.ErrorResponseException ex) when (ex.Response?.StatusCode == HttpStatusCode.NotFound)
+            {
+                _logger.Information("Creating a Event hub namespace. rgName: {rgName}, name: {name} ...", rgName, name);
+                eventHubNamespace = await FluentClient
+                    .EventHubNamespaces
+                    .Define(name)
+                    .WithRegion(location)
+                    .WithExistingResourceGroup(rgName)
+                    .WithTags(tags)
+                    .CreateAsync();
+            }
+
+            return eventHubNamespace;
+        }
+
+        public async Task<IEventHub> GetOrCreateEventHubAsync(Region location, string rgName, string namespaceName, string hubName, IDictionary<string, string> tags)
+        {
+            _logger.Information("Getting Event Hub. rgName: {rgName}, namespaceName: {namespaceName}, hubName: {hubName} ...", rgName, namespaceName, hubName);
+            IEventHub eventhub = null;
+            try
+            {
+                eventhub = await FluentClient
+                    .EventHubs
+                    .GetByNameAsync(rgName, namespaceName, hubName);
+            }
+            catch (Azure.Management.EventHub.Fluent.Models.ErrorResponseException ex) when (ex.Response?.StatusCode == HttpStatusCode.NotFound)
+            {
+                _logger.Information("Cannot find Event Hub. rgName: {rgName}, namespaceName: {namespaceName}, hubName: {hubName} ...", rgName, namespaceName, hubName);
+                IEventHubNamespace eventHubNamespace = await GetOrCreateEventHubNamespaceAsync(location, rgName, namespaceName, tags);
+
+                _logger.Information($"Creating a Event Hub with namespaceName {namespaceName}, name {hubName} ...", namespaceName, hubName);
+                eventhub = await FluentClient
+                    .EventHubs
+                    .Define(hubName)
+                    .WithExistingNamespace(eventHubNamespace)
+                    .CreateAsync();
+            }
+
+            return eventhub;
         }
         #endregion
     }

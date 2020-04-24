@@ -8,6 +8,7 @@ using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Dns.Fluent;
+using Microsoft.Azure.Management.Eventhub.Fluent;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
@@ -195,6 +196,12 @@ namespace Microsoft.Liftr.Fluent
         Task<ResourceGetResponse> GetOrCreateLogAnalyticsWorkspaceAsync(Region location, string rgName, string name, IDictionary<string, string> tags);
 
         Task<ResourceGetResponse> GetLogAnalyticsWorkspaceAsync(string rgName, string name);
+        #endregion
+
+        #region Event Hub
+        Task<IEventHubNamespace> GetOrCreateEventHubNamespaceAsync(Region location, string rgName, string name, IDictionary<string, string> tags);
+
+        Task<IEventHub> GetOrCreateEventHubAsync(Region location, string rgName, string namespaceName, string hubName, IDictionary<string, string> tags);
         #endregion
     }
 }
