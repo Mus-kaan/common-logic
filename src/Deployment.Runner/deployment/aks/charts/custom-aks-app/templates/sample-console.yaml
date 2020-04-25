@@ -2,9 +2,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: liftr-sample-console
+  name: {{ .Release.Name }}-liftr-sample-console
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: liftr-sample-console
+    app: {{ .Release.Name }}-liftr-sample-console
     app.kubernetes.io/name: liftr-sample-console
     app.kubernetes.io/managed-by: helm
     appVersion: {{ required "The appVersion must be provided." .Values.appVersion }}
@@ -12,13 +13,15 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: liftr-sample-console
+      app: {{ .Release.Name }}-liftr-sample-console
+      release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: liftr-sample-console
+        app: {{ .Release.Name }}-liftr-sample-console
         aadpodidbinding: liftr-aad-pod-identity
         appVersion: {{ .Values.appVersion }}
+        release: {{ .Release.Name }}
     spec:
       containers:
       - name: liftr-sample-console-container

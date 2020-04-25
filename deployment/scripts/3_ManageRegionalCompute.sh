@@ -38,14 +38,14 @@ fi
 
 ./ConnectAKS.sh
 
-./DeployNginx.sh
-
-./DeployPrometheusOperator.sh \
+./DeployPodIdentity.sh \
 --environmentName="$APP_ASPNETCORE_ENVIRONMENT" \
 --compactRegion="$compactRegion" \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId"
 
-./DeployPodIdentity.sh \
+./DeployNginx.sh
+
+./DeployPrometheusOperator.sh \
 --environmentName="$APP_ASPNETCORE_ENVIRONMENT" \
 --compactRegion="$compactRegion" \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId"

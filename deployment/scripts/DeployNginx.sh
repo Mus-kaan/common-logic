@@ -25,15 +25,11 @@ kubectl create namespace "$namespace"
 set -e
 
 echo "helm upgrade $helmReleaseName ..."
-$Helm upgrade $helmReleaseName --install \
+$Helm upgrade $helmReleaseName --install --atomic --wait --cleanup-on-fail --timeout 15m \
 --set controller.image.repository="$liftrACRURI/kubernetes-ingress-controller/nginx-ingress-controller" \
 --set controller.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
 --set defaultBackend.image.repository="$liftrACRURI/defaultbackend-amd64" \
 --namespace "$namespace" nginx-*.tgz
-
-echo "Wait for the helm release '$helmReleaseName' ..."
-kubectl rollout status deployment.apps/nginx-rel-nginx-ingress-controller -n "$namespace"
-kubectl rollout status deployment.apps/nginx-rel-nginx-ingress-default-backend -n "$namespace"
 
 echo "------------------------------------------------------------"
 echo "Finished helm upgrade Nginx ingress chart"

@@ -135,8 +135,11 @@ sslCertB64Content=$(cat ssl-cert.cer | base64 -w 0)
 sslKeyB64Content=$(cat ssl-cert.key | base64 -w 0)
 
 # Deploy the helm chart.
-echo "start deploy $HelmReleaseName helm chart."
-$Helm upgrade $HelmReleaseName --install \
+echo "-----------------------------------------------------------------"
+echo "Start deploy '$HelmReleaseName' helm chart."
+echo "-----------------------------------------------------------------"
+
+$Helm upgrade $HelmReleaseName --install --atomic --wait --cleanup-on-fail \
 --set appVersion="$AppVersion" \
 --set vaultEndpoint="$KeyVaultEndpoint" \
 --set hostname="$RPWebHostname" \
@@ -150,24 +153,6 @@ $Helm upgrade $HelmReleaseName --install \
 --set nginx-ingress.controller.image.repository="$liftrACRURI/kubernetes-ingress-controller/nginx-ingress-controller" \
 --set nginx-ingress.defaultBackend.image.repository="$liftrACRURI/defaultbackend-amd64" \
 --namespace $namespace $AKSAppChartPackage
-
-# Wait and check Helm deployment status
-# Reasons:
-# 1. If the helm upgrade failed, we want the EV2 deployment to fail.
-# 2. After the app is successfully deployed to AKS cluster, it will generate a public IP address. We can retrieve the IP and put it in TM in the next step.
-
-echo "Getting names of the current deployments in Kubernetes"
-deploymentNames=$(kubectl get deployments -o=jsonpath='{.items[*].metadata.name}' |tr -s '[[:space:]]' '\n')
-
-echo "Name of the deployments are":
-echo $deploymentNames
-
-for name in $deploymentNames
-do
-    ROLLOUT_STATUS_CMD="kubectl rollout status deployment/$name --timeout=600s" #wait for 10 minutes for the deployment to succeed
-    echo "Checking rollout status for deployment $name"
-    $ROLLOUT_STATUS_CMD || exit 1 #exit statement will only be executed when the command returns a non zero which implies a failure
-done
 
 echo "-----------------------------------------------------------------"
 echo "Finished helm upgrade AKS APP chart"

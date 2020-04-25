@@ -153,7 +153,7 @@ set -e
 
 # Deploy geneva daemonset
 echo "start deploy geneva helm chart."
-$Helm upgrade aks-geneva --install \
+$Helm upgrade aks-geneva --install --atomic --wait --cleanup-on-fail \
 --values "$GenevaParametersFile" \
 --set genevaTenant="$PartnerName" \
 --set genevaRole="$AKSName" \
@@ -169,8 +169,6 @@ $Helm upgrade aks-geneva --install \
 --set gcskeyb64="$genevaServiceKey" \
 --set linuxgenevaACR.endpoint="$liftrACRURI" \
 --namespace "$namespace" geneva-*.tgz
-
-kubectl rollout status daemonset/geneva-services -n "$namespace"
 
 echo "-------------------------------------"
 echo "Finished helm upgrade geneva chart"

@@ -156,7 +156,7 @@ kubectl -n $namespace create secret generic thanos-objstore-config --from-file=t
 
 # https://itnext.io/monitoring-kubernetes-workloads-with-prometheus-and-thanos-4ddb394b32c
 echo "helm upgrade $helmReleaseName ..."
-$Helm upgrade $helmReleaseName prometheus-operator-*.tgz --install \
+$Helm upgrade $helmReleaseName prometheus-operator-*.tgz --install --atomic --wait --cleanup-on-fail \
 --namespace $namespace \
 --set alertmanager.enabled=false \
 --set grafana.enabled=false \
@@ -184,11 +184,6 @@ $Helm upgrade $helmReleaseName prometheus-operator-*.tgz --install \
 --set prometheusOperator.prometheusSpec.image.repository="$liftrACRURI/prometheus/prometheus" \
 --set kube-state-metrics.image.repository="$liftrACRURI/coreos/kube-state-metrics" \
 --set prometheus-node-exporter.image.repository="$liftrACRURI/prometheus/node-exporter" \
-
-echo "Wait for the helm release '$helmReleaseName' ..."
-kubectl rollout status deployment.apps/prom-rel-kube-state-metrics -n "$namespace"
-kubectl rollout status deployment.apps/prom-rel-prometheus-operat-operator -n "$namespace"
-kubectl rollout status daemonset/prom-rel-prometheus-node-exporter -n "$namespace"
 
 if [ ! -f thanos-api.cer ]; then
     echo "Cannot find the api secret for Thanos. Skip deploying Thanos ingress"
