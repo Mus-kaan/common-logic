@@ -15,17 +15,6 @@ namespace Microsoft.Liftr.DiagnosticSource
     /// </summary>
     internal sealed class HttpCoreDiagnosticSourceListener : IObserver<KeyValuePair<string, object>>
     {
-        private static readonly HashSet<string> s_domainsToAddCorrelationHeader = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            // ARM endpoints
-            // source: https://github.com/Azure/azure-libraries-for-net/blob/4ffeb074323fad078b6ef8823b406afdb06ef654/src/ResourceManagement/ResourceManager/AzureEnvironment.cs
-            "management.azure.com",
-            "api-dogfood.resources.windows-int.net",
-            "management.chinacloudapi.cn",
-            "management.usgovcloudapi.net",
-            "management.microsoftazure.de",
-        };
-
         private readonly PropertyFetcher _startRequestFetcher = new PropertyFetcher("Request");
 
         /// <summary>
@@ -97,5 +86,20 @@ namespace Microsoft.Liftr.DiagnosticSource
             {
             }
         }
+
+        private static readonly HashSet<string> s_domainsToAddCorrelationHeader = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            // ARM endpoints
+            // source: https://github.com/Azure/azure-libraries-for-net/blob/4ffeb074323fad078b6ef8823b406afdb06ef654/src/ResourceManagement/ResourceManager/AzureEnvironment.cs
+            "management.azure.com",                         // Production
+            "api-dogfood.resources.windows-int.net",        // DogFood
+            "management.chinacloudapi.cn",                  // MoonCake
+            "management.usgovcloudapi.net",
+            "management.microsoftazure.de",
+
+            // Marketplace
+            "https://marketplaceapi.microsoft.com",         // Production
+            "https://marketplaceapi.spza-internal.net",     // DogFood
+        };
     }
 }
