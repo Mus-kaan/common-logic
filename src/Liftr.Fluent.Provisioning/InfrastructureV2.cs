@@ -574,19 +574,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     agentPoolProfileName: agentPoolName);
 
                 _logger.Information("Created AKS cluster with Id {ResourceId}", aks.Id);
-
-                if (!string.IsNullOrEmpty(computeOptions.LogAnalyticsWorkspaceResourceId))
-                {
-                    var aksAddOns = new Dictionary<string, ManagedClusterAddonProfile>()
-                    {
-                        ["omsagent"] = new ManagedClusterAddonProfile(true, new Dictionary<string, string>()
-                        {
-                            ["logAnalyticsWorkspaceResourceID"] = computeOptions.LogAnalyticsWorkspaceResourceId,
-                        }),
-                    };
-                    _logger.Information("Enable AKS Azure Monitor and send the diagnostics data to Log Analytics with Id '{logAnalyticsWorkspaceResourceId}'", computeOptions.LogAnalyticsWorkspaceResourceId);
-                    await aks.Update().WithAddOnProfiles(aksAddOns).ApplyAsync();
-                }
             }
             else
             {
@@ -597,6 +584,19 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     _logger.Information("Restrict the Key Vault '{kvId}' to IP '{currentPublicIP}'.", regionalKeyVault.Id, currentPublicIP);
                     await liftrAzure.WithKeyVaultAccessFromNetworkAsync(regionalKeyVault, currentPublicIP, null);
                 }
+            }
+
+            if (!string.IsNullOrEmpty(computeOptions.LogAnalyticsWorkspaceResourceId))
+            {
+                var aksAddOns = new Dictionary<string, ManagedClusterAddonProfile>()
+                {
+                    ["omsagent"] = new ManagedClusterAddonProfile(true, new Dictionary<string, string>()
+                    {
+                        ["logAnalyticsWorkspaceResourceID"] = computeOptions.LogAnalyticsWorkspaceResourceId,
+                    }),
+                };
+                _logger.Information("Enable AKS Azure Monitor and send the diagnostics data to Log Analytics with Id '{logAnalyticsWorkspaceResourceId}'", computeOptions.LogAnalyticsWorkspaceResourceId);
+                await aks.Update().WithAddOnProfiles(aksAddOns).ApplyAsync();
             }
 
             return (regionalKeyVault, msi, aks);
