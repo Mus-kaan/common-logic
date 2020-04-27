@@ -10,6 +10,7 @@ using Liftr.MarketplaceResource.DataSource.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Azure.KeyVault;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -19,6 +20,7 @@ using Microsoft.Liftr.DataSource;
 using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.Hosting.Swagger;
 using Microsoft.Liftr.Queue;
+using Microsoft.Liftr.TokenManager;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using Serilog;
@@ -69,6 +71,13 @@ namespace Microsoft.Liftr.Sample.Web
             });
 
             services.Configure<MongoOptions>(_configuration.GetSection(nameof(MongoOptions)));
+            services.Configure<MongoOptions>(_configuration.GetSection(nameof(MongoOptions)));
+
+            services.Configure<AADAppTokenProviderOptions>(_configuration.GetSection("SampleFPA"));
+            services.Configure<AADAppTokenProviderOptions>((ops) =>
+            {
+                ops.KeyVaultEndpoint = new Uri(_configuration["VaultEndpoint"]);
+            });
 
             services.AddSingleton<MongoCollectionsFactory, MongoCollectionsFactory>((sp) =>
             {
@@ -145,6 +154,15 @@ namespace Microsoft.Liftr.Sample.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            services.AddSingleton<IMultiTenantAppTokenProvider, MultiTenantAppTokenProvider>((sp) =>
+            {
+                var options = sp.GetService<IOptions<AADAppTokenProviderOptions>>().Value;
+                var kvClient = sp.GetService<IKeyVaultClient>();
+                var logger = sp.GetService<ILogger>();
+
+                return new MultiTenantAppTokenProvider(options, kvClient, logger);
+            });
+
             services.AddControllers();
             services.AddRazorPages();
         }
@@ -188,6 +206,7 @@ namespace Microsoft.Liftr.Sample.Web
             // Warm dependency up
             app.ApplicationServices.GetService<ICounterEntityDataSource>();
             app.ApplicationServices.GetService<IQueueWriter>();
+            app.ApplicationServices.GetService<ISingleTenantAppTokenProvider>();
         }
     }
 }

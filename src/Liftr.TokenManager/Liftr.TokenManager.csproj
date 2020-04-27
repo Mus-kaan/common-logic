@@ -9,8 +9,6 @@
     <PackageProjectUrl>https://msazure.visualstudio.com/Liftr/_git/Liftr.Common?path=%2Fsrc%2FLiftr.TokenManager%2FReadMe.md&amp;version=GBmaster</PackageProjectUrl>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="$(PackageVersion_Microsoft_Extensions_Caching_Memory)" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions)" />
     <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="$(PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory)" />
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="$(PackageVersion_Microsoft_Azure_KeyVault)" />
   </ItemGroup>

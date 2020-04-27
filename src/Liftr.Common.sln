@@ -109,7 +109,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.MarketplaceResource.D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Sample.WorkerService", "Samples\Liftr.Sample.WorkerService\Liftr.Sample.WorkerService.csproj", "{8B367199-4655-4E45-BCF0-9D809E3544F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.KeyVault.Tests", "Liftr.KeyVault.Tests\Liftr.KeyVault.Tests.csproj", "{68776734-F8DB-4A58-AC01-955CDE4EABCD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.KeyVault.Tests", "Liftr.KeyVault.Tests\Liftr.KeyVault.Tests.csproj", "{68776734-F8DB-4A58-AC01-955CDE4EABCD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

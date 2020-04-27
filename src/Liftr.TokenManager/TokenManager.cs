@@ -53,9 +53,8 @@ namespace Microsoft.Liftr.TokenManager
         public async Task<string> GetTokenAsync(string clientId, X509Certificate2 certificate, string tenantId = null, bool sendX5c = false)
         {
             var clientAssertion = new ClientAssertionCertificate(clientId, certificate);
-            var token = await GetAuthContextForTenant(tenantId)
-                .AcquireTokenAsync(_tokenManagerConfiguration.TargetResource, clientAssertion, sendX5c: sendX5c);
-
+            var authContext = GetAuthContextForTenant(tenantId);
+            var token = await authContext.AcquireTokenAsync(_tokenManagerConfiguration.TargetResource, clientAssertion, sendX5c: sendX5c);
             return token.AccessToken;
         }
 
@@ -66,19 +65,7 @@ namespace Microsoft.Liftr.TokenManager
                 tenantId = _tokenManagerConfiguration.TenantId;
             }
 
-            AuthenticationContext targetAuthContext;
-
-            if (!_authContexts.ContainsKey(tenantId))
-            {
-                targetAuthContext = new AuthenticationContext($"{_tokenManagerConfiguration.AadEndpoint}/{tenantId}");
-                _authContexts[tenantId] = targetAuthContext;
-            }
-            else
-            {
-                targetAuthContext = _authContexts[tenantId];
-            }
-
-            return targetAuthContext;
+            return _authContexts.GetOrAdd(tenantId, new AuthenticationContext(authority: $"{_tokenManagerConfiguration.AadEndpoint}/{tenantId}", validateAuthority: true));
         }
     }
 }

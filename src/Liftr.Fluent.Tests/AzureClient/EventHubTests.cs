@@ -3,8 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.Azure.Storage;
-using Microsoft.Azure.Storage.Blob;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
