@@ -30,27 +30,27 @@ namespace Microsoft.Liftr.SimpleDeploy
         {
             if (string.IsNullOrEmpty(PartnerName))
             {
-                throw new InvalidOperationException($"{nameof(PartnerName)} cannot be null or empty.");
+                throw new InvalidHostingOptionException($"{nameof(PartnerName)} cannot be null or empty.");
             }
 
             if (string.IsNullOrEmpty(ShortPartnerName))
             {
-                throw new InvalidOperationException($"{nameof(ShortPartnerName)} cannot be null or empty.");
+                throw new InvalidHostingOptionException($"{nameof(ShortPartnerName)} cannot be null or empty.");
             }
 
             if (string.IsNullOrEmpty(SecretPrefix))
             {
-                throw new InvalidOperationException($"{nameof(SecretPrefix)} cannot be null or empty.");
+                throw new InvalidHostingOptionException($"{nameof(SecretPrefix)} cannot be null or empty.");
             }
 
             if (StorageCountPerDataPlaneSubscription < 0)
             {
-                throw new InvalidOperationException($"{nameof(StorageCountPerDataPlaneSubscription)} cannot be negative.");
+                throw new InvalidHostingOptionException($"{nameof(StorageCountPerDataPlaneSubscription)} cannot be negative.");
             }
 
             if (Environments == null || !Environments.Any())
             {
-                throw new InvalidOperationException($"Please specify at leat one environment in the '{nameof(Environments)}' section.");
+                throw new InvalidHostingOptionException($"Please specify at leat one environment in the '{nameof(Environments)}' section.");
             }
 
             foreach (var env in Environments)
@@ -88,19 +88,19 @@ namespace Microsoft.Liftr.SimpleDeploy
         {
             if (string.IsNullOrEmpty(DomainName))
             {
-                throw new InvalidOperationException($"{nameof(DomainName)} cannot be null or empty.");
+                throw new InvalidHostingOptionException($"{nameof(DomainName)} cannot be null or empty.");
             }
 
             if (Global == null)
             {
-                throw new InvalidOperationException($"{nameof(Global)} cannot be null.");
+                throw new InvalidHostingOptionException($"{nameof(Global)} cannot be null.");
             }
 
             Global.CheckValid();
 
             if (Regions == null || !Regions.Any())
             {
-                throw new InvalidOperationException($"Please specify at leat one region in the '{nameof(Regions)}' section.");
+                throw new InvalidHostingOptionException($"Please specify at leat one region in the '{nameof(Regions)}' section.");
             }
 
             foreach (var region in Regions)
@@ -110,12 +110,13 @@ namespace Microsoft.Liftr.SimpleDeploy
 
             if (AKSConfigurations == null)
             {
-                throw new InvalidOperationException($"{nameof(AKSConfigurations)} cannot be null.");
+                throw new InvalidHostingOptionException($"{nameof(AKSConfigurations)} cannot be null.");
             }
 
-            if (OneCertCertificates == null && !OneCertCertificates.ContainsKey(CertificateName.GenevaClientCert))
+            if (OneCertCertificates == null ||
+                !OneCertCertificates.ContainsKey(CertificateName.GenevaClientCert))
             {
-                throw new InvalidOperationException($"Please specify the Geneva certificate in the '{nameof(OneCertCertificates)}' section. The certification name must be '{CertificateName.GenevaClientCert}' and please specific a subject name.");
+                throw new InvalidHostingOptionException($"Please specify the Geneva certificate in the '{nameof(OneCertCertificates)}' section. The certification name must be '{CertificateName.GenevaClientCert}' and please specific a subject name.");
             }
         }
     }
@@ -131,7 +132,7 @@ namespace Microsoft.Liftr.SimpleDeploy
         {
             if (string.IsNullOrEmpty(BaseName))
             {
-                throw new InvalidOperationException($"{nameof(BaseName)} cannot be null or empty.");
+                throw new InvalidHostingOptionException($"{nameof(BaseName)} cannot be null or empty.");
             }
         }
     }
@@ -151,12 +152,12 @@ namespace Microsoft.Liftr.SimpleDeploy
         {
             if (string.IsNullOrEmpty(DataBaseName))
             {
-                throw new InvalidOperationException($"{nameof(DataBaseName)} cannot be null or empty.");
+                throw new InvalidHostingOptionException($"{nameof(DataBaseName)} cannot be null or empty.");
             }
 
             if (string.IsNullOrEmpty(ComputeBaseName))
             {
-                throw new InvalidOperationException($"{nameof(ComputeBaseName)} cannot be null or empty.");
+                throw new InvalidHostingOptionException($"{nameof(ComputeBaseName)} cannot be null or empty.");
             }
         }
     }
