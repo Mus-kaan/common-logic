@@ -139,7 +139,7 @@ echo "-----------------------------------------------------------------"
 echo "Start deploy '$HelmReleaseName' helm chart."
 echo "-----------------------------------------------------------------"
 
-$Helm upgrade $HelmReleaseName --install --atomic --wait --cleanup-on-fail --debug \
+$Helm upgrade $HelmReleaseName --install --atomic --wait --cleanup-on-fail \
 --set appVersion="$AppVersion" \
 --set vaultEndpoint="$KeyVaultEndpoint" \
 --set hostname="$RPWebHostname" \

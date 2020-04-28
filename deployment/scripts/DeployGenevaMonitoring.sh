@@ -153,7 +153,7 @@ set -e
 
 # Deploy geneva daemonset
 echo "start deploy geneva helm chart."
-$Helm upgrade aks-geneva --install --atomic --wait --cleanup-on-fail --debug \
+$Helm upgrade aks-geneva --install --atomic --wait --cleanup-on-fail \
 --values "$GenevaParametersFile" \
 --set genevaTenant="$PartnerName" \
 --set genevaRole="$AKSName" \
