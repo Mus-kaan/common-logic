@@ -14,6 +14,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.RPaaS\Liftr.RPaaS.csproj" />
+    <ProjectReference Include="..\Liftr.Tests.Common\Liftr.Tests.Common.csproj" />
     <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
   </ItemGroup>
 </Project>

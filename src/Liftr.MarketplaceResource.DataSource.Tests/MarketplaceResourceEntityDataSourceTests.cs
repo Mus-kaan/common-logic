@@ -2,19 +2,17 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Liftr.MarketplaceResource.DataSource.Models;
-using Microsoft.Liftr;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.DataSource.Mongo.Tests.Common;
 using Microsoft.Liftr.Logging;
-using MongoDB.Bson;
+using Microsoft.Liftr.MarketplaceResource.DataSource.Models;
 using System;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Liftr.MarketplaceResource.DataSource.Tests
+namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
 {
     public sealed class MarketplaceResourceEntityDataSourceTests : IDisposable
     {

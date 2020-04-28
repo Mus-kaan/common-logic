@@ -11,18 +11,16 @@
     <PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>2.2.0</PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>
     <PackageVersion_Microsoft_AspNetCore_Mvc_Core>2.2.0</PackageVersion_Microsoft_AspNetCore_Mvc_Core>
     <PackageVersion_Microsoft_Azure_KeyVault>3.0.5</PackageVersion_Microsoft_Azure_KeyVault>
-    <PackageVersion_Microsoft_Azure_KeyVault_Extension>3.0.5</PackageVersion_Microsoft_Azure_KeyVault_Extension>
+    <PackageVersion_Microsoft_Azure_KeyVault_Extensions>3.0.5</PackageVersion_Microsoft_Azure_KeyVault_Extensions>
     <PackageVersion_Microsoft_Azure_Management_Fluent>1.32.0</PackageVersion_Microsoft_Azure_Management_Fluent>
     <PackageVersion_Microsoft_Azure_Services_AppAuthentication>1.4.0</PackageVersion_Microsoft_Azure_Services_AppAuthentication>
     <PackageVersion_Microsoft_Azure_Storage_Blob>11.1.0</PackageVersion_Microsoft_Azure_Storage_Blob>
     <PackageVersion_Microsoft_Azure_Storage_Queue>11.1.0</PackageVersion_Microsoft_Azure_Storage_Queue>
     <PackageVersion_Microsoft_CSharp>4.5.0</PackageVersion_Microsoft_CSharp>
-    <PackageVersion_Microsoft_Extensions_Caching_Memory>3.1.2</PackageVersion_Microsoft_Extensions_Caching_Memory>
     <PackageVersion_Microsoft_Extensions_Configuration_AzureKeyVault>3.1.2</PackageVersion_Microsoft_Extensions_Configuration_AzureKeyVault>
     <PackageVersion_Microsoft_Extensions_Configuration_EnvironmentVariables>3.1.2</PackageVersion_Microsoft_Extensions_Configuration_EnvironmentVariables>
     <PackageVersion_Microsoft_Extensions_Configuration_Json>3.1.2</PackageVersion_Microsoft_Extensions_Configuration_Json>
     <PackageVersion_Microsoft_Extensions_Configuration_UserSecrets>3.1.2</PackageVersion_Microsoft_Extensions_Configuration_UserSecrets>
-    <PackageVersion_Microsoft_Extensions_DependencyInjection_Abstractions>3.1.2</PackageVersion_Microsoft_Extensions_DependencyInjection_Abstractions>
     <PackageVersion_Microsoft_Extensions_Hosting>3.1.2</PackageVersion_Microsoft_Extensions_Hosting>
     <PackageVersion_Microsoft_Extensions_Http>3.1.2</PackageVersion_Microsoft_Extensions_Http>
     <PackageVersion_Microsoft_Extensions_Http_Polly>3.1.2</PackageVersion_Microsoft_Extensions_Http_Polly>
@@ -46,7 +44,6 @@
     <PackageVersion_Swashbuckle_AspNetCore_Annotations>5.1.0</PackageVersion_Swashbuckle_AspNetCore_Annotations>
     <PackageVersion_Swashbuckle_AspNetCore_Newtonsoft>5.1.0</PackageVersion_Swashbuckle_AspNetCore_Newtonsoft>
     <PackageVersion_System_Diagnostics_DiagnosticSource>4.5.1</PackageVersion_System_Diagnostics_DiagnosticSource>
-    <PackageVersion_System_Text_Json>4.7.1</PackageVersion_System_Text_Json>
     <PackageVersion_xunit>2.4.1</PackageVersion_xunit>
     <PackageVersion_xunit_runner_visualstudio>2.4.1</PackageVersion_xunit_runner_visualstudio>
   </PropertyGroup>

@@ -10,6 +10,8 @@ using Serilog.Context;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.Net;
 
 namespace Microsoft.Liftr.Logging
 {
@@ -119,6 +121,23 @@ namespace Microsoft.Liftr.Logging
                 _appInsightsOperation.Telemetry.ResponseCode = "500";
             }
 
+            if (!string.IsNullOrEmpty(message))
+            {
+                SetProperty("FailureMessage", message);
+            }
+        }
+
+        public void FailOperation(HttpStatusCode statusCode, string message = null)
+        {
+            _isSuccessful = false;
+            var statusCodeStr = ((int)statusCode).ToString(CultureInfo.InvariantCulture);
+            if (_appInsightsOperation != null)
+            {
+                _appInsightsOperation.Telemetry.Success = false;
+                _appInsightsOperation.Telemetry.ResponseCode = statusCodeStr;
+            }
+
+            SetProperty("FailureStatusCode", statusCodeStr);
             if (!string.IsNullOrEmpty(message))
             {
                 SetProperty("FailureMessage", message);

@@ -111,6 +111,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Sample.WorkerService"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.KeyVault.Tests", "Liftr.KeyVault.Tests\Liftr.KeyVault.Tests.csproj", "{68776734-F8DB-4A58-AC01-955CDE4EABCD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.RPaaS.Abstractions", "Liftr.RPaaS.Abstractions\Liftr.RPaaS.Abstractions.csproj", "{93E15DC3-6AE3-42A7-90F3-DE05573DDEAA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -309,6 +311,10 @@ Global
 		{68776734-F8DB-4A58-AC01-955CDE4EABCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68776734-F8DB-4A58-AC01-955CDE4EABCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68776734-F8DB-4A58-AC01-955CDE4EABCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93E15DC3-6AE3-42A7-90F3-DE05573DDEAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93E15DC3-6AE3-42A7-90F3-DE05573DDEAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93E15DC3-6AE3-42A7-90F3-DE05573DDEAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93E15DC3-6AE3-42A7-90F3-DE05573DDEAA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

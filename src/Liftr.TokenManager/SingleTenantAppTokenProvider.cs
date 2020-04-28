@@ -32,6 +32,15 @@ namespace Microsoft.Liftr.TokenManager
             };
 
             _tokenManager = new TokenManager(tmOptions, _certStore);
+
+            logger.LogInformation($"Run '{nameof(GetTokenAsync)}' to make sure the provider is initialized correctly.");
+#pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
+            var token = GetTokenAsync().Result;
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new InvalidOperationException("Cannot load token.");
+            }
+#pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
         }
 
         public void Dispose()

@@ -7,7 +7,7 @@ using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DataSource.Mongo;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Liftr.MarketplaceResource.DataSource.Models
+namespace Microsoft.Liftr.MarketplaceResource.DataSource.Models
 {
     /// <summary>
     /// This entity will be used to store the Managed Identity and Marketplace metadata for a resource

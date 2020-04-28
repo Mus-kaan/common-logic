@@ -73,10 +73,14 @@ namespace Microsoft.Liftr.RPaaS.Hosting
                     throw ex;
                 }
 
-                var metaRPClient = new MetaRPStorageClient(metaRPOptions.MetaRPEndpoint, httpClientFactory.CreateClient(), () =>
-                {
-                    return tokenManager.GetTokenAsync(metaRPOptions.KeyVaultEndpoint, metaRPOptions.AccessorClientId, metaRPOptions.AccessorCertificateName);
-                });
+                var metaRPClient = new MetaRPStorageClient(
+                    new Uri(metaRPOptions.MetaRPEndpoint),
+                    httpClientFactory.CreateClient(),
+                    () =>
+                    {
+                        return tokenManager.GetTokenAsync(metaRPOptions.KeyVaultEndpoint, metaRPOptions.AccessorClientId, metaRPOptions.AccessorCertificateName);
+                    },
+                    logger);
 
                 return metaRPClient;
             });

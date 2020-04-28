@@ -2,15 +2,15 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Liftr.MarketplaceResource.DataSource.Interfaces;
-using Liftr.MarketplaceResource.DataSource.Models;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DataSource.Mongo;
+using Microsoft.Liftr.MarketplaceResource.DataSource.Interfaces;
+using Microsoft.Liftr.MarketplaceResource.DataSource.Models;
 using MongoDB.Driver;
 using System.Threading.Tasks;
 
-namespace Liftr.MarketplaceResource.DataSource
+namespace Microsoft.Liftr.MarketplaceResource.DataSource
 {
     public class MarketplaceResourceEntityDataSource : ResourceEntityDataSource<MarketplaceResourceEntity>, IMarketplaceResourceEntityDataSource
     {

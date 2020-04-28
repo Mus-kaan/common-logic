@@ -65,7 +65,7 @@ namespace Microsoft.Liftr.TokenManager
                 operation.SetContextProperty(nameof(certificateName), certificateName);
                 try
                 {
-                    _logger.Information("Start loading certificate with name {CertificateName} ...", certificateName);
+                    _logger.Information("Start loading certificate with name {CertificateName} from key vault with endpoint {KeyVaultEndpoint} ...", certificateName, keyVaultEndpoint.AbsoluteUri);
                     var secretBundle = await _kvClient.GetSecretAsync(keyVaultEndpoint.AbsoluteUri, certificateName);
                     _logger.Information("Loaded the certificate with name {CertificateName} from key vault with endpoint {KeyVaultEndpoint}", certificateName, keyVaultEndpoint.AbsoluteUri);
                     var privateKeyBytes = Convert.FromBase64String(secretBundle.Value);

@@ -4,9 +4,6 @@
 
 using Azure.Core;
 using Azure.Storage.Queues;
-using Liftr.MarketplaceResource.DataSource;
-using Liftr.MarketplaceResource.DataSource.Interfaces;
-using Liftr.MarketplaceResource.DataSource.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -19,6 +16,9 @@ using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DataSource;
 using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.Hosting.Swagger;
+using Microsoft.Liftr.MarketplaceResource.DataSource;
+using Microsoft.Liftr.MarketplaceResource.DataSource.Interfaces;
+using Microsoft.Liftr.MarketplaceResource.DataSource.Models;
 using Microsoft.Liftr.Queue;
 using Microsoft.Liftr.TokenManager;
 using Microsoft.OpenApi.Models;
@@ -73,8 +73,8 @@ namespace Microsoft.Liftr.Sample.Web
             services.Configure<MongoOptions>(_configuration.GetSection(nameof(MongoOptions)));
             services.Configure<MongoOptions>(_configuration.GetSection(nameof(MongoOptions)));
 
-            services.Configure<AADAppTokenProviderOptions>(_configuration.GetSection("SampleFPA"));
-            services.Configure<AADAppTokenProviderOptions>((ops) =>
+            services.Configure<SingleTenantAADAppTokenProviderOptions>(_configuration.GetSection("SampleFPA"));
+            services.Configure<SingleTenantAADAppTokenProviderOptions>((ops) =>
             {
                 ops.KeyVaultEndpoint = new Uri(_configuration["VaultEndpoint"]);
             });
@@ -156,11 +156,20 @@ namespace Microsoft.Liftr.Sample.Web
 
             services.AddSingleton<IMultiTenantAppTokenProvider, MultiTenantAppTokenProvider>((sp) =>
             {
-                var options = sp.GetService<IOptions<AADAppTokenProviderOptions>>().Value;
+                var options = sp.GetService<IOptions<SingleTenantAADAppTokenProviderOptions>>().Value;
                 var kvClient = sp.GetService<IKeyVaultClient>();
                 var logger = sp.GetService<ILogger>();
 
                 return new MultiTenantAppTokenProvider(options, kvClient, logger);
+            });
+
+            services.AddSingleton<ISingleTenantAppTokenProvider, SingleTenantAppTokenProvider>((sp) =>
+            {
+                var options = sp.GetService<IOptions<SingleTenantAADAppTokenProviderOptions>>().Value;
+                var kvClient = sp.GetService<IKeyVaultClient>();
+                var logger = sp.GetService<ILogger>();
+
+                return new SingleTenantAppTokenProvider(options, kvClient, logger);
             });
 
             services.AddControllers();
@@ -206,6 +215,7 @@ namespace Microsoft.Liftr.Sample.Web
             // Warm dependency up
             app.ApplicationServices.GetService<ICounterEntityDataSource>();
             app.ApplicationServices.GetService<IQueueWriter>();
+            app.ApplicationServices.GetService<IMultiTenantAppTokenProvider>();
             app.ApplicationServices.GetService<ISingleTenantAppTokenProvider>();
         }
     }

@@ -1,7 +1,7 @@
-﻿using Liftr.MarketplaceResource.DataSource.Interfaces;
-using Liftr.MarketplaceResource.DataSource.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Liftr.Contracts.Marketplace;
+using Microsoft.Liftr.MarketplaceResource.DataSource.Interfaces;
+using Microsoft.Liftr.MarketplaceResource.DataSource.Models;
 using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Threading.Tasks;

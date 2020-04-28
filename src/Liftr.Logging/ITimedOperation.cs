@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using System;
+using System.Net;
 
 namespace Microsoft.Liftr.Logging
 {
@@ -59,5 +60,10 @@ namespace Microsoft.Liftr.Logging
         /// Mark the <see cref="ITimedOperation"/> as failed and set the 'FailureMessage' property.
         /// </summary>
         void FailOperation(string message = null);
+
+        /// <summary>
+        /// Mark the <see cref="ITimedOperation"/> as failed and set the 'FailureStatusCode' 'FailureMessage' property.
+        /// </summary>
+        void FailOperation(HttpStatusCode statusCode, string message = null);
     }
 }
