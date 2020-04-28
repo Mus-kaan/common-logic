@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Configuration;
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.KeyVault;
 using System;
 using System.Runtime.CompilerServices;
@@ -44,9 +45,9 @@ namespace Microsoft.Liftr.GenericHosting
                 TokenCredential tokenCredential = null;
                 KeyVaultClient kvClient = null;
 
-                string clientId = context.Configuration["ClientId"];
+                string clientId = context.Configuration[GlobalSettingConstants.ClientId];
                 string tenantId = context.Configuration["TenantId"];
-                string clientSecret = context.Configuration["ClientSecret"];
+                string clientSecret = context.Configuration[GlobalSettingConstants.ClientSecret];
 
                 if (string.IsNullOrEmpty(clientId) ||
                 string.IsNullOrEmpty(tenantId) ||

@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Extensions.Configuration;
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.KeyVault;
 using System;
 
@@ -22,11 +23,11 @@ namespace Microsoft.Liftr.Configuration
 
             var builtConfig = config.Build();
 
-            string vaultEndpoint = builtConfig["VaultEndpoint"];
+            string vaultEndpoint = builtConfig[GlobalSettingConstants.VaultEndpoint];
             if (!string.IsNullOrEmpty(vaultEndpoint))
             {
-                string clientId = builtConfig["ClientId"];
-                string clientSecret = builtConfig["ClientSecret"];
+                string clientId = builtConfig[GlobalSettingConstants.ClientId];
+                string clientSecret = builtConfig[GlobalSettingConstants.ClientSecret];
 
                 if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
                 {

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Liftr.Configuration;
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.KeyVault;
 using System;
 
@@ -40,9 +41,9 @@ namespace Microsoft.Liftr.WebHosting
                 TokenCredential tokenCredential = null;
                 KeyVaultClient kvClient = null;
 
-                string clientId = context.Configuration["ClientId"];
+                string clientId = context.Configuration[GlobalSettingConstants.ClientId];
                 string tenantId = context.Configuration["TenantId"];
-                string clientSecret = context.Configuration["ClientSecret"];
+                string clientSecret = context.Configuration[GlobalSettingConstants.ClientSecret];
 
                 if (string.IsNullOrEmpty(clientId) ||
                 string.IsNullOrEmpty(tenantId) ||

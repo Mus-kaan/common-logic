@@ -105,6 +105,26 @@ namespace Microsoft.Liftr
             logger.Information("***********************************************************************************");
         }
 
+        public static void LogError<T>(this ILogger logger, string messageTemplate, T propertyValue, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
+        {
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Error(EnrichMessage(messageTemplate, filePath, memberName, lineNumber), propertyValue);
+        }
+
+        public static void LogError(this ILogger logger, string messageTemplate, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
+        {
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Error(EnrichMessage(messageTemplate, filePath, memberName, lineNumber));
+        }
+
         public static void LogInformation<T>(this ILogger logger, string messageTemplate, T propertyValue, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
         {
             if (logger == null)

@@ -7,9 +7,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Hosting.Swagger;
+using Microsoft.Liftr.RPaaS;
 using Microsoft.Liftr.RPaaS.Hosting;
-using Microsoft.Liftr.TokenManager;
 using Microsoft.OpenApi.Models;
 using System;
 using System.IO;
@@ -36,13 +37,11 @@ namespace SampleWebApp
             services.AddHttpClient();
 
             services.Configure<MetaRPOptions>(Configuration.GetSection(nameof(MetaRPOptions)));
-
             services.Configure<MetaRPOptions>((metaRPOptions) =>
             {
-                metaRPOptions.KeyVaultEndpoint = new Uri(Configuration["VaultEndpoint"]);
+                metaRPOptions.FPAOptions.KeyVaultEndpoint = new Uri(Configuration[GlobalSettingConstants.VaultEndpoint]);
             });
 
-            services.AddSingleton<CertificateStore>();
             services.AddMetaRPClient(Configuration);
 
             // Register the Swagger generator, defining 1 or more Swagger documents
@@ -88,6 +87,11 @@ namespace SampleWebApp
             {
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
             });
+
+            // Warm dependency up
+#pragma warning disable CA1062 // Validate arguments of public methods
+            app.ApplicationServices.GetService<IMetaRPStorageClient>();
+#pragma warning restore CA1062 // Validate arguments of public methods
         }
     }
 }

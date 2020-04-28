@@ -29,47 +29,42 @@ namespace Microsoft.Liftr.RPaaS.Hosting
 
                 if (metaRPOptions == null
                 || string.IsNullOrEmpty(metaRPOptions.MetaRPEndpoint)
-                || string.IsNullOrEmpty(metaRPOptions.AccessorCertificateName))
+                || metaRPOptions == null)
                 {
-                    var ex = new InvalidOperationException($"[RPaaS Init] Please make sure '{nameof(MetaRPOptions)}' is set in the configuration.");
-                    logger.Fatal(ex, ex.Message);
+                    var ex = new InvalidOperationException($"Please make sure '{nameof(MetaRPOptions)}' section is set in the appsettings.");
+                    logger.LogError(ex.Message);
                     throw ex;
                 }
 
                 var kvClient = sp.GetService<IKeyVaultClient>();
                 if (kvClient == null)
                 {
-                    var ex = new InvalidOperationException("[RPaaS Init] Cannot find a key vault client in the dependency injection container to initizlize RPaaS client.");
-                    logger.Fatal(ex, ex.Message);
+                    var ex = new InvalidOperationException("Cannot find a key vault client in the dependency injection container to initizlize RPaaS client.");
+                    logger.LogError(ex.Message);
                     throw ex;
                 }
 
-                var tokenManagerConfiguration = sp.GetService<IOptions<MetaRPOptions>>().Value.TokenManagerConfiguration;
-                if (tokenManagerConfiguration == null
-                || string.IsNullOrEmpty(tokenManagerConfiguration.AadEndpoint)
-                || string.IsNullOrEmpty(tokenManagerConfiguration.TargetResource)
-                || string.IsNullOrEmpty(tokenManagerConfiguration.TenantId))
+                var fpaOptions = metaRPOptions.FPAOptions;
+                if (fpaOptions == null
+                || fpaOptions.KeyVaultEndpoint == null
+                || string.IsNullOrEmpty(fpaOptions.AadEndpoint)
+                || string.IsNullOrEmpty(fpaOptions.TargetResource)
+                || string.IsNullOrEmpty(fpaOptions.ApplicationId)
+                || string.IsNullOrEmpty(fpaOptions.CertificateName)
+                || string.IsNullOrEmpty(fpaOptions.TenantId))
                 {
-                    var ex = new InvalidOperationException($"[RPaaS Init] Please make sure '{nameof(MetaRPOptions)}' is set in the configuration.");
-                    logger.Fatal(ex, ex.Message);
+                    var ex = new InvalidOperationException($"Please make sure '{nameof(MetaRPOptions.FPAOptions)}' is set under the '{nameof(MetaRPOptions)}' section.");
+                    logger.LogError(ex.Message);
                     throw ex;
                 }
 
-                var certStore = sp.GetService<CertificateStore>();
-                if (certStore == null)
-                {
-                    var ex = new InvalidOperationException("[RPaaS Init] Cannot find a certificate store in the dependency injection container to initizlize RPaaS client.");
-                    logger.Fatal(ex, ex.Message);
-                    throw ex;
-                }
-
-                var tokenManager = new TokenManager.TokenManager(tokenManagerConfiguration, certStore);
+                var tokenProvider = new SingleTenantAppTokenProvider(fpaOptions, kvClient, logger);
 
                 var httpClientFactory = sp.GetService<IHttpClientFactory>();
                 if (httpClientFactory == null)
                 {
-                    var ex = new InvalidOperationException("[RPaaS Init] Cannot find a httpClientFactory instance to initizlize RPaaS client.");
-                    logger.Fatal(ex, ex.Message);
+                    var ex = new InvalidOperationException("Cannot find a httpClientFactory instance to initizlize RPaaS client.");
+                    logger.LogError(ex.Message);
                     throw ex;
                 }
 
@@ -78,7 +73,7 @@ namespace Microsoft.Liftr.RPaaS.Hosting
                     httpClientFactory.CreateClient(),
                     () =>
                     {
-                        return tokenManager.GetTokenAsync(metaRPOptions.KeyVaultEndpoint, metaRPOptions.AccessorClientId, metaRPOptions.AccessorCertificateName);
+                        return tokenProvider.GetTokenAsync();
                     },
                     logger);
 

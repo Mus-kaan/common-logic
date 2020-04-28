@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.AzureKeyVault" Version="$(PackageVersion_Microsoft_Extensions_Configuration_AzureKeyVault)" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.KeyVault\Liftr.KeyVault.csproj" />
   </ItemGroup>
 </Project>

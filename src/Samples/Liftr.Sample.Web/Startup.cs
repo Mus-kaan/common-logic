@@ -76,7 +76,7 @@ namespace Microsoft.Liftr.Sample.Web
             services.Configure<SingleTenantAADAppTokenProviderOptions>(_configuration.GetSection("SampleFPA"));
             services.Configure<SingleTenantAADAppTokenProviderOptions>((ops) =>
             {
-                ops.KeyVaultEndpoint = new Uri(_configuration["VaultEndpoint"]);
+                ops.KeyVaultEndpoint = new Uri(_configuration[GlobalSettingConstants.VaultEndpoint]);
             });
 
             services.AddSingleton<MongoCollectionsFactory, MongoCollectionsFactory>((sp) =>

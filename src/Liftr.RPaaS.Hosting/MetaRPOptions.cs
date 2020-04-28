@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.TokenManager;
-using System;
 
 namespace Microsoft.Liftr.RPaaS.Hosting
 {
@@ -11,12 +10,6 @@ namespace Microsoft.Liftr.RPaaS.Hosting
     {
         public string MetaRPEndpoint { get; set; }
 
-        public Uri KeyVaultEndpoint { get; set; }
-
-        public string AccessorClientId { get; set; }
-
-        public string AccessorCertificateName { get; set; }
-
-        public TokenManagerConfiguration TokenManagerConfiguration { get; set; }
+        public SingleTenantAADAppTokenProviderOptions FPAOptions { get; set; }
     }
 }
