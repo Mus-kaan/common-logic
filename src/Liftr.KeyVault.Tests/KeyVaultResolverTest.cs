@@ -7,7 +7,7 @@ using System;
 using System.Threading;
 using Xunit;
 
-namespace Liftr.KeyVault.Tests
+namespace Liftr.Encryption.KeyVault.Tests
 {
     public class KeyVaultResolverTest
     {

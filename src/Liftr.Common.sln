@@ -109,7 +109,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.MarketplaceResource.D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Sample.WorkerService", "Samples\Liftr.Sample.WorkerService\Liftr.Sample.WorkerService.csproj", "{8B367199-4655-4E45-BCF0-9D809E3544F5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.KeyVault.Tests", "Liftr.KeyVault.Tests\Liftr.KeyVault.Tests.csproj", "{68776734-F8DB-4A58-AC01-955CDE4EABCD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Encryption.KeyVault", "Liftr.Encryption.KeyVault\Liftr.Encryption.KeyVault.csproj", "{449903F7-E408-47A9-A33D-78655117A85B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Encryption.KeyVault.Test", "Liftr.Encryption.KeyVault.Test\Liftr.Encryption.KeyVault.Test.csproj", "{E283DD0C-E2E3-47F9-AC18-177A67E7D31C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.RPaaS.Abstractions", "Liftr.RPaaS.Abstractions\Liftr.RPaaS.Abstractions.csproj", "{93E15DC3-6AE3-42A7-90F3-DE05573DDEAA}"
 EndProject
@@ -307,14 +309,18 @@ Global
 		{8B367199-4655-4E45-BCF0-9D809E3544F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B367199-4655-4E45-BCF0-9D809E3544F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B367199-4655-4E45-BCF0-9D809E3544F5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{68776734-F8DB-4A58-AC01-955CDE4EABCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{68776734-F8DB-4A58-AC01-955CDE4EABCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{68776734-F8DB-4A58-AC01-955CDE4EABCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{68776734-F8DB-4A58-AC01-955CDE4EABCD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{93E15DC3-6AE3-42A7-90F3-DE05573DDEAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{93E15DC3-6AE3-42A7-90F3-DE05573DDEAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93E15DC3-6AE3-42A7-90F3-DE05573DDEAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93E15DC3-6AE3-42A7-90F3-DE05573DDEAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{449903F7-E408-47A9-A33D-78655117A85B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{449903F7-E408-47A9-A33D-78655117A85B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{449903F7-E408-47A9-A33D-78655117A85B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{449903F7-E408-47A9-A33D-78655117A85B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E283DD0C-E2E3-47F9-AC18-177A67E7D31C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E283DD0C-E2E3-47F9-AC18-177A67E7D31C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E283DD0C-E2E3-47F9-AC18-177A67E7D31C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E283DD0C-E2E3-47F9-AC18-177A67E7D31C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
