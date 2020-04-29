@@ -1,4 +1,6 @@
 {
+  // Schema details: https://aka.ms/liftr/hosting-options
+  // Please create your own 'hosting-options.json' in this folder with similar format to this one.
   "PartnerName": "SamplePartner",
   "ShortPartnerName": "sp",
   "SecretPrefix": "SamplePartner",
@@ -10,8 +12,8 @@
       "TenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", // ms
       "AzureSubscription": "d21a525e-7c86-486d-a79e-a4f3622f639a",
       "EnableVNet": true,
-      "OneCertCertificates": {
-        "GenevaClientCert": "antares-mds-agent.geneva.keyvault.liftr-dev.net", // key is certificate name, value is certificate subject
+      "OneCertCertificates": { // key is certificate name, value is certificate subject
+        "GenevaClientCert": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
         "FirstPartyAppCert": "test-first-party-certificate.liftr-dev.net"
       },
       "AKSConfigurations": {

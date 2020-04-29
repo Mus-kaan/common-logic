@@ -118,59 +118,76 @@ namespace Microsoft.Liftr.KeyVault
                 throw new ArgumentNullException(nameof(certificateSubject));
             }
 
-            CertificatePolicy certPolicy = new CertificatePolicy()
+            using (var ops = _logger.StartTimedOperation(nameof(CreateCertificateAsync)))
             {
-                IssuerParameters = new IssuerParameters
-                {
-                    Name = issuerName,
-                },
-                KeyProperties = new KeyProperties
-                {
-                    Exportable = true,
-                    KeySize = 2048,
-                    KeyType = "RSA",
-                    ReuseKey = false,
-                },
-                SecretProperties = new SecretProperties
-                {
-                    ContentType = CertificateContentType.Pfx,
-                },
-                X509CertificateProperties = new X509CertificateProperties
-                {
-                    Subject = $"CN={certificateSubject}",
-                    SubjectAlternativeNames = new SubjectAlternativeNames(emails: null, dnsNames: subjectAlternativeNames),
-                    ValidityInMonths = 12,
-                },
-                LifetimeActions = new List<LifetimeAction>()
-                {
-                    new LifetimeAction(
-                        new Trigger(daysBeforeExpiry: 290), // ECR require certificate to be auto-renewed in less than 90 days.
-                        new Azure.KeyVault.Models.Action(ActionType.AutoRenew)),
-                },
-            };
+                ops.SetContextProperty("CertificateName", certName);
+                ops.SetContextProperty(nameof(issuerName), issuerName);
+                ops.SetContextProperty(nameof(certificateSubject), certificateSubject);
 
-            var certificateAttributes = new CertificateAttributes
-            {
-                Enabled = true,
-            };
+                try
+                {
+                    CertificatePolicy certPolicy = new CertificatePolicy()
+                    {
+                        IssuerParameters = new IssuerParameters
+                        {
+                            Name = issuerName,
+                        },
+                        KeyProperties = new KeyProperties
+                        {
+                            Exportable = true,
+                            KeySize = 2048,
+                            KeyType = "RSA",
+                            ReuseKey = false,
+                        },
+                        SecretProperties = new SecretProperties
+                        {
+                            ContentType = CertificateContentType.Pfx,
+                        },
+                        X509CertificateProperties = new X509CertificateProperties
+                        {
+                            Subject = $"CN={certificateSubject}",
+                            SubjectAlternativeNames = new SubjectAlternativeNames(emails: null, dnsNames: subjectAlternativeNames),
+                            ValidityInMonths = 12,
+                        },
+                        LifetimeActions = new List<LifetimeAction>()
+                        {
+                            new LifetimeAction(
+                                new Trigger(daysBeforeExpiry: 290), // ECR require certificate to be auto-renewed in less than 90 days.
+                                new Azure.KeyVault.Models.Action(ActionType.AutoRenew)),
+                        },
+                    };
 
-            _logger.Information("Start creating certificate with name {@certificateName}, subject name {certSubjectName} and policy: {@certPolicy} in vault '{vaultBaseUrl}' ...", certName, certPolicy.X509CertificateProperties.Subject, certPolicy, _vaultBaseUrl);
-            var certOperation = await _keyVaultClient.CreateCertificateAsync(_vaultBaseUrl, certName, certPolicy, certificateAttributes, tags);
+                    var certificateAttributes = new CertificateAttributes
+                    {
+                        Enabled = true,
+                    };
 
-            while (certOperation.Status.OrdinalEquals("InProgress"))
-            {
-                await Task.Delay(5000);
-                certOperation = await _keyVaultClient.GetCertificateOperationAsync(_vaultBaseUrl, certName);
+                    _logger.Information("Start creating certificate with name {@certificateName}, subject name {certSubjectName} and policy: {@certPolicy} in vault '{vaultBaseUrl}' ...", certName, certPolicy.X509CertificateProperties.Subject, certPolicy, _vaultBaseUrl);
+                    var certOperation = await _keyVaultClient.CreateCertificateAsync(_vaultBaseUrl, certName, certPolicy, certificateAttributes, tags);
+
+                    while (certOperation.Status.OrdinalEquals("InProgress"))
+                    {
+                        await Task.Delay(5000);
+                        certOperation = await _keyVaultClient.GetCertificateOperationAsync(_vaultBaseUrl, certName);
+                    }
+
+                    _logger.Information("Finished cert cration with name '{certificateName}', subject name '{certSubjectName}'. Operation result: {@certOperation}", certName, certPolicy.X509CertificateProperties.Subject, certOperation);
+
+                    if (!certOperation.Status.OrdinalEquals("Completed"))
+                    {
+                        _logger.Error("Failed at creating certificate with name '{certificateName}', creation error message: {errorMessage}", certName, certOperation?.Error?.Message);
+                        _logger.Error("Certificate creation operation details: {@certOperation}", certOperation);
+                        throw new KeyVaultErrorException("Failed to create certificate. " + certOperation?.Error?.Message);
+                    }
+
+                    return certOperation;
+                }
+                catch (Exception ex)
+                {
+                    ops.FailOperation(ex.Message);
+                    throw;
+                }
             }
-
-            _logger.Information("Finished cert cration with name {@certificateName}, subject name {certSubjectName}. Operation result: {certOperation}", certName, certPolicy.X509CertificateProperties.Subject, certOperation);
-
-            if (!certOperation.Status.OrdinalEquals("Completed"))
-            {
-                throw new KeyVaultErrorException("Failed to create certificate. " + certOperation.Status + certOperation.StatusDetails);
-            }
-
-            return certOperation;
         }
 
         /// <summary>
