@@ -321,8 +321,10 @@ namespace Microsoft.Liftr.ImageBuilder
                     if (!asyncOperationResponse.OrdinalContains("Succeeded"))
                     {
                         operation.FailOperation(asyncOperationResponse);
-                        _logger.Error("Failed at running AIB template. asyncOperationResponse: {asyncOperationResponse}", asyncOperationResponse);
-                        throw new InvalidOperationException(asyncOperationResponse);
+                        _logger.Error("Failed at running AIB template. asyncOperationResponse: {@asyncOperationResponse}", asyncOperationResponse);
+                        var ex = new RunAzureVMImageBuilderException("Failed at running the Azure VM Image Builder template. There might be some issues in the 'bake-image.sh' or 'bakeImage.ps1' script. ", client.FluentClient.SubscriptionId, rgName, templateName);
+                        _logger.Fatal(ex.Message);
+                        throw ex;
                     }
 
                     return asyncOperationResponse;
@@ -331,7 +333,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 var resBody = await startRunResponse.Content.ReadAsStringAsync();
                 operation.FailOperation(resBody);
                 _logger.Error("Failed at running AIB template. startRunResponse: {startRunResponse}", resBody);
-                throw new InvalidOperationException(resBody);
+                throw new RunAzureVMImageBuilderException(resBody, client.FluentClient.SubscriptionId, rgName, templateName);
             }
         }
 
