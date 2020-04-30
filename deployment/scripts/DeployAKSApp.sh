@@ -139,7 +139,13 @@ echo "-----------------------------------------------------------------"
 echo "Start deploy '$HelmReleaseName' helm chart."
 echo "-----------------------------------------------------------------"
 
-$Helm upgrade $HelmReleaseName --install --atomic --wait --cleanup-on-fail \
+DeploymentFlag=""
+if [ "$APP_ASPNETCORE_ENVIRONMENT" = "Production" ]; then
+    DeploymentFlag="--atomic --cleanup-on-fail "
+    echo "Set '$DeploymentFlag' for production to roll back automatically."
+fi
+
+$Helm upgrade $HelmReleaseName --install --wait $DeploymentFlag\
 --set appVersion="$AppVersion" \
 --set vaultEndpoint="$KeyVaultEndpoint" \
 --set hostname="$RPWebHostname" \
