@@ -20,6 +20,8 @@ namespace Microsoft.Liftr.ImageBuilder
     {
         public TenantType Tenant { get; set; } = TenantType.AME;
 
+        public bool KeepAzureVMImageBuilderLogs { get; set; } = false;
+
         public Guid SubscriptionId { get; set; }
 
         public string ExecutorSPNObjectId { get; set; }
@@ -62,9 +64,9 @@ namespace Microsoft.Liftr.ImageBuilder
                 throw new InvalidOperationException($"{nameof(Location)} cannot be null.");
             }
 
-            if (ImageVersionRetentionTimeInDays < 10)
+            if (ImageVersionRetentionTimeInDays < 1)
             {
-                throw new InvalidOperationException($"{nameof(ImageVersionRetentionTimeInDays)} must be greater than 10.");
+                throw new InvalidOperationException($"{nameof(ImageVersionRetentionTimeInDays)} must be greater than 1.");
             }
         }
     }

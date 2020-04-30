@@ -277,7 +277,7 @@ namespace Microsoft.Liftr.ImageBuilder
             return galleryImageVersion;
         }
 
-        public async Task<string> CreateImageVersionByAzureImageBuilderAsync(
+        public async Task<string> CreateNewSBIVersionByRunAzureVMImageBuilderAsync(
             ILiftrAzure client,
             Region location,
             string rgName,
@@ -304,7 +304,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
             // https://github.com/Azure/azure-rest-api-specs-pr/blob/87dbc20106afce8c615113d654c14359a3356486/specification/imagebuilder/resource-manager/Microsoft.VirtualMachineImages/preview/2019-05-01-preview/imagebuilder.json#L328
             // https://github.com/Azure/azure-rest-api-specs-pr/blob/87dbc20106afce8c615113d654c14359a3356486/specification/imagebuilder/resource-manager/Microsoft.VirtualMachineImages/preview/2019-05-01-preview/examples/RunImageTemplate.json
-            using (var operation = _logger.StartTimedOperation(nameof(CreateImageVersionByAzureImageBuilderAsync)))
+            using (var operation = _logger.StartTimedOperation(nameof(CreateNewSBIVersionByRunAzureVMImageBuilderAsync)))
             using (var handler = new AzureApiAuthHandler(client.AzureCredentials))
             using (var httpClient = new HttpClient(handler))
             {

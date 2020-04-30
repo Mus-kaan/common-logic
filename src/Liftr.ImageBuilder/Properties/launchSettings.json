@@ -2,11 +2,11 @@
   "profiles": {
     "ms-linux-img-test": {
       "commandName": "Project",
-      "commandLineArgs": "-f configs\\ms-test-sig-eastus.json --srcImg U1804LTS -n TestImageName123 --imgVerionTag 1.0.01019.0002-3678b756 --artifactPath configs\\test-packer.tar --authFile my.azureauth-ms.auth.json"
+      "commandLineArgs": "-f configs\\ms-test-sig-eastus.json --srcImg U1804LTS -n TestImageName123 -v 1.2.532 --artifactPath configs\\test-packer.tar --authFile my.azureauth-ms.auth.json"
     },
     "ms-windows-img-test": {
       "commandName": "Project",
-      "commandLineArgs": "-f configs\\ms-test-sig-eastus.json --srcImg WindowsServer2019 -n TestWinImageName123 --imgVerionTag 0.9.01020.0003-3678b756 --artifactPath configs\\packer-windows.tar.gz --authFile my.azureauth-ms.auth.json"
+      "commandLineArgs": "-f configs\\ms-test-sig-eastus.json --srcImg WindowsServer2019 -n TestWinImageName123 -v 0.9.5423 --artifactPath configs\\packer-windows.tar.gz --authFile my.azureauth-ms.auth.json"
     }
   }
 }

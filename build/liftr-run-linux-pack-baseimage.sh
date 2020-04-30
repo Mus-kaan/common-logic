@@ -35,13 +35,14 @@ else
 fi
 echo "EV2 artifact version is: $EV2ArtifactVersion"
 
-if [ -v CDP_FILE_VERSION_SEMANTIC ]; then
-    ImageVerionTag="$CDP_FILE_VERSION_SEMANTIC"
+# CDPx Versioning: https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/325/Versioning
+if [ -v CDP_PACKAGE_VERSION_NUMERIC ]; then
+    ImageVerion="$CDP_PACKAGE_VERSION_NUMERIC"
 else
     # Use a fake version when building locally.
-    ImageVerionTag="0.3.01076.0009-417de0e5"
+    ImageVerion="0.3.010760009"
 fi
-echo "ImageVerionTag: $ImageVerionTag"
+echo "ImageVerion: $ImageVerion"
 
 # Create directories.
 mkdir --parent "$OutDir"
@@ -65,8 +66,8 @@ rm -rf "$EV2ExtensionFilesDir/bin/generated-ev2"
 cp $PackerTarFile "$EV2ExtensionFilesDir/bin"
 echo -n "$EV2ArtifactVersion" > "$EV2ExtensionFilesDir/bin/version.txt"
 
-echo -n "$ImageVerionTag" > "$EV2ExtensionFilesDir/bin/semantic.fileversion.info"
-echo -n "$ImageVerionTag" > "$EV2ExtensionFilesDir/semantic.fileversion.info"
+echo -n "$ImageVerion" > "$EV2ExtensionFilesDir/bin/numeric.packageversion.info"
+echo -n "$ImageVerion" > "$EV2ExtensionFilesDir/numeric.packageversion.info"
 
 for script in "$EV2ExtensionFilesDir"/*.sh
 do

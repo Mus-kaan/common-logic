@@ -47,10 +47,10 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
 
                 try
                 {
-                    await orchestrator.CreateOrUpdateImageBuildInfrastructureAsync(TestCredentials.AzureVMImageBuilderObjectIdAME, tags);
+                    await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(tags);
 
                     // Run another time will not fail.
-                    await orchestrator.CreateOrUpdateImageBuildInfrastructureAsync(TestCredentials.AzureVMImageBuilderObjectIdAME, tags);
+                    await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(tags);
                 }
                 catch (Exception ex)
                 {

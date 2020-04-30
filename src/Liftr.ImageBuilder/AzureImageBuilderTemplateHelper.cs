@@ -18,6 +18,7 @@ namespace Microsoft.Liftr.ImageBuilder
     public class AzureImageBuilderTemplateHelper
     {
         private const string c_ARTIFACT_URI_PLACEHOLDER = "ARTIFACT_URI_PLACEHOLDER";
+        private const string c_USER_ASSIGNED_MI_ID_PLACEHOLDER = "USER_ASSIGNED_MI_ID_PLACEHOLDER";
         private const string c_REPLICATION_REGIONS_PLACEHOLDER = "\"REPLICATION_REGIONS_PLACEHOLDER\"";
         private const string c_linux_aib_base_template = "Microsoft.Liftr.ImageBuilder.aib.template.linux.json";
         private const string c_windows_aib_base_template = "Microsoft.Liftr.ImageBuilder.aib.template.windows.json";
@@ -37,7 +38,9 @@ namespace Microsoft.Liftr.ImageBuilder
             Region location,
             string imageTemplateName,
             string imageName,
+            string imageVersion,
             string artifactLinkWithSAS,
+            string msiId,
             string srcImgVersionId,
             IDictionary<string, string> tags = null,
             bool formatJson = true)
@@ -58,7 +61,9 @@ namespace Microsoft.Liftr.ImageBuilder
                 location,
                 imageTemplateName,
                 imageName,
+                imageVersion,
                 artifactLinkWithSAS,
+                msiId,
                 formatJson,
                 srcImg,
                 tags);
@@ -68,7 +73,9 @@ namespace Microsoft.Liftr.ImageBuilder
             Region location,
             string imageTemplateName,
             string imageName,
+            string imageVersion,
             string artifactLinkWithSAS,
+            string msiId,
             PlatformImageIdentifier sourceImage,
             IDictionary<string, string> tags = null,
             bool formatJson = true)
@@ -97,7 +104,9 @@ namespace Microsoft.Liftr.ImageBuilder
                 location,
                 imageTemplateName,
                 imageName,
+                imageVersion,
                 artifactLinkWithSAS,
+                msiId,
                 formatJson,
                 srcImg,
                 tags);
@@ -108,13 +117,16 @@ namespace Microsoft.Liftr.ImageBuilder
             Region location,
             string imageTemplateName,
             string imageName,
+            string imageVersion,
             string artifactUrlWithSAS,
+            string msiId,
             bool formatJson,
             IDictionary<string, string> source,
             IDictionary<string, string> tags)
         {
             var templateContent = EmbeddedContentReader.GetContent(Assembly.GetExecutingAssembly(), templateContentFileName);
             templateContent = templateContent.Replace(c_ARTIFACT_URI_PLACEHOLDER, artifactUrlWithSAS, StringComparison.OrdinalIgnoreCase);
+            templateContent = templateContent.Replace(c_USER_ASSIGNED_MI_ID_PLACEHOLDER, msiId, StringComparison.OrdinalIgnoreCase);
 
             var regions = string.Join(", ", _options.ImageReplicationRegions.Select(r => $"\"{r.Name}\""));
             templateContent = templateContent.Replace(c_REPLICATION_REGIONS_PLACEHOLDER, regions, StringComparison.OrdinalIgnoreCase);
@@ -123,7 +135,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
             var resourceObject = templateObj.resources[0];
 
-            var galleryImageResourceId = $"/subscriptions/{_options.SubscriptionId.ToString()}/resourceGroups/{_options.ResourceGroupName}/providers/Microsoft.Compute/galleries/{_options.ImageGalleryName}/images/{imageName}";
+            var galleryImageResourceId = $"/subscriptions/{_options.SubscriptionId}/resourceGroups/{_options.ResourceGroupName}/providers/Microsoft.Compute/galleries/{_options.ImageGalleryName}/images/{imageName}/versions/{imageVersion}";
 
             resourceObject.name = imageTemplateName;
             resourceObject.location = location.Name;

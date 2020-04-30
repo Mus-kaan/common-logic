@@ -14,8 +14,8 @@ case $i in
     ImageName="${i#*=}"
     shift # past argument=value
     ;;
-    --ImageVersionTag=*)
-    ImageVersionTag="${i#*=}"
+    --ImageVersion=*)
+    ImageVersion="${i#*=}"
     shift # past argument=value
     ;;
     --SourceImage=*)
@@ -47,8 +47,8 @@ if [ -z ${ImageName+x} ]; then
     exit 1
 fi
 
-if [ -z ${ImageVersionTag+x} ]; then
-    echo "ImageVersionTag is blank."
+if [ -z ${ImageVersion+x} ]; then
+    echo "ImageVersion is blank."
     exit 1
 fi
 
@@ -77,7 +77,7 @@ if [ "$OnlyOutputSubscriptionId" = "true" ]; then
     -f "$ConfigurationPath" \
     --outputSubscriptionIdOnly \
     -n "$ImageName" \
-    --imageVersionTag "$ImageVersionTag" \
+    -v "$ImageVersion" \
     --srcImg "$SourceImage" \
     --spnObjectId "$RunnerSPNObjectId" \
     --artifactPath "packer-files.tar.gz"
@@ -85,7 +85,7 @@ else
     dotnet BaseImageBuilder.dll \
     -f "$ConfigurationPath" \
     -n "$ImageName" \
-    --imageVersionTag "$ImageVersionTag" \
+    -v "$ImageVersion" \
     --srcImg "$SourceImage" \
     --spnObjectId "$RunnerSPNObjectId" \
     --artifactPath "packer-files.tar.gz"

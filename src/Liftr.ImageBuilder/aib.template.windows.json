@@ -8,6 +8,12 @@
       "name": "WILL_BE_CHANGED 0.2.0123",
       "location": "WILL_BE_REPLACED eastus",
       "dependsOn": [],
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "USER_ASSIGNED_MI_ID_PLACEHOLDER": {}
+        }
+      },
       "properties": {
         "vmProfile": {
           "vmSize": "WILL_BE_REPLACED <vmSize>"
@@ -34,7 +40,7 @@
         "distribute": [
           {
             "type": "SharedImage",
-            "galleryImageId": "WILL_BE_REPLACED /subscriptions/73543923-8c67-42cf-b9b2-cb816bb61581/resourceGroups/aibwinsig/providers/Microsoft.Compute/galleries/my22stSIG/images/winSvrimages",
+            "galleryImageId": "WILL_BE_REPLACED /subscriptions/73543923-8c67-42cf-b9b2-cb816bb61581/resourceGroups/aibwinsig/providers/Microsoft.Compute/galleries/my22stSIG/images/winSvrimages/versions/0.24234.2781",
             "runOutputName": "liftr-windows-base-image",
             "artifactTags": {
               "source": "azureVmImageBuilder",

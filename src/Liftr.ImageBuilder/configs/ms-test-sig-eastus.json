@@ -4,9 +4,11 @@
   "Location": "westus",
   "ResourceGroupName": "LFTestRG",
   "ImageGalleryName": "LiftrSBiTestSIG",
+  "PackerVMSize": "Standard_D4s_v3",
   "RegionalReplicaCount": 1,
   "ImageReplicationRegions": [
     "westus",
     "westus2"
-  ]
+  ],
+  "KeepAzureVMImageBuilderLogs": true
 }

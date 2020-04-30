@@ -9,6 +9,7 @@ using Microsoft.Azure.Management.Compute.Fluent.Models;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
+using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Storage;
@@ -45,6 +46,7 @@ namespace Microsoft.Liftr.ImageBuilder
         private readonly ITimeSource _timeSource;
         private ArtifactStore _artifactStore;
         private IVault _keyVault;
+        private IIdentity _msi;
         private CloudStorageAccount _cloudStorageAccount;
 
         public ImageBuilderOrchestrator(
@@ -61,7 +63,7 @@ namespace Microsoft.Liftr.ImageBuilder
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<IVault> CreateOrUpdateImageBuildInfrastructureAsync(string azureVMImageBuilderObjectId, IDictionary<string, string> tags)
+        public async Task<(IVault, IIdentity)> CreateOrUpdateLiftrImageBuilderInfrastructureAsync(IDictionary<string, string> tags)
         {
             var liftrAzure = _azFactory.GenerateLiftrAzure();
 
@@ -72,10 +74,10 @@ namespace Microsoft.Liftr.ImageBuilder
 
             try
             {
-                _logger.Information("Granting resource group '{rgId}' contributor role to Azure Image Builder First Party app ...", rg.Id);
+                _logger.Information("Granting resource group '{rgId}' contributor role to the Azure VM Image Builder's Managed Identity {msiId} ...", rg.Id, _msi.Id);
                 await liftrAzure.Authenticated.RoleAssignments
                 .Define(SdkContext.RandomGuid())
-                .ForObjectId(azureVMImageBuilderObjectId)
+                .ForObjectId(_msi.GetObjectId())
                 .WithBuiltInRole(BuiltInRole.Contributor)
                 .WithResourceGroupScope(rg)
                 .CreateAsync();
@@ -92,14 +94,14 @@ namespace Microsoft.Liftr.ImageBuilder
             ImageGalleryClient galleryClient = new ImageGalleryClient(_logger);
             var gallery = await galleryClient.CreateGalleryAsync(liftrAzure.FluentClient, _options.Location, _options.ResourceGroupName, _options.ImageGalleryName, tags);
 
-            _logger.Information($"Successfully finished {nameof(CreateOrUpdateImageBuildInfrastructureAsync)}.");
+            _logger.Information($"Successfully finished {nameof(CreateOrUpdateLiftrImageBuilderInfrastructureAsync)}.");
 
-            return _keyVault;
+            return (_keyVault, _msi);
         }
 
         public async Task<string> BuildCustomizedSBIAsync(
             string imageName,
-            string imageVersionTag,
+            string imageVersion,
             SourceImageType sourceImageType,
             string artifactPath,
             IDictionary<string, string> tags,
@@ -110,7 +112,16 @@ namespace Microsoft.Liftr.ImageBuilder
                 throw new ArgumentNullException(nameof(tags));
             }
 
-            _logger.Information("imageVersionTag: {imageVersionTag}", imageVersionTag);
+            if (Version.TryParse(imageVersion, out var parsedVersion))
+            {
+                imageVersion = parsedVersion.ToString();
+            }
+            else
+            {
+                throw new InvalidImageVersionException($"The image version value '{imageVersion}' is invalid. ");
+            }
+
+            _logger.Information("GeneratingImageVersion: {imageVersion}", imageVersion);
 
             if (!File.Exists(artifactPath))
             {
@@ -152,11 +163,11 @@ namespace Microsoft.Liftr.ImageBuilder
             var artifactUrlWithSAS = await _artifactStore.UploadBuildArtifactsAndGenerateReadSASAsync(artifactPath);
             _logger.Information("uploaded the file {filePath} and generated the url with the SAS token.", artifactPath);
 
-            var templateName = imageName + imageVersionTag;
+            var templateName = $"{imageName}-{imageVersion}";
             var generatedTemplate = string.Empty;
 
             tags[NamingContext.c_createdAtTagName] = _timeSource.UtcNow.ToZuluString();
-            tags["VersionTag"] = imageVersionTag;
+            tags["VersionTag"] = imageVersion;
 
             bool isLinux = true;
             if (windowsSourceImage != null)
@@ -165,7 +176,9 @@ namespace Microsoft.Liftr.ImageBuilder
                     _options.Location,
                     templateName,
                     imageName,
+                    imageVersion,
                     artifactUrlWithSAS.ToString(),
+                    _msi.Id,
                     windowsSourceImage,
                     tags);
 
@@ -184,9 +197,25 @@ namespace Microsoft.Liftr.ImageBuilder
                     _options.Location,
                     templateName,
                     imageName,
+                    imageVersion,
                     artifactUrlWithSAS.ToString(),
+                    _msi.Id,
                     linuxSourceImage.Id,
                     tags);
+            }
+
+            var existingSIGImageVersion = await galleryClient.GetImageVersionAsync(
+                _azFactory.GenerateLiftrAzure().FluentClient,
+                _options.ResourceGroupName,
+                _options.ImageGalleryName,
+                imageName,
+                imageVersion);
+
+            if (existingSIGImageVersion != null)
+            {
+                var ex = new DuplicatedSharedImageGalleryImagerVersionException($"There already exist a same image version '{imageVersion}' for image '{imageName}' in gallery '{_options.ImageGalleryName}'. We cannot generate another image version with this name.");
+                _logger.Fatal(ex.Message);
+                throw ex;
             }
 
             var cleanUpTask = CleanUpAsync(_azFactory.GenerateLiftrAzure().FluentClient, imageName, galleryClient);
@@ -211,7 +240,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 isLinux: isLinux);
             }
 
-            var res = await galleryClient.CreateImageVersionByAzureImageBuilderAsync(
+            var res = await galleryClient.CreateNewSBIVersionByRunAzureVMImageBuilderAsync(
                 az,
                 _options.Location,
                 _options.ResourceGroupName,
@@ -221,7 +250,11 @@ namespace Microsoft.Liftr.ImageBuilder
 
             _logger.Information("Run AIB template result: {AIBTemplateRunResult}", res);
 
-            await galleryClient.DeleteVMImageBuilderTemplateAsync(az, _options.ResourceGroupName, templateName, cancellationToken);
+            if (!_options.KeepAzureVMImageBuilderLogs)
+            {
+                _logger.Information("Clean up Azure VM Image Builder logs by deleting ther AIB template.");
+                await galleryClient.DeleteVMImageBuilderTemplateAsync(az, _options.ResourceGroupName, templateName, cancellationToken);
+            }
 
             await cleanUpTask;
 
@@ -326,8 +359,28 @@ namespace Microsoft.Liftr.ImageBuilder
                 var kv = await GetOrCreateKeyVaultAsync();
                 Interlocked.Exchange(ref _keyVault, kv);
             }
+
+            if (_msi == null)
+            {
+                var msi = await GetOrCreateMSIAsync();
+                Interlocked.Exchange(ref _msi, msi);
+            }
         }
         #endregion
+
+        private async Task<IIdentity> GetOrCreateMSIAsync()
+        {
+            Dictionary<string, string> tags = new Dictionary<string, string>()
+            {
+                [NamingContext.c_createdAtTagName] = _timeSource.UtcNow.ToZuluString(),
+            };
+
+            var liftrAzure = _azFactory.GenerateLiftrAzure();
+            var msiName = $"lib-{_options.ImageGalleryName}-{_options.Location.ShortName()}-mi".ToLowerInvariant();
+            var msi = await liftrAzure.GetOrCreateMSIAsync(_options.Location, _options.ResourceGroupName, msiName, tags);
+
+            return msi;
+        }
 
         #region SBI mover. TODO: delete this after SBI support AME tenant.
         private async Task<IVault> GetOrCreateKeyVaultAsync()

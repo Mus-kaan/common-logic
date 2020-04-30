@@ -24,12 +24,13 @@ if [ "$RunnerSPNObjectId" = "" ]; then
     exit 1 # terminate and indicate error
 fi
 
-imageVersionTag=$(<semantic.fileversion.info)
+# CDPx Versioning: https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/325/Versioning
+ImageVersion=$(<numeric.packageversion.info)
 
 ./RunImageBuilder.sh \
 --ConfigurationPath="$ConfigurationPath" \
 --ImageName="$ImageName" \
---ImageVersionTag="$imageVersionTag" \
+--ImageVersion="$ImageVersion" \
 --SourceImage="$SourceImage" \
 --RunnerSPNObjectId="$RunnerSPNObjectId" \
 --OnlyOutputSubscriptionId="true"
@@ -50,7 +51,7 @@ fi
 ./RunImageBuilder.sh \
 --ConfigurationPath="$ConfigurationPath" \
 --ImageName="$ImageName" \
---ImageVersionTag="$imageVersionTag" \
+--ImageVersion="$ImageVersion" \
 --SourceImage="$SourceImage" \
 --RunnerSPNObjectId="$RunnerSPNObjectId" \
 --OnlyOutputSubscriptionId="false"

@@ -37,6 +37,8 @@ fi
 checkAndRegisterProvider "Microsoft.VirtualMachineImages"
 checkAndRegisterProvider "Microsoft.Storage"
 checkAndRegisterProvider "Microsoft.Compute"
+checkAndRegisterProvider "Microsoft.KeyVault"
+checkAndRegisterProvider "Microsoft.ManagedIdentity"
 
 # register and enable for shared image gallery
 echo "az feature register --namespace Microsoft.VirtualMachineImages --name VirtualMachineTemplatePreview"

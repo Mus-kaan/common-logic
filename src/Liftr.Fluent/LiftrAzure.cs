@@ -911,20 +911,20 @@ namespace Microsoft.Liftr.Fluent
 
         public async Task<IIdentity> CreateMSIAsync(Region location, string rgName, string msiName, IDictionary<string, string> tags)
         {
-            _logger.Information("Creating a MSI with name {msiName} ...", msiName);
+            _logger.Information("Creating a Managed Identity with name {msiName} ...", msiName);
             var msi = await FluentClient.Identities
                 .Define(msiName)
                 .WithRegion(location)
                 .WithExistingResourceGroup(rgName)
                 .WithTags(tags)
                 .CreateAsync();
-            _logger.Information("Created MSI with Id {ResourceId} ...", msi.Id);
+            _logger.Information("Created Managed Identity with Id {ResourceId} ...", msi.Id);
             return msi;
         }
 
         public Task<IIdentity> GetMSIAsync(string rgName, string msiName)
         {
-            _logger.Information("Getting MSI with name {msiName} in RG {rgName} ...", msiName, rgName);
+            _logger.Information("Getting Managed Identity with name {msiName} in RG {rgName} ...", msiName, rgName);
             return FluentClient.Identities.GetByResourceGroupAsync(rgName, msiName);
         }
         #endregion

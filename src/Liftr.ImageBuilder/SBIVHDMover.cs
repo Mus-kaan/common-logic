@@ -47,11 +47,11 @@ namespace Microsoft.Liftr.ImageBuilder
                 return targetBlob.Uri;
             }
 
-            using (var operation = _logger.StartTimedOperation("CopySBIVhdBlobToLocalBlobStorage"))
+            using (var operation = _logger.StartTimedOperation("CopyAzLinuxSBIVHDToCachedLocalBlob"))
             {
                 var srcBlob = new CloudPageBlob(srcUri);
                 var copyId = await targetBlob.StartCopyAsync(srcBlob);
-                _logger.Information("Start copying job with {copyId} of sbi VHD with Version {SBIVersion} to target blob: {@targetSBIBlob}", copyId, sbiVhdVerion, targetBlob.Uri);
+                _logger.Information("Start copying (copyJobId: {copyId}) Azure Linux SBI VHD with Version {SBIVersion} to local cached blob '{@targetSBIBlob}' for faster image build next time.", copyId, sbiVhdVerion, targetBlob.Uri);
                 await WaitAfterPendingStateAsync(targetBlob);
             }
 

@@ -44,6 +44,7 @@ namespace Microsoft.Liftr.ImageBuilder
             LogContext.PushProperty(nameof(options.SourceImage), options.SourceImage.ToString());
             LogContext.PushProperty(nameof(options.ImageName), options.ImageName);
             LogContext.PushProperty("PartnerName", options.ImageName); // ImageBuilder does not have a 'PartnerName' concept, this is for reuse the existing dashboard.
+            LogContext.PushProperty(nameof(options.ImageVersion), options.ImageVersion);
             logger.LogProcessStart();
         }
 
@@ -79,25 +80,22 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
 
                 string tenantId = null;
-                string azureVMImageBuilderObjectId = null;
                 switch (config.Tenant)
                 {
                     case TenantType.MS:
                         {
                             tenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
-                            azureVMImageBuilderObjectId = "ef511139-6170-438e-a6e1-763dc31bdf74";
                             break;
                         }
 
                     case TenantType.AME:
                         {
                             tenantId = "33e01921-4d64-4f8c-a055-5bdaffd5e33d";
-                            azureVMImageBuilderObjectId = "cc22e29d-20f4-457d-87dd-aea1bdcce16a";
                             break;
                         }
 
                     default:
-                        throw new InvalidOperationException($"Does not support tenant: {config.Tenant.ToString()}");
+                        throw new InvalidOperationException($"Does not support tenant: {config.Tenant}");
                 }
 
                 if (!string.IsNullOrEmpty(_options.RunnerSPNObjectId))
@@ -140,7 +138,7 @@ namespace Microsoft.Liftr.ImageBuilder
                     azureCredentialsProvider);
 
                 // fire and forget.
-                _ = RunActionAsync(azureVMImageBuilderObjectId, kvClient, config, azFactory, cancellationToken);
+                _ = RunActionAsync(kvClient, config, azFactory, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -154,7 +152,7 @@ namespace Microsoft.Liftr.ImageBuilder
             return Task.CompletedTask;
         }
 
-        private async Task RunActionAsync(string azureVMImageBuilderObjectId, KeyVaultClient kvClient, BuilderOptions config, LiftrAzureFactory azFactory, CancellationToken cancellationToken)
+        private async Task RunActionAsync(KeyVaultClient kvClient, BuilderOptions config, LiftrAzureFactory azFactory, CancellationToken cancellationToken)
         {
             _logger.Information("BuilderCommandOptions: {@BuilderCommandOptions}", _options);
             _logger.Information("Parsed config file: {@BuilderOptions}", config);
@@ -178,11 +176,11 @@ namespace Microsoft.Liftr.ImageBuilder
                         _timeSource,
                         _logger);
 
-                    await orchestrator.CreateOrUpdateImageBuildInfrastructureAsync(azureVMImageBuilderObjectId, tags);
+                    await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(tags);
 
                     var generatedBuilderTemplate = await orchestrator.BuildCustomizedSBIAsync(
                         _options.ImageName,
-                        _options.ImageVersionTag,
+                        _options.ImageVersion,
                         _options.SourceImage,
                         _options.ArtifactPath,
                         tags,

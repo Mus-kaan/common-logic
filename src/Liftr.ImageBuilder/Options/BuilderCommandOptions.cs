@@ -18,8 +18,8 @@ namespace Microsoft.Liftr.ImageBuilder
         [Option('n', "imageName", Required = true, HelpText = "Image name, the name of the generating Shared Image Galalery Image Name.")]
         public string ImageName { get; set; }
 
-        [Option("imageVersionTag", Required = true, HelpText = "CDPx build tag, e.g. '0.9.01018.0002-3678b756'")]
-        public string ImageVersionTag { get; set; }
+        [Option('v', "imageVersion", Required = true, HelpText = "The generating Shared Image Gallery Image Version Name, e.g. '0.9.2326'")]
+        public string ImageVersion { get; set; }
 
         [Option("srcImg", Required = true, HelpText = "Source image type, one of: [ WindowsServer2016Datacenter, WindowsServer2016DatacenterCore, WindowsServer2016DatacenterContainers, WindowsServer2019Datacenter, WindowsServer2019DatacenterCore, WindowsServer2019DatacenterContainers, U1604LTS, U1804LTS ]")]
         public SourceImageType SourceImage { get; set; }

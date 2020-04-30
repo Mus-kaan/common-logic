@@ -48,11 +48,11 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
 
                 try
                 {
-                    await orchestrator.CreateOrUpdateImageBuildInfrastructureAsync(TestCredentials.AzureVMImageBuilderObjectIdAME, tags);
+                    await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(tags);
 
                     var result = await orchestrator.BuildCustomizedSBIAsync(
                                     "img" + baseName,
-                                    "0.9.01018.0002-3678b756",
+                                    "0.9.1018",
                                     SourceImageType.WindowsServer2019DatacenterCore,
                                     "packer-windows.tar.gz",
                                     tags,

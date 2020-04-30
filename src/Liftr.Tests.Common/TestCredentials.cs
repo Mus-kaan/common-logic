@@ -14,8 +14,6 @@ namespace Microsoft.Liftr
 {
     public static class TestCredentials
     {
-        public const string AzureVMImageBuilderObjectIdAME = "cc22e29d-20f4-457d-87dd-aea1bdcce16a";
-
         public const string SharedKeyVaultResourceId = "/subscriptions/60fad35b-3a47-4ca0-b691-4a789f737cea/resourcegroups/unit-test-shared-rg/providers/Microsoft.KeyVault/vaults/tests-shared-eus-rg";
 
         public const string SharedKeyVaultUri = "https://tests-shared-eus-rg.vault.azure.net/";
