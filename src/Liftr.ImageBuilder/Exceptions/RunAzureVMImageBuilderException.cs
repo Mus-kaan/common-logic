@@ -9,7 +9,7 @@ namespace Microsoft.Liftr.ImageBuilder
     public class RunAzureVMImageBuilderException : Exception
     {
         private const string c_link = "More trouble-shotting guide: https://aka.ms/liftr/aib-tsg";
-        private const string c_messagePart = "Please see Azure VM Image Builder logs for details. The logs can be found in the resource group with name";
+        private const string c_messagePart = "Please see Azure VM Image Builder logs for details. The logs can be found in the resource group with name starting with";
         private const string c_basicErrorMessage = c_messagePart + " 'IT_<ImageResourceGroupName>_<TemplateName>'. " + c_link;
 
         public RunAzureVMImageBuilderException()
@@ -28,8 +28,20 @@ namespace Microsoft.Liftr.ImageBuilder
         }
 
         public RunAzureVMImageBuilderException(string message, string subscriptionId, string resourceGroup, string templateName)
-            : base($"{message} {c_messagePart} 'IT_{resourceGroup}_{templateName}' in subscription '{subscriptionId}'. {c_link}")
+            : base($"{message} {c_messagePart} '{Truncate($"IT_{resourceGroup}_{templateName}", 40)}' in subscription '{subscriptionId}'. {c_link}")
         {
+        }
+
+        private static string Truncate(string input, int maxLength)
+        {
+            if (input.Length <= maxLength)
+            {
+                return input;
+            }
+            else
+            {
+                return input.Substring(0, maxLength);
+            }
         }
     }
 }
