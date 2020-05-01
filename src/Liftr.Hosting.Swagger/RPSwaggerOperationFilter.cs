@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Liftr.Hosting.Swagger
 {
@@ -23,6 +24,11 @@ namespace Microsoft.Liftr.Hosting.Swagger
                 throw new ArgumentNullException(nameof(operation));
             }
 
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             if (operation.OperationId.Contains("List"))
             {
                 operation.Extensions.Add("x-ms-pageable", new OpenApiObject()
@@ -34,6 +40,18 @@ namespace Microsoft.Liftr.Hosting.Swagger
             if (operation.Responses.ContainsKey("201") || operation.Responses.ContainsKey("202"))
             {
                 operation.Extensions.Add("x-ms-long-running-operation", new OpenApiBoolean(true));
+            }
+
+            var methodsWithExamples = new List<string>() { "PUT", "GET", "POST" };
+
+            if (methodsWithExamples.Contains(context.ApiDescription.HttpMethod.ToUpperInvariant()))
+            {
+                // Example key and path should be based on the operation id.
+                var examplePathObject = new OpenApiString($"./examples/{operation.OperationId}.json");
+                var innerObject = new OpenApiObject() { { "$ref", examplePathObject } };
+                var outerObject = new OpenApiObject() { { operation.OperationId, innerObject } };
+
+                operation.Extensions.Add("x-ms-examples", outerObject);
             }
         }
     }

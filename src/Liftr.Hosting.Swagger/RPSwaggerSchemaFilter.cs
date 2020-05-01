@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Utilities;
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
@@ -31,6 +33,14 @@ namespace Microsoft.Liftr.Hosting.Swagger
 
             if (context.Type != null)
             {
+                if (context.Type.IsEnum)
+                {
+                    var enumExtension = new OpenApiObject();
+                    enumExtension["modelAsString"] = new OpenApiBoolean(true);
+                    schema.Extensions["x-ms-enum"] = enumExtension;
+                }
+
+                // Look for attributes in the type definition
                 var systemTypeAttributes = context.Type.GetCustomAttributes(true);
 
                 foreach (Attribute attribute in systemTypeAttributes)
@@ -51,15 +61,20 @@ namespace Microsoft.Liftr.Hosting.Swagger
                     }
                 }
 
+                // Look for attributes in the properties of the type.
+                // Mutability properties should only be applied at the property level,
+                // not on the schema level.
                 if (schema.Properties != null)
                 {
                     var excludedProperties = new List<string>();
                     var readonlyProperties = new List<string>();
+                    var mutabilityProperties = new Dictionary<string, OpenApiArray>();
 
                     context.Type.GetProperties().ToList().ForEach(property =>
                     {
                         var shouldExclude = false;
                         var shouldMarkAsReadOnly = false;
+                        var mutabilityValue = MutabilityValues.None;
 
                         var propertyAttributes = property.GetCustomAttributes(true);
 
@@ -78,6 +93,8 @@ namespace Microsoft.Liftr.Hosting.Swagger
                                 {
                                     shouldMarkAsReadOnly = true;
                                 }
+
+                                mutabilityValue = swaggerAttribute.MutabilityValues;
                             }
                         }
 
@@ -90,6 +107,12 @@ namespace Microsoft.Liftr.Hosting.Swagger
                         {
                             readonlyProperties.Add(ToCamelCase(property.Name));
                         }
+
+                        if (mutabilityValue != MutabilityValues.None)
+                        {
+                            var mutabilityList = GetMutabilityProperties(mutabilityValue);
+                            mutabilityProperties.Add(ToCamelCase(property.Name), mutabilityList);
+                        }
                     });
 
                     foreach (var property in schema.Properties)
@@ -97,6 +120,11 @@ namespace Microsoft.Liftr.Hosting.Swagger
                         if (readonlyProperties.Contains(property.Key))
                         {
                             property.Value.ReadOnly = true;
+                        }
+
+                        if (mutabilityProperties.ContainsKey(property.Key))
+                        {
+                            property.Value.Extensions.Add("x-ms-mutability", mutabilityProperties[property.Key]);
                         }
                     }
 
@@ -109,6 +137,28 @@ namespace Microsoft.Liftr.Hosting.Swagger
                     }
                 }
             }
+        }
+
+        private OpenApiArray GetMutabilityProperties(MutabilityValues values)
+        {
+            var returnValue = new OpenApiArray();
+
+            if ((values & MutabilityValues.Create) == MutabilityValues.Create)
+            {
+                returnValue.Add(new OpenApiString("create"));
+            }
+
+            if ((values & MutabilityValues.Read) == MutabilityValues.Read)
+            {
+                returnValue.Add(new OpenApiString("read"));
+            }
+
+            if ((values & MutabilityValues.Update) == MutabilityValues.Update)
+            {
+                returnValue.Add(new OpenApiString("update"));
+            }
+
+            return returnValue;
         }
 
         private static string ToCamelCase(string value)

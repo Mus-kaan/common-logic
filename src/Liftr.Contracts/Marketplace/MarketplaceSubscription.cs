@@ -2,10 +2,12 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Utilities;
 using System;
 
 namespace Microsoft.Liftr.Contracts.Marketplace
 {
+    [SwaggerExtension(ExcludeFromSwagger = true)]
     public class MarketplaceSubscription
     {
         public MarketplaceSubscription(Guid id)

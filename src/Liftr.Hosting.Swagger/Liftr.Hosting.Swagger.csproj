@@ -12,6 +12,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="$(PackageVersion_Swashbuckle_AspNetCore_Newtonsoft)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
+    <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
   </ItemGroup>
 </Project>

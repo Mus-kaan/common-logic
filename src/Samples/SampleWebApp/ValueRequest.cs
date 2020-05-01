@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Liftr.Hosting.Swagger;
+using Microsoft.Liftr.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -27,6 +27,9 @@ namespace SampleWebApp
     public class ValueRequest
     {
         public string ItemName { get; set; }
+
+        [SwaggerExtension(MutabilityValues = MutabilityValues.Create | MutabilityValues.Read)]
+        public string ItemKey { get; set; }
 
         public EnumType1 EValue1 { get; set; }
 

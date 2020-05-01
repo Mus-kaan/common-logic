@@ -72,7 +72,11 @@ namespace SampleWebApp
             }
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
+            app.UseSwagger(c =>
+            {
+                // We need to serialize the swagger using version 2 as ARM does not support version 3.
+                c.SerializeAsV2 = true;
+            });
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
             // specifying the Swagger JSON endpoint.
