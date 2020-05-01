@@ -24,7 +24,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [SkipInOfficialBuild(Skip = "Skip for VM quota issue")]
         public async Task VerifyRegionalComputeResourceCreationAsync()
         {
             var context = new NamingContext("UnitTest", "ut", EnvironmentType.Test, Region.USEast);

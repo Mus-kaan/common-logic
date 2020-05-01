@@ -49,7 +49,7 @@ namespace Microsoft.Liftr.Fluent.Contracts
 
         public EnvironmentType Environment { get; }
 
-        public string ShortEnvironmentName => ShortEnvName(Environment);
+        public string ShortEnvironmentName => Environment.ShortName();
 
         public Region Location { get; }
 
@@ -145,11 +145,11 @@ namespace Microsoft.Liftr.Fluent.Contracts
             => $"{vmOrServiceName}-pip";
 
         public string LeafDomainName(string baseName)
-            => SdkContext.RandomResourceName($"{ShortPartnerName}-{baseName}-{ShortEnvName(Environment)}-{Location.ShortName()}-", 25);
+            => SdkContext.RandomResourceName($"{ShortPartnerName}-{baseName}-{Environment.ShortName()}-{Location.ShortName()}-", 25);
 
         public string GenerateCommonName(string baseName, string suffix = null, bool noRegion = false, string delimiter = "-")
         {
-            var name = $"{ShortPartnerName}{delimiter}{ShortEnvName(Environment)}{delimiter}{baseName}";
+            var name = $"{ShortPartnerName}{delimiter}{Environment.ShortName()}{delimiter}{baseName}";
 
             if (!noRegion)
             {
@@ -163,26 +163,5 @@ namespace Microsoft.Liftr.Fluent.Contracts
 
             return name;
         }
-
-        #region Private
-        private static string ShortEnvName(EnvironmentType env)
-        {
-            switch (env)
-            {
-                case EnvironmentType.Production:
-                    return "prod";
-                case EnvironmentType.PPE:
-                    return "ppe";
-                case EnvironmentType.DogFood:
-                    return "df";
-                case EnvironmentType.Dev:
-                    return "dev";
-                case EnvironmentType.Test:
-                    return "test";
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(env));
-            }
-        }
-        #endregion
     }
 }

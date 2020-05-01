@@ -6,7 +6,6 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Liftr.Encryption.KeyVault;
 using Microsoft.Liftr.KeyVault;
 using Serilog.Core;
-using System;
 using System.Threading;
 using Xunit;
 

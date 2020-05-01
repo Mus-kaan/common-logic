@@ -139,10 +139,10 @@ echo "-----------------------------------------------------------------"
 echo "Start deploy '$HelmReleaseName' helm chart."
 echo "-----------------------------------------------------------------"
 
-DeploymentFlag=""
-if [ "$APP_ASPNETCORE_ENVIRONMENT" = "Production" ]; then
-    DeploymentFlag="--atomic --cleanup-on-fail "
-    echo "Set '$DeploymentFlag' for production to roll back automatically."
+DeploymentFlag="--atomic --cleanup-on-fail "
+if [ "$APP_ASPNETCORE_ENVIRONMENT" = "DogFood" ] || [ "$APP_ASPNETCORE_ENVIRONMENT" = "Dev" ] || [ "$APP_ASPNETCORE_ENVIRONMENT" = "Test" ]; then
+    DeploymentFlag=""
+    echo "Remove '--atomic' auto roll back for non-production environment"
 fi
 
 $Helm upgrade $HelmReleaseName --install --wait $DeploymentFlag\

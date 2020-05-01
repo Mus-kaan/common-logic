@@ -156,7 +156,7 @@ kubectl -n $namespace create secret generic thanos-objstore-config --from-file=t
 
 # https://itnext.io/monitoring-kubernetes-workloads-with-prometheus-and-thanos-4ddb394b32c
 echo "helm upgrade $helmReleaseName ..."
-$Helm upgrade $helmReleaseName prometheus-operator-*.tgz --install --atomic --wait --cleanup-on-fail \
+$Helm upgrade $helmReleaseName prometheus-operator-*.tgz --install --wait \
 --namespace $namespace \
 --set alertmanager.enabled=false \
 --set grafana.enabled=false \

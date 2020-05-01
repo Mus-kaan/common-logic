@@ -1,12 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
     <IsPackable>true</IsPackable>
     <AssemblyName>Microsoft.Liftr.Encryption.KeyVault</AssemblyName>
     <RootNamespace>Microsoft.Liftr.Encryption.KeyVault</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="$(PackageVersion_Microsoft_Azure_KeyVault)" />
     <PackageReference Include="Microsoft.Azure.KeyVault.Extensions" Version="$(PackageVersion_Microsoft_Azure_KeyVault_Extensions)" />
@@ -16,5 +15,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
   </ItemGroup>
-
 </Project>

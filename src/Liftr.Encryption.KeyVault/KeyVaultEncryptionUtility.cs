@@ -55,7 +55,7 @@ namespace Microsoft.Liftr.Encryption.KeyVault
 
             var iv = Convert.FromBase64String(ivStr);
 
-            var decryptedContent = await key.DecryptAsync(encryptedContent, iv, null,  null, null, cancellationToken);
+            var decryptedContent = await key.DecryptAsync(encryptedContent, iv, null, null, null, cancellationToken);
 
             return Encoding.UTF8.GetString(decryptedContent, 0, decryptedContent.Length);
         }
