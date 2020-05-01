@@ -5,9 +5,9 @@
 using Microsoft.Liftr.Contracts;
 using System;
 
-namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
+namespace Microsoft.Liftr.DataSource.Mongo
 {
-    internal class EncryptionMetaData : IEncryptionMetaData
+    public class EncryptionMetaData : IEncryptionMetaData
     {
         public string ContentEncryptionIV { get; set; }
 

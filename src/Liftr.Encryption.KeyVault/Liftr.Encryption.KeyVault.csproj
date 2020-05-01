@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
     <IsPackable>true</IsPackable>
     <AssemblyName>Microsoft.Liftr.Encryption.KeyVault</AssemblyName>
     <RootNamespace>Microsoft.Liftr.Encryption.KeyVault</RootNamespace>
