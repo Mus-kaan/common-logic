@@ -178,7 +178,7 @@ namespace Microsoft.Liftr.RPaaS
                 throw new ArgumentNullException(nameof(operation));
             }
 
-            using (var ops = _logger.StartTimedOperation(nameof(ListResourcesAsync)))
+            using (var ops = _logger.StartTimedOperation(nameof(PatchOperationAsync)))
             using (var content = new StringContent(JsonConvert.SerializeObject(operation, s_camelCaseSettings), Encoding.UTF8, "application/json"))
             {
                 ops.SetContextProperty("AsyncOperationId", operation.Id);
