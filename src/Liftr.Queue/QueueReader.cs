@@ -67,6 +67,13 @@ namespace Microsoft.Liftr.Queue
 
                         if (queueMessage != null)
                         {
+                            if (queueMessage.DequeueCount > _options.MaxDequeueCount)
+                            {
+                                _logger.Error("Message exceeded the max dequeue count. Discard it");
+                                await _queue.DeleteMessageAsync(queueMessage.MessageId, queueMessage.PopReceipt);
+                                continue;
+                            }
+
                             waitTime = GetWaitTime(true);
                             var message = queueMessage.MessageText.FromJson<LiftrQueueMessage>();
                             message.InsertedOn = queueMessage.InsertedOn;
@@ -98,6 +105,8 @@ namespace Microsoft.Liftr.Queue
                                 using (new LogContextPropertyScope("LiftrQueueMessageId", message.MsgId))
                                 using (var operation = _logger.StartTimedOperation("ProcessQueueMessage"))
                                 {
+                                    _logger.Information("Queue msg info: MsgId '{MsgId}', DequeueCount '{DequeueCount}', CreatedAt '{CreatedAt}', InsertedOn '{InsertedOn}', ExpiresOn '{ExpiresOn}'", message.MsgId, message.DequeueCount, message.CreatedAt, message.InsertedOn, message.ExpiresOn);
+
                                     var processingResult = new QueueMessageProcessingResult();
                                     try
                                     {
