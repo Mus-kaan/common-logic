@@ -11,15 +11,16 @@ ameLiftrACRName="liftrameacr"
 msLiftrACRName="liftrmsacr"
 region="westus"
 
+# [[[GENEVA_UPDATE_CHANGE_HERE]]]
 # The version are referenced at three places. You need to update all of them. Please search for this sentence.
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/references/linuxcontainers.html"
-IMG_mdsd="genevamdsd:master_260"
-IMG_mdm="genevamdm:master_33"
-IMG_fluentd="genevafluentd_td-agent:master_130"
-IMG_azsecpack="genevasecpackinstall:master_35"
-IMG_kubegen="kube-gen:master_12"
-IMG_kubectl="kubectl:master_8"
-IMG_acskv="acskeyvaultagent:master_11"
+IMG_mdsd="genevamdsd:master_279"
+IMG_mdm="genevamdm:master_37"
+IMG_fluentd="genevafluentd_td-agent:master_134"
+IMG_azsecpack="genevasecpackinstall:master_40"
+IMG_kubegen="kube-gen:master_18"
+IMG_kubectl="kubectl:master_14"
+IMG_acskv="acskeyvaultagent:master_23"
 
 ameACR="$ameLiftrACRName.azurecr.io"
 msACR="$msLiftrACRName.azurecr.io"

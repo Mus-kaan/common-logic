@@ -8,12 +8,13 @@ if [ "$NoWait" = "true" ]; then
     exit 0
 fi
 
+# [[[GENEVA_UPDATE_CHANGE_HERE]]]
 # The version are referenced at three places. You need to update all of them. Please search for this sentence.
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/references/linuxcontainers.html"
-IMG_mdsd="genevamdsd:master_260"
-IMG_mdm="genevamdm:master_33"
-IMG_fluentd="genevafluentd_td-agent:master_130"
-IMG_azsecpack="genevasecpackinstall:master_35"
+IMG_mdsd="genevamdsd:master_279"
+IMG_mdm="genevamdm:master_37"
+IMG_fluentd="genevafluentd_td-agent:master_134"
+IMG_azsecpack="genevasecpackinstall:master_40"
 
 for i in "$@"
 do
