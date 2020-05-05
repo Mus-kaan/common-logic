@@ -191,7 +191,7 @@ namespace Microsoft.Liftr.ImageBuilder
                     if (ex is CloudException)
                     {
                         var cloudEx = ex as CloudException;
-                        _logger.Fatal(ex, "Failed with CloudException. Status code: {statusCode}, Response: {@response}, Request: {@request}", cloudEx.Response.StatusCode, cloudEx.Response, cloudEx.Request);
+                        _logger.Fatal(ex, "Failed with CloudException. Status code: {statusCode}, Response: {@response}, Request: {requestUri}", cloudEx.Response.StatusCode, cloudEx.Response, cloudEx.Request.RequestUri.ToString());
                     }
                     else
                     {
