@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
     <IsPackable>true</IsPackable>
-    <AssemblyName>Microsoft.Liftr.Encryption.KeyVault</AssemblyName>
-    <RootNamespace>Microsoft.Liftr.Encryption.KeyVault</RootNamespace>
+    <AssemblyName>Microsoft.Liftr.Encryption</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Encryption</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="$(PackageVersion_Microsoft_Azure_KeyVault)" />
@@ -13,6 +13,8 @@
     <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="$(PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory)" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
+    <ProjectReference Include="..\Liftr.Encryption.Abstractions\Liftr.Encryption.Abstractions.csproj" />
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
   </ItemGroup>
 </Project>

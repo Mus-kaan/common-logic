@@ -5,15 +5,13 @@
 using Microsoft.Liftr.Contracts;
 using System;
 
-namespace Microsoft.Liftr.DataSource.Mongo
+namespace Microsoft.Liftr.Encryption
 {
     public class EncryptionMetaData : IEncryptionMetaData
     {
-        public string ContentEncryptionIV { get; set; }
+        public byte[] ContentEncryptionIV { get; set; }
 
-        public string EncryptionAlgorithm { get; set; }
-
-        public DateTime EncryptionTime { get; set; }
+        public EncryptionAlgorithm EncryptionAlgorithm { get; set; }
 
         public string KeyResourceId { get; set; }
     }

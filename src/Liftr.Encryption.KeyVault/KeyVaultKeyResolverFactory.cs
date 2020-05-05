@@ -6,7 +6,7 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace Microsoft.Liftr.Encryption.KeyVault
+namespace Microsoft.Liftr.Encryption
 {
     public static class KeyVaultKeyResolverFactory
     {

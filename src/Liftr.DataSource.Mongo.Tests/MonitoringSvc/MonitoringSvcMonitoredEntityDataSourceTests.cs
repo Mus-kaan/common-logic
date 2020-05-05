@@ -5,9 +5,11 @@
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DataSource.Mongo.MonitoringSvc;
 using Microsoft.Liftr.DataSource.Mongo.Tests.Common;
+using Microsoft.Liftr.Encryption;
 using Microsoft.Liftr.Logging;
 using System;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -51,9 +53,8 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             uint priority = 1;
             IEncryptionMetaData encryptionMetaData = new EncryptionMetaData
             {
-                ContentEncryptionIV = "mockContentEncryptionIV",
-                EncryptionAlgorithm = "mockEncryptionAlgorithm",
-                EncryptionTime = DateTime.UtcNow,
+                ContentEncryptionIV = Encoding.UTF8.GetBytes("mockContentEncryptionIV"),
+                EncryptionAlgorithm = EncryptionAlgorithm.A256CBC,
                 KeyResourceId = "mockKeyResourceId",
             };
 

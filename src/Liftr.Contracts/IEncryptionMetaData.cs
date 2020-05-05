@@ -16,16 +16,11 @@ namespace Microsoft.Liftr.Contracts
         /// <summary>
         /// Encryption algoritm
         /// </summary>
-        public string EncryptionAlgorithm { get; set; }
+        public EncryptionAlgorithm EncryptionAlgorithm { get; set; }
 
         /// <summary>
         /// Initialization vector
         /// </summary>
-        public string ContentEncryptionIV { get; set; }
-
-        /// <summary>
-        /// Encryption date
-        /// </summary>
-        public DateTime EncryptionTime { get; set; }
+        public byte[] ContentEncryptionIV { get; set; }
     }
 }

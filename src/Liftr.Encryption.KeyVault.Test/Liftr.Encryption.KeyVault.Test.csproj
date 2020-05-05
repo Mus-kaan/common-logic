@@ -10,7 +10,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="$(PackageVersion_xunit_runner_visualstudio)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Liftr.Encryption.KeyVault\Liftr.Encryption.KeyVault.csproj" />
+    <ProjectReference Include="..\Liftr.Encryption.KeyVault\Liftr.Encryption.csproj" />
     <ProjectReference Include="..\Liftr.KeyVault\Liftr.KeyVault.csproj" />
   </ItemGroup>
 </Project>
