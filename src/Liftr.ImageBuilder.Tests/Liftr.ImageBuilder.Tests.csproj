@@ -12,6 +12,7 @@
     <PackageReference Include="xunit" Version="$(PackageVersion_xunit)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(PackageVersion_xunit_runner_visualstudio)" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="$(PackageVersion_Serilog_Sinks_Debug)" />
+    <PackageReference Include="coverlet.collector" Version="$(PackageVersion_coverlet_collector)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.ImageBuilder\Liftr.ImageBuilder.csproj" />

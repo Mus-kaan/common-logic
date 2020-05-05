@@ -115,6 +115,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Encryption.KeyVault.T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.RPaaS.Abstractions", "Liftr.RPaaS.Abstractions\Liftr.RPaaS.Abstractions.csproj", "{93E15DC3-6AE3-42A7-90F3-DE05573DDEAA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.TokenManager.Tests", "Liftr.TokenManager.Tests\Liftr.TokenManager.Tests.csproj", "{6FABC68A-B1F9-4739-8341-538DA82196FE}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Encryption.Abstractions", "Liftr.Encryption.Abstractions\Liftr.Encryption.Abstractions.csproj", "{08472C9D-45B1-4B68-934B-2BF6CA1A2BC1}"
 EndProject
 Global
@@ -327,6 +329,14 @@ Global
 		{08472C9D-45B1-4B68-934B-2BF6CA1A2BC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08472C9D-45B1-4B68-934B-2BF6CA1A2BC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08472C9D-45B1-4B68-934B-2BF6CA1A2BC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93E15DC3-6AE3-42A7-90F3-DE05573DDEAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93E15DC3-6AE3-42A7-90F3-DE05573DDEAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93E15DC3-6AE3-42A7-90F3-DE05573DDEAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93E15DC3-6AE3-42A7-90F3-DE05573DDEAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FABC68A-B1F9-4739-8341-538DA82196FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FABC68A-B1F9-4739-8341-538DA82196FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FABC68A-B1F9-4739-8341-538DA82196FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FABC68A-B1F9-4739-8341-538DA82196FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

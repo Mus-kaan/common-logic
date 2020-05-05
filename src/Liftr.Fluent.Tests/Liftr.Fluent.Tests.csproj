@@ -11,6 +11,7 @@
     <PackageReference Include="xunit" Version="$(PackageVersion_xunit)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(PackageVersion_xunit_runner_visualstudio)" />
     <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="$(PackageVersion_Microsoft_Azure_Storage_Blob)" />
+    <PackageReference Include="coverlet.collector" Version="$(PackageVersion_coverlet_collector)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Fluent.Provisioning\Liftr.Fluent.Provisioning.csproj" />

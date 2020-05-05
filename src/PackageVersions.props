@@ -5,6 +5,7 @@
     <PackageVersion_Azure_Storage_Blobs>12.4.0</PackageVersion_Azure_Storage_Blobs>
     <PackageVersion_Azure_Storage_Queues>12.3.0</PackageVersion_Azure_Storage_Queues>
     <PackageVersion_CommandLineParser>2.6.0</PackageVersion_CommandLineParser>
+    <PackageVersion_coverlet_collector>1.2.0</PackageVersion_coverlet_collector>
     <PackageVersion_Microsoft_ApplicationInsights>2.11.0</PackageVersion_Microsoft_ApplicationInsights>
     <PackageVersion_Microsoft_ApplicationInsights_AspNetCore>2.8.2</PackageVersion_Microsoft_ApplicationInsights_AspNetCore>
     <PackageVersion_Microsoft_ApplicationInsights_DependencyCollector>2.11.2</PackageVersion_Microsoft_ApplicationInsights_DependencyCollector>
