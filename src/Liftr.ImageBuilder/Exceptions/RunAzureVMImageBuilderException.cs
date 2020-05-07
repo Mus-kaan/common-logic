@@ -28,8 +28,13 @@ namespace Microsoft.Liftr.ImageBuilder
         }
 
         public RunAzureVMImageBuilderException(string message, string subscriptionId, string resourceGroup, string templateName)
-            : base($"{message} {c_messagePart} '{Truncate($"IT_{resourceGroup}_{templateName}", 40)}' in subscription '{subscriptionId}'. {c_link}")
+            : base($"{message} {c_messagePart} {PackaerLogLocaionMessage(subscriptionId, resourceGroup, templateName)}. {c_link}")
         {
+        }
+
+        public static string PackaerLogLocaionMessage(string subscriptionId, string resourceGroup, string templateName)
+        {
+            return $"Resource group starting with name '{Truncate($"IT_{resourceGroup}_{templateName}", 40)}' in subscription '{subscriptionId}'";
         }
 
         private static string Truncate(string input, int maxLength)

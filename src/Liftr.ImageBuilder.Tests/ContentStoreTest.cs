@@ -14,27 +14,28 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.ImageBuilder.Tests
 {
-    public class ArtifactStoreTest
+    public class ContentStoreTest
     {
         private readonly ITestOutputHelper _output;
 
-        public ArtifactStoreTest(ITestOutputHelper output)
+        public ContentStoreTest(ITestOutputHelper output)
         {
             _output = output;
         }
 
         [SkipInOfficialBuild(skipLinux: true)]
-        public async Task VerifyArtifactsCleanUpAsync()
+        public async Task VerifyCleanUpAsync()
         {
             MockTimeSource timeSource = new MockTimeSource();
-            var namingContext = new NamingContext("ArtifactStore", "arti", EnvironmentType.Test, TestCommon.Location);
+            var namingContext = new NamingContext("ContentStore", "con", EnvironmentType.Test, TestCommon.Location);
             TestCommon.AddCommonTags(namingContext.Tags);
             var baseName = SdkContext.RandomResourceName(string.Empty, 20).Substring(0, 8);
 
-            var artifactOptions = new ArtifactStoreOptions()
+            var artifactOptions = new ContentStoreOptions()
             {
-                ContainerName = "artifacts",
-                OldArtifactTTLInDays = 7,
+                ArtifactContainerName = "artifacts",
+                VHDExportContainerName = "test-vhd-exporting",
+                ContentTTLInDays = 7,
             };
 
             using (var scope = new TestResourceGroupScope(baseName, namingContext, _output))
@@ -46,27 +47,30 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                     string blobEndpoint = $"https://{storageAccount.Name}.blob.core.windows.net";
                     var cred = new ClientSecretCredential(TestCredentials.TenantId, TestCredentials.ClientId, TestCredentials.ClientSecret);
                     BlobServiceClient blobClient = new BlobServiceClient(new Uri(blobEndpoint), cred);
-                    var containerClient = (await blobClient.CreateBlobContainerAsync(artifactOptions.ContainerName)).Value;
-                    var key = (await blobClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(7))).Value;
 
-                    var store = new ArtifactStore(
-                        storageAccount.Name,
-                        key,
-                        containerClient,
+                    var store = new ContentStore(
+                        blobClient,
                         artifactOptions,
                         timeSource,
                         scope.Logger);
 
-                    for (int i = 0; i < 5; i++)
+                    for (int i = 1; i <= 5; i++)
                     {
-                        await store.UploadBuildArtifactsAndGenerateReadSASAsync("packer.tar");
+                        var sas = await store.UploadBuildArtifactsAndGenerateReadSASAsync("packer.tar");
+                        timeSource.Add(TimeSpan.FromSeconds(123));
+                        await store.CopyGeneratedVHDAsync(sas.ToString(), "TestImageName", "1.2.1" + i);
                         timeSource.Add(TimeSpan.FromSeconds(123));
                     }
 
-                    timeSource.Add(TimeSpan.FromDays(40));
-                    var deletedCount = await store.CleanUpOldArtifactsAsync();
+                    var exportingContainerSas = (await store.GetExportingContainerSASTokenAsync()).ToString();
+                    Assert.NotNull(exportingContainerSas);
 
-                    Assert.Equal(5, deletedCount);
+                    timeSource.Add(TimeSpan.FromDays(40));
+                    var deletedArtifactCount = await store.CleanUpOldArtifactsAsync();
+                    var deletedVHDCount = await store.CleanUpExportingVHDsAsync();
+
+                    Assert.Equal(5, deletedArtifactCount);
+                    Assert.Equal(5, deletedVHDCount);
                 }
                 catch (Exception ex)
                 {

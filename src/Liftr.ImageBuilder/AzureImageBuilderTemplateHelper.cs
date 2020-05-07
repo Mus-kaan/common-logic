@@ -142,7 +142,7 @@ namespace Microsoft.Liftr.ImageBuilder
             resourceObject.properties.vmProfile.vmSize = _options.PackerVMSize;
             resourceObject.properties.source = source.ToJObject();
 
-            var distributeObject = resourceObject.properties.distribute[0];
+            var distributeObject = resourceObject.properties.distribute[1];
             distributeObject.galleryImageId = galleryImageResourceId;
 
             var artifactTags = distributeObject.artifactTags;

@@ -12,7 +12,6 @@ using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
-using Microsoft.Azure.Storage;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
@@ -44,10 +43,9 @@ namespace Microsoft.Liftr.ImageBuilder
         private readonly LiftrAzureFactory _azFactory;
         private readonly KeyVaultClient _kvClient;
         private readonly ITimeSource _timeSource;
-        private ArtifactStore _artifactStore;
+        private ContentStore _contentStore;
         private IVault _keyVault;
         private IIdentity _msi;
-        private CloudStorageAccount _cloudStorageAccount;
 
         public ImageBuilderOrchestrator(
             BuilderOptions options,
@@ -99,7 +97,7 @@ namespace Microsoft.Liftr.ImageBuilder
             return (_keyVault, _msi);
         }
 
-        public async Task<string> BuildCustomizedSBIAsync(
+        public async Task BuildCustomizedSBIAsync(
             string imageName,
             string imageVersion,
             SourceImageType sourceImageType,
@@ -131,12 +129,13 @@ namespace Microsoft.Liftr.ImageBuilder
             }
 
             AzureImageBuilderTemplateHelper templateHelper = new AzureImageBuilderTemplateHelper(_options, _timeSource);
-            var windowsSourceImage = SourceImageResolver.ResolveWindowsSourceImage(sourceImageType);
-            IGalleryImageVersion linuxSourceImage = null;
-
             await InitializeAsync();
 
-            ImageGalleryClient galleryClient = new ImageGalleryClient(_logger);
+            var galleryClient = new ImageGalleryClient(_logger);
+            var aibClient = new AIBClient(_azFactory.GenerateLiftrAzure(), _logger);
+
+            IGalleryImageVersion linuxSourceImage = null;
+            PlatformImageIdentifier windowsSourceImage = null;
 
             if (sourceImageType == SourceImageType.U1604LTS ||
                 sourceImageType == SourceImageType.U1804LTS)
@@ -159,17 +158,20 @@ namespace Microsoft.Liftr.ImageBuilder
 
                 linuxSourceImage = await CheckLatestSBIVHDAsync(sbiSASToken, sourceImageType, galleryClient);
             }
+            else
+            {
+                windowsSourceImage = SourceImageResolver.ResolveWindowsSourceImage(sourceImageType);
+            }
 
-            var artifactUrlWithSAS = await _artifactStore.UploadBuildArtifactsAndGenerateReadSASAsync(artifactPath);
+            var artifactUrlWithSAS = await _contentStore.UploadBuildArtifactsAndGenerateReadSASAsync(artifactPath);
             _logger.Information("uploaded the file {filePath} and generated the url with the SAS token.", artifactPath);
 
             var templateName = $"{imageName}-{imageVersion}";
-            var generatedTemplate = string.Empty;
-
             tags[NamingContext.c_createdAtTagName] = _timeSource.UtcNow.ToZuluString();
             tags["VersionTag"] = imageVersion;
 
             bool isLinux = true;
+            string generatedTemplate;
             if (windowsSourceImage != null)
             {
                 generatedTemplate = templateHelper.GenerateWinodwsImageTemplate(
@@ -204,24 +206,7 @@ namespace Microsoft.Liftr.ImageBuilder
                     tags);
             }
 
-            var existingSIGImageVersion = await galleryClient.GetImageVersionAsync(
-                _azFactory.GenerateLiftrAzure().FluentClient,
-                _options.ResourceGroupName,
-                _options.ImageGalleryName,
-                imageName,
-                imageVersion);
-
-            if (existingSIGImageVersion != null)
-            {
-                var ex = new DuplicatedSharedImageGalleryImagerVersionException($"There already exist a same image version '{imageVersion}' for image '{imageName}' in gallery '{_options.ImageGalleryName}'. We cannot generate another image version with this name.");
-                _logger.Fatal(ex.Message);
-                throw ex;
-            }
-
-            var cleanUpTask = CleanUpAsync(_azFactory.GenerateLiftrAzure().FluentClient, imageName, galleryClient);
-
             var az = _azFactory.GenerateLiftrAzure();
-
             var imgDefinition = await galleryClient.GetImageDefinitionAsync(
                 az.FluentClient,
                 _options.ResourceGroupName,
@@ -240,33 +225,69 @@ namespace Microsoft.Liftr.ImageBuilder
                 isLinux: isLinux);
             }
 
-            var res = await galleryClient.CreateNewSBIVersionByRunAzureVMImageBuilderAsync(
-                az,
-                _options.Location,
+            var sigImgVersion = await galleryClient.GetImageVersionAsync(
+                _azFactory.GenerateLiftrAzure().FluentClient,
                 _options.ResourceGroupName,
-                templateName,
-                generatedTemplate,
-                cancellationToken);
+                _options.ImageGalleryName,
+                imageName,
+                imageVersion);
 
-            _logger.Information("Run AIB template result: {AIBTemplateRunResult}", res);
+            if (sigImgVersion != null)
+            {
+                var ex = new DuplicatedSharedImageGalleryImagerVersionException($"There already exist a same image version '{imageVersion}' for image '{imageName}' in gallery '{_options.ImageGalleryName}'. We cannot generate another image version with this name.");
+                _logger.Fatal(ex.Message);
+                throw ex;
+            }
+            else
+            {
+                var cleanUpTask = CleanUpAsync(_azFactory.GenerateLiftrAzure().FluentClient, imageName, galleryClient);
+
+                var res = await aibClient.CreateNewSBIVersionByRunAzureVMImageBuilderAsync(
+                    _options.Location,
+                    _options.ResourceGroupName,
+                    templateName,
+                    generatedTemplate,
+                    cancellationToken);
+
+                _logger.Information("Run AIB template result: {AIBTemplateRunResult}", res);
+
+                await cleanUpTask;
+            }
+
+            var generatedImageSAS = await aibClient.GetGeneratedVDHSASAsync(_options.ResourceGroupName, templateName);
+            var vhdUri = await _contentStore.CopyGeneratedVHDAsync(generatedImageSAS, imageName, imageVersion);
 
             if (!_options.KeepAzureVMImageBuilderLogs)
             {
                 _logger.Information("Clean up Azure VM Image Builder logs by deleting ther AIB template.");
-                await galleryClient.DeleteVMImageBuilderTemplateAsync(az, _options.ResourceGroupName, templateName, cancellationToken);
+                await aibClient.DeleteVMImageBuilderTemplateAsync(_options.ResourceGroupName, templateName, cancellationToken);
             }
 
-            await cleanUpTask;
+            sigImgVersion = await galleryClient.GetImageVersionAsync(
+                _azFactory.GenerateLiftrAzure().FluentClient,
+                _options.ResourceGroupName,
+                _options.ImageGalleryName,
+                imageName,
+                imageVersion);
 
-            return res;
+            if (sigImgVersion == null)
+            {
+                throw new InvalidOperationException("Cannot find the generated SIG version.");
+            }
+
+            _logger.Information("The new image version can be found at Shared Image Gallery Image version resource Id: {sigVerionId}", sigImgVersion.Id);
+            _logger.Information("The generated image VHD can also be found in the storage account at URL: {vhdUri}", vhdUri);
+            _logger.Information("To import the VHDs to another cloud, you can manually generate a SAS token url for the exporting VHD container: {exportingVHDUri}", _contentStore.ExportingVHDContainerUri.ToString());
         }
 
         #region Private
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Swallow clean up issues.")]
         private async Task CleanUpAsync(IAzure az, string imageName, ImageGalleryClient galleryClient)
         {
-            var cleanupCount = await _artifactStore.CleanUpOldArtifactsAsync();
-            _logger.Information("Removed old artifacts count: {cleanupCount}", cleanupCount);
+            var deletedArtifactCount = await _contentStore.CleanUpOldArtifactsAsync();
+            _logger.Information("Removed old artifacts count: {deletedArtifactCount}", deletedArtifactCount);
+
+            var deletedVHDCount = await _contentStore.CleanUpExportingVHDsAsync();
+            _logger.Information("Removed old exporting VHDs: {deletedVHDCount}", deletedVHDCount);
 
             _logger.Information("Start cleaning up old image versions ...");
             var existingVersions = await galleryClient.ListImageVersionsAsync(az, _options.ResourceGroupName, _options.ImageGalleryName, imageName);
@@ -297,7 +318,7 @@ namespace Microsoft.Liftr.ImageBuilder
             }
         }
 
-        private async Task<ArtifactStore> GetOrCreateArtifactStoreAsync()
+        private async Task<ContentStore> GetOrCreateArtifactStoreAsync()
         {
             Dictionary<string, string> tags = new Dictionary<string, string>()
             {
@@ -325,33 +346,21 @@ namespace Microsoft.Liftr.ImageBuilder
 
             var blobUri = new Uri($"https://{storageAccount.Name}.blob.core.windows.net");
             BlobServiceClient blobClient = new BlobServiceClient(blobUri, _azFactory.TokenCredential);
-            BlobContainerClient containerClient = blobClient.GetBlobContainerClient(_options.ArtifactStoreOptions.ContainerName);
-            await containerClient.CreateIfNotExistsAsync();
-            var delegationKey = (await blobClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(1))).Value;
-
-            var store = new ArtifactStore(
-                        storageAccount.Name,
-                        delegationKey,
-                        containerClient,
-                        _options.ArtifactStoreOptions,
+            var store = new ContentStore(
+                        blobClient,
+                        _options.ContentStoreOptions,
                         _timeSource,
                         _logger);
-
-            var key = await storageAccount.GetPrimaryStorageKeyAsync();
-            var connectionString = key.ToConnectionString(storageAccount.Name);
-
-            var cred = new Azure.Storage.Auth.StorageCredentials(storageAccount.Name, key.Value, key.KeyName);
-            _cloudStorageAccount = new Azure.Storage.CloudStorageAccount(cred, useHttps: true);
 
             return store;
         }
 
         private async Task InitializeAsync()
         {
-            if (_artifactStore == null)
+            if (_contentStore == null)
             {
                 var store = await GetOrCreateArtifactStoreAsync();
-                Interlocked.Exchange(ref _artifactStore, store);
+                Interlocked.Exchange(ref _contentStore, store);
             }
 
             if (_keyVault == null)
@@ -479,9 +488,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 [NamingContext.c_createdAtTagName] = _timeSource.UtcNow.ToZuluString(),
             };
 
-            var mover = new SBIVHDMover(_logger);
-            var localVhdUri = await mover.CopyRegistryInfoAsync(latestVersion, vhdSASToken, _cloudStorageAccount);
-
+            var localVhdUri = await _contentStore.CopySourceSBIAsync(latestVersion, vhdSASToken);
             var customImage = await CreateCustomImageAsync(latestVersion, localVhdUri.AbsoluteUri);
 
             var sbiImgDefinition = await galleryClient.CreateImageDefinitionAsync(

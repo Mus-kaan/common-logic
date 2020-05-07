@@ -178,7 +178,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
                     await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(tags);
 
-                    var generatedBuilderTemplate = await orchestrator.BuildCustomizedSBIAsync(
+                    await orchestrator.BuildCustomizedSBIAsync(
                         _options.ImageName,
                         _options.ImageVersion,
                         _options.SourceImage,

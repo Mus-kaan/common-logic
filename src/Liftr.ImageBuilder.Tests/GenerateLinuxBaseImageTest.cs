@@ -60,7 +60,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                         await kvValet.SetSecretAsync(ImageBuilderOrchestrator.c_SBISASSecretName, sbiSASToken);
                     }
 
-                    var result = await orchestrator.BuildCustomizedSBIAsync(
+                    await orchestrator.BuildCustomizedSBIAsync(
                                     "img" + baseName,
                                     "0.9.1018",
                                     SourceImageType.U1804LTS,

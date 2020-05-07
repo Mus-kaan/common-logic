@@ -2,9 +2,9 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PackageVersion_Azure_Identity>1.1.1</PackageVersion_Azure_Identity>
-    <PackageVersion_Azure_Storage_Blobs>12.4.0</PackageVersion_Azure_Storage_Blobs>
+    <PackageVersion_Azure_Storage_Blobs>12.4.2</PackageVersion_Azure_Storage_Blobs>
     <PackageVersion_Azure_Storage_Queues>12.3.0</PackageVersion_Azure_Storage_Queues>
-    <PackageVersion_CommandLineParser>2.6.0</PackageVersion_CommandLineParser>
+    <PackageVersion_CommandLineParser>2.8.0</PackageVersion_CommandLineParser>
     <PackageVersion_coverlet_collector>1.2.0</PackageVersion_coverlet_collector>
     <PackageVersion_Microsoft_ApplicationInsights>2.11.0</PackageVersion_Microsoft_ApplicationInsights>
     <PackageVersion_Microsoft_ApplicationInsights_AspNetCore>2.8.2</PackageVersion_Microsoft_ApplicationInsights_AspNetCore>
@@ -13,7 +13,7 @@
     <PackageVersion_Microsoft_AspNetCore_Mvc_Core>2.2.0</PackageVersion_Microsoft_AspNetCore_Mvc_Core>
     <PackageVersion_Microsoft_Azure_KeyVault>3.0.5</PackageVersion_Microsoft_Azure_KeyVault>
     <PackageVersion_Microsoft_Azure_KeyVault_Extensions>3.0.5</PackageVersion_Microsoft_Azure_KeyVault_Extensions>
-    <PackageVersion_Microsoft_Azure_Management_Fluent>1.32.0</PackageVersion_Microsoft_Azure_Management_Fluent>
+    <PackageVersion_Microsoft_Azure_Management_Fluent>1.33.0</PackageVersion_Microsoft_Azure_Management_Fluent>
     <PackageVersion_Microsoft_Azure_Services_AppAuthentication>1.4.0</PackageVersion_Microsoft_Azure_Services_AppAuthentication>
     <PackageVersion_Microsoft_Azure_Storage_Blob>11.1.0</PackageVersion_Microsoft_Azure_Storage_Blob>
     <PackageVersion_Microsoft_Azure_Storage_Queue>11.1.0</PackageVersion_Microsoft_Azure_Storage_Queue>
@@ -29,9 +29,9 @@
     <PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>5.2.1</PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>
     <PackageVersion_Microsoft_Liftr_EV2>2.0.1206-build201</PackageVersion_Microsoft_Liftr_EV2>
     <PackageVersion_Microsoft_NET_Test_Sdk>16.0.1</PackageVersion_Microsoft_NET_Test_Sdk>
-    <PackageVersion_MongoDB_Driver>2.10.2</PackageVersion_MongoDB_Driver>
+    <PackageVersion_MongoDB_Driver>2.10.4</PackageVersion_MongoDB_Driver>
     <PackageVersion_Moq>4.12.0</PackageVersion_Moq>
-    <PackageVersion_Newtonsoft_Json>12.0.2</PackageVersion_Newtonsoft_Json>
+    <PackageVersion_Newtonsoft_Json>12.0.3</PackageVersion_Newtonsoft_Json>
     <PackageVersion_Serilog>2.9.0</PackageVersion_Serilog>
     <PackageVersion_Serilog_AspNetCore>3.2.0</PackageVersion_Serilog_AspNetCore>
     <PackageVersion_Serilog_Extensions_Hosting>3.0.0</PackageVersion_Serilog_Extensions_Hosting>

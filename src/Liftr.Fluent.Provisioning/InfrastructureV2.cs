@@ -527,7 +527,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     await stor.Update().WithAccessFromNetworkSubnet(subnet.Inner.Id).ApplyAsync();
 
                     _logger.Information("Restrict access to cosmos DB with Id {cosmosDBId} to subnet {subnetId}.", db.Id, subnet.Inner.Id);
-                    await db.Update().WithVirtualNetwork(vnet.Id, subnet.Name).ApplyAsync();
+                    await db.Update().WithVirtualNetworkRule(vnet.Id, subnet.Name).ApplyAsync();
 
                     try
                     {

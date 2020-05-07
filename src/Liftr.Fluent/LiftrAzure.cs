@@ -650,7 +650,7 @@ namespace Microsoft.Liftr.Fluent
 
             if (subnet != null)
             {
-                creatable = creatable.WithVirtualNetwork(subnet.Parent.Id, subnet.Name);
+                creatable = creatable.WithVirtualNetworkRule(subnet.Parent.Id, subnet.Name);
             }
 
             ICosmosDBAccount cosmosDBAccount = await creatable.CreateAsync();

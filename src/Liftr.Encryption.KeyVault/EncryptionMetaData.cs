@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts;
-using System;
 
 namespace Microsoft.Liftr.Encryption
 {

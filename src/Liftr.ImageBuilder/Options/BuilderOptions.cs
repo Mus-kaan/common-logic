@@ -45,7 +45,7 @@ namespace Microsoft.Liftr.ImageBuilder
         /// </summary>
         public int RegionalReplicaCount { get; set; } = 1;
 
-        public ArtifactStoreOptions ArtifactStoreOptions { get; set; } = new ArtifactStoreOptions();
+        public ContentStoreOptions ContentStoreOptions { get; set; } = new ContentStoreOptions();
 
         public void CheckValid()
         {
