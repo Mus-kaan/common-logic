@@ -23,7 +23,7 @@ namespace Microsoft.Liftr.ImageBuilder
            string templateName,
            CancellationToken cancellationToken = default);
 
-        Task<string> GetAIBRunOutPutAsync(
+        Task<string> GetAIBRunOutputAsync(
                 string rgName,
                 string templateName,
                 string runOutputName,

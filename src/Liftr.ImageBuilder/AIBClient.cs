@@ -79,10 +79,15 @@ namespace Microsoft.Liftr.ImageBuilder
                     return asyncOperationResponse;
                 }
 
-                var resBody = await startRunResponse.Content.ReadAsStringAsync();
-                operation.FailOperation(resBody);
-                _logger.Error("Failed at running AIB template. startRunResponse: {startRunResponse}", resBody);
-                throw new RunAzureVMImageBuilderException(resBody, _liftrAzure.FluentClient.SubscriptionId, rgName, templateName);
+                string errorMessage = $"Failed at running AIB template with status code {startRunResponse.StatusCode}.";
+                if (startRunResponse.Content != null)
+                {
+                    errorMessage = $"{errorMessage} Erros response: {await startRunResponse.Content.ReadAsStringAsync()}. ";
+                }
+
+                operation.FailOperation(errorMessage);
+                _logger.Error(errorMessage);
+                throw new RunAzureVMImageBuilderException(errorMessage, _liftrAzure.FluentClient.SubscriptionId, rgName, templateName);
             }
         }
 
@@ -91,7 +96,7 @@ namespace Microsoft.Liftr.ImageBuilder
             string templateName,
             CancellationToken cancellationToken = default)
         {
-            var runOutput = await GetAIBRunOutPutAsync(rgName, templateName, c_aibVHDRunOutputName, cancellationToken);
+            var runOutput = await GetAIBRunOutputAsync(rgName, templateName, c_aibVHDRunOutputName, cancellationToken);
             if (TryExtractVHDSASFromRunOutput(runOutput, out var sas))
             {
                 return sas;
@@ -102,13 +107,13 @@ namespace Microsoft.Liftr.ImageBuilder
             }
         }
 
-        public async Task<string> GetAIBRunOutPutAsync(
+        public async Task<string> GetAIBRunOutputAsync(
             string rgName,
             string templateName,
             string runOutputName,
             CancellationToken cancellationToken = default)
         {
-            using (var operation = _logger.StartTimedOperation(nameof(GetAIBRunOutPutAsync)))
+            using (var operation = _logger.StartTimedOperation(nameof(GetAIBRunOutputAsync)))
             using (var handler = new AzureApiAuthHandler(_liftrAzure.AzureCredentials))
             using (var httpClient = new HttpClient(handler))
             {
