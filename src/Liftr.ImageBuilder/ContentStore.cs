@@ -59,49 +59,58 @@ namespace Microsoft.Liftr.ImageBuilder
         public Uri ExportingVHDContainerUri => _exportingVHDBlobContainer.Uri;
 
         #region Artifacts management
-        public async Task<Uri> UploadBuildArtifactsAndGenerateReadSASAsync(string filePath)
+        public async Task<Uri> UploadBuildArtifactsToSupportingStorageAsync(string filePath)
         {
-            if (!File.Exists(filePath))
+            using var ops = _logger.StartTimedOperation(nameof(UploadBuildArtifactsToSupportingStorageAsync));
+            try
             {
-                var errMsg = $"Cannot find the file located at path: {filePath}";
-                _logger.Error(errMsg);
-                throw new InvalidOperationException(errMsg);
+                if (!File.Exists(filePath))
+                {
+                    var errMsg = $"Cannot find the file located at path: {filePath}";
+                    _logger.Error(errMsg);
+                    throw new InvalidOperationException(errMsg);
+                }
+
+                var fileName = Path.GetFileName(filePath);
+                var blob = _artifactBlobContainer.GetBlobClient(GetBlobName(fileName));
+
+                _logger.Information("Start uploading local file at path '{filePath}' to cloud blob {@blobUri}", filePath, blob.Uri);
+                await blob.UploadAsync(filePath);
+
+                _logger.Information("Generating read only SAS token to cloud blob {@blobUri}", blob.Uri);
+
+                // Create a SAS token that's valid a short interval.
+                BlobSasBuilder sasBuilder = new BlobSasBuilder()
+                {
+                    Protocol = SasProtocol.Https,
+                    Resource = "b", // b is for blobs
+                    BlobContainerName = _artifactBlobContainer.Name,
+                    BlobName = blob.Name,
+                    StartsOn = DateTimeOffset.UtcNow.AddMinutes(-10),
+                    ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(_storeOptions.SASTTLInMinutes),
+                };
+                sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+                // Use the key to get the SAS token.
+                var delegationKey = (await _blobClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddMinutes(_storeOptions.SASTTLInMinutes))).Value;
+                string sasToken = sasBuilder.ToSasQueryParameters(delegationKey, _blobClient.AccountName).ToString();
+
+                // Construct the full URI, including the SAS token.
+                UriBuilder fullUri = new UriBuilder()
+                {
+                    Scheme = "https",
+                    Host = _blobClient.Uri.Host,
+                    Path = $"{_artifactBlobContainer.Name}/{blob.Name}",
+                    Query = sasToken,
+                };
+
+                return fullUri.Uri;
             }
-
-            var fileName = Path.GetFileName(filePath);
-            var blob = _artifactBlobContainer.GetBlobClient(GetBlobName(fileName));
-
-            _logger.Information("Start uploading local file at path '{filePath}' to cloud blob {@blobUri}", filePath, blob.Uri);
-            await blob.UploadAsync(filePath);
-
-            _logger.Information("Generating read only SAS token to cloud blob {@blobUri}", blob.Uri);
-
-            // Create a SAS token that's valid a short interval.
-            BlobSasBuilder sasBuilder = new BlobSasBuilder()
+            catch (Exception ex)
             {
-                Protocol = SasProtocol.Https,
-                Resource = "b", // b is for blobs
-                BlobContainerName = _artifactBlobContainer.Name,
-                BlobName = blob.Name,
-                StartsOn = DateTimeOffset.UtcNow.AddMinutes(-10),
-                ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(_storeOptions.SASTTLInMinutes),
-            };
-            sasBuilder.SetPermissions(BlobSasPermissions.Read);
-
-            // Use the key to get the SAS token.
-            var delegationKey = (await _blobClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddMinutes(_storeOptions.SASTTLInMinutes))).Value;
-            string sasToken = sasBuilder.ToSasQueryParameters(delegationKey, _blobClient.AccountName).ToString();
-
-            // Construct the full URI, including the SAS token.
-            UriBuilder fullUri = new UriBuilder()
-            {
-                Scheme = "https",
-                Host = _blobClient.Uri.Host,
-                Path = $"{_artifactBlobContainer.Name}/{blob.Name}",
-                Query = sasToken,
-            };
-
-            return fullUri.Uri;
+                ops.FailOperation(ex.Message);
+                throw;
+            }
         }
 
         public async Task<int> CleanUpOldArtifactsAsync()
@@ -213,31 +222,41 @@ namespace Microsoft.Liftr.ImageBuilder
 
         public async Task<Uri> CopyGeneratedVHDAsync(string sourceVHDSASToken, string imageName, string imageVersion)
         {
+            using var ops = _logger.StartTimedOperation(nameof(CopyGeneratedVHDAsync));
+
             // Final structure is like:
             // /exporting-vhds/TestImageName/1.2.32/TestImageName-1.2.32.vhd
             // /exporting-vhds/TestImageName/1.2.32/TestImageName-1.2.32-metadata.json
-            var targetBlobName = VHDBlobName(imageName, imageVersion);
-            _logger.Information("Moving the AIB generated VHD to exporting blob: {targetBlobName}", targetBlobName);
-            var blob = await CopyBlobAsync(sourceVHDSASToken, _storeOptions.VHDExportContainerName, targetBlobName, operationName: "CopyGeneratedVHD");
-            var blobPropeties = await blob.GetPropertiesAsync();
-
-            var meta = new VHDMeta()
+            try
             {
-                ImageName = imageName,
-                ImageVersion = imageVersion,
-                CreatedAtUTC = _timeSource.UtcNow.Date.ToZuluString(),
-                CopiedAtUTC = _timeSource.UtcNow.Date.ToZuluString(),
-                ContentHash = Convert.ToBase64String(blobPropeties.Value.ContentHash),
-            };
+                var targetBlobName = VHDBlobName(imageName, imageVersion);
+                _logger.Information("Moving the AIB generated VHD to exporting blob: {targetBlobName}", targetBlobName);
+                var blob = await CopyBlobAsync(sourceVHDSASToken, _storeOptions.VHDExportContainerName, targetBlobName, operationName: "CopyGeneratedVHD");
+                var blobPropeties = await blob.GetPropertiesAsync();
 
-            var metaBlobName = VHDMetaBlobName(imageName, imageVersion);
-            var metaBlob = _exportingVHDBlobContainer.GetBlobClient(metaBlobName);
-            using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(meta.ToJson(indented: true))))
-            {
-                await metaBlob.UploadAsync(ms);
+                var meta = new VHDMeta()
+                {
+                    ImageName = imageName,
+                    ImageVersion = imageVersion,
+                    CreatedAtUTC = _timeSource.UtcNow.Date.ToZuluString(),
+                    CopiedAtUTC = _timeSource.UtcNow.Date.ToZuluString(),
+                    ContentHash = Convert.ToBase64String(blobPropeties.Value.ContentHash),
+                };
+
+                var metaBlobName = VHDMetaBlobName(imageName, imageVersion);
+                var metaBlob = _exportingVHDBlobContainer.GetBlobClient(metaBlobName);
+                using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(meta.ToJson(indented: true))))
+                {
+                    await metaBlob.UploadAsync(ms);
+                }
+
+                return blob.Uri;
             }
-
-            return blob.Uri;
+            catch (Exception ex)
+            {
+                ops.FailOperation(ex.Message);
+                throw;
+            }
         }
 
         public async Task<int> CleanUpExportingVHDsAsync()

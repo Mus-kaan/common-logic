@@ -56,7 +56,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
 
                     for (int i = 1; i <= 5; i++)
                     {
-                        var sas = await store.UploadBuildArtifactsAndGenerateReadSASAsync("packer.tar");
+                        var sas = await store.UploadBuildArtifactsToSupportingStorageAsync("packer.tar");
                         timeSource.Add(TimeSpan.FromSeconds(123));
                         await store.CopyGeneratedVHDAsync(sas.ToString(), "TestImageName", "1.2.1" + i);
                         timeSource.Add(TimeSpan.FromSeconds(123));
