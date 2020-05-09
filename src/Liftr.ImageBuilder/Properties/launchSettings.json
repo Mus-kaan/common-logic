@@ -2,7 +2,7 @@
   "profiles": {
     "ms-linux-img-test": {
       "commandName": "Project",
-      "commandLineArgs": "-f configs\\ms-test-sig-eastus.json --srcImg U1804LTS -n TestImageName123 -v 1.2.602 --artifactPath configs\\test-packer.tar --authFile my.azureauth-ms.auth.json"
+      "commandLineArgs": "-f configs\\ms-test-sig-eastus.json --srcImg U1804LTS -n TestImageName123 -v 1.2.603 --artifactPath configs\\test-packer.tar --authFile my.azureauth-ms.auth.json"
     },
     "ms-windows-img-test": {
       "commandName": "Project",

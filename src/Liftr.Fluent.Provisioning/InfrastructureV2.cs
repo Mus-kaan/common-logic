@@ -231,11 +231,12 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 .Attach()
                 .ApplyAsync();
 
-            _logger.Information("Start adding access policy for msi to regional kv.");
+            _logger.Information("Start adding access policy for managed identity to regional kv.");
             provisionedResources.KeyVault = await provisionedResources.KeyVault.RefreshAsync();
             await provisionedResources.KeyVault.Update()
                 .DefineAccessPolicy()
                 .ForObjectId(provisionedResources.ManagedIdentity.GetObjectId())
+                .AllowKeyPermissions(KeyPermissions.Get, KeyPermissions.List)
                 .AllowSecretPermissions(SecretPermissions.List, SecretPermissions.Get)
                 .AllowCertificatePermissions(CertificatePermissions.Get, CertificatePermissions.Getissuers, CertificatePermissions.List)
                 .Attach()

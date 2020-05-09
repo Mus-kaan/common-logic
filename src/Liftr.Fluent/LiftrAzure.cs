@@ -797,6 +797,7 @@ namespace Microsoft.Liftr.Fluent
             await kv.Update()
                 .DefineAccessPolicy()
                 .ForObjectId(SPNObjectId)
+                .AllowKeyAllPermissions()
                 .AllowSecretAllPermissions()
                 .AllowCertificateAllPermissions()
                 .Attach()
