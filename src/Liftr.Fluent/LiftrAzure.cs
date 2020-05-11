@@ -220,16 +220,22 @@ namespace Microsoft.Liftr.Fluent
             return stor;
         }
 
-        public async Task<IEnumerable<IStorageAccount>> ListStorageAccountAsync(string rgName)
+        public async Task<IEnumerable<IStorageAccount>> ListStorageAccountAsync(string rgName, string namePrefix = null)
         {
-            _logger.Information("Listing storage accounts in rgName: {rgName} ...", rgName);
+            _logger.Information("Listing storage accounts in rgName '{rgName}' with prefix '{namePrefix}' ...", rgName, namePrefix);
 
             var accounts = await FluentClient
                 .StorageAccounts
                 .ListByResourceGroupAsync(rgName);
 
-            _logger.Information("Found {cnt} storage accounts in rgName: {rgName} ...", accounts.Count(), rgName);
-            return accounts.ToList();
+            IEnumerable<IStorageAccount> filteredAccount = accounts.ToList();
+            if (!string.IsNullOrEmpty(namePrefix))
+            {
+                filteredAccount = filteredAccount.Where((acct) => acct.Name.OrdinalStartsWith(namePrefix));
+            }
+
+            _logger.Information("Found {cnt} storage accounts in rgName '{rgName}' with prefix '{namePrefix}'.", filteredAccount.Count(), rgName, namePrefix);
+            return filteredAccount;
         }
 
         public async Task GrantBlobContributorAsync(IResourceGroup rg, string objectId)
@@ -765,12 +771,19 @@ namespace Microsoft.Liftr.Fluent
             }
         }
 
-        public async Task<IEnumerable<IVault>> ListKeyVaultAsync(string rgName)
+        public async Task<IEnumerable<IVault>> ListKeyVaultAsync(string rgName, string namePrefix = null)
         {
-            _logger.Information($"Listing KeyVault in resource group {rgName} ...");
-            return await FluentClient
+            _logger.Information($"Listing KeyVault in resource group {rgName} with prefix {namePrefix} ...");
+            IEnumerable<IVault> kvs = (await FluentClient
                 .Vaults
-                .ListByResourceGroupAsync(rgName);
+                .ListByResourceGroupAsync(rgName)).ToList();
+
+            if (!string.IsNullOrEmpty(namePrefix))
+            {
+                kvs = kvs.Where((kv) => kv.Name.OrdinalStartsWith(namePrefix));
+            }
+
+            return kvs;
         }
 
         public async Task RemoveAccessPolicyAsync(string kvResourceId, string servicePrincipalObjectId)

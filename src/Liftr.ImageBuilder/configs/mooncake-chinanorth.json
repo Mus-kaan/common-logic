@@ -1,0 +1,12 @@
+{
+  "SubscriptionId": "bd3ad04d-52b8-4b19-a3c9-4180dfe8f927", // ACR - Test - Mooncake
+  "Location": "chinanorth",
+  "ResourceGroupName": "wuweng-img-builder",
+  "ImageGalleryName": "LiftrTestSIG",
+  "PackerVMSize": "Standard_D2s_v3",
+  "RegionalReplicaCount": 1,
+  "ImageReplicationRegions": [
+    "chinanorth",
+    "chinanorth2"
+  ]
+}

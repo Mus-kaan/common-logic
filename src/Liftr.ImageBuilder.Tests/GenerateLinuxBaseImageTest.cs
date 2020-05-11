@@ -51,7 +51,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
 
                 try
                 {
-                    (var kv, _) = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(tags);
+                    (var kv, _) = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.BakeNewImageAndExport, tags: tags);
 
                     using (var testKvValet = new KeyVaultConcierge(TestCredentials.SharedKeyVaultUri, TestCredentials.KeyVaultClient, scope.Logger))
                     using (var kvValet = new KeyVaultConcierge(kv.VaultUri, TestCredentials.KeyVaultClient, scope.Logger))

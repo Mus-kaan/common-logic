@@ -62,7 +62,7 @@ namespace Microsoft.Liftr.Fluent
 
         Task<IStorageAccount> GetStorageAccountAsync(string rgName, string storageAccountName);
 
-        Task<IEnumerable<IStorageAccount>> ListStorageAccountAsync(string rgName);
+        Task<IEnumerable<IStorageAccount>> ListStorageAccountAsync(string rgName, string namePrefix = null);
 
         Task GrantBlobContributorAsync(IResourceGroup rg, string objectId);
 
@@ -143,7 +143,7 @@ namespace Microsoft.Liftr.Fluent
 
         Task<IVault> GetKeyVaultByIdAsync(string kvResourceId);
 
-        Task<IEnumerable<IVault>> ListKeyVaultAsync(string rgName);
+        Task<IEnumerable<IVault>> ListKeyVaultAsync(string rgName, string namePrefix = null);
 
         Task WithKeyVaultAccessFromNetworkAsync(IVault vault, string ipAddress, string subnetId);
 

@@ -47,10 +47,10 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
 
                 try
                 {
-                    await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(tags);
+                    await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.BakeNewImageAndExport, tags: tags);
 
                     // Run another time will not fail.
-                    await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(tags);
+                    await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.BakeNewImageAndExport, tags: tags);
                 }
                 catch (Exception ex)
                 {

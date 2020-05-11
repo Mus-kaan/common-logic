@@ -8,6 +8,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent.Contracts;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -44,9 +45,8 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                 {
                     var storageAccount = await scope.GetTestStorageAccountAsync();
 
-                    string blobEndpoint = $"https://{storageAccount.Name}.blob.core.windows.net";
                     var cred = new ClientSecretCredential(TestCredentials.TenantId, TestCredentials.ClientId, TestCredentials.ClientSecret);
-                    BlobServiceClient blobClient = new BlobServiceClient(new Uri(blobEndpoint), cred);
+                    BlobServiceClient blobClient = new BlobServiceClient(new Uri(storageAccount.Inner.PrimaryEndpoints.Blob), cred);
 
                     var store = new ContentStore(
                         blobClient,
@@ -58,7 +58,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                     {
                         var sas = await store.UploadBuildArtifactsToSupportingStorageAsync("packer.tar");
                         timeSource.Add(TimeSpan.FromSeconds(123));
-                        await store.CopyGeneratedVHDAsync(sas.ToString(), "TestImageName", "1.2.1" + i);
+                        await store.CopyVHDToExportAsync(sas, "TestImageName", "1.2.1" + i, SourceImageType.U1804LTS, (IReadOnlyDictionary<string, string>)namingContext.Tags);
                         timeSource.Add(TimeSpan.FromSeconds(123));
                     }
 

@@ -97,7 +97,12 @@ namespace Microsoft.Liftr.SimpleDeploy
                     }
 
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory.FromFile(_commandOptions.AuthFile);
-                    tokenCredential = new ClientSecretCredential(authContract.TenantId, authContract.ClientId, authContract.ClientSecret);
+
+                    TokenCredentialOptions options = new TokenCredentialOptions()
+                    {
+                        AuthorityHost = new Uri(authContract.ActiveDirectoryEndpointUrl),
+                    };
+                    tokenCredential = new ClientSecretCredential(authContract.TenantId, authContract.ClientId, authContract.ClientSecret, options);
                 }
                 else
                 {

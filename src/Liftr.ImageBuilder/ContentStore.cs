@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Azure;
+using Azure.Storage;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
@@ -47,13 +48,10 @@ namespace Microsoft.Liftr.ImageBuilder
             }
 
             _artifactBlobContainer = blobClient.GetBlobContainerClient(storeOptions.ArtifactContainerName);
-            _artifactBlobContainer.CreateIfNotExists();
 
             _exportingVHDBlobContainer = blobClient.GetBlobContainerClient(storeOptions.VHDExportContainerName);
-            _exportingVHDBlobContainer.CreateIfNotExists();
 
             _importingVHDBlobContainer = blobClient.GetBlobContainerClient(storeOptions.VHDImportContainerName);
-            _importingVHDBlobContainer.CreateIfNotExists();
         }
 
         public Uri ExportingVHDContainerUri => _exportingVHDBlobContainer.Uri;
@@ -64,6 +62,8 @@ namespace Microsoft.Liftr.ImageBuilder
             using var ops = _logger.StartTimedOperation(nameof(UploadBuildArtifactsToSupportingStorageAsync));
             try
             {
+                await _artifactBlobContainer.CreateIfNotExistsAsync();
+
                 if (!File.Exists(filePath))
                 {
                     var errMsg = $"Cannot find the file located at path: {filePath}";
@@ -116,6 +116,11 @@ namespace Microsoft.Liftr.ImageBuilder
         public async Task<int> CleanUpOldArtifactsAsync()
         {
             int deletedCount = 0;
+
+            if (!(await _artifactBlobContainer.ExistsAsync()))
+            {
+                return deletedCount;
+            }
 
             var dateFolders = await ToListAsync(_artifactBlobContainer.GetBlobsByHierarchyAsync(prefix: "drop/", delimiter: "/"));
 
@@ -183,8 +188,37 @@ namespace Microsoft.Liftr.ImageBuilder
             return fullUri.Uri;
         }
 
+        public async Task<(Uri, Uri)> GetExportedVHDSASTokenAsync(string imageName, string imageVersion, string connectionString)
+        {
+            using var ops = _logger.StartTimedOperation(nameof(GetExportedVHDSASTokenAsync));
+
+            // Final structure is like:
+            // /exporting-vhds/TestImageName/1.2.32/TestImageName-1.2.32.vhd
+            // /exporting-vhds/TestImageName/1.2.32/TestImageName-1.2.32-metadata.json
+            try
+            {
+                AzureStorageConnectionString azStr = null;
+                if (!AzureStorageConnectionString.TryParseConnectionString(connectionString, out azStr))
+                {
+                    var ex = new InvalidOperationException("The storage connection string is in invalid format.");
+                    _logger.Fatal(ex.Message);
+                    throw ex;
+                }
+
+                var vhdSAS = await GetExportingBlobSASTokenAsync(VHDBlobName(imageName, imageVersion), azStr);
+                var metaSAS = await GetExportingBlobSASTokenAsync(VHDMetaBlobName(imageName, imageVersion), azStr);
+
+                return (vhdSAS, metaSAS);
+            }
+            catch (Exception ex)
+            {
+                ops.FailOperation(ex.Message);
+                throw;
+            }
+        }
+
         public async Task<BlobClient> CopyBlobAsync(
-           string sourceSASToken,
+           Uri sourceSASToken,
            string targetContainerName,
            string targetBlobName,
            string operationName = nameof(CopyBlobAsync),
@@ -204,15 +238,14 @@ namespace Microsoft.Liftr.ImageBuilder
             using (_logger.StartTimedOperation(operationName))
             {
                 _logger.Information("Start copying to blob with URI: {blobUri}", targetBlob.Uri.AbsoluteUri);
-                var srcUri = new Uri(sourceSASToken);
-                var operation = await targetBlob.StartCopyFromUriAsync(srcUri, cancellationToken: cancellationToken);
+                var operation = await targetBlob.StartCopyFromUriAsync(sourceSASToken, cancellationToken: cancellationToken);
                 await operation.WaitForCompletionAsync(cancellationToken);
             }
 
             return targetBlob;
         }
 
-        public async Task<Uri> CopySourceSBIAsync(string sbiVhdVersion, string sourceVHDSASToken)
+        public async Task<Uri> CopySourceSBIAsync(string sbiVhdVersion, Uri sourceVHDSASToken)
         {
             var targetBlobName = sbiVhdVersion + ".vhd";
             _logger.Information("Checking and move the Azure Linux base SBI VHD with version '{sbiVhdVerion}' to local storage account for caching. This will improve the image generation proces in the next build.", sbiVhdVersion);
@@ -220,9 +253,19 @@ namespace Microsoft.Liftr.ImageBuilder
             return blob.Uri;
         }
 
-        public async Task<Uri> CopyGeneratedVHDAsync(string sourceVHDSASToken, string imageName, string imageVersion)
+        public async Task<Uri> CopyVHDToExportAsync(
+            Uri sourceVHDSASToken,
+            string imageName,
+            string imageVersion,
+            SourceImageType sourceImageType,
+            IReadOnlyDictionary<string, string> tags)
         {
-            using var ops = _logger.StartTimedOperation(nameof(CopyGeneratedVHDAsync));
+            if (tags == null)
+            {
+                throw new ArgumentNullException(nameof(tags));
+            }
+
+            using var ops = _logger.StartTimedOperation(nameof(CopyVHDToExportAsync));
 
             // Final structure is like:
             // /exporting-vhds/TestImageName/1.2.32/TestImageName-1.2.32.vhd
@@ -241,13 +284,19 @@ namespace Microsoft.Liftr.ImageBuilder
                     CreatedAtUTC = _timeSource.UtcNow.Date.ToZuluString(),
                     CopiedAtUTC = _timeSource.UtcNow.Date.ToZuluString(),
                     ContentHash = Convert.ToBase64String(blobPropeties.Value.ContentHash),
+                    SourceImageType = sourceImageType,
                 };
+
+                meta.OtherTags = tags.ToJson();
 
                 var metaBlobName = VHDMetaBlobName(imageName, imageVersion);
                 var metaBlob = _exportingVHDBlobContainer.GetBlobClient(metaBlobName);
-                using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(meta.ToJson(indented: true))))
+                if (!(await metaBlob.ExistsAsync()))
                 {
-                    await metaBlob.UploadAsync(ms);
+                    using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(meta.ToJson(indented: true))))
+                    {
+                        await metaBlob.UploadAsync(ms);
+                    }
                 }
 
                 return blob.Uri;
@@ -259,13 +308,59 @@ namespace Microsoft.Liftr.ImageBuilder
             }
         }
 
-        public async Task<int> CleanUpExportingVHDsAsync()
+        public async Task<(Uri, VHDMeta)> CopyVHDToImportAsync(Uri sourceVHDSASToken, Uri sourceVHDMetaSASToken, string imageName, string imageVersion)
+        {
+            using var ops = _logger.StartTimedOperation(nameof(CopyVHDToImportAsync));
+
+            // Final structure is like:
+            // /importing-vhds/TestImageName/1.2.32/TestImageName-1.2.32.vhd
+            // /importing-vhds/TestImageName/1.2.32/TestImageName-1.2.32-metadata.json
+            try
+            {
+                VHDMeta meta;
+                var metaBlob = await CopyBlobAsync(sourceVHDMetaSASToken, _storeOptions.VHDImportContainerName, VHDMetaBlobName(imageName, imageVersion), operationName: nameof(CopyVHDToImportAsync) + "MetaImpl");
+                var downloadResponse = await metaBlob.DownloadAsync();
+                using (StreamReader reader = new StreamReader(downloadResponse.Value.Content, Encoding.UTF8))
+                {
+                    var metaContent = reader.ReadToEnd();
+                    meta = metaContent.FromJson<VHDMeta>();
+                }
+
+                var targetBlobName = VHDBlobName(imageName, imageVersion);
+                _logger.Information("Moving the VHD to importing blob: {targetBlobName}. This can easily take 15 minutes, e.g. it took 14.2 minutes to move a 30GB VHD from west US to China North.", targetBlobName);
+                var vhdBlob = await CopyBlobAsync(sourceVHDSASToken, _storeOptions.VHDImportContainerName, targetBlobName, operationName: nameof(CopyVHDToImportAsync) + "Impl");
+
+                return (vhdBlob.Uri, meta);
+            }
+            catch (Exception ex)
+            {
+                ops.FailOperation(ex.Message);
+                throw;
+            }
+        }
+
+        public Task<int> CleanUpExportingVHDsAsync()
+        {
+            return CleanUpVHDsAsync(_exportingVHDBlobContainer);
+        }
+
+        public Task<int> CleanUpImportingVHDsAsync()
+        {
+            return CleanUpVHDsAsync(_importingVHDBlobContainer);
+        }
+
+        private async Task<int> CleanUpVHDsAsync(BlobContainerClient container)
         {
             // Final structure is like:
             // /exporting-vhds/TestImageName/1.2.32/TestImageName-1.2.32.vhd
             // /exporting-vhds/TestImageName/1.2.32/TestImageName-1.2.32-metadata.json
             int deletedCount = 0;
-            var imageFolders = await ToListAsync(_exportingVHDBlobContainer.GetBlobsByHierarchyAsync(delimiter: "/"));
+            if (!(await container.ExistsAsync()))
+            {
+                return deletedCount;
+            }
+
+            var imageFolders = await ToListAsync(container.GetBlobsByHierarchyAsync(delimiter: "/"));
 
             var cutOffTime = _timeSource.UtcNow.AddDays(-1 * _storeOptions.ContentTTLInDays);
 
@@ -277,7 +372,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
 
                 var imageName = imageFolder.Prefix.Split('/')[0];
-                var imageVersionFolders = await ToListAsync(_exportingVHDBlobContainer.GetBlobsByHierarchyAsync(prefix: imageFolder.Prefix, delimiter: "/"));
+                var imageVersionFolders = await ToListAsync(container.GetBlobsByHierarchyAsync(prefix: imageFolder.Prefix, delimiter: "/"));
 
                 foreach (var imageVersionFolder in imageVersionFolders)
                 {
@@ -287,7 +382,7 @@ namespace Microsoft.Liftr.ImageBuilder
                     }
 
                     var imageVersion = imageVersionFolder.Prefix.Split('/')[1];
-                    var metaBlob = _exportingVHDBlobContainer.GetBlobClient(VHDMetaBlobName(imageName, imageVersion));
+                    var metaBlob = container.GetBlobClient(VHDMetaBlobName(imageName, imageVersion));
                     var exist = await metaBlob.ExistsAsync();
                     if (!exist)
                     {
@@ -310,7 +405,7 @@ namespace Microsoft.Liftr.ImageBuilder
                             continue;
                         }
 
-                        var vhdBlob = _exportingVHDBlobContainer.GetBlobClient(VHDBlobName(imageName, imageVersion));
+                        var vhdBlob = container.GetBlobClient(VHDBlobName(imageName, imageVersion));
                         await vhdBlob.DeleteIfExistsAsync();
                         await metaBlob.DeleteIfExistsAsync();
                         deletedCount++;
@@ -322,6 +417,46 @@ namespace Microsoft.Liftr.ImageBuilder
             }
 
             return deletedCount;
+        }
+
+        private async Task<Uri> GetExportingBlobSASTokenAsync(string blobName, AzureStorageConnectionString connectionString)
+        {
+            if (!(await _exportingVHDBlobContainer.ExistsAsync()))
+            {
+                var ex = new InvalidOperationException($"Cannot find the container with name '{_exportingVHDBlobContainer.Name}' in the storage account '{_blobClient.Uri}'. See more information at: https://aka.ms/liftr/import-img");
+                _logger.Fatal(ex.Message);
+                throw ex;
+            }
+
+            var blob = _exportingVHDBlobContainer.GetBlobClient(blobName);
+            var exist = await blob.ExistsAsync();
+            if (!exist)
+            {
+                var ex = new InvalidOperationException($"Cannot find the exporting blob at '{blob.Uri}'. See more information at: https://aka.ms/liftr/import-img");
+                _logger.Fatal(ex.Message);
+                throw ex;
+            }
+
+            // Create a SAS token that's valid a short interval.
+            BlobSasBuilder sasBuilder = new BlobSasBuilder()
+            {
+                Protocol = SasProtocol.Https,
+                Resource = "b", // b is for blobs
+                BlobContainerName = blob.BlobContainerName,
+                BlobName = blob.Name,
+                StartsOn = DateTimeOffset.UtcNow.AddMinutes(-10),
+                ExpiresOn = DateTimeOffset.UtcNow.AddHours(5),
+            };
+            sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+            StorageSharedKeyCredential cred = new StorageSharedKeyCredential(connectionString.AccountName, connectionString.AccountKey);
+            string sasToken = sasBuilder.ToSasQueryParameters(cred).ToString();
+
+            // Construct the full URI, including the SAS token.
+            UriBuilder fullUri = new UriBuilder(blob.Uri);
+            fullUri.Query = sasToken;
+
+            return fullUri.Uri;
         }
 
         private static async Task<List<T>> ToListAsync<T>(AsyncPageable<T> source, CancellationToken cancellationToken = default)

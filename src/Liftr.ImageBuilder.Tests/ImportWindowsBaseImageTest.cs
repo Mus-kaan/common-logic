@@ -5,25 +5,25 @@
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.KeyVault;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.ImageBuilder.Tests
 {
-    public class GenerateWindowsBaseImageTest
+    public class ImportWindowsBaseImageTest
     {
         private readonly ITestOutputHelper _output;
 
-        public GenerateWindowsBaseImageTest(ITestOutputHelper output)
+        public ImportWindowsBaseImageTest(ITestOutputHelper output)
         {
             _output = output;
         }
 
         [SkipInOfficialBuild(skipLinux: true)]
-        public async Task VerifyWindowsBaseImageGenerationAsync()
+        public async Task VerifyImportWindowsAsync()
         {
             MockTimeSource timeSource = new MockTimeSource();
             var tags = new Dictionary<string, string>();
@@ -37,7 +37,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                     SubscriptionId = new Guid(TestCredentials.SubscriptionId),
                     Location = TestCommon.Location,
                     ResourceGroupName = scope.ResourceGroupName,
-                    ImageGalleryName = "testsig" + baseName,
+                    ImageGalleryName = "Import" + baseName,
                     ImageReplicationRegions = new List<Region>()
                     {
                         Region.USEast,
@@ -48,15 +48,20 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
 
                 try
                 {
-                    await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.BakeNewImageAndExport, tags: tags);
+                    (var kv, var artifactStore) = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.ImportImage, tags: tags);
 
-                    await orchestrator.BuildCustomizedSBIAsync(
-                                    "img" + baseName,
-                                    "0.9.1018",
-                                    SourceImageType.WindowsServer2019DatacenterCore,
-                                    "packer-windows.tar.gz",
-                                    tags,
-                                    CancellationToken.None);
+                    using (var sharedTestKvValet = new KeyVaultConcierge(TestCredentials.SharedKeyVaultUri, TestCredentials.KeyVaultClient, scope.Logger))
+                    using (var kvValet = new KeyVaultConcierge(kv.VaultUri, TestCredentials.KeyVaultClient, scope.Logger))
+                    {
+                        var connStr = (await sharedTestKvValet.GetSecretAsync(ImageImporter.c_exportingStorageAccountConnectionStringSecretName)).Value;
+                        await kvValet.SetSecretAsync(ImageImporter.c_exportingStorageAccountConnectionStringSecretName, connStr);
+
+                        var importer = new ImageImporter(options, artifactStore, scope.AzFactory, kvValet, timeSource, scope.Logger);
+                        await importer.ImportImageVHDAsync("LiftrUTWinImg", "0.5.666");
+
+                        // Import again will not fail.
+                        await importer.ImportImageVHDAsync("LiftrUTWinImg", "0.5.666");
+                    }
                 }
                 catch (Exception ex)
                 {

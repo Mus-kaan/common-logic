@@ -7,8 +7,17 @@ using Microsoft.Liftr.Contracts;
 
 namespace Microsoft.Liftr.ImageBuilder
 {
+    public enum ActionType
+    {
+        BakeNewVersion,
+        ImportOneVersion,
+    }
+
     public class BuilderCommandOptions
     {
+        [Option('a', "action", Required = false, HelpText = "Action type, e.g. BakeNewVersion, ImportOneVersion.")]
+        public ActionType Action { get; set; } = ActionType.BakeNewVersion;
+
         [Option('f', "file", Required = true, HelpText = "Path to the configuration file.")]
         public string ConfigPath { get; set; }
 
@@ -21,13 +30,13 @@ namespace Microsoft.Liftr.ImageBuilder
         [Option('v', "imageVersion", Required = true, HelpText = "The generating Shared Image Gallery Image Version Name, e.g. '0.9.2326'")]
         public string ImageVersion { get; set; }
 
-        [Option("srcImg", Required = true, HelpText = "Source image type, one of: [ WindowsServer2016Datacenter, WindowsServer2016DatacenterCore, WindowsServer2016DatacenterContainers, WindowsServer2019Datacenter, WindowsServer2019DatacenterCore, WindowsServer2019DatacenterContainers, U1604LTS, U1804LTS ]")]
-        public SourceImageType SourceImage { get; set; }
+        [Option("srcImg", Required = false, HelpText = "Source image type, one of: [ WindowsServer2016Datacenter, WindowsServer2016DatacenterCore, WindowsServer2016DatacenterContainers, WindowsServer2019Datacenter, WindowsServer2019DatacenterCore, WindowsServer2019DatacenterContainers, U1604LTS, U1804LTS ]")]
+        public SourceImageType? SourceImage { get; set; } = null;
 
         [Option("spnObjectId", Required = false, HelpText = "The Object Id of the executing Service Principal.")]
         public string RunnerSPNObjectId { get; set; }
 
-        [Option("artifactPath", Required = true, HelpText = "Path to the artifact package file. The artifact must be packed in a tar file. We will call 'bake-image.sh' in the package.")]
+        [Option("artifactPath", Required = false, HelpText = "Path to the artifact package file. The artifact must be packed in a tar file. We will call 'bake-image.sh' in the package.")]
         public string ArtifactPath { get; set; }
 
         [Option("authFile", Required = false, HelpText = "Use auth file to login instead of managed identity.")]

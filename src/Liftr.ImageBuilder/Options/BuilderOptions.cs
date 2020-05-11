@@ -18,7 +18,10 @@ namespace Microsoft.Liftr.ImageBuilder
 
     public class BuilderOptions
     {
+        [Obsolete("This is old code, please switch to 'TenantId'.", false)]
         public TenantType Tenant { get; set; } = TenantType.AME;
+
+        public string TenantId { get; set; }
 
         public bool KeepAzureVMImageBuilderLogs { get; set; } = false;
 

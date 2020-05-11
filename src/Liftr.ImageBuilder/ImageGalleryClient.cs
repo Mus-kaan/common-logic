@@ -4,11 +4,14 @@
 
 using Microsoft.Azure.Management.Compute.Fluent;
 using Microsoft.Azure.Management.Compute.Fluent.Models;
+using Microsoft.Azure.Management.Compute.Fluent.VirtualMachineCustomImage.Definition;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Rest.Azure;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -271,6 +274,124 @@ namespace Microsoft.Liftr.ImageBuilder
             }
 
             return galleryImageVersion;
+        }
+
+        public async Task<int> CleanUpOldImageVersionAsync(
+            IAzure fluentClient,
+            string rgName,
+            string galleryName,
+            string imageName,
+            DateTime cutOffTime)
+        {
+            using var ops = _logger.StartTimedOperation(nameof(CleanUpOldImageVersionAsync));
+            ops.SetContextProperty(nameof(cutOffTime), cutOffTime.ToZuluString());
+
+            int deletedCount = 0;
+
+            try
+            {
+                var existingVersions = await ListImageVersionsAsync(fluentClient, rgName, galleryName, imageName);
+                foreach (var version in existingVersions)
+                {
+                    try
+                    {
+                        var timeStamp = DateTime.Parse(version.Tags[NamingContext.c_createdAtTagName], CultureInfo.InvariantCulture);
+                        if (timeStamp < cutOffTime)
+                        {
+                            _logger.Information("Remove old verion with '{versionId}' since it is older than the cutOffTime: {cutOffTime}", version.Id, cutOffTime);
+                            await DeleteImageVersionAsync(fluentClient, rgName, galleryName, imageName, version.Name);
+                            deletedCount++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Clean up old image verion failed for versionId: {versionId}", version.Id);
+                    }
+                }
+
+                if (deletedCount == 0)
+                {
+                    _logger.Information("All image versions are within its TTL. Skip deleting.");
+                }
+
+                ops.SetContextProperty(nameof(deletedCount), deletedCount);
+                return deletedCount;
+            }
+            catch (Exception ex)
+            {
+                ops.FailOperation(ex.Message);
+                throw;
+            }
+        }
+        #endregion
+
+        #region Virtual Machine Custom image operations
+        public async Task<IVirtualMachineCustomImage> CreateCustomImageFromVHDAsync(
+            IAzure fluentClient,
+            Region location,
+            string rgName,
+            string customImageName,
+            Uri vhdUri,
+            bool isLinux,
+            Dictionary<string, string> tags = null)
+        {
+            if (fluentClient == null)
+            {
+                throw new ArgumentNullException(nameof(fluentClient));
+            }
+
+            if (vhdUri == null)
+            {
+                throw new ArgumentNullException(nameof(vhdUri));
+            }
+
+            var customImage = await fluentClient.VirtualMachineCustomImages
+                .GetByResourceGroupAsync(rgName, customImageName);
+
+            if (customImage == null)
+            {
+                using var ops = _logger.StartTimedOperation(nameof(CreateCustomImageFromVHDAsync));
+                try
+                {
+                    _logger.Information("Start creating custom image {name} from vhd Url: {vhdUrl}", customImageName, vhdUri);
+                    var creatable1 = fluentClient.VirtualMachineCustomImages
+                        .Define(customImageName)
+                        .WithRegion(location)
+                        .WithExistingResourceGroup(rgName);
+
+                    IWithCreateAndDataDiskImageOSDiskSettings creatable = null;
+                    if (isLinux)
+                    {
+                        creatable = creatable1.WithLinuxFromVhd(vhdUri.ToString(), OperatingSystemStateTypes.Generalized);
+                    }
+                    else
+                    {
+                        creatable = creatable1.WithWindowsFromVhd(vhdUri.ToString(), OperatingSystemStateTypes.Generalized);
+                    }
+
+                    if (tags != null)
+                    {
+                        customImage = await creatable.WithTags(tags).CreateAsync();
+                    }
+                    else
+                    {
+                        customImage = await creatable.CreateAsync();
+                    }
+
+                    _logger.Information("Created a custom image with resource Id: {customImageId}", customImage.Id);
+                }
+                catch (Exception ex)
+                {
+                    ops.FailOperation(ex.Message);
+                    throw;
+                }
+            }
+            else
+            {
+                _logger.Information("Use the exisitng custom image with resource Id: {customImageId}", customImage.Id);
+            }
+
+            return customImage;
         }
         #endregion
     }

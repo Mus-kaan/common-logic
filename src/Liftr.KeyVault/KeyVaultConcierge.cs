@@ -31,6 +31,7 @@ namespace Microsoft.Liftr.KeyVault
             }
 
             _vaultBaseUrl = vaultBaseUrl;
+            VaultUri = new Uri(vaultBaseUrl);
             _keyVaultClient = KeyVaultClientFactory.FromClientIdAndSecret(clientId, clientSecret);
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _needDispose = true;
@@ -44,9 +45,12 @@ namespace Microsoft.Liftr.KeyVault
             }
 
             _vaultBaseUrl = vaultBaseUrl;
+            VaultUri = new Uri(vaultBaseUrl);
             _keyVaultClient = kvClient ?? throw new ArgumentNullException(nameof(kvClient));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
+
+        public Uri VaultUri { get; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "By Design.")]
         public async Task<bool> ContainsSecretAsync(string secretName)

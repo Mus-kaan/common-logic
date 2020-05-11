@@ -2,7 +2,9 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Contracts;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.ImageBuilder
@@ -11,12 +13,16 @@ namespace Microsoft.Liftr.ImageBuilder
     {
         Task<Uri> UploadBuildArtifactsToSupportingStorageAsync(string filePath);
 
-        Task<Uri> CopySourceSBIAsync(string sbiVhdVersion, string sourceVHDSASToken);
+        Task<Uri> CopySourceSBIAsync(string sbiVhdVersion, Uri sourceVHDSASToken);
 
-        Task<Uri> CopyGeneratedVHDAsync(string sourceVHDSASToken, string imageName, string imageVersion);
+        Task<Uri> CopyVHDToExportAsync(Uri sourceVHDSASToken, string imageName, string imageVersion, SourceImageType sourceImageType, IReadOnlyDictionary<string, string> tags);
+
+        Task<(Uri, VHDMeta)> CopyVHDToImportAsync(Uri sourceVHDSASToken, Uri sourceVHDMetaSASToken, string imageName, string imageVersion);
 
         Task<int> CleanUpOldArtifactsAsync();
 
         Task<int> CleanUpExportingVHDsAsync();
+
+        Task<int> CleanUpImportingVHDsAsync();
     }
 }
