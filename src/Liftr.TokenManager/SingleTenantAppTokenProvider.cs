@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.KeyVault;
+using Microsoft.Liftr.TokenManager.Options;
 using System;
 using System.Threading.Tasks;
 

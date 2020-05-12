@@ -21,6 +21,7 @@ using Microsoft.Liftr.MarketplaceResource.DataSource.Interfaces;
 using Microsoft.Liftr.MarketplaceResource.DataSource.Models;
 using Microsoft.Liftr.Queue;
 using Microsoft.Liftr.TokenManager;
+using Microsoft.Liftr.TokenManager.Options;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using Serilog;
@@ -156,7 +157,7 @@ namespace Microsoft.Liftr.Sample.Web
 
             services.AddSingleton<IMultiTenantAppTokenProvider, MultiTenantAppTokenProvider>((sp) =>
             {
-                var options = sp.GetService<IOptions<SingleTenantAADAppTokenProviderOptions>>().Value;
+                var options = sp.GetService<IOptions<AADAppTokenProviderOptions>>().Value;
                 var kvClient = sp.GetService<IKeyVaultClient>();
                 var logger = sp.GetService<ILogger>();
 

@@ -50,15 +50,21 @@ namespace Microsoft.Liftr.RPaaS.Hosting
                 || string.IsNullOrEmpty(fpaOptions.AadEndpoint)
                 || string.IsNullOrEmpty(fpaOptions.TargetResource)
                 || string.IsNullOrEmpty(fpaOptions.ApplicationId)
-                || string.IsNullOrEmpty(fpaOptions.CertificateName)
-                || string.IsNullOrEmpty(fpaOptions.TenantId))
+                || string.IsNullOrEmpty(fpaOptions.CertificateName))
                 {
                     var ex = new InvalidOperationException($"Please make sure '{nameof(MetaRPOptions.FPAOptions)}' is set under the '{nameof(MetaRPOptions)}' section.");
                     logger.LogError(ex.Message);
                     throw ex;
                 }
 
-                var tokenProvider = new SingleTenantAppTokenProvider(fpaOptions, kvClient, logger);
+                if (string.IsNullOrEmpty(metaRPOptions.UserRPTenantId))
+                {
+                    var ex = new InvalidOperationException($"Please make sure '{nameof(MetaRPOptions.UserRPTenantId)}' is set under the '{nameof(MetaRPOptions)}' section.");
+                    logger.LogError(ex.Message);
+                    throw ex;
+                }
+
+                var tokenProvider = new MultiTenantAppTokenProvider(fpaOptions, kvClient, logger);
 
                 var httpClientFactory = sp.GetService<IHttpClientFactory>();
                 if (httpClientFactory == null)
@@ -71,9 +77,10 @@ namespace Microsoft.Liftr.RPaaS.Hosting
                 var metaRPClient = new MetaRPStorageClient(
                     new Uri(metaRPOptions.MetaRPEndpoint),
                     httpClientFactory.CreateClient(),
-                    () =>
+                    metaRPOptions,
+                    (tenantId) =>
                     {
-                        return tokenProvider.GetTokenAsync();
+                        return tokenProvider.GetTokenAsync(tenantId);
                     },
                     logger);
 

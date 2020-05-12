@@ -119,6 +119,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.TokenManager.Tests", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Encryption.Abstractions", "Liftr.Encryption.Abstractions\Liftr.Encryption.Abstractions.csproj", "{08472C9D-45B1-4B68-934B-2BF6CA1A2BC1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.TokenManager.Abstractions", "Liftr.TokenManager.Abstractions\Liftr.TokenManager.Abstractions.csproj", "{94B9A018-4CE0-4230-B798-5FC5A1015852}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.AAD", "Liftr.AAD\Liftr.AAD.csproj", "{F8D05E68-A4B0-4DE8-B3F0-56FFA790914A}"
 EndProject
 Global
@@ -335,6 +337,10 @@ Global
 		{08472C9D-45B1-4B68-934B-2BF6CA1A2BC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08472C9D-45B1-4B68-934B-2BF6CA1A2BC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08472C9D-45B1-4B68-934B-2BF6CA1A2BC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94B9A018-4CE0-4230-B798-5FC5A1015852}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94B9A018-4CE0-4230-B798-5FC5A1015852}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94B9A018-4CE0-4230-B798-5FC5A1015852}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94B9A018-4CE0-4230-B798-5FC5A1015852}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F8D05E68-A4B0-4DE8-B3F0-56FFA790914A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F8D05E68-A4B0-4DE8-B3F0-56FFA790914A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8D05E68-A4B0-4DE8-B3F0-56FFA790914A}.Release|Any CPU.ActiveCfg = Release|Any CPU

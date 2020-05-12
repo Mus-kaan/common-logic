@@ -18,6 +18,7 @@ namespace Microsoft.Liftr.RPaaS
     public class MetaRPStorageClient : IMetaRPStorageClient
     {
         private readonly HttpClient _httpClient;
+        private readonly MetaRPOptions _options;
         private readonly AuthenticationTokenCallback _tokenCallback;
         private readonly Serilog.ILogger _logger;
 
@@ -30,34 +31,48 @@ namespace Microsoft.Liftr.RPaaS
         public MetaRPStorageClient(
             Uri metaRPEndpoint,
             HttpClient httpClient,
+            MetaRPOptions metaRpOptions,
             AuthenticationTokenCallback tokenCallback,
             Serilog.ILogger logger)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _options = metaRpOptions ?? throw new ArgumentNullException(nameof(metaRpOptions));
             _httpClient.BaseAddress = metaRPEndpoint ?? throw new ArgumentNullException(nameof(metaRPEndpoint));
             _tokenCallback = tokenCallback ?? throw new ArgumentNullException(nameof(tokenCallback));
             _logger = logger ?? throw new ArgumentNullException(nameof(tokenCallback));
 
             logger.LogInformation($"Loading token to make sure '{nameof(MetaRPStorageClient)}' is correctly initialized");
-            var token = tokenCallback().Result;
+#pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
+            var token = tokenCallback(_options.UserRPTenantId).Result;
+#pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
             if (string.IsNullOrEmpty(token))
             {
                 throw new InvalidOperationException($"Cannot load token for {nameof(MetaRPStorageClient)}");
             }
         }
 
-        public delegate Task<string> AuthenticationTokenCallback();
+        public delegate Task<string> AuthenticationTokenCallback(string tenantId);
 
         #region Resource operations
 
         /// <inheritdoc/>
-        public async Task<T> GetResourceAsync<T>(string resourceId, string apiVersion)
+        public async Task<T> GetResourceAsync<T>(string resourceId, string tenantId, string apiVersion)
         {
+            if (string.IsNullOrEmpty(resourceId))
+            {
+                throw new ArgumentNullException(nameof(resourceId));
+            }
+
+            if (string.IsNullOrEmpty(tenantId))
+            {
+                throw new ArgumentException("Please provide the User's tenant id", nameof(tenantId));
+            }
+
             using (var operation = _logger.StartTimedOperation(nameof(GetResourceAsync)))
             {
                 operation.SetContextProperty(nameof(resourceId), resourceId);
                 var url = GetMetaRPResourceUrl(resourceId, apiVersion);
-                _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();
+                _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
                 var response = await _httpClient.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
@@ -75,11 +90,16 @@ namespace Microsoft.Liftr.RPaaS
         }
 
         /// <inheritdoc/>
-        public async Task<HttpResponseMessage> UpdateResourceAsync<T>(T resource, string resourceId, string apiVersion)
+        public async Task<HttpResponseMessage> UpdateResourceAsync<T>(T resource, string resourceId, string tenantId, string apiVersion)
         {
             if (resource == null)
             {
                 throw new ArgumentNullException(nameof(resource));
+            }
+
+            if (string.IsNullOrEmpty(tenantId))
+            {
+                throw new ArgumentException("Please provide the User's tenant id", nameof(tenantId));
             }
 
             using (var operation = _logger.StartTimedOperation(nameof(UpdateResourceAsync)))
@@ -87,7 +107,7 @@ namespace Microsoft.Liftr.RPaaS
             {
                 operation.SetContextProperty(nameof(resourceId), resourceId);
                 var url = GetMetaRPResourceUrl(resourceId, apiVersion);
-                _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();
+                _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
                 var response = await _httpClient.PutAsync(url, content);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -116,7 +136,7 @@ namespace Microsoft.Liftr.RPaaS
                 operation.SetContextProperty(nameof(resourcePath), resourcePath);
                 do
                 {
-                    _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();
+                    _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(_options.UserRPTenantId);
                     var response = await _httpClient.GetAsync(listResponse.NextLink);
 
                     if (!response.IsSuccessStatusCode)
@@ -146,7 +166,7 @@ namespace Microsoft.Liftr.RPaaS
             string userRpSubscriptionId, string providerName, string subscriptionId, string apiVersion)
         {
             var resourceId = $"/subscriptions/{userRpSubscriptionId}/providers/{providerName}/registeredSubscriptions/{subscriptionId}";
-            var subscription = await GetResourceAsync<RegisteredSubscriptionModel>(resourceId, apiVersion);
+            var subscription = await GetResourceAsync<RegisteredSubscriptionModel>(resourceId, _options.UserRPTenantId, apiVersion);
             return subscription.TenantId;
         }
 
@@ -171,37 +191,40 @@ namespace Microsoft.Liftr.RPaaS
         #region Operation operations
 
         /// <inheritdoc/>
-        public async Task<HttpResponseMessage> PatchOperationAsync<T>(T operation, string apiVersion) where T : OperationResource
+        public async Task<HttpResponseMessage> PatchOperationAsync<T>(T operation, string tenantId, string apiVersion) where T : OperationResource
         {
             if (operation == null)
             {
                 throw new ArgumentNullException(nameof(operation));
             }
 
-            using (var ops = _logger.StartTimedOperation(nameof(PatchOperationAsync)))
-            using (var content = new StringContent(JsonConvert.SerializeObject(operation, s_camelCaseSettings), Encoding.UTF8, "application/json"))
+            if (string.IsNullOrEmpty(tenantId))
             {
-                ops.SetContextProperty("AsyncOperationId", operation.Id);
-                var url = GetMetaRPResourceUrl(operation.Id, apiVersion);
-                _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync();
-                var method = new HttpMethod("PATCH");
-                using (var request = new HttpRequestMessage(method, url)
-                {
-                    Content = content,
-                })
-                {
-                    var response = await _httpClient.SendAsync(request);
+                throw new ArgumentException("Please provide the User's tenant id", nameof(tenantId));
+            }
 
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        var resContent = await response.Content.ReadAsStringAsync();
-                        _logger.Error("Failed at patching operation status. StatusCode: '{statusCode}', Response: '{response}'", response.StatusCode, resContent);
-                        ops.FailOperation(response.StatusCode, resContent);
-                        throw MetaRPException.Create(response, operation.Id);
-                    }
+            using var ops = _logger.StartTimedOperation(nameof(PatchOperationAsync));
+            using var content = new StringContent(JsonConvert.SerializeObject(operation, s_camelCaseSettings), Encoding.UTF8, "application/json");
+            ops.SetContextProperty("AsyncOperationId", operation.Id);
+            var url = GetMetaRPResourceUrl(operation.Id, apiVersion);
+            _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
+            var method = new HttpMethod("PATCH");
+            using (var request = new HttpRequestMessage(method, url)
+            {
+                Content = content,
+            })
+            {
+                var response = await _httpClient.SendAsync(request);
 
-                    return response;
+                if (!response.IsSuccessStatusCode)
+                {
+                    var resContent = await response.Content.ReadAsStringAsync();
+                    _logger.Error("Failed at patching operation status. StatusCode: '{statusCode}', Response: '{response}'", response.StatusCode, resContent);
+                    ops.FailOperation(response.StatusCode, resContent);
+                    throw MetaRPException.Create(response, operation.Id);
                 }
+
+                return response;
             }
         }
 
@@ -209,6 +232,7 @@ namespace Microsoft.Liftr.RPaaS
         public async Task<HttpResponseMessage> PatchOperationStatusAsync(
             string operationStatusId,
             ProvisioningState state,
+            string tenantId,
             string errorCode,
             string errorMessage,
             string apiVersion)
@@ -228,7 +252,7 @@ namespace Microsoft.Liftr.RPaaS
                     Message = errorMessage,
                 },
             };
-            return await PatchOperationAsync(operation, apiVersion);
+            return await PatchOperationAsync(operation, tenantId, apiVersion);
         }
 
         #endregion
@@ -254,11 +278,11 @@ namespace Microsoft.Liftr.RPaaS
             return resourceId + "?api-version=" + apiVersion;
         }
 
-        private async Task<AuthenticationHeaderValue> GetAuthHeaderAsync()
+        private async Task<AuthenticationHeaderValue> GetAuthHeaderAsync(string tenantId)
         {
             var authenticationHeader = new AuthenticationHeaderValue(
                         "Bearer",
-                        await _tokenCallback());
+                        await _tokenCallback(tenantId));
             return authenticationHeader;
         }
     }

@@ -67,6 +67,7 @@ namespace SampleWebApp.Controllers
                 var apiVersion = "2020-02-01-preview";
                 var userRpSubscription = "f9d7ebed-adbd-4cb4-b973-aaf82c136138";
                 var providerName = "Microsoft.Datadog";
+                var tenantId = "f686d426-8d16-42db-81b7-ab578e110ccd";
 
                 await _metaRPStorageClient.GetTenantForSubscriptionAsync(userRpSubscription, providerName, userRpSubscription, apiVersion);
                 await _metaRPStorageClient.GetTenantForAllSubscriptionsAsync(userRpSubscription, providerName, apiVersion);
@@ -80,7 +81,7 @@ namespace SampleWebApp.Controllers
                     Type = "Microsoft.Datadog",
                 };
 
-                await _metaRPStorageClient.UpdateResourceAsync(resource, requestPath, apiVersion);
+                await _metaRPStorageClient.UpdateResourceAsync(resource, requestPath, tenantId, apiVersion);
 
                 return await _metaRPStorageClient.ListResourcesAsync<TestResource>(requestPath, apiVersion);
             }
@@ -113,9 +114,11 @@ namespace SampleWebApp.Controllers
         {
             var resourceId = "/subscriptions/f9aed45d-b9e6-462a-a3f5-6ab34857bc17/resourceGroups/myrg/providers/Microsoft.Nginx/frontends/frontend";
             var apiVersion = "2019-11-01-preview";
+            var tenantId = "f686d426-8d16-42db-81b7-ab578e110ccd";
+
             try
             {
-                var resource = await _metaRPStorageClient.GetResourceAsync<ARMResource>(resourceId, apiVersion);
+                var resource = await _metaRPStorageClient.GetResourceAsync<ARMResource>(resourceId, tenantId, apiVersion);
                 Console.WriteLine(JsonConvert.SerializeObject(resource));
             }
             catch (Exception ex)

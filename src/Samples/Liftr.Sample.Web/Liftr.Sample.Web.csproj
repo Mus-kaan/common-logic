@@ -14,6 +14,7 @@
     <ProjectReference Include="..\..\Liftr.MarketplaceResource.DataSource\Liftr.MarketplaceResource.DataSource.csproj" />
     <ProjectReference Include="..\..\Liftr.Logging.AspNetCore\Liftr.Logging.AspNetCore.csproj" />
     <ProjectReference Include="..\..\Liftr.Queue\Liftr.Queue.csproj" />
+    <ProjectReference Include="..\..\Liftr.TokenManager.Abstractions\Liftr.TokenManager.Abstractions.csproj" />
     <ProjectReference Include="..\..\Liftr.TokenManager\Liftr.TokenManager.csproj" />
     <ProjectReference Include="..\..\Liftr.WebHosting\Liftr.WebHosting.csproj" />
   </ItemGroup>

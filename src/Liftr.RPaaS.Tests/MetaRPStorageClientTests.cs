@@ -29,7 +29,8 @@ namespace Microsoft.Liftr.RPaaS.Tests
                 var metaRpClient = new MetaRPStorageClient(
                     new Uri(Constants.MetaRpEndpoint),
                     httpClient,
-                    () => Task.FromResult("authToken"),
+                    new MetaRPOptions(),
+                    (_) => Task.FromResult("authToken"),
                     _logger);
 
                 var resources = await metaRpClient.ListResourcesAsync<TestResource>(Constants.RequestPath, Constants.ApiVersion);

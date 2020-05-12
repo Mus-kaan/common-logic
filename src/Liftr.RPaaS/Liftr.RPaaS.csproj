@@ -11,5 +11,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
     <ProjectReference Include="..\Liftr.RPaaS.Abstractions\Liftr.RPaaS.Abstractions.csproj" />
+    <ProjectReference Include="..\Liftr.TokenManager.Abstractions\Liftr.TokenManager.Abstractions.csproj" />
   </ItemGroup>
 </Project>

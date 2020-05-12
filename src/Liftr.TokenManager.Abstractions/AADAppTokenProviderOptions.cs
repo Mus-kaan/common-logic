@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Liftr.TokenManager
+namespace Microsoft.Liftr.TokenManager.Options
 {
     public class AADAppTokenProviderOptions
     {

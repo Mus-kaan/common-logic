@@ -21,9 +21,10 @@ namespace Microsoft.Liftr.RPaaS
         /// Retrieves ARM resource for given resource id and api version from MetaRP
         /// </summary>
         /// <param name="resourceId"></param>
+        /// <param name="tenantId">Tenant in which the resource exists</param>
         /// <param name="apiVersion"></param>
         /// <returns></returns>
-        Task<T> GetResourceAsync<T>(string resourceId, string apiVersion);
+        Task<T> GetResourceAsync<T>(string resourceId, string tenantId, string apiVersion);
 
         /// <summary>
         /// Updates ARM resource for given api version
@@ -31,9 +32,10 @@ namespace Microsoft.Liftr.RPaaS
         /// <typeparam name="T"></typeparam>
         /// <param name="resource"></param>
         /// <param name="resourceId"></param>
+        /// <param name="tenantId">Tenant in which the resource exists</param>
         /// <param name="apiVersion"></param>
         /// <returns></returns>
-        Task<HttpResponseMessage> UpdateResourceAsync<T>(T resource, string resourceId, string apiVersion);
+        Task<HttpResponseMessage> UpdateResourceAsync<T>(T resource, string resourceId, string tenantId, string apiVersion);
 
         /// <summary>
         /// Gets a list of resources.
@@ -82,15 +84,17 @@ namespace Microsoft.Liftr.RPaaS
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="operation"></param>
+        /// <param name="tenantId">Tenant in which the resource exists</param>
         /// <param name="apiVersion"></param>
         /// <returns></returns>
-        Task<HttpResponseMessage> PatchOperationAsync<T>(T operation, string apiVersion) where T : OperationResource;
+        Task<HttpResponseMessage> PatchOperationAsync<T>(T operation, string tenantId, string apiVersion) where T : OperationResource;
 
         /// <summary>
         /// Patch operation status for given api version
         /// </summary>
         /// <param name="operationStatusId"></param>
         /// <param name="state"></param>
+        /// <param name="tenantId">Tenant in which the resource exists</param>
         /// <param name="errorCode"></param>
         /// <param name="errorMessage"></param>
         /// <param name="apiVersion"></param>
@@ -98,6 +102,7 @@ namespace Microsoft.Liftr.RPaaS
         Task<HttpResponseMessage> PatchOperationStatusAsync(
             string operationStatusId,
             ProvisioningState state,
+            string tenantId,
             string errorCode,
             string errorMessage,
             string apiVersion);
