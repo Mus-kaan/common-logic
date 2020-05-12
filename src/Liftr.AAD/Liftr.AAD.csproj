@@ -3,10 +3,10 @@
   <PropertyGroup>
     <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
     <IsPackable>true</IsPackable>
-    <AssemblyName>Microsoft.Liftr.Encryption.Abstractions</AssemblyName>
-    <RootNamespace>Microsoft.Liftr.Encryption</RootNamespace>
+    <AssemblyName>Microsoft.Liftr.AAD</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.AAD</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="$(PackageVersion_System_IdentityModel_Tokens_Jwt)" />
   </ItemGroup>
 </Project>

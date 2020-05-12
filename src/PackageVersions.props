@@ -45,6 +45,7 @@
     <PackageVersion_Swashbuckle_AspNetCore_Annotations>5.1.0</PackageVersion_Swashbuckle_AspNetCore_Annotations>
     <PackageVersion_Swashbuckle_AspNetCore_Newtonsoft>5.1.0</PackageVersion_Swashbuckle_AspNetCore_Newtonsoft>
     <PackageVersion_System_Diagnostics_DiagnosticSource>4.5.1</PackageVersion_System_Diagnostics_DiagnosticSource>
+    <PackageVersion_System_IdentityModel_Tokens_Jwt>5.6.0</PackageVersion_System_IdentityModel_Tokens_Jwt>
     <PackageVersion_xunit>2.4.1</PackageVersion_xunit>
     <PackageVersion_xunit_runner_visualstudio>2.4.1</PackageVersion_xunit_runner_visualstudio>
   </PropertyGroup>
