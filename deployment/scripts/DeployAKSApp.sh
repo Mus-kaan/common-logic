@@ -141,8 +141,9 @@ echo "-----------------------------------------------------------------"
 
 DeploymentFlag="--atomic --cleanup-on-fail "
 if [ "$APP_ASPNETCORE_ENVIRONMENT" = "DogFood" ] || [ "$APP_ASPNETCORE_ENVIRONMENT" = "Dev" ] || [ "$APP_ASPNETCORE_ENVIRONMENT" = "Test" ]; then
-    DeploymentFlag=""
-    echo "Remove '--atomic' auto roll back for non-production environment"
+    # https://github.com/helm/helm/issues/3353
+    DeploymentFlag="--force "
+    echo "Remove '--atomic' auto roll back for non-production environment. And use '--force' to delete and replace failed releases."
 fi
 
 $Helm upgrade $HelmReleaseName --install --wait $DeploymentFlag\
