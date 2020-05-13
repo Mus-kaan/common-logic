@@ -25,7 +25,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
         public bool KeepAzureVMImageBuilderLogs { get; set; } = false;
 
-        public bool ExportVHDToStorage { get; set; } = true;
+        public bool ExportVHDToStorage { get; set; } = false;
 
         public Guid SubscriptionId { get; set; }
 

@@ -63,6 +63,13 @@ namespace Microsoft.Liftr.Fluent.Contracts
         public string ResourceGroupName(string baseName)
             => GenerateCommonName(baseName, "rg");
 
+        public string AKSManagedRGName(string baseName)
+        {
+            // https://docs.microsoft.com/en-us/azure/aks/faq#can-i-provide-my-own-name-for-the-aks-node-resource-group
+            // MC_resourcegroupname_clustername_location
+            return $"MC_{ResourceGroupName(baseName)}_{AKSName(baseName)}_{Location.Name}";
+        }
+
         public string StorageAccountName(string baseName)
         {
             var name = "st" + GenerateCommonName(baseName, suffix: null, noRegion: false, delimiter: string.Empty);

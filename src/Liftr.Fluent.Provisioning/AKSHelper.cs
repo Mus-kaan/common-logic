@@ -87,7 +87,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             await update.Attach().ApplyAsync();
         }
 
-        public Task<IPublicIPAddress> GetAppPublicIpAsync(IAzure fluentClient, string AKSRGName, string AKSName, Region location, string aksSvcLabel)
+        public Task<IPublicIPAddress> GetAKSPublicIPAsync(IAzure fluentClient, string AKSRGName, string AKSName, Region location)
         {
             if (fluentClient == null)
             {
@@ -95,31 +95,43 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
 
             var mcRGName = GetMCResourceGroupName(AKSRGName, AKSName, location);
-            return GetAppPublicIpAsync(fluentClient, mcRGName, aksSvcLabel);
+            return GetAKSPublicIPAsync(fluentClient, mcRGName);
         }
 
-        private async Task<IPublicIPAddress> GetAppPublicIpAsync(IAzure fluentClient, string mcRGName, string aksSvcLabel)
+        private async Task<IPublicIPAddress> GetAKSPublicIPAsync(IAzure fluentClient, string mcRGName)
         {
             if (fluentClient == null)
             {
                 throw new ArgumentNullException(nameof(fluentClient));
             }
 
-            _logger.Information("Listing all public IP addresses in ResourceGroup {mcRGName}...", mcRGName);
-            var ips = await fluentClient.PublicIPAddresses.ListByResourceGroupAsync(mcRGName);
-            _logger.Information("Found {ipCount} public IP addresses in ResourceGroup {mcRGName}...", ips.Count(), mcRGName);
-            foreach (var ip in ips)
+            _logger.Information("Listing all public load balancers in ResourceGroup {mcRGName}...", mcRGName);
+            var lbs = (await fluentClient
+                .LoadBalancers
+                .ListByResourceGroupAsync(mcRGName)).ToList().Where(lb => lb.PublicIPAddressIds.Any());
+            _logger.Information("Found {lbCount} public load balancers in ResourceGroup {mcRGName}...", lbs.Count(), mcRGName);
+
+            if (lbs.Count() > 1)
             {
-                if (ip.Tags.ContainsKey("service"))
-                {
-                    if (ip.Tags["service"].Contains(aksSvcLabel))
-                    {
-                        return ip;
-                    }
-                }
+                var ex = new InvalidOperationException($"There exists multiple load balancers in the AKS managed '{mcRGName}' resource group. This is not supported, since the egress traffic will be random using one of the front end's IPs.");
+                _logger.Error(ex, ex.Message);
+                throw ex;
             }
 
-            return null;
+            var lb = lbs.FirstOrDefault();
+            if (lb == null)
+            {
+                return null;
+            }
+
+            if (lb.PublicIPAddressIds.Count > 1)
+            {
+                var ex = new InvalidOperationException($"There exists multiple frontend IPs in the public load balancer '{lb.Id}'. This is not supported, since the egress traffic will be random using one of the front end's IPs.");
+                _logger.Error(ex, ex.Message);
+                throw ex;
+            }
+
+            return await fluentClient.PublicIPAddresses.GetByIdAsync(lb.PublicIPAddressIds[0]);
         }
 
         private static string GetMCResourceGroupName(string AKSRGName, string AKSName, Region location)

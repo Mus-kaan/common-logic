@@ -26,10 +26,6 @@ case $i in
     ActiveKey="${i#*=}"
     shift # past argument=value
     ;;
-    --AKSSvcLabel=*)
-    AKSSvcLabel="${i#*=}"
-    shift # past argument=value
-    ;;
     *)
     echo "Not matched option '${i#*=}' passed in."
     exit 1
@@ -60,13 +56,6 @@ if [ -z ${ActiveKey+x} ]; then
     ActiveKey="Primary MongoDB Connection String"
 fi
 
-if [ "$ProvisionAction" = "UpdateAKSPublicIpInTrafficManager" ]; then
-    if [ -z ${AKSSvcLabel+x} ]; then
-        echo "AKSSvcLabel is blank."
-        exit 1
-    fi
-fi
-
 if [ "$RunnerSPNObjectId" = "" ]; then
     echo "Please set the object Id of the executing service principal using variable 'RunnerSPNObjectId' ..."
     exit 1 # terminate and indicate error
@@ -74,24 +63,13 @@ fi
 
 cd bin
 
-if [ "$AKSSvcLabel" = "" ]; then
-    dotnet Deployment.Runner.dll \
-    -a "$ProvisionAction" \
-    -f "$ConfigFilePath" \
-    -e "$EnvName" \
-    -r "$Region" \
-    --spnObjectId "$RunnerSPNObjectId" \
-    --activeKey "$ActiveKey"
-else
-    dotnet Deployment.Runner.dll \
-    -a "$ProvisionAction" \
-    -f "$ConfigFilePath" \
-    -e "$EnvName" \
-    -r "$Region" \
-    -l "$AKSSvcLabel" \
-    --spnObjectId "$RunnerSPNObjectId" \
-    --activeKey "$ActiveKey"
-fi
+dotnet Deployment.Runner.dll \
+-a "$ProvisionAction" \
+-f "$ConfigFilePath" \
+-e "$EnvName" \
+-r "$Region" \
+--spnObjectId "$RunnerSPNObjectId" \
+--activeKey "$ActiveKey"
 
 exit_code=$?
 if [ $exit_code -ne 0 ]; then

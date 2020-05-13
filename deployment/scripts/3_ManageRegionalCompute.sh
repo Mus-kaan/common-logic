@@ -4,8 +4,6 @@ set -e
 CurrentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 currentScriptName=`basename "$0"`
 
-AKSSvcLabel="nginx-ingress-controller"
-
 echo "CurrentDir: $CurrentDir"
 echo "currentScriptName: $currentScriptName"
 
@@ -66,8 +64,7 @@ fi
 ./ExecuteDeploymentRunner.sh \
 --ProvisionAction="UpdateAKSPublicIpInTrafficManager" \
 --EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
---Region="$REGION" \
---AKSSvcLabel="$AKSSvcLabel"
+--Region="$REGION"
 
 for script in "$CurrentDir"/3_*.sh
 do

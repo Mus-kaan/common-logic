@@ -15,7 +15,7 @@ AKSAppChartPackage="liftr-*.tgz"
 
 echo "Get Key Vault endpoint and save on disk."
 ./ExecuteDeploymentRunner.sh \
---ProvisionAction="GetKeyVaultEndpoint" \
+--ProvisionAction="PrepareK8SAppDeployment" \
 --EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
 --Region="$REGION"
 

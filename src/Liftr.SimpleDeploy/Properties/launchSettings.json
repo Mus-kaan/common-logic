@@ -9,7 +9,7 @@
     },
     "2_wcus-data": {
       "commandName": "Project",
-      "commandLineArgs": "-a CreateOrUpdateRegionalData -e Test -r wcus --authFile my.azureauth-ms.auth.json --activeKey \"Primary MongoDB Connection String\"",
+      "commandLineArgs": "-a CreateOrUpdateRegionalData -e Test -r westcentralus --authFile my.azureauth-ms.auth.json --activeKey \"Primary MongoDB Connection String\"",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

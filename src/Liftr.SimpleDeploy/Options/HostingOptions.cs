@@ -76,6 +76,8 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public AKSInfo AKSConfigurations { get; set; } = new AKSInfo();
 
+        public int IPPerRegion { get; set; } = 0;
+
         public bool EnableVNet { get; set; } = true;
 
         public string DomainName { get; set; }
@@ -117,6 +119,19 @@ namespace Microsoft.Liftr.SimpleDeploy
                 !OneCertCertificates.ContainsKey(CertificateName.GenevaClientCert))
             {
                 throw new InvalidHostingOptionException($"Please specify the Geneva certificate in the '{nameof(OneCertCertificates)}' section. The certification name must be '{CertificateName.GenevaClientCert}' and please specific a subject name.");
+            }
+
+            if (IPPerRegion < 0)
+            {
+                throw new InvalidHostingOptionException($"{nameof(IPPerRegion)} cannot be less than 0.");
+            }
+            else if (IPPerRegion == 1)
+            {
+                throw new InvalidHostingOptionException($"{nameof(IPPerRegion)} cannot be 1, since there will be no room for swap deployment.");
+            }
+            else if (IPPerRegion > 100)
+            {
+                throw new InvalidHostingOptionException($"{nameof(IPPerRegion)} cannot be large than 100.");
             }
         }
     }

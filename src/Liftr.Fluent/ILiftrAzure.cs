@@ -104,6 +104,8 @@ namespace Microsoft.Liftr.Fluent
 
         Task<IPublicIPAddress> GetPublicIPAsync(string rgName, string pipName);
 
+        Task<IEnumerable<IPublicIPAddress>> ListPublicIPAsync(string rgName, string namePrefix = null);
+
         Task<ITrafficManagerProfile> GetOrCreateTrafficManagerAsync(string rgName, string tmName, IDictionary<string, string> tags);
 
         Task<ITrafficManagerProfile> CreateTrafficManagerAsync(string rgName, string tmName, IDictionary<string, string> tags);

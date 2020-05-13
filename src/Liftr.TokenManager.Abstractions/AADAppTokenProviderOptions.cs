@@ -32,6 +32,29 @@ namespace Microsoft.Liftr.TokenManager.Options
         /// The name of the certificate in Key Vault.
         /// </summary>
         public string CertificateName { get; set; }
+
+        public void CheckValues()
+        {
+            if (KeyVaultEndpoint == null)
+            {
+                throw new InvalidOperationException($"'{nameof(KeyVaultEndpoint)}' is null. Please make sure '{nameof(AADAppTokenProviderOptions)}.{nameof(KeyVaultEndpoint)}' is configured correctly.");
+            }
+
+            if (string.IsNullOrEmpty(CertificateName))
+            {
+                throw new InvalidOperationException($"'{nameof(CertificateName)}' is null. Please make sure '{nameof(AADAppTokenProviderOptions)}.{nameof(CertificateName)}' is configured correctly.");
+            }
+
+            if (string.IsNullOrEmpty(AadEndpoint))
+            {
+                throw new InvalidOperationException($"'{nameof(AadEndpoint)}' is null. Please make sure '{nameof(AADAppTokenProviderOptions)}.{nameof(AadEndpoint)}' is configured correctly.");
+            }
+
+            if (string.IsNullOrEmpty(ApplicationId))
+            {
+                throw new InvalidOperationException($"'{nameof(ApplicationId)}' is null. Please make sure '{nameof(AADAppTokenProviderOptions)}.{nameof(ApplicationId)}' is configured correctly.");
+            }
+        }
     }
 
     public class SingleTenantAADAppTokenProviderOptions : AADAppTokenProviderOptions

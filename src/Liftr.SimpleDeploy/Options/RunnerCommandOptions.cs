@@ -11,14 +11,14 @@ namespace Microsoft.Liftr.SimpleDeploy
         CreateOrUpdateGlobal,
         CreateOrUpdateRegionalData,
         CreateOrUpdateRegionalCompute,
-        GetKeyVaultEndpoint,
+        PrepareK8SAppDeployment,
         UpdateAKSPublicIpInTrafficManager,
         OutputSubscriptionId,
     }
 
     public class RunnerCommandOptions
     {
-        [Option('a', "action", Required = true, HelpText = "Action type, e.g. CreateOrUpdateGlobal, CreateOrUpdateRegionalData, CreateOrUpdateRegionalCompute, GetKeyVaultEndpoint, UpdateAKSPublicIpInTrafficManager, OutputSubscriptionId.")]
+        [Option('a', "action", Required = true, HelpText = "Action type, e.g. CreateOrUpdateGlobal, CreateOrUpdateRegionalData, CreateOrUpdateRegionalCompute, PrepareK8SAppDeployment, UpdateAKSPublicIpInTrafficManager, OutputSubscriptionId.")]
         public ActionType Action { get; set; }
 
         [Option('f', "file", Required = false, HelpText = "Path to the configuration file.")]
@@ -38,8 +38,5 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         [Option("activeKey", Required = false, HelpText = "Name of the active cosmos DB connection String.")]
         public string ActiveKeyName { get; set; }
-
-        [Option('l', "svcLabel", Required = false, HelpText = "The AKS service label that we will try to get the IP address of.")]
-        public string AKSAppSvcLabel { get; set; }
     }
 }

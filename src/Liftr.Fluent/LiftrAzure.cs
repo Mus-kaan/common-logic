@@ -545,6 +545,7 @@ namespace Microsoft.Liftr.Fluent
                 .WithRegion(location)
                 .WithExistingResourceGroup(rgName)
                 .WithStaticIP()
+                .WithLeafDomainLabel(pipName)
                 .WithTags(tags)
                 .CreateAsync();
 
@@ -559,6 +560,24 @@ namespace Microsoft.Liftr.Fluent
             return FluentClient
                 .PublicIPAddresses
                 .GetByResourceGroupAsync(rgName, pipName);
+        }
+
+        public async Task<IEnumerable<IPublicIPAddress>> ListPublicIPAsync(string rgName, string namePrefix = null)
+        {
+            _logger.Information($"Listing Public IP in resource group {rgName} with prefix {namePrefix} ...");
+
+            IEnumerable<IPublicIPAddress> ips = (await FluentClient
+                .PublicIPAddresses
+                .ListByResourceGroupAsync(rgName)).ToList();
+
+            if (!string.IsNullOrEmpty(namePrefix))
+            {
+                ips = ips.Where((pip) => pip.Name.OrdinalStartsWith(namePrefix));
+            }
+
+            _logger.Information($"Found {ips.Count()} Public IP in resource group {rgName} with prefix {namePrefix}.");
+
+            return ips;
         }
 
         public async Task<ITrafficManagerProfile> GetOrCreateTrafficManagerAsync(string rgName, string tmName, IDictionary<string, string> tags)

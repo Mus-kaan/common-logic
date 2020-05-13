@@ -23,6 +23,8 @@ namespace Microsoft.Liftr.TokenManager
                 throw new ArgumentNullException(nameof(logger));
             }
 
+            _options.CheckValues();
+
             _certStore = new CertificateStore(kvClient, logger);
 
             var tmOptions = new TokenManagerConfiguration()

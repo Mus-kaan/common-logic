@@ -157,7 +157,7 @@ namespace Microsoft.Liftr.Sample.Web
 
             services.AddSingleton<IMultiTenantAppTokenProvider, MultiTenantAppTokenProvider>((sp) =>
             {
-                var options = sp.GetService<IOptions<AADAppTokenProviderOptions>>().Value;
+                var options = sp.GetService<IOptions<SingleTenantAADAppTokenProviderOptions>>().Value;
                 var kvClient = sp.GetService<IKeyVaultClient>();
                 var logger = sp.GetService<ILogger>();
 
