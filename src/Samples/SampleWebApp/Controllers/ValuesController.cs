@@ -43,8 +43,8 @@ namespace SampleWebApp.Controllers
 
             try
             {
-                var apiVersion = "2019-11-01-preview";
-                var requestPath = "/subscriptions/60d3e394-7bbe-4744-a115-363c94f9a209/providers/Microsoft.IncrediBuild/clusters";
+                var apiVersion = "2020-02-01-preview";
+                var requestPath = "subscriptions/f9d7ebed-adbd-4cb4-b973-aaf82c136138/providers/Microsoft.Datadog/monitors";
                 return await _metaRPStorageClient.ListResourcesAsync<TestResource>(requestPath, apiVersion);
             }
             catch (Exception ex)
@@ -71,7 +71,6 @@ namespace SampleWebApp.Controllers
 
                 await _metaRPStorageClient.GetTenantForSubscriptionAsync(userRpSubscription, providerName, userRpSubscription, apiVersion);
                 await _metaRPStorageClient.GetTenantForAllSubscriptionsAsync(userRpSubscription, providerName, apiVersion);
-
                 var requestPath = "/subscriptions/f9d7ebed-adbd-4cb4-b973-aaf82c136138/resourceGroups/limgurg/providers/Microsoft.Datadog/monitors/testdf12";
                 var resource = new TestResource()
                 {
@@ -81,8 +80,7 @@ namespace SampleWebApp.Controllers
                     Type = "Microsoft.Datadog",
                 };
 
-                await _metaRPStorageClient.UpdateResourceAsync(resource, requestPath, tenantId, apiVersion);
-
+                await _metaRPStorageClient.GetResourceAsync<TestResource>(requestPath, tenantId, apiVersion);
                 return await _metaRPStorageClient.ListResourcesAsync<TestResource>(requestPath, apiVersion);
             }
             catch (Exception ex)
