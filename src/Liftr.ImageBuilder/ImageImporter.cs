@@ -181,6 +181,11 @@ namespace Microsoft.Liftr.ImageBuilder
                 var deletedVHDCount = await _artifactStore.CleanUpExportingVHDsAsync();
                 _logger.Information("Removed old importing VHDs: {deletedVHDCount}", deletedVHDCount);
 
+                if (_options.ImageVersionRetentionTimeInDays == 0)
+                {
+                    return;
+                }
+
                 var az = _azFactory.GenerateLiftrAzure();
                 var cutOffTime = _timeSource.UtcNow.AddDays(-1 * _options.ImageVersionRetentionTimeInDays);
                 var galleryClient = new ImageGalleryClient(_logger);

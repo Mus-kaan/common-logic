@@ -334,6 +334,11 @@ namespace Microsoft.Liftr.ImageBuilder
         #region Private
         private async Task CleanUpAsync(IAzure az, string imageName, ImageGalleryClient galleryClient)
         {
+            if (_options.ImageVersionRetentionTimeInDays == 0)
+            {
+                _logger.Information("Skip clean up old image versions.");
+            }
+
             using var ops = _logger.StartTimedOperation(nameof(CleanUpAsync));
 
             try

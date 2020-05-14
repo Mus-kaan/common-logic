@@ -40,6 +40,9 @@ namespace Microsoft.Liftr.ImageBuilder
 
         public string PackerVMSize { get; set; } = "Standard_D2s_v3";
 
+        /// <summary>
+        /// The retention time for each image version. 0 means do not clean up old images.
+        /// </summary>
         public int ImageVersionRetentionTimeInDays { get; set; } = 15;
 
         [JsonProperty(ItemConverterType = typeof(RegionConverter))]
@@ -69,9 +72,9 @@ namespace Microsoft.Liftr.ImageBuilder
                 throw new InvalidOperationException($"{nameof(Location)} cannot be null.");
             }
 
-            if (ImageVersionRetentionTimeInDays < 1)
+            if (ImageVersionRetentionTimeInDays < 0)
             {
-                throw new InvalidOperationException($"{nameof(ImageVersionRetentionTimeInDays)} must be greater than 1.");
+                throw new InvalidOperationException($"{nameof(ImageVersionRetentionTimeInDays)} cannot be negative.");
             }
         }
     }
