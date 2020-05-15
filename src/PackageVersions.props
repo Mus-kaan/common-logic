@@ -27,7 +27,7 @@
     <PackageVersion_Microsoft_Extensions_Http_Polly>3.1.2</PackageVersion_Microsoft_Extensions_Http_Polly>
     <PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions>3.1.2</PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions>
     <PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>5.2.1</PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>
-    <PackageVersion_Microsoft_Liftr_EV2>2.0.1206-build201</PackageVersion_Microsoft_Liftr_EV2>
+    <PackageVersion_Microsoft_Liftr_EV2>2.1.1230-build255</PackageVersion_Microsoft_Liftr_EV2>
     <PackageVersion_Microsoft_NET_Test_Sdk>16.0.1</PackageVersion_Microsoft_NET_Test_Sdk>
     <PackageVersion_MongoDB_Driver>2.10.4</PackageVersion_MongoDB_Driver>
     <PackageVersion_Moq>4.12.0</PackageVersion_Moq>

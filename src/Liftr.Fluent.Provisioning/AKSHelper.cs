@@ -87,15 +87,24 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             await update.Attach().ApplyAsync();
         }
 
-        public Task<IPublicIPAddress> GetAKSPublicIPAsync(IAzure fluentClient, string AKSRGName, string AKSName, Region location)
+        public async Task<IPublicIPAddress> GetAKSPublicIPAsync(ILiftrAzure liftrAzureClient, string AKSRGName, string AKSName, Region location)
         {
-            if (fluentClient == null)
+            if (liftrAzureClient == null)
             {
-                throw new ArgumentNullException(nameof(fluentClient));
+                throw new ArgumentNullException(nameof(liftrAzureClient));
+            }
+
+            var aksId = $"subscriptions/{liftrAzureClient.FluentClient.SubscriptionId}/resourceGroups/{AKSRGName}/providers/Microsoft.ContainerService/managedClusters/{AKSName}";
+            var aks = await liftrAzureClient.GetAksClusterAsync(aksId);
+            if (aks == null)
+            {
+                var ex = new InvalidOperationException($"Cannot find the AKS cluster with resource Id '{aksId}'. We will not be able to find its public IP address. Please make sure the AKS is provisioned first.");
+                _logger.Error(ex, ex.Message);
+                throw ex;
             }
 
             var mcRGName = GetMCResourceGroupName(AKSRGName, AKSName, location);
-            return GetAKSPublicIPAsync(fluentClient, mcRGName);
+            return await GetAKSPublicIPAsync(liftrAzureClient.FluentClient, mcRGName);
         }
 
         private async Task<IPublicIPAddress> GetAKSPublicIPAsync(IAzure fluentClient, string mcRGName)

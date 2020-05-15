@@ -410,7 +410,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                             }
 
                             var aksHelper = new AKSHelper(_logger);
-                            var pip = await aksHelper.GetAKSPublicIPAsync(az, aksRGName, aksName, regionalNamingContext.Location);
+                            var pip = await aksHelper.GetAKSPublicIPAsync(liftrAzure, aksRGName, aksName, regionalNamingContext.Location);
                             if (pip == null)
                             {
                                 var errMsg = $"Cannot find the public Ip address for the AKS cluster. aksRGName:{aksRGName}, aksName:{aksName}, region:{regionalNamingContext.Location}.";
@@ -500,8 +500,7 @@ namespace Microsoft.Liftr.SimpleDeploy
             }
 
             var aksHelper = new AKSHelper(_logger);
-            var az = azFactory.GenerateLiftrAzure().FluentClient;
-            var pip = await aksHelper.GetAKSPublicIPAsync(az, aksRGName, aksName, regionalNamingContext.Location);
+            var pip = await aksHelper.GetAKSPublicIPAsync(azFactory.GenerateLiftrAzure(), aksRGName, aksName, regionalNamingContext.Location);
             if (pip == null)
             {
                 pip = await ipPool.GetAvailableIPAsync(regionalNamingContext.Location);
