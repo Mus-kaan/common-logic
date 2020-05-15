@@ -495,62 +495,59 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 sshPublicKey = (await globalKVValet.GetSecretAsync(SSHPublicKeySecretName))?.Value ?? throw new InvalidOperationException("Cannot find ssh public key in key vault");
             }
 
-            var aksId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.ContainerService/managedClusters/{aksName}";
-            var aks = await liftrAzure.GetAksClusterAsync(aksId);
-            if (aks == null)
+            var subnet = enableVNet ? await liftrAzure.CreateNewSubnetAsync(vnet, namingContext.SubnetName(computeOptions.ComputeBaseName), nsg?.Id) : null;
+
+            if (enableVNet)
             {
-                var subnet = enableVNet ? await liftrAzure.CreateNewSubnetAsync(vnet, namingContext.SubnetName(computeOptions.ComputeBaseName), nsg?.Id) : null;
+                _logger.Information("Restrict the Key Vault '{kvId}' to IP '{currentPublicIP}' and subnet '{subnetId}'.", regionalKeyVault.Id, currentPublicIP, subnet?.Inner?.Id);
+                await liftrAzure.WithKeyVaultAccessFromNetworkAsync(regionalKeyVault, currentPublicIP, subnet?.Inner?.Id);
 
                 var storName = namingContext.StorageAccountName(computeOptions.DataBaseName);
                 var stor = await liftrAzure.GetStorageAccountAsync(dataRGName, storName);
-                if (stor == null)
+                if (stor != null)
                 {
-                    var ex = new InvalidOperationException($"Cannot find the storage account with name '{storName}' in the data resource group '{dataRGName}'.");
-                    _logger.Fatal(ex, ex.Message);
-                    throw ex;
+                    _logger.Information("Restrict access to storage account with Id '{storId}' to subnet '{subnetId}'.", stor.Id, subnet.Inner.Id);
+                    await stor.Update().WithAccessFromNetworkSubnet(subnet.Inner.Id).ApplyAsync();
                 }
 
                 var dbName = namingContext.CosmosDBName(computeOptions.DataBaseName);
                 var db = await liftrAzure.GetCosmosDBAsync(dataRGName, dbName);
-                if (db == null)
+                if (db != null)
                 {
-                    var ex = new InvalidOperationException($"Cannot find the cosmos DB with name '{dbName}' in the data resource group '{dataRGName}'.");
-                    _logger.Fatal(ex, ex.Message);
-                    throw ex;
-                }
-
-                if (enableVNet)
-                {
-                    _logger.Information("Restrict the Key Vault '{kvId}' to IP '{currentPublicIP}' and subnet '{subnetId}'.", regionalKeyVault.Id, currentPublicIP, subnet?.Inner?.Id);
-                    await liftrAzure.WithKeyVaultAccessFromNetworkAsync(regionalKeyVault, currentPublicIP, subnet?.Inner?.Id);
-
-                    _logger.Information("Restrict access to storage account with Id {storId} to subnet {subnetId}.", stor.Id, subnet.Inner.Id);
-                    await stor.Update().WithAccessFromNetworkSubnet(subnet.Inner.Id).ApplyAsync();
-
-                    _logger.Information("Restrict access to cosmos DB with Id {cosmosDBId} to subnet {subnetId}.", db.Id, subnet.Inner.Id);
-                    await db.Update().WithVirtualNetworkRule(vnet.Id, subnet.Name).ApplyAsync();
-
-                    try
+                    // The cosmos DB service endpoint PUT is not idempotent. PUT the same subnet Id will generate 400.
+                    var dbVNetRules = db.VirtualNetworkRules;
+                    if (dbVNetRules?.Any((subnetId) => subnetId?.Id?.OrdinalEquals(subnet.Inner.Id) == true) != true)
                     {
-                        _logger.Information("Make sure the AKS SPN '{AKSSPNObjectId}' has write access to the subnet '{subnetId}'.", aksInfo.AKSSPNObjectId, subnet.Inner.Id);
-                        await liftrAzure.Authenticated.RoleAssignments
-                            .Define(SdkContext.RandomGuid())
-                            .ForObjectId(aksInfo.AKSSPNObjectId)
-                            .WithBuiltInRole(BuiltInRole.NetworkContributor)
-                            .WithScope(subnet.Inner.Id)
-                            .CreateAsync();
-                        _logger.Information("Network contributor role is assigned to the AKS SPN '{AKSSPNObjectId}' for the subnet '{subnetId}'.", aksInfo.AKSSPNObjectId, subnet.Inner.Id);
-                    }
-                    catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
-                    {
-                    }
-                    catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
-                    {
-                        _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", aksInfo.AKSSPNObjectId);
-                        throw;
+                        _logger.Information("Restrict access to cosmos DB with Id '{cosmosDBId}' to subnet '{subnetId}'.", db.Id, subnet.Inner.Id);
+                        await db.Update().WithVirtualNetworkRule(vnet.Id, subnet.Name).ApplyAsync();
                     }
                 }
 
+                try
+                {
+                    _logger.Information("Make sure the AKS SPN '{AKSSPNObjectId}' has write access to the subnet '{subnetId}'.", aksInfo.AKSSPNObjectId, subnet.Inner.Id);
+                    await liftrAzure.Authenticated.RoleAssignments
+                        .Define(SdkContext.RandomGuid())
+                        .ForObjectId(aksInfo.AKSSPNObjectId)
+                        .WithBuiltInRole(BuiltInRole.NetworkContributor)
+                        .WithScope(subnet.Inner.Id)
+                        .CreateAsync();
+                    _logger.Information("Network contributor role is assigned to the AKS SPN '{AKSSPNObjectId}' for the subnet '{subnetId}'.", aksInfo.AKSSPNObjectId, subnet.Inner.Id);
+                }
+                catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
+                {
+                }
+                catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
+                {
+                    _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", aksInfo.AKSSPNObjectId);
+                    throw;
+                }
+            }
+
+            var aksId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.ContainerService/managedClusters/{aksName}";
+            var aks = await liftrAzure.GetAksClusterAsync(aksId);
+            if (aks == null)
+            {
                 var agentPoolName = (namingContext.ShortPartnerName + namingContext.ShortEnvironmentName + namingContext.Location.ShortName()).ToLowerInvariant();
                 if (agentPoolName.Length > 11)
                 {
@@ -579,12 +576,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             else
             {
                 _logger.Information("Use existing AKS cluster (ProvisioningState: {ProvisioningState}) with Id '{ResourceId}'.", aks.ProvisioningState, aks.Id);
-
-                if (enableVNet)
-                {
-                    _logger.Information("Restrict the Key Vault '{kvId}' to IP '{currentPublicIP}'.", regionalKeyVault.Id, currentPublicIP);
-                    await liftrAzure.WithKeyVaultAccessFromNetworkAsync(regionalKeyVault, currentPublicIP, null);
-                }
             }
 
             if (!string.IsNullOrEmpty(computeOptions.LogAnalyticsWorkspaceResourceId))

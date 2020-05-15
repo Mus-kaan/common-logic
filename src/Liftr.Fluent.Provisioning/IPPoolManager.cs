@@ -77,7 +77,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     }
                 }
 
-                _logger.Information("Created {createdCount} IP addresses in the IP pool resource group '{rg.Id}'.", createdCount, rg.Id);
+                _logger.Information("Created {createdCount} IP addresses in the IP pool resource group '{rgId}'.", createdCount, rg.Id);
             }
             catch (Exception ex)
             {

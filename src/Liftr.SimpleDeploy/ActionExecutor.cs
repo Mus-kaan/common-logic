@@ -205,7 +205,6 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                         File.WriteAllText("acr-name.txt", globalResources.ContainerRegistry.Name);
                         File.WriteAllText("acr-endpoint.txt", globalResources.ContainerRegistry.LoginServerUrl);
-                        _logger.Information("Successfully managed global resources.");
 
                         if (SimpleDeployExtension.AfterProvisionGlobalResourcesAsync != null)
                         {
@@ -222,6 +221,10 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 await SimpleDeployExtension.AfterProvisionGlobalResourcesAsync.Invoke(parameters);
                             }
                         }
+
+                        _logger.Information("-----------------------------------------------------------------------");
+                        _logger.Information($"Successfully finished managing global resources.");
+                        _logger.Information("-----------------------------------------------------------------------");
                     }
                     else
                     {
@@ -254,7 +257,6 @@ namespace Microsoft.Liftr.SimpleDeploy
                             };
 
                             var dataResources = await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions);
-                            _logger.Information("Successfully managed regional data resources.");
 
                             if (SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync != null)
                             {
@@ -272,6 +274,10 @@ namespace Microsoft.Liftr.SimpleDeploy
                                     await SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync.Invoke(parameters);
                                 }
                             }
+
+                            _logger.Information("-----------------------------------------------------------------------");
+                            _logger.Information($"Successfully finished managing regional data resources.");
+                            _logger.Information("-----------------------------------------------------------------------");
                         }
                         else if (_commandOptions.Action == ActionType.CreateOrUpdateRegionalCompute)
                         {
@@ -341,7 +347,10 @@ namespace Microsoft.Liftr.SimpleDeploy
                             File.WriteAllText("aks-rg.txt", aks.ResourceGroupName);
                             File.WriteAllText("msi-resourceId.txt", msi.Id);
                             File.WriteAllText("msi-clientId.txt", msi.ClientId);
-                            _logger.Information("Successfully managed regional compute resources.");
+
+                            _logger.Information("-----------------------------------------------------------------------");
+                            _logger.Information($"Successfully finished managing regional compute resources.");
+                            _logger.Information("-----------------------------------------------------------------------");
                         }
                         else if (_commandOptions.Action == ActionType.PrepareK8SAppDeployment)
                         {
