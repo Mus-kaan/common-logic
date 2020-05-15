@@ -24,6 +24,11 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public int StorageCountPerDataPlaneSubscription { get; set; }
 
+        /// <summary>
+        /// See more at: https://thanos.io/
+        /// </summary>
+        public bool EnableThanos { get; set; } = false;
+
         public IEnumerable<HostingEnvironmentOptions> Environments { get; set; }
 
         public void CheckValid()

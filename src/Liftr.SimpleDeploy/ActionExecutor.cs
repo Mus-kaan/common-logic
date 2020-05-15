@@ -75,6 +75,11 @@ namespace Microsoft.Liftr.SimpleDeploy
                     File.WriteAllText("helm-releasename.txt", _hostingOptions.HelmReleaseName);
                 }
 
+                if (_hostingOptions.EnableThanos)
+                {
+                    File.WriteAllText("enable-thanos.txt", "true");
+                }
+
                 _logger.Information("ActionExecutor Action:{ExeAction}", _commandOptions.Action);
                 _logger.Information("RunnerCommandOptions: {@RunnerCommandOptions}", _commandOptions);
 

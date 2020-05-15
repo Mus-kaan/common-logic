@@ -119,6 +119,12 @@ sed -i "s|PLACE_HOLDER_AKS_DOMAIN|$AKSDomain|g" thanos-sidecar-ingress.yaml
 set +e
 echo "kubectl create namespace $namespace"
 kubectl create namespace "$namespace"
+set -e
+
+ThanosFlag="--set prometheus.prometheusSpec.replicas=1 "
+
+if [ ! -f bin/enable-thanos.txt ]; then
+echo "Thanos is enabled."
 
 ./CreateCertificateSecret.sh \
 --DeploymentSubscriptionId=$DeploymentSubscriptionId \
@@ -127,7 +133,6 @@ kubectl create namespace "$namespace"
 --tlsSecretName="dummy-tls-secret" \
 --caSecretName="thanos-ca-secret" \
 --Namespace=$namespace
-set -e
 
 ./CreateCertificateSecret.sh \
 --DeploymentSubscriptionId=$DeploymentSubscriptionId \
@@ -136,12 +141,6 @@ set -e
 --tlsSecretName="thanos-ingress-secret" \
 --caSecretName="dummy-ca-secret" \
 --Namespace=$namespace
-
-
-
-echo "************************************************************"
-echo "Start helm upgrade Prometheus chart ..."
-echo "************************************************************"
 
 set +e
 kubectl -n $namespace delete secret thanos-objstore-config
@@ -154,7 +153,14 @@ sed -i "s|STOR_KEY_PLACEHOLDER|$DiagStorKey|g" thanos-storage-config.yaml
 echo "Create thanos secret 'thanos-objstore-config'"
 kubectl -n $namespace create secret generic thanos-objstore-config --from-file=thanos.yaml=thanos-storage-config.yaml
 
-# https://itnext.io/monitoring-kubernetes-workloads-with-prometheus-and-thanos-4ddb394b32c
+ThanosFlag="--set prometheus.prometheusSpec.replicas=2 --set prometheus.prometheusSpec.thanos.tag=v0.3.1 --set prometheus.prometheusSpec.thanos.objectStorageConfig.key=thanos.yaml --set prometheus.prometheusSpec.thanos.objectStorageConfig.name=thanos-objstore-config "
+fi
+
+echo "************************************************************"
+echo "Start helm upgrade Prometheus chart ..."
+echo "************************************************************"
+
+# https: //itnext.io/monitoring-kubernetes-workloads-with-prometheus-and-thanos-4ddb394b32c
 echo "helm upgrade $helmReleaseName ..."
 $Helm upgrade $helmReleaseName prometheus-operator-*.tgz --install --wait \
 --namespace $namespace \
@@ -169,11 +175,7 @@ $Helm upgrade $helmReleaseName prometheus-operator-*.tgz --install --wait \
 --set prometheus.prometheusSpec.externalLabels.region=$compactRegion \
 --set prometheus.prometheusSpec.externalLabels.aks_rg=$AKSRGName \
 --set prometheus.prometheusSpec.externalLabels.aks_name=$AKSName \
---set prometheus.prometheusSpec.replicas=2 \
 --set prometheus.prometheusSpec.retention=12h \
---set prometheus.prometheusSpec.thanos.tag=v0.3.1 \
---set prometheus.prometheusSpec.thanos.objectStorageConfig.key=thanos.yaml \
---set prometheus.prometheusSpec.thanos.objectStorageConfig.name=thanos-objstore-config \
 --set alertmanager.alertmanagerSpec.image.repository="$liftrACRURI/prometheus/alertmanager" \
 --set prometheusOperator.tlsProxy.image.repository="$liftrACRURI/squareup/ghostunnel" \
 --set prometheusOperator.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
@@ -184,6 +186,7 @@ $Helm upgrade $helmReleaseName prometheus-operator-*.tgz --install --wait \
 --set prometheusOperator.prometheusSpec.image.repository="$liftrACRURI/prometheus/prometheus" \
 --set kube-state-metrics.image.repository="$liftrACRURI/coreos/kube-state-metrics" \
 --set prometheus-node-exporter.image.repository="$liftrACRURI/prometheus/node-exporter" \
+$ThanosFlag
 
 if [ ! -f thanos-api.cer ]; then
     echo "Cannot find the api secret for Thanos. Skip deploying Thanos ingress"
