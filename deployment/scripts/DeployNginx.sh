@@ -36,13 +36,13 @@ set -e
 echo "helm upgrade $helmReleaseName ..."
 
 if [ "$PublicIP" = "" ]; then
-$Helm upgrade $helmReleaseName --install --wait --timeout 25m \
+$Helm upgrade $helmReleaseName --install --wait --force --timeout 25m \
 --set controller.image.repository="$liftrACRURI/kubernetes-ingress-controller/nginx-ingress-controller" \
 --set controller.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
 --set defaultBackend.image.repository="$liftrACRURI/defaultbackend-amd64" \
 --namespace "$namespace" nginx-*.tgz
 else
-$Helm upgrade $helmReleaseName --install --wait --timeout 25m \
+$Helm upgrade $helmReleaseName --install --wait --force --timeout 25m \
 --set controller.image.repository="$liftrACRURI/kubernetes-ingress-controller/nginx-ingress-controller" \
 --set controller.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
 --set controller.service.loadBalancerIP=$PublicIP \

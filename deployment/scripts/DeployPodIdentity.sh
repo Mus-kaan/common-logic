@@ -64,7 +64,7 @@ kubectl create namespace "$namespace"
 set -e
 
 echo "helm upgrade aad-pod-id-rel"
-$Helm upgrade aad-pod-id-rel aad-pod-identity-*.tgz --install --wait \
+$Helm upgrade aad-pod-id-rel aad-pod-identity-*.tgz --install --wait --force \
 --namespace $namespace \
 --set azureIdentity.enabled=true \
 --set azureIdentity.resourceID=$MSIResourceId \
