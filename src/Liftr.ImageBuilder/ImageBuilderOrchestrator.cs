@@ -346,8 +346,11 @@ namespace Microsoft.Liftr.ImageBuilder
                 var deletedArtifactCount = await _artifactStore.CleanUpOldArtifactsAsync();
                 _logger.Information("Removed old artifacts count: {deletedArtifactCount}", deletedArtifactCount);
 
-                var deletedVHDCount = await _exportStore.CleanUpExportingVHDsAsync();
-                _logger.Information("Removed old exporting VHDs: {deletedVHDCount}", deletedVHDCount);
+                if (_exportStore != null)
+                {
+                    var deletedVHDCount = await _exportStore.CleanUpExportingVHDsAsync();
+                    _logger.Information("Removed old exporting VHDs: {deletedVHDCount}", deletedVHDCount);
+                }
 
                 _logger.Information("Start cleaning up old image versions ...");
                 var cutOffTime = _timeSource.UtcNow.AddDays(-1 * _options.ImageVersionRetentionTimeInDays);
