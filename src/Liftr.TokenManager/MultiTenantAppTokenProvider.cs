@@ -52,6 +52,11 @@ namespace Microsoft.Liftr.TokenManager
 
         public async Task<string> GetTokenAsync(string tenantId)
         {
+            if (string.IsNullOrEmpty(tenantId))
+            {
+                throw new ArgumentException("TenantId should not be empty", nameof(tenantId));
+            }
+
 #pragma warning disable CA2000 // Dispose objects before losing scope
             var cert = await _certStore.GetCertificateAsync(_options.KeyVaultEndpoint, _options.CertificateName);
 #pragma warning restore CA2000 // Dispose objects before losing scope

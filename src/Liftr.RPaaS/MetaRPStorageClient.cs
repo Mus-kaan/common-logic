@@ -71,6 +71,7 @@ namespace Microsoft.Liftr.RPaaS
             using (var operation = _logger.StartTimedOperation(nameof(GetResourceAsync)))
             {
                 operation.SetContextProperty(nameof(resourceId), resourceId);
+                operation.SetContextProperty(nameof(tenantId), tenantId);
                 var url = GetMetaRPResourceUrl(resourceId, apiVersion);
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
                 var response = await _httpClient.GetAsync(url);
@@ -106,6 +107,7 @@ namespace Microsoft.Liftr.RPaaS
             using (var content = new StringContent(JsonConvert.SerializeObject(resource, s_camelCaseSettings), Encoding.UTF8, "application/json"))
             {
                 operation.SetContextProperty(nameof(resourceId), resourceId);
+                operation.SetContextProperty(nameof(tenantId), tenantId);
                 var url = GetMetaRPResourceUrl(resourceId, apiVersion);
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
                 var response = await _httpClient.PutAsync(url, content);
@@ -280,6 +282,11 @@ namespace Microsoft.Liftr.RPaaS
 
         private async Task<AuthenticationHeaderValue> GetAuthHeaderAsync(string tenantId)
         {
+            if (string.IsNullOrEmpty(tenantId))
+            {
+                throw new ArgumentException("Tenant Id cannot be empty", nameof(tenantId));
+            }
+
             var authenticationHeader = new AuthenticationHeaderValue(
                         "Bearer",
                         await _tokenCallback(tenantId));
