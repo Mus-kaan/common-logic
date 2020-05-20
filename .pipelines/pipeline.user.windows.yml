@@ -8,9 +8,11 @@ environment:
     provider: 'appcontainer'
     image: 'cdpxwinrs5.azurecr.io/global/vse2019:latest'
 
+# https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/316/Signing
+# https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/2350/Code-Sign-Validation
 signing_options:
   profile: 'internal_azure_service'   # This service deploys to Azure!
-  codesign_validation_glob_pattern: 'f|**\Microsoft.Liftr.*.dll'
+  codesign_validation_glob_pattern: '+:file|**\bin\*\Microsoft.Liftr.*.dll;+:file|**\bin\*\Microsoft.Liftr.*.exe'
 
 workspace_options:
   enable_legacy_networking: true    # Default is false. If false, only the Restore stage enables network connectivity to the user build container. 
@@ -47,6 +49,7 @@ build:
           to: 'bin'
           include:
             - '*/bin/*/*/Microsoft.Liftr.*.dll'
+            - '*/bin/*/*/Microsoft.Liftr.*.exe'
 
 test:
   commands:
@@ -84,3 +87,4 @@ static_analysis_options: # OPTIONAL: If you wish to add options to FxCop, Modern
       - from: 'src/**/bin'
         include:
           - '**/Microsoft.Liftr.*.dll'
+          - '**/Microsoft.Liftr.*.exe'
