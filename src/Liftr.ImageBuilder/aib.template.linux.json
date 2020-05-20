@@ -24,6 +24,7 @@
             "type": "Shell",
             "name": "CustomizeLiftrSettings",
             "inline": [
+              "echo '<liftr>------<liftr>------<liftr>------<liftr>------<liftr>------<liftr>------<liftr>------<liftr>------<liftr>'",
               "echo '[liftr-image-builder] Toubleshooting guide: https://aka.ms/liftr/aib-tsg'",
               "echo '[liftr-image-builder] sudo mkdir -p /home/packer-tmp'",
               "sudo mkdir -p /home/packer-tmp",
@@ -42,7 +43,9 @@
               "echo '[liftr-image-builder] sudo chmod u+x *.sh'",
               "sudo chmod u+x *.sh",
               "echo '[liftr-image-builder] run Liftr VM Image Builder entry script: bake-image.sh'",
-              "sudo -S bash -c './bake-image.sh'"
+              "sudo -S bash -c './bake-image.sh'",
+              "echo '[liftr-image-builder] Funished running bake-image.sh'",
+              "echo '<liftr>------<liftr>------<liftr>------<liftr>------<liftr>------<liftr>------<liftr>------<liftr>------<liftr>'"
             ]
           }
         ],
