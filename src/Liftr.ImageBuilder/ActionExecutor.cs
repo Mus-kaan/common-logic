@@ -140,10 +140,20 @@ namespace Microsoft.Liftr.ImageBuilder
                     _logger.Information("Use Managed Identity to authenticate against Azure.");
                     kvClient = KeyVaultClientFactory.FromMSI();
 
+                    var azEnv = _options.Cloud.LoadAzEnvironment();
+                    TokenCredentialOptions tokenCredentialOptions = null;
+                    if (_options.Cloud != CloudType.Public)
+                    {
+                        tokenCredentialOptions = new TokenCredentialOptions()
+                        {
+                            AuthorityHost = new Uri(azEnv.AuthenticationEndpoint),
+                        };
+                    }
+
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory
-                    .FromMSI(new MSILoginInformation(MSIResourceType.VirtualMachine), _options.Cloud.LoadAzEnvironment(), config.TenantId)
+                    .FromMSI(new MSILoginInformation(MSIResourceType.VirtualMachine), azEnv, config.TenantId)
                     .WithDefaultSubscription(config.SubscriptionId.ToString());
-                    tokenCredential = new ManagedIdentityCredential();
+                    tokenCredential = new ManagedIdentityCredential(options: tokenCredentialOptions);
                 }
 
                 LogContext.PushProperty(nameof(config.TenantId), config.TenantId);
