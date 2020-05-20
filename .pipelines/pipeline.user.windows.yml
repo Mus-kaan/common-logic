@@ -19,7 +19,7 @@ workspace_options:
 version:
   name: 'Liftr.Common'                                              
   major: 2                                                              # The major version number.
-  minor: 1                                                              # The minor version number
+  minor: 2                                                              # The minor version number
   system: 'buildrevision'                                               
 
 versioning:

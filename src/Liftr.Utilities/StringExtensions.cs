@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using System.Text;
 
 namespace Microsoft.Liftr
@@ -53,6 +54,15 @@ namespace Microsoft.Liftr
         {
             var bytes = Convert.FromBase64String(input);
             return Encoding.UTF8.GetString(bytes);
+        }
+
+        public static string RemoveWhitespace(this string input)
+        {
+            Ensure.ArgumentNotNull(input, nameof(input));
+
+            return new string(input.ToCharArray()
+                .Where(c => !char.IsWhiteSpace(c))
+                .ToArray());
         }
     }
 }

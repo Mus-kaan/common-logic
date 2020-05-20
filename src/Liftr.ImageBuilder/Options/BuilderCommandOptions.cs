@@ -33,6 +33,9 @@ namespace Microsoft.Liftr.ImageBuilder
         [Option("srcImg", Required = false, HelpText = "Source image type, one of: [ WindowsServer2016Datacenter, WindowsServer2016DatacenterCore, WindowsServer2016DatacenterContainers, WindowsServer2019Datacenter, WindowsServer2019DatacenterCore, WindowsServer2019DatacenterContainers, U1604LTS, U1804LTS ]")]
         public SourceImageType? SourceImage { get; set; } = null;
 
+        [Option("cloud", Required = false, HelpText = "Azure cloud type, one of: [ Public, DogFood, Fairfax, Mooncake, USNat, USSec ]")]
+        public CloudType Cloud { get; set; } = CloudType.Public;
+
         [Option("spnObjectId", Required = false, HelpText = "The Object Id of the executing Service Principal.")]
         public string RunnerSPNObjectId { get; set; }
 

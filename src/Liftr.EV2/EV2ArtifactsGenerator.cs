@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.EV2.Contracts;
 using System;
 using System.Collections.Generic;
@@ -64,30 +65,16 @@ namespace Microsoft.Liftr.EV2
 
                 foreach (var image in imageBuilderOptions.Images)
                 {
-                    var serviceModel = AssembleServiceModel(
-                        "Production", // hard code the env name for image builder artifacts.
-                        regions,
-                        imageBuilderOptions.ServiceTreeName,
-                        imageBuilderOptions.ServiceTreeId,
-                        image.RunnerInformation.Location,
-                        image.RunnerInformation.SubscriptionId,
-                        (_, region) => ArtifactConstants.RolloutParametersFileName(image.ImageName));
+                    BakeImageArtifacts(imageBuilderOptions, image, outputDirectory);
 
-                    File.WriteAllText(Path.Combine(outputDirectory, ArtifactConstants.ServiceModelFileName(image.ImageName)), serviceModel.ToJsonString(indented: true));
-
-                    var rollputSpec = AssembleRolloutSpec(
-                        image.ImageName,
-                        "global",
-                        description: $"[{image.ImageName}] Run Liftr Image Builder to generate base image in Shared Image Gallery",
-                        imageBuilderOptions.NotificationEmail);
-                    File.WriteAllText(Path.Combine(outputDirectory, ArtifactConstants.RolloutSpecFileName(image.ImageName)), rollputSpec.ToJsonString(indented: true));
-
-                    var parameterFileName = ArtifactConstants.RolloutParametersFileName(image.ImageName);
-                    var parameterFilePath = Path.Combine(outputDirectory, parameterFileName);
-                    var parameters = AssembleImageBuilderRolloutParameters(
-                        image,
-                        "1_BuildSharedImageGalleryImage.sh");
-                    File.WriteAllText(parameterFilePath, parameters.ToJsonString(indented: true));
+                    if (image.Distribute != null && image.Distribute.Any())
+                    {
+                        int i = 1;
+                        foreach (var dist in image.Distribute)
+                        {
+                            DistributeImageArtifacts(imageBuilderOptions, image, dist, outputDirectory, i++);
+                        }
+                    }
                 }
 
                 _logger.Information("Generated EV2 image builder artifacts and stored in directory: {outputDirectory}", outputDirectory);
@@ -97,6 +84,75 @@ namespace Microsoft.Liftr.EV2
                 _logger.Error(ex, ex.Message);
                 throw;
             }
+        }
+
+        private static void BakeImageArtifacts(EV2ImageBuilderOptions imageBuilderOptions, ImageOptions image, string outputDirectory)
+        {
+            var fileBaseName = $"{image.ImageName}";
+            var regions = new List<string>() { "Global" };
+
+            var serviceModel = AssembleServiceModel(
+                        "Production", // hard code the env name for image builder artifacts.
+                        regions,
+                        imageBuilderOptions.ServiceTreeName,
+                        imageBuilderOptions.ServiceTreeId,
+                        image.Bake.RunnerInformation.Location,
+                        image.Bake.RunnerInformation.SubscriptionId,
+                        (_, region) => ArtifactConstants.RolloutParametersFileName(fileBaseName));
+
+            File.WriteAllText(Path.Combine(outputDirectory, ArtifactConstants.ServiceModelFileName(fileBaseName)), serviceModel.ToJsonString(indented: true));
+
+            var rollputSpec = AssembleRolloutSpec(
+                fileBaseName,
+                "global",
+                description: $"[{image.ImageName}]{GetCDPxVersionText()} Bake VM image",
+                imageBuilderOptions.NotificationEmail);
+            File.WriteAllText(Path.Combine(outputDirectory, ArtifactConstants.RolloutSpecFileName(fileBaseName)), rollputSpec.ToJsonString(indented: true));
+
+            var parameterFileName = ArtifactConstants.RolloutParametersFileName(fileBaseName);
+            var parameterFilePath = Path.Combine(outputDirectory, parameterFileName);
+            var parameters = AssembleImageBuilderRolloutParameters(
+                image,
+                image.Bake.ConfigurationPath,
+                image.Bake.RunnerInformation.UserAssignedManagedIdentityResourceId,
+                image.Bake.RunnerInformation.UserAssignedManagedIdentityObjectId,
+                image.Bake.Cloud,
+                entryScript: "1_BakeVMImage.sh");
+            File.WriteAllText(parameterFilePath, parameters.ToJsonString(indented: true));
+        }
+
+        private static void DistributeImageArtifacts(EV2ImageBuilderOptions imageBuilderOptions, ImageOptions image, EnvironmentOptions distribute, string outputDirectory, int num)
+        {
+            var fileBaseName = $"{image.ImageName}-dist{num}-{distribute.Cloud}";
+            var regions = new List<string>() { "Global" };
+
+            var serviceModel = AssembleServiceModel(
+                        "Production", // hard code the env name for image builder artifacts.
+                        regions,
+                        imageBuilderOptions.ServiceTreeName,
+                        imageBuilderOptions.ServiceTreeId,
+                        distribute.RunnerInformation.Location,
+                        distribute.RunnerInformation.SubscriptionId,
+                        (_, region) => ArtifactConstants.RolloutParametersFileName(fileBaseName));
+            File.WriteAllText(Path.Combine(outputDirectory, ArtifactConstants.ServiceModelFileName(fileBaseName)), serviceModel.ToJsonString(indented: true));
+
+            var rollputSpec = AssembleRolloutSpec(
+                fileBaseName,
+                "global",
+                description: $"[{image.ImageName}]{GetCDPxVersionText()} Import VM image",
+                imageBuilderOptions.NotificationEmail);
+            File.WriteAllText(Path.Combine(outputDirectory, ArtifactConstants.RolloutSpecFileName(fileBaseName)), rollputSpec.ToJsonString(indented: true));
+
+            var parameterFileName = ArtifactConstants.RolloutParametersFileName(fileBaseName);
+            var parameterFilePath = Path.Combine(outputDirectory, parameterFileName);
+            var parameters = AssembleImageBuilderRolloutParameters(
+                image,
+                distribute.ConfigurationPath,
+                distribute.RunnerInformation.UserAssignedManagedIdentityResourceId,
+                distribute.RunnerInformation.UserAssignedManagedIdentityObjectId,
+                distribute.Cloud,
+                entryScript: "2_ImportVMImage.sh");
+            File.WriteAllText(parameterFilePath, parameters.ToJsonString(indented: true));
         }
 
         private static void GenerateGlobalArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
@@ -244,6 +300,7 @@ namespace Microsoft.Liftr.EV2
             Guid ev2ShellSubscriptionId,
             Func<string, string, string> rolloutParameterPathGenerator)
         {
+            var ev2RGName = $"liftr-ev2-shell-{ev2ShellLocation.ToLowerInvariant().RemoveWhitespace()}-rg";
             regions = regions.Select(r => ToSimpleName(r));
 
             var serviceModel = new ServiceModel()
@@ -276,7 +333,7 @@ namespace Microsoft.Liftr.EV2
                                                     Properties = new Dictionary<string, string>()
                                                     {
                                                         ["ImageName"] = "adm-ubuntu-1804-l",
-                                                        ["ImageVersion"] = "v11",
+                                                        ["ImageVersion"] = "v13", // https://ev2docs.azure.net/features/extensibility/shell/intro.html#supported-images-and-availability
                                                     },
                                                 },
                                             },
@@ -290,7 +347,7 @@ namespace Microsoft.Liftr.EV2
                     {
                         new ServiceResourceGroup()
                         {
-                            AzureResourceGroupName = "liftr-ev2-shell-ext-rg",
+                            AzureResourceGroupName = ev2RGName,
                             Location = ev2ShellLocation,
                             InstanceOf = ArtifactConstants.c_EV2ServiceResourceGroupDefinitionName,
                             AzureSubscriptionId = ev2ShellSubscriptionId,
@@ -452,7 +509,13 @@ namespace Microsoft.Liftr.EV2
             return parameters;
         }
 
-        private static RolloutParameters AssembleImageBuilderRolloutParameters(ImageOptions options, string entryScript)
+        private static RolloutParameters AssembleImageBuilderRolloutParameters(
+            ImageOptions options,
+            string configPath,
+            string managedIdentityResourceId,
+            Guid managedIdentityObjectId,
+            CloudType cloud,
+            string entryScript)
         {
             if (options == null)
             {
@@ -474,12 +537,17 @@ namespace Microsoft.Liftr.EV2
                 new ShellEnvironmentVariable()
                 {
                     Name = "ConfigurationPath",
-                    Value = options.ConfigurationPath,
+                    Value = configPath,
                 },
                 new ShellEnvironmentVariable()
                 {
                     Name = "RunnerSPNObjectId",
-                    Value = options.RunnerInformation.UserAssignedManagedIdentityObjectId.ToString(),
+                    Value = managedIdentityObjectId.ToString(),
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "Cloud",
+                    Value = cloud.ToString(),
                 },
             };
 
@@ -494,7 +562,7 @@ namespace Microsoft.Liftr.EV2
                     Type = "UserAssigned",
                     UserAssignedIdentities = new List<string>()
                     {
-                        options.RunnerInformation.UserAssignedManagedIdentityResourceId,
+                        managedIdentityResourceId,
                     },
                 },
             };
@@ -531,6 +599,20 @@ namespace Microsoft.Liftr.EV2
         private static string ToSimpleName(string region)
         {
             return region.Replace(" ", string.Empty, StringComparison.OrdinalIgnoreCase).ToLowerInvariant();
+        }
+
+        private static string GetCDPxVersionText()
+        {
+            // https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/325/Versioning
+            var numericVersion = Environment.GetEnvironmentVariable("CDP_PACKAGE_VERSION_NUMERIC");
+            if (string.IsNullOrEmpty(numericVersion))
+            {
+                return string.Empty;
+            }
+            else
+            {
+                return $" [Version: {numericVersion}]";
+            }
         }
     }
 }

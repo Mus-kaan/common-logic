@@ -183,6 +183,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
                 if (_options.ImageVersionRetentionTimeInDays == 0)
                 {
+                    _logger.Information("Skip clean up old image versions.");
                     return;
                 }
 

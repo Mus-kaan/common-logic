@@ -1,0 +1,18 @@
+{
+  "ServiceTreeName": "Azure Resource Provider",
+  "ServiceTreeId": "be735280-523b-421e-8581-9ea2362e9dbe",
+  "NotificationEmail": "random@microsoft.com",
+  "Images": [
+    {
+      "RunnerInformation": {
+        "Location": "South Central US",
+        "SubscriptionId": "671004f8-a4f8-4bd2-80e2-68f416c944fa",
+        "UserAssignedManagedIdentityResourceId": "/subscriptions/671004f8-a4f8-4bd2-80e2-68f416c944fa/resourceGroups/aznb-common/providers/Microsoft.ManagedIdentity/userAssignedIdentities/EV2_Dev_AME_MSI", // Please make sure this identity has owner role on the above subscription.
+        "UserAssignedManagedIdentityObjectId": "44b729a0-b83c-4140-b3bd-a18eb29d7c51"
+      },
+      "ImageName": "NotebooksUB18SBI",
+      "SourceImage": "U1804LTS",
+      "ConfigurationPath": "configs/public-ame-southcentralus.json"
+    }
+  ]
+}

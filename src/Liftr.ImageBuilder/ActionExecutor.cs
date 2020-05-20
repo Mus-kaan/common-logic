@@ -46,7 +46,6 @@ namespace Microsoft.Liftr.ImageBuilder
             LogContext.PushProperty(nameof(options.SourceImage), options.SourceImage.ToString());
             LogContext.PushProperty(nameof(options.ImageName), options.ImageName);
             LogContext.PushProperty("PartnerName", options.ImageName); // ImageBuilder does not have a 'PartnerName' concept, this is for reuse the existing dashboard.
-            LogContext.PushProperty(nameof(options.ImageVersion), options.ImageVersion);
             logger.LogProcessStart();
         }
 
@@ -56,6 +55,17 @@ namespace Microsoft.Liftr.ImageBuilder
 
             try
             {
+                if (Version.TryParse(_options.ImageVersion, out var parsedVersion))
+                {
+                    _options.ImageVersion = parsedVersion.ToString();
+                }
+                else
+                {
+                    throw new InvalidImageVersionException($"The image version value '{_options.ImageVersion}' is invalid. ");
+                }
+
+                LogContext.PushProperty(nameof(_options.ImageVersion), _options.ImageVersion);
+
                 var content = File.ReadAllText(_options.ConfigPath);
                 BuilderOptions config = content.FromJson<BuilderOptions>();
 
@@ -131,7 +141,7 @@ namespace Microsoft.Liftr.ImageBuilder
                     kvClient = KeyVaultClientFactory.FromMSI();
 
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory
-                    .FromMSI(new MSILoginInformation(MSIResourceType.VirtualMachine), AzureEnvironment.AzureGlobalCloud, config.TenantId)
+                    .FromMSI(new MSILoginInformation(MSIResourceType.VirtualMachine), _options.Cloud.LoadAzEnvironment(), config.TenantId)
                     .WithDefaultSubscription(config.SubscriptionId.ToString());
                     tokenCredential = new ManagedIdentityCredential();
                 }

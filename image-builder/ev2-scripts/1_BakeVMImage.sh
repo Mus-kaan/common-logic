@@ -24,6 +24,11 @@ if [ "$RunnerSPNObjectId" = "" ]; then
     exit 1 # terminate and indicate error
 fi
 
+if [ "$Cloud" = "" ]; then
+    echo "Please set the cloud type using variable 'Cloud' ..."
+    exit 1 # terminate and indicate error
+fi
+
 # CDPx Versioning: https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/325/Versioning
 ImageVersion=$(<numeric.packageversion.info)
 
@@ -33,7 +38,8 @@ ImageVersion=$(<numeric.packageversion.info)
 --ImageVersion="$ImageVersion" \
 --SourceImage="$SourceImage" \
 --RunnerSPNObjectId="$RunnerSPNObjectId" \
---OnlyOutputSubscriptionId="true"
+--OnlyOutputSubscriptionId="true" \
+--Cloud="$Cloud"
 
 if [ "$DeploymentSubscriptionId" = "" ]; then
 DeploymentSubscriptionId=$(<bin/subscription-id.txt)
@@ -54,10 +60,11 @@ fi
 --ImageVersion="$ImageVersion" \
 --SourceImage="$SourceImage" \
 --RunnerSPNObjectId="$RunnerSPNObjectId" \
---OnlyOutputSubscriptionId="false"
+--OnlyOutputSubscriptionId="false" \
+--Cloud="$Cloud"
 
 echo "----------------------------------------------------------------------------------------------"
-echo "Finished running the Liftr Image Builder."
+echo "Finished running Liftr Image Builder to bake VM image."
 echo "----------------------------------------------------------------------------------------------"
 echo "Successfully finished running: $currentScriptName"
 echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"

@@ -30,6 +30,14 @@ case $i in
     OnlyOutputSubscriptionId="${i#*=}"
     shift # past argument=value
     ;;
+    --ImportImage=*)
+    ImportImage="${i#*=}"
+    shift # past argument=value
+    ;;
+    --Cloud=*)
+    Cloud="${i#*=}"
+    shift # past argument=value
+    ;;
     *)
     echo "Not matched option '${i#*=}' passed in."
     exit 1
@@ -67,6 +75,10 @@ if [ -z ${OnlyOutputSubscriptionId+x} ]; then
     exit 1
 fi
 
+if [ -z ${Cloud+x} ]; then
+    echo "Cloud is blank."
+    exit 1
+fi
 
 echo "Using Configuration file: $ConfigurationPath"
 
@@ -81,6 +93,14 @@ if [ "$OnlyOutputSubscriptionId" = "true" ]; then
     --srcImg "$SourceImage" \
     --spnObjectId "$RunnerSPNObjectId" \
     --artifactPath "packer-files.tar.gz"
+elif [ "$ImportImage" = "true" ]; then
+    dotnet BaseImageBuilder.dll \
+    -a ImportOneVersion \
+    -f "$ConfigurationPath" \
+    -n "$ImageName" \
+    -v "$ImageVersion" \
+    --spnObjectId "$RunnerSPNObjectId" \
+    --cloud "$Cloud"
 else
     dotnet BaseImageBuilder.dll \
     -f "$ConfigurationPath" \

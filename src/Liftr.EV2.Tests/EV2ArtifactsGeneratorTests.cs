@@ -63,9 +63,33 @@ namespace Microsoft.Liftr.EV2.Tests
             var folders = Directory.GetDirectories(dir);
 
             Assert.Single(folders);
+
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.TestBaseImage.json")));
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutSpec.TestBaseImage.json")));
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutParameters.TestBaseImage.json")));
+
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.TestBaseImage-dist2-Fairfax.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutSpec.TestBaseImage-dist2-Fairfax.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutParameters.TestBaseImage-dist2-Fairfax.json")));
+
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.TestBaseImage-dist1-Mooncake.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutSpec.TestBaseImage-dist1-Mooncake.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutParameters.TestBaseImage-dist1-Mooncake.json")));
+        }
+
+        [Fact]
+        public void VerifyUpdateErrorMessage()
+        {
+            var artifact = new EV2ArtifactsGenerator(_logger);
+
+            var options = JsonConvert.DeserializeObject<EV2ImageBuilderOptions>(File.ReadAllText("UpdateEV2ImageOptions.json"));
+
+            var dir = Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString());
+
+            Assert.Throws<InvalidImageBuilderEV2OptionsException>(() =>
+            {
+                artifact.GenerateImageBuilderArtifacts(options, dir);
+            });
         }
     }
 }

@@ -14,7 +14,7 @@
     },
     "mooncake-import-img": {
       "commandName": "Project",
-      "commandLineArgs": "-a ImportOneVersion -f configs\\mooncake-chinanorth.json -n 5ETestImg -v 1.5.102 --authFile liftr-img-builder-mc-spn-mooncake.auth.json"
+      "commandLineArgs": "-a ImportOneVersion -f configs\\mooncake-chinanorth.json -n 5ETestImg -v 1.5.102 --cloud Mooncake --authFile liftr-img-builder-mc-spn-mooncake.auth.json"
     },
     "ame-linux-img-unit-test-setup": {
       "commandName": "Project",
