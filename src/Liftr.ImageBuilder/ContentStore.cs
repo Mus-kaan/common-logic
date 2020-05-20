@@ -113,6 +113,18 @@ namespace Microsoft.Liftr.ImageBuilder
             }
         }
 
+        public async Task DeleteBuildArtifactAsync(Uri blobSas)
+        {
+            if (blobSas == null)
+            {
+                throw new ArgumentNullException(nameof(blobSas));
+            }
+
+            var target = new BlobClient(blobSas);
+            var blob = _artifactBlobContainer.GetBlobClient(target.Name);
+            await blob.DeleteIfExistsAsync();
+        }
+
         public async Task<int> CleanUpOldArtifactsAsync()
         {
             int deletedCount = 0;
@@ -283,9 +295,22 @@ namespace Microsoft.Liftr.ImageBuilder
                     ImageVersion = imageVersion,
                     CreatedAtUTC = _timeSource.UtcNow.Date.ToZuluString(),
                     CopiedAtUTC = _timeSource.UtcNow.Date.ToZuluString(),
-                    ContentHash = Convert.ToBase64String(blobPropeties.Value.ContentHash),
                     SourceImageType = sourceImageType,
                 };
+
+                if (blobPropeties?.Value?.ContentHash != null &&
+                    blobPropeties.Value.ContentHash.Length > 0)
+                {
+                    meta.ContentHash = Convert.ToBase64String(blobPropeties.Value.ContentHash);
+                }
+                else
+                {
+                    _logger.Warning("The content hash in the blob properties is null.");
+                    if (blobPropeties?.Value != null)
+                    {
+                        _logger.Warning("Blob properties: {@blobProperties}.", blobPropeties.Value);
+                    }
+                }
 
                 meta.OtherTags = tags.ToJson();
 

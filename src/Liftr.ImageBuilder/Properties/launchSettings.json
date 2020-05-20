@@ -2,7 +2,11 @@
   "profiles": {
     "ms-linux-img-test": {
       "commandName": "Project",
-      "commandLineArgs": "-f configs\\ms-test-sig-eastus.json --srcImg U1804LTS -n 5ETestImg -v 1.5.102 --artifactPath configs\\test-packer.tar --authFile my.azureauth-ms.auth.json"
+      "commandLineArgs": "-f configs\\ms-test-sig-eastus.json --srcImg U1804LTS -n 5ETestImg -v 1.5.103 --artifactPath configs\\test-packer.tar --authFile my.azureauth-ms.auth.json"
+    },
+    "vanilla-ubuntu-img-test": {
+      "commandName": "Project",
+      "commandLineArgs": "-f configs\\ms-vanilla-ub-test-sig-eastus.json --srcImg UbuntuServer1804 -n 5EVanUB18 -v 1.5.103 --artifactPath configs\\test-packer.tar --authFile my.azureauth-ms.auth.json"
     },
     "ms-windows-img-test": {
       "commandName": "Project",
@@ -10,11 +14,11 @@
     },
     "ms-import-img": {
       "commandName": "Project",
-      "commandLineArgs": "-a ImportOneVersion -f configs\\ms-import-test-westus.json -n 5ETestImg -v 1.5.102 --authFile my.azureauth-ms.auth.json"
+      "commandLineArgs": "-a ImportOneVersion -f configs\\ms-import-test-westus.json -n 5ETestImg -v 1.5.103 --authFile my.azureauth-ms.auth.json"
     },
     "mooncake-import-img": {
       "commandName": "Project",
-      "commandLineArgs": "-a ImportOneVersion -f configs\\mooncake-chinanorth.json -n 5ETestImg -v 1.5.102 --cloud Mooncake --authFile liftr-img-builder-mc-spn-mooncake.auth.json"
+      "commandLineArgs": "-a ImportOneVersion -f configs\\mooncake-chinanorth.json -n 5ETestImg -v 1.5.103 --cloud Mooncake --authFile liftr-img-builder-mc-spn-mooncake.auth.json"
     },
     "ame-linux-img-unit-test-setup": {
       "commandName": "Project",

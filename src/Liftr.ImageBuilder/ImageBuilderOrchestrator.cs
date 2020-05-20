@@ -74,7 +74,7 @@ namespace Microsoft.Liftr.ImageBuilder
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<(IVault, IContentStore)> CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType infraType, IDictionary<string, string> tags)
+        public async Task<(IVault, IContentStore)> CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType infraType, SourceImageType? sourceImageType, IDictionary<string, string> tags)
         {
             using var ops = _logger.StartTimedOperation(nameof(CreateOrUpdateLiftrImageBuilderInfrastructureAsync));
             try
@@ -87,7 +87,16 @@ namespace Microsoft.Liftr.ImageBuilder
                 ImageGalleryClient galleryClient = new ImageGalleryClient(_logger);
                 var gallery = await galleryClient.CreateGalleryAsync(liftrAzure.FluentClient, _options.Location, _options.ResourceGroupName, _options.ImageGalleryName, tags);
 
-                _keyVault = await GetOrCreateKeyVaultAsync(c_keyVaultNamePrefix);
+                bool needKeyVault = true;
+                if (sourceImageType?.IsPlatformImage() == true)
+                {
+                    needKeyVault = false;
+                }
+
+                if (needKeyVault)
+                {
+                    _keyVault = await GetOrCreateKeyVaultAsync(c_keyVaultNamePrefix);
+                }
 
                 _artifactStore = await GetOrCreateContentStoreAsync(c_artifactStorageNamePrefix);
 
@@ -167,16 +176,23 @@ namespace Microsoft.Liftr.ImageBuilder
             var galleryClient = new ImageGalleryClient(_logger);
             var aibClient = new AIBClient(_azFactory.GenerateLiftrAzure(), _logger);
 
-            IGalleryImageVersion linuxSourceImage = null;
-            PlatformImageIdentifier windowsSourceImage = null;
             using var rootOperation = _logger.StartTimedOperation(nameof(BuildCustomizedSBIAsync));
             try
             {
-                if (sourceImageType == SourceImageType.U1604LTS ||
-                    sourceImageType == SourceImageType.U1804LTS)
+                var artifactUrlWithSAS = await _artifactStore.UploadBuildArtifactsToSupportingStorageAsync(artifactPath);
+                _logger.Information("uploaded the file '{filePath}' and generated the url with the SAS token.", artifactPath);
+
+                bool isLinux = true;
+                string generatedTemplate;
+                var templateName = $"{imageName}-{imageVersion}";
+                tags[NamingContext.c_createdAtTagName] = _timeSource.UtcNow.ToZuluString();
+                tags["VersionTag"] = imageVersion;
+                tags["LiftrSourceImageType"] = sourceImageType.ToString();
+
+                if (!sourceImageType.IsPlatformImage())
                 {
                     string sbiSASToken = null;
-                    using (var ops = _logger.StartTimedOperation("RetrieveAzureLinuxSBISasKey"))
+                    using (var ops = _logger.StartTimedOperation("RetrieveAzureLinuxSBISASKey"))
                     using (var kvValet = new KeyVaultConcierge(_keyVault.VaultUri, _kvClient, _logger))
                     {
                         try
@@ -192,26 +208,22 @@ namespace Microsoft.Liftr.ImageBuilder
                         }
                     }
 
-                    linuxSourceImage = await CheckLatestSourceSBIAndCacheLocallyAsync(sbiSASToken, sourceImageType, galleryClient);
+                    var linuxSourceImage = await CheckLatestSourceSBIAndCacheLocallyAsync(sbiSASToken, sourceImageType, galleryClient);
+                    generatedTemplate = templateHelper.GenerateLinuxSBITemplate(
+                        _options.Location,
+                        templateName,
+                        imageName,
+                        imageVersion,
+                        artifactUrlWithSAS.ToString(),
+                        _msi.Id,
+                        linuxSourceImage.Id,
+                        tags);
                 }
-                else
+                else if (sourceImageType.IsWindows())
                 {
-                    windowsSourceImage = SourceImageResolver.ResolveWindowsSourceImage(sourceImageType);
-                }
-
-                var artifactUrlWithSAS = await _artifactStore.UploadBuildArtifactsToSupportingStorageAsync(artifactPath);
-                _logger.Information("uploaded the file {filePath} and generated the url with the SAS token.", artifactPath);
-
-                var templateName = $"{imageName}-{imageVersion}";
-                tags[NamingContext.c_createdAtTagName] = _timeSource.UtcNow.ToZuluString();
-                tags["VersionTag"] = imageVersion;
-                tags["LiftrSourceImageType"] = sourceImageType.ToString();
-
-                bool isLinux = true;
-                string generatedTemplate;
-                if (windowsSourceImage != null)
-                {
-                    generatedTemplate = templateHelper.GenerateWinodwsImageTemplate(
+                    isLinux = false;
+                    var windowsSourceImage = SourceImageResolver.ResolvePlatformSourceImage(sourceImageType);
+                    generatedTemplate = templateHelper.GenerateWinodwsPlatformImageTemplate(
                         _options.Location,
                         templateName,
                         imageName,
@@ -220,26 +232,18 @@ namespace Microsoft.Liftr.ImageBuilder
                         _msi.Id,
                         windowsSourceImage,
                         tags);
-
-                    isLinux = false;
                 }
                 else
                 {
-                    if (linuxSourceImage == null)
-                    {
-                        var ex = new InvalidOperationException($"The source image type '{sourceImageType}' is not supported.");
-                        _logger.Fatal(ex, ex.Message);
-                        throw ex;
-                    }
-
-                    generatedTemplate = templateHelper.GenerateLinuxImageTemplate(
+                    var linuxPlatformImage = SourceImageResolver.ResolvePlatformSourceImage(sourceImageType);
+                    generatedTemplate = templateHelper.GenerateLinuxPlatformImageTemplate(
                         _options.Location,
                         templateName,
                         imageName,
                         imageVersion,
                         artifactUrlWithSAS.ToString(),
                         _msi.Id,
-                        linuxSourceImage.Id,
+                        linuxPlatformImage,
                         tags);
                 }
 
@@ -323,6 +327,9 @@ namespace Microsoft.Liftr.ImageBuilder
                     _logger.Information("The generated image VHD can also be found in the storage account at URL: {vhdUri}", vhdUri);
                     _logger.Information("To export and import the generated VM image in another cloud, see instructions: https://aka.ms/liftr/import-img");
                 }
+
+                _logger.Information("Delete the build artifact in storage blob: {artifactUri}", artifactUrlWithSAS.AbsolutePath);
+                await _artifactStore.DeleteBuildArtifactAsync(artifactUrlWithSAS);
             }
             catch (Exception ex)
             {

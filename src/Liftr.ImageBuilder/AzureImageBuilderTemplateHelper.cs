@@ -21,7 +21,7 @@ namespace Microsoft.Liftr.ImageBuilder
         private const string c_USER_ASSIGNED_MI_ID_PLACEHOLDER = "USER_ASSIGNED_MI_ID_PLACEHOLDER";
         private const string c_REPLICATION_REGIONS_PLACEHOLDER = "\"REPLICATION_REGIONS_PLACEHOLDER\"";
         private const string c_linux_aib_base_template = "Microsoft.Liftr.ImageBuilder.aib.template.linux.json";
-        private const string c_windows_aib_base_template = "Microsoft.Liftr.ImageBuilder.aib.template.windows.json";
+        private const string c_windows_platform_aib_base_template = "Microsoft.Liftr.ImageBuilder.aib.template.windows.json";
 
         private readonly BuilderOptions _options;
         private readonly ITimeSource _timeSource;
@@ -34,7 +34,7 @@ namespace Microsoft.Liftr.ImageBuilder
             _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
         }
 
-        public string GenerateLinuxImageTemplate(
+        public string GenerateLinuxSBITemplate(
             Region location,
             string imageTemplateName,
             string imageName,
@@ -69,7 +69,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 tags);
         }
 
-        public string GenerateWinodwsImageTemplate(
+        public string GenerateLinuxPlatformImageTemplate(
             Region location,
             string imageTemplateName,
             string imageName,
@@ -100,7 +100,50 @@ namespace Microsoft.Liftr.ImageBuilder
             };
 
             return GenerateImageTemplate(
-                c_windows_aib_base_template,
+                c_linux_aib_base_template,
+                location,
+                imageTemplateName,
+                imageName,
+                imageVersion,
+                artifactLinkWithSAS,
+                msiId,
+                formatJson,
+                srcImg,
+                tags);
+        }
+
+        public string GenerateWinodwsPlatformImageTemplate(
+            Region location,
+            string imageTemplateName,
+            string imageName,
+            string imageVersion,
+            string artifactLinkWithSAS,
+            string msiId,
+            PlatformImageIdentifier sourceImage,
+            IDictionary<string, string> tags = null,
+            bool formatJson = true)
+        {
+            if (location == null)
+            {
+                throw new ArgumentNullException(nameof(location));
+            }
+
+            if (sourceImage == null)
+            {
+                throw new ArgumentNullException(nameof(sourceImage));
+            }
+
+            Dictionary<string, string> srcImg = new Dictionary<string, string>()
+            {
+                ["type"] = "PlatformImage",
+                ["publisher"] = sourceImage.Publisher,
+                ["offer"] = sourceImage.Offer,
+                ["sku"] = sourceImage.Sku,
+                ["version"] = sourceImage.Version,
+            };
+
+            return GenerateImageTemplate(
+                c_windows_platform_aib_base_template,
                 location,
                 imageTemplateName,
                 imageName,

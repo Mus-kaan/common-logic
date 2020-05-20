@@ -105,7 +105,7 @@ namespace Microsoft.Liftr.ImageBuilder
                     .Define(imageName)
                     .WithExistingGallery(rgName, galleryName)
                     .WithLocation(location)
-                    .WithIdentifier(publisher: "AzureLiftr", offer: "UbuntuSecureBaseImage", sku: imageName)
+                    .WithIdentifier(publisher: "AzureLiftr", offer: "LinuxVMImage", sku: imageName)
                     .WithGeneralizedLinux()
                     .WithTags(tags)
                     .CreateAsync();
@@ -117,7 +117,7 @@ namespace Microsoft.Liftr.ImageBuilder
                     .Define(imageName)
                     .WithExistingGallery(rgName, galleryName)
                     .WithLocation(location)
-                    .WithIdentifier(publisher: "AzureLiftr", offer: "WindowsServerBaseImage", sku: imageName)
+                    .WithIdentifier(publisher: "AzureLiftr", offer: "WindowsVMImage", sku: imageName)
                     .WithGeneralizedWindows()
                     .WithTags(tags)
                     .CreateAsync();

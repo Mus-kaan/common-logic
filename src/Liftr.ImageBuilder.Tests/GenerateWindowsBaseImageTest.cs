@@ -48,7 +48,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
 
                 try
                 {
-                    await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.BakeNewImageAndExport, tags: tags);
+                    await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.BakeNewImageAndExport, SourceImageType.WindowsServer2019DatacenterCore, tags: tags);
 
                     await orchestrator.BuildCustomizedSBIAsync(
                                     "img" + baseName,

@@ -239,7 +239,7 @@ namespace Microsoft.Liftr.ImageBuilder
                         infraType = config.ExportVHDToStorage ? InfrastructureType.BakeNewImageAndExport : InfrastructureType.BakeNewImage;
                     }
 
-                    (var kv, var artifactStore) = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(infraType, tags);
+                    (var kv, var artifactStore) = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(infraType, _options.SourceImage, tags);
 
                     if (_options.Action == ActionType.BakeNewVersion)
                     {

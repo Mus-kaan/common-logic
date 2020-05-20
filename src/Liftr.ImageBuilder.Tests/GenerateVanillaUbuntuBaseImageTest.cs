@@ -5,24 +5,27 @@
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.KeyVault;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.ImageBuilder.Tests
 {
-    public class ResourceProvisioningTest
+    public class GenerateVanillaUbuntuBaseImageTest
     {
         private readonly ITestOutputHelper _output;
 
-        public ResourceProvisioningTest(ITestOutputHelper output)
+        public GenerateVanillaUbuntuBaseImageTest(ITestOutputHelper output)
         {
             _output = output;
         }
 
         [SkipInOfficialBuild(skipLinux: true)]
-        public async Task VerifyResourcesProvisioningAsync()
+        public async Task VerifySBIGenerationAsync()
         {
             MockTimeSource timeSource = new MockTimeSource();
             var tags = new Dictionary<string, string>();
@@ -36,21 +39,29 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                     SubscriptionId = new Guid(TestCredentials.SubscriptionId),
                     Location = TestCommon.Location,
                     ResourceGroupName = scope.ResourceGroupName,
-                    ImageGalleryName = "testsig" + baseName,
+                    ImageGalleryName = "ubsigtest" + baseName,
                     ImageReplicationRegions = new List<Region>()
                     {
                         Region.USEast,
                     },
+                    KeepAzureVMImageBuilderLogs = false,
+                    ExportVHDToStorage = true,
                 };
 
                 var orchestrator = new ImageBuilderOrchestrator(options, scope.AzFactory, TestCredentials.KeyVaultClient, timeSource, scope.Logger);
 
                 try
                 {
-                    await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.BakeNewImageAndExport, SourceImageType.U1804LTS, tags: tags);
+                    (var kv, _) = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.BakeNewImageAndExport, SourceImageType.UbuntuServer1804, tags: tags);
+                    Assert.Null(kv);
 
-                    // Run another time will not fail.
-                    await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.BakeNewImageAndExport, SourceImageType.U1804LTS, tags: tags);
+                    await orchestrator.BuildCustomizedSBIAsync(
+                                    "img" + baseName,
+                                    "0.9.1018",
+                                    SourceImageType.UbuntuServer1804,
+                                    "packer.tar",
+                                    tags,
+                                    CancellationToken.None);
                 }
                 catch (Exception ex)
                 {
