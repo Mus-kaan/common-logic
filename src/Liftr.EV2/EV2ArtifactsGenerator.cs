@@ -88,7 +88,7 @@ namespace Microsoft.Liftr.EV2
 
         private static void BakeImageArtifacts(EV2ImageBuilderOptions imageBuilderOptions, ImageOptions image, string outputDirectory)
         {
-            var fileBaseName = $"{image.ImageName}";
+            var fileBaseName = string.IsNullOrEmpty(image.Bake.Name) ? $"{image.ImageName}-bake" : image.Bake.Name;
             var regions = new List<string>() { "Global" };
 
             var serviceModel = AssembleServiceModel(
@@ -123,7 +123,7 @@ namespace Microsoft.Liftr.EV2
 
         private static void DistributeImageArtifacts(EV2ImageBuilderOptions imageBuilderOptions, ImageOptions image, EnvironmentOptions distribute, string outputDirectory, int num)
         {
-            var fileBaseName = $"{image.ImageName}-dist{num}-{distribute.Cloud}";
+            var fileBaseName = string.IsNullOrEmpty(distribute.Name) ? $"{image.ImageName}-dist{num}-{distribute.Cloud}" : distribute.Name;
             var regions = new List<string>() { "Global" };
 
             var serviceModel = AssembleServiceModel(

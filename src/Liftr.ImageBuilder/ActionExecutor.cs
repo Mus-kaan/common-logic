@@ -13,6 +13,7 @@ using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.KeyVault;
+using Microsoft.Liftr.Utilities;
 using Microsoft.Rest.Azure;
 using Serilog.Context;
 using System;
@@ -94,11 +95,14 @@ namespace Microsoft.Liftr.ImageBuilder
                 Func<AzureCredentials> azureCredentialsProvider = null;
                 KeyVaultClient kvClient = null;
 
+                string tenantId = null;
+
                 if (!string.IsNullOrEmpty(_options.AuthFile))
                 {
                     _logger.Information("Use auth json file to authenticate against Azure.");
                     var authContract = AuthFileContract.FromFile(_options.AuthFile);
 
+                    tenantId = authContract.TenantId;
                     config.ExecutorSPNObjectId = authContract.ServicePrincipalObjectId;
                     config.SubscriptionId = Guid.Parse(authContract.SubscriptionId);
                     kvClient = KeyVaultClientFactory.FromClientIdAndSecret(authContract.ClientId, authContract.ClientSecret);
@@ -109,34 +113,9 @@ namespace Microsoft.Liftr.ImageBuilder
                         AuthorityHost = new Uri(authContract.ActiveDirectoryEndpointUrl),
                     };
                     tokenCredential = new ClientSecretCredential(authContract.TenantId, authContract.ClientId, authContract.ClientSecret, options);
-
-                    config.TenantId = authContract.TenantId;
                 }
                 else
                 {
-                    if (string.IsNullOrEmpty(config.TenantId))
-                    {
-#pragma warning disable CS0618 // Type or member is obsolete
-                        switch (config.Tenant)
-                        {
-                            case TenantType.MS:
-                                {
-                                    config.TenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
-                                    break;
-                                }
-
-                            case TenantType.AME:
-                                {
-                                    config.TenantId = "33e01921-4d64-4f8c-a055-5bdaffd5e33d";
-                                    break;
-                                }
-
-                            default:
-                                throw new InvalidOperationException($"Does not support tenant: {config.Tenant}");
-                        }
-#pragma warning restore CS0618 // Type or member is obsolete
-                    }
-
                     _logger.Information("Use Managed Identity to authenticate against Azure.");
                     kvClient = KeyVaultClientFactory.FromMSI();
 
@@ -150,17 +129,20 @@ namespace Microsoft.Liftr.ImageBuilder
                         };
                     }
 
+                    using TenantHelper tenantHelper = new TenantHelper(new Uri(azEnv.ResourceManagerEndpoint));
+                    tenantId = await tenantHelper.GetTenantIdForSubscriptionAsync(config.SubscriptionId.ToString());
+
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory
-                    .FromMSI(new MSILoginInformation(MSIResourceType.VirtualMachine), azEnv, config.TenantId)
+                    .FromMSI(new MSILoginInformation(MSIResourceType.VirtualMachine), azEnv, tenantId)
                     .WithDefaultSubscription(config.SubscriptionId.ToString());
                     tokenCredential = new ManagedIdentityCredential(options: tokenCredentialOptions);
                 }
 
-                LogContext.PushProperty(nameof(config.TenantId), config.TenantId);
+                LogContext.PushProperty(nameof(tenantId), tenantId);
 
                 LiftrAzureFactory azFactory = new LiftrAzureFactory(
                     _logger,
-                    config.TenantId,
+                    tenantId,
                     config.ExecutorSPNObjectId,
                     config.SubscriptionId.ToString(),
                     tokenCredential,

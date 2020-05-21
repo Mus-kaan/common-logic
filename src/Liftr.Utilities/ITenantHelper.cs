@@ -4,7 +4,7 @@
 
 using System.Threading.Tasks;
 
-namespace Microsoft.Liftr.TokenManager
+namespace Microsoft.Liftr.Utilities
 {
     public interface ITenantHelper
     {

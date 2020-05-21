@@ -5,7 +5,6 @@
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Contracts;
-using Microsoft.Liftr.KeyVault;
 using System;
 using System.Collections.Generic;
 using System.Threading;

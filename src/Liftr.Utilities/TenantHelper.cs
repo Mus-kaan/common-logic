@@ -2,14 +2,13 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Liftr.Utilities;
 using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Microsoft.Liftr.TokenManager
+namespace Microsoft.Liftr.Utilities
 {
     public sealed class TenantHelper : ITenantHelper, IDisposable
     {

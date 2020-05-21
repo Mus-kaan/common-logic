@@ -10,19 +10,8 @@ using System.Collections.Generic;
 
 namespace Microsoft.Liftr.ImageBuilder
 {
-    public enum TenantType
-    {
-        MS,
-        AME,
-    }
-
     public class BuilderOptions
     {
-        [Obsolete("This is old code, please switch to 'TenantId'.", false)]
-        public TenantType Tenant { get; set; } = TenantType.AME;
-
-        public string TenantId { get; set; }
-
         public bool KeepAzureVMImageBuilderLogs { get; set; } = false;
 
         public bool ExportVHDToStorage { get; set; } = false;

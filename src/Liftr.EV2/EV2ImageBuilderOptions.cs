@@ -83,6 +83,11 @@ namespace Microsoft.Liftr.EV2
     public class EnvironmentOptions
     {
         /// <summary>
+        /// Name of the EV2 rollout step. This will be part of the rollout artifacts' name.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
         /// Cloud type name.
         /// </summary>
         public CloudType Cloud { get; set; } = CloudType.Public;
