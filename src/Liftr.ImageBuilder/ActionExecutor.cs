@@ -86,10 +86,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
                 ValidateOptions(config);
 
-                if (!string.IsNullOrEmpty(_options.RunnerSPNObjectId))
-                {
-                    config.ExecutorSPNObjectId = _options.RunnerSPNObjectId;
-                }
+                var executingSPNObjectId = _options.RunnerSPNObjectId;
 
                 TokenCredential tokenCredential = null;
                 Func<AzureCredentials> azureCredentialsProvider = null;
@@ -102,8 +99,12 @@ namespace Microsoft.Liftr.ImageBuilder
                     _logger.Information("Use auth json file to authenticate against Azure.");
                     var authContract = AuthFileContract.FromFile(_options.AuthFile);
 
+                    if (!string.IsNullOrEmpty(authContract.ServicePrincipalObjectId))
+                    {
+                        executingSPNObjectId = authContract.ServicePrincipalObjectId;
+                    }
+
                     tenantId = authContract.TenantId;
-                    config.ExecutorSPNObjectId = authContract.ServicePrincipalObjectId;
                     config.SubscriptionId = Guid.Parse(authContract.SubscriptionId);
                     kvClient = KeyVaultClientFactory.FromClientIdAndSecret(authContract.ClientId, authContract.ClientSecret);
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory.FromFile(_options.AuthFile);
@@ -143,7 +144,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 LiftrAzureFactory azFactory = new LiftrAzureFactory(
                     _logger,
                     tenantId,
-                    config.ExecutorSPNObjectId,
+                    executingSPNObjectId,
                     config.SubscriptionId.ToString(),
                     tokenCredential,
                     azureCredentialsProvider);
