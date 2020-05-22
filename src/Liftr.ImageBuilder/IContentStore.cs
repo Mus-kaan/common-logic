@@ -15,7 +15,14 @@ namespace Microsoft.Liftr.ImageBuilder
 
         Task<Uri> CopySourceSBIAsync(string sbiVhdVersion, Uri sourceVHDSASToken);
 
-        Task<Uri> CopyVHDToExportAsync(Uri sourceVHDSASToken, string imageName, string imageVersion, SourceImageType sourceImageType, IReadOnlyDictionary<string, string> tags);
+        Task<Uri> CopyVHDToExportAsync(
+            Uri sourceVHDSASToken,
+            string imageName,
+            string imageVersion,
+            SourceImageType sourceImageType,
+            IReadOnlyDictionary<string, string> tags,
+            string createdAt,
+            string deleteAfter);
 
         Task<(Uri, VHDMeta)> CopyVHDToImportAsync(Uri sourceVHDSASToken, Uri sourceVHDMetaSASToken, string imageName, string imageVersion);
 

@@ -84,7 +84,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 var rg = await liftrAzure.GetOrCreateResourceGroupAsync(_options.Location, _options.ResourceGroupName, tags);
                 await liftrAzure.GrantBlobContributorAsync(rg, liftrAzure.SPNObjectId);
 
-                ImageGalleryClient galleryClient = new ImageGalleryClient(_logger);
+                ImageGalleryClient galleryClient = new ImageGalleryClient(_timeSource, _logger);
                 var gallery = await galleryClient.CreateGalleryAsync(liftrAzure.FluentClient, _options.Location, _options.ResourceGroupName, _options.ImageGalleryName, tags);
 
                 bool needKeyVault = true;
@@ -173,7 +173,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
             AzureImageBuilderTemplateHelper templateHelper = new AzureImageBuilderTemplateHelper(_options, _timeSource);
 
-            var galleryClient = new ImageGalleryClient(_logger);
+            var galleryClient = new ImageGalleryClient(_timeSource, _logger);
             var aibClient = new AIBClient(_azFactory.GenerateLiftrAzure(), _logger);
 
             using var rootOperation = _logger.StartTimedOperation(nameof(BuildCustomizedSBIAsync));
@@ -185,9 +185,17 @@ namespace Microsoft.Liftr.ImageBuilder
                 bool isLinux = true;
                 string generatedTemplate;
                 var templateName = $"{imageName}-{imageVersion}";
-                tags[NamingContext.c_createdAtTagName] = _timeSource.UtcNow.ToZuluString();
+
+                // 0 means do not delete. Put a really long date here.
+                int ttlInDays = _options.ImageVersionRetentionTimeInDays == 0 ? 3000 : _options.ImageVersionRetentionTimeInDays;
+                var deleteAfterStr = _timeSource.UtcNow.AddDays(ttlInDays).ToZuluString();
+                var createdAtStr = _timeSource.UtcNow.ToZuluString();
+                tags[NamingContext.c_createdAtTagName] = createdAtStr;
                 tags["VersionTag"] = imageVersion;
                 tags["LiftrSourceImageType"] = sourceImageType.ToString();
+
+                Dictionary<string, string> imgVersionTags = new Dictionary<string, string>(tags);
+                imgVersionTags[ImageGalleryClient.c_deleteAfterTagName] = deleteAfterStr;
 
                 if (!sourceImageType.IsPlatformImage())
                 {
@@ -217,7 +225,7 @@ namespace Microsoft.Liftr.ImageBuilder
                         artifactUrlWithSAS.ToString(),
                         _msi.Id,
                         linuxSourceImage.Id,
-                        tags);
+                        imgVersionTags);
                 }
                 else if (sourceImageType.IsWindows())
                 {
@@ -231,7 +239,7 @@ namespace Microsoft.Liftr.ImageBuilder
                         artifactUrlWithSAS.ToString(),
                         _msi.Id,
                         windowsSourceImage,
-                        tags);
+                        imgVersionTags);
                 }
                 else
                 {
@@ -244,7 +252,7 @@ namespace Microsoft.Liftr.ImageBuilder
                         artifactUrlWithSAS.ToString(),
                         _msi.Id,
                         linuxPlatformImage,
-                        tags);
+                        imgVersionTags);
                 }
 
                 var az = _azFactory.GenerateLiftrAzure();
@@ -281,8 +289,6 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
                 else
                 {
-                    var cleanUpTask = CleanUpAsync(_azFactory.GenerateLiftrAzure().FluentClient, imageName, galleryClient);
-
                     var res = await aibClient.CreateNewSBIVersionByRunAzureVMImageBuilderAsync(
                         _options.Location,
                         _options.ResourceGroupName,
@@ -292,7 +298,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
                     _logger.Information("Run AIB template result: {AIBTemplateRunResult}", res);
 
-                    await cleanUpTask;
+                    await CleanUpAsync(_azFactory.GenerateLiftrAzure().FluentClient, imageName, galleryClient);
                 }
 
                 sigImgVersion = await galleryClient.GetImageVersionAsync(
@@ -312,7 +318,15 @@ namespace Microsoft.Liftr.ImageBuilder
                 {
                     _logger.Information("Start exporting generted VHD to a storage account.");
                     var generatedImageSAS = await aibClient.GetGeneratedVDHSASAsync(_options.ResourceGroupName, templateName);
-                    vhdUri = await _exportStore.CopyVHDToExportAsync(new Uri(generatedImageSAS), imageName, imageVersion, sourceImageType, sigImgVersion.Tags);
+
+                    vhdUri = await _exportStore.CopyVHDToExportAsync(
+                        new Uri(generatedImageSAS),
+                        imageName,
+                        imageVersion,
+                        sourceImageType,
+                        sigImgVersion.Tags,
+                        createdAtStr,
+                        deleteAfterStr);
                 }
 
                 if (!_options.KeepAzureVMImageBuilderLogs)
@@ -361,9 +375,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
 
                 _logger.Information("Start cleaning up old image versions ...");
-                var cutOffTime = _timeSource.UtcNow.AddDays(-1 * _options.ImageVersionRetentionTimeInDays);
-
-                await galleryClient.CleanUpOldImageVersionAsync(az, _options.ResourceGroupName, _options.ImageGalleryName, imageName, cutOffTime);
+                await galleryClient.CleanUpOldImageVersionAsync(az, _options.ResourceGroupName, _options.ImageGalleryName, imageName, _options.ImageVersionRetentionTimeInDays);
             }
             catch (Exception ex)
             {
@@ -376,7 +388,7 @@ namespace Microsoft.Liftr.ImageBuilder
         {
             Dictionary<string, string> tags = new Dictionary<string, string>()
             {
-                ["FirstCreatedAt"] = _timeSource.UtcNow.ToZuluString(),
+                [NamingContext.c_createdAtTagName] = _timeSource.UtcNow.ToZuluString(),
             };
 
             var liftrAzure = _azFactory.GenerateLiftrAzure();

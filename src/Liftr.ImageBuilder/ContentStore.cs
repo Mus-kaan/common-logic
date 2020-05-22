@@ -270,7 +270,9 @@ namespace Microsoft.Liftr.ImageBuilder
             string imageName,
             string imageVersion,
             SourceImageType sourceImageType,
-            IReadOnlyDictionary<string, string> tags)
+            IReadOnlyDictionary<string, string> tags,
+            string createdAt,
+            string deleteAfter)
         {
             if (tags == null)
             {
@@ -293,7 +295,8 @@ namespace Microsoft.Liftr.ImageBuilder
                 {
                     ImageName = imageName,
                     ImageVersion = imageVersion,
-                    CreatedAtUTC = _timeSource.UtcNow.Date.ToZuluString(),
+                    CreatedAtUTC = createdAt,
+                    DeleteAfterUTC = deleteAfter,
                     CopiedAtUTC = _timeSource.UtcNow.Date.ToZuluString(),
                     SourceImageType = sourceImageType,
                 };

@@ -7,6 +7,7 @@ using Microsoft.Azure.Management.Compute.Fluent.Models;
 using Microsoft.Azure.Management.Compute.Fluent.VirtualMachineCustomImage.Definition;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Rest.Azure;
 using System;
@@ -19,10 +20,14 @@ namespace Microsoft.Liftr.ImageBuilder
 {
     public class ImageGalleryClient
     {
+        public const string c_createdAtTagName = NamingContext.c_createdAtTagName;
+        public const string c_deleteAfterTagName = "DeleteAfter";
+        private readonly ITimeSource _timeSource;
         private readonly Serilog.ILogger _logger;
 
-        public ImageGalleryClient(Serilog.ILogger logger)
+        public ImageGalleryClient(ITimeSource timeSource, Serilog.ILogger logger)
         {
+            _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -281,11 +286,9 @@ namespace Microsoft.Liftr.ImageBuilder
             string rgName,
             string galleryName,
             string imageName,
-            DateTime cutOffTime)
+            int imageVersionRetentionTimeInDays)
         {
             using var ops = _logger.StartTimedOperation(nameof(CleanUpOldImageVersionAsync));
-            ops.SetContextProperty(nameof(cutOffTime), cutOffTime.ToZuluString());
-
             int deletedCount = 0;
 
             try
@@ -295,12 +298,12 @@ namespace Microsoft.Liftr.ImageBuilder
                 {
                     try
                     {
-                        var timeStamp = DateTime.Parse(version.Tags[NamingContext.c_createdAtTagName], CultureInfo.InvariantCulture);
-                        if (timeStamp < cutOffTime)
+                        if (ShouldCleanUpImageVersion(version, imageVersionRetentionTimeInDays))
                         {
-                            _logger.Information("Remove old verion with '{versionId}' since it is older than the cutOffTime: {cutOffTime}", version.Id, cutOffTime);
-                            await DeleteImageVersionAsync(fluentClient, rgName, galleryName, imageName, version.Name);
+                            _logger.Information("Remove old verion with '{versionId}'.", version.Id);
+                            var fireAndForget = DeleteImageVersionAsync(fluentClient, rgName, galleryName, imageName, version.Name);
                             deletedCount++;
+                            await Task.Delay(1000); // wait 1 second to make log looks better.
                         }
                     }
                     catch (Exception ex)
@@ -394,5 +397,26 @@ namespace Microsoft.Liftr.ImageBuilder
             return customImage;
         }
         #endregion
+
+        private bool ShouldCleanUpImageVersion(IGalleryImageVersion version, int imageVersionRetentionTimeInDays)
+        {
+            if (version.Tags.TryGetValue(c_deleteAfterTagName, out string deleteAfterStr))
+            {
+                if (DateTime.TryParse(deleteAfterStr, out var deleteAfter))
+                {
+                    return deleteAfter < _timeSource.UtcNow;
+                }
+            }
+
+            if (version.Tags.TryGetValue(c_createdAtTagName, out string createdAtStr))
+            {
+                if (DateTime.TryParse(createdAtStr, out var createdAt))
+                {
+                    return createdAt.AddDays(imageVersionRetentionTimeInDays) < _timeSource.UtcNow;
+                }
+            }
+
+            return false;
+        }
     }
 }

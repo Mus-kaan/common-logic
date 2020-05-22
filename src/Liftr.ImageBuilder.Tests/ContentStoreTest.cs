@@ -58,7 +58,9 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                     {
                         var sas = await store.UploadBuildArtifactsToSupportingStorageAsync("packer.tar");
                         timeSource.Add(TimeSpan.FromSeconds(123));
-                        await store.CopyVHDToExportAsync(sas, "TestImageName", "1.2.1" + i, SourceImageType.U1804LTS, (IReadOnlyDictionary<string, string>)namingContext.Tags);
+                        var createAt = timeSource.UtcNow.ToZuluString();
+                        var deletedAt = timeSource.UtcNow.AddDays(artifactOptions.ContentTTLInDays).ToZuluString();
+                        await store.CopyVHDToExportAsync(sas, "TestImageName", "1.2.1" + i, SourceImageType.U1804LTS, (IReadOnlyDictionary<string, string>)namingContext.Tags, createAt, deletedAt);
                         timeSource.Add(TimeSpan.FromSeconds(123));
                     }
 

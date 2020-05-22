@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.Fluent.Contracts;
 using System.Collections.Generic;
 
 namespace Microsoft.Liftr.ImageBuilder
@@ -21,6 +22,8 @@ namespace Microsoft.Liftr.ImageBuilder
 
         public string CreatedAtUTC { get; set; }
 
+        public string DeleteAfterUTC { get; set; }
+
         public string CopiedAtUTC { get; set; }
 
         public string ContentHash { get; set; }
@@ -35,7 +38,8 @@ namespace Microsoft.Liftr.ImageBuilder
             {
                 [nameof(ImageName)] = ImageName,
                 [nameof(ImageVersion)] = ImageVersion,
-                [nameof(CreatedAtUTC)] = CreatedAtUTC,
+                [NamingContext.c_createdAtTagName] = CreatedAtUTC,
+                [ImageGalleryClient.c_deleteAfterTagName] = DeleteAfterUTC,
                 [nameof(CopiedAtUTC)] = CopiedAtUTC,
                 [nameof(SourceImageType)] = SourceImageType.ToString(),
             };
@@ -45,7 +49,10 @@ namespace Microsoft.Liftr.ImageBuilder
                 var extraTags = OtherTags.FromJson<Dictionary<string, string>>();
                 foreach (var kvp in extraTags)
                 {
-                    tags[kvp.Key] = kvp.Value;
+                    if (!tags.ContainsKey(kvp.Key))
+                    {
+                        tags[kvp.Key] = kvp.Value;
+                    }
                 }
             }
 

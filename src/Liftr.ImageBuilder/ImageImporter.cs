@@ -62,7 +62,7 @@ namespace Microsoft.Liftr.ImageBuilder
             }
 
             var az = _azFactory.GenerateLiftrAzure();
-            var galleryClient = new ImageGalleryClient(_logger);
+            var galleryClient = new ImageGalleryClient(_timeSource, _logger);
 
             var imgVersion = await galleryClient.GetImageVersionAsync(
                 az.FluentClient,
@@ -188,9 +188,8 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
 
                 var az = _azFactory.GenerateLiftrAzure();
-                var cutOffTime = _timeSource.UtcNow.AddDays(-1 * _options.ImageVersionRetentionTimeInDays);
-                var galleryClient = new ImageGalleryClient(_logger);
-                await galleryClient.CleanUpOldImageVersionAsync(az.FluentClient, _options.ResourceGroupName, _options.ImageGalleryName, imageName, cutOffTime);
+                var galleryClient = new ImageGalleryClient(_timeSource, _logger);
+                await galleryClient.CleanUpOldImageVersionAsync(az.FluentClient, _options.ResourceGroupName, _options.ImageGalleryName, imageName, _options.ImageVersionRetentionTimeInDays);
             }
             catch (Exception ex)
             {
