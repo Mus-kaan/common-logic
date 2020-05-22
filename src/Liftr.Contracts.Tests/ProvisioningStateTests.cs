@@ -16,6 +16,7 @@ namespace Microsoft.Liftr.Contracts.Tests
         [InlineData(ProvisioningState.Succeeded, true)]
         [InlineData(ProvisioningState.Failed, true)]
         [InlineData(ProvisioningState.Canceled, true)]
+        [InlineData(ProvisioningState.Deleted, true)]
         public void CanCheckFinalState(ProvisioningState state, bool isFinalState)
         {
             Assert.Equal(isFinalState, state.IsFinalState());
