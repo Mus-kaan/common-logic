@@ -123,7 +123,7 @@ set -e
 
 ThanosFlag="--set prometheus.prometheusSpec.replicas=1 "
 
-if [ ! -f bin/enable-thanos.txt ]; then
+if [ -f bin/enable-thanos.txt ]; then
 echo "Thanos is enabled."
 
 ./CreateCertificateSecret.sh \
