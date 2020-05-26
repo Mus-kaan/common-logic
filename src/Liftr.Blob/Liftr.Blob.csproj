@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.Blob</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Blob</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Azure.Storage.Blobs" Version="$(PackageVersion_Azure_Storage_Blobs)" />
+  </ItemGroup>
+</Project>

@@ -2,11 +2,10 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Azure;
 using Azure.Storage;
 using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
+using Microsoft.Liftr.Blob;
 using Microsoft.Liftr.Contracts;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
@@ -134,7 +133,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 return deletedCount;
             }
 
-            var dateFolders = await ToListAsync(_artifactBlobContainer.GetBlobsByHierarchyAsync(prefix: "drop/", delimiter: "/"));
+            var dateFolders = await _artifactBlobContainer.ListBlobsByHierarchyAsync(prefix: "drop/", delimiter: "/");
 
             foreach (var dateFolder in dateFolders)
             {
@@ -150,7 +149,7 @@ namespace Microsoft.Liftr.ImageBuilder
                     continue;
                 }
 
-                var toDeletes = await ToListAsync(_artifactBlobContainer.GetBlobsByHierarchyAsync(prefix: dateFolder.Prefix));
+                var toDeletes = await _artifactBlobContainer.ListBlobsByHierarchyAsync(prefix: dateFolder.Prefix);
 
                 foreach (var toDelete in toDeletes)
                 {
@@ -388,7 +387,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 return deletedCount;
             }
 
-            var imageFolders = await ToListAsync(container.GetBlobsByHierarchyAsync(delimiter: "/"));
+            var imageFolders = await container.ListBlobsByHierarchyAsync(delimiter: "/");
 
             var cutOffTime = _timeSource.UtcNow.AddDays(-1 * _storeOptions.ContentTTLInDays);
 
@@ -400,7 +399,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
 
                 var imageName = imageFolder.Prefix.Split('/')[0];
-                var imageVersionFolders = await ToListAsync(container.GetBlobsByHierarchyAsync(prefix: imageFolder.Prefix, delimiter: "/"));
+                var imageVersionFolders = await container.ListBlobsByHierarchyAsync(prefix: imageFolder.Prefix, delimiter: "/");
 
                 foreach (var imageVersionFolder in imageVersionFolders)
                 {
@@ -485,28 +484,6 @@ namespace Microsoft.Liftr.ImageBuilder
             fullUri.Query = sasToken;
 
             return fullUri.Uri;
-        }
-
-        private static async Task<List<T>> ToListAsync<T>(AsyncPageable<T> source, CancellationToken cancellationToken = default)
-        {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            List<T> results = new List<T>();
-
-            await foreach (var page in source)
-            {
-                results.Add(page);
-            }
-
-            return results;
-        }
-
-        private static Task<List<BlobHierarchyItem>> ToListAsync(AsyncPageable<BlobHierarchyItem> source, CancellationToken cancellationToken = default)
-        {
-            return ToListAsync<BlobHierarchyItem>(source);
         }
 
         private string GetBlobName(string fileName)

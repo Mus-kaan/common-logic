@@ -17,6 +17,7 @@ using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
 using Microsoft.Liftr.KeyVault;
+using Microsoft.Liftr.Utilities;
 using Microsoft.Rest.Azure;
 using Serilog.Context;
 using System;
@@ -46,7 +47,7 @@ namespace Microsoft.Liftr.SimpleDeploy
             _hostingOptions = hostingOptions ?? throw new ArgumentNullException(nameof(hostingOptions));
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             try
             {
@@ -69,7 +70,6 @@ namespace Microsoft.Liftr.SimpleDeploy
                 File.WriteAllText("partner-name.txt", _hostingOptions.PartnerName);
                 LogContext.PushProperty("TargetSubscriptionId", hostingEnvironmentOptions.AzureSubscription);
                 File.WriteAllText("subscription-id.txt", hostingEnvironmentOptions.AzureSubscription.ToString());
-                File.WriteAllText("tenant-id.txt", hostingEnvironmentOptions.TenantId.ToString());
                 if (!string.IsNullOrEmpty(_hostingOptions.HelmReleaseName))
                 {
                     File.WriteAllText("helm-releasename.txt", _hostingOptions.HelmReleaseName);
@@ -86,12 +86,14 @@ namespace Microsoft.Liftr.SimpleDeploy
                 if (_commandOptions.Action == ActionType.OutputSubscriptionId)
                 {
                     _appLifetime.StopApplication();
-                    return Task.CompletedTask;
+                    return;
                 }
 
                 TokenCredential tokenCredential = null;
                 Func<AzureCredentials> azureCredentialsProvider = null;
                 KeyVaultClient kvClient = null;
+                string tenantId = null;
+
                 if (!string.IsNullOrEmpty(_commandOptions.AuthFile))
                 {
                     _logger.Information("Use auth json file to authenticate against Azure.");
@@ -103,6 +105,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                         _commandOptions.ExecutingSPNObjectId = authContract.ServicePrincipalObjectId;
                     }
 
+                    tenantId = authContract.TenantId;
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory.FromFile(_commandOptions.AuthFile);
 
                     TokenCredentialOptions options = new TokenCredentialOptions()
@@ -116,11 +119,19 @@ namespace Microsoft.Liftr.SimpleDeploy
                     _logger.Information("Use Managed Identity to authenticate against Azure.");
                     kvClient = KeyVaultClientFactory.FromMSI();
 
+                    // TODO: update for non-public cloud.
+                    var azEnv = AzureEnvironment.AzureGlobalCloud;
+                    using TenantHelper tenantHelper = new TenantHelper(new Uri(azEnv.ResourceManagerEndpoint));
+                    tenantId = await tenantHelper.GetTenantIdForSubscriptionAsync(hostingEnvironmentOptions.AzureSubscription.ToString());
+
                     azureCredentialsProvider = () => SdkContext.AzureCredentialsFactory
-                    .FromMSI(new MSILoginInformation(MSIResourceType.VirtualMachine), AzureEnvironment.AzureGlobalCloud, hostingEnvironmentOptions.TenantId.ToString())
+                    .FromMSI(new MSILoginInformation(MSIResourceType.VirtualMachine), azEnv, tenantId)
                     .WithDefaultSubscription(hostingEnvironmentOptions.AzureSubscription.ToString());
                     tokenCredential = new ManagedIdentityCredential();
                 }
+
+                LogContext.PushProperty(nameof(tenantId), tenantId);
+                File.WriteAllText("tenant-id.txt", tenantId);
 
                 if (string.IsNullOrEmpty(_commandOptions.ExecutingSPNObjectId))
                 {
@@ -133,7 +144,7 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                 LiftrAzureFactory azFactory = new LiftrAzureFactory(
                     _logger,
-                    hostingEnvironmentOptions.TenantId.ToString(),
+                    tenantId,
                     _commandOptions.ExecutingSPNObjectId,
                     hostingEnvironmentOptions.AzureSubscription.ToString(),
                     tokenCredential,
@@ -146,8 +157,6 @@ namespace Microsoft.Liftr.SimpleDeploy
                 _logger.Fatal(ex, "ActionExecutor Failed.");
                 throw;
             }
-
-            return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

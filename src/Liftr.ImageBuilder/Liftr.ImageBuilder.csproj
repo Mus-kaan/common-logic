@@ -9,10 +9,10 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="$(PackageVersion_Azure_Identity)" />
-    <PackageReference Include="Azure.Storage.Blobs" Version="$(PackageVersion_Azure_Storage_Blobs)" />
     <PackageReference Include="CommandLineParser" Version="$(PackageVersion_CommandLineParser)" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Liftr.Blob\Liftr.Blob.csproj" />
     <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.Fluent\Liftr.Fluent.csproj" />
     <ProjectReference Include="..\Liftr.KeyVault\Liftr.KeyVault.csproj" />

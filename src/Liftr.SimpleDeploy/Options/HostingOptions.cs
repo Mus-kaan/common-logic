@@ -14,8 +14,14 @@ namespace Microsoft.Liftr.SimpleDeploy
 {
     public class HostingOptions
     {
+        /// <summary>
+        /// Name of the partner, e.g. 'Datadog', 'Gateway'
+        /// </summary>
         public string PartnerName { get; set; }
 
+        /// <summary>
+        /// Partner short name, it is recommended to keep this short and in lower case. It will be used in almost all the resource names. e.g. 'dg' for 'Datadog'.
+        /// </summary>
         public string ShortPartnerName { get; set; }
 
         public string SecretPrefix { get; set; }
@@ -67,14 +73,24 @@ namespace Microsoft.Liftr.SimpleDeploy
 
     public class HostingEnvironmentOptions
     {
+        /// <summary>
+        /// Type of the environment. One of [ Production, Canary, DogFood, Dev, Test, Fairfax, Mooncake ]
+        /// </summary>
         public EnvironmentType EnvironmentName { get; set; }
 
-        public Guid TenantId { get; set; }
-
+        /// <summary>
+        /// Azure subscription Id. All the resources will be provisionined in thie subscription.
+        /// </summary>
         public Guid AzureSubscription { get; set; }
 
+        /// <summary>
+        /// Section for defining the global resources.
+        /// </summary>
         public GlobalOptions Global { get; set; }
 
+        /// <summary>
+        /// A list of regional definition sections.
+        /// </summary>
         public IEnumerable<RegionOptions> Regions { get; set; }
 
         public Dictionary<string, string> OneCertCertificates { get; set; } = new Dictionary<string, string>();
