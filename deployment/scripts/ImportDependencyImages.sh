@@ -11,7 +11,7 @@ fi
 # [[[GENEVA_UPDATE_CHANGE_HERE]]]
 # The version are referenced at three places. You need to update all of them. Please search for this sentence.
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/references/linuxcontainers.html"
-IMG_mdsd="genevamdsd:master_279"
+IMG_mdsd="genevamdsd:master_285"
 IMG_mdm="genevamdm:master_37"
 IMG_fluentd="genevafluentd_td-agent:master_134"
 IMG_azsecpack="genevasecpackinstall:master_40"
