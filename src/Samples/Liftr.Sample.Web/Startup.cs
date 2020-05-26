@@ -24,7 +24,6 @@ using Microsoft.Liftr.TokenManager;
 using Microsoft.Liftr.TokenManager.Options;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
-using Serilog;
 using System;
 using System.IO;
 using System.Linq;
@@ -35,27 +34,16 @@ namespace Microsoft.Liftr.Sample.Web
     public class Startup
     {
         private readonly IConfiguration _configuration;
-        private readonly Serilog.ILogger _logger;
 
-        public Startup(IConfiguration configuration, Serilog.ILogger logger)
+        public Startup(IConfiguration configuration)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _logger.LogProcessStart();
         }
 
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<ITimeSource, SystemTimeSource>();
-
-            // 'RPAssetOptions' is loaded from Key Vault by default. This is set at provisioning time.
-            var optionsValue = _configuration.GetSection(nameof(RPAssetOptions)).Value.FromJson<RPAssetOptions>();
-            services.AddSingleton(optionsValue);
-
-            services.AddHttpClient();
-
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
@@ -71,6 +59,17 @@ namespace Microsoft.Liftr.Sample.Web
                 c.IncludeXmlComments(xmlPath);
             });
 
+            services.AddSingleton<ITimeSource, SystemTimeSource>();
+
+            // 'RPAssetOptions' is loaded from Key Vault by default. This is set at provisioning time.
+            var optionsValue = _configuration.GetSection(nameof(RPAssetOptions)).Value.FromJson<RPAssetOptions>();
+            if (optionsValue != null)
+            {
+                services.AddSingleton(optionsValue);
+            }
+
+            services.AddHttpClient();
+
             services.Configure<MongoOptions>(_configuration.GetSection(nameof(MongoOptions)));
             services.Configure<MongoOptions>(_configuration.GetSection(nameof(MongoOptions)));
 
@@ -82,6 +81,7 @@ namespace Microsoft.Liftr.Sample.Web
 
             services.AddSingleton<MongoCollectionsFactory, MongoCollectionsFactory>((sp) =>
             {
+                var logger = sp.GetService<Serilog.ILogger>();
                 var assetOptions = sp.GetService<RPAssetOptions>();
                 var mongoOptions = sp.GetService<IOptions<MongoOptions>>().Value;
 
@@ -91,11 +91,12 @@ namespace Microsoft.Liftr.Sample.Web
                 }
 
                 mongoOptions.ConnectionString = assetOptions.CosmosDBConnectionStrings.Where(i => i.Description.OrdinalEquals(assetOptions.ActiveKeyName)).FirstOrDefault().ConnectionString;
-                return new MongoCollectionsFactory(mongoOptions, _logger);
+                return new MongoCollectionsFactory(mongoOptions, logger);
             });
 
             services.AddSingleton<ICounterEntityDataSource, CounterEntityDataSource>((sp) =>
             {
+                var logger = sp.GetService<Serilog.ILogger>();
                 try
                 {
                     var timeSource = sp.GetService<ITimeSource>();
@@ -107,14 +108,14 @@ namespace Microsoft.Liftr.Sample.Web
                 }
                 catch (Exception ex)
                 {
-                    _logger.Fatal(ex, "cannot create ICounterEntityDataSource");
+                    logger.Fatal(ex, "cannot create ICounterEntityDataSource");
                     throw;
                 }
             });
 
             services.AddSingleton<IMarketplaceResourceEntityDataSource, MarketplaceResourceEntityDataSource>((sp) =>
             {
-                var logger = sp.GetService<ILogger>();
+                var logger = sp.GetService<Serilog.ILogger>();
 
                 try
                 {
@@ -138,6 +139,7 @@ namespace Microsoft.Liftr.Sample.Web
 
             services.AddSingleton<IQueueWriter, QueueWriter>((sp) =>
             {
+                var logger = sp.GetService<Serilog.ILogger>();
                 var assetOptions = sp.GetService<RPAssetOptions>();
                 var tokenCredentials = sp.GetService<TokenCredential>();
 
@@ -145,7 +147,7 @@ namespace Microsoft.Liftr.Sample.Web
                 QueueClient queue = new QueueClient(queueUri, tokenCredentials);
                 queue.CreateIfNotExists();
 
-                return new QueueWriter(queue, sp.GetService<ITimeSource>(), _logger, messageVisibilityTimeout: TimeSpan.FromSeconds(5));
+                return new QueueWriter(queue, sp.GetService<ITimeSource>(), logger, messageVisibilityTimeout: TimeSpan.FromSeconds(5));
             });
 
             services.Configure<CookiePolicyOptions>(options =>
@@ -159,7 +161,7 @@ namespace Microsoft.Liftr.Sample.Web
             {
                 var options = sp.GetService<IOptions<SingleTenantAADAppTokenProviderOptions>>().Value;
                 var kvClient = sp.GetService<IKeyVaultClient>();
-                var logger = sp.GetService<ILogger>();
+                var logger = sp.GetService<Serilog.ILogger>();
 
                 return new MultiTenantAppTokenProvider(options, kvClient, logger);
             });
@@ -168,7 +170,7 @@ namespace Microsoft.Liftr.Sample.Web
             {
                 var options = sp.GetService<IOptions<SingleTenantAADAppTokenProviderOptions>>().Value;
                 var kvClient = sp.GetService<IKeyVaultClient>();
-                var logger = sp.GetService<ILogger>();
+                var logger = sp.GetService<Serilog.ILogger>();
 
                 return new SingleTenantAppTokenProvider(options, kvClient, logger);
             });
@@ -184,6 +186,9 @@ namespace Microsoft.Liftr.Sample.Web
             {
                 throw new ArgumentNullException(nameof(app));
             }
+
+            var logger = app.ApplicationServices.GetService<Serilog.ILogger>();
+            logger.LogProcessStart();
 
             if (env.IsDevelopment())
             {

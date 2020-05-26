@@ -119,9 +119,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.TokenManager.Tests", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Encryption.Abstractions", "Liftr.Encryption.Abstractions\Liftr.Encryption.Abstractions.csproj", "{08472C9D-45B1-4B68-934B-2BF6CA1A2BC1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.TokenManager.Abstractions", "Liftr.TokenManager.Abstractions\Liftr.TokenManager.Abstractions.csproj", "{94B9A018-4CE0-4230-B798-5FC5A1015852}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.TokenManager.Abstractions", "Liftr.TokenManager.Abstractions\Liftr.TokenManager.Abstractions.csproj", "{94B9A018-4CE0-4230-B798-5FC5A1015852}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.AAD", "Liftr.AAD\Liftr.AAD.csproj", "{F8D05E68-A4B0-4DE8-B3F0-56FFA790914A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.AAD", "Liftr.AAD\Liftr.AAD.csproj", "{F8D05E68-A4B0-4DE8-B3F0-56FFA790914A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Sample.Web.Tests", "Samples\Liftr.Sample.Web.Tests\Liftr.Sample.Web.Tests.csproj", "{930EE827-D11D-4F94-A213-F9D1C199E4C5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -345,6 +347,10 @@ Global
 		{F8D05E68-A4B0-4DE8-B3F0-56FFA790914A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8D05E68-A4B0-4DE8-B3F0-56FFA790914A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8D05E68-A4B0-4DE8-B3F0-56FFA790914A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{930EE827-D11D-4F94-A213-F9D1C199E4C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{930EE827-D11D-4F94-A213-F9D1C199E4C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{930EE827-D11D-4F94-A213-F9D1C199E4C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{930EE827-D11D-4F94-A213-F9D1C199E4C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -366,6 +372,7 @@ Global
 		{39030FA7-8BA1-4A8B-A830-67421BCBA3E7} = {E6C8A847-172D-4E1A-ADFB-AC96B7C1314F}
 		{9D0B9A7C-84F7-419A-906B-C1F681373CFA} = {E6C8A847-172D-4E1A-ADFB-AC96B7C1314F}
 		{8B367199-4655-4E45-BCF0-9D809E3544F5} = {E6C8A847-172D-4E1A-ADFB-AC96B7C1314F}
+		{930EE827-D11D-4F94-A213-F9D1C199E4C5} = {E6C8A847-172D-4E1A-ADFB-AC96B7C1314F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CF8F327F-EB87-482C-861B-2D635AB4E992}

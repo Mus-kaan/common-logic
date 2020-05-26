@@ -3,7 +3,7 @@ environment:
     os: 'linux'                                                         # used to verify at runtime that correct host pool is being used
   runtime:
     provider: 'appcontainer'                                            # Currently only appcontainer is supported future will bring oscontainer and virtualmachine
-    image: 'mcr.microsoft.com/dotnet/core/sdk:3.1'                                    # This is the image that your pipeline will run in.
+    image: 'cdpxlinux.azurecr.io/global/ubuntu-1804-all:4.0'            # This has both 3.1 SDK and 2.2 SDK
 
 signing_options:
   profile: 'internal_azure_service'   # This service deploys to Azure!

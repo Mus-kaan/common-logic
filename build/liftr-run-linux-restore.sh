@@ -33,5 +33,9 @@ echo "Downloading Helm from '$HelmTarUri...'"
 curl --silent --show-error "$HelmTarUri" | tar -zxC "$HelmDir"
 chmod +x "$Helm"
 
+# https://github.com/domaindrivendev/Swashbuckle.AspNetCore#swashbuckleaspnetcorecli
+cd $SrcRoot/src/Samples/Liftr.Sample.Web
+dotnet tool restore
+
 echo "Successfully finished pakcage restore!"
 echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"
