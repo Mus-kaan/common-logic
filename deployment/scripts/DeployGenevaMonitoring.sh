@@ -151,21 +151,9 @@ echo "kubectl create namespace $namespace"
 kubectl create namespace "$namespace"
 set -e
 
-DeploymentFlag="--atomic --cleanup-on-fail "
-if [ "$environmentName" = "DogFood" ] || [ "$environmentName" = "Dev" ] || [ "$environmentName" = "Test" ]; then
-    # https://github.com/helm/helm/issues/3353
-    
-    ./CleanUpFirstFailedHelmRelease.sh \
-    --HelmReleaseName="aks-geneva" \
-    --Namespace=$namespace
-
-    DeploymentFlag="--force "
-    echo "Remove '--atomic' auto roll back for non-production environment. And use '--force' to delete and replace failed releases."
-fi
-
 # Deploy geneva daemonset
 echo "start deploy geneva helm chart."
-$Helm upgrade aks-geneva --install --wait $DeploymentFlag\
+$Helm upgrade aks-geneva --install --wait --force \
 --values "$GenevaParametersFile" \
 --set genevaTenant="$PartnerName" \
 --set genevaRole="$AKSName" \
