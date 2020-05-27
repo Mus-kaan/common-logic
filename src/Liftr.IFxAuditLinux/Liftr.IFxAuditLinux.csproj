@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.IFxAuditLinux</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.IFxAuditLinux</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.IFxAudit" Version="$(PackageVersion_Microsoft_IFxAudit)" />
+  </ItemGroup>
+</Project>

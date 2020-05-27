@@ -127,6 +127,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Sample.Web.Tests", "S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Blob", "Liftr.Blob\Liftr.Blob.csproj", "{EA835D6E-97FA-429E-A6EA-6FC6B0F9AA9E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.IFxAuditLinux", "Liftr.IFxAuditLinux\Liftr.IFxAuditLinux.csproj", "{CCA74C2F-5C73-4B42-A0BE-F5F87F4FC92C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -357,6 +359,10 @@ Global
 		{EA835D6E-97FA-429E-A6EA-6FC6B0F9AA9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA835D6E-97FA-429E-A6EA-6FC6B0F9AA9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA835D6E-97FA-429E-A6EA-6FC6B0F9AA9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCA74C2F-5C73-4B42-A0BE-F5F87F4FC92C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCA74C2F-5C73-4B42-A0BE-F5F87F4FC92C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCA74C2F-5C73-4B42-A0BE-F5F87F4FC92C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCA74C2F-5C73-4B42-A0BE-F5F87F4FC92C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
