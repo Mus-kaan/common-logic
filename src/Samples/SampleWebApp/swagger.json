@@ -1,0 +1,343 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "My API",
+        "version": "v1"
+    },
+    "paths": {
+        "/api/Values/ListAllResources": {
+            "get": {
+                "tags": [
+                    "Values"
+                ],
+                "operationId": "List",
+                "produces": [
+                    "text/plain",
+                    "application/json",
+                    "text/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ARMResource"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response.",
+                        "schema": {
+                            "$ref": "#/definitions/ResourceProviderDefaultErrorResponse"
+                        }
+                    }
+                },
+                "x-ms-pageable": {
+                    "nextLinkName": "nextLink"
+                },
+                "x-ms-examples": {
+                    "List": {
+                        "$ref": "./examples/List.json"
+                    }
+                }
+            }
+        },
+        "/api/Values/ListAllSubResources": {
+            "get": {
+                "tags": [
+                    "Values"
+                ],
+                "operationId": "ListSubResources",
+                "produces": [
+                    "text/plain",
+                    "application/json",
+                    "text/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ARMResource"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response.",
+                        "schema": {
+                            "$ref": "#/definitions/ResourceProviderDefaultErrorResponse"
+                        }
+                    }
+                },
+                "x-ms-pageable": {
+                    "nextLinkName": "nextLink"
+                },
+                "x-ms-examples": {
+                    "ListSubResources": {
+                        "$ref": "./examples/ListSubResources.json"
+                    }
+                }
+            }
+        },
+        "/api/Values/{id}": {
+            "get": {
+                "tags": [
+                    "Values"
+                ],
+                "operationId": "Get",
+                "produces": [
+                    "text/plain",
+                    "application/json",
+                    "text/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response.",
+                        "schema": {
+                            "$ref": "#/definitions/ResourceProviderDefaultErrorResponse"
+                        }
+                    }
+                },
+                "x-ms-examples": {
+                    "Get": {
+                        "$ref": "./examples/Get.json"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Values"
+                ],
+                "operationId": "Put",
+                "consumes": [
+                    "application/json",
+                    "text/json",
+                    "application/*+json"
+                ],
+                "produces": [
+                    "text/plain",
+                    "application/json",
+                    "text/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "schema": {
+                            "format": "int32",
+                            "type": "integer"
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response.",
+                        "schema": {
+                            "$ref": "#/definitions/ResourceProviderDefaultErrorResponse"
+                        }
+                    }
+                },
+                "x-ms-long-running-operation": true,
+                "x-ms-examples": {
+                    "Put": {
+                        "$ref": "./examples/Put.json"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Values"
+                ],
+                "operationId": "Delete",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Success"
+                    },
+                    "default": {
+                        "description": "Default error response.",
+                        "schema": {
+                            "$ref": "#/definitions/ResourceProviderDefaultErrorResponse"
+                        }
+                    }
+                },
+                "x-ms-long-running-operation": true
+            }
+        },
+        "/api/Values": {
+            "post": {
+                "tags": [
+                    "Values"
+                ],
+                "operationId": "Post",
+                "consumes": [
+                    "application/json",
+                    "text/json",
+                    "application/*+json"
+                ],
+                "produces": [
+                    "text/plain",
+                    "application/json",
+                    "text/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "schema": {
+                            "$ref": "#/definitions/ValueRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/ValueRequest"
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response.",
+                        "schema": {
+                            "$ref": "#/definitions/ResourceProviderDefaultErrorResponse"
+                        }
+                    }
+                },
+                "x-ms-examples": {
+                    "Post": {
+                        "$ref": "./examples/Post.json"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "ARMResource": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "location": {
+                    "type": "string"
+                }
+            }
+        },
+        "ErrorResponseBody": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "target": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ErrorResponseBody"
+                    }
+                }
+            }
+        },
+        "ResourceProviderDefaultErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/ErrorResponseBody"
+                }
+            }
+        },
+        "EnumType1": {
+            "enum": [
+                "None",
+                "Val1",
+                "Val2"
+            ],
+            "type": "string",
+            "x-ms-enum": {
+                "modelAsString": true,
+                "name": "EnumType1"
+            }
+        },
+        "ValueRequest": {
+            "type": "object",
+            "properties": {
+                "itemName": {
+                    "type": "string"
+                },
+                "itemKey": {
+                    "type": "string",
+                    "x-ms-mutability": [
+                        "create",
+                        "read"
+                    ]
+                },
+                "eValue1": {
+                    "$ref": "#/definitions/EnumType1"
+                },
+                "readOnlyProperty": {
+                    "format": "int32",
+                    "type": "integer",
+                    "readOnly": true
+                }
+            }
+        }
+    }
+}

@@ -35,8 +35,11 @@ namespace Microsoft.Liftr.Hosting.Swagger
             {
                 if (context.Type.IsEnum)
                 {
-                    var enumExtension = new OpenApiObject();
-                    enumExtension["modelAsString"] = new OpenApiBoolean(true);
+                    var enumExtension = new OpenApiObject
+                    {
+                        ["modelAsString"] = new OpenApiBoolean(true),
+                        ["name"] = new OpenApiString(context.Type.Name),
+                    };
                     schema.Extensions["x-ms-enum"] = enumExtension;
                 }
 
