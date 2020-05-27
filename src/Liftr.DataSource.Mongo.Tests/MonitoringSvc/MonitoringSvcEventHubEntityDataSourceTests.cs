@@ -64,6 +64,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 PartnerServiceType = MonitoringSvcType.DataDog,
                 DataType = MonitoringSvcDataType.Log,
                 MonitoringSvcResourceProviderType = resourceProviderType,
+                IsDataEncrypted = false,
             };
 
             await _collectionScope.Collection.InsertOneAsync(mockEntity);
@@ -81,6 +82,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 Assert.Equal(MonitoringSvcDataType.Log, retrieved.DataType);
                 Assert.Equal(MonitoringSvcType.DataDog, retrieved.PartnerServiceType);
                 Assert.Equal(resourceProviderType, retrieved.MonitoringSvcResourceProviderType);
+                Assert.False(retrieved.IsDataEncrypted);
             }
 
             // Can retrieve with resourceProviderType.
@@ -96,6 +98,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 Assert.Equal(MonitoringSvcDataType.Log, retrieved.DataType);
                 Assert.Equal(MonitoringSvcType.DataDog, retrieved.PartnerServiceType);
                 Assert.Equal(resourceProviderType, retrieved.MonitoringSvcResourceProviderType);
+                Assert.False(retrieved.IsDataEncrypted);
             }
 
             // List entity

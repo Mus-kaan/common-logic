@@ -55,8 +55,19 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
         [BsonElement("timestampUTC")]
         public DateTimeOffset TimestampUTC { get; set; }
 
-        [BsonElement("encryptionMetaData")]
-        [JsonConverter(typeof(IEncryptionMetaData))]
-        public IEncryptionMetaData EncryptionMetaData { get; set; }
+        [BsonElement("isEncrypted")]
+        public bool IsDataEncrypted { get; set; }
+
+        [BsonElement("encryptionKeyId")]
+        public string EncryptionKeyResourceId { get; set; }
+
+        [BsonElement("encryptionAlgorithm")]
+        [JsonConverter(typeof(StringEnumConverter))]
+        [BsonRepresentation(BsonType.String)]
+        public EncryptionAlgorithm EncryptionAlgorithm { get; set; }
+
+        [BsonElement("encryptionContentIV")]
+        [BsonRepresentation(BsonType.Binary)]
+        public byte[] ContentEncryptionIV { get; set; }
     }
 }

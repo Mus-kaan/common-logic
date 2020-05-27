@@ -67,8 +67,23 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
         DateTimeOffset TimestampUTC { get; set; }
 
         /// <summary>
-        /// Encryption meta data
+        /// Boolean to represent if data is encrypted or not
         /// </summary>
-        IEncryptionMetaData EncryptionMetaData { get; set; }
+        bool IsDataEncrypted { get; set; }
+
+        /// <summary>
+        /// Resource id of the key used for encrypting
+        /// </summary>
+        string EncryptionKeyResourceId { get; set; }
+
+        /// <summary>
+        /// Algorithm used for encrypting
+        /// </summary>
+        EncryptionAlgorithm EncryptionAlgorithm { get; set; }
+
+        /// <summary>
+        /// Encryption initialization vector
+        /// </summary>
+        byte[] ContentEncryptionIV { get; set; }
     }
 }
