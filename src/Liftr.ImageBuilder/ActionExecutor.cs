@@ -121,14 +121,10 @@ namespace Microsoft.Liftr.ImageBuilder
                     kvClient = KeyVaultClientFactory.FromMSI();
 
                     var azEnv = _options.Cloud.LoadAzEnvironment();
-                    TokenCredentialOptions tokenCredentialOptions = null;
-                    if (_options.Cloud != CloudType.Public)
+                    TokenCredentialOptions tokenCredentialOptions = new TokenCredentialOptions()
                     {
-                        tokenCredentialOptions = new TokenCredentialOptions()
-                        {
-                            AuthorityHost = new Uri(azEnv.AuthenticationEndpoint),
-                        };
-                    }
+                        AuthorityHost = new Uri(azEnv.AuthenticationEndpoint),
+                    };
 
                     using TenantHelper tenantHelper = new TenantHelper(new Uri(azEnv.ResourceManagerEndpoint));
                     tenantId = await tenantHelper.GetTenantIdForSubscriptionAsync(config.SubscriptionId.ToString());
