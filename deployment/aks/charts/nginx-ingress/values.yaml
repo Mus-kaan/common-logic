@@ -24,10 +24,28 @@ controller:
   # Will add custom configuration options to Nginx https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/
   config:
     log-format-escape-json: "true"
-    log-format-upstream: '{"time": "$time_iso8601", "remote_addr": "$remote_addr", "upstream_addr": "$upstream_addr", "ms_request_id": "$http_x_ms_client_request_id", "ms_coorelation_id": "$http_x_ms_correlation_request_id", "liftr_coorelation_id": "$http_x_liftr_correlation_request_id", "x-forward-for": "$proxy_add_x_forwarded_for", "request_id": "$req_id",
-  "remote_user": "$remote_user", "bytes_sent": $bytes_sent, "request_time": $request_time, "status":$status, "vhost": "$host", "request_proto": "$server_protocol",
-  "path": "$uri", "request_query": "$args", "request_length": $request_length, "duration_seconds": $request_time,"method": "$request_method", "http_referrer": "$http_referer",
-  "http_user_agent": "$http_user_agent" }'
+    log-format-upstream: '{
+        "Type": "HttpRequest",
+        "Request": "$request",
+        "RequestUri": "$request_uri",
+        "ServerProtocol": "$server_protocol",
+        "ForwardedClientIpAddress": "$the_real_ip",
+        "DomainName": "$host",
+        "StatusCode": "$status",
+        "SSLProtocol": "$ssl_protocol",
+        "RequestId": "$sent_http_x_ms_request_id",
+        "ClientRequestId": "$sent_http_x_ms_client_request_id",
+        "ClientSessionId": "$http_x_ms_client_session_id",
+        "CorrelationRequestId": "$sent_http_x_ms_correlation_request_id",
+        "ResponseBodyBytes": "$body_bytes_sent",
+        "UserAgent": "$http_user_agent",
+        "RequestLength": "$request_length",
+        "RequestTime": "$request_time",
+        "UpstreamName": "$proxy_upstream_name",
+        "UpstreamAddress": "$upstream_addr",
+        "UpstreamResponseLength": "$upstream_response_length",
+        "UpstreamResponseTime": "$upstream_response_time",
+        "UpstreamResponseStatusCode": "$upstream_status"}'
 
   # Maxmind license key to download GeoLite2 Databases
   # https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases

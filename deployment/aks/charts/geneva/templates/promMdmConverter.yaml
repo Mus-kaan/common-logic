@@ -1,0 +1,106 @@
+# ------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# ------------------------------------------------------------
+
+# Prometheus converter deployment depends on statsD daemon set. Since 
+# helm will install daemon sets before deployments. No need to specify any 
+# dependencies here.
+#
+# The prom-mdm-converter relies on Prometheus' remote_write module, which can be used to pipe ALL metrics Prometheus receives to an HTTP endpoint.
+# The prom-mdm-converter then uses the rules its been given to decide whether to fire these metrics to MDM.
+#
+apiVersion: v1
+kind: Secret
+metadata:
+  name: prom-converter-mdm-cert
+type: Opaque
+data:
+  cert.pem: {{ .Values.gcscertb64 }}
+  key.pem: {{ .Values.gcskeyb64 }}
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Values.promMdmConverter.name }}
+  labels:
+    component: {{ .Chart.Name }}-prommdmconv
+spec:
+  replicas: {{ .Values.promMdmConverter.replicas }}
+  template:
+    metadata:
+      labels:
+        component: {{ .Chart.Name }}-prommdmconv
+    spec:
+      containers:
+        - name: prom-mdm-converter
+          image: {{ .Values.linuxgenevaACR.endpoint }}/shared/prom-mdm-converter:{{ .Values.promMdmConverter.dockerTag }}
+          imagePullPolicy: {{ .Values.promMdmConverter.promConverterImagePullPolicy }}
+          env:
+            - name: STATSD_ENDPOINT
+              value: "localhost"
+            - name: STATSD_PORT
+              value: "8125"
+            - name: REGION
+              value: {{ .Values.gcs_region | quote }}
+            - name: SERVER_PORT
+              value: "8080"
+            - name: UNDERLAY
+              value: "underlay"
+            - name: MDM_ACCOUNT
+              value: {{ .Values.mdm_account | quote }}
+            - name: MDM_ENDPOINT
+              value: {{ .Values.metricEndpoint | quote }}
+            - name: MDM_LOG_LEVEL
+              value: "Info"
+            - name: MDM_SOURCE_ENVIRONMENT
+              value: {{ .Values.gcs_environment | quote }}
+            - name: MDM_SOURCE_ROLE
+              value: {{ .Chart.Name | quote }}
+            - name: MDM_SOURCE_ROLE_INSTANCE
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName # it's from pod's spec.nodeName
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: mdm-cert-vol
+              mountPath: /mdm/certs
+              readOnly: true
+      volumes:
+        - name: mdm-cert-vol
+          secret:
+            secretName: prom-converter-mdm-cert
+        - name: config
+          configMap:
+            name: "prom-mdm-converter-conf"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.promMdmConverter.name }}
+  labels:
+    component:  {{ .Chart.Name }}-prommdmconv
+spec:
+  type: ClusterIP
+  ports:
+    - name: "prom-mdm-http"
+      protocol: "TCP"
+      port: 80
+      targetPort: 8080
+  selector:
+    component:  {{ .Chart.Name }}-prommdmconv
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "prom-mdm-converter-conf"
+  labels:
+    component: {{ .Chart.Name }}-prommdmconv
+data:
+  rules.yaml: |
+    defaultMetricAllow: false
+    defaultDimensionAllow: true
+    startsWithFilters: []
+    metrics:
+{{ toYaml .Values.promMdmConverter.metrics | indent 6 }}

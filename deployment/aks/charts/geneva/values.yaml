@@ -19,3 +19,25 @@ fluentd:
 
 secpack:
   dockerTag: master_40
+
+promMdmConverter:
+  name: prom-mdm-converter
+  replicas: 1
+  promConverterImagePullPolicy: Always
+  dockerTag: 2.0.master.20200106.5
+
+  metrics: # Metrics below with a suffix "_named" or "_rate" are likely defined in the Prometheus configuration
+    kube_pod_status_phase:
+    kube_pod_container_status_running:
+    kubelet_running_pod_count_named:
+    kubelet_running_container_count_named:
+    container_memory_usage_bytes:
+    node_cpu_usage:
+    node_memory_MemAvailable_bytes_named:
+    node_memory_Active_bytes_named:
+    kube_node_status_condition:
+    node_filesystem_avail_bytes_named:
+    node_network_receive_bytes_total_rate:
+    node_network_receive_drop_total_rate:
+    node_network_transmit_bytes_total_rate:
+    node_network_transmit_drop_total_rate:
