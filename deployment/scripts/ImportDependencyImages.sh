@@ -71,8 +71,8 @@ fi
 
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
 echo "import 'nginx-ingress' chart images"
-echo "import quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0"
-az acr import --name "$ACRName" --source quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.30.0 --force
+echo "import quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.32.0"
+az acr import --name "$ACRName" --source quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.32.0 --force
 
 echo "import k8s.gcr.io/defaultbackend-amd64:1.5"
 az acr import --name "$ACRName" --source k8s.gcr.io/defaultbackend-amd64:1.5 --force

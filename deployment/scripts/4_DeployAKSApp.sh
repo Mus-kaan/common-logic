@@ -40,6 +40,11 @@ fi
 --APP_ASPNETCORE_ENVIRONMENT="$APP_ASPNETCORE_ENVIRONMENT" \
 --AKSAppChartPackage="$AKSAppChartPackage"
 
+./ExecuteDeploymentRunner.sh \
+--ProvisionAction="UpdateAKSPublicIpInTrafficManager" \
+--EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
+--Region="$REGION"
+
 for script in "$CurrentDir"/4_*.sh
 do
   if [[ "$script" != *"$currentScriptName"* ]]; then

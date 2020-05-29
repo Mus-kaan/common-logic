@@ -429,27 +429,31 @@ namespace Microsoft.Liftr.SimpleDeploy
                             {
                                 var errMsg = $"Cannot find the public Ip address for the AKS cluster. aksRGName:{aksRGName}, aksName:{aksName}, region:{regionalNamingContext.Location}.";
                                 _logger.Error(errMsg);
-                                throw new InvalidOperationException(errMsg);
+
+                                // TODO: fix this. The IP listing is very flacky recently.
+                                // throw new InvalidOperationException(errMsg);
                             }
-
-                            _logger.Information("Find the IP of the AKS is: {IPAddress}", pip.IPAddress);
-
-                            if (string.IsNullOrEmpty(pip.IPAddress))
+                            else
                             {
-                                _logger.Error("The IP address is null of the created Pulic IP with Id {PipResourceId}", pip.Id);
-                                throw new InvalidOperationException($"The IP address is null of the created Pulic IP with Id {pip.Id}");
+                                _logger.Information("Find the IP of the AKS is: {IPAddress}", pip.IPAddress);
+
+                                if (string.IsNullOrEmpty(pip.IPAddress))
+                                {
+                                    _logger.Error("The IP address is null of the created Pulic IP with Id {PipResourceId}", pip.Id);
+                                    throw new InvalidOperationException($"The IP address is null of the created Pulic IP with Id {pip.Id}");
+                                }
+
+                                var epName = $"{aksRGName}-{SdkContext.RandomResourceName(string.Empty, 5).Substring(0, 3)}";
+                                _logger.Information("New endpoint name: {epName}", epName);
+                                await aksHelper.AddPulicIpToTrafficManagerAsync(az, tmId, epName, pip.IPAddress, enabled: true);
+                                _logger.Information("Successfully updated AKS public IP in the traffic manager.");
+
+                                await dnsZone.Update().DefineARecordSet(aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
+                                await dnsZone.Update().DefineARecordSet("*." + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
+                                await dnsZone.Update().DefineARecordSet("thanos-0-" + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
+                                await dnsZone.Update().DefineARecordSet("thanos-1-" + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
+                                _logger.Information("Successfully DNS A record '{recordName}' to IP '{ipAddress}'.", aksName, pip.IPAddress);
                             }
-
-                            var epName = $"{aksRGName}-{SdkContext.RandomResourceName(string.Empty, 5).Substring(0, 3)}";
-                            _logger.Information("New endpoint name: {epName}", epName);
-                            await aksHelper.AddPulicIpToTrafficManagerAsync(az, tmId, epName, pip.IPAddress, enabled: true);
-                            _logger.Information("Successfully updated AKS public IP in the traffic manager.");
-
-                            await dnsZone.Update().DefineARecordSet(aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
-                            await dnsZone.Update().DefineARecordSet("*." + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
-                            await dnsZone.Update().DefineARecordSet("thanos-0-" + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
-                            await dnsZone.Update().DefineARecordSet("thanos-1-" + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
-                            _logger.Information("Successfully DNS A record '{recordName}' to IP '{ipAddress}'.", aksName, pip.IPAddress);
                         }
                     }
 
