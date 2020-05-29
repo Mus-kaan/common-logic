@@ -12,6 +12,8 @@ namespace Microsoft.Liftr
     public static class TestCommon
     {
         public static readonly Region Location = Region.USEast;
+        public static readonly int EventHubPartitionCount = 32;
+        public static readonly List<string> EventHubConsumerGroups = new List<string> { "cgroup1", "cgroup2" };
 
         public static readonly Dictionary<string, string> Tags
             = new Dictionary<string, string>()

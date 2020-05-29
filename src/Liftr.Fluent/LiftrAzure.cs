@@ -1113,10 +1113,16 @@ namespace Microsoft.Liftr.Fluent
             return eventHubNamespace;
         }
 
-        public async Task<IEventHub> GetOrCreateEventHubAsync(Region location, string rgName, string namespaceName, string hubName, IDictionary<string, string> tags)
+        public async Task<IEventHub> GetOrCreateEventHubAsync(Region location, string rgName, string namespaceName, string hubName, int partitionCount, IList<string> consumerGroups, IDictionary<string, string> tags)
         {
             _logger.Information("Getting Event Hub. rgName: {rgName}, namespaceName: {namespaceName}, hubName: {hubName} ...", rgName, namespaceName, hubName);
             IEventHub eventhub = null;
+
+            if (consumerGroups == null)
+            {
+                throw new ArgumentNullException(nameof(consumerGroups));
+            }
+
             try
             {
                 eventhub = await FluentClient
@@ -1129,11 +1135,19 @@ namespace Microsoft.Liftr.Fluent
                 IEventHubNamespace eventHubNamespace = await GetOrCreateEventHubNamespaceAsync(location, rgName, namespaceName, tags);
 
                 _logger.Information($"Creating a Event Hub with namespaceName {namespaceName}, name {hubName} ...", namespaceName, hubName);
-                eventhub = await FluentClient
+
+                var eventHubBuilder = FluentClient
                     .EventHubs
                     .Define(hubName)
                     .WithExistingNamespace(eventHubNamespace)
-                    .CreateAsync();
+                    .WithPartitionCount(partitionCount);
+
+                foreach (var consumerGroup in consumerGroups)
+                {
+                    eventHubBuilder.WithNewConsumerGroup(consumerGroup);
+                }
+
+                eventhub = await eventHubBuilder.CreateAsync();
             }
 
             return eventhub;

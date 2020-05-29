@@ -203,7 +203,7 @@ namespace Microsoft.Liftr.Fluent
         #region Event Hub
         Task<IEventHubNamespace> GetOrCreateEventHubNamespaceAsync(Region location, string rgName, string name, IDictionary<string, string> tags);
 
-        Task<IEventHub> GetOrCreateEventHubAsync(Region location, string rgName, string namespaceName, string hubName, IDictionary<string, string> tags);
+        Task<IEventHub> GetOrCreateEventHubAsync(Region location, string rgName, string namespaceName, string hubName, int partitionCount, IList<string> consumerGroups, IDictionary<string, string> tags);
         #endregion
     }
 }
