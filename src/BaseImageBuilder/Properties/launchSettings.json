@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "bake-simple-ubuntu-img": {
+      "commandName": "Project",
+      "commandLineArgs": "-f configs\\gallery-simple-ubuntu.json --srcImg UbuntuServer1804 -n LIBUBImg -v 1.0.105 --artifactPath configs\\packer-files.tar.gz --authFile my.azureauth-ms.auth.json"
+    },
+    "global-azure-bake-sbi-img": {
+      "commandName": "Project",
+      "commandLineArgs": "-f configs\\gallery-global-azure-wus.json --srcImg U1804LTS -n LIBSampleImg -v 1.0.105 --artifactPath configs\\packer-files.tar.gz --authFile my.azureauth-ms.auth.json"
+    },
+    "mooncake-import-sbi-img": {
+      "commandName": "Project",
+      "commandLineArgs": "-a ImportOneVersion -f configs\\gallery-mooncake.json -n LIBSampleImg -v 1.0.105 --cloud Mooncake --authFile liftr-img-builder-mc-spn-mooncake.auth.json"
+    }
+  }
+}

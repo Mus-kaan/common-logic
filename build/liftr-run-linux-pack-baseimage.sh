@@ -8,7 +8,7 @@ dos2unix(){
 
 SrcRoot="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 
-echo "----------[Liftr]----------[Liftr]----------[Liftr]----------[Liftr]----------"
+echo "----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------"
 echo "Start packing Liftr image builder ..."
 echo "Source root folder: $SrcRoot"
 echo "CDP_FILE_VERSION_NUMERIC : $CDP_FILE_VERSION_NUMERIC"
@@ -21,8 +21,10 @@ EV2ScriptsDir="$SupportingFilesDir/ev2-scripts"
 
 OutDir="$SrcRoot/out-ev2-base-image"
 ServiceGroupRootWindowsBaseImage="$OutDir/ServiceGroupRoot"
-PackerFilesDir="$OutDir/packer-files"
-PackerTarFile="$OutDir/packer-files.tar.gz"
+PackerFilesDirName="packer-files"
+PackerFilesDir="$OutDir/$PackerFilesDirName"
+PackerZipFileName="packer-files.zip"
+PackerZipFile="$OutDir/$PackerZipFileName"
 EV2ExtensionFilesDir="$OutDir/ev2-extension-files"
 EV2ExtensionTarFile="$OutDir/ev2-extension.tar"
 #Ev2 has a size limitation of the uploaded file(200 MB).
@@ -54,8 +56,9 @@ echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
 echo "Prepare packer files ..."
 cp -a "$SupportingFilesDir/packer-files/." "$PackerFilesDir"
 
-cd "$PackerFilesDir" && tar -czf $PackerTarFile *
-echo "Zipped packer files into $PackerTarFile."
+cd "$OutDir"
+zip -r $PackerZipFileName $PackerFilesDirName
+echo "Zipped packer files into $PackerZipFile."
 
 echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
 echo "Prepare EV2 shell extension files ..."
@@ -63,7 +66,7 @@ cp -a $EV2ScriptsDir/. "$EV2ExtensionFilesDir"
 cp -a $PublishedImageBuilderDir/. "$EV2ExtensionFilesDir/bin"
 rm -rf "$EV2ExtensionFilesDir/bin/supporting-files"
 rm -rf "$EV2ExtensionFilesDir/bin/generated-ev2"
-cp $PackerTarFile "$EV2ExtensionFilesDir/bin"
+cp $PackerZipFile "$EV2ExtensionFilesDir/bin"
 echo -n "$EV2ArtifactVersion" > "$EV2ExtensionFilesDir/bin/version.txt"
 
 echo -n "$ImageVerion" > "$EV2ExtensionFilesDir/bin/numeric.packageversion.info"
@@ -88,6 +91,6 @@ echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
 echo "Clean unecessary files ..."
 rm $EV2ExtensionTarFile
 
-echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"
+echo "**********[Liftr]**********[https://aka.ms/liftr]**********[Liftr]**********[https://aka.ms/liftr]**********"
 echo "Finished packing base image builder"
-echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"
+echo "**********[Liftr]**********[https://aka.ms/liftr]**********[Liftr]**********[https://aka.ms/liftr]**********"

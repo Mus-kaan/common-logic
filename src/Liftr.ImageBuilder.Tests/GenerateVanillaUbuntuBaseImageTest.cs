@@ -52,13 +52,13 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                 try
                 {
                     (var kv, _) = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.BakeNewImageAndExport, SourceImageType.UbuntuServer1804, tags: tags);
-                    Assert.Null(kv);
+                    Assert.NotNull(kv);
 
                     await orchestrator.BuildCustomizedSBIAsync(
                                     "img" + baseName,
                                     "0.9.1018",
                                     SourceImageType.UbuntuServer1804,
-                                    "packer.tar",
+                                    "packer-files-ub18.zip",
                                     tags,
                                     CancellationToken.None);
                 }

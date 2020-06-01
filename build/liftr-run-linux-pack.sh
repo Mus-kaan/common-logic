@@ -18,7 +18,7 @@ publishProject(){
 
 if [ "$publishOrNot" = "true" ]; then
   dotnet publish $csproj -c Release --no-build --no-restore -o $csprojFolder/bin/publish /p:MajorVersion=$CDP_MAJOR_NUMBER_ONLY /p:MinorVersion=$CDP_MINOR_NUMBER_ONLY /p:PatchVersion=$CDP_BUILD_NUMBER /p:BuildMetadata=$CDP_DEFINITION_BUILD_COUNT
-  echo "- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - [Liftr]- - - - - "
+  echo "- - - - - [Liftr]- - - - - [https://aka.ms/liftr]- - - - - [Liftr]- - - - - [https://aka.ms/liftr]- - - - - "
 fi
 }
 
@@ -47,7 +47,7 @@ echo "CDP_DEFINITION_BUILD_COUNT: $CDP_DEFINITION_BUILD_COUNT"
 
 for solution in $SrcRoot/src/*.sln
 do
-  echo "----------[Liftr]----------[Liftr]----------[Liftr]----------[Liftr]----------"
+  echo "----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------"
   echo "Start dotnet pack $solution"
   dotnet pack $solution -c Release --include-source --include-symbols --no-build --no-restore -o $SrcRoot/nupkgs /p:MajorVersion=$CDP_MAJOR_NUMBER_ONLY /p:MinorVersion=$CDP_MINOR_NUMBER_ONLY /p:PatchVersion=$CDP_BUILD_NUMBER /p:BuildMetadata=$CDP_DEFINITION_BUILD_COUNT
     exit_code=$?
@@ -56,7 +56,7 @@ do
         exit $exit_code
     fi
   echo "Finished dotnet pack $solution"
-  echo "==========[Liftr]==========[Liftr]==========[Liftr]==========[Liftr]=========="
+  echo "==========[Liftr]==========[https://aka.ms/liftr]==========[Liftr]==========[https://aka.ms/liftr]=========="
 done
 
 for csproj in $SrcRoot/src/*/*.csproj
@@ -76,4 +76,4 @@ if [ $exit_code -ne 0 ]; then
 fi
 
 echo "Successfully finished packing solutions!"
-echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"
+echo "**********[Liftr]**********[https://aka.ms/liftr]**********[Liftr]**********[https://aka.ms/liftr]**********"

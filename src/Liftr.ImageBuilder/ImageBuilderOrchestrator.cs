@@ -23,8 +23,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,6 +51,9 @@ namespace Microsoft.Liftr.ImageBuilder
         private const string c_exportingStorageNamePrefix = "export";
 
         private const string c_keyVaultNamePrefix = "liftr-img-";
+
+        private const string c_packerFilesFolderName = "packer-files";
+        private const string c_entryScriptLinux = "bake-image.sh";
 
         private readonly Serilog.ILogger _logger;
         private readonly BuilderOptions _options;
@@ -87,16 +92,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 ImageGalleryClient galleryClient = new ImageGalleryClient(_timeSource, _logger);
                 var gallery = await galleryClient.CreateGalleryAsync(liftrAzure.FluentClient, _options.Location, _options.ResourceGroupName, _options.ImageGalleryName, tags);
 
-                bool needKeyVault = true;
-                if (sourceImageType?.IsPlatformImage() == true)
-                {
-                    needKeyVault = false;
-                }
-
-                if (needKeyVault)
-                {
-                    _keyVault = await GetOrCreateKeyVaultAsync(c_keyVaultNamePrefix);
-                }
+                _keyVault = await GetOrCreateKeyVaultAsync(c_keyVaultNamePrefix);
 
                 _artifactStore = await GetOrCreateContentStoreAsync(c_artifactStorageNamePrefix);
 
@@ -171,6 +167,13 @@ namespace Microsoft.Liftr.ImageBuilder
                 throw new FileNotFoundException(errMsg);
             }
 
+            bool isZip = artifactPath.OrdinalEndsWith("zip");
+            using var kvValet = new KeyVaultConcierge(_keyVault.VaultUri, _kvClient, _logger);
+            if (isZip)
+            {
+                artifactPath = await CheckAndModeifyArtifactZipAsync(artifactPath, kvValet);
+            }
+
             AzureImageBuilderTemplateHelper templateHelper = new AzureImageBuilderTemplateHelper(_options, _timeSource);
 
             var galleryClient = new ImageGalleryClient(_timeSource, _logger);
@@ -181,6 +184,10 @@ namespace Microsoft.Liftr.ImageBuilder
             {
                 var artifactUrlWithSAS = await _artifactStore.UploadBuildArtifactsToSupportingStorageAsync(artifactPath);
                 _logger.Information("uploaded the file '{filePath}' and generated the url with the SAS token.", artifactPath);
+                if (isZip)
+                {
+                    File.Delete(artifactPath);
+                }
 
                 bool isLinux = true;
                 string generatedTemplate;
@@ -201,7 +208,6 @@ namespace Microsoft.Liftr.ImageBuilder
                 {
                     string sbiSASToken = null;
                     using (var ops = _logger.StartTimedOperation("RetrieveAzureLinuxSBISASKey"))
-                    using (var kvValet = new KeyVaultConcierge(_keyVault.VaultUri, _kvClient, _logger))
                     {
                         try
                         {
@@ -225,7 +231,8 @@ namespace Microsoft.Liftr.ImageBuilder
                         artifactUrlWithSAS.ToString(),
                         _msi.Id,
                         linuxSourceImage.Id,
-                        imgVersionTags);
+                        imgVersionTags,
+                        isZip);
                 }
                 else if (sourceImageType.IsWindows())
                 {
@@ -252,7 +259,8 @@ namespace Microsoft.Liftr.ImageBuilder
                         artifactUrlWithSAS.ToString(),
                         _msi.Id,
                         linuxPlatformImage,
-                        imgVersionTags);
+                        imgVersionTags,
+                        isZip);
                 }
 
                 var az = _azFactory.GenerateLiftrAzure();
@@ -352,7 +360,6 @@ namespace Microsoft.Liftr.ImageBuilder
             }
         }
 
-        #region Private
         private async Task CleanUpAsync(IAzure az, string imageName, ImageGalleryClient galleryClient)
         {
             if (_options.ImageVersionRetentionTimeInDays == 0)
@@ -420,7 +427,6 @@ namespace Microsoft.Liftr.ImageBuilder
 
             return store;
         }
-        #endregion
 
         private async Task<IIdentity> GetOrCreateMSIAsync()
         {
@@ -594,6 +600,64 @@ namespace Microsoft.Liftr.ImageBuilder
                 .FirstOrDefault(kvp => kvp.Value.VHDS.ContainsKey(lastestVHDKvp.Key) && kvp.Value.VHDS[lastestVHDKvp.Key].OrdinalEquals(lastestVHDKvp.Value));
 
             return sematicVersionObject.Key;
+        }
+
+        private async Task<string> CheckAndModeifyArtifactZipAsync(string artifactPath, KeyVaultConcierge kvValet)
+        {
+            _logger.Information("Checking the file content in '{artifactPath}' ...", artifactPath);
+            var fileNameNoExt = Path.GetFileNameWithoutExtension(artifactPath);
+
+            var workingFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Guid.NewGuid().ToString());
+            Directory.CreateDirectory(workingFolder);
+
+            var localZipFile = Path.Combine(workingFolder, $"{fileNameNoExt}-original.zip");
+            var localUnzipFolder = Path.Combine(workingFolder, "content");
+
+            File.Copy(artifactPath, localZipFile);
+
+            _logger.Information("Unzip file to path: {folderPath}", localUnzipFolder);
+            ZipFile.ExtractToDirectory(localZipFile, localUnzipFolder);
+
+            if (!Directory.Exists(Path.Combine(localUnzipFolder, c_packerFilesFolderName)))
+            {
+                var ex = new InvalidArtifactPackageException($"Cannot find the '{c_packerFilesFolderName}' folder in '{artifactPath}'");
+                _logger.Fatal(ex.Message);
+                throw ex;
+            }
+
+            if (!File.Exists(Path.Combine(localUnzipFolder, c_packerFilesFolderName, c_entryScriptLinux)))
+            {
+                var ex = new InvalidArtifactPackageException($"Cannot find the entry script '{c_entryScriptLinux}' under '{c_packerFilesFolderName}' folder in '{artifactPath}'");
+                _logger.Fatal(ex.Message);
+                throw ex;
+            }
+
+            _logger.Information($"Downloading supporting secrets from key vault ...");
+            int cnt = 0;
+            var secretsToCopy = await kvValet.ListSecretsAsync();
+            foreach (var secret in secretsToCopy)
+            {
+                if (secret.Identifier.Name.OrdinalEquals(c_SBISASSecretName))
+                {
+                    continue;
+                }
+
+                var secretBundle = await kvValet.GetSecretAsync(secret.Identifier.Name);
+                var secretFilePath = Path.Combine(localUnzipFolder, c_packerFilesFolderName, $"{secret.Identifier.Name}.txt");
+                File.WriteAllText(secretFilePath, secretBundle.Value);
+                _logger.Information("Downloaded '{secretName}' to file '{seceretFile}'", secret.Identifier.Name, secretFilePath);
+                cnt++;
+            }
+
+            _logger.Information("Downloaded {copiedSecretCount} secrets from key vault.", cnt);
+
+            var generateZip = Path.Combine(workingFolder, $"{fileNameNoExt}.zip");
+            ZipFile.CreateFromDirectory(localUnzipFolder, generateZip);
+
+            File.Delete(localZipFile);
+            Directory.Delete(localUnzipFolder, recursive: true);
+
+            return generateZip;
         }
 
         private static string GetImageVersion(string imageName)

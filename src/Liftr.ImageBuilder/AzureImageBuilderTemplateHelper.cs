@@ -151,8 +151,8 @@ namespace Microsoft.Liftr.ImageBuilder
                 artifactLinkWithSAS,
                 msiId,
                 formatJson,
-                srcImg,
-                tags);
+                source: srcImg,
+                tags: tags);
         }
 
         private string GenerateImageTemplate(

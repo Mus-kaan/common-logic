@@ -17,9 +17,9 @@ namespace Microsoft.Liftr.Contracts
         WindowsServer2019DatacenterCore,
         WindowsServer2019DatacenterContainers,
 
+        // RedHat7LVM,
+        // CentOS,
         UbuntuServer1804,
-        RedHat7LVM,
-        CentOS,
 
         /// <summary>
         /// Azure Linux Secure Base Image Ubuntu 1604

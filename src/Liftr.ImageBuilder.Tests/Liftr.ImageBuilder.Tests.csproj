@@ -24,7 +24,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Update="packer.tar">
+    <None Update="packer-files-ub18.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="packer-windows.tar.gz">

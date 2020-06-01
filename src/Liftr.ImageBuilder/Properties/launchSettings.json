@@ -2,11 +2,11 @@
   "profiles": {
     "ms-linux-img-test": {
       "commandName": "Project",
-      "commandLineArgs": "-f configs\\ms-test-sig-eastus.json --srcImg U1804LTS -n 5ETestImg -v 1.5.110 --artifactPath configs\\test-packer.tar --authFile my.azureauth-ms.auth.json"
+      "commandLineArgs": "-f configs\\ms-test-sig-eastus.json --srcImg U1804LTS -n 5ETestImg -v 1.5.117 --artifactPath configs\\packer-files-ub18.zip --authFile my.azureauth-ms.auth.json"
     },
     "vanilla-ubuntu-img-test": {
       "commandName": "Project",
-      "commandLineArgs": "-f configs\\ms-vanilla-ub-test-sig-eastus.json --srcImg UbuntuServer1804 -n 5EVanUB18 -v 1.5.110 --artifactPath configs\\test-packer.tar --authFile my.azureauth-ms.auth.json"
+      "commandLineArgs": "-f configs\\ms-vanilla-ub-test-sig-eastus.json --srcImg UbuntuServer1804 -n 5EVanUB18 -v 1.5.117 --artifactPath configs\\packer-files-ub18.zip --authFile my.azureauth-ms.auth.json"
     },
     "ms-windows-img-test": {
       "commandName": "Project",
@@ -14,11 +14,11 @@
     },
     "ms-import-img": {
       "commandName": "Project",
-      "commandLineArgs": "-a ImportOneVersion -f configs\\ms-import-test-westus.json -n 5ETestImg -v 1.5.110 --authFile my.azureauth-ms.auth.json"
+      "commandLineArgs": "-a ImportOneVersion -f configs\\ms-import-test-westus.json -n 5ETestImg -v 1.5.117 --authFile my.azureauth-ms.auth.json"
     },
     "mooncake-import-img": {
       "commandName": "Project",
-      "commandLineArgs": "-a ImportOneVersion -f configs\\mooncake-chinanorth.json -n 5ETestImg -v 1.5.110 --cloud Mooncake --authFile liftr-img-builder-mc-spn-mooncake.auth.json"
+      "commandLineArgs": "-a ImportOneVersion -f configs\\mooncake-chinanorth.json -n 5ETestImg -v 1.5.117 --cloud Mooncake --authFile liftr-img-builder-mc-spn-mooncake.auth.json"
     },
     "ame-linux-img-unit-test-setup": {
       "commandName": "Project",
@@ -27,6 +27,10 @@
     "ame-windows-img-unit-test-setup": {
       "commandName": "Project",
       "commandLineArgs": "-f configs\\ame-unittest-setup-eastus.json --srcImg WindowsServer2019DatacenterCore -n LiftrUTWinImg -v 0.5.666 --artifactPath configs\\packer-windows.tar.gz --authFile liftr-unit-test-20191001-ame.auth.json"
+    },
+    "ms-linux-img-test-old-tar": {
+      "commandName": "Project",
+      "commandLineArgs": "-f configs\\ms-test-sig-eastus.json --srcImg U1804LTS -n 5ETestImg -v 1.5.117 --artifactPath configs\\test-packer.tar --authFile my.azureauth-ms.auth.json"
     }
   }
 }

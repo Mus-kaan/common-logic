@@ -64,7 +64,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                                     "img" + baseName,
                                     "0.9.1018",
                                     SourceImageType.U1804LTS,
-                                    "packer.tar",
+                                    "packer-files-ub18.zip",
                                     tags,
                                     CancellationToken.None);
                 }
@@ -107,7 +107,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                         "img" + baseName,
                         "0.9.01018.0002-3678b756",
                         SourceImageType.U1804LTS,
-                        "packer.tar",
+                        "packer-files-ub18.zip",
                         tags,
                         CancellationToken.None));
             }

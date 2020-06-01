@@ -1,0 +1,12 @@
+{
+  // See details about the image builder options at: https://aka.ms/liftr/img-builder-options
+  "SubscriptionId": "bd3ad04d-52b8-4b19-a3c9-4180dfe8f927", // ACR - Test - Mooncake
+  "Location": "chinaeast2",
+  "ResourceGroupName": "LiftrMCRG", // Please make sure the service principal or managed identity used to run the image builder has at least contributor role on this resource group.
+  "ImageGalleryName": "LiftrMCSIG",
+  "RegionalReplicaCount": 2, // https://docs.microsoft.com/en-us/azure/virtual-machines/windows/shared-image-galleries#scaling
+  "ImageReplicationRegions": [
+    "chinaeast",
+    "chinaeast2"
+  ]
+}

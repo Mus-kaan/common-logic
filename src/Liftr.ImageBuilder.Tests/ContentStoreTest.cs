@@ -56,7 +56,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
 
                     for (int i = 1; i <= 5; i++)
                     {
-                        var sas = await store.UploadBuildArtifactsToSupportingStorageAsync("packer.tar");
+                        var sas = await store.UploadBuildArtifactsToSupportingStorageAsync("packer-files-ub18.zip");
                         timeSource.Add(TimeSpan.FromSeconds(123));
                         var createAt = timeSource.UtcNow.ToZuluString();
                         var deletedAt = timeSource.UtcNow.AddDays(artifactOptions.ContentTTLInDays).ToZuluString();

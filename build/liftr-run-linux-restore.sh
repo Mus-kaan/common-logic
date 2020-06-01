@@ -7,7 +7,7 @@ echo "SrcRoot $SrcRoot"
 
 for solution in $SrcRoot/src/*.sln
 do
-  echo "----------[Liftr]----------[Liftr]----------[Liftr]----------[Liftr]----------"
+  echo "----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------"
   echo "Start dotnet restore $solution"
   echo
 
@@ -18,7 +18,7 @@ do
         exit $exit_code
     fi
   echo "Finished dotnet restore $solution"
-  echo "==========[Liftr]==========[Liftr]==========[Liftr]==========[Liftr]=========="
+  echo "==========[Liftr]==========[https://aka.ms/liftr]==========[Liftr]==========[https://aka.ms/liftr]=========="
 done
 
 # download helm
@@ -38,4 +38,4 @@ cd $SrcRoot/src/Samples/Liftr.Sample.Web
 dotnet tool restore
 
 echo "Successfully finished pakcage restore!"
-echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"
+echo "**********[Liftr]**********[https://aka.ms/liftr]**********[Liftr]**********[https://aka.ms/liftr]**********"

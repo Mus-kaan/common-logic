@@ -7,7 +7,7 @@ echo "SrcRoot $SrcRoot"
 
 for solution in $SrcRoot/src/*.sln
 do
-  echo "----------[Liftr]----------[Liftr]----------[Liftr]----------[Liftr]----------"
+  echo "----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------"
   echo "Start dotnet test $solution"
   echo
 
@@ -18,8 +18,8 @@ do
         exit $exit_code
     fi
   echo "Finished dotnet test $solution"
-  echo "==========[Liftr]==========[Liftr]==========[Liftr]==========[Liftr]=========="
+  echo "==========[Liftr]==========[https://aka.ms/liftr]==========[Liftr]==========[https://aka.ms/liftr]=========="
 done
 
-echo "Successfully testing!"
-echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"
+echo "Successfully finished testing!"
+echo "**********[Liftr]**********[https://aka.ms/liftr]**********[Liftr]**********[https://aka.ms/liftr]**********"

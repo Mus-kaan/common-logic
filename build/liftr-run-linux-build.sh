@@ -26,7 +26,7 @@ echo "CDP_DEFINITION_BUILD_COUNT: $CDP_DEFINITION_BUILD_COUNT"
 
 for solution in $SrcRoot/src/*.sln
 do
-  echo "----------[Liftr]----------[Liftr]----------[Liftr]----------[Liftr]----------"
+  echo "----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------"
   echo "Start dotnet build $solution"
   dotnet build $solution -c Release --no-restore /p:MajorVersion=$CDP_MAJOR_NUMBER_ONLY /p:MinorVersion=$CDP_MINOR_NUMBER_ONLY /p:PatchVersion=$CDP_BUILD_NUMBER /p:BuildMetadata=$CDP_DEFINITION_BUILD_COUNT
     exit_code=$?
@@ -35,8 +35,8 @@ do
         exit $exit_code
     fi
   echo "Finished dotnet build $solution"
-  echo "==========[Liftr]==========[Liftr]==========[Liftr]==========[Liftr]=========="
+  echo "==========[Liftr]==========[https://aka.ms/liftr]==========[Liftr]==========[https://aka.ms/liftr]=========="
 done
 
 echo "Successfully finished running: $currentScriptName"
-echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"
+echo "**********[Liftr]**********[https://aka.ms/liftr]**********[Liftr]**********[https://aka.ms/liftr]**********"

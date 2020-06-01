@@ -104,30 +104,29 @@ namespace Microsoft.Liftr.ImageBuilder
                         break;
                     }
 
-                case SourceImageType.RedHat7LVM:
-                    {
-                        image = new PlatformImageIdentifier()
-                        {
-                            Publisher = "RedHat",
-                            Offer = "RHEL",
-                            Sku = "7-LVM",
-                            Version = "latest",
-                        };
-                        break;
-                    }
+                // case SourceImageType.RedHat7LVM:
+                //    {
+                //        image = new PlatformImageIdentifier()
+                //        {
+                //            Publisher = "RedHat",
+                //            Offer = "RHEL",
+                //            Sku = "7-LVM",
+                //            Version = "latest",
+                //        };
+                //        break;
+                //    }
 
-                case SourceImageType.CentOS:
-                    {
-                        image = new PlatformImageIdentifier()
-                        {
-                            Publisher = "CoreOS",
-                            Offer = "CoreOS",
-                            Sku = "Stable",
-                            Version = "latest",
-                        };
-                        break;
-                    }
-
+                // case SourceImageType.CentOS:
+                //    {
+                //        image = new PlatformImageIdentifier()
+                //        {
+                //            Publisher = "CoreOS",
+                //            Offer = "CoreOS",
+                //            Sku = "Stable",
+                //            Version = "latest",
+                //        };
+                //        break;
+                //    }
                 default:
                     throw new InvalidOperationException("The source image is not supported: " + imageType.ToString());
             }

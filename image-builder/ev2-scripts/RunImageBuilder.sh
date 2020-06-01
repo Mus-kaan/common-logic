@@ -91,8 +91,7 @@ if [ "$OnlyOutputSubscriptionId" = "true" ]; then
     -n "$ImageName" \
     -v "$ImageVersion" \
     --srcImg "$SourceImage" \
-    --spnObjectId "$RunnerSPNObjectId" \
-    --artifactPath "packer-files.tar.gz"
+    --spnObjectId "$RunnerSPNObjectId"
 elif [ "$ImportImage" = "true" ]; then
     dotnet BaseImageBuilder.dll \
     -a ImportOneVersion \
@@ -108,7 +107,7 @@ else
     -v "$ImageVersion" \
     --srcImg "$SourceImage" \
     --spnObjectId "$RunnerSPNObjectId" \
-    --artifactPath "packer-files.tar.gz"
+    --artifactPath "packer-files.zip"
 fi
 
 exit_code=$?
