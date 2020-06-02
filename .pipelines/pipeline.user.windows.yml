@@ -12,17 +12,17 @@ environment:
 # https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/2350/Code-Sign-Validation
 signing_options:
   profile: 'internal_azure_service'   # This service deploys to Azure!
-  codesign_validation_glob_pattern: '+:file|**\bin\*\Microsoft.Liftr.*.dll;+:file|**\bin\*\Microsoft.Liftr.*.exe'
+  codesign_validation_glob_pattern: '+:file|**\bin\*\Microsoft.Liftr.*.dll;+:file|**\bin\*\Microsoft.Liftr.*.exe;-:file|**.Tests\bin\**'
 
 workspace_options:
-  enable_legacy_networking: true    # Default is false. If false, only the Restore stage enables network connectivity to the user build container. 
+  enable_legacy_networking: true    # Default is false. If false, only the Restore stage enables network connectivity to the user build container.
                                     # If true, all stages enable network connectivity to user build container.
 
 version:
-  name: 'Liftr.Common'                                              
+  name: 'Liftr.Common'
   major: 2                                                              # The major version number.
   minor: 3                                                              # The minor version number
-  system: 'buildrevision'                                               
+  system: 'buildrevision'
 
 versioning:
   commands:
@@ -38,7 +38,7 @@ restore:
     - !!defaultcommand
       name: 'Restore Windows'
       command: 'build/run-windows-restore.cmd'
-      
+
 build:
   commands:
     - !!buildcommand
@@ -83,7 +83,7 @@ package:
 
 static_analysis_options: # OPTIONAL: If you wish to add options to FxCop, ModernCop, PoliCheck, or BinSkim
   binskim_options:       # OPTIONAL: If you want to add options for BinSkim.
-    files_to_scan:     
+    files_to_scan:
       - from: 'src/**/bin'
         include:
           - '**/Microsoft.Liftr.*.dll'
