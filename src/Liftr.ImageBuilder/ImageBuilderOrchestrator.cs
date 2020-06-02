@@ -171,7 +171,12 @@ namespace Microsoft.Liftr.ImageBuilder
             using var kvValet = new KeyVaultConcierge(_keyVault.VaultUri, _kvClient, _logger);
             if (isZip)
             {
-                artifactPath = await CheckAndModeifyArtifactZipAsync(artifactPath, kvValet);
+                artifactPath = await CheckAndModeifyArtifactZipAsync(
+                    artifactPath,
+                    kvValet,
+                    imageName,
+                    imageVersion,
+                    sourceImageType);
             }
 
             AzureImageBuilderTemplateHelper templateHelper = new AzureImageBuilderTemplateHelper(_options, _timeSource);
@@ -602,7 +607,12 @@ namespace Microsoft.Liftr.ImageBuilder
             return sematicVersionObject.Key;
         }
 
-        private async Task<string> CheckAndModeifyArtifactZipAsync(string artifactPath, KeyVaultConcierge kvValet)
+        private async Task<string> CheckAndModeifyArtifactZipAsync(
+            string artifactPath,
+            KeyVaultConcierge kvValet,
+            string imageName,
+            string imageVersion,
+            SourceImageType sourceImageType)
         {
             _logger.Information("Checking the file content in '{artifactPath}' ...", artifactPath);
             var fileNameNoExt = Path.GetFileNameWithoutExtension(artifactPath);
@@ -631,6 +641,10 @@ namespace Microsoft.Liftr.ImageBuilder
                 _logger.Fatal(ex.Message);
                 throw ex;
             }
+
+            File.WriteAllText(Path.Combine(localUnzipFolder, c_packerFilesFolderName, $"image-name.txt"), imageName);
+            File.WriteAllText(Path.Combine(localUnzipFolder, c_packerFilesFolderName, $"image-version.txt"), imageVersion);
+            File.WriteAllText(Path.Combine(localUnzipFolder, c_packerFilesFolderName, $"source-image-type.txt"), sourceImageType.ToString());
 
             _logger.Information($"Downloading supporting secrets from key vault ...");
             int cnt = 0;
