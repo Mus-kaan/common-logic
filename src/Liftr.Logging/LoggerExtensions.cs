@@ -17,9 +17,9 @@ namespace Microsoft.Liftr
 {
     public static class LoggerExtensions
     {
+        private static readonly List<IDisposable> s_disposablesHolder = new List<IDisposable>();
         private static MetaInfo s_metaInfo;
         private static bool s_metaInitialized;
-        private static List<IDisposable> s_disposablesHolder = new List<IDisposable>();
 
         /// <summary>
         /// Start tracking an <see cref="ITimedOperation"/>, which contains two log events:
@@ -54,6 +54,10 @@ namespace Microsoft.Liftr
                 var assemblyProductVersion = FileVersionInfo.GetVersionInfo(callingAssembly.Location).ProductVersion;
                 s_disposablesHolder.Add(LogContext.PushProperty("AssemblyName", assemblyName));
                 s_disposablesHolder.Add(LogContext.PushProperty("AssemblyVersion", assemblyProductVersion));
+
+                var currentAssembly = Assembly.GetExecutingAssembly();
+                var currentAssemblyProductVersion = FileVersionInfo.GetVersionInfo(currentAssembly.Location).ProductVersion;
+                s_disposablesHolder.Add(LogContext.PushProperty("LiftrLibVer", currentAssemblyProductVersion));
 
                 var instanceMeta = await InstanceMetadata.LoadAsync(logger);
 
