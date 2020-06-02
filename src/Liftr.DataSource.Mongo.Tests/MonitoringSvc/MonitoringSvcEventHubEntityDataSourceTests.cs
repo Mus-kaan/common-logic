@@ -44,66 +44,57 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             var ts = new MockTimeSource();
             var s = new MonitoringSvcEventHubEntityDataSource(_collectionScope.Collection);
 
-            var name = "mockName";
-            var nameSpace = "mockNameSpace";
-            var authruleid = "mockAuthRuleId";
-            var eventHubConnectionString = "mockEHConnectionString";
-            var storageConnectionString = "mockSAConnectionString";
-            var location = "mockLocation";
-            var resourceProviderType = "Microsoft.Datadog/datadogs";
-
             var mockEntity = new MonitoringSvcEventHubEntity()
             {
-                Name = name,
-                Namespace = nameSpace,
-                AuthorizationRuleId = authruleid,
-                EventHubConnStr = eventHubConnectionString,
-                StorageConnStr = storageConnectionString,
+                Name = "mockName",
+                Namespace = "mockNameSpace",
+                AuthorizationRuleId = "mockAuthRuleId",
+                EventHubConnStr = "mockEHConnectionString",
+                StorageConnStr = "mockSAConnectionString",
                 Enabled = true,
-                Location = location,
+                Location = "mockLocation",
                 PartnerServiceType = MonitoringSvcType.DataDog,
                 DataType = MonitoringSvcDataType.Log,
-                MonitoringSvcResourceProviderType = resourceProviderType,
+                MonitoringSvcResourceProviderType = "Microsoft.Datadog/datadogs",
                 IsDataEncrypted = false,
             };
 
-            await _collectionScope.Collection.InsertOneAsync(mockEntity);
+            await s.InsertEntityAsync(mockEntity);
 
-            // Can retrieve with partnerSvcType.
-            {
-                var retrieved = await s.GetEntityAsync(mockEntity.PartnerServiceType, mockEntity.Location);
-
-                Assert.Equal(name, retrieved.Name);
-                Assert.Equal(nameSpace, retrieved.Namespace);
-                Assert.Equal(authruleid, retrieved.AuthorizationRuleId);
-                Assert.Equal(eventHubConnectionString, retrieved.EventHubConnStr);
-                Assert.Equal(storageConnectionString, retrieved.StorageConnStr);
-                Assert.Equal(location, retrieved.Location);
-                Assert.Equal(MonitoringSvcDataType.Log, retrieved.DataType);
-                Assert.Equal(MonitoringSvcType.DataDog, retrieved.PartnerServiceType);
-                Assert.Equal(resourceProviderType, retrieved.MonitoringSvcResourceProviderType);
-                Assert.False(retrieved.IsDataEncrypted);
-            }
-
-            // Can retrieve with resourceProviderType.
-            {
-                var retrieved = await s.GetEntityAsync(resourceProviderType, mockEntity.Location);
-
-                Assert.Equal(name, retrieved.Name);
-                Assert.Equal(nameSpace, retrieved.Namespace);
-                Assert.Equal(authruleid, retrieved.AuthorizationRuleId);
-                Assert.Equal(eventHubConnectionString, retrieved.EventHubConnStr);
-                Assert.Equal(storageConnectionString, retrieved.StorageConnStr);
-                Assert.Equal(location, retrieved.Location);
-                Assert.Equal(MonitoringSvcDataType.Log, retrieved.DataType);
-                Assert.Equal(MonitoringSvcType.DataDog, retrieved.PartnerServiceType);
-                Assert.Equal(resourceProviderType, retrieved.MonitoringSvcResourceProviderType);
-                Assert.False(retrieved.IsDataEncrypted);
-            }
-
-            // List entity
+            // Assert insertion successful
             var list = await s.ListEntityAsync();
             Assert.True(list.Count() == 1);
+
+            // Can retrieve with partnerSvcType.
+            var retrieved = await s.GetEntityAsync(mockEntity.PartnerServiceType, mockEntity.Location);
+            AssertEqual(retrieved, mockEntity);
+
+            // Can retrieve with resourceProviderType.
+            retrieved = await s.GetEntityAsync(mockEntity.MonitoringSvcResourceProviderType, mockEntity.Location);
+            AssertEqual(retrieved, mockEntity);
+
+            // Can retrieve with resourceProviderType.
+            retrieved = await s.GetEntityAsync(mockEntity.MonitoringSvcResourceProviderType, mockEntity.Location);
+            AssertEqual(retrieved, mockEntity);
+
+            // Can delete with eventHubNamespace
+            await s.DeleteEntitiesAsync(mockEntity.Namespace);
+            list = await s.ListEntityAsync();
+            Assert.Empty(list);
+        }
+
+        private void AssertEqual(IMonitoringSvcEventHubEntity actual, MonitoringSvcEventHubEntity expected)
+        {
+            Assert.Equal(actual.Name, expected.Name);
+            Assert.Equal(actual.Namespace, expected.Namespace);
+            Assert.Equal(actual.AuthorizationRuleId, expected.AuthorizationRuleId);
+            Assert.Equal(actual.EventHubConnStr, expected.EventHubConnStr);
+            Assert.Equal(actual.StorageConnStr, expected.StorageConnStr);
+            Assert.Equal(actual.Location, expected.Location);
+            Assert.Equal(actual.DataType, expected.DataType);
+            Assert.Equal(actual.PartnerServiceType, expected.PartnerServiceType);
+            Assert.Equal(actual.MonitoringSvcResourceProviderType, expected.MonitoringSvcResourceProviderType);
+            Assert.Equal(actual.IsDataEncrypted, expected.IsDataEncrypted);
         }
     }
 }
