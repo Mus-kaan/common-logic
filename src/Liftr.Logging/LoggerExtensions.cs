@@ -77,6 +77,7 @@ namespace Microsoft.Liftr
                     InstanceMeta = instanceMeta,
                     AssemblyName = assemblyName,
                     Version = assemblyProductVersion,
+                    LiftrLibraryVersion = currentAssemblyProductVersion,
                 };
             }
 
@@ -94,9 +95,9 @@ namespace Microsoft.Liftr
             var meta = logger.GetMetaInfoAsync(Assembly.GetEntryAssembly()).Result;
             var instanceMeta = meta.InstanceMeta;
 
-            logger.Information("***********************************************************************************");
+            logger.Information("**********[Liftr]**********[https://aka.ms/liftr]**********[Liftr]**********[https://aka.ms/liftr]**********[Liftr]**********");
 
-            logger.Information("Process start. Assembly info: {assemblyName}, version: {assemblyProductVersion}, machine name: {machineName}", meta.AssemblyName, meta.Version, Environment.MachineName);
+            logger.Information("Process start. Assembly info: {assemblyName}, version: {assemblyProductVersion}, machine name: {machineName}, liftrLibraryVersion: {liftrLibraryVersion}", meta.AssemblyName, meta.Version, Environment.MachineName, meta.LiftrLibraryVersion);
 
             if (instanceMeta != null && instanceMeta.Compute != null)
             {
@@ -106,7 +107,7 @@ namespace Microsoft.Liftr
                 logger.Information("Process start Azure Compute Info: vmLocation: {vmLocation}, vmName: {vmName}, vmSize: {vmSize}", vmLocation, vmName, vmSize);
             }
 
-            logger.Information("***********************************************************************************");
+            logger.Information("**********[Liftr]**********[https://aka.ms/liftr]**********[Liftr]**********[https://aka.ms/liftr]**********[Liftr]**********");
         }
 
         public static void LogError<T>(this ILogger logger, string messageTemplate, T propertyValue, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)

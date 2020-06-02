@@ -10,6 +10,8 @@ namespace Microsoft.Liftr.Logging
 
         public string Version { get; set; }
 
+        public string LiftrLibraryVersion { get; set; }
+
         public InstanceMetadata InstanceMeta { get; set; }
     }
 }
