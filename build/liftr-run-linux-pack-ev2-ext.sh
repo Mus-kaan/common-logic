@@ -52,7 +52,7 @@ if [ -v CDP_PACKAGE_VERSION_NUMERIC ]; then
     cp -a "$SrcRoot/.version/." "$TarTmpDir/bin/version-files"
 else
     # Use a fake version when building locally.
-    CURRENTEPOCTIME=`date +%s`
+    CURRENTEPOCTIME=`date +'%y%m%d%H%M'`
     ChartVersion="0.9.$CURRENTEPOCTIME"
 fi
 echo "Chart version is: $ChartVersion"

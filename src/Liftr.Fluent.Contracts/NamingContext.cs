@@ -109,6 +109,9 @@ namespace Microsoft.Liftr.Fluent.Contracts
         public string LogAnalyticsName(string baseName)
             => GenerateCommonName(baseName, "log");
 
+        public string EventHubNamespaceName(string baseName)
+            => GenerateCommonName(baseName, "evh");
+
         public string SharedImageGalleryName(string baseName)
            => GenerateCommonName(baseName, "sig", noRegion: false, delimiter: "_");
 

@@ -29,20 +29,13 @@ EV2ExtensionFilesDir="$OutDir/ev2-extension-files"
 EV2ExtensionTarFile="$OutDir/ev2-extension.tar"
 #Ev2 has a size limitation of the uploaded file(200 MB).
 
-if [ -v CDP_PACKAGE_VERSION_NUMERIC ]; then
-    EV2ArtifactVersion="$CDP_PACKAGE_VERSION_NUMERIC"
-else
-    # Use a fake version when building locally.
-    EV2ArtifactVersion="9.9.9999-localdev"
-fi
-echo "EV2 artifact version is: $EV2ArtifactVersion"
-
 # CDPx Versioning: https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/325/Versioning
 if [ -v CDP_PACKAGE_VERSION_NUMERIC ]; then
     ImageVerion="$CDP_PACKAGE_VERSION_NUMERIC"
 else
     # Use a fake version when building locally.
-    ImageVerion="0.3.010760009"
+    CURRENTEPOCTIME=`date +'%y%m%d%H%M'`
+    ImageVerion="0.1.$CURRENTEPOCTIME"
 fi
 echo "ImageVerion: $ImageVerion"
 
@@ -67,8 +60,7 @@ cp -a $PublishedImageBuilderDir/. "$EV2ExtensionFilesDir/bin"
 rm -rf "$EV2ExtensionFilesDir/bin/supporting-files"
 rm -rf "$EV2ExtensionFilesDir/bin/generated-ev2"
 cp $PackerZipFile "$EV2ExtensionFilesDir/bin"
-echo -n "$EV2ArtifactVersion" > "$EV2ExtensionFilesDir/bin/version.txt"
-
+echo -n "$ImageVerion" > "$EV2ExtensionFilesDir/bin/version.txt"
 echo -n "$ImageVerion" > "$EV2ExtensionFilesDir/bin/numeric.packageversion.info"
 echo -n "$ImageVerion" > "$EV2ExtensionFilesDir/numeric.packageversion.info"
 
@@ -85,7 +77,7 @@ echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
 echo "Prepare EV2 roll out spec files ..."
 cp -a "$PublishedImageBuilderDir/generated-ev2/image_builder/." "$ServiceGroupRootWindowsBaseImage"
 cp $EV2ExtensionTarFile $ServiceGroupRootWindowsBaseImage
-echo -n "$EV2ArtifactVersion" > "$ServiceGroupRootWindowsBaseImage/version.txt"
+echo -n "$ImageVerion" > "$ServiceGroupRootWindowsBaseImage/version.txt"
 
 echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
 echo "Clean unecessary files ..."

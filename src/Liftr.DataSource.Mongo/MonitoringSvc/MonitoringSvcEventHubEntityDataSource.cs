@@ -43,5 +43,17 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
             var cursor = await _collection.FindAsync<MonitoringSvcEventHubEntity>(filter);
             return cursor.ToEnumerable();
         }
+
+        public async Task DeleteEntitiesAsync(string ehNamespace)
+        {
+            var builder = Builders<MonitoringSvcEventHubEntity>.Filter;
+            var filter = builder.Eq(u => u.Namespace, ehNamespace);
+            await _collection.DeleteManyAsync(filter);
+        }
+
+        public async Task InsertEntityAsync(MonitoringSvcEventHubEntity entity)
+        {
+            await _collection.InsertOneAsync(entity);
+        }
     }
 }
