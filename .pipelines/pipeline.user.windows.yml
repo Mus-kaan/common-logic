@@ -88,3 +88,5 @@ static_analysis_options: # OPTIONAL: If you wish to add options to FxCop, Modern
         include:
           - '**/Microsoft.Liftr.*.dll'
           - '**/Microsoft.Liftr.*.exe'
+        exclude:                                    # OPTIONAL: Glob patterns of files to not scan. This is a sequence, so you can have any number of search patterns.
+          - '**.Tests/**'
