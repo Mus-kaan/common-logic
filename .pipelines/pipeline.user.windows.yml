@@ -50,6 +50,8 @@ build:
           include:
             - '*/bin/*/*/Microsoft.Liftr.*.dll'
             - '*/bin/*/*/Microsoft.Liftr.*.exe'
+          exclude:
+          - '**/*.Tests/**'
 
 test:
   commands:
