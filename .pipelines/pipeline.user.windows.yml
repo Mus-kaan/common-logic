@@ -48,8 +48,8 @@ build:
         - from: 'src'
           to: 'bin'
           include:
-            - '*/bin/*/*/Microsoft.Liftr.*.dll'
-            - '*/bin/*/*/Microsoft.Liftr.*.exe'
+            - '*/Liftr.*/bin/*/*/Microsoft.Liftr.*.dll'
+            - '*/Liftr.*/bin/*/*/Microsoft.Liftr.*.exe'
           exclude:
             - '**/*.Tests/**'
             - '**/*.Tests.*/**'
