@@ -34,7 +34,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
         public static string PackaerLogLocaionMessage(string subscriptionId, string resourceGroup, string templateName)
         {
-            return $"Resource group starting with name '{Truncate($"IT_{resourceGroup}_{templateName}", 40)}' in subscription '{subscriptionId}'";
+            return $"Resource group starting with name '{Truncate($"IT_{resourceGroup}_{templateName}", 43)}' in subscription '{subscriptionId}'";
         }
 
         private static string Truncate(string input, int maxLength)
