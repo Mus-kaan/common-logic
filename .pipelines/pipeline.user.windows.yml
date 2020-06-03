@@ -51,7 +51,9 @@ build:
             - '*/bin/*/*/Microsoft.Liftr.*.dll'
             - '*/bin/*/*/Microsoft.Liftr.*.exe'
           exclude:
-          - '**/*.Tests/**'
+            - '**/*.Tests/**'
+            - '**/*.Tests.*/**'
+            - '**/*.Test/**'
 
 test:
   commands:
