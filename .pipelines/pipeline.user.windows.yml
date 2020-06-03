@@ -55,6 +55,8 @@ build:
             - '**/*.Tests.*/**'
             - '**/*.Test/**'
             - '**/Samples/**'
+            - '**/BaseImageBuilder/**'
+            - '**/Deployment.Runner/**'
 
 test:
   commands:
