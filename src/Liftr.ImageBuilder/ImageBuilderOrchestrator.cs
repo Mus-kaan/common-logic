@@ -570,6 +570,9 @@ namespace Microsoft.Liftr.ImageBuilder
                             tags,
                             targetRegions);
 
+                _logger.Information("Start deleting intermidiate custom image with Id 'customImageId'", customImage.Id);
+                var forget = az.FluentClient.VirtualMachineCustomImages.DeleteByIdAsync(customImage.Id);
+
                 return imgVersion;
             }
             catch (Exception ex)
