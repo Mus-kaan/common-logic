@@ -154,7 +154,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 try
                 {
                     _logger.Information("Deleting the intermediate VM custom image: " + customImage.Id);
-                    await az.FluentClient.VirtualMachineCustomImages.DeleteByIdAsync(customImage.Id);
+                    var forget = az.FluentClient.VirtualMachineCustomImages.DeleteByIdAsync(customImage.Id);
                     await CleanUpAsync(imageName);
                 }
                 catch (Exception ex)
