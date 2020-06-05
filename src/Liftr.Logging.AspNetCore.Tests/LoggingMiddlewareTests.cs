@@ -23,7 +23,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
             {
                 await Task.CompletedTask;
                 observeredValue = CallContextHolder.LogFilterOverwrite.Value;
-            }, LoggerFactory.VoidLogger);
+            }, LoggerFactory.VoidLogger,
+                logRequest: true);
 
             var contextMock = new Mock<HttpContext>();
             StringValues val = new StringValues("debug");
@@ -43,7 +44,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
             {
                 await Task.CompletedTask;
                 observeredValue = CallContextHolder.LogFilterOverwrite.Value;
-            }, LoggerFactory.VoidLogger);
+            }, LoggerFactory.VoidLogger,
+                logRequest: true);
 
             var contextMock = new Mock<HttpContext>();
             StringValues val = new StringValues(new string[] { "debug", "information" });
@@ -63,7 +65,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
             {
                 await Task.CompletedTask;
                 observeredValue = CallContextHolder.LogFilterOverwrite.Value;
-            }, LoggerFactory.VoidLogger);
+            }, LoggerFactory.VoidLogger,
+                logRequest: true);
 
             var contextMock = new Mock<HttpContext>();
             StringValues val = new StringValues("debug");
@@ -83,7 +86,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
             {
                 await Task.CompletedTask;
                 observeredValue = CallContextHolder.LogFilterOverwrite.Value;
-            }, LoggerFactory.VoidLogger);
+            }, LoggerFactory.VoidLogger,
+                logRequest: true);
 
             var contextMock = new Mock<HttpContext>();
             StringValues val = new StringValues(new string[] { "debug", "information" });
@@ -103,7 +107,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
             {
                 await Task.CompletedTask;
                 observeredValue = CallContextHolder.LogFilterOverwrite.Value;
-            }, LoggerFactory.VoidLogger);
+            }, LoggerFactory.VoidLogger,
+                logRequest: true);
 
             var contextMock = new Mock<HttpContext>();
             StringValues val = new StringValues(new string[] { "error", "fatal" });
@@ -128,7 +133,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 observeredClientId = CallContextHolder.ClientRequestId.Value;
                 observeredTrackingId = CallContextHolder.ARMRequestTrackingId.Value;
                 observeredCorrelationId = CallContextHolder.CorrelationId.Value;
-            }, LoggerFactory.VoidLogger);
+            }, LoggerFactory.VoidLogger,
+                logRequest: true);
 
             var contextMock = new Mock<HttpContext>();
 
@@ -172,7 +178,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
             {
                 await Task.CompletedTask;
                 observeredValue = CallContextHolder.CorrelationId.Value;
-            }, LoggerFactory.VoidLogger);
+            }, LoggerFactory.VoidLogger,
+                logRequest: true);
 
             var contextMock = new Mock<HttpContext>();
             StringValues val = new StringValues("debug");
@@ -192,7 +199,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 {
                     await Task.CompletedTask;
                     observeredValue = CallContextHolder.CorrelationId.Value;
-                }, LoggerFactory.VoidLogger);
+                }, LoggerFactory.VoidLogger,
+                logRequest: true);
 
             var res = new MockHttpResponse();
             res.StatusCode = 404;
@@ -206,7 +214,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
 
             await middleware.InvokeAsync(contextMock.Object);
 
-            Assert.True(Guid.TryParse(observeredValue, out _));
+            Assert.False(Guid.TryParse(observeredValue, out _));
 
             var content = res.GetContent();
             Assert.Contains("assemblyName", content, StringComparison.OrdinalIgnoreCase);
@@ -214,7 +222,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
         }
 
         [Fact]
-        public async Task LivenessProbeIsNotAddedAsync()
+        public async Task LivenessProbeIsAddedFor200Async()
         {
             string observeredValue = string.Empty;
             var middleware = new LoggingMiddleware(
@@ -222,7 +230,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 {
                     await Task.CompletedTask;
                     observeredValue = CallContextHolder.CorrelationId.Value;
-                }, LoggerFactory.VoidLogger);
+                }, LoggerFactory.VoidLogger,
+                logRequest: true);
 
             var res = new MockHttpResponse();
             res.StatusCode = 200;
@@ -236,8 +245,11 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
 
             await middleware.InvokeAsync(contextMock.Object);
 
-            Assert.True(Guid.TryParse(observeredValue, out _));
-            Assert.Equal(0, res.Body.Length);
+            Assert.False(Guid.TryParse(observeredValue, out _));
+
+            var content = res.GetContent();
+            Assert.Contains("assemblyName", content, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("version", content, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

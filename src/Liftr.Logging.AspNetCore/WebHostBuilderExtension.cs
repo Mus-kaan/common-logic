@@ -40,7 +40,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             webHostBuilder
                 .UseSerilog((host, config) =>
                 {
-                    (var allowOverride, var defaultLevel) = GetOverrideOptions(host);
+                    (var allowOverride, var logRequest, var defaultLevel) = GetOverrideOptions(host);
                     if (allowOverride)
                     {
                         config.ReadFrom.Configuration(host.Configuration).MinimumLevel.ControlledBy(LogFilterOverrideScope.EnableFilterOverride(defaultLevel)).Enrich.FromLogContext();
@@ -57,11 +57,16 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 })
                 .ConfigureServices((host, services) =>
                 {
+                    (var allowOverride, var logRequest, var defaultLevel) = GetOverrideOptions(host);
+
                     services.AddApplicationInsightsTelemetry();
 
                     services.AddSingleton(new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener()));
 
-                    services.AddSingleton<IStartupFilter, LoggingMiddlewareStartupFilter>();
+                    services.AddSingleton<IStartupFilter>((sp) =>
+                    {
+                        return new LoggingMiddlewareStartupFilter(logRequest);
+                    });
 
                     services.AddSingleton<Serilog.ILogger>((sp) =>
                     {
@@ -80,13 +85,23 @@ namespace Microsoft.Liftr.Logging.AspNetCore
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Middleware should fail silently.")]
-        private static (bool allowOverride, LogEventLevel defaultLevel) GetOverrideOptions(WebHostBuilderContext host)
+        private static (bool allowOverride, bool logRequest, LogEventLevel defaultLevel) GetOverrideOptions(WebHostBuilderContext host)
         {
             bool allowOverride = false;
+            bool logRequest = false;
             try
             {
                 var allowOverrideStr = host.Configuration.GetSection("Serilog")?.GetSection("AllowFilterDynamicOverride")?.Value;
                 allowOverride = bool.Parse(allowOverrideStr);
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                var allowOverrideStr = host.Configuration.GetSection("Serilog")?.GetSection("LogRequest")?.Value;
+                logRequest = bool.Parse(allowOverrideStr);
             }
             catch
             {
@@ -102,7 +117,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             {
             }
 
-            return (allowOverride, defaultLevel);
+            return (allowOverride, logRequest, defaultLevel);
         }
     }
 }

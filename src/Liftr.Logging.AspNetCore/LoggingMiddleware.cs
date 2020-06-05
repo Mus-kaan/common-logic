@@ -18,14 +18,17 @@ namespace Microsoft.Liftr.Logging.AspNetCore
 {
     internal class LoggingMiddleware
     {
-        private const string s_logLevelOverwriteQueryName = "LiftrLogFilterOverwrite";
+        private const string c_logLevelOverwriteQueryName = "LiftrLogFilterOverwrite";
+
         private readonly RequestDelegate _next;
         private readonly Serilog.ILogger _logger;
+        private readonly bool _logRequest;
 
-        public LoggingMiddleware(RequestDelegate next, Serilog.ILogger logger)
+        public LoggingMiddleware(RequestDelegate next, Serilog.ILogger logger, bool logRequest)
         {
             _next = next;
             _logger = logger;
+            _logRequest = logRequest;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Middleware should fail silently.")]
@@ -61,7 +64,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             try
             {
                 // The vaule can be set from query parameter.
-                if (httpContext.Request.Query.TryGetValue(s_logLevelOverwriteQueryName, out var parameterValue))
+                if (httpContext?.Request?.Query?.TryGetValue(c_logLevelOverwriteQueryName, out var parameterValue) == true)
                 {
                     levelOverwrite = parameterValue.LastOrDefault();
                 }
@@ -102,25 +105,38 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 CallContextHolder.CorrelationId.Value = correlationtId;
             }
 
+            if (httpContext.Request?.Path.Value?.OrdinalStartsWith("/api/liveness-probe") == true)
+            {
+                try
+                {
+                    // This is to remove AppInsights logging when it is enabled. If not, this will do nothing.
+                    httpContext?.Features?.Set<RequestTelemetry>(null);
+                }
+                catch
+                {
+                }
+
+                var meta = await _logger.GetMetaInfoAsync();
+                httpContext.Response.StatusCode = (int)HttpStatusCode.OK;
+                await httpContext.Response.WriteAsync(meta.ToJson(indented: true));
+                return;
+            }
+
             using (var logFilterOverrideScope = new LogFilterOverrideScope(overrideLevel))
             using (new LogContextPropertyScope("LiftrTrackingId", armRequestTrackingId))
             using (new LogContextPropertyScope("LiftrCorrelationId", correlationtId))
             {
-                await _next(httpContext);
-                if (httpContext.Response?.StatusCode == (int)HttpStatusCode.NotFound && httpContext.Request?.Path.Value?.OrdinalStartsWith("/api/liveness-probe") == true)
+                var scope = new RequestLoggingScope(httpContext?.Request, _logger, _logRequest, correlationtId);
+                try
                 {
-                    try
-                    {
-                        // This is to remove AppInsights logging when it is enabled. If not, this will do nothing.
-                        httpContext?.Features?.Set<RequestTelemetry>(null);
-                    }
-                    catch
-                    {
-                    }
-
-                    var meta = await _logger.GetMetaInfoAsync();
-                    httpContext.Response.StatusCode = (int)HttpStatusCode.OK;
-                    await httpContext.Response.WriteAsync(meta.ToJson(indented: true));
+                    await _next(httpContext);
+                    scope.Finish(httpContext?.Response);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Unhandled exception.");
+                    scope.Finish(httpContext?.Response, ex);
+                    throw;
                 }
             }
         }

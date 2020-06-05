@@ -17,6 +17,9 @@ namespace Microsoft.Liftr.Logging
 {
     internal class TimedOperation : ITimedOperation
     {
+        private const string ResultDescription = nameof(ResultDescription);
+        private const string FailureMessage = nameof(FailureMessage);
+        private const string StatusCode = nameof(StatusCode);
         private readonly Serilog.ILogger _logger;
         private readonly string _operationName;
         private readonly Dictionary<string, object> _properties = new Dictionary<string, object>();
@@ -26,6 +29,7 @@ namespace Microsoft.Liftr.Logging
         private readonly Stopwatch _sw = Stopwatch.StartNew();
         private readonly LogContextPropertyScope _correlationIdScope;
         private bool _isSuccessful = true;
+        private int? _statusCode = null;
 
         public TimedOperation(Serilog.ILogger logger, string operationName, string operationId = null)
         {
@@ -57,7 +61,15 @@ namespace Microsoft.Liftr.Logging
             }
 
             _sw.Stop();
-            _logger.Information("Finished TimedOperation '{TimedOperationName}' with '{TimedOperationId}'. Successful: {isSuccessful}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationName, _operationId, _isSuccessful, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
+            if (_statusCode == null)
+            {
+                _logger.Information("Finished TimedOperation '{TimedOperationName}' with '{TimedOperationId}'. Successful: {isSuccessful}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationName, _operationId, _isSuccessful, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
+            }
+            else
+            {
+                _logger.Information("Finished TimedOperation '{TimedOperationName}' with '{TimedOperationId}'. Successful: {isSuccessful}. StatusCode: {statusCode}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationName, _operationId, _isSuccessful, _statusCode.Value, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
+            }
+
             _appInsightsOperation?.Dispose();
             _correlationIdScope?.Dispose();
         }
@@ -109,12 +121,40 @@ namespace Microsoft.Liftr.Logging
 
         public void SetResultDescription(string resultDescription)
         {
-            SetProperty("ResultDescription", resultDescription);
+            SetProperty(ResultDescription, resultDescription);
+        }
+
+        public void SetResult(int statusCode, string resultDescription = null)
+        {
+            if (statusCode == 0)
+            {
+                statusCode = 200;
+            }
+
+            if (!string.IsNullOrEmpty(resultDescription))
+            {
+                SetProperty(ResultDescription, resultDescription);
+            }
+
+            _statusCode = statusCode;
+
+            if (statusCode < 200 || statusCode > 299)
+            {
+                _isSuccessful = false;
+            }
+
+            if (_appInsightsOperation != null)
+            {
+                _appInsightsOperation.Telemetry.Success = _isSuccessful;
+                _appInsightsOperation.Telemetry.ResponseCode = ((int)statusCode).ToString(CultureInfo.InvariantCulture);
+            }
         }
 
         public void FailOperation(string message = null)
         {
             _isSuccessful = false;
+            _statusCode = 500;
+
             if (_appInsightsOperation != null)
             {
                 _appInsightsOperation.Telemetry.Success = false;
@@ -123,13 +163,15 @@ namespace Microsoft.Liftr.Logging
 
             if (!string.IsNullOrEmpty(message))
             {
-                SetProperty("FailureMessage", message);
+                SetProperty(FailureMessage, message);
             }
         }
 
         public void FailOperation(HttpStatusCode statusCode, string message = null)
         {
             _isSuccessful = false;
+            _statusCode = (int)statusCode;
+
             var statusCodeStr = ((int)statusCode).ToString(CultureInfo.InvariantCulture);
             if (_appInsightsOperation != null)
             {
@@ -137,10 +179,9 @@ namespace Microsoft.Liftr.Logging
                 _appInsightsOperation.Telemetry.ResponseCode = statusCodeStr;
             }
 
-            SetProperty("FailureStatusCode", statusCodeStr);
             if (!string.IsNullOrEmpty(message))
             {
-                SetProperty("FailureMessage", message);
+                SetProperty(FailureMessage, message);
             }
         }
     }

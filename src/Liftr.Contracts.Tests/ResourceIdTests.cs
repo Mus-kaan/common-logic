@@ -49,6 +49,43 @@ namespace Microsoft.Liftr.Contracts.Tests
             Assert.Equal("AvSet", rid.TypedNames[0].ResourceName);
         }
 
+        [Fact]
+        public void CanParseChildResourceId()
+        {
+            string resourceIdString = "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-acr-rg/providers/Microsoft.ContainerRegistry/registries/liftrmsacr/replication/eastus";
+            var rid = new ResourceId(resourceIdString);
+
+            Assert.Equal(resourceIdString, rid.ToString());
+            Assert.Equal("eebfbfdb-4167-49f6-be43-466a6709609f", rid.SubscriptionId);
+            Assert.Equal("liftr-acr-rg", rid.ResourceGroup);
+            Assert.Equal("Microsoft.ContainerRegistry", rid.Provider);
+            Assert.Equal("registries", rid.ResourceType);
+            Assert.Equal("liftrmsacr", rid.ResourceName);
+            Assert.Equal("replication", rid.ChildResourceType);
+            Assert.Equal("eastus", rid.ChildResourceName);
+
+            Assert.Equal(2, rid.TypedNames.Length);
+            Assert.Equal("registries", rid.TypedNames[0].ResourceType);
+            Assert.Equal("liftrmsacr", rid.TypedNames[0].ResourceName);
+            Assert.Equal("replication", rid.TypedNames[1].ResourceType);
+            Assert.Equal("eastus", rid.TypedNames[1].ResourceName);
+
+            var rid2 = new ResourceId(rid.SubscriptionId, rid.ResourceGroup, rid.Provider, rid.ResourceType, rid.ResourceName, rid.ChildResourceType, rid.ChildResourceName);
+            Assert.Equal(rid2.ToString(), rid.ToString());
+        }
+
+        [Fact]
+        public void CanParseResourceIdWithoutResourceName()
+        {
+            string resourceIdString = "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-acr-rg/providers/Microsoft.ContainerRegistry";
+            var rid = new ResourceId(resourceIdString);
+
+            Assert.Equal(resourceIdString, rid.ToString());
+            Assert.Equal("eebfbfdb-4167-49f6-be43-466a6709609f", rid.SubscriptionId);
+            Assert.Equal("liftr-acr-rg", rid.ResourceGroup);
+            Assert.Equal("Microsoft.ContainerRegistry", rid.Provider);
+        }
+
         [Theory]
         [InlineData("/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/providers/Microsoft.Compute/")]
         [InlineData("asdasasfdsf")]

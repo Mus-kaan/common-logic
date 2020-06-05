@@ -57,6 +57,11 @@ namespace Microsoft.Liftr.Logging
         void SetResultDescription(string resultDescription);
 
         /// <summary>
+        /// Set the 'ResultDescription' property of the <see cref="ITimedOperation"/>.
+        /// </summary>
+        void SetResult(int statusCode, string resultDescription = null);
+
+        /// <summary>
         /// Mark the <see cref="ITimedOperation"/> as failed and set the 'FailureMessage' property.
         /// </summary>
         void FailOperation(string message = null);

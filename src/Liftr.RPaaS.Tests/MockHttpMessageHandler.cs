@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Contracts.ARM;
 using System;
 using System.Collections.Generic;
 using System.Net;
