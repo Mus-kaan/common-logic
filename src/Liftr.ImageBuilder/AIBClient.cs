@@ -107,6 +107,40 @@ namespace Microsoft.Liftr.ImageBuilder
             }
         }
 
+        public async Task<string> GetAIBTemplateAsync(
+            string rgName,
+            string templateName,
+            CancellationToken cancellationToken = default)
+        {
+            using (var operation = _logger.StartTimedOperation(nameof(GetAIBTemplateAsync)))
+            using (var handler = new AzureApiAuthHandler(_liftrAzure.AzureCredentials))
+            using (var httpClient = new HttpClient(handler))
+            {
+                var uriBuilder = new UriBuilder(_liftrAzure.AzureCredentials.Environment.ResourceManagerEndpoint);
+                uriBuilder.Path =
+                    $"/subscriptions/{_liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{templateName}";
+                uriBuilder.Query = $"api-version={c_AIBAPIVersion}";
+                var runOutputResponse = await httpClient.GetAsync(uriBuilder.Uri);
+
+                if (runOutputResponse.StatusCode == HttpStatusCode.OK)
+                {
+                    return await runOutputResponse.Content.ReadAsStringAsync();
+                }
+                else if (runOutputResponse.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return null;
+                }
+                else
+                {
+                    var errMsg = $"Failed at getting AIB template run output. statusCode: '{runOutputResponse.StatusCode}',  response: {await runOutputResponse.Content.ReadAsStringAsync()}";
+                    var ex = new RunAzureVMImageBuilderException(errMsg, _liftrAzure.FluentClient.SubscriptionId, rgName, templateName);
+                    operation.FailOperation(ex.Message);
+                    _logger.Error(ex.Message);
+                    throw ex;
+                }
+            }
+        }
+
         public async Task<string> GetAIBRunOutputAsync(
             string rgName,
             string templateName,
@@ -159,6 +193,10 @@ namespace Microsoft.Liftr.ImageBuilder
                     _logger.Error("Delete AIB template {templateName} in {rgName} failed", templateName, rgName);
                     throw new InvalidOperationException("Delete template failed.");
                 }
+                else if (deleteResponse.StatusCode == HttpStatusCode.Accepted)
+                {
+                    var asyncOperationResponse = await WaitAsyncOperationAsync(httpClient, deleteResponse, cancellationToken);
+                }
 
                 _logger.Information("Delete AIB template succeeded. rgName: {rgName}. templateName: {templateName}", rgName, templateName);
                 return deleteResponse;
@@ -193,6 +231,11 @@ namespace Microsoft.Liftr.ImageBuilder
             if (startOperationResponse.Headers.Contains("Location"))
             {
                 statusUrl = startOperationResponse.Headers.GetValues("Location").FirstOrDefault();
+            }
+
+            if (string.IsNullOrEmpty(statusUrl) && startOperationResponse.Headers.Contains("Azure-AsyncOperation"))
+            {
+                statusUrl = startOperationResponse.Headers.GetValues("Azure-AsyncOperation").FirstOrDefault();
             }
 
             while (true)

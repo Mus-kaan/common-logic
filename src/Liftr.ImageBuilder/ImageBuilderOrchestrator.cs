@@ -19,6 +19,7 @@ using Microsoft.Liftr.KeyVault;
 using Microsoft.Liftr.SBI.Mover;
 using Microsoft.Rest.Azure;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -301,6 +302,21 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
                 else
                 {
+                    var existingTemplate = await aibClient.GetAIBTemplateAsync(_options.ResourceGroupName, templateName);
+                    if (!string.IsNullOrEmpty(existingTemplate))
+                    {
+                        var aibResourceId = $"/subscriptions/{az.FluentClient.SubscriptionId}/resourceGroups/{_options.ResourceGroupName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{templateName}";
+                        var aibRunState = GetLastRunState(existingTemplate);
+                        _logger.Information("There exist the same AIB template with Id '{aibResourceId}' in runState '{aibRunState}'", aibResourceId, aibRunState);
+
+                        if (aibRunState.OrdinalEquals("Running"))
+                        {
+                            throw new InvalidOperationException("There exist another running AIB template with the same resource Id: " + aibResourceId);
+                        }
+
+                        await aibClient.DeleteVMImageBuilderTemplateAsync(_options.ResourceGroupName, templateName);
+                    }
+
                     var res = await aibClient.CreateNewSBIVersionByRunAzureVMImageBuilderAsync(
                         _options.Location,
                         _options.ResourceGroupName,
@@ -694,6 +710,19 @@ namespace Microsoft.Liftr.ImageBuilder
 
             Version ver = new Version(0, 1, digitVersion);
             return ver.ToString();
+        }
+
+        private static string GetLastRunState(string aibTemplate)
+        {
+            try
+            {
+                dynamic templateObj = JObject.Parse(aibTemplate);
+                return (string)templateObj.properties.lastRunStatus.runState;
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
     }
 }
