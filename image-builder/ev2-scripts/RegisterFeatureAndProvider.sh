@@ -34,11 +34,12 @@ if [ -z ${DeploymentSubscriptionId+x} ]; then
     exit 1
 fi
 
-checkAndRegisterProvider "Microsoft.VirtualMachineImages"
 checkAndRegisterProvider "Microsoft.Storage"
 checkAndRegisterProvider "Microsoft.Compute"
+checkAndRegisterProvider "Microsoft.Network"
 checkAndRegisterProvider "Microsoft.KeyVault"
 checkAndRegisterProvider "Microsoft.ManagedIdentity"
+checkAndRegisterProvider "Microsoft.VirtualMachineImages"
 
 # register and enable for shared image gallery
 echo "az feature register --namespace Microsoft.VirtualMachineImages --name VirtualMachineTemplatePreview"
