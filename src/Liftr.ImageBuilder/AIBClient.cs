@@ -19,7 +19,7 @@ namespace Microsoft.Liftr.ImageBuilder
     /// </summary>
     public class AIBClient : IAIBClient
     {
-        private const string c_AIBAPIVersion = "2019-05-01-preview";
+        private const string c_AIBAPIVersion = "2020-02-14";
         private const string c_aibVHDRunOutputName = "liftr-vhd-output";
         private readonly ILiftrAzure _liftrAzure;
         private readonly Serilog.ILogger _logger;
