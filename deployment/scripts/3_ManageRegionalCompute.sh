@@ -69,11 +69,11 @@ fi
 for script in "$CurrentDir"/3_*.sh
 do
   if [[ "$script" != *"$currentScriptName"* ]]; then
-    echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
+    echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
     echo "Executing extension script '$script' :"
     $script
     echo "Finished Executing extension script '$script'."
-    echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
+    echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
   fi
 done
 

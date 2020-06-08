@@ -15,6 +15,7 @@ IMG_mdsd="genevamdsd:master_285"
 IMG_mdm="genevamdm:master_37"
 IMG_fluentd="genevafluentd_td-agent:master_134"
 IMG_azsecpack="genevasecpackinstall:master_40"
+IMG_prommdm="shared/prom-mdm-converter:2.0.master.20200505.2"
 
 for i in "$@"
 do
@@ -69,7 +70,9 @@ else
     LiftrACRResourceId="/subscriptions/d8f298fb-60f5-4676-a7d3-25442ec5ce1e/resourceGroups/liftr-acr-rg/providers/Microsoft.ContainerRegistry/registries/LiftrAMEACR"
 fi
 
-echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
+set -x
+
+echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "import 'nginx-ingress' chart images"
 echo "import quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.32.0"
 az acr import --name "$ACRName" --source quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.32.0 --force
@@ -77,17 +80,17 @@ az acr import --name "$ACRName" --source quay.io/kubernetes-ingress-controller/n
 echo "import k8s.gcr.io/defaultbackend-amd64:1.5"
 az acr import --name "$ACRName" --source k8s.gcr.io/defaultbackend-amd64:1.5 --force
 
-echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
+echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "import 'kube-state-metrics' chart images"
 echo "import quay.io/coreos/kube-state-metrics:v1.9.5"
 az acr import --name "$ACRName" --source quay.io/coreos/kube-state-metrics:v1.9.5 --force
 
-echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
+echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "import 'prometheus-node-exporter' chart images"
 echo "import quay.io/prometheus/node-exporter:v0.18.1"
 az acr import --name "$ACRName" --source quay.io/prometheus/node-exporter:v0.18.1 --force
 
-echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
+echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "import 'prometheus-operator' chart images"
 echo "import quay.io/prometheus/alertmanager:v0.20.0"
 az acr import --name "$ACRName" --source quay.io/prometheus/alertmanager:v0.20.0 --force
@@ -113,7 +116,7 @@ az acr import --name "$ACRName" --source k8s.gcr.io/hyperkube:v1.12.1 --force
 echo "import quay.io/prometheus/prometheus:v2.15.2"
 az acr import --name "$ACRName" --source quay.io/prometheus/prometheus:v2.15.2 --force
 
-echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
+echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/environments/linuxcontainers.html"
 echo "import geneva images"
 echo "Please make sure the Geneva images are imported to the shared liftr ACR first: https://msazure.visualstudio.com/Liftr/_git/Liftr.Common?path=%2Ftools%2Fdependency-images%2FPrepareGenevaImages.sh"
@@ -121,5 +124,7 @@ az acr import --name "$ACRName" --source $IMG_mdsd --registry $LiftrACRResourceI
 az acr import --name "$ACRName" --source $IMG_mdm --registry $LiftrACRResourceId --force
 az acr import --name "$ACRName" --source $IMG_fluentd --registry $LiftrACRResourceId --force
 az acr import --name "$ACRName" --source $IMG_azsecpack --registry $LiftrACRResourceId --force
+az acr import --name "$ACRName" --source $IMG_prommdm --registry $LiftrACRResourceId --force
 
+set +x
 echo "Imported all the dependency images"

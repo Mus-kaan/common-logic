@@ -28,15 +28,11 @@ PublicIPRG=$(<bin/public-ip-rg.txt)
 echo "PublicIPRG: $PublicIPRG"
 fi
 
-set +e
-echo "kubectl create namespace $namespace"
-kubectl create namespace "$namespace"
-set -e
-
 echo "helm upgrade $helmReleaseName ..."
 
 if [ "$PublicIP" = "" ]; then
 $Helm upgrade $helmReleaseName --install --wait --timeout 25m \
+--create-namespace \
 --set controller.image.repository="$liftrACRURI/kubernetes-ingress-controller/nginx-ingress-controller" \
 --set controller.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
 --set controller.service.enableHttp=false \
@@ -44,6 +40,7 @@ $Helm upgrade $helmReleaseName --install --wait --timeout 25m \
 --namespace "$namespace" nginx-*.tgz
 else
 $Helm upgrade $helmReleaseName --install --wait --timeout 25m \
+--create-namespace \
 --set controller.image.repository="$liftrACRURI/kubernetes-ingress-controller/nginx-ingress-controller" \
 --set controller.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
 --set controller.service.enableHttp=false \

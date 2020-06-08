@@ -1,6 +1,7 @@
 #!/bin/bash
 # Stop on error.
 set -e
+namespace="monitoring"
 
 for i in "$@"
 do
@@ -145,12 +146,6 @@ rm -f geneva.pfx
 rm -f geneva_cert.pem
 rm -f geneva_key.pem
 
-set +e
-namespace="monitoring"
-echo "kubectl create namespace $namespace"
-kubectl create namespace "$namespace"
-set -e
-
 ./CleanUpFirstFailedHelmRelease.sh \
 --HelmReleaseName="aks-geneva" \
 --Namespace=$namespace
@@ -158,6 +153,7 @@ set -e
 # Deploy geneva daemonset
 echo "start deploy geneva helm chart."
 $Helm upgrade aks-geneva --install --wait --force \
+--create-namespace \
 --values "$GenevaParametersFile" \
 --set genevaTenant="$PartnerName" \
 --set genevaRole="$AKSName" \

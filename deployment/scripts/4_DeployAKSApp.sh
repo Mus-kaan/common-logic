@@ -34,25 +34,25 @@ fi
 ./ImportCDPxImages.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId"
 
+./ExecuteDeploymentRunner.sh \
+--ProvisionAction="UpdateAKSPublicIpInTrafficManager" \
+--EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
+--Region="$REGION"
+
 ./DeployAKSApp.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId" \
 --compactRegion="$compactRegion" \
 --APP_ASPNETCORE_ENVIRONMENT="$APP_ASPNETCORE_ENVIRONMENT" \
 --AKSAppChartPackage="$AKSAppChartPackage"
 
-./ExecuteDeploymentRunner.sh \
---ProvisionAction="UpdateAKSPublicIpInTrafficManager" \
---EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
---Region="$REGION"
-
 for script in "$CurrentDir"/4_*.sh
 do
   if [[ "$script" != *"$currentScriptName"* ]]; then
-    echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
+    echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
     echo "Executing extension script '$script' :"
     $script
     echo "Finished Executing extension script '$script'."
-    echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~"
+    echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
   fi
 done
 

@@ -1,6 +1,7 @@
 #!/bin/bash
 # Stop on error.
 set -e
+namespace="aad-pod-id"
 
 for i in "$@"
 do
@@ -56,21 +57,17 @@ MSIClientId=$(<bin/msi-clientId.txt)
     fi
 fi
 echo "MSIClientId: $MSIClientId"
+set -x
 
-set +e
-namespace="aad-pod-id"
-echo "kubectl create namespace $namespace"
-kubectl create namespace "$namespace"
-set -e
-
-echo "helm upgrade aad-pod-id-rel"
-$Helm upgrade aad-pod-id-rel aad-pod-identity-*.tgz --install --wait --force \
+$Helm upgrade aad-pod-id-rel aad-pod-identity-*.tgz --install --create-namespace \
+--wait --force \
 --namespace $namespace \
 --set azureIdentity.enabled=true \
 --set azureIdentity.resourceID=$MSIResourceId \
 --set azureIdentity.clientID=$MSIClientId \
---set azureIdentityBinding.selector="liftr-aad-pod-identity"
+--set azureIdentityBinding.selector="liftr-aad-pod-identity" \
 
+set +x
 echo "-------------------------------------"
 echo "Finished helm upgrade aks pod identity chart"
 echo "-------------------------------------"
