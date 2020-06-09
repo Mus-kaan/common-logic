@@ -31,9 +31,14 @@ namespace Microsoft.Liftr.EV2
 
                 CheckStageName(stageNames, image.Bake?.Name);
 
+                if (image.Distribute == null)
+                {
+                    continue;
+                }
+
                 foreach (var import in image.Distribute)
                 {
-                    CheckStageName(stageNames, import.Name);
+                    CheckStageName(stageNames, import?.Name);
                 }
             }
         }

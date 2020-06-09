@@ -1,0 +1,61 @@
+{
+  "ServiceTreeName": "Project Babylon",
+  "ServiceTreeId": "d7801634-41e1-49d1-9d28-d32d97154318",
+  "NotificationEmail": "asdasda@microsoft.com",
+  "Images": [
+    {
+      "ImageName": "Babylon.Proxy.Dev",
+      "SourceImage": "U1804LTS",
+      // Create the image in the subscription specified in "Bake". This image will be used for DEV clusters only
+      "Bake": {
+        "Name": "DevImageBake",
+        "ConfigurationPath": "configs/babylon-dev-ms-westus2.json",
+        "RunnerInformation": {
+          "Location": "West US 2",
+          // Please make sure the EV2 caller has access over the resource group 'liftr-ev2-shell-ext-rg' in this subscription.
+          // The EV2 rollout caller's access token will be used to provision a resource group 'liftr-ev2-shell-ext-rg' in this subscription.
+          // Then the caller token will be used create an ACI to run the EV2 shell extension.
+          // Then the caller token also need MI assign access over the 'UserAssignedManagedIdentityResourceId'.
+          "SubscriptionId": "70ad908f-23f2-4331-a466-6366fcce61a9", // Babylon_Test_ImageBuilder
+          // 2. Please make sure this identity has owner role over the resource group you specified in the configs file.
+          "UserAssignedManagedIdentityResourceId": "/subscriptions/9f759b90-3a7a-4cda-84c1-5f098f7ae608/resourceGroups/babylon-gw-infra-df-rg-wus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/Babylon_Ev2Shell_ManagedIdentity_Test",
+          "UserAssignedManagedIdentityObjectId": "838046b3-e619-452d-91c4-a34945f671d2"
+        }
+      }
+    },
+    {
+      "ImageName": "Babylon.Proxy.Prod",
+      "SourceImage": "U1804LTS",
+      // Create the image in the subscription specified in "Bake". This image will be used for Dogfood/PROD clusters
+      "Bake": {
+        "Name": "ProdImageBake",
+        "ConfigurationPath": "configs/babylon-prod-ms-westus2.json",
+        "RunnerInformation": {
+          "Location": "West US 2",
+          // Please make sure the EV2 caller has access over the resource group 'liftr-ev2-shell-ext-rg' in this subscription.
+          // The EV2 rollout caller's access token will be used to provision a resource group 'liftr-ev2-shell-ext-rg' in this subscription.
+          // Then the caller token will be used create an ACI to run the EV2 shell extension.
+          // Then the caller token also need MI assign access over the 'UserAssignedManagedIdentityResourceId'.
+          "SubscriptionId": "70ad908f-23f2-4331-a466-6366fcce61a9", // Babylon_Test_ImageBuilder
+          // 2. Please make sure this identity has owner role over the resource group you specified in the configs file.
+          "UserAssignedManagedIdentityResourceId": "/subscriptions/9f759b90-3a7a-4cda-84c1-5f098f7ae608/resourceGroups/babylon-gw-infra-df-rg-wus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/Babylon_Ev2Shell_ManagedIdentity_Test",
+          "UserAssignedManagedIdentityObjectId": "838046b3-e619-452d-91c4-a34945f671d2"
+        }
+      },
+      "Distribute": [
+        {
+          // Distribute image to the AME tenant
+          "Name": "ProdImageDistrib",
+          "Cloud": "Public",
+          "RunnerInformation": {
+            "Location": "East US",
+            "SubscriptionId": "56bf5d74-2586-4c82-bcf6-38c9f8cb86bc",
+            "UserAssignedManagedIdentityResourceId": "/subscriptions/56bf5d74-2586-4c82-bcf6-38c9f8cb86bc/resourceGroups/babylon-gw-infra-prod-rg-eus/providers/Microsoft.ManagedIdentity/userAssignedIdentities/Babylon_Ev2Shell_ManagedIdentity_Prod",
+            "UserAssignedManagedIdentityObjectId": "0d18a684-39ac-4ffc-94b3-7bc7beb6bc9e"
+          },
+          "ConfigurationPath": "configs/babylon-prod-ame-eastus.json"
+        }
+      ]
+    }
+  ]
+}

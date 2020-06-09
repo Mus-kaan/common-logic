@@ -123,6 +123,34 @@ namespace Microsoft.Liftr.EV2.Tests
         }
 
         [Fact]
+        public void VerifyGenerateImageBuilderArtifactsNRE()
+        {
+            var artifact = new EV2ArtifactsGenerator(_logger);
+
+            var options = JsonConvert.DeserializeObject<EV2ImageBuilderOptions>(File.ReadAllText("TestEV2ImageOptionsEmpty.json"));
+
+            var dir = Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString());
+
+            artifact.GenerateImageBuilderArtifacts(options, dir);
+
+            var folders = Directory.GetDirectories(dir);
+
+            Assert.Single(folders);
+
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutParameters.DevImageBake.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutParameters.ProdImageBake.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutParameters.ProdImageDistrib.json")));
+
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutSpec.DevImageBake.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutSpec.ProdImageBake.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutSpec.ProdImageDistrib.json")));
+
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.DevImageBake.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.ProdImageBake.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.ProdImageDistrib.json")));
+        }
+
+        [Fact]
         public void VerifyUpdateErrorMessage()
         {
             var artifact = new EV2ArtifactsGenerator(_logger);
