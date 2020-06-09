@@ -23,9 +23,32 @@ namespace Microsoft.Liftr.EV2
                 throw ex;
             }
 
-            foreach (var images in Images)
+            HashSet<string> stageNames = new HashSet<string>();
+
+            foreach (var image in Images)
             {
-                images.CheckValid();
+                image.CheckValid();
+
+                CheckStageName(stageNames, image.Bake?.Name);
+
+                foreach (var import in image.Distribute)
+                {
+                    CheckStageName(stageNames, import.Name);
+                }
+            }
+        }
+
+        private static void CheckStageName(HashSet<string> stageNames, string stageName)
+        {
+            if (!string.IsNullOrEmpty(stageName))
+            {
+                if (stageNames.Contains(stageName))
+                {
+                    var ex = new InvalidImageBuilderEV2OptionsException($"Please make sure the name is unique. There exist duplicated stage name '{stageName}'");
+                    throw ex;
+                }
+
+                stageNames.Add(stageName);
             }
         }
     }

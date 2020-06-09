@@ -5,6 +5,7 @@
 using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -103,6 +104,22 @@ namespace Microsoft.Liftr.EV2.Tests
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.DistributeToProd.json")));
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutSpec.DistributeToProd.json")));
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutParameters.DistributeToProd.json")));
+        }
+
+        [Fact]
+        public void VerifyGenerateImageBuilderArtifactsCheckDuplication()
+        {
+            var artifact = new EV2ArtifactsGenerator(_logger);
+
+            var options = JsonConvert.DeserializeObject<EV2ImageBuilderOptions>(File.ReadAllText("TestEV2ImageOptionsWithName.json"));
+
+            var dir = Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString());
+
+            options.Images.First().Bake.Name = "DistributeToCanary";
+            Assert.Throws<InvalidImageBuilderEV2OptionsException>(() =>
+            {
+                artifact.GenerateImageBuilderArtifacts(options, dir);
+            });
         }
 
         [Fact]
