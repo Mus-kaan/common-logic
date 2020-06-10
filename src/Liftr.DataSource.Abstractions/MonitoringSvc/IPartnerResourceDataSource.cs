@@ -3,15 +3,13 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts.MonitoringSvc;
-using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.DataSource.MonitoringSvc
 {
     /// <summary>
-    /// DataSource for managing azure vm extension details
+    /// DataSource for partner resource entity
     /// </summary>
-    public interface IMonitoringSvcVMExtensionDetailsEntityDataSource
+    public interface IPartnerResourceDataSource<TResource> : IResourceEntityDataSource<TResource> where TResource : IPartnerResourceEntity
     {
-        Task<IMonitoringSvcVMExtensionDetailsEntity> GetEntityAsync(string resourceProviderType, string operatingSystem);
     }
 }

@@ -12,6 +12,6 @@ namespace Microsoft.Liftr.Encryption
 
         public EncryptionAlgorithm EncryptionAlgorithm { get; set; }
 
-        public string KeyResourceId { get; set; }
+        public string EncryptionKeyResourceId { get; set; }
     }
 }

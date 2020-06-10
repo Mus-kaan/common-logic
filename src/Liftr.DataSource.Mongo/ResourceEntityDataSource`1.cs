@@ -21,11 +21,17 @@ namespace Microsoft.Liftr.DataSource.Mongo
             _timeSource = timeSource;
         }
 
-        public virtual async Task<TResource> AddEntityAsync(TResource entity)
+        public virtual async Task<TResource> AddAsync(TResource entity)
         {
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
+            }
+
+            if (!string.IsNullOrEmpty(entity.ResourceId))
+            {
+                // resource Id is case insensitive
+                entity.ResourceId = entity.ResourceId.ToUpperInvariant();
             }
 
             try
@@ -41,7 +47,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
             }
         }
 
-        public virtual async Task<TResource> GetEntityAsync(string entityId)
+        public virtual async Task<TResource> GetAsync(string entityId)
         {
             var builder = Builders<TResource>.Filter;
             var filter = builder.Eq(u => u.EntityId, entityId);
@@ -49,8 +55,14 @@ namespace Microsoft.Liftr.DataSource.Mongo
             return await cursor.FirstOrDefaultAsync();
         }
 
-        public virtual async Task<IEnumerable<TResource>> ListEntitiesByResourceIdAsync(string resourceId, bool showActiveOnly = true)
+        public virtual async Task<IEnumerable<TResource>> ListAsync(string resourceId, bool showActiveOnly = true)
         {
+            if (string.IsNullOrEmpty(resourceId))
+            {
+                throw new ArgumentNullException(nameof(resourceId));
+            }
+
+            resourceId = resourceId.ToUpperInvariant();
             var builder = Builders<TResource>.Filter;
             var filter = builder.Eq(u => u.ResourceId, resourceId);
 
@@ -61,6 +73,23 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
             var cursor = await _collection.FindAsync(filter);
             return await cursor.ToListAsync();
+        }
+
+        public virtual async Task<bool> SoftDeleteAsync(string entityId)
+        {
+            var builder = Builders<TResource>.Filter;
+            var filter = builder.Eq(u => u.EntityId, entityId);
+            var update = Builders<TResource>.Update.Set(u => u.Active, false).Set(u => u.ProvisioningState, ProvisioningState.Deleting);
+            var updateResult = await _collection.UpdateOneAsync(filter, update);
+            return updateResult.ModifiedCount == 1;
+        }
+
+        public virtual async Task<bool> DeleteAsync(string entityId)
+        {
+            var builder = Builders<TResource>.Filter;
+            var filter = builder.Eq(u => u.EntityId, entityId);
+            var deleteResult = await _collection.DeleteOneAsync(filter);
+            return deleteResult.DeletedCount == 1;
         }
     }
 }

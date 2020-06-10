@@ -10,16 +10,26 @@ namespace Microsoft.Liftr.DataSource
 {
     public interface IResourceEntityDataSource<TResource> where TResource : IResourceEntity
     {
-        Task<TResource> AddEntityAsync(TResource entity);
+        Task<TResource> AddAsync(TResource entity);
 
         /// <summary>
         /// Get an entity by the entity Id (Mongo DB Object Id).
         /// </summary>
-        Task<TResource> GetEntityAsync(string entityId);
+        Task<TResource> GetAsync(string entityId);
 
         /// <summary>
         /// List all the entities for a specific ARM resource Id.
         /// </summary>
-        Task<IEnumerable<TResource>> ListEntitiesByResourceIdAsync(string resourceId, bool showActiveOnly = true);
+        Task<IEnumerable<TResource>> ListAsync(string resourceId, bool showActiveOnly = true);
+
+        /// <summary>
+        /// Find an entity by the entity Id (Mongo DB Object Id) and then mark it as inactive and change the provisioning state.
+        /// </summary>
+        Task<bool> SoftDeleteAsync(string entityId);
+
+        /// <summary>
+        /// Delete an entity by the entity Id (Mongo DB Object Id).
+        /// </summary>
+        Task<bool> DeleteAsync(string entityId);
     }
 }

@@ -50,13 +50,13 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
             var saasResourceId = "providers/Microsoft.SaaS/saasresources/1e0b1ed8-1e35-ab0b-0c39-60aacd8982d9";
 
             var marketplaceResourceEntity = new MarketplaceResourceEntity(marketplaceSubscription, saasResourceId, rid, tenantId);
-            var entity1 = await dataSource.AddEntityAsync(marketplaceResourceEntity);
+            var entity1 = await dataSource.AddAsync(marketplaceResourceEntity);
 
             // Can retrieve.
             {
-                var retrieved = await dataSource.GetEntityAsync(entity1.EntityId);
+                var retrieved = await dataSource.GetAsync(entity1.EntityId);
 
-                Assert.Equal(rid, retrieved.ResourceId);
+                Assert.Equal(rid.ToUpperInvariant(), retrieved.ResourceId);
                 Assert.Equal(marketplaceSubscription.Id, retrieved.MarketplaceSubscription.Id);
 
                 var exceptedStr = entity1.ToJson();
@@ -67,7 +67,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
             // Can retrieve by marketplace subscription id.
             {
                 var retrieved = await dataSource.GetEntityForMarketplaceSubscriptionAsync(marketplaceSubscription);
-                Assert.Equal(rid, retrieved.ResourceId);
+                Assert.Equal(rid.ToUpperInvariant(), retrieved.ResourceId);
                 Assert.Equal(marketplaceSubscription.Id, retrieved.MarketplaceSubscription.Id);
                 Assert.Equal(tenantId, retrieved.TenantId);
             }

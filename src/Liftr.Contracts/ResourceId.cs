@@ -156,5 +156,19 @@ namespace Microsoft.Liftr.Contracts
                 throw new FormatException($"'{resourceUri}' does not contain valid resource Id part.", ex);
             }
         }
+
+        public static bool TryParse(string resourceId, out ResourceId parsedId)
+        {
+            try
+            {
+                parsedId = new ResourceId(resourceId);
+                return true;
+            }
+            catch
+            {
+                parsedId = null;
+                return false;
+            }
+        }
     }
 }

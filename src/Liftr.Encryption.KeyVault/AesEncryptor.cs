@@ -42,7 +42,7 @@ namespace Microsoft.Liftr.Encryption
             {
                 EncryptionAlgorithm = _encryptionAlgorithm,
                 ContentEncryptionIV = encryptionRes.Item2,
-                KeyResourceId = _keyIdentifier,
+                EncryptionKeyResourceId = _keyIdentifier,
             };
 
             return (encryptionRes.Item1, encryptionMetaData);

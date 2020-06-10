@@ -40,7 +40,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
         [BsonElement("provisionState")]
         [BsonRepresentation(BsonType.String)]
-        public ProvisioningState ProvisioningState { get; set; }
+        public ProvisioningState ProvisioningState { get; set; } = ProvisioningState.Succeeded;
 
         [BsonElement("createdAt")]
         public DateTime CreatedUTC { get; set; } = LiftrDateTime.MinValue;
@@ -48,9 +48,11 @@ namespace Microsoft.Liftr.DataSource.Mongo
         [BsonElement("lastModified")]
         public DateTime LastModifiedUTC { get; set; } = LiftrDateTime.MinValue;
 
+        [BsonIgnoreIfDefault]
         [BsonElement("etag")]
         public string ETag { get; set; }
 
+        [BsonIgnoreIfDefault]
         [BsonElement("tenantId")]
         public string TenantId { get; set; }
     }

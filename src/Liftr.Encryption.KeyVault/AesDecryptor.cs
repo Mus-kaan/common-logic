@@ -41,12 +41,12 @@ namespace Microsoft.Liftr.Encryption
             await _mu.WaitAsync();
             try
             {
-                if (!_encryptionKeys.ContainsKey(encryptionMetaData.KeyResourceId))
+                if (!_encryptionKeys.ContainsKey(encryptionMetaData.EncryptionKeyResourceId))
                 {
-                    _encryptionKeys[encryptionMetaData.KeyResourceId] = await _keyVaultResolver.ResolveKeyAsSymmetricKeyAsync(encryptionMetaData.KeyResourceId, cancellationToken);
+                    _encryptionKeys[encryptionMetaData.EncryptionKeyResourceId] = await _keyVaultResolver.ResolveKeyAsSymmetricKeyAsync(encryptionMetaData.EncryptionKeyResourceId, cancellationToken);
                 }
 
-                key = _encryptionKeys[encryptionMetaData.KeyResourceId];
+                key = _encryptionKeys[encryptionMetaData.EncryptionKeyResourceId];
             }
             finally
             {

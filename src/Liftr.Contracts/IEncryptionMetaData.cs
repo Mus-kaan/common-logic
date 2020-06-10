@@ -7,9 +7,9 @@ namespace Microsoft.Liftr.Contracts
     public interface IEncryptionMetaData
     {
         /// <summary>
-        /// The resource Id of the key/securet in KeyVault
+        /// Resource id of the key used for encryption
         /// </summary>
-        public string KeyResourceId { get; set; }
+        public string EncryptionKeyResourceId { get; set; }
 
         /// <summary>
         /// Encryption algoritm
@@ -17,7 +17,7 @@ namespace Microsoft.Liftr.Contracts
         public EncryptionAlgorithm EncryptionAlgorithm { get; set; }
 
         /// <summary>
-        /// Initialization vector
+        /// Encryption initialization vector
         /// </summary>
         public byte[] ContentEncryptionIV { get; set; }
     }

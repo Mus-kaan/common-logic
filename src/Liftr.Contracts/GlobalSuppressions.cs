@@ -8,4 +8,5 @@
 
 using System.Diagnostics.CodeAnalysis;
 
+[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.Contracts.ResourceId.TryParse(System.String,Microsoft.Liftr.Contracts.ResourceId@)~System.Boolean")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.Contracts.ResourceIdPath.TryParse(System.String,Microsoft.Liftr.Contracts.ResourceIdPath@)~System.Boolean")]

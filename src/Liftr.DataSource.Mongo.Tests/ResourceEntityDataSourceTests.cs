@@ -46,13 +46,13 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
             var rid = "/subscriptions/b0a321d2-3073-44f0-b012-6e60db53ae22/resourceGroups/ngx-test-sbi0920-eus-rg/providers/Microsoft.Storage/storageAccounts/stngxtestsbi0920eus";
 
             var mockEntity = new MockResourceEntity() { ResourceId = rid, VNet = "VnetId123" };
-            var entity1 = await s.AddEntityAsync(mockEntity);
+            var entity1 = await s.AddAsync(mockEntity);
 
             // Can retrieve.
             {
-                var retrieved = await s.GetEntityAsync(entity1.EntityId);
+                var retrieved = await s.GetAsync(entity1.EntityId);
 
-                Assert.Equal(rid, retrieved.ResourceId);
+                Assert.Equal(rid.ToUpperInvariant(), retrieved.ResourceId);
                 Assert.Equal("VnetId123", retrieved.VNet);
 
                 var exceptedStr = entity1.ToJson();
@@ -62,46 +62,46 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
 
             // Can retrieve only by resoure id.
             {
-                var retrieved = await s.ListEntitiesByResourceIdAsync(entity1.ResourceId);
+                var retrieved = await s.ListAsync(entity1.ResourceId);
 
                 var exceptedStr = entity1.ToJson();
                 var actualStr = retrieved.First().ToJson();
                 Assert.Equal(exceptedStr, actualStr);
             }
 
-            Assert.Null(await s.GetEntityAsync(ObjectId.GenerateNewId().ToString()));
+            Assert.Null(await s.GetAsync(ObjectId.GenerateNewId().ToString()));
 
-            Assert.Empty(await s.ListEntitiesByResourceIdAsync(entity1.ResourceId + "asdasd"));
+            Assert.Empty(await s.ListAsync(entity1.ResourceId + "asdasd"));
 
             // Same EntityId throws.
             await Assert.ThrowsAsync<DuplicatedKeyException>(async () =>
             {
                 var entity = new MockResourceEntity() { EntityId = entity1.EntityId, ResourceId = "asdasdas" };
-                await s.AddEntityAsync(entity);
+                await s.AddAsync(entity);
             });
 
             // Same Resource Id is OK.
             {
                 var entity = new MockResourceEntity() { ResourceId = rid, VNet = "VnetId456" };
-                await s.AddEntityAsync(entity);
+                await s.AddAsync(entity);
             }
 
-            var entities = await s.ListEntitiesByResourceIdAsync(rid);
+            var entities = await s.ListAsync(rid);
             Assert.Equal(2, entities.Count());
 
             // Same Resource Id with disabled.
             {
                 var entity = new MockResourceEntity() { ResourceId = rid, VNet = "VnetId456", Active = false };
-                await s.AddEntityAsync(entity);
+                await s.AddAsync(entity);
             }
 
             {
-                var activeEntities = await s.ListEntitiesByResourceIdAsync(rid);
+                var activeEntities = await s.ListAsync(rid);
                 Assert.Equal(2, activeEntities.Count());
             }
 
             {
-                var allEntities = await s.ListEntitiesByResourceIdAsync(rid, showActiveOnly: false);
+                var allEntities = await s.ListAsync(rid, showActiveOnly: false);
                 Assert.Equal(3, allEntities.Count());
             }
         }

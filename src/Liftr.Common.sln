@@ -39,12 +39,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Hosting.Tests", "Lift
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Hosting.Swagger", "Liftr.Hosting.Swagger\Liftr.Hosting.Swagger.csproj", "{0B8AC032-B4A0-47B0-82DB-305BB0CB35DC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.AzureAsyncOperation", "Liftr.AzureAsyncOperation\Liftr.AzureAsyncOperation.csproj", "{DBF8D2D6-936A-457F-8EC3-92C6903086AA}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.AzureAsyncOperation.DataSource", "Liftr.AzureAsyncOperation.DataSource\Liftr.AzureAsyncOperation.DataSource.csproj", "{597F5B37-2075-4618-A083-A2ECF6347D17}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lift.AzureAsyncOperation.DataSource.Test", "Lift.AzureAsyncOperation.DataSource.Test\Lift.AzureAsyncOperation.DataSource.Test.csproj", "{C536D1FE-C0FF-4601-902F-38AEA570B771}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Fluent", "Liftr.Fluent\Liftr.Fluent.csproj", "{08D4FCD3-87AB-448A-AE3A-79A79F75E819}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Fluent.Contracts", "Liftr.Fluent.Contracts\Liftr.Fluent.Contracts.csproj", "{215B1D28-BE23-4454-8045-1E35345B7E39}"
@@ -193,18 +187,6 @@ Global
 		{0B8AC032-B4A0-47B0-82DB-305BB0CB35DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B8AC032-B4A0-47B0-82DB-305BB0CB35DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B8AC032-B4A0-47B0-82DB-305BB0CB35DC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DBF8D2D6-936A-457F-8EC3-92C6903086AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DBF8D2D6-936A-457F-8EC3-92C6903086AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DBF8D2D6-936A-457F-8EC3-92C6903086AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DBF8D2D6-936A-457F-8EC3-92C6903086AA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{597F5B37-2075-4618-A083-A2ECF6347D17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{597F5B37-2075-4618-A083-A2ECF6347D17}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{597F5B37-2075-4618-A083-A2ECF6347D17}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{597F5B37-2075-4618-A083-A2ECF6347D17}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C536D1FE-C0FF-4601-902F-38AEA570B771}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C536D1FE-C0FF-4601-902F-38AEA570B771}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C536D1FE-C0FF-4601-902F-38AEA570B771}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C536D1FE-C0FF-4601-902F-38AEA570B771}.Release|Any CPU.Build.0 = Release|Any CPU
 		{08D4FCD3-87AB-448A-AE3A-79A79F75E819}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{08D4FCD3-87AB-448A-AE3A-79A79F75E819}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08D4FCD3-87AB-448A-AE3A-79A79F75E819}.Release|Any CPU.ActiveCfg = Release|Any CPU

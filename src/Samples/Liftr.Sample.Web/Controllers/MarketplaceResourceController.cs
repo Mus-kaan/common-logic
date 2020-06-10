@@ -29,7 +29,7 @@ namespace Liftr.Sample.Web.Controllers
         public async Task<IActionResult> AddMarketplaceResourceAsync(string resourceId, string marketplaceSubId)
         {
             var entity = new MarketplaceResourceEntity(MarketplaceSubscription.From(marketplaceSubId), "saasResourceId", resourceId, "tenantId");
-            var addedEntity = await _dataSource.AddEntityAsync(entity);
+            var addedEntity = await _dataSource.AddAsync(entity);
             _logger.Information("Added entity with resource id: {resourceId}", entity.ResourceId);
             return Ok(addedEntity);
         }

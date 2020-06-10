@@ -6,10 +6,10 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
 {
     public class MonitoringSvcMongoOptions : MongoOptions
     {
-        public string VmExtensionDetailsEntityCollectionName { get; set; }
+        public string EventHubSourceEntityCollectionName { get; set; } = "metadata-evh";
 
-        public string EventHubSourceEntityCollectionName { get; set; }
+        public string MonitoringRelationshipCollectionName { get; set; } = "metadata-monitoring-relationship";
 
-        public string MonitoredEntityCollectionName { get; set; }
+        public string PartnerResourceEntityCollectionName { get; set; } = "metadata-partner";
     }
 }

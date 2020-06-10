@@ -2,11 +2,14 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.DataSource.Mongo.MonitoringSvc;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Events;
 using Serilog;
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Authentication;
 using System.Threading.Tasks;
@@ -20,6 +23,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
     {
         private readonly ILogger _logger;
         private readonly IMongoDatabase _db;
+        private readonly string _dbName;
 
         public MongoCollectionsFactory(MongoOptions options, ILogger logger)
         {
@@ -61,6 +65,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
             var client = new MongoClient(mongoClientSettings);
             _db = client.GetDatabase(options.DatabaseName);
+            _dbName = options.DatabaseName;
         }
 
         public async Task<IMongoCollection<T>> GetCollectionAsync<T>(string collectionName)
@@ -83,23 +88,6 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
             _logger.Fatal($"Collection with name {nameof(collectionName)} does not exist.", collectionName);
             throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
-        }
-
-        public async Task<IMongoCollection<T>> GetOrCreateCollectionAsync<T>(string collectionName)
-        {
-            if (!await CollectionExistsAsync(_db, collectionName))
-            {
-                _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
-#pragma warning disable CS0618 // Type or member is obsolete
-                var collection = await CreateCollectionAsync<T>(collectionName);
-#pragma warning restore CS0618 // Type or member is obsolete
-
-                return collection;
-            }
-            else
-            {
-                return await GetCollectionAsync<T>(collectionName);
-            }
         }
 
         public async Task<IMongoCollection<T>> GetOrCreateEntityCollectionAsync<T>(string collectionName) where T : BaseResourceEntity
@@ -142,8 +130,84 @@ namespace Microsoft.Liftr.DataSource.Mongo
             }
         }
 
-        [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
-        internal async Task<IMongoCollection<T>> CreateCollectionAsync<T>(string collectionName)
+        public async Task<IMongoCollection<EventHubEntity>> GetOrCreateEventHubEntityCollectionAsync(string collectionName)
+        {
+            if (!await CollectionExistsAsync(_db, collectionName))
+            {
+                _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
+#pragma warning disable CS0618 // Type or member is obsolete
+                var collection = await CreateCollectionAsync<EventHubEntity>(collectionName);
+#pragma warning restore CS0618 // Type or member is obsolete
+
+                return collection;
+            }
+            else
+            {
+                return await GetCollectionAsync<EventHubEntity>(collectionName);
+            }
+        }
+
+        public async Task<IMongoCollection<MonitoringRelationship>> GetOrCreateMonitoringRelationshipCollectionAsync(string collectionName)
+        {
+            var instance = new MonitoringRelationship();
+            var tenantProperty = typeof(MonitoringRelationship).GetProperty(nameof(instance.TenantId));
+            var bsonElementAttribute = tenantProperty?.CustomAttributes?.FirstOrDefault(attr => attr.AttributeType == typeof(BsonElementAttribute));
+            if (bsonElementAttribute == null)
+            {
+                throw new InvalidOperationException($"Please make sure the it has a {nameof(BsonElementAttribute)} attribute on {nameof(instance.TenantId)}");
+            }
+
+            string shardingKeyName = bsonElementAttribute.ConstructorArguments.FirstOrDefault().Value.ToString();
+            if (!await CollectionExistsAsync(_db, collectionName))
+            {
+                _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
+                var bson = new BsonDocument
+                {
+                    { "shardCollection", _dbName + "." + collectionName },
+                    { "key", new BsonDocument(shardingKeyName, "hashed") },
+                };
+
+                var shellCommand = new BsonDocumentCommand<BsonDocument>(bson);
+
+                try
+                {
+                    var commandResult = await _db.RunCommandAsync(shellCommand);
+                }
+                catch (MongoCommandException ex)
+                {
+                    var message = $"Encountered issue when creating collection '{_dbName}.{collectionName}' with shard key '{shardingKeyName}'.";
+                    _logger.Fatal(ex, message);
+                    throw new InvalidOperationException(message, ex);
+                }
+
+                var collection = await GetCollectionAsync<MonitoringRelationship>(collectionName);
+
+                var monitorIdIdx = new CreateIndexModel<MonitoringRelationship>(Builders<MonitoringRelationship>.IndexKeys.Ascending(item => item.MonitoredResourceId), new CreateIndexOptions<MonitoringRelationship> { Unique = false });
+                collection.Indexes.CreateOne(monitorIdIdx);
+
+                var partnerIdIdx = new CreateIndexModel<MonitoringRelationship>(Builders<MonitoringRelationship>.IndexKeys.Ascending(item => item.PartnerEntityId), new CreateIndexOptions<MonitoringRelationship> { Unique = false });
+                collection.Indexes.CreateOne(partnerIdIdx);
+
+                return collection;
+            }
+            else
+            {
+                return await GetCollectionAsync<MonitoringRelationship>(collectionName);
+            }
+        }
+
+        public Task<IMongoCollection<PartnerResourceEntity>> GetOrCreatePartnerResourceEntityCollectionAsync(string collectionName)
+        {
+            return GetOrCreateEntityCollectionAsync<PartnerResourceEntity>(collectionName);
+        }
+
+        public async Task DeleteCollectionAsync(string collectionName)
+        {
+            await _db.DropCollectionAsync(collectionName);
+        }
+
+        #region Internal and Private
+        private async Task<IMongoCollection<T>> CreateCollectionAsync<T>(string collectionName)
         {
             if (!await CollectionExistsAsync(_db, collectionName))
             {
@@ -155,8 +219,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
             throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
         }
 
-        [Obsolete("Use Mongo Shell to create a collection with a partition key. See more: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-create-container#create-a-container-using-net-sdk")]
-        internal IMongoCollection<T> CreateCollection<T>(string collectionName)
+        private IMongoCollection<T> CreateCollection<T>(string collectionName)
         {
             if (!CollectionExists(_db, collectionName))
             {
@@ -168,7 +231,6 @@ namespace Microsoft.Liftr.DataSource.Mongo
             throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
         }
 
-        #region Private
         private static async Task<bool> CollectionExistsAsync(IMongoDatabase db, string collectionName)
         {
             var filter = new BsonDocument("name", collectionName);
