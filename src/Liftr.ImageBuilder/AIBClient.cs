@@ -190,7 +190,9 @@ namespace Microsoft.Liftr.ImageBuilder
 
                 if (!deleteResponse.IsSuccessStatusCode)
                 {
-                    _logger.Error("Delete AIB template {templateName} in {rgName} failed", templateName, rgName);
+                    _logger.Error("Delete AIB template {templateName} in {rgName} failed. Status code: {deleteResponseStatusCode}", templateName, rgName, deleteResponse.StatusCode);
+                    var errorContent = await deleteResponse.Content.ReadAsStringAsync();
+                    _logger.Error("Response body: {errorContent}", errorContent);
                     throw new InvalidOperationException("Delete template failed.");
                 }
                 else if (deleteResponse.StatusCode == HttpStatusCode.Accepted)
