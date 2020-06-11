@@ -7,7 +7,6 @@ using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.DataSource.Mongo.Tests.Common;
 using Microsoft.Liftr.Logging;
-using Microsoft.Liftr.MarketplaceResource.DataSource.Models;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -16,17 +15,17 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
 {
     public sealed class MarketplaceResourceEntityDataSourceTests : IDisposable
     {
-        private readonly TestCollectionScope<MarketplaceResourceEntity> _collectionScope;
+        private readonly TestCollectionScope<MarketplaceResourceContainerEntity> _collectionScope;
 
         public MarketplaceResourceEntityDataSourceTests()
         {
             var option = new MockMongoOptions() { ConnectionString = TestDBConnection.TestMongodbConStr, DatabaseName = TestDBConnection.TestDatabaseName };
             var collectionFactory = new MongoCollectionsFactory(option, LoggerFactory.VoidLogger);
-            _collectionScope = new TestCollectionScope<MarketplaceResourceEntity>((db, collectionName) =>
+            _collectionScope = new TestCollectionScope<MarketplaceResourceContainerEntity>((db, collectionName) =>
             {
 #pragma warning disable CS0618 // Type or member is obsolete
 #pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-                var collection = collectionFactory.GetOrCreateEntityCollectionAsync<MarketplaceResourceEntity>(collectionName).Result;
+                var collection = collectionFactory.GetOrCreateEntityCollectionAsync<MarketplaceResourceContainerEntity>(collectionName).Result;
 #pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
 #pragma warning restore CS0618 // Type or member is obsolete
                 return collection;
@@ -42,14 +41,14 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
         public async Task BasicDataSourceUsageAsync()
         {
             var ts = new MockTimeSource();
-            var dataSource = new MarketplaceResourceEntityDataSource(_collectionScope.Collection, ts);
+            var dataSource = new MarketplaceResourceContainerEntityDataSource(_collectionScope.Collection, ts);
 
             var rid = "/subscriptions/b0a321d2-3073-44f0-b012-6e60db53ae22/resourceGroups/ngx-test-sbi0920-eus-rg/providers/Microsoft.Storage/storageAccounts/stngxtestsbi0920eus";
             var marketplaceSubscription = new MarketplaceSubscription(Guid.NewGuid());
             var tenantId = "testTenantId";
-            var saasResourceId = "providers/Microsoft.SaaS/saasresources/1e0b1ed8-1e35-ab0b-0c39-60aacd8982d9";
+            var saasResource = new MarketplaceSaasResourceEntity(marketplaceSubscription, "test-name", "planid", "hjdtn7tfnxcy", BillingTermTypes.Monthly);
 
-            var marketplaceResourceEntity = new MarketplaceResourceEntity(marketplaceSubscription, saasResourceId, rid, tenantId);
+            var marketplaceResourceEntity = new MarketplaceResourceContainerEntity(saasResource, rid, tenantId);
             var entity1 = await dataSource.AddAsync(marketplaceResourceEntity);
 
             // Can retrieve.
@@ -57,7 +56,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
                 var retrieved = await dataSource.GetAsync(entity1.EntityId);
 
                 Assert.Equal(rid.ToUpperInvariant(), retrieved.ResourceId);
-                Assert.Equal(marketplaceSubscription.Id, retrieved.MarketplaceSubscription.Id);
+                Assert.Equal(marketplaceSubscription.Id, retrieved.MarketplaceSaasResource.MarketplaceSubscription.Id);
 
                 var exceptedStr = entity1.ToJson();
                 var actualStr = retrieved.ToJson();
@@ -68,7 +67,9 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
             {
                 var retrieved = await dataSource.GetEntityForMarketplaceSubscriptionAsync(marketplaceSubscription);
                 Assert.Equal(rid.ToUpperInvariant(), retrieved.ResourceId);
-                Assert.Equal(marketplaceSubscription.Id, retrieved.MarketplaceSubscription.Id);
+                Assert.Equal(marketplaceSubscription.Id, retrieved.MarketplaceSaasResource.MarketplaceSubscription.Id);
+                Assert.Equal(saasResource.Name, retrieved.MarketplaceSaasResource.Name);
+                Assert.Equal(saasResource.Plan, retrieved.MarketplaceSaasResource.Plan);
                 Assert.Equal(tenantId, retrieved.TenantId);
             }
         }

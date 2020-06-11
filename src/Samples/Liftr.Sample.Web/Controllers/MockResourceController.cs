@@ -14,14 +14,11 @@ namespace Liftr.Sample.Web.Controllers
     [Produces("application/json")]
     public class MockResourceController : ControllerBase
     {
-        private readonly IMarketplaceResourceEntityDataSource _dataSource;
         private readonly ILogger _logger;
 
         public MockResourceController(
-            IMarketplaceResourceEntityDataSource resourceMetadataEntityDataSource,
             ILogger logger)
         {
-            _dataSource = resourceMetadataEntityDataSource;
             _logger = logger;
         }
 

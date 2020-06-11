@@ -130,6 +130,29 @@ namespace Microsoft.Liftr.DataSource.Mongo
             }
         }
 
+        public async Task<IMongoCollection<T>> GetOrCreateMarketplaceEntityCollectionAsync<T>(string collectionName) where T : MarketplaceResourceContainerEntity
+        {
+            if (!await CollectionExistsAsync(_db, collectionName))
+            {
+                _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
+#pragma warning disable CS0618 // Type or member is obsolete
+                var collection = await CreateCollectionAsync<T>(collectionName);
+#pragma warning restore CS0618 // Type or member is obsolete
+                var marketplaceSubscriptionIdx = new CreateIndexModel<T>(Builders<T>.IndexKeys.Ascending(item => item.MarketplaceSaasResource.MarketplaceSubscription), new CreateIndexOptions<T> { Unique = false });
+                collection.Indexes.CreateOne(marketplaceSubscriptionIdx);
+                var resourceIdIdx = new CreateIndexModel<T>(
+                    Builders<T>.IndexKeys.Ascending(item => item.ResourceId),
+                    new CreateIndexOptions<T> { Unique = false });
+                collection.Indexes.CreateOne(resourceIdIdx);
+
+                return collection;
+            }
+            else
+            {
+                return await GetCollectionAsync<T>(collectionName);
+            }
+        }
+
         public async Task<IMongoCollection<EventHubEntity>> GetOrCreateEventHubEntityCollectionAsync(string collectionName)
         {
             if (!await CollectionExistsAsync(_db, collectionName))

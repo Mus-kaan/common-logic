@@ -2,16 +2,15 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DataSource;
-using Microsoft.Liftr.MarketplaceResource.DataSource.Models;
+using Microsoft.Liftr.DataSource.Mongo;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.MarketplaceResource.DataSource.Interfaces
 {
-    public interface IMarketplaceResourceEntityDataSource : IResourceEntityDataSource<MarketplaceResourceEntity>
+    public interface IMarketplaceResourceContainerEntityDataSource : IResourceEntityDataSource<MarketplaceResourceContainerEntity>
     {
-        Task<IMarketplaceResourceEntity> GetEntityForMarketplaceSubscriptionAsync(MarketplaceSubscription marketplaceSubscription);
+        Task<IMarketplaceResourceContainerEntity> GetEntityForMarketplaceSubscriptionAsync(MarketplaceSubscription marketplaceSubscription);
     }
 }

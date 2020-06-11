@@ -18,7 +18,6 @@ using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.Hosting.Swagger;
 using Microsoft.Liftr.MarketplaceResource.DataSource;
 using Microsoft.Liftr.MarketplaceResource.DataSource.Interfaces;
-using Microsoft.Liftr.MarketplaceResource.DataSource.Models;
 using Microsoft.Liftr.Queue;
 using Microsoft.Liftr.TokenManager;
 using Microsoft.Liftr.TokenManager.Options;
@@ -113,7 +112,7 @@ namespace Microsoft.Liftr.Sample.Web
                 }
             });
 
-            services.AddSingleton<IMarketplaceResourceEntityDataSource, MarketplaceResourceEntityDataSource>((sp) =>
+            services.AddSingleton<IMarketplaceResourceContainerEntityDataSource, MarketplaceResourceContainerEntityDataSource>((sp) =>
             {
                 var logger = sp.GetService<Serilog.ILogger>();
 
@@ -122,13 +121,13 @@ namespace Microsoft.Liftr.Sample.Web
                     var timeSource = sp.GetService<ITimeSource>();
                     var factory = sp.GetService<MongoCollectionsFactory>();
 #pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-                    IMongoCollection<MarketplaceResourceEntity> collection = factory.GetOrCreateEntityCollectionAsync<MarketplaceResourceEntity>("resource-metadata-entity").Result;
+                    var collection = factory.GetOrCreateMarketplaceEntityCollectionAsync<MarketplaceResourceContainerEntity>("resource-metadata-entity").Result;
 #pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
 
-                    var marketplaceSubscriptionIdx = new CreateIndexModel<MarketplaceResourceEntity>(Builders<MarketplaceResourceEntity>.IndexKeys.Ascending(item => item.MarketplaceSubscription), new CreateIndexOptions<MarketplaceResourceEntity> { Unique = false });
+                    var marketplaceSubscriptionIdx = new CreateIndexModel<MarketplaceResourceContainerEntity>(Builders<MarketplaceResourceContainerEntity>.IndexKeys.Ascending(item => item.MarketplaceSaasResource.MarketplaceSubscription.Id), new CreateIndexOptions<MarketplaceResourceContainerEntity> { Unique = false });
                     collection.Indexes.CreateOne(marketplaceSubscriptionIdx);
 
-                    return new MarketplaceResourceEntityDataSource(collection, timeSource);
+                    return new MarketplaceResourceContainerEntityDataSource(collection, timeSource);
                 }
                 catch (Exception ex)
                 {
