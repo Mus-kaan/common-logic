@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts.Marketplace;
+using Microsoft.Liftr.Utilities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
@@ -10,6 +11,7 @@ using System;
 
 namespace Microsoft.Liftr.DataSource.Mongo
 {
+    [SwaggerExtension(ExcludeFromSwagger = true)]
     public class MarketplaceSaasResourceEntity : IMarketplaceSaasResource
     {
         public MarketplaceSaasResourceEntity(
