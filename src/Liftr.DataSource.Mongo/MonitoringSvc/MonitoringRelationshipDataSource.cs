@@ -37,7 +37,8 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
                 throw new ArgumentException($"'{nameof(entity.TenantId)}' cannot be empty.");
             }
 
-            if (!ResourceId.TryParse(entity.MonitoredResourceId, out _))
+            if (!ResourceId.TryParse(entity.MonitoredResourceId, out _) &&
+                !entity.MonitoredResourceId.OrdinalStartsWith("/SUBSCRIPTIONS/"))
             {
                 throw new ArgumentException($"'{nameof(entity.MonitoredResourceId)}' '{entity.MonitoredResourceId}' is not in valid format.");
             }

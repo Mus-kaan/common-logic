@@ -146,6 +146,10 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 // List entity by monitored resource id
                 list = await s.ListByMonitoredResourceAsync(tenantId, monitoredResourceId1);
                 Assert.Empty(list);
+
+                // Can handle subscription case
+                mockEntity.MonitoredResourceId = "/SUBSCRIPTIONS/60FAD35B-3A47-4CA0-B691-4A789F737CEA".ToLowerInvariant();
+                await s.AddAsync(mockEntity);
             }
             catch (Exception ex)
             {
