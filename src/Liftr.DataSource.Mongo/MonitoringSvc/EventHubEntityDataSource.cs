@@ -30,14 +30,9 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            if (string.IsNullOrEmpty(entity.ResourceProvider))
-            {
-                throw new ArithmeticException(nameof(entity.ResourceProvider));
-            }
-
             var mappedEntity = new EventHubEntity()
             {
-                ResourceProvider = entity.ResourceProvider.ToUpperInvariant(),
+                ResourceProvider = entity.ResourceProvider,
                 Namespace = entity.Namespace,
                 Name = entity.Name,
                 Location = entity.Location,
@@ -50,41 +45,30 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
             await _collection.InsertOneAsync(mappedEntity);
         }
 
-        public async Task<IEnumerable<IEventHubEntity>> ListAsync(string resourceProvider)
+        public async Task<IEnumerable<IEventHubEntity>> ListAsync()
         {
-            if (string.IsNullOrEmpty(resourceProvider))
-            {
-                throw new ArgumentNullException(nameof(resourceProvider));
-            }
+            var filter = Builders<EventHubEntity>.Filter.Empty;
+            var cursor = await _collection.FindAsync<EventHubEntity>(filter);
+            return await cursor.ToListAsync();
+        }
 
-            resourceProvider = resourceProvider.ToUpperInvariant();
+        public async Task<IEnumerable<IEventHubEntity>> ListAsync(MonitoringResourceProvider resourceProvider)
+        {
             var filter = Builders<EventHubEntity>.Filter.Eq(i => i.ResourceProvider, resourceProvider);
             var cursor = await _collection.FindAsync<EventHubEntity>(filter);
             return await cursor.ToListAsync();
         }
 
-        public async Task<IEnumerable<IEventHubEntity>> ListAsync(string resourceProvider, string location)
+        public async Task<IEnumerable<IEventHubEntity>> ListAsync(MonitoringResourceProvider resourceProvider, string location)
         {
-            if (string.IsNullOrEmpty(resourceProvider))
-            {
-                throw new ArgumentNullException(nameof(resourceProvider));
-            }
-
-            resourceProvider = resourceProvider.ToUpperInvariant();
             var filter = Builders<EventHubEntity>.Filter.Eq(i => i.ResourceProvider, resourceProvider) &
                 Builders<EventHubEntity>.Filter.Eq(i => i.Location, location);
             var cursor = await _collection.FindAsync<EventHubEntity>(filter);
             return await cursor.ToListAsync();
         }
 
-        public async Task<int> DeleteAsync(string resourceProvider)
+        public async Task<int> DeleteAsync(MonitoringResourceProvider resourceProvider)
         {
-            if (string.IsNullOrEmpty(resourceProvider))
-            {
-                throw new ArgumentNullException(nameof(resourceProvider));
-            }
-
-            resourceProvider = resourceProvider.ToUpperInvariant();
             var filter = Builders<EventHubEntity>.Filter.Eq(i => i.ResourceProvider, resourceProvider);
             var deleteResult = await _collection.DeleteManyAsync(filter);
             return (int)deleteResult.DeletedCount;

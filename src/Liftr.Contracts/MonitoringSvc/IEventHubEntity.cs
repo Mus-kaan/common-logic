@@ -14,7 +14,7 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
         /// <summary>
         /// Resource provider name i.e. Microsoft.Datadog
         /// </summary>
-        string ResourceProvider { get; set; }
+        MonitoringResourceProvider ResourceProvider { get; set; }
 
         /// <summary>
         /// Event hub namespace
@@ -50,5 +50,10 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
         /// The last modified timestamp in UTC
         /// </summary>
         DateTime CreatedAtUTC { get; set; }
+
+        /// <summary>
+        /// If this event hub is active
+        /// </summary>
+        bool Active { get; set; }
     }
 }

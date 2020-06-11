@@ -16,10 +16,12 @@ namespace Microsoft.Liftr.DataSource.MonitoringSvc
     {
         Task AddAsync(IEventHubEntity entity);
 
-        Task<IEnumerable<IEventHubEntity>> ListAsync(string resourceProvider);
+        Task<IEnumerable<IEventHubEntity>> ListAsync();
 
-        Task<IEnumerable<IEventHubEntity>> ListAsync(string resourceProvider, string location);
+        Task<IEnumerable<IEventHubEntity>> ListAsync(MonitoringResourceProvider resourceProvider);
 
-        Task<int> DeleteAsync(string resourceProvider);
+        Task<IEnumerable<IEventHubEntity>> ListAsync(MonitoringResourceProvider resourceProvider, string location);
+
+        Task<int> DeleteAsync(MonitoringResourceProvider resourceProvider);
     }
 }

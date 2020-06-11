@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.Contracts.MonitoringSvc;
 using Microsoft.Liftr.DataSource.Mongo.MonitoringSvc;
 using Microsoft.Liftr.DataSource.Mongo.Tests.Common;
 using Microsoft.Liftr.Logging;
@@ -43,6 +44,8 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             var location1 = "westus";
             var location2 = "eastus2";
 
+            var rp = MonitoringResourceProvider.Datadog;
+
             var mockEntity = new EventHubEntity()
             {
                 Name = "name1",
@@ -51,7 +54,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 EventHubConnectionString = "mockEHConnectionString",
                 StorageConnectionString = "mockSAConnectionString",
                 Location = location1,
-                ResourceProvider = "Microsoft.Datadog",
+                ResourceProvider = rp,
                 CreatedAtUTC = DateTime.UtcNow,
             };
 
@@ -75,19 +78,27 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             mockEntity.Namespace = "ns5";
             await s.AddAsync(mockEntity);
 
-            var list = await s.ListAsync(mockEntity.ResourceProvider);
+            mockEntity.Name = "name6";
+            mockEntity.Namespace = "ns6";
+            mockEntity.ResourceProvider = MonitoringResourceProvider.Logz;
+            await s.AddAsync(mockEntity);
+
+            var list = await s.ListAsync(rp);
             Assert.Equal(5, list.Count());
 
-            list = await s.ListAsync(mockEntity.ResourceProvider, location1);
+            list = await s.ListAsync();
+            Assert.Equal(6, list.Count());
+
+            list = await s.ListAsync(rp, location1);
             Assert.Equal(3, list.Count());
 
-            list = await s.ListAsync(mockEntity.ResourceProvider, location2);
+            list = await s.ListAsync(rp, location2);
             Assert.Equal(2, list.Count());
 
-            var deleteCount = await s.DeleteAsync(mockEntity.ResourceProvider);
+            var deleteCount = await s.DeleteAsync(rp);
             Assert.Equal(5, deleteCount);
 
-            list = await s.ListAsync(mockEntity.ResourceProvider);
+            list = await s.ListAsync(rp);
             Assert.Empty(list);
         }
     }

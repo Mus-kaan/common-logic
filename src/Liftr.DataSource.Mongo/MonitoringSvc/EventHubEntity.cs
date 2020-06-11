@@ -16,7 +16,8 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
         public string DocumentObjectId { get; set; }
 
         [BsonElement("rp")]
-        public string ResourceProvider { get; set; }
+        [BsonRepresentation(BsonType.String)]
+        public MonitoringResourceProvider ResourceProvider { get; set; }
 
         [BsonElement("ns")]
         public string Namespace { get; set; }
@@ -38,5 +39,8 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
 
         [BsonElement("createdAt")]
         public DateTime CreatedAtUTC { get; set; }
+
+        [BsonElement("active")]
+        public bool Active { get; set; } = true;
     }
 }
