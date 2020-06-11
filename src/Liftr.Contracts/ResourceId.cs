@@ -7,7 +7,10 @@ using System.Collections.Generic;
 
 namespace Microsoft.Liftr.Contracts
 {
-    public sealed class ResourceId
+    /// <summary>
+    /// https://armwiki.azurewebsites.net/introduction/concepts/resourceids.html
+    /// </summary>
+    public class ResourceId
     {
         private const string c_subscriptions = "subscriptions";
         private const string c_resourceGroups = "resourceGroups";
