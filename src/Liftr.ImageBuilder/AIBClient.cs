@@ -132,7 +132,12 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
                 else
                 {
-                    var errMsg = $"Failed at getting AIB template run output. statusCode: '{runOutputResponse.StatusCode}',  response: {await runOutputResponse.Content.ReadAsStringAsync()}";
+                    var errMsg = $"Failed at getting AIB template run output. statusCode: '{runOutputResponse.StatusCode}'";
+                    if (runOutputResponse?.Content != null)
+                    {
+                        errMsg = errMsg + $", response: {await runOutputResponse.Content?.ReadAsStringAsync()}";
+                    }
+
                     var ex = new RunAzureVMImageBuilderException(errMsg, _liftrAzure.FluentClient.SubscriptionId, rgName, templateName);
                     operation.FailOperation(ex.Message);
                     _logger.Error(ex.Message);
@@ -163,7 +168,12 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
                 else
                 {
-                    var errMsg = $"Failed at getting AIB template run output. statusCode: '{runOutputResponse.StatusCode}',  response: {await runOutputResponse.Content.ReadAsStringAsync()}";
+                    var errMsg = $"Failed at getting AIB template run output. statusCode: '{runOutputResponse.StatusCode}'";
+                    if (runOutputResponse?.Content != null)
+                    {
+                        errMsg = errMsg + $", response: {await runOutputResponse.Content?.ReadAsStringAsync()}";
+                    }
+
                     var ex = new RunAzureVMImageBuilderException(errMsg, _liftrAzure.FluentClient.SubscriptionId, rgName, templateName);
                     operation.FailOperation(ex.Message);
                     _logger.Error(ex.Message);
@@ -191,8 +201,12 @@ namespace Microsoft.Liftr.ImageBuilder
                 if (!deleteResponse.IsSuccessStatusCode)
                 {
                     _logger.Error("Delete AIB template {templateName} in {rgName} failed. Status code: {deleteResponseStatusCode}", templateName, rgName, deleteResponse.StatusCode);
-                    var errorContent = await deleteResponse.Content.ReadAsStringAsync();
-                    _logger.Error("Response body: {errorContent}", errorContent);
+                    if (deleteResponse?.Content != null)
+                    {
+                        var errorContent = await deleteResponse.Content.ReadAsStringAsync();
+                        _logger.Error("Response body: {errorContent}", errorContent);
+                    }
+
                     throw new InvalidOperationException("Delete template failed.");
                 }
                 else if (deleteResponse.StatusCode == HttpStatusCode.Accepted)

@@ -507,7 +507,12 @@ namespace Microsoft.Liftr.ImageBuilder
                     if (!response.IsSuccessStatusCode)
                     {
                         _logger.Error("Cannot download the registry.json file from SBI storage account. Error response: {@SBIResponse}", response);
-                        throw new InvalidOperationException("Failed of getting  registry.json file from SBI storage account.");
+                        if (response.Content != null)
+                        {
+                            _logger.Error("Error content:" + await response.Content.ReadAsStringAsync());
+                        }
+
+                        throw new InvalidOperationException("Failed of getting registry.json file from SBI storage account.");
                     }
 
                     var sbiRegistryContent = await response.Content.ReadAsStringAsync();

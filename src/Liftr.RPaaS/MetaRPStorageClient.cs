@@ -82,10 +82,15 @@ namespace Microsoft.Liftr.RPaaS
                 }
                 else
                 {
-                    var resContent = await response.Content.ReadAsStringAsync();
-                    _logger.Error("Failed at getting resource from RPaaS. StatusCode: '{statusCode}', Response: '{response}'", response.StatusCode, resContent);
-                    operation.FailOperation(response.StatusCode, resContent);
-                    throw MetaRPException.Create(response, resourceId);
+                    var errorMessage = $"Failed at getting resource from RPaaS. StatusCode: '{response.StatusCode}'";
+                    if (response.Content != null)
+                    {
+                        errorMessage = errorMessage + $", Response: '{await response.Content.ReadAsStringAsync()}'";
+                    }
+
+                    _logger.LogError(errorMessage);
+                    operation.FailOperation(response.StatusCode, errorMessage);
+                    throw MetaRPException.Create(response, nameof(GetResourceAsync));
                 }
             }
         }
@@ -113,10 +118,15 @@ namespace Microsoft.Liftr.RPaaS
                 var response = await _httpClient.PutAsync(url, content);
                 if (!response.IsSuccessStatusCode)
                 {
-                    var resContent = await response.Content.ReadAsStringAsync();
-                    _logger.Error("Failed at updating resource. StatusCode: '{statusCode}', Response: '{response}'", response.StatusCode, resContent);
-                    operation.FailOperation(response.StatusCode, resContent);
-                    throw MetaRPException.Create(response, resourceId);
+                    var errorMessage = $"Failed at updating resource from RPaaS. StatusCode: '{response.StatusCode}'";
+                    if (response.Content != null)
+                    {
+                        errorMessage = errorMessage + $", Response: '{await response.Content.ReadAsStringAsync()}'";
+                    }
+
+                    _logger.LogError(errorMessage);
+                    operation.FailOperation(response.StatusCode, errorMessage);
+                    throw MetaRPException.Create(response, nameof(UpdateResourceAsync));
                 }
 
                 return response;
@@ -143,9 +153,14 @@ namespace Microsoft.Liftr.RPaaS
 
                     if (!response.IsSuccessStatusCode)
                     {
-                        var resContent = await response.Content.ReadAsStringAsync();
-                        _logger.Error("Failed at listing resources. StatusCode: '{statusCode}', Response: '{response}'", response.StatusCode, resContent);
-                        operation.FailOperation(response.StatusCode, resContent);
+                        var errorMessage = $"Failed at listing resources. StatusCode: '{response.StatusCode}'";
+                        if (response.Content != null)
+                        {
+                            errorMessage = errorMessage + $", Response: '{await response.Content.ReadAsStringAsync()}'";
+                        }
+
+                        _logger.LogError(errorMessage);
+                        operation.FailOperation(response.StatusCode, errorMessage);
                         throw MetaRPException.Create(response, nameof(ListResourcesAsync));
                     }
 
@@ -220,10 +235,15 @@ namespace Microsoft.Liftr.RPaaS
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var resContent = await response.Content.ReadAsStringAsync();
-                    _logger.Error("Failed at patching operation status. StatusCode: '{statusCode}', Response: '{response}'", response.StatusCode, resContent);
-                    ops.FailOperation(response.StatusCode, resContent);
-                    throw MetaRPException.Create(response, operation.Id);
+                    var errorMessage = $"Failed at patching operation status. StatusCode: '{response.StatusCode}'";
+                    if (response.Content != null)
+                    {
+                        errorMessage = errorMessage + $", Response: '{await response.Content.ReadAsStringAsync()}'";
+                    }
+
+                    _logger.LogError(errorMessage);
+                    ops.FailOperation(response.StatusCode, errorMessage);
+                    throw MetaRPException.Create(response, nameof(PatchOperationAsync));
                 }
 
                 return response;
