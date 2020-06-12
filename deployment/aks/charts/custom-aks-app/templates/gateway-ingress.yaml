@@ -19,6 +19,13 @@ spec:
               serviceName: {{ .Release.Name }}-gateway-web-svc
               servicePort: 80
             path: /
+    - host:  {{ required "The aksdomain must be provided." .Values.aksdomain }}
+      http:
+          paths:
+          - backend:
+              serviceName: {{ .Release.Name }}-gateway-web-svc
+              servicePort: 80
+            path: /
     - http:
         paths:
           - path: /api/liveness-probe
@@ -29,4 +36,5 @@ spec:
   tls:
       - hosts:
           - {{ required "The hostname must be provided." .Values.hostname }}
+          - {{ required "The aksdomain must be provided." .Values.aksdomain }}
         secretName: {{ .Release.Name }}-gateway-tls

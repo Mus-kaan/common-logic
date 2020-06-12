@@ -56,16 +56,6 @@ fi
 --Region="$REGION" \
 --gcs_region="$gcs_region"
 
-if [ "$NoWait" = "" ]; then
-    echo "Wait for extra 120 seconds to make sure the Public IP address is provisioned"
-    sleep 120s
-fi
-
-./ExecuteDeploymentRunner.sh \
---ProvisionAction="UpdateAKSPublicIpInTrafficManager" \
---EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
---Region="$REGION"
-
 for script in "$CurrentDir"/3_*.sh
 do
   if [[ "$script" != *"$currentScriptName"* ]]; then

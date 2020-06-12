@@ -113,6 +113,16 @@ RPWebHostname="$HelmReleaseName.$RPWebHostname"
 fi
 echo "RPWebHostname: $RPWebHostname"
 
+if [ "$ClusterHostname" = "" ]; then
+echo "Read ClusterHostname from file 'bin/aks-domain.txt'."
+ClusterHostname=$(<bin/aks-domain.txt)
+    if [ "$ClusterHostname" = "" ]; then
+        echo "Please set aks host name using variable 'ClusterHostname' ..."
+        exit 1 # terminate and indicate error
+    fi
+fi
+echo "ClusterHostname: $ClusterHostname"
+
 if [ "$VaultName" = "" ]; then
 echo "Read VaultName from file 'bin/vault-name.txt'."
 VaultName=$(<bin/vault-name.txt)
@@ -155,6 +165,7 @@ $Helm upgrade $HelmReleaseName --install --wait $DeploymentFlag\
 --set appVersion="$AppVersion" \
 --set vaultEndpoint="$KeyVaultEndpoint" \
 --set hostname="$RPWebHostname" \
+--set aksdomain="$ClusterHostname" \
 --set sslcertb64="$sslCertB64Content" \
 --set sslkeyb64="$sslKeyB64Content" \
 --set controller.service.omitClusterIP=true \
@@ -168,5 +179,6 @@ $Helm upgrade $HelmReleaseName --install --wait $DeploymentFlag\
 
 echo "-----------------------------------------------------------------"
 echo "Finished helm upgrade AKS APP chart"
-echo "The web can be reached at: https://$RPWebHostname"
+echo "The Application host name (behind TM) will be:        https://$RPWebHostname"
+echo "The AKS cluster host name will be:                    https://$ClusterHostname"
 echo "-----------------------------------------------------------------"

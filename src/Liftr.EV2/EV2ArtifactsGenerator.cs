@@ -37,6 +37,7 @@ namespace Microsoft.Liftr.EV2
                 GenerateRegionDataArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_RegionalDataFolderName));
                 GenerateRegionComputeArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_RegionalComputeFolderName));
                 GenerateAKSAppArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_ApplicationFolderName));
+                GenerateTMArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_TMFolderName));
 
                 _logger.Information("Generated EV2 rollout artifacts and stored in directory: {outputDirectory}", outputDirectory);
             }
@@ -234,6 +235,24 @@ namespace Microsoft.Liftr.EV2
                     outputDirectory,
                     description: "Deploy AKS applications",
                     entryScript: "4_DeployAKSApp.sh");
+            }
+        }
+
+        private static void GenerateTMArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
+        {
+            if (ev2Options == null)
+            {
+                throw new ArgumentNullException(nameof(ev2Options));
+            }
+
+            foreach (var targetEnvironment in ev2Options.TargetEnvironments)
+            {
+                GenerateEnvironmentArtifacts(
+                    ev2Options,
+                    targetEnvironment,
+                    outputDirectory,
+                    description: "Update the AKS Public IP in Traffic Manager",
+                    entryScript: "5_UpdateTrafficManager.sh");
             }
         }
 

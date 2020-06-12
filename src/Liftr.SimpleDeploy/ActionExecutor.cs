@@ -410,7 +410,10 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                             _logger.Information("Successfully retrieved Key Vault endpoint.");
                         }
-                        else if (_commandOptions.Action == ActionType.UpdateAKSPublicIpInTrafficManager)
+
+                        if (_commandOptions.Action == ActionType.UpdateAKSPublicIpInTrafficManager ||
+                            _commandOptions.Action == ActionType.CreateOrUpdateRegionalCompute ||
+                            _commandOptions.Action == ActionType.PrepareK8SAppDeployment)
                         {
                             var az = liftrAzure.FluentClient;
                             var tmId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{regionalNamingContext.ResourceGroupName(regionOptions.DataBaseName)}/providers/Microsoft.Network/trafficmanagerprofiles/{regionalNamingContext.TrafficManagerName(regionOptions.DataBaseName)}";
@@ -428,10 +431,12 @@ namespace Microsoft.Liftr.SimpleDeploy
                             if (pip == null)
                             {
                                 var errMsg = $"Cannot find the public Ip address for the AKS cluster. aksRGName:{aksRGName}, aksName:{aksName}, region:{regionalNamingContext.Location}.";
-                                _logger.Error(errMsg);
+                                _logger.Warning(errMsg);
 
-                                // TODO: fix this. The IP listing is very flacky recently.
-                                // throw new InvalidOperationException(errMsg);
+                                if (_commandOptions.Action == ActionType.UpdateAKSPublicIpInTrafficManager)
+                                {
+                                    throw new InvalidOperationException(errMsg);
+                                }
                             }
                             else
                             {
@@ -443,16 +448,19 @@ namespace Microsoft.Liftr.SimpleDeploy
                                     throw new InvalidOperationException($"The IP address is null of the created Pulic IP with Id {pip.Id}");
                                 }
 
-                                var epName = $"{aksRGName}-{SdkContext.RandomResourceName(string.Empty, 5).Substring(0, 3)}";
-                                _logger.Information("New endpoint name: {epName}", epName);
-                                await aksHelper.AddPulicIpToTrafficManagerAsync(az, tmId, epName, pip.IPAddress, enabled: true);
-                                _logger.Information("Successfully updated AKS public IP in the traffic manager.");
-
                                 await dnsZone.Update().DefineARecordSet(aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
                                 await dnsZone.Update().DefineARecordSet("*." + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
                                 await dnsZone.Update().DefineARecordSet("thanos-0-" + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
                                 await dnsZone.Update().DefineARecordSet("thanos-1-" + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
-                                _logger.Information("Successfully DNS A record '{recordName}' to IP '{ipAddress}'.", aksName, pip.IPAddress);
+                                _logger.Information("Successfully added DNS A record '{recordName}' to IP '{ipAddress}'.", aksName, pip.IPAddress);
+
+                                if (_commandOptions.Action == ActionType.UpdateAKSPublicIpInTrafficManager)
+                                {
+                                    var epName = $"{aksRGName}-{SdkContext.RandomResourceName(string.Empty, 5).Substring(0, 3)}";
+                                    _logger.Information("New endpoint name: {epName}", epName);
+                                    await aksHelper.AddPulicIpToTrafficManagerAsync(az, tmId, epName, pip.IPAddress, enabled: true);
+                                    _logger.Information("Successfully updated AKS public IP in the traffic manager.");
+                                }
                             }
                         }
                     }

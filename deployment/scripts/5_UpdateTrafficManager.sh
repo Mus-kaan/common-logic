@@ -11,36 +11,12 @@ if [ "$APP_ASPNETCORE_ENVIRONMENT" = "" ]; then
 APP_ASPNETCORE_ENVIRONMENT="Production"
 fi
 
-AKSAppChartPackage="liftr-*.tgz"
-
-echo "Get Key Vault endpoint and save on disk."
 ./ExecuteDeploymentRunner.sh \
---ProvisionAction="PrepareK8SAppDeployment" \
+--ProvisionAction="UpdateAKSPublicIpInTrafficManager" \
 --EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
 --Region="$REGION"
 
-if [ "$DeploymentSubscriptionId" = "" ]; then
-DeploymentSubscriptionId=$(<bin/subscription-id.txt)
-    if [ "$DeploymentSubscriptionId" = "" ]; then
-        echo "Please set 'DeploymentSubscriptionId' ..."
-        exit 1 # terminate and indicate error
-    fi
-fi
-
-./AzLogin.sh
-
-./ConnectAKS.sh
-
-./ImportCDPxImages.sh \
---DeploymentSubscriptionId="$DeploymentSubscriptionId"
-
-./DeployAKSApp.sh \
---DeploymentSubscriptionId="$DeploymentSubscriptionId" \
---compactRegion="$compactRegion" \
---APP_ASPNETCORE_ENVIRONMENT="$APP_ASPNETCORE_ENVIRONMENT" \
---AKSAppChartPackage="$AKSAppChartPackage"
-
-for script in "$CurrentDir"/4_*.sh
+for script in "$CurrentDir"/5_*.sh
 do
   if [[ "$script" != *"$currentScriptName"* ]]; then
     echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"

@@ -14,6 +14,8 @@ namespace Microsoft.Liftr.EV2
 
         public const string c_ApplicationFolderName = "4_deploy_aks_app";
 
+        public const string c_TMFolderName = "5_traffic_manager";
+
         public const string c_ImageBuilderFolderName = "image_builder";
 
         public const string c_EV2ShellExtensionType = "LiftrCustomShellExtension";

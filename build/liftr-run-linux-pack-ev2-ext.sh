@@ -28,6 +28,7 @@ EV2GlobalDir="$PublishedRunnerDir/generated-ev2/1_global"
 EV2RegionalDataDir="$PublishedRunnerDir/generated-ev2/2_regional_data"
 EV2RegionalComputeDir="$PublishedRunnerDir/generated-ev2/3_regional_compute"
 EV2AppDir="$PublishedRunnerDir/generated-ev2/4_deploy_aks_app"
+EV2TMDir="$PublishedRunnerDir/generated-ev2/5_traffic_manager"
 
 # Output folders and files
 OutDir="$SrcRoot/out-ev2"
@@ -40,6 +41,7 @@ ServiceGroupRootGlobal="$OutDir/1_ServiceGroupRootGlobal"
 ServiceGroupRootRegionalData="$OutDir/2_ServiceGroupRootRegionalData"
 ServiceGroupRootRegionalCompute="$OutDir/3_ServiceGroupRootRegionalCompute"
 ServiceGroupRootApp="$OutDir/4_ServiceGroupRootApp"
+ServiceGroupRootTM="$OutDir/5_ServiceGroupRootTrafficManager"
 
 rm -rf $ChartsOutDir
 rm -rf $ChartsTmpDir
@@ -150,22 +152,26 @@ mkdir --parent "$ServiceGroupRootGlobal"
 mkdir --parent "$ServiceGroupRootRegionalData"
 mkdir --parent "$ServiceGroupRootRegionalCompute"
 mkdir --parent "$ServiceGroupRootApp"
+mkdir --parent "$ServiceGroupRootTM"
 
 # Place deployment artifacts
 cp -r $EV2GlobalDir/* $ServiceGroupRootGlobal/
 cp -r $EV2RegionalDataDir/* $ServiceGroupRootRegionalData/
 cp -r $EV2RegionalComputeDir/* $ServiceGroupRootRegionalCompute/
 cp -r $EV2AppDir/* $ServiceGroupRootApp/
+cp -r $EV2TMDir/* $ServiceGroupRootTM/
 
 cp $ExtTarFile $ServiceGroupRootGlobal/.
 cp $ExtTarFile $ServiceGroupRootRegionalData/.
 cp $ExtTarFile $ServiceGroupRootRegionalCompute/.
 cp $ExtTarFile $ServiceGroupRootApp/.
+cp $ExtTarFile $ServiceGroupRootTM/.
 
 echo -n "$ChartVersion" > "$ServiceGroupRootGlobal/version.txt"
 echo -n "$ChartVersion" > "$ServiceGroupRootRegionalData/version.txt"
 echo -n "$ChartVersion" > "$ServiceGroupRootRegionalCompute/version.txt"
 echo -n "$ChartVersion" > "$ServiceGroupRootApp/version.txt"
+echo -n "$ChartVersion" > "$ServiceGroupRootTM/version.txt"
 
 rm -rf $ChartsOutDir
 
