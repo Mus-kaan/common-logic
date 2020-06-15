@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Liftr.Contracts.ARM;
-using Microsoft.Liftr.MarketplaceResource.DataSource.Interfaces;
 using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
 using System;

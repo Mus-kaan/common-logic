@@ -17,7 +17,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Liftr
 {
-    public sealed class TestResourceGroupScope : IDisposable
+    public class TestResourceGroupScope : IDisposable
     {
         private TelemetryConfiguration _appInsightsConfig;
         private TelemetryClient _appInsightsClient;
@@ -51,7 +51,7 @@ namespace Microsoft.Liftr
 
         public Serilog.ILogger Logger { get; private set; }
 
-        public LiftrAzureFactory AzFactory { get; }
+        public LiftrAzureFactory AzFactory { get; protected set; }
 
         public ILiftrAzure Client
         {
@@ -73,9 +73,20 @@ namespace Microsoft.Liftr
             return await az.GetOrCreateStorageAccountAsync(TestCommon.Location, ResourceGroupName, storageAccountName, TestCommon.Tags);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
+        protected virtual void Dispose(bool bothManagedAndNative)
+        {
+            if (!bothManagedAndNative)
+            {
+                return;
+            }
+
             try
             {
                 _appInsightsClient?.Flush();

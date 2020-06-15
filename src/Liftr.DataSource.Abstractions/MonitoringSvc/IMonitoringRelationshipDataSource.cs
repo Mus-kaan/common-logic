@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts.MonitoringSvc;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
