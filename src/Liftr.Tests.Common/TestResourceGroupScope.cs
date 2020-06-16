@@ -8,6 +8,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
+using Microsoft.Liftr.Logging;
 using Serilog;
 using System;
 using System.IO;
@@ -19,6 +20,8 @@ namespace Microsoft.Liftr
 {
     public class TestResourceGroupScope : IDisposable
     {
+        private static readonly string s_appInsightsIntrumentationKey = GetInstrumentationKey();
+
         private TelemetryConfiguration _appInsightsConfig;
         private TelemetryClient _appInsightsClient;
 
@@ -27,6 +30,10 @@ namespace Microsoft.Liftr
             GenerateLogger(filePath, memberName);
             AzFactory = new LiftrAzureFactory(Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
             ResourceGroupName = resourceGroupName;
+
+            var operationName = $"{Path.GetFileNameWithoutExtension(filePath)}-{memberName}";
+            TimedOperation = Logger.StartTimedOperation(operationName);
+            TimedOperation.SetContextProperty(nameof(resourceGroupName), resourceGroupName);
         }
 
         public TestResourceGroupScope(string baseName, ITestOutputHelper output, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "")
@@ -34,6 +41,10 @@ namespace Microsoft.Liftr
             GenerateLogger(filePath, memberName, output);
             AzFactory = new LiftrAzureFactory(Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
             ResourceGroupName = SdkContext.RandomResourceName(baseName, 25);
+
+            var operationName = $"{Path.GetFileNameWithoutExtension(filePath)}-{memberName}";
+            TimedOperation = Logger.StartTimedOperation(operationName);
+            TimedOperation.SetContextProperty(nameof(baseName), baseName);
         }
 
         public TestResourceGroupScope(string baseName, NamingContext namingContext, ITestOutputHelper output, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "")
@@ -47,9 +58,15 @@ namespace Microsoft.Liftr
             AzFactory = new LiftrAzureFactory(Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
             ResourceGroupName = namingContext.ResourceGroupName(baseName);
             TestCommon.AddCommonTags(namingContext.Tags);
+
+            var operationName = $"{Path.GetFileNameWithoutExtension(filePath)}-{memberName}";
+            TimedOperation = Logger.StartTimedOperation(operationName);
+            TimedOperation.SetContextProperty(nameof(baseName), baseName);
         }
 
-        public Serilog.ILogger Logger { get; private set; }
+        public ILogger Logger { get; private set; }
+
+        public ITimedOperation TimedOperation { get; }
 
         public LiftrAzureFactory AzFactory { get; protected set; }
 
@@ -89,6 +106,7 @@ namespace Microsoft.Liftr
 
             try
             {
+                TimedOperation?.Dispose();
                 _appInsightsClient?.Flush();
                 _appInsightsConfig?.Dispose();
                 var deleteTask = Client.DeleteResourceGroupAsync(ResourceGroupName);
@@ -104,8 +122,7 @@ namespace Microsoft.Liftr
 
         private void GenerateLogger(string filePath, string memberName, ITestOutputHelper output = null)
         {
-            // /subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourcegroups/liftr-dev-wus-rg/providers/microsoft.insights/components/liftr-unittest-wus2-ai
-            _appInsightsConfig = new TelemetryConfiguration("78b3bb82-b6b7-42bf-93d8-c8ba1ca26331");
+            _appInsightsConfig = new TelemetryConfiguration(s_appInsightsIntrumentationKey);
             _appInsightsClient = new TelemetryClient(_appInsightsConfig);
 
             var fileName = Path.GetFileNameWithoutExtension(filePath);
@@ -122,6 +139,18 @@ namespace Microsoft.Liftr
             }
 
             Logger = loggerConfig.Enrich.FromLogContext().CreateLogger();
+        }
+
+        private static string GetInstrumentationKey()
+        {
+            var ikey = Environment.GetEnvironmentVariable("LIFTR_APPINSIGHTS_IKEY");
+            if (string.IsNullOrEmpty(ikey))
+            {
+                // /subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourcegroups/liftr-dev-wus-rg/providers/microsoft.insights/components/liftr-unittest-wus2-ai
+                ikey = "78b3bb82-b6b7-42bf-93d8-c8ba1ca26331";
+            }
+
+            return ikey;
         }
     }
 }
