@@ -127,6 +127,7 @@ namespace Microsoft.Liftr
         {
             _appInsightsConfig = new TelemetryConfiguration(s_appInsightsIntrumentationKey);
             _appInsightsClient = new TelemetryClient(_appInsightsConfig);
+            AppInsightsHelper.AppInsightsClient = _appInsightsClient;
 
             var fileName = Path.GetFileNameWithoutExtension(filePath);
             var loggerConfig = new LoggerConfiguration()

@@ -6,6 +6,7 @@ using Microsoft.ApplicationInsights;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.GenericHosting")]
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Tests.Common")]
 
 namespace Microsoft.Liftr.Logging
 {
