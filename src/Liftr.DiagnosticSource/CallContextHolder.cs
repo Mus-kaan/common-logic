@@ -10,6 +10,7 @@ using System.Threading;
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.AspNetCore.Tests")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.GenericHosting")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Queue")]
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Tests.Common")]
 
 namespace Microsoft.Liftr.DiagnosticSource
 {

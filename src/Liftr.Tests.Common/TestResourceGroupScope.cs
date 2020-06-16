@@ -6,6 +6,7 @@ using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.Storage.Fluent;
+using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Logging;
@@ -21,6 +22,7 @@ namespace Microsoft.Liftr
     public class TestResourceGroupScope : IDisposable
     {
         private static readonly string s_appInsightsIntrumentationKey = GetInstrumentationKey();
+        private static readonly IDisposable s_httpClientSubscriber = GetHttpCoreDiagnosticSourceSubscriber();
 
         private TelemetryConfiguration _appInsightsConfig;
         private TelemetryClient _appInsightsClient;
@@ -147,6 +149,11 @@ namespace Microsoft.Liftr
 
         private static string GetInstrumentationKey()
         {
+            if (s_httpClientSubscriber == null)
+            {
+                Console.WriteLine($"'{nameof(s_httpClientSubscriber)}' is null.");
+            }
+
             var ikey = Environment.GetEnvironmentVariable("LIFTR_APPINSIGHTS_IKEY");
             if (string.IsNullOrEmpty(ikey))
             {
@@ -155,6 +162,11 @@ namespace Microsoft.Liftr
             }
 
             return ikey;
+        }
+
+        private static IDisposable GetHttpCoreDiagnosticSourceSubscriber()
+        {
+            return new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener());
         }
     }
 }
