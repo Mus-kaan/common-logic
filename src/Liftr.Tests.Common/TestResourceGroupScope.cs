@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DependencyCollector;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.Storage.Fluent;
@@ -25,6 +26,7 @@ namespace Microsoft.Liftr
         private static readonly IDisposable s_httpClientSubscriber = GetHttpCoreDiagnosticSourceSubscriber();
 
         private TelemetryConfiguration _appInsightsConfig;
+        private DependencyTrackingTelemetryModule _depModule;
         private TelemetryClient _appInsightsClient;
 
         public TestResourceGroupScope(string resourceGroupName, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "")
@@ -71,7 +73,7 @@ namespace Microsoft.Liftr
 
         public ILogger Logger { get; private set; }
 
-        public ITimedOperation TimedOperation { get; }
+        public ITimedOperation TimedOperation { get; private set; }
 
         public LiftrAzureFactory AzFactory { get; protected set; }
 
@@ -114,11 +116,17 @@ namespace Microsoft.Liftr
                 TimedOperation?.Dispose();
                 _appInsightsClient?.Flush();
                 _appInsightsConfig?.Dispose();
+                _depModule?.Dispose();
                 var deleteTask = Client.DeleteResourceGroupAsync(ResourceGroupName);
                 Task.Yield();
 #pragma warning disable Liftr1005 // Avoid calling System.Threading.Tasks.Task.Wait()
                 Task.Delay(2000).Wait();
 #pragma warning restore Liftr1005 // Avoid calling System.Threading.Tasks.Task.Wait()
+
+                TimedOperation = null;
+                _appInsightsClient = null;
+                _appInsightsConfig = null;
+                _depModule = null;
             }
             catch
             {
@@ -128,6 +136,8 @@ namespace Microsoft.Liftr
         private void GenerateLogger(string filePath, string memberName, ITestOutputHelper output = null)
         {
             _appInsightsConfig = new TelemetryConfiguration(s_appInsightsIntrumentationKey);
+            _depModule = new DependencyTrackingTelemetryModule();
+            _depModule.Initialize(_appInsightsConfig);
             _appInsightsClient = new TelemetryClient(_appInsightsConfig);
             AppInsightsHelper.AppInsightsClient = _appInsightsClient;
 
