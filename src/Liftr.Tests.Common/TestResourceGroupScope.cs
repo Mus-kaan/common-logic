@@ -34,6 +34,7 @@ namespace Microsoft.Liftr
             var operationName = $"{Path.GetFileNameWithoutExtension(filePath)}-{memberName}";
             TimedOperation = Logger.StartTimedOperation(operationName);
             TimedOperation.SetContextProperty(nameof(resourceGroupName), resourceGroupName);
+            TimedOperation.SetProperty("TestEnv", "CICD");
         }
 
         public TestResourceGroupScope(string baseName, ITestOutputHelper output, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "")
@@ -45,6 +46,7 @@ namespace Microsoft.Liftr
             var operationName = $"{Path.GetFileNameWithoutExtension(filePath)}-{memberName}";
             TimedOperation = Logger.StartTimedOperation(operationName);
             TimedOperation.SetContextProperty(nameof(baseName), baseName);
+            TimedOperation.SetProperty("TestEnv", "CICD");
         }
 
         public TestResourceGroupScope(string baseName, NamingContext namingContext, ITestOutputHelper output, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "")
@@ -62,6 +64,7 @@ namespace Microsoft.Liftr
             var operationName = $"{Path.GetFileNameWithoutExtension(filePath)}-{memberName}";
             TimedOperation = Logger.StartTimedOperation(operationName);
             TimedOperation.SetContextProperty(nameof(baseName), baseName);
+            TimedOperation.SetProperty("TestEnv", "CICD");
         }
 
         public ILogger Logger { get; private set; }
