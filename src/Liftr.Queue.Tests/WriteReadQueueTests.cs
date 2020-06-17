@@ -64,7 +64,7 @@ namespace Microsoft.Liftr.Queue.Tests
                     Assert.Single(receivedMessages);
                     {
                         var msg = receivedMessages.Last();
-                        Assert.Null(msg.MsgTelemetryContext);
+                        Assert.NotNull(msg.MsgTelemetryContext);
                         Assert.Equal(msgContent1, msg.Content);
                         Assert.Equal("2019-01-20T08:00:00.0000000Z", msg.CreatedAt);
                     }
