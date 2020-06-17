@@ -18,6 +18,7 @@ namespace Microsoft.Liftr.Contracts
         Failed,
         Canceled,
         Deleted,
+        NotSpecified,
     }
 
     public static class ProvisioningStateExtensions
