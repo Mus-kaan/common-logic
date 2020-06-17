@@ -148,6 +148,7 @@ namespace Microsoft.Liftr.Fluent
                 string deleteResource = null;
                 _logger.Information($"Start deleting resource at Uri: {uriBuilder.Uri}");
                 var deleteResponse = await httpClient.DeleteAsync(uriBuilder.Uri, cancellationToken);
+                _logger.Information($"DELETE response code: {deleteResponse.StatusCode}");
 
                 if (!deleteResponse.IsSuccessStatusCode)
                 {
