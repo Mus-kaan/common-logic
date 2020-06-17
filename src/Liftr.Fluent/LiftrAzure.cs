@@ -1237,13 +1237,27 @@ namespace Microsoft.Liftr.Fluent
                 if (body.OrdinalContains("Running") || body.OrdinalContains("InProgress"))
                 {
                     _logger.Debug("Waiting for ARM Async Operation. statusUrl: {statusUrl}", statusUrl);
-                    await Task.Delay(TimeSpan.FromSeconds(60), cancellationToken);
+                    var retryAfter = GetRetryAfterValue(statusResponse);
+                    await Task.Delay(retryAfter, cancellationToken);
                 }
                 else
                 {
                     return body;
                 }
             }
+        }
+
+        private TimeSpan GetRetryAfterValue(HttpResponseMessage response)
+        {
+            var retryAfter = response.Headers.RetryAfter?.Delta;
+            if (retryAfter == null)
+            {
+                var errorMessage = $"Could not parse correct headers from operation response. Request Uri : {response.RequestMessage.RequestUri}";
+                _logger.Error(errorMessage);
+                return TimeSpan.FromSeconds(10);
+            }
+
+            return retryAfter.Value;
         }
     }
 }
