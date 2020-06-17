@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,7 +33,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 string runOutputName,
                 CancellationToken cancellationToken = default);
 
-        Task<HttpResponseMessage> DeleteVMImageBuilderTemplateAsync(
+        Task<string> DeleteVMImageBuilderTemplateAsync(
                 string rgName,
                 string templateName,
                 CancellationToken cancellationToken = default);

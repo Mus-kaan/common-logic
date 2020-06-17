@@ -43,7 +43,7 @@ namespace Microsoft.Liftr.Fluent
             await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true);
         }
 
-        public Task<ResourceGetResponse> GetLogAnalyticsWorkspaceAsync(ILiftrAzure liftrAzure, string rgName, string name)
+        public Task<string> GetLogAnalyticsWorkspaceAsync(ILiftrAzure liftrAzure, string rgName, string name)
         {
             if (liftrAzure == null)
             {

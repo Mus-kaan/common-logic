@@ -20,6 +20,8 @@ using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Azure.Management.TrafficManager.Fluent;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using static Microsoft.Azure.Management.Fluent.Azure;
 
@@ -41,7 +43,11 @@ namespace Microsoft.Liftr.Fluent
 
         string DefaultSubnetName { get; }
 
-        Task<ResourceGetResponse> GetResourceAsync(string resourceId, string apiVersion);
+        Task<string> GetResourceAsync(string resourceId, string apiVersion);
+
+        Task<string> DeleteResourceAsync(string resourceId, string apiVersion, CancellationToken cancellationToken = default);
+
+        Task<string> WaitAsyncOperationAsync(HttpClient client, HttpResponseMessage startOperationResponse, CancellationToken cancellationToken);
 
         #region Resource Group
         Task<IResourceGroup> GetOrCreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags);
@@ -195,9 +201,9 @@ namespace Microsoft.Liftr.Fluent
         #endregion
 
         #region Monitoring
-        Task<ResourceGetResponse> GetOrCreateLogAnalyticsWorkspaceAsync(Region location, string rgName, string name, IDictionary<string, string> tags);
+        Task<string> GetOrCreateLogAnalyticsWorkspaceAsync(Region location, string rgName, string name, IDictionary<string, string> tags);
 
-        Task<ResourceGetResponse> GetLogAnalyticsWorkspaceAsync(string rgName, string name);
+        Task<string> GetLogAnalyticsWorkspaceAsync(string rgName, string name);
         #endregion
 
         #region Event Hub

@@ -6,7 +6,6 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -66,7 +65,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
                 if (startRunResponse.StatusCode == HttpStatusCode.Accepted)
                 {
-                    var asyncOperationResponse = await WaitAsyncOperationAsync(httpClient, startRunResponse, cancellationToken);
+                    var asyncOperationResponse = await _liftrAzure.WaitAsyncOperationAsync(httpClient, startRunResponse, cancellationToken);
                     if (!asyncOperationResponse.OrdinalContains("Succeeded"))
                     {
                         operation.FailOperation(asyncOperationResponse);
@@ -146,77 +145,23 @@ namespace Microsoft.Liftr.ImageBuilder
             }
         }
 
-        public async Task<string> GetAIBRunOutputAsync(
+        public Task<string> GetAIBRunOutputAsync(
             string rgName,
             string templateName,
             string runOutputName,
             CancellationToken cancellationToken = default)
         {
-            using (var operation = _logger.StartTimedOperation(nameof(GetAIBRunOutputAsync)))
-            using (var handler = new AzureApiAuthHandler(_liftrAzure.AzureCredentials))
-            using (var httpClient = new HttpClient(handler))
-            {
-                var uriBuilder = new UriBuilder(_liftrAzure.AzureCredentials.Environment.ResourceManagerEndpoint);
-                uriBuilder.Path =
-                    $"/subscriptions/{_liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{templateName}/runOutputs/{runOutputName}";
-                uriBuilder.Query = $"api-version={c_AIBAPIVersion}";
-                var runOutputResponse = await httpClient.GetAsync(uriBuilder.Uri);
-
-                if (runOutputResponse.StatusCode == HttpStatusCode.OK)
-                {
-                    return await runOutputResponse.Content.ReadAsStringAsync();
-                }
-                else
-                {
-                    var errMsg = $"Failed at getting AIB template run output. statusCode: '{runOutputResponse.StatusCode}'";
-                    if (runOutputResponse?.Content != null)
-                    {
-                        errMsg = errMsg + $", response: {await runOutputResponse.Content?.ReadAsStringAsync()}";
-                    }
-
-                    var ex = new RunAzureVMImageBuilderException(errMsg, _liftrAzure.FluentClient.SubscriptionId, rgName, templateName);
-                    operation.FailOperation(ex.Message);
-                    _logger.Error(ex.Message);
-                    throw ex;
-                }
-            }
+            var resourceId = $"/subscriptions/{_liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{templateName}/runOutputs/{runOutputName}";
+            return _liftrAzure.GetResourceAsync(resourceId, c_AIBAPIVersion);
         }
 
-        public async Task<HttpResponseMessage> DeleteVMImageBuilderTemplateAsync(
+        public Task<string> DeleteVMImageBuilderTemplateAsync(
             string rgName,
             string templateName,
             CancellationToken cancellationToken = default)
         {
-            // https://github.com/Azure/azure-rest-api-specs-pr/blob/87dbc20106afce8c615113d654c14359a3356486/specification/imagebuilder/resource-manager/Microsoft.VirtualMachineImages/preview/2019-05-01-preview/imagebuilder.json#L280
-            using (var handler = new AzureApiAuthHandler(_liftrAzure.AzureCredentials))
-            using (var httpClient = new HttpClient(handler))
-            {
-                _logger.Information("Delete AIB template. rgName: {rgName}. templateName: {templateName}", rgName, templateName);
-                var uriBuilder = new UriBuilder(_liftrAzure.AzureCredentials.Environment.ResourceManagerEndpoint);
-                uriBuilder.Path =
-                    $"/subscriptions/{_liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{templateName}";
-                uriBuilder.Query = $"api-version={c_AIBAPIVersion}";
-                var deleteResponse = await httpClient.DeleteAsync(uriBuilder.Uri, cancellationToken);
-
-                if (!deleteResponse.IsSuccessStatusCode)
-                {
-                    _logger.Error("Delete AIB template {templateName} in {rgName} failed. Status code: {deleteResponseStatusCode}", templateName, rgName, deleteResponse.StatusCode);
-                    if (deleteResponse?.Content != null)
-                    {
-                        var errorContent = await deleteResponse.Content.ReadAsStringAsync();
-                        _logger.Error("Response body: {errorContent}", errorContent);
-                    }
-
-                    throw new InvalidOperationException("Delete template failed.");
-                }
-                else if (deleteResponse.StatusCode == HttpStatusCode.Accepted)
-                {
-                    var asyncOperationResponse = await WaitAsyncOperationAsync(httpClient, deleteResponse, cancellationToken);
-                }
-
-                _logger.Information("Delete AIB template succeeded. rgName: {rgName}. templateName: {templateName}", rgName, templateName);
-                return deleteResponse;
-            }
+            var resourceId = $"/subscriptions/{_liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{templateName}";
+            return _liftrAzure.DeleteResourceAsync(resourceId, c_AIBAPIVersion, cancellationToken);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
@@ -235,39 +180,6 @@ namespace Microsoft.Liftr.ImageBuilder
             }
 
             return false;
-        }
-
-        private async Task<string> WaitAsyncOperationAsync(
-            HttpClient client,
-            HttpResponseMessage startOperationResponse,
-            CancellationToken cancellationToken)
-        {
-            string statusUrl = string.Empty;
-
-            if (startOperationResponse.Headers.Contains("Location"))
-            {
-                statusUrl = startOperationResponse.Headers.GetValues("Location").FirstOrDefault();
-            }
-
-            if (string.IsNullOrEmpty(statusUrl) && startOperationResponse.Headers.Contains("Azure-AsyncOperation"))
-            {
-                statusUrl = startOperationResponse.Headers.GetValues("Azure-AsyncOperation").FirstOrDefault();
-            }
-
-            while (true)
-            {
-                var statusResponse = await client.GetAsync(new Uri(statusUrl), cancellationToken);
-                var body = await statusResponse.Content.ReadAsStringAsync();
-                if (body.OrdinalContains("Running") || body.OrdinalContains("InProgress"))
-                {
-                    _logger.Debug("Waiting for ARM Async Operation. statusUrl: {statusUrl}", statusUrl);
-                    await Task.Delay(TimeSpan.FromSeconds(60), cancellationToken);
-                }
-                else
-                {
-                    return body;
-                }
-            }
         }
     }
 }

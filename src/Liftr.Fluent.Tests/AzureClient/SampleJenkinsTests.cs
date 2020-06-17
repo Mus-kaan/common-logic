@@ -3,6 +3,8 @@
 //-----------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -42,6 +44,38 @@ namespace Microsoft.Liftr.Fluent.Tests
                     scope.Logger.Error(ex, ex.Message);
                     throw;
                 }
+            }
+        }
+
+        [JenkinsOnly]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
+        public async Task CleanUpOldTestRGAsync()
+        {
+            using (var scope = new JenkinsTestResourceGroupScope("unittest-rg-", _output))
+            {
+                var client = scope.Client;
+                var fireAndForget = client.DeleteResourceGroupWithTagAsync("Creator", "UnitTest", (IReadOnlyDictionary<string, string> tags) =>
+                {
+                    if (tags.ContainsKey("CreatedAt"))
+                    {
+                        try
+                        {
+                            var timeStamp = DateTime.Parse(tags["CreatedAt"], CultureInfo.InvariantCulture);
+                            if (timeStamp < DateTime.Now.AddDays(-1))
+                            {
+                                return true;
+                            }
+                        }
+                        catch
+                        {
+                        }
+                    }
+
+                    return false;
+                });
+
+                await Task.Yield();
+                await Task.Delay(TimeSpan.FromSeconds(30));
             }
         }
     }

@@ -54,8 +54,9 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var client = regionalDataScope.Client;
 
                     await client.GetOrCreateResourceGroupAsync(context.Location, dataRGName, context.Tags);
-                    var logAnalytics = await client.GetOrCreateLogAnalyticsWorkspaceAsync(context.Location, dataRGName, context.LogAnalyticsName("gbl001"), context.Tags);
-                    dataOptions.LogAnalyticsWorkspaceId = logAnalytics.Id;
+                    var laName = context.LogAnalyticsName("gbl001");
+                    var logAnalytics = await client.GetOrCreateLogAnalyticsWorkspaceAsync(context.Location, dataRGName, laName, context.Tags);
+                    dataOptions.LogAnalyticsWorkspaceId = $"/subscriptions/{client.FluentClient.SubscriptionId}/resourcegroups/{dataRGName}/providers/microsoft.operationalinsights/workspaces/{laName}";
 
                     var resources = await infra.CreateOrUpdateRegionalDataRGAsync(dataBaseName, context, dataOptions);
 

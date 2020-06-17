@@ -29,6 +29,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using static Microsoft.Azure.Management.Fluent.Azure;
 
@@ -80,6 +81,94 @@ namespace Microsoft.Liftr.Fluent
         public TokenCredential TokenCredential { get; }
 
         public AzureCredentials AzureCredentials { get; }
+
+        public async Task<string> GetResourceAsync(string resourceId, string apiVersion)
+        {
+            using (var handler = new AzureApiAuthHandler(AzureCredentials))
+            using (var httpClient = new HttpClient(handler))
+            {
+                if (string.IsNullOrEmpty(resourceId))
+                {
+                    throw new ArgumentNullException(nameof(resourceId));
+                }
+
+                if (string.IsNullOrEmpty(apiVersion))
+                {
+                    throw new ArgumentNullException(nameof(apiVersion));
+                }
+
+                var uriBuilder = new UriBuilder(AzureCredentials.Environment.ResourceManagerEndpoint);
+                uriBuilder.Path = resourceId;
+                uriBuilder.Query = $"api-version={apiVersion}";
+                _logger.Information($"Start getting resource at Uri: {uriBuilder.Uri}");
+                var runOutputResponse = await httpClient.GetAsync(uriBuilder.Uri);
+
+                if (runOutputResponse.StatusCode == HttpStatusCode.OK)
+                {
+                    return await runOutputResponse.Content.ReadAsStringAsync();
+                }
+                else if (runOutputResponse.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return null;
+                }
+                else
+                {
+                    var errMsg = $"Failed at getting resource with Id '{resourceId}'. statusCode: '{runOutputResponse.StatusCode}'";
+                    if (runOutputResponse?.Content != null)
+                    {
+                        errMsg = errMsg + $", response: {await runOutputResponse.Content?.ReadAsStringAsync()}";
+                    }
+
+                    var ex = new InvalidOperationException(errMsg);
+                    _logger.Error(ex.Message);
+                    throw ex;
+                }
+            }
+        }
+
+        public async Task<string> DeleteResourceAsync(string resourceId, string apiVersion, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrEmpty(resourceId))
+            {
+                throw new ArgumentNullException(nameof(resourceId));
+            }
+
+            if (string.IsNullOrEmpty(apiVersion))
+            {
+                throw new ArgumentNullException(nameof(apiVersion));
+            }
+
+            // https://github.com/Azure/azure-rest-api-specs-pr/blob/87dbc20106afce8c615113d654c14359a3356486/specification/imagebuilder/resource-manager/Microsoft.VirtualMachineImages/preview/2019-05-01-preview/imagebuilder.json#L280
+            using (var handler = new AzureApiAuthHandler(AzureCredentials))
+            using (var httpClient = new HttpClient(handler))
+            {
+                var uriBuilder = new UriBuilder(AzureCredentials.Environment.ResourceManagerEndpoint);
+                uriBuilder.Path = resourceId;
+                uriBuilder.Query = $"api-version={apiVersion}";
+                string deleteResource = null;
+                _logger.Information($"Start deleting resource at Uri: {uriBuilder.Uri}");
+                var deleteResponse = await httpClient.DeleteAsync(uriBuilder.Uri, cancellationToken);
+
+                if (!deleteResponse.IsSuccessStatusCode)
+                {
+                    _logger.Error($"Deleting resource at Uri: '{uriBuilder.Uri}' failed with error code '{deleteResponse.StatusCode}'");
+                    if (deleteResponse?.Content != null)
+                    {
+                        var errorContent = await deleteResponse.Content.ReadAsStringAsync();
+                        _logger.Error("Error response body: {errorContent}", errorContent);
+                    }
+
+                    throw new InvalidOperationException($"Delete resource with id '{resourceId}' failed.");
+                }
+                else if (deleteResponse.StatusCode == HttpStatusCode.Accepted)
+                {
+                    deleteResource = await WaitAsyncOperationAsync(httpClient, deleteResponse, cancellationToken);
+                }
+
+                _logger.Information($"Finished deleting resource at Uri: {uriBuilder.Uri}");
+                return deleteResource;
+            }
+        }
 
         #region Resource Group
         public async Task<IResourceGroup> GetOrCreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags)
@@ -150,6 +239,7 @@ namespace Microsoft.Liftr.Fluent
 
         public async Task DeleteResourceGroupWithTagAsync(string tagName, string tagValue, Func<IReadOnlyDictionary<string, string>, bool> tagsFilter = null)
         {
+            _logger.Information($"Listing resource groups in subscription: {FluentClient.SubscriptionId}");
             var rgs = await FluentClient
                 .ResourceGroups
                 .ListByTagAsync(tagName, tagValue);
@@ -1034,39 +1124,8 @@ namespace Microsoft.Liftr.Fluent
         }
         #endregion
 
-        public async Task<ResourceGetResponse> GetResourceAsync(string resourceId, string apiVersion)
-        {
-            using (var handler = new AzureApiAuthHandler(AzureCredentials))
-            using (var httpClient = new HttpClient(handler))
-            {
-                var uriBuilder = new UriBuilder(AzureCredentials.Environment.ResourceManagerEndpoint);
-                uriBuilder.Path = resourceId;
-                uriBuilder.Query = $"api-version={apiVersion}";
-
-                try
-                {
-                    var response = await httpClient.GetStringAsync(uriBuilder.Uri);
-                    return new ResourceGetResponse()
-                    {
-                        Id = resourceId,
-                        Details = response,
-                    };
-                }
-                catch (Exception ex)
-                {
-                    if (ex.Message.OrdinalContains("Response status code does not indicate success: 404 (Not Found)"))
-                    {
-                        return null;
-                    }
-
-                    _logger.Error(ex, $"{nameof(GetResourceAsync)} failed.");
-                    throw;
-                }
-            }
-        }
-
         #region Monitoring
-        public async Task<ResourceGetResponse> GetOrCreateLogAnalyticsWorkspaceAsync(Region location, string rgName, string name, IDictionary<string, string> tags)
+        public async Task<string> GetOrCreateLogAnalyticsWorkspaceAsync(Region location, string rgName, string name, IDictionary<string, string> tags)
         {
             var logAnalytics = await GetLogAnalyticsWorkspaceAsync(rgName, name);
             if (logAnalytics == null)
@@ -1074,13 +1133,13 @@ namespace Microsoft.Liftr.Fluent
                 var helper = new LogAnalyticsHelper(_logger);
                 await helper.CreateLogAnalyticsWorkspaceAsync(this, location, rgName, name, tags);
                 logAnalytics = await GetLogAnalyticsWorkspaceAsync(rgName, name);
-                _logger.Information("Created a new Log Analytics Workspace with resource Id: '{logAnalyticsId}'.", logAnalytics.Id);
+                _logger.Information("Created a new Log Analytics Workspace");
             }
 
             return logAnalytics;
         }
 
-        public Task<ResourceGetResponse> GetLogAnalyticsWorkspaceAsync(string rgName, string name)
+        public Task<string> GetLogAnalyticsWorkspaceAsync(string rgName, string name)
         {
             var helper = new LogAnalyticsHelper(_logger);
             return helper.GetLogAnalyticsWorkspaceAsync(this, rgName, name);
@@ -1153,5 +1212,38 @@ namespace Microsoft.Liftr.Fluent
             return eventhub;
         }
         #endregion
+
+        public async Task<string> WaitAsyncOperationAsync(
+           HttpClient client,
+           HttpResponseMessage startOperationResponse,
+           CancellationToken cancellationToken)
+        {
+            string statusUrl = string.Empty;
+
+            if (startOperationResponse.Headers.Contains("Location"))
+            {
+                statusUrl = startOperationResponse.Headers.GetValues("Location").FirstOrDefault();
+            }
+
+            if (string.IsNullOrEmpty(statusUrl) && startOperationResponse.Headers.Contains("Azure-AsyncOperation"))
+            {
+                statusUrl = startOperationResponse.Headers.GetValues("Azure-AsyncOperation").FirstOrDefault();
+            }
+
+            while (true)
+            {
+                var statusResponse = await client.GetAsync(new Uri(statusUrl), cancellationToken);
+                var body = await statusResponse.Content.ReadAsStringAsync();
+                if (body.OrdinalContains("Running") || body.OrdinalContains("InProgress"))
+                {
+                    _logger.Debug("Waiting for ARM Async Operation. statusUrl: {statusUrl}", statusUrl);
+                    await Task.Delay(TimeSpan.FromSeconds(60), cancellationToken);
+                }
+                else
+                {
+                    return body;
+                }
+            }
+        }
     }
 }

@@ -68,8 +68,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 if (string.IsNullOrEmpty(logAnalyticsWorkspaceId))
                 {
                     var logAnalyticsName = namingContext.LogAnalyticsName(baseName);
+                    logAnalyticsWorkspaceId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourcegroups/{rgName}/providers/microsoft.operationalinsights/workspaces/{logAnalyticsName}";
                     var logAnalytics = await liftrAzure.GetOrCreateLogAnalyticsWorkspaceAsync(namingContext.Location, rgName, logAnalyticsName, namingContext.Tags);
-                    logAnalyticsWorkspaceId = logAnalytics.Id;
                 }
 
                 result.DnsZone = await liftrAzure.GetDNSZoneAsync(rgName, dnsName);
