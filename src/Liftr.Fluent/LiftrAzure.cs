@@ -1235,15 +1235,18 @@ namespace Microsoft.Liftr.Fluent
             {
                 var statusResponse = await client.GetAsync(new Uri(statusUrl), cancellationToken);
                 var body = await statusResponse.Content.ReadAsStringAsync();
-                if (body.OrdinalContains("Running") || body.OrdinalContains("InProgress"))
+
+                if (body.OrdinalContains("Succeeded") ||
+                    body.OrdinalContains("Failed") ||
+                    body.OrdinalContains("Canceled"))
                 {
-                    _logger.Debug("Waiting for ARM Async Operation. statusUrl: {statusUrl}", statusUrl);
-                    var retryAfter = GetRetryAfterValue(statusResponse);
-                    await Task.Delay(retryAfter, cancellationToken);
+                    return body;
                 }
                 else
                 {
-                    return body;
+                    _logger.Information("Waiting for ARM Async Operation. statusUrl: {statusUrl}", statusUrl);
+                    var retryAfter = GetRetryAfterValue(statusResponse);
+                    await Task.Delay(retryAfter, cancellationToken);
                 }
             }
         }
