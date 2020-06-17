@@ -80,12 +80,14 @@ namespace Microsoft.Liftr.Queue
                             message.ExpiresOn = queueMessage.ExpiresOn;
                             message.DequeueCount = queueMessage.DequeueCount;
 
+                            string correlationId = null;
                             LogEventLevel? overrideLevel = null;
                             if (message.MsgTelemetryContext != null)
                             {
                                 CallContextHolder.ClientRequestId.Value = message.MsgTelemetryContext.ClientRequestId;
                                 CallContextHolder.ARMRequestTrackingId.Value = message.MsgTelemetryContext.ARMRequestTrackingId;
                                 CallContextHolder.CorrelationId.Value = message.MsgTelemetryContext.CorrelationId;
+                                correlationId = message.MsgTelemetryContext.CorrelationId;
 
                                 if (Enum.TryParse<LogEventLevel>(message.MsgTelemetryContext.LogFilterOverwrite, true, out var level))
                                 {
@@ -103,7 +105,7 @@ namespace Microsoft.Liftr.Queue
                                 using (new LogContextPropertyScope("LiftrTrackingId", message.MsgTelemetryContext?.ARMRequestTrackingId))
                                 using (new LogContextPropertyScope("LiftrCorrelationId", message.MsgTelemetryContext?.CorrelationId))
                                 using (new LogContextPropertyScope("LiftrQueueMessageId", message.MsgId))
-                                using (var operation = _logger.StartTimedOperation("ProcessQueueMessage"))
+                                using (var operation = _logger.StartTimedOperation("ProcessQueueMessage", correlationId))
                                 {
                                     _logger.Information("Queue msg info: MsgId '{MsgId}', DequeueCount '{DequeueCount}', CreatedAt '{CreatedAt}', InsertedOn '{InsertedOn}', ExpiresOn '{ExpiresOn}'", message.MsgId, message.DequeueCount, message.CreatedAt, message.InsertedOn, message.ExpiresOn);
 
