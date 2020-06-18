@@ -1235,10 +1235,10 @@ namespace Microsoft.Liftr.Fluent
             {
                 var statusResponse = await client.GetAsync(new Uri(statusUrl), cancellationToken);
                 var body = await statusResponse.Content.ReadAsStringAsync();
-
                 if (body.OrdinalContains("Succeeded") ||
                     body.OrdinalContains("Failed") ||
-                    body.OrdinalContains("Canceled"))
+                    body.OrdinalContains("Canceled") ||
+                    (statusResponse.StatusCode != HttpStatusCode.Accepted && statusResponse.StatusCode != HttpStatusCode.Created))
                 {
                     return body;
                 }
