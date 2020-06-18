@@ -1235,16 +1235,27 @@ namespace Microsoft.Liftr.Fluent
             {
                 var statusResponse = await client.GetAsync(new Uri(statusUrl), cancellationToken);
                 var body = await statusResponse.Content.ReadAsStringAsync();
-                if (body.OrdinalContains("Succeeded") ||
+                bool keepWaiting = false;
+
+                if (body.OrdinalContains("Running") ||
+                    body.OrdinalContains("InProgress"))
+                {
+                    keepWaiting = true;
+                }
+                else if (body.OrdinalContains("Succeeded") ||
                     body.OrdinalContains("Failed") ||
                     body.OrdinalContains("Canceled") ||
                     (statusResponse.StatusCode != HttpStatusCode.Accepted && statusResponse.StatusCode != HttpStatusCode.Created))
                 {
-                    return body;
+                    keepWaiting = false;
                 }
                 else
                 {
-                    _logger.Information("Waiting for ARM Async Operation. statusUrl: {statusUrl}", statusUrl);
+                    keepWaiting = true;
+                }
+
+                if (keepWaiting)
+                {
                     var retryAfter = GetRetryAfterValue(statusResponse);
                     await Task.Delay(retryAfter, cancellationToken);
                 }
@@ -1256,8 +1267,6 @@ namespace Microsoft.Liftr.Fluent
             var retryAfter = response.Headers.RetryAfter?.Delta;
             if (retryAfter == null)
             {
-                var errorMessage = $"Could not parse correct headers from operation response. Request Uri : {response.RequestMessage.RequestUri}";
-                _logger.Error(errorMessage);
                 return TimeSpan.FromSeconds(10);
             }
 
