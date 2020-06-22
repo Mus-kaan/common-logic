@@ -6,6 +6,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -65,7 +66,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
                 if (startRunResponse.StatusCode == HttpStatusCode.Accepted)
                 {
-                    var asyncOperationResponse = await _liftrAzure.WaitAsyncOperationAsync(httpClient, startRunResponse, cancellationToken);
+                    var asyncOperationResponse = await WaitAsyncOperationAsync(httpClient, startRunResponse, cancellationToken);
                     if (!asyncOperationResponse.OrdinalContains("Succeeded"))
                     {
                         operation.FailOperation(asyncOperationResponse);
@@ -180,6 +181,34 @@ namespace Microsoft.Liftr.ImageBuilder
             }
 
             return false;
+        }
+
+        private async Task<string> WaitAsyncOperationAsync(
+            HttpClient client,
+            HttpResponseMessage startOperationResponse,
+            CancellationToken cancellationToken)
+        {
+            string statusUrl = string.Empty;
+
+            if (startOperationResponse.Headers.Contains("Location"))
+            {
+                statusUrl = startOperationResponse.Headers.GetValues("Location").FirstOrDefault();
+            }
+
+            while (true)
+            {
+                var statusResponse = await client.GetAsync(new Uri(statusUrl), cancellationToken);
+                var body = await statusResponse.Content.ReadAsStringAsync();
+                if (body.OrdinalContains("Running") || body.OrdinalContains("InProgress"))
+                {
+                    _logger.Debug("Waiting for ARM Async Operation. statusUrl: {statusUrl}", statusUrl);
+                    await Task.Delay(TimeSpan.FromSeconds(60), cancellationToken);
+                }
+                else
+                {
+                    return body;
+                }
+            }
         }
     }
 }

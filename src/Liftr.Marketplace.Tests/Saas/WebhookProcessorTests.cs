@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using FluentAssertions;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.Marketplace.Exceptions;
 using Microsoft.Liftr.Marketplace.Saas.Contracts;

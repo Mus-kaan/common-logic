@@ -2,11 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using FluentAssertions;
 using Flurl.Http.Testing;
-using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.Marketplace.ARM.Contracts;
-using Microsoft.Liftr.Marketplace.ARM.Exceptions;
 using Microsoft.Liftr.Marketplace.ARM.Models;
 using Microsoft.Liftr.Marketplace.Contracts;
 using Microsoft.Liftr.Marketplace.Tests;
