@@ -1213,7 +1213,7 @@ namespace Microsoft.Liftr.Fluent
         }
         #endregion
 
-        public async Task WaitAsyncOperationAsync(
+        public async Task<string> WaitAsyncOperationAsync(
            HttpClient client,
            HttpResponseMessage startOperationResponse,
            CancellationToken cancellationToken)
@@ -1260,7 +1260,7 @@ namespace Microsoft.Liftr.Fluent
                 }
                 else
                 {
-                    return;
+                    return body;
                 }
             }
         }
