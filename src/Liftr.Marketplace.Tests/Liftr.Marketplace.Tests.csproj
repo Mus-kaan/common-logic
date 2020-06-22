@@ -14,5 +14,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Marketplace\Liftr.Marketplace.csproj" />
+    <ProjectReference Include="..\Liftr.Tests.Common\Liftr.Tests.Common.csproj" />
   </ItemGroup>
 </Project>

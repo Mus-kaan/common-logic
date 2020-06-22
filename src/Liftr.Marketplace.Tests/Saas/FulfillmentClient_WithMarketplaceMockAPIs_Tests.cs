@@ -34,7 +34,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
         }
 
         // TO DO: Should be skipped in official build as it needs internet
-        [Fact]
+        [SkipInOfficialBuild]
         public async Task Can_resolve_subscription_Async()
         {
             var expectedSubscription = new ResolvedMarketplaceSubscription()
@@ -50,14 +50,14 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             resolvedSubscription.Should().BeEquivalentTo(expectedSubscription);
         }
 
-        [Fact]
+        [SkipInOfficialBuild]
         public async Task Can_activate_subscription_Async()
         {
             Func<Task> act = async () => { await _fulfillmentClient.ActivateSaaSSubscriptionAsync(new ActivateSubscriptionRequest(_marketplaceMockSubscription, "Gold", 100)); };
             await act.Should().NotThrowAsync();
         }
 
-        [Fact]
+        [SkipInOfficialBuild]
         public async Task Throws_exception_if_activation_doesnot_succeed_Async()
         {
             var marketplaceSubscription = new MarketplaceSubscription(Guid.NewGuid());
@@ -66,7 +66,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
                 new ActivateSubscriptionRequest(marketplaceSubscription, "NOT_EXISTING_PLAN", 100), CancellationToken.None));
         }
 
-        [Fact]
+        [SkipInOfficialBuild]
         public async Task Can_get_subscription_operation_Async()
         {
             var operationId = Guid.Parse("529f53e1-c04b-49c8-881c-c49fb5c6fada");
@@ -77,14 +77,14 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             Assert.Equal(subscriptionOperation.Id, operationId);
         }
 
-        [Fact]
+        [SkipInOfficialBuild]
         public async Task Can_get_pending_operations_Async()
         {
             var subscriptionOperation = await _fulfillmentClient.ListPendingOperationsAsync(_marketplaceMockSubscription);
             subscriptionOperation.Should().HaveCount(2);
         }
 
-        [Fact]
+        [SkipInOfficialBuild]
         public async Task Can_update_operation_Async()
         {
             var operationId = Guid.Parse("529f53e1-c04b-49c8-881c-c49fb5c6fada");
