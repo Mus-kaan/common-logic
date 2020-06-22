@@ -45,9 +45,9 @@ namespace Microsoft.Liftr.Fluent
 
         Task<string> GetResourceAsync(string resourceId, string apiVersion);
 
-        Task<string> DeleteResourceAsync(string resourceId, string apiVersion, CancellationToken cancellationToken = default);
+        Task DeleteResourceAsync(string resourceId, string apiVersion, CancellationToken cancellationToken = default);
 
-        Task<string> WaitAsyncOperationAsync(HttpClient client, HttpResponseMessage startOperationResponse, CancellationToken cancellationToken);
+        Task WaitAsyncOperationAsync(HttpClient client, HttpResponseMessage startOperationResponse, CancellationToken cancellationToken);
 
         #region Resource Group
         Task<IResourceGroup> GetOrCreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags);

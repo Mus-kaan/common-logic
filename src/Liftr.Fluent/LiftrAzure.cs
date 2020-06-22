@@ -126,7 +126,7 @@ namespace Microsoft.Liftr.Fluent
             }
         }
 
-        public async Task<string> DeleteResourceAsync(string resourceId, string apiVersion, CancellationToken cancellationToken = default)
+        public async Task DeleteResourceAsync(string resourceId, string apiVersion, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(resourceId))
             {
@@ -145,7 +145,6 @@ namespace Microsoft.Liftr.Fluent
                 var uriBuilder = new UriBuilder(AzureCredentials.Environment.ResourceManagerEndpoint);
                 uriBuilder.Path = resourceId;
                 uriBuilder.Query = $"api-version={apiVersion}";
-                string deleteResource = null;
                 _logger.Information($"Start deleting resource at Uri: {uriBuilder.Uri}");
                 var deleteResponse = await httpClient.DeleteAsync(uriBuilder.Uri, cancellationToken);
                 _logger.Information($"DELETE response code: {deleteResponse.StatusCode}");
@@ -163,11 +162,11 @@ namespace Microsoft.Liftr.Fluent
                 }
                 else if (deleteResponse.StatusCode == HttpStatusCode.Accepted)
                 {
-                    deleteResource = await WaitAsyncOperationAsync(httpClient, deleteResponse, cancellationToken);
+                    await WaitAsyncOperationAsync(httpClient, deleteResponse, cancellationToken);
                 }
 
                 _logger.Information($"Finished deleting resource at Uri: {uriBuilder.Uri}");
-                return deleteResource;
+                return;
             }
         }
 
@@ -1214,7 +1213,7 @@ namespace Microsoft.Liftr.Fluent
         }
         #endregion
 
-        public async Task<string> WaitAsyncOperationAsync(
+        public async Task WaitAsyncOperationAsync(
            HttpClient client,
            HttpResponseMessage startOperationResponse,
            CancellationToken cancellationToken)
@@ -1258,6 +1257,10 @@ namespace Microsoft.Liftr.Fluent
                 {
                     var retryAfter = GetRetryAfterValue(statusResponse);
                     await Task.Delay(retryAfter, cancellationToken);
+                }
+                else
+                {
+                    return;
                 }
             }
         }
