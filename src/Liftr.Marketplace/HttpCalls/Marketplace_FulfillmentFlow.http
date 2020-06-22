@@ -1,0 +1,45 @@
+### Prod Configuration ###
+@prodTokenEndpoint = https://login.microsoftonline.com
+@prodMarketplaceResource = 62d94f6c-d599-489b-a797-3e10e42fbe22
+@prodSaasOfferClientId = ae25e474-f1e3-4b49-b288-08dd8b811323
+@prodSaasOfferTenantId = 33e01921-4d64-4f8c-a055-5bdaffd5e33d
+@prodMarketplaceEndpoint = https://marketplaceapi.microsoft.com/
+
+### Dogfood Configuration ###
+@dogfoodTokenEndpoint = https://login.windows-ppe.net
+@dogfoodMarketplaceResource = 4c328f8a-1356-4991-883b-ff83cb17aba3
+@dogfoodSaasOfferTenantId = f686d426-8d16-42db-81b7-ab578e110ccd
+@dogfoodSaasOfferClientId = bf901379-e946-48c2-a6fa-906ef12cb172
+@dogfoodMarketplaceEndpoint = https://marketplaceapi.spza-internal.net
+
+@tokenEndpoint = {{prodTokenEndpoint}}
+@tenantId = {{prodSaasOfferTenantId}}
+@clientId = {{prodSaasOfferClientId}}
+@resource = {{prodMarketplaceResource}}
+@baseAddressMarketplaceAPI = {{prodMarketplaceEndpoint}}
+@secret = {{clientSecret}}
+
+### Get Publisher Token ###
+
+# @name auth
+POST {{tokenEndpoint}}/{{tenantId}}/oauth2/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+&client_id={{clientId}}
+&client_secret={{secret}}
+&resource={{resource}}
+
+@bearerToken = Bearer {{auth.response.body.access_token}}
+
+### Activate Saas Offer ####
+@marketplaceResourceId = 2f99670a-239e-6d01-da05-cd174328f53a
+@planId = liftsaasplan1 
+
+POST {{baseAddressMarketplaceAPI}}/api/saas/subscriptions/{{marketplaceResourceId}}/activate?api-version=2018-08-31
+Authorization: {{bearerToken}}
+Content-Type: application/json
+
+{
+  "planId": "{{planId}}"
+}

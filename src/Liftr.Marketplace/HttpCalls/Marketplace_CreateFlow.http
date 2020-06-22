@@ -1,0 +1,55 @@
+## Http calls to create Marketplace resource
+
+// Configuration for Dogfood Environment
+@dogfoodEndpoint = https://api-dogfood.resources.windows-int.net
+@dogfoodSubscription = 7a122ed2-bf67-4642-8178-2da2f652437d
+
+// Configuration for Prod Environment
+@armProdEndpoint = https://management.azure.com
+@prodSubscription = d2f3e524-6bae-4357-82ed-ea60f82647a4
+
+// Configuration for creating Marketplace Saas resource
+@armEndpoint = {{armProdEndpoint}}
+@azureSubscriptionId = {{prodSubscription}}
+
+@skuId = trial
+@saasResourceName = akshitaTest1
+@publisherId = royin-test
+@offerId = liftr_datadog_prod_offer
+@termId = hjdtn7tfnxcy
+@bearerToken = Bearer <your_token>
+
+## Send request to create 
+# @name createRequest
+PUT {{armEndpoint}}/providers/microsoft.saas/saasresources?api-version=2018-03-01-beta
+Authorization: {{bearerToken}}
+Content-Type: application/json
+x-ms-requestid: {{$guid}}
+x-ms-correlationid: {{$guid}}
+
+{
+    "properties": {
+        "publisherId": "{{publisherId}}",
+        "offerId": "{{offerId}}",
+        "saasResourceName": "{{saasResourceName}}",
+        "skuId": "{{skuId}}",
+        "termId": "{{termId}}",
+        "paymentChannelType": "SubscriptionDelegated",
+        "paymentChannelMetadata": {
+            "AzureSubscriptionId" : "{{azureSubscriptionId}}"
+        }
+    }
+}
+
+### Get Operation Status
+GET {{createRequest.response.headers.Location}}
+Authorization: {{bearerToken}}
+
+### Get the created subscription
+@marketplaceResourceId = 6d298058-45ef-71d3-8c7b-c352cef1f34c
+GET {{armEndpoint}}/providers/microsoft.saas/saasresources/{{marketplaceResourceId}}?api-version=2018-03-01-beta
+Authorization: {{bearerToken}}
+
+### Get the access token for the subscription
+POST {{armEndpoint}}/providers/microsoft.saas/saasresources/{{marketplaceResourceId}}/listAccessToken?api-version=2018-03-01-beta
+Authorization: {{bearerToken}}
