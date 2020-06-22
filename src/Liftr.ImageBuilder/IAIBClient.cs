@@ -33,7 +33,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 string runOutputName,
                 CancellationToken cancellationToken = default);
 
-        Task<string> DeleteVMImageBuilderTemplateAsync(
+        Task DeleteVMImageBuilderTemplateAsync(
                 string rgName,
                 string templateName,
                 CancellationToken cancellationToken = default);

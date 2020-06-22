@@ -156,13 +156,40 @@ namespace Microsoft.Liftr.ImageBuilder
             return _liftrAzure.GetResourceAsync(resourceId, c_AIBAPIVersion);
         }
 
-        public Task<string> DeleteVMImageBuilderTemplateAsync(
-            string rgName,
-            string templateName,
-            CancellationToken cancellationToken = default)
+        public async Task DeleteVMImageBuilderTemplateAsync(
+             string rgName,
+             string templateName,
+             CancellationToken cancellationToken = default)
         {
-            var resourceId = $"/subscriptions/{_liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{templateName}";
-            return _liftrAzure.DeleteResourceAsync(resourceId, c_AIBAPIVersion, cancellationToken);
+            // https://github.com/Azure/azure-rest-api-specs-pr/blob/87dbc20106afce8c615113d654c14359a3356486/specification/imagebuilder/resource-manager/Microsoft.VirtualMachineImages/preview/2019-05-01-preview/imagebuilder.json#L280
+            using (var handler = new AzureApiAuthHandler(_liftrAzure.AzureCredentials))
+            using (var httpClient = new HttpClient(handler))
+            {
+                _logger.Information("Delete AIB template. rgName: {rgName}. templateName: {templateName}", rgName, templateName);
+                var uriBuilder = new UriBuilder(_liftrAzure.AzureCredentials.Environment.ResourceManagerEndpoint);
+                uriBuilder.Path =
+                    $"/subscriptions/{_liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{templateName}";
+                uriBuilder.Query = $"api-version={c_AIBAPIVersion}";
+                var deleteResponse = await httpClient.DeleteAsync(uriBuilder.Uri, cancellationToken);
+
+                if (!deleteResponse.IsSuccessStatusCode)
+                {
+                    _logger.Error("Delete AIB template {templateName} in {rgName} failed. Status code: {deleteResponseStatusCode}", templateName, rgName, deleteResponse.StatusCode);
+                    if (deleteResponse?.Content != null)
+                    {
+                        var errorContent = await deleteResponse.Content.ReadAsStringAsync();
+                        _logger.Error("Response body: {errorContent}", errorContent);
+                    }
+
+                    throw new InvalidOperationException("Delete template failed.");
+                }
+                else if (deleteResponse.StatusCode == HttpStatusCode.Accepted)
+                {
+                    var asyncOperationResponse = await WaitAsyncOperationAsync(httpClient, deleteResponse, cancellationToken);
+                }
+
+                _logger.Information("Delete AIB template succeeded. rgName: {rgName}. templateName: {templateName}", rgName, templateName);
+            }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
