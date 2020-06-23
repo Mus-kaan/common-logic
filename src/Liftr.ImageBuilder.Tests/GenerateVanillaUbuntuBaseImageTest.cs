@@ -23,7 +23,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [JenkinsOnly]
         public async Task VerifySBIGenerationAsync()
         {
             MockTimeSource timeSource = new MockTimeSource();
@@ -33,24 +33,24 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
 
             using (var scope = new TestResourceGroupScope(baseName, _output))
             {
-                var options = new BuilderOptions()
+                try
                 {
-                    SubscriptionId = new Guid(TestCredentials.SubscriptionId),
-                    Location = TestCommon.Location,
-                    ResourceGroupName = scope.ResourceGroupName,
-                    ImageGalleryName = "ubsigtest" + baseName,
-                    ImageReplicationRegions = new List<Region>()
+                    var options = new BuilderOptions()
+                    {
+                        SubscriptionId = new Guid(TestCredentials.SubscriptionId),
+                        Location = TestCommon.Location,
+                        ResourceGroupName = scope.ResourceGroupName,
+                        ImageGalleryName = "ubsigtest" + baseName,
+                        ImageReplicationRegions = new List<Region>()
                     {
                         Region.USEast,
                     },
-                    KeepAzureVMImageBuilderLogs = false,
-                    ExportVHDToStorage = true,
-                };
+                        KeepAzureVMImageBuilderLogs = false,
+                        ExportVHDToStorage = true,
+                    };
 
-                var orchestrator = new ImageBuilderOrchestrator(options, scope.AzFactory, TestCredentials.KeyVaultClient, timeSource, scope.Logger);
+                    var orchestrator = new ImageBuilderOrchestrator(options, scope.AzFactory, TestCredentials.KeyVaultClient, timeSource, scope.Logger);
 
-                try
-                {
                     (var kv, _) = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.BakeNewImageAndExport, SourceImageType.UbuntuServer1804, tags: tags);
                     Assert.NotNull(kv);
 
@@ -64,6 +64,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                 }
                 catch (Exception ex)
                 {
+                    scope.TimedOperation.FailOperation(ex.Message);
                     scope.Logger.Error(ex, ex.Message);
                     throw;
                 }

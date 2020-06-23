@@ -22,7 +22,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [JenkinsOnly]
         public async Task VerifyWindowsBaseImageGenerationAsync()
         {
             MockTimeSource timeSource = new MockTimeSource();
@@ -32,22 +32,22 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
 
             using (var scope = new TestResourceGroupScope(baseName, _output))
             {
-                var options = new BuilderOptions()
+                try
                 {
-                    SubscriptionId = new Guid(TestCredentials.SubscriptionId),
-                    Location = TestCommon.Location,
-                    ResourceGroupName = scope.ResourceGroupName,
-                    ImageGalleryName = "testsig" + baseName,
-                    ImageReplicationRegions = new List<Region>()
+                    var options = new BuilderOptions()
+                    {
+                        SubscriptionId = new Guid(TestCredentials.SubscriptionId),
+                        Location = TestCommon.Location,
+                        ResourceGroupName = scope.ResourceGroupName,
+                        ImageGalleryName = "testsig" + baseName,
+                        ImageReplicationRegions = new List<Region>()
                     {
                         Region.USEast,
                     },
-                };
+                    };
 
-                var orchestrator = new ImageBuilderOrchestrator(options, scope.AzFactory, TestCredentials.KeyVaultClient, timeSource, scope.Logger);
+                    var orchestrator = new ImageBuilderOrchestrator(options, scope.AzFactory, TestCredentials.KeyVaultClient, timeSource, scope.Logger);
 
-                try
-                {
                     await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.BakeNewImageAndExport, SourceImageType.WindowsServer2019DatacenterCore, tags: tags);
 
                     await orchestrator.BuildCustomizedSBIAsync(
@@ -60,6 +60,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                 }
                 catch (Exception ex)
                 {
+                    scope.TimedOperation.FailOperation(ex.Message);
                     scope.Logger.Error(ex, ex.Message);
                     throw;
                 }

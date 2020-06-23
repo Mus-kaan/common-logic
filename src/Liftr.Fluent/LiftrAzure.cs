@@ -1216,7 +1216,8 @@ namespace Microsoft.Liftr.Fluent
         public async Task<string> WaitAsyncOperationAsync(
            HttpClient client,
            HttpResponseMessage startOperationResponse,
-           CancellationToken cancellationToken)
+           CancellationToken cancellationToken,
+           TimeSpan? pollingTime = null)
         {
             string statusUrl = string.Empty;
 
@@ -1228,6 +1229,13 @@ namespace Microsoft.Liftr.Fluent
             if (string.IsNullOrEmpty(statusUrl) && startOperationResponse.Headers.Contains("Azure-AsyncOperation"))
             {
                 statusUrl = startOperationResponse.Headers.GetValues("Azure-AsyncOperation").FirstOrDefault();
+            }
+
+            if (string.IsNullOrEmpty(statusUrl))
+            {
+                var ex = new InvalidOperationException("Cannot find the async status url from both the headers: Location, AsyncOperation");
+                _logger.LogError(ex.Message);
+                throw ex;
             }
 
             while (true)
@@ -1255,7 +1263,8 @@ namespace Microsoft.Liftr.Fluent
 
                 if (keepWaiting)
                 {
-                    var retryAfter = GetRetryAfterValue(statusResponse);
+                    var retryAfter = pollingTime.HasValue ? pollingTime.Value : GetRetryAfterValue(statusResponse);
+                    _logger.Information($"Wait for {retryAfter.TotalSeconds} seconds before checking the async status at: '{statusUrl}'");
                     await Task.Delay(retryAfter, cancellationToken);
                 }
                 else
