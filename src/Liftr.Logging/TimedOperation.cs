@@ -19,6 +19,8 @@ namespace Microsoft.Liftr.Logging
     {
         private const string ResultDescription = nameof(ResultDescription);
         private const string FailureMessage = nameof(FailureMessage);
+        private const string SucceededOperationCount = nameof(SucceededOperationCount);
+        private const string FailedOperationCount = nameof(FailedOperationCount);
         private const string StatusCode = nameof(StatusCode);
         private readonly Serilog.ILogger _logger;
         private readonly string _operationName;
@@ -68,6 +70,20 @@ namespace Microsoft.Liftr.Logging
             else
             {
                 _logger.Information("Finished TimedOperation '{TimedOperationName}' with '{TimedOperationId}'. Successful: {isSuccessful}. StatusCode: {statusCode}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationName, _operationId, _isSuccessful, _statusCode.Value, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
+            }
+
+            if (_appInsightsOperation != null)
+            {
+                if (_isSuccessful)
+                {
+                    _appInsightsOperation.Telemetry.Metrics[SucceededOperationCount] = 1;
+                    _appInsightsOperation.Telemetry.Metrics[FailedOperationCount] = 0;
+                }
+                else
+                {
+                    _appInsightsOperation.Telemetry.Metrics[SucceededOperationCount] = 0;
+                    _appInsightsOperation.Telemetry.Metrics[FailedOperationCount] = 1;
+                }
             }
 
             _appInsightsOperation?.Dispose();
