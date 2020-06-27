@@ -78,11 +78,15 @@ namespace Microsoft.Liftr.Logging
                 {
                     _appInsightsOperation.Telemetry.Metrics[SucceededOperationCount] = 1;
                     _appInsightsOperation.Telemetry.Metrics[FailedOperationCount] = 0;
+                    _appInsightsOperation.Telemetry.Metrics[_operationName + SucceededOperationCount] = 1;
+                    _appInsightsOperation.Telemetry.Metrics[_operationName + FailedOperationCount] = 0;
                 }
                 else
                 {
                     _appInsightsOperation.Telemetry.Metrics[SucceededOperationCount] = 0;
                     _appInsightsOperation.Telemetry.Metrics[FailedOperationCount] = 1;
+                    _appInsightsOperation.Telemetry.Metrics[_operationName + SucceededOperationCount] = 0;
+                    _appInsightsOperation.Telemetry.Metrics[_operationName + FailedOperationCount] = 1;
                 }
             }
 
