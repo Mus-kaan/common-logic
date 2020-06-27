@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -29,6 +30,42 @@ namespace Microsoft.Liftr.Fluent.Tests
                 {
                     var client = scope.Client;
                     var rg = await client.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
+                    var retrieved = await client.GetResourceGroupAsync(scope.ResourceGroupName);
+
+                    TestCommon.CheckCommonTags(retrieved.Inner.Tags);
+
+                    await client.DeleteResourceGroupAsync(scope.ResourceGroupName);
+
+                    // It is deleted.
+                    Assert.Null(await client.GetResourceGroupAsync(scope.ResourceGroupName));
+                }
+                catch (Exception ex)
+                {
+                    scope.TimedOperation.FailOperation(ex.Message);
+                    scope.Logger.Error(ex, ex.Message);
+                    throw;
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData("westus")]
+        [InlineData("eastus")]
+        public async Task VerityTheoryAsync(string location)
+        {
+            if (TestConstants.IsNonJenkins())
+            {
+                return;
+            }
+
+            using (var scope = new JenkinsTestResourceGroupScope("jenkins-test-rg-", _output))
+            {
+                scope.TimedOperation.SetContextProperty("TestLocation", location);
+                var loc = Region.Create(location);
+                try
+                {
+                    var client = scope.Client;
+                    var rg = await client.CreateResourceGroupAsync(loc, scope.ResourceGroupName, TestCommon.Tags);
                     var retrieved = await client.GetResourceGroupAsync(scope.ResourceGroupName);
 
                     TestCommon.CheckCommonTags(retrieved.Inner.Tags);
