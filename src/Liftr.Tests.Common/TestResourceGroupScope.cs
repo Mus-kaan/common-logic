@@ -75,6 +75,8 @@ namespace Microsoft.Liftr
 
         public ITimedOperation TimedOperation { get; private set; }
 
+        public bool SkipDeleteResourceGroup { get; set; } = false;
+
         public LiftrAzureFactory AzFactory { get; protected set; }
 
         public ILiftrAzure Client
@@ -117,11 +119,14 @@ namespace Microsoft.Liftr
                 _appInsightsClient?.Flush();
                 _appInsightsConfig?.Dispose();
                 _depModule?.Dispose();
-                var deleteTask = Client.DeleteResourceGroupAsync(ResourceGroupName);
-                Task.Yield();
+                if (!SkipDeleteResourceGroup)
+                {
+                    var deleteTask = Client.DeleteResourceGroupAsync(ResourceGroupName);
+                    Task.Yield();
 #pragma warning disable Liftr1005 // Avoid calling System.Threading.Tasks.Task.Wait()
-                Task.Delay(2000).Wait();
+                    Task.Delay(2000).Wait();
 #pragma warning restore Liftr1005 // Avoid calling System.Threading.Tasks.Task.Wait()
+                }
 
                 TimedOperation = null;
                 _appInsightsClient = null;
