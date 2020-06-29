@@ -12,10 +12,10 @@ fi
 # The version are referenced at three places. You need to update all of them. Please search for this sentence.
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/references/linuxcontainers.html"
 IMG_mdsd="genevamdsd:master_293"
-IMG_mdm="genevamdm:master_39"
-IMG_fluentd="genevafluentd_td-agent:master_136"
-IMG_azsecpack="genevasecpackinstall:master_52"
-IMG_prommdm="shared/prom-mdm-converter:2.0.master.20200505.2"
+IMG_mdm="genevamdm:master_40"
+IMG_fluentd="genevafluentd_td-agent:master_138"
+IMG_azsecpack="genevasecpackinstall:master_53"
+IMG_prommdm="shared/prom-mdm-converter:2.0.master.20200629.1"
 
 for i in "$@"
 do

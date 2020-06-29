@@ -12,19 +12,19 @@ mdsd:
   dockerTag: master_293
 
 mdm:
-  dockerTag: master_39
+  dockerTag: master_40
 
 fluentd:
-  dockerTag: master_136
+  dockerTag: master_138
 
 secpack:
-  dockerTag: master_52
+  dockerTag: master_53
 
 promMdmConverter:
   name: prom-mdm-converter
   replicas: 1
   promConverterImagePullPolicy: Always
-  dockerTag: 2.0.master.20200505.2
+  dockerTag: 2.0.master.20200629.1
 
   metrics: # Metrics below with a suffix "_named" or "_rate" are likely defined in the Prometheus configuration
     kube_pod_status_phase:
