@@ -36,7 +36,7 @@ namespace Microsoft.Liftr
             ResourceGroupName = resourceGroupName;
 
             var operationName = $"{Path.GetFileNameWithoutExtension(filePath)}-{memberName}";
-            TimedOperation = Logger.StartTimedOperation(operationName);
+            TimedOperation = Logger.StartTimedOperation(operationName, generateMetrics: true);
             TimedOperation.SetContextProperty(nameof(resourceGroupName), resourceGroupName);
             TimedOperation.SetProperty("TestEnv", "CICD");
         }
@@ -48,7 +48,7 @@ namespace Microsoft.Liftr
             ResourceGroupName = SdkContext.RandomResourceName(baseName, 25);
 
             var operationName = $"{Path.GetFileNameWithoutExtension(filePath)}-{memberName}";
-            TimedOperation = Logger.StartTimedOperation(operationName);
+            TimedOperation = Logger.StartTimedOperation(operationName, generateMetrics: true);
             TimedOperation.SetContextProperty(nameof(baseName), baseName);
             TimedOperation.SetProperty("TestEnv", "CICD");
         }
@@ -66,7 +66,7 @@ namespace Microsoft.Liftr
             TestCommon.AddCommonTags(namingContext.Tags);
 
             var operationName = $"{Path.GetFileNameWithoutExtension(filePath)}-{memberName}";
-            TimedOperation = Logger.StartTimedOperation(operationName);
+            TimedOperation = Logger.StartTimedOperation(operationName, generateMetrics: true);
             TimedOperation.SetContextProperty(nameof(baseName), baseName);
             TimedOperation.SetProperty("TestEnv", "CICD");
         }

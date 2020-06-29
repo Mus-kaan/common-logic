@@ -27,13 +27,14 @@ namespace Microsoft.Liftr.Logging
         private readonly Dictionary<string, object> _properties = new Dictionary<string, object>();
         private readonly IOperationHolder<RequestTelemetry> _appInsightsOperation;
         private readonly string _operationId;
+        private readonly bool _generateMetrics;
         private readonly string _startTime = DateTime.UtcNow.ToZuluString();
         private readonly Stopwatch _sw = Stopwatch.StartNew();
         private readonly LogContextPropertyScope _correlationIdScope;
         private bool _isSuccessful = true;
         private int? _statusCode = null;
 
-        public TimedOperation(Serilog.ILogger logger, string operationName, string operationId = null)
+        public TimedOperation(Serilog.ILogger logger, string operationName, string operationId = null, bool generateMetrics = false)
         {
             if (string.IsNullOrEmpty(operationId))
             {
@@ -50,6 +51,7 @@ namespace Microsoft.Liftr.Logging
             _operationName = operationName;
             _appInsightsOperation = AppInsightsHelper.AppInsightsClient?.StartOperation<RequestTelemetry>(operationName);
             _operationId = operationId;
+            _generateMetrics = generateMetrics;
             SetContextProperty("LiftrTimedOperationId", operationId);
             _logger.Information("Start TimedOperation '{TimedOperationName}' with '{TimedOperationId}' at StartTime {StartTime}.", _operationName, _operationId, _startTime);
         }
@@ -72,7 +74,7 @@ namespace Microsoft.Liftr.Logging
                 _logger.Information("Finished TimedOperation '{TimedOperationName}' with '{TimedOperationId}'. Successful: {isSuccessful}. StatusCode: {statusCode}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationName, _operationId, _isSuccessful, _statusCode.Value, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
             }
 
-            if (_appInsightsOperation != null)
+            if (_appInsightsOperation != null && _generateMetrics)
             {
                 if (_isSuccessful)
                 {
