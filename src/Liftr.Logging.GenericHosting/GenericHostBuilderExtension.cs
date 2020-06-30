@@ -50,6 +50,9 @@ namespace Microsoft.Liftr.Logging.GenericHosting
                         appInsightsConfig.InstrumentationKey = ikey;
                         DependencyTrackingTelemetryModule depModule = new DependencyTrackingTelemetryModule();
                         depModule.Initialize(appInsightsConfig);
+                        var builder = appInsightsConfig.DefaultTelemetrySink.TelemetryProcessorChainBuilder;
+                        builder.Use((next) => new NoSamplingTelemetryProcessor());
+                        builder.Build();
                         var appInsightsClient = new TelemetryClient(appInsightsConfig);
                         AppInsightsHelper.AppInsightsClient = appInsightsClient;
                         serilogConfig = serilogConfig.WriteTo.ApplicationInsights(appInsightsClient, TelemetryConverter.Events);
