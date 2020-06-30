@@ -51,7 +51,7 @@ namespace Microsoft.Liftr.Logging.GenericHosting
                         DependencyTrackingTelemetryModule depModule = new DependencyTrackingTelemetryModule();
                         depModule.Initialize(appInsightsConfig);
                         var builder = appInsightsConfig.DefaultTelemetrySink.TelemetryProcessorChainBuilder;
-                        builder.Use((next) => new NoSamplingTelemetryProcessor());
+                        builder.Use((next) => new NoSamplingTelemetryProcessor(next));
                         builder.Build();
                         var appInsightsClient = new TelemetryClient(appInsightsConfig);
                         AppInsightsHelper.AppInsightsClient = appInsightsClient;

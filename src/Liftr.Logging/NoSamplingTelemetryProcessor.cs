@@ -10,12 +10,21 @@ namespace Microsoft.Liftr.Logging
 {
     public class NoSamplingTelemetryProcessor : ITelemetryProcessor
     {
+        private readonly ITelemetryProcessor _next;
+
+        public NoSamplingTelemetryProcessor(ITelemetryProcessor next)
+        {
+            _next = next;
+        }
+
         public void Process(ITelemetry item)
         {
             if (item is ISupportSampling)
             {
                 ((ISupportSampling)item).SamplingPercentage = 100;
             }
+
+            _next.Process(item);
         }
     }
 }
