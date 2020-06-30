@@ -59,7 +59,13 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 {
                     (var allowOverride, var logRequest, var defaultLevel) = GetOverrideOptions(host);
 
-                    services.AddApplicationInsightsTelemetry();
+                    var ikey = host.Configuration.GetSection("ApplicationInsights")?.GetSection("InstrumentationKey")?.Value;
+                    if (!string.IsNullOrEmpty(ikey))
+                    {
+                        var aiOptions = new ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions();
+                        aiOptions.EnableAdaptiveSampling = false;
+                        services.AddApplicationInsightsTelemetry(aiOptions);
+                    }
 
                     services.AddSingleton(new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener()));
 
@@ -70,7 +76,6 @@ namespace Microsoft.Liftr.Logging.AspNetCore
 
                     services.AddSingleton<Serilog.ILogger>((sp) =>
                     {
-                        var ikey = host.Configuration.GetSection("ApplicationInsights")?.GetSection("InstrumentationKey")?.Value;
                         if (!string.IsNullOrEmpty(ikey))
                         {
                             var appInsightsClient = sp.GetService<TelemetryClient>();
