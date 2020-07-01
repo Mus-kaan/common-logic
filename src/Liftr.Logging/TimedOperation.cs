@@ -31,10 +31,11 @@ namespace Microsoft.Liftr.Logging
         private readonly string _startTime = DateTime.UtcNow.ToZuluString();
         private readonly Stopwatch _sw = Stopwatch.StartNew();
         private readonly LogContextPropertyScope _correlationIdScope;
+        private readonly LogContextPropertyScope _parentCorrelationIdScope;
         private bool _isSuccessful = true;
         private int? _statusCode = null;
 
-        public TimedOperation(Serilog.ILogger logger, string operationName, string operationId = null, bool generateMetrics = false)
+        public TimedOperation(Serilog.ILogger logger, string operationName, string operationId = null, bool generateMetrics = false, bool newCorrelationId = false)
         {
             if (string.IsNullOrEmpty(operationId))
             {
@@ -45,6 +46,12 @@ namespace Microsoft.Liftr.Logging
             {
                 CallContextHolder.CorrelationId.Value = operationId;
                 _correlationIdScope = new LogContextPropertyScope("LiftrCorrelationId", operationId);
+            }
+            else if (newCorrelationId)
+            {
+                var parentId = CallContextHolder.CorrelationId.Value;
+                _parentCorrelationIdScope = new LogContextPropertyScope("ParentLiftrCorrelationId", parentId);
+                CallContextHolder.CorrelationId.Value = operationId;
             }
 
             _logger = logger;
@@ -94,6 +101,7 @@ namespace Microsoft.Liftr.Logging
 
             _appInsightsOperation?.Dispose();
             _correlationIdScope?.Dispose();
+            _parentCorrelationIdScope?.Dispose();
         }
 
         public void SetProperty(string name, string value)
