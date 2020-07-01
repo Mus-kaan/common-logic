@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Liftr.Configuration;
@@ -62,9 +63,12 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                     var ikey = host.Configuration.GetSection("ApplicationInsights")?.GetSection("InstrumentationKey")?.Value;
                     if (!string.IsNullOrEmpty(ikey))
                     {
-                        var aiOptions = new ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions();
-                        aiOptions.EnableAdaptiveSampling = false;
-                        services.AddApplicationInsightsTelemetry(aiOptions);
+#pragma warning disable CS0618 // Type or member is obsolete
+                        var builder = TelemetryConfiguration.Active.TelemetryProcessorChainBuilder;
+#pragma warning restore CS0618 // Type or member is obsolete
+                        builder.Use((next) => new NoSamplingTelemetryProcessor(next));
+                        builder.Build();
+                        services.AddApplicationInsightsTelemetry();
                     }
 
                     services.AddSingleton(new HttpCoreDiagnosticSourceSubscriber(new HttpCoreDiagnosticSourceListener()));
