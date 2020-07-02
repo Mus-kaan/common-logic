@@ -70,6 +70,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
                 }
                 catch (Exception ex)
                 {
+                    scope.SkipDeleteResourceGroup = true;
                     scope.TimedOperation.FailOperation(ex.Message);
                     scope.Logger.Error(ex, ex.Message);
                     throw;
