@@ -35,8 +35,8 @@ az account set -s $ameSubscriptionId
 echo "az group create -l $region -n $resourceGroupName"
 az group create -l $region -n $resourceGroupName
 
-echo "az acr create -n $ameLiftrACRName -g $resourceGroupName --sku Premium"
-az acr create -n $ameLiftrACRName -g $resourceGroupName --sku Premium
+# echo "az acr create -n $ameLiftrACRName -g $resourceGroupName --sku Premium"
+# az acr create -n $ameLiftrACRName -g $resourceGroupName --sku Premium
 
 echo "import geneva images to AME Liftr ACR"
 az acr import --name $ameLiftrACRName --source $IMG_mdsd --registry /subscriptions/db67ee91-0665-44d4-b451-31faee93c5fd/resourceGroups/linuxgeneva/providers/Microsoft.ContainerRegistry/registries/linuxgeneva --force
@@ -68,8 +68,8 @@ az account set -s $msSubscriptionId
 echo "az group create -l $region -n $resourceGroupName"
 az group create -l $region -n $resourceGroupName
 
-echo "az acr create -n $msLiftrACRName -g $resourceGroupName --sku Premium"
-az acr create -n $msLiftrACRName -g $resourceGroupName --sku Premium
+# echo "az acr create -n $msLiftrACRName -g $resourceGroupName --sku Premium"
+# az acr create -n $msLiftrACRName -g $resourceGroupName --sku Premium
 
 echo "Psuh geneva images to MS Liftr ACR"
 az acr login -n $msLiftrACRName
