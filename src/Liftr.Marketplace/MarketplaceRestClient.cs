@@ -239,7 +239,7 @@ namespace Microsoft.Liftr.Marketplace
                 {
                     case OperationStatus.InProgress:
                     case OperationStatus.NotStarted:
-                        _logger.LogInformation($"Trying to check the status of operation again. {resultLocation}");
+                        _logger.Information($"Trying to check the status of operation again. {resultLocation}");
                         return await PollOperationAsync<T>(originalRequest, response, --retryCounter);
 
                     case OperationStatus.Failed:

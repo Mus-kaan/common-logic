@@ -35,7 +35,7 @@ namespace Microsoft.Liftr.TokenManager
 
             _tokenManager = new TokenManager(tmOptions, _certStore);
 
-            logger.LogInformation($"Load certificate to make sure the provider is initialized correctly.");
+            logger.Information($"Load certificate to make sure the provider is initialized correctly.");
 #pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
             var cert = _certStore.GetCertificateAsync(_options.KeyVaultEndpoint, _options.CertificateName).Result;
             if (cert == null)

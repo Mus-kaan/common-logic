@@ -35,7 +35,7 @@ namespace Microsoft.Liftr.Sample.WorkerService
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                _logger.Information("Worker running at: {time}", DateTimeOffset.Now);
                 await DoWorkAsync();
                 await Task.Delay(10000, stoppingToken);
             }

@@ -41,7 +41,7 @@ namespace Microsoft.Liftr.RPaaS
             _tokenCallback = tokenCallback ?? throw new ArgumentNullException(nameof(tokenCallback));
             _logger = logger ?? throw new ArgumentNullException(nameof(tokenCallback));
 
-            logger.LogInformation($"Loading token to make sure '{nameof(MetaRPStorageClient)}' is correctly initialized");
+            logger.Information($"Loading token to make sure '{nameof(MetaRPStorageClient)}' is correctly initialized");
 #pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
             var token = tokenCallback(_options.UserRPTenantId).Result;
 #pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
