@@ -8,7 +8,6 @@ using System.Collections.Generic;
 
 namespace Microsoft.Liftr
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "<Pending>")]
     public static class TestCommon
     {
         public static readonly Region Location = Region.USEast;
@@ -22,10 +21,16 @@ namespace Microsoft.Liftr
                 ["CreatedAt"] = DateTime.UtcNow.ToShortDateString(),
                 ["TestRunningMachine"] = Environment.MachineName,
                 ["TestDummyTag"] = "Dummy value",
+                ["ResourceCreationTimestamp"] = DateTime.UtcNow.ToZuluString(),
             };
 
         public static void CheckCommonTags(IDictionary<string, string> tags)
         {
+            if (tags == null)
+            {
+                throw new ArgumentNullException(nameof(tags));
+            }
+
             foreach (var kvp in Tags)
             {
                 if (!kvp.Value.StrictEquals(tags[kvp.Key]))
@@ -37,6 +42,11 @@ namespace Microsoft.Liftr
 
         public static void AddCommonTags(IDictionary<string, string> tags)
         {
+            if (tags == null)
+            {
+                throw new ArgumentNullException(nameof(tags));
+            }
+
             foreach (var kvp in Tags)
             {
                 tags[kvp.Key] = kvp.Value;
