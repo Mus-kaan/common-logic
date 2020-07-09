@@ -9,19 +9,37 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.KeyVault;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Liftr
 {
     public static class JenkinsTestCredentials
     {
         private const string LIFTR_CICD_AUTH_FILE_BASE64 = nameof(LIFTR_CICD_AUTH_FILE_BASE64);
+        private const string LIFTR_CICD_TEST_SUBSCRIPTION_LIST = nameof(LIFTR_CICD_TEST_SUBSCRIPTION_LIST);
 
+        private static readonly List<string> s_subscriptionList;
+        private static readonly Random s_rand = new Random();
+
+#pragma warning disable CA1810 // Initialize reference type static fields inline
         static JenkinsTestCredentials()
+#pragma warning restore CA1810 // Initialize reference type static fields inline
         {
             var encodedAuthFile = Environment.GetEnvironmentVariable(LIFTR_CICD_AUTH_FILE_BASE64);
             if (!string.IsNullOrEmpty(encodedAuthFile))
             {
                 AuthFileContract = AuthFileContract.FromFileContent(encodedAuthFile.FromBase64());
+            }
+
+            var subscriptionListStr = Environment.GetEnvironmentVariable(LIFTR_CICD_TEST_SUBSCRIPTION_LIST);
+            if (!string.IsNullOrEmpty(subscriptionListStr))
+            {
+                s_subscriptionList = subscriptionListStr.Split(',').ToList();
+            }
+            else
+            {
+                s_subscriptionList = new List<string>();
             }
         }
 
@@ -63,6 +81,12 @@ namespace Microsoft.Liftr
             get
             {
                 Check();
+                if (s_subscriptionList.Any())
+                {
+                    var idx = s_rand.Next(0, s_subscriptionList.Count);
+                    return s_subscriptionList[idx];
+                }
+
                 return AuthFileContract.SubscriptionId;
             }
         }
