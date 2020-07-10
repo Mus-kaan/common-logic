@@ -3,6 +3,10 @@
 pipeline {
 	agent any
 
+	options {
+		timeout(time: 100, unit: 'MINUTES')
+	}
+
 	environment {
 		CDP_BUILD_TYPE = 'Official'
 		LIFTR_ENV = 'JENKINS'
