@@ -16,11 +16,13 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
     public class MonitoringRelationshipDataSource : IMonitoringRelationshipDataSource
     {
         private readonly IMongoCollection<MonitoringRelationship> _collection;
+        private readonly MongoWaitQueueRateLimiter _rateLimiter;
         private readonly ITimeSource _timeSource;
 
-        public MonitoringRelationshipDataSource(IMongoCollection<MonitoringRelationship> collection, ITimeSource timeSource)
+        public MonitoringRelationshipDataSource(IMongoCollection<MonitoringRelationship> collection, MongoWaitQueueRateLimiter rateLimiter, ITimeSource timeSource)
         {
             _collection = collection ?? throw new ArgumentNullException(nameof(collection));
+            _rateLimiter = rateLimiter ?? throw new ArgumentNullException(nameof(rateLimiter));
             _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
         }
 
@@ -68,6 +70,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
                 CreatedAtUTC = _timeSource.UtcNow,
             };
 
+            await _rateLimiter.WaitAsync();
             try
             {
                 await _collection.InsertOneAsync(mappedEntity);
@@ -77,6 +80,10 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
             {
                 throw new DuplicatedKeyException(ex);
             }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
 
         /// <inheritdoc/>
@@ -85,8 +92,17 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
             var filter = Builders<MonitoringRelationship>.Filter.Eq(u => u.TenantId, tenantId) &
                 Builders<MonitoringRelationship>.Filter.Eq(u => u.PartnerEntityId, partnerObjectId) &
                 Builders<MonitoringRelationship>.Filter.Eq(u => u.MonitoredResourceId, monitoredResourceId);
-            var cursor = await _collection.FindAsync<MonitoringRelationship>(filter);
-            return await cursor.FirstOrDefaultAsync();
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var cursor = await _collection.FindAsync<MonitoringRelationship>(filter);
+                return await cursor.FirstOrDefaultAsync();
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
 
         /// <inheritdoc/>
@@ -94,8 +110,17 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
         {
             var filter = Builders<MonitoringRelationship>.Filter.Eq(u => u.TenantId, tenantId) &
                 Builders<MonitoringRelationship>.Filter.Eq(u => u.MonitoredResourceId, monitoredResourceId);
-            var cursor = await _collection.FindAsync<MonitoringRelationship>(filter);
-            return await cursor.ToListAsync();
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var cursor = await _collection.FindAsync<MonitoringRelationship>(filter);
+                return await cursor.ToListAsync();
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
 
         /// <inheritdoc/>
@@ -103,8 +128,17 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
         {
             var filter = Builders<MonitoringRelationship>.Filter.Eq(u => u.TenantId, tenantId) &
                 Builders<MonitoringRelationship>.Filter.Eq(u => u.PartnerEntityId, partnerResourceObjectId);
-            var cursor = await _collection.FindAsync<MonitoringRelationship>(filter);
-            return await cursor.ToListAsync();
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var cursor = await _collection.FindAsync<MonitoringRelationship>(filter);
+                return await cursor.ToListAsync();
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
 
         /// <inheritdoc/>
@@ -127,8 +161,16 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
                 filter = filter & Builders<MonitoringRelationship>.Filter.Eq(u => u.MonitoredResourceId, monitoredResourceId);
             }
 
-            var deleteResult = await _collection.DeleteManyAsync(filter);
-            return (int)deleteResult.DeletedCount;
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var deleteResult = await _collection.DeleteManyAsync(filter);
+                return (int)deleteResult.DeletedCount;
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
     }
 }

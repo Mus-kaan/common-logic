@@ -43,7 +43,8 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             try
             {
                 var ts = new MockTimeSource();
-                IMonitoringRelationshipDataSource s = new MonitoringRelationshipDataSource(_collectionScope.Collection, ts);
+                using var rateLimiter = new MongoWaitQueueRateLimiter(100, TestLogger.VoidLogger);
+                IMonitoringRelationshipDataSource s = new MonitoringRelationshipDataSource(_collectionScope.Collection, rateLimiter, ts);
 
                 var tenantId = Guid.NewGuid().ToString();
                 var authId = $"/subscriptions/{Guid.NewGuid()}/resourceGroups/5e-ms-dev-machines-wus2-rg/providers/Microsoft.Compute/virtualMachines/eventhujahsfu";

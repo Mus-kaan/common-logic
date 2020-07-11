@@ -13,8 +13,8 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource
 {
     public class MarketplaceResourceContainerEntityDataSource : ResourceEntityDataSource<MarketplaceResourceContainerEntity>, IMarketplaceResourceContainerEntityDataSource
     {
-        public MarketplaceResourceContainerEntityDataSource(IMongoCollection<MarketplaceResourceContainerEntity> collection, ITimeSource timeSource)
-            : base(collection, timeSource)
+        public MarketplaceResourceContainerEntityDataSource(IMongoCollection<MarketplaceResourceContainerEntity> collection, MongoWaitQueueRateLimiter rateLimiter, ITimeSource timeSource)
+            : base(collection, rateLimiter, timeSource)
         {
         }
 
@@ -27,8 +27,17 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource
 
             var builder = Builders<MarketplaceResourceContainerEntity>.Filter;
             var filter = builder.Eq(u => u.MarketplaceSaasResource.MarketplaceSubscription, marketplaceSubscription);
-            var cursor = await _collection.FindAsync<MarketplaceResourceContainerEntity>(filter);
-            return await cursor.FirstOrDefaultAsync();
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var cursor = await _collection.FindAsync<MarketplaceResourceContainerEntity>(filter);
+                return await cursor.FirstOrDefaultAsync();
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
     }
 }

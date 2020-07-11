@@ -13,12 +13,14 @@ namespace Microsoft.Liftr.DataSource.Mongo
     public class ResourceEntityDataSource<TResource> : IResourceEntityDataSource<TResource> where TResource : BaseResourceEntity
     {
         protected readonly IMongoCollection<TResource> _collection;
+        protected readonly MongoWaitQueueRateLimiter _rateLimiter;
         protected readonly ITimeSource _timeSource;
 
-        public ResourceEntityDataSource(IMongoCollection<TResource> collection, ITimeSource timeSource)
+        public ResourceEntityDataSource(IMongoCollection<TResource> collection, MongoWaitQueueRateLimiter rateLimiter, ITimeSource timeSource)
         {
-            _collection = collection;
-            _timeSource = timeSource;
+            _collection = collection ?? throw new ArgumentNullException(nameof(collection));
+            _rateLimiter = rateLimiter ?? throw new ArgumentNullException(nameof(rateLimiter));
+            _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
         }
 
         public virtual async Task<TResource> AddAsync(TResource entity)
@@ -34,6 +36,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 entity.ResourceId = entity.ResourceId.ToUpperInvariant();
             }
 
+            await _rateLimiter.WaitAsync();
             try
             {
                 entity.CreatedUTC = _timeSource.UtcNow;
@@ -45,14 +48,27 @@ namespace Microsoft.Liftr.DataSource.Mongo
             {
                 throw new DuplicatedKeyException(ex);
             }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
 
         public virtual async Task<TResource> GetAsync(string entityId)
         {
             var builder = Builders<TResource>.Filter;
             var filter = builder.Eq(u => u.EntityId, entityId);
-            var cursor = await _collection.FindAsync(filter);
-            return await cursor.FirstOrDefaultAsync();
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var cursor = await _collection.FindAsync(filter);
+                return await cursor.FirstOrDefaultAsync();
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
 
         public virtual async Task<IEnumerable<TResource>> ListAsync(string resourceId, bool showActiveOnly = true)
@@ -71,8 +87,16 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 filter = filter & builder.Eq(u => u.Active, true);
             }
 
-            var cursor = await _collection.FindAsync(filter);
-            return await cursor.ToListAsync();
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var cursor = await _collection.FindAsync(filter);
+                return await cursor.ToListAsync();
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
 
         public virtual async Task<bool> SoftDeleteAsync(string entityId)
@@ -80,16 +104,34 @@ namespace Microsoft.Liftr.DataSource.Mongo
             var builder = Builders<TResource>.Filter;
             var filter = builder.Eq(u => u.EntityId, entityId);
             var update = Builders<TResource>.Update.Set(u => u.Active, false).Set(u => u.ProvisioningState, ProvisioningState.Deleting);
-            var updateResult = await _collection.UpdateOneAsync(filter, update);
-            return updateResult.ModifiedCount == 1;
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var updateResult = await _collection.UpdateOneAsync(filter, update);
+                return updateResult.ModifiedCount == 1;
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
 
         public virtual async Task<bool> DeleteAsync(string entityId)
         {
             var builder = Builders<TResource>.Filter;
             var filter = builder.Eq(u => u.EntityId, entityId);
-            var deleteResult = await _collection.DeleteOneAsync(filter);
-            return deleteResult.DeletedCount == 1;
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var deleteResult = await _collection.DeleteOneAsync(filter);
+                return deleteResult.DeletedCount == 1;
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
     }
 }

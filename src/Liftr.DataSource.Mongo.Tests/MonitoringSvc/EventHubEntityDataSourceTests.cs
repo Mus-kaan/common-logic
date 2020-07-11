@@ -39,7 +39,8 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
         public async Task BasicDataSourceUsageAsync()
         {
             var ts = new MockTimeSource();
-            var s = new EventHubEntityDataSource(_collectionScope.Collection, ts);
+            using var rateLimiter = new MongoWaitQueueRateLimiter(100, TestLogger.VoidLogger);
+            var s = new EventHubEntityDataSource(_collectionScope.Collection, rateLimiter, ts);
 
             var location1 = "westus";
             var location2 = "eastus2";

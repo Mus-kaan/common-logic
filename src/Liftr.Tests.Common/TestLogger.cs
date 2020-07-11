@@ -10,6 +10,8 @@ namespace Microsoft.Liftr
 {
     public static class TestLogger
     {
+        public static ILogger VoidLogger => new LoggerConfiguration().CreateLogger();
+
         public static ILogger GenerateLogger(ITestOutputHelper output)
         {
             var loggerConfig = new LoggerConfiguration()

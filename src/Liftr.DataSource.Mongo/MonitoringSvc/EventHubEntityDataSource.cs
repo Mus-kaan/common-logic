@@ -15,11 +15,13 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
     public class EventHubEntityDataSource : IEventHubEntityDataSource
     {
         private readonly IMongoCollection<EventHubEntity> _collection;
+        private readonly MongoWaitQueueRateLimiter _rateLimiter;
         private readonly ITimeSource _timeSource;
 
-        public EventHubEntityDataSource(IMongoCollection<EventHubEntity> collection, ITimeSource timeSource)
+        public EventHubEntityDataSource(IMongoCollection<EventHubEntity> collection, MongoWaitQueueRateLimiter rateLimiter, ITimeSource timeSource)
         {
             _collection = collection ?? throw new ArgumentNullException(nameof(collection));
+            _rateLimiter = rateLimiter ?? throw new ArgumentNullException(nameof(rateLimiter));
             _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
         }
 
@@ -42,36 +44,80 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
                 CreatedAtUTC = _timeSource.UtcNow,
             };
 
-            await _collection.InsertOneAsync(mappedEntity);
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                await _collection.InsertOneAsync(mappedEntity);
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
 
         public async Task<IEnumerable<IEventHubEntity>> ListAsync()
         {
             var filter = Builders<EventHubEntity>.Filter.Empty;
-            var cursor = await _collection.FindAsync<EventHubEntity>(filter);
-            return await cursor.ToListAsync();
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var cursor = await _collection.FindAsync<EventHubEntity>(filter);
+                return await cursor.ToListAsync();
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
 
         public async Task<IEnumerable<IEventHubEntity>> ListAsync(MonitoringResourceProvider resourceProvider)
         {
             var filter = Builders<EventHubEntity>.Filter.Eq(i => i.ResourceProvider, resourceProvider);
-            var cursor = await _collection.FindAsync<EventHubEntity>(filter);
-            return await cursor.ToListAsync();
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var cursor = await _collection.FindAsync<EventHubEntity>(filter);
+                return await cursor.ToListAsync();
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
 
         public async Task<IEnumerable<IEventHubEntity>> ListAsync(MonitoringResourceProvider resourceProvider, string location)
         {
             var filter = Builders<EventHubEntity>.Filter.Eq(i => i.ResourceProvider, resourceProvider) &
                 Builders<EventHubEntity>.Filter.Eq(i => i.Location, location);
-            var cursor = await _collection.FindAsync<EventHubEntity>(filter);
-            return await cursor.ToListAsync();
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var cursor = await _collection.FindAsync<EventHubEntity>(filter);
+                return await cursor.ToListAsync();
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
 
         public async Task<int> DeleteAsync(MonitoringResourceProvider resourceProvider)
         {
             var filter = Builders<EventHubEntity>.Filter.Eq(i => i.ResourceProvider, resourceProvider);
-            var deleteResult = await _collection.DeleteManyAsync(filter);
-            return (int)deleteResult.DeletedCount;
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var deleteResult = await _collection.DeleteManyAsync(filter);
+                return (int)deleteResult.DeletedCount;
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
         }
     }
 }

@@ -6,6 +6,9 @@
     <PackageVersion_Azure_Storage_Queues>12.3.0</PackageVersion_Azure_Storage_Queues>
     <PackageVersion_CommandLineParser>2.8.0</PackageVersion_CommandLineParser>
     <PackageVersion_coverlet_collector>1.2.0</PackageVersion_coverlet_collector>
+    <PackageVersion_FluentAssertions>5.9.0</PackageVersion_FluentAssertions>
+    <PackageVersion_Flurl>2.8.2</PackageVersion_Flurl>
+    <PackageVersion_Flurl_Http>2.4.2</PackageVersion_Flurl_Http>
     <PackageVersion_Microsoft_ApplicationInsights>2.11.0</PackageVersion_Microsoft_ApplicationInsights>
     <PackageVersion_Microsoft_ApplicationInsights_AspNetCore>2.8.2</PackageVersion_Microsoft_ApplicationInsights_AspNetCore>
     <PackageVersion_Microsoft_ApplicationInsights_DependencyCollector>2.11.2</PackageVersion_Microsoft_ApplicationInsights_DependencyCollector>
@@ -25,9 +28,6 @@
     <PackageVersion_Microsoft_Extensions_Http>3.1.4</PackageVersion_Microsoft_Extensions_Http>
     <PackageVersion_Microsoft_Extensions_Http_Polly>3.1.4</PackageVersion_Microsoft_Extensions_Http_Polly>
     <PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions>3.1.4</PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions>
-    <PackageVersion_FluentAssertions>5.9.0</PackageVersion_FluentAssertions>
-    <PackageVersion_Flurl>2.8.2</PackageVersion_Flurl>
-    <PackageVersion_Flurl_Http>2.4.2</PackageVersion_Flurl_Http>
     <PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>5.2.7</PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>
     <PackageVersion_Microsoft_IFxAudit>1.0.1200</PackageVersion_Microsoft_IFxAudit>
     <PackageVersion_Microsoft_Liftr_EV2>0.7.1259-build817</PackageVersion_Microsoft_Liftr_EV2>
@@ -45,11 +45,11 @@
     <PackageVersion_Serilog_Sinks_Debug>1.0.1</PackageVersion_Serilog_Sinks_Debug>
     <PackageVersion_Serilog_Sinks_Xunit2>1.0.0</PackageVersion_Serilog_Sinks_Xunit2>
     <PackageVersion_Swashbuckle_AspNetCore>5.4.1</PackageVersion_Swashbuckle_AspNetCore>
-    <PackageVersion_System_Text_Json>4.7.2</PackageVersion_System_Text_Json>
     <PackageVersion_Swashbuckle_AspNetCore_Annotations>5.4.1</PackageVersion_Swashbuckle_AspNetCore_Annotations>
     <PackageVersion_Swashbuckle_AspNetCore_Newtonsoft>5.4.1</PackageVersion_Swashbuckle_AspNetCore_Newtonsoft>
     <PackageVersion_System_Diagnostics_DiagnosticSource>4.5.1</PackageVersion_System_Diagnostics_DiagnosticSource>
     <PackageVersion_System_IdentityModel_Tokens_Jwt>5.6.0</PackageVersion_System_IdentityModel_Tokens_Jwt>
+    <PackageVersion_System_Text_Json>4.7.2</PackageVersion_System_Text_Json>
     <PackageVersion_xunit>2.4.1</PackageVersion_xunit>
     <PackageVersion_xunit_runner_visualstudio>2.4.1</PackageVersion_xunit_runner_visualstudio>
   </PropertyGroup>

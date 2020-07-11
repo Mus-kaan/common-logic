@@ -37,7 +37,8 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
         public async Task BasicCounterUsageTestAsync()
         {
             var ts = new MockTimeSource();
-            ICounterEntityDataSource s = new CounterEntityDataSource(_collectionScope.Collection, ts);
+            using var rateLimiter = new MongoWaitQueueRateLimiter(100, TestLogger.VoidLogger);
+            ICounterEntityDataSource s = new CounterEntityDataSource(_collectionScope.Collection, rateLimiter, ts);
 
             var prefix = "counter-prefix";
 

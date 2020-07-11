@@ -43,7 +43,8 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
         public async Task BasicDataSourceUsageAsync()
         {
             var ts = new MockTimeSource();
-            var s = new PartnerResourceDataSource(_collectionScope.Collection, ts);
+            using var rateLimiter = new MongoWaitQueueRateLimiter(100, TestLogger.VoidLogger);
+            var s = new PartnerResourceDataSource(_collectionScope.Collection, rateLimiter, ts);
 
             var partnerResourceId = "/subscriptions/b0a321d2-3073-44f0-b012-6e60db53ae22/resourceGroups/ngx-test-sbi0920-eus-rg/providers/Microsoft.Storage/storageAccounts/stngxtestsbi0920eus";
             var partnerCredential = "mockPartnerCredential";

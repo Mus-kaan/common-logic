@@ -103,7 +103,7 @@ namespace Microsoft.Liftr.Sample.Web
 #pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
                     IMongoCollection<CounterEntity> collection = factory.GetOrCreateCounterEntityCollectionAsync("counter-entity").Result;
 #pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-                    return new CounterEntityDataSource(collection, timeSource);
+                    return new CounterEntityDataSource(collection, factory.MongoWaitQueueProtector, timeSource);
                 }
                 catch (Exception ex)
                 {
@@ -127,7 +127,7 @@ namespace Microsoft.Liftr.Sample.Web
                     var marketplaceSubscriptionIdx = new CreateIndexModel<MarketplaceResourceContainerEntity>(Builders<MarketplaceResourceContainerEntity>.IndexKeys.Ascending(item => item.MarketplaceSaasResource.MarketplaceSubscription.Id), new CreateIndexOptions<MarketplaceResourceContainerEntity> { Unique = false });
                     collection.Indexes.CreateOne(marketplaceSubscriptionIdx);
 
-                    return new MarketplaceResourceContainerEntityDataSource(collection, timeSource);
+                    return new MarketplaceResourceContainerEntityDataSource(collection, factory.MongoWaitQueueProtector, timeSource);
                 }
                 catch (Exception ex)
                 {

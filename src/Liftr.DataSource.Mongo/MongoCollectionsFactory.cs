@@ -66,7 +66,18 @@ namespace Microsoft.Liftr.DataSource.Mongo
             var client = new MongoClient(mongoClientSettings);
             _db = client.GetDatabase(options.DatabaseName);
             _dbName = options.DatabaseName;
+
+            _logger.Information("mongoClientSettings.MaxConnectionPoolSize: {MaxConnectionPoolSize}", mongoClientSettings.MaxConnectionPoolSize);
+            var maxDBConcurrency = mongoClientSettings.MaxConnectionPoolSize;
+            if (maxDBConcurrency > 50)
+            {
+                maxDBConcurrency = maxDBConcurrency - 10;
+            }
+
+            MongoWaitQueueProtector = new MongoWaitQueueRateLimiter(maxDBConcurrency, _logger);
         }
+
+        public MongoWaitQueueRateLimiter MongoWaitQueueProtector { get; }
 
         public async Task<IMongoCollection<T>> GetCollectionAsync<T>(string collectionName)
         {

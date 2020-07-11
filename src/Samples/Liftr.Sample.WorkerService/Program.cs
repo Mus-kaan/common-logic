@@ -67,7 +67,7 @@ namespace Microsoft.Liftr.Sample.WorkerService
 #pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
                         IMongoCollection<CounterEntity> collection = factory.GetOrCreateCounterEntityCollectionAsync("counter-entity").Result;
 #pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-                        return new CounterEntityDataSource(collection, timeSource);
+                        return new CounterEntityDataSource(collection, factory.MongoWaitQueueProtector, timeSource);
                     }
                     catch (Exception ex)
                     {
