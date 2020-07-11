@@ -33,6 +33,12 @@ namespace Microsoft.Liftr
 
             foreach (var kvp in Tags)
             {
+                if (kvp.Key.OrdinalEquals("ResourceCreationTimestamp"))
+                {
+                    // ignore the Tag in Zulu time format. It will be converted to not Zulu format by ARM.
+                    continue;
+                }
+
                 if (!kvp.Value.StrictEquals(tags[kvp.Key]))
                 {
                     throw new InvalidOperationException($"Tags value not equal. Expect: {kvp.Value}, Actual: {tags[kvp.Key]}");
