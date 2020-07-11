@@ -35,7 +35,18 @@ namespace Microsoft.Liftr.RPaaS
         /// <param name="tenantId">Tenant in which the resource exists</param>
         /// <param name="apiVersion"></param>
         /// <returns></returns>
-        Task<HttpResponseMessage> UpdateResourceAsync<T>(T resource, string resourceId, string tenantId, string apiVersion);
+        Task<HttpResponseMessage> PutResourceAsync<T>(T resource, string resourceId, string tenantId, string apiVersion);
+
+        /// <summary>
+        /// Updates ARM resource for given api version
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="resource"></param>
+        /// <param name="resourceId"></param>
+        /// <param name="tenantId">Tenant in which the resource exists</param>
+        /// <param name="apiVersion"></param>
+        /// <returns></returns>
+        Task<HttpResponseMessage> PatchResourceAsync<T>(T resource, string resourceId, string tenantId, string apiVersion);
 
         /// <summary>
         /// Gets a list of resources.

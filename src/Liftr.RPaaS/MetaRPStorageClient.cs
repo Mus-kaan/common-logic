@@ -95,8 +95,7 @@ namespace Microsoft.Liftr.RPaaS
             }
         }
 
-        /// <inheritdoc/>
-        public async Task<HttpResponseMessage> UpdateResourceAsync<T>(T resource, string resourceId, string tenantId, string apiVersion)
+        public async Task<HttpResponseMessage> PutResourceAsync<T>(T resource, string resourceId, string tenantId, string apiVersion)
         {
             if (resource == null)
             {
@@ -108,7 +107,7 @@ namespace Microsoft.Liftr.RPaaS
                 throw new ArgumentException("Please provide the User's tenant id", nameof(tenantId));
             }
 
-            using (var operation = _logger.StartTimedOperation(nameof(UpdateResourceAsync)))
+            using (var operation = _logger.StartTimedOperation(nameof(PutResourceAsync)))
             using (var content = new StringContent(JsonConvert.SerializeObject(resource, s_camelCaseSettings), Encoding.UTF8, "application/json"))
             {
                 operation.SetContextProperty(nameof(resourceId), resourceId);
@@ -126,7 +125,53 @@ namespace Microsoft.Liftr.RPaaS
 
                     _logger.LogError(errorMessage);
                     operation.FailOperation(response.StatusCode, errorMessage);
-                    throw MetaRPException.Create(response, nameof(UpdateResourceAsync));
+                    throw MetaRPException.Create(response, nameof(PutResourceAsync));
+                }
+
+                return response;
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<HttpResponseMessage> PatchResourceAsync<T>(T resource, string resourceId, string tenantId, string apiVersion)
+        {
+            if (resource == null)
+            {
+                throw new ArgumentNullException(nameof(resource));
+            }
+
+            if (string.IsNullOrEmpty(tenantId))
+            {
+                throw new ArgumentException("Please provide the User's tenant id", nameof(tenantId));
+            }
+
+            using (var operation = _logger.StartTimedOperation(nameof(PatchResourceAsync)))
+            using (var content = new StringContent(JsonConvert.SerializeObject(resource, s_camelCaseSettings), Encoding.UTF8, "application/json"))
+            {
+                operation.SetContextProperty(nameof(resourceId), resourceId);
+                operation.SetContextProperty(nameof(tenantId), tenantId);
+                var url = GetMetaRPResourceUrl(resourceId, apiVersion);
+                _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
+
+                var method = new HttpMethod("PATCH");
+                var request = new HttpRequestMessage(method, url)
+                {
+                    Content = content,
+                };
+
+                var response = await _httpClient.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorMessage = $"Failed at updating resource from RPaaS. StatusCode: '{response.StatusCode}'";
+                    if (response.Content != null)
+                    {
+                        errorMessage = errorMessage + $", Response: '{await response.Content.ReadAsStringAsync()}'";
+                    }
+
+                    _logger.LogError(errorMessage);
+                    operation.FailOperation(response.StatusCode, errorMessage);
+                    throw MetaRPException.Create(response, nameof(PatchResourceAsync));
                 }
 
                 return response;
