@@ -9,17 +9,6 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Liftr.IFxAuditLinux
 {
-    public interface IIfxAuditLogger
-    {
-        IFxAuditReturnValue LogAudit(
-            ICollection<IFxAuditCallerId> callerIds,
-            IFxAuditEventCategories eventCategory,
-            string operationName,
-            ICollection<IFxAuditTargetResource> targets,
-            IFxAuditResultType result,
-            string resultDescription = "");
-    }
-
     public class IfxAuditLogger : IIfxAuditLogger
     {
         private static bool s_isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
@@ -80,6 +69,21 @@ namespace Microsoft.Liftr.IFxAuditLinux
             optProperties.ResultDescription = resultDescription;
 
             return IFxAudit.IFxAudit.LogAudit(AuditType.APPLICATION, reqProperties, optProperties);
+        }
+
+        public IFxAuditReturnValue LogAudit(AuditType auditType, IFxAuditRequiredProperties rqdProps, IFxAuditOptionalProperties optProps = null, IDictionary<string, string> partC = null)
+        {
+            if (!s_isLinux)
+            {
+                return IFxAuditReturnValue.AUDIT_SUCCESS;
+            }
+
+            if (rqdProps is null)
+            {
+                return IFxAuditReturnValue.INVALID_MANDATORY_PROPERTIES;
+            }
+
+            return IFxAudit.IFxAudit.LogAudit(auditType, rqdProps, optProps, partC);
         }
     }
 }
