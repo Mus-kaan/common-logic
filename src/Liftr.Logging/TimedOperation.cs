@@ -34,6 +34,7 @@ namespace Microsoft.Liftr.Logging
         private readonly LogContextPropertyScope _parentCorrelationIdScope;
         private bool _isSuccessful = true;
         private int? _statusCode = null;
+        private string _environmentType = null;
 
         public TimedOperation(Serilog.ILogger logger, string operationName, string operationId = null, bool generateMetrics = false, bool newCorrelationId = false)
         {
@@ -89,6 +90,14 @@ namespace Microsoft.Liftr.Logging
                     _appInsightsOperation.Telemetry.Metrics[FailedOperationCount] = 0;
                     _appInsightsOperation.Telemetry.Metrics[_operationName + SucceededOperationCount] = 1;
                     _appInsightsOperation.Telemetry.Metrics[_operationName + FailedOperationCount] = 0;
+
+                    if (!string.IsNullOrEmpty(_environmentType))
+                    {
+                        _appInsightsOperation.Telemetry.Metrics[_environmentType + SucceededOperationCount] = 1;
+                        _appInsightsOperation.Telemetry.Metrics[_environmentType + FailedOperationCount] = 0;
+                        _appInsightsOperation.Telemetry.Metrics[_environmentType + _operationName + SucceededOperationCount] = 1;
+                        _appInsightsOperation.Telemetry.Metrics[_environmentType + _operationName + FailedOperationCount] = 0;
+                    }
                 }
                 else
                 {
@@ -96,12 +105,25 @@ namespace Microsoft.Liftr.Logging
                     _appInsightsOperation.Telemetry.Metrics[FailedOperationCount] = 1;
                     _appInsightsOperation.Telemetry.Metrics[_operationName + SucceededOperationCount] = 0;
                     _appInsightsOperation.Telemetry.Metrics[_operationName + FailedOperationCount] = 1;
+
+                    if (!string.IsNullOrEmpty(_environmentType))
+                    {
+                        _appInsightsOperation.Telemetry.Metrics[_environmentType + SucceededOperationCount] = 0;
+                        _appInsightsOperation.Telemetry.Metrics[_environmentType + FailedOperationCount] = 1;
+                        _appInsightsOperation.Telemetry.Metrics[_environmentType + _operationName + SucceededOperationCount] = 0;
+                        _appInsightsOperation.Telemetry.Metrics[_environmentType + _operationName + FailedOperationCount] = 1;
+                    }
                 }
             }
 
             _appInsightsOperation?.Dispose();
             _correlationIdScope?.Dispose();
             _parentCorrelationIdScope?.Dispose();
+        }
+
+        public void SetEnvironmentType(string environmentType)
+        {
+            _environmentType = environmentType;
         }
 
         public void SetProperty(string name, string value)

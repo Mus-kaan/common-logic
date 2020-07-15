@@ -37,11 +37,11 @@ namespace Microsoft.Liftr
 
             var operationName = $"{Path.GetFileNameWithoutExtension(filePath)}-{memberName}";
             TimedOperation = Logger.StartTimedOperation(operationName, generateMetrics: true);
-            TimedOperation.SetContextProperty(nameof(resourceGroupName), resourceGroupName);
+            TimedOperation.SetContextProperty(nameof(ResourceGroupName), ResourceGroupName);
             TimedOperation.SetProperty("TestEnv", "CICD");
         }
 
-        public TestResourceGroupScope(string baseName, ITestOutputHelper output, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "")
+        public TestResourceGroupScope(string baseName, ITestOutputHelper output, EnvironmentType? env = null, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "")
         {
             GenerateLogger(filePath, memberName, output);
             AzFactory = new LiftrAzureFactory(Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
@@ -49,7 +49,13 @@ namespace Microsoft.Liftr
 
             var operationName = $"{Path.GetFileNameWithoutExtension(filePath)}-{memberName}";
             TimedOperation = Logger.StartTimedOperation(operationName, generateMetrics: true);
-            TimedOperation.SetContextProperty(nameof(baseName), baseName);
+            TimedOperation.SetContextProperty(nameof(ResourceGroupName), ResourceGroupName);
+            if (env != null)
+            {
+                TimedOperation.SetContextProperty(nameof(EnvironmentType), env.ToString());
+                TimedOperation.SetEnvironmentType(env.ToString());
+            }
+
             TimedOperation.SetProperty("TestEnv", "CICD");
         }
 
@@ -67,7 +73,7 @@ namespace Microsoft.Liftr
 
             var operationName = $"{Path.GetFileNameWithoutExtension(filePath)}-{memberName}";
             TimedOperation = Logger.StartTimedOperation(operationName, generateMetrics: true);
-            TimedOperation.SetContextProperty(nameof(baseName), baseName);
+            TimedOperation.SetContextProperty(nameof(ResourceGroupName), ResourceGroupName);
             TimedOperation.SetProperty("TestEnv", "CICD");
         }
 

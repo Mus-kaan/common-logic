@@ -9,6 +9,8 @@ namespace Microsoft.Liftr.Logging
 {
     public interface ITimedOperation : IDisposable
     {
+        void SetEnvironmentType(string environmentType);
+
         /// <summary>
         /// Add a property to the <see cref="ITimedOperation"/>.
         /// This property will be logged in the 'operation finish' event.
