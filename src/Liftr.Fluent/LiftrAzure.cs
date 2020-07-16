@@ -965,13 +965,13 @@ namespace Microsoft.Liftr.Fluent
                 throw new ArgumentException("Agent pool profile name does not match pattern '^[a-z][a-z0-9]{0,11}$'");
             }
 
-            _logger.Information("Creating a Kubernetes cluster with name {aksName} ...", aksName);
+            _logger.Information("Creating a Kubernetes cluster of version {kubernetesVersion} with name {aksName} ...", _options.KubernetesVersion, aksName);
 
             var creatable = FluentClient.KubernetesClusters
                              .Define(aksName)
                              .WithRegion(region)
                              .WithExistingResourceGroup(rgName)
-                             .WithLatestVersion()
+                             .WithVersion(_options.KubernetesVersion)
                              .WithRootUsername(rootUserName)
                              .WithSshKey(sshPublicKey)
                              .WithServicePrincipalClientId(servicePrincipalClientId)

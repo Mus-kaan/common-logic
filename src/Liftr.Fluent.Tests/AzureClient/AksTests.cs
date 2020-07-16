@@ -21,57 +21,67 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [SkipInOfficialBuild(skipLinux: true, Skip = "Cannot create AKS in East US for now.")]
         public async Task CanCreateAksAsync()
         {
             using (var scope = new TestResourceGroupScope("unittest-aks-", _output))
             {
-                var client = scope.Client;
-                var rg = await client.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
-                var name = SdkContext.RandomResourceName("test-aks-", 15);
-                var rootUserName = "aksuser";
-                var sshPublicKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIoUCnmwyMDFAf0Ia/OnCTR3g9uxp6uxU/"
-                + "Sa4VwFEFpOmMH9fUZcSGPMlAZLtXYUrgsNDLDr22wXI8wd8AXQJTxnxmgSISENVVFntC+1WCETQFMZ4BkEeLCGL0s"
-                + "CoAEKnWNjlE4qBbZUfkShGCmj50YC9R0zHcqpCbMCz3BjEGrqttlIHaYGKD1v7g2vHEaDj459cqyQw3yBr3l9erS6"
-                + "/vJSe5tBtZPimTTUKhLYP+ZXdqldLa/TI7e6hkZHQuMOe2xXCqMfJXp4HtBszIua7bM3rQFlGuBe7+Vv+NzL5wJyy"
-                + "y6KnZjoLknnRoeJUSyZE2UtRF6tpkoGu3PhqZBmx7 limingu@Limins-MacBook-Pro.local";
-                var vmCount = 3;
-
-                await Assert.ThrowsAsync<ArgumentException>(async () =>
+                try
                 {
-                    await client.CreateAksClusterAsync(
-                    TestCommon.Location,
-                    scope.ResourceGroupName,
-                    name,
-                    rootUserName,
-                    sshPublicKey,
-                    TestCredentials.ClientId,
-                    TestCredentials.ClientSecret,
-                    ContainerServiceVMSizeTypes.StandardDS2,
-                    vmCount,
-                    TestCommon.Tags,
-                    agentPoolProfileName: "sp-dev");
-                });
+                    var client = scope.Client;
+                    var rg = await client.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
+                    var name = SdkContext.RandomResourceName("test-aks-", 15);
+                    var rootUserName = "aksuser";
+                    var sshPublicKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIoUCnmwyMDFAf0Ia/OnCTR3g9uxp6uxU/"
+                    + "Sa4VwFEFpOmMH9fUZcSGPMlAZLtXYUrgsNDLDr22wXI8wd8AXQJTxnxmgSISENVVFntC+1WCETQFMZ4BkEeLCGL0s"
+                    + "CoAEKnWNjlE4qBbZUfkShGCmj50YC9R0zHcqpCbMCz3BjEGrqttlIHaYGKD1v7g2vHEaDj459cqyQw3yBr3l9erS6"
+                    + "/vJSe5tBtZPimTTUKhLYP+ZXdqldLa/TI7e6hkZHQuMOe2xXCqMfJXp4HtBszIua7bM3rQFlGuBe7+Vv+NzL5wJyy"
+                    + "y6KnZjoLknnRoeJUSyZE2UtRF6tpkoGu3PhqZBmx7 limingu@Limins-MacBook-Pro.local";
+                    var vmCount = 3;
 
-                var created = await client.CreateAksClusterAsync(
-                    TestCommon.Location,
-                    scope.ResourceGroupName,
-                    name,
-                    rootUserName,
-                    sshPublicKey,
-                    TestCredentials.ClientId,
-                    TestCredentials.ClientSecret,
-                    ContainerServiceVMSizeTypes.StandardDS2,
-                    vmCount,
-                    TestCommon.Tags,
-                    agentPoolProfileName: "spdev");
+                    await Assert.ThrowsAsync<ArgumentException>(async () =>
+                    {
+                        await client.CreateAksClusterAsync(
+                        TestCommon.Location,
+                        scope.ResourceGroupName,
+                        name,
+                        rootUserName,
+                        sshPublicKey,
+                        TestCredentials.ClientId,
+                        TestCredentials.ClientSecret,
+                        ContainerServiceVMSizeTypes.StandardDS2,
+                        vmCount,
+                        TestCommon.Tags,
+                        agentPoolProfileName: "sp-dev");
+                    });
 
-                var resources = await client.ListAksClusterAsync(scope.ResourceGroupName);
-                Assert.Single(resources);
+                    var created = await client.CreateAksClusterAsync(
+                        TestCommon.Location,
+                        scope.ResourceGroupName,
+                        name,
+                        rootUserName,
+                        sshPublicKey,
+                        TestCredentials.ClientId,
+                        TestCredentials.ClientSecret,
+                        ContainerServiceVMSizeTypes.StandardDS2,
+                        vmCount,
+                        TestCommon.Tags,
+                        agentPoolProfileName: "spdev");
 
-                var k8sCluster = resources.First();
-                Assert.Equal(name, k8sCluster.Name);
-                TestCommon.CheckCommonTags(k8sCluster.Inner.Tags);
+                    var resources = await client.ListAksClusterAsync(scope.ResourceGroupName);
+                    Assert.Single(resources);
+
+                    var k8sCluster = resources.First();
+                    Assert.Equal(name, k8sCluster.Name);
+                    TestCommon.CheckCommonTags(k8sCluster.Inner.Tags);
+                }
+                catch (Exception ex)
+                {
+                    scope.Logger.Error(ex, ex.Message);
+                    scope.TimedOperation.FailOperation(ex.Message);
+                    scope.SkipDeleteResourceGroup = true;
+                    throw;
+                }
             }
         }
     }

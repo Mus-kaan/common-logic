@@ -18,14 +18,18 @@ data:
   cert.pem: {{ .Values.gcscertb64 }}
   key.pem: {{ .Values.gcskeyb64 }}
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.promMdmConverter.name }}
+  namespace: {{ .Release.Namespace }}
   labels:
     component: {{ .Chart.Name }}-prommdmconv
 spec:
   replicas: {{ .Values.promMdmConverter.replicas }}
+  selector:
+    matchLabels:
+      component: {{ .Chart.Name }}-prommdmconv
   template:
     metadata:
       labels:
