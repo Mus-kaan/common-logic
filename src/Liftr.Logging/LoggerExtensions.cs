@@ -4,23 +4,14 @@
 
 using Microsoft.Liftr.Logging;
 using Serilog;
-using Serilog.Context;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 
 namespace Microsoft.Liftr
 {
     public static class LoggerExtensions
     {
-        private static readonly List<IDisposable> s_disposablesHolder = new List<IDisposable>();
-        private static MetaInfo s_metaInfo;
-        private static bool s_metaInitialized;
-
         /// <summary>
         /// Start tracking an <see cref="ITimedOperation"/>, which contains two log events:
         /// <para> 1. The 'start' event will be logged when call this function.</para>
@@ -39,51 +30,6 @@ namespace Microsoft.Liftr
             return new TimedOperation(logger, operationName, operationId, generateMetrics, newCorrelationId);
         }
 
-        public static async Task<MetaInfo> GetMetaInfoAsync(this ILogger logger, Assembly callingAssembly = null)
-        {
-            if (!s_metaInitialized)
-            {
-                s_metaInitialized = true;
-
-                if (callingAssembly == null)
-                {
-                    callingAssembly = Assembly.GetEntryAssembly();
-                }
-
-                var assemblyName = callingAssembly.GetName().Name;
-                var assemblyProductVersion = FileVersionInfo.GetVersionInfo(callingAssembly.Location).ProductVersion;
-                s_disposablesHolder.Add(LogContext.PushProperty("AssemblyName", assemblyName));
-                s_disposablesHolder.Add(LogContext.PushProperty("AssemblyVersion", assemblyProductVersion));
-
-                var currentAssembly = Assembly.GetExecutingAssembly();
-                var currentAssemblyProductVersion = FileVersionInfo.GetVersionInfo(currentAssembly.Location).ProductVersion;
-                s_disposablesHolder.Add(LogContext.PushProperty("LiftrLibVer", currentAssemblyProductVersion));
-
-                var instanceMeta = await InstanceMetadata.LoadAsync(logger);
-
-                if (instanceMeta != null)
-                {
-                    s_disposablesHolder.Add(LogContext.PushProperty(nameof(instanceMeta.MachineNameEnv), instanceMeta.MachineNameEnv));
-                    s_disposablesHolder.Add(LogContext.PushProperty("Meta" + nameof(instanceMeta.Compute.AzEnvironment), instanceMeta.Compute.AzEnvironment));
-                    s_disposablesHolder.Add(LogContext.PushProperty("Meta" + nameof(instanceMeta.Compute.Location), instanceMeta.Compute.Location));
-                    s_disposablesHolder.Add(LogContext.PushProperty("MetaVM" + nameof(instanceMeta.Compute.Name), instanceMeta.Compute.Name));
-                    s_disposablesHolder.Add(LogContext.PushProperty("MetaResourceGroup", instanceMeta.Compute.ResourceGroupName));
-                    s_disposablesHolder.Add(LogContext.PushProperty("Meta" + nameof(instanceMeta.Compute.Sku), instanceMeta.Compute.Sku));
-                    s_disposablesHolder.Add(LogContext.PushProperty("Meta" + nameof(instanceMeta.Compute.VmSize), instanceMeta.Compute.VmSize));
-                }
-
-                s_metaInfo = new MetaInfo()
-                {
-                    InstanceMeta = instanceMeta,
-                    AssemblyName = assemblyName,
-                    Version = assemblyProductVersion,
-                    LiftrLibraryVersion = currentAssemblyProductVersion,
-                };
-            }
-
-            return s_metaInfo;
-        }
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "Liftr1004:Avoid calling System.Threading.Tasks.Task<TResult>.Result", Justification = "<Pending>")]
         public static void LogProcessStart(this ILogger logger)
         {
@@ -92,7 +38,7 @@ namespace Microsoft.Liftr
                 throw new ArgumentNullException(nameof(logger));
             }
 
-            var meta = logger.GetMetaInfoAsync(Assembly.GetEntryAssembly()).Result;
+            var meta = InstanceMetaHelper.GetMetaInfoAsync().Result;
             var instanceMeta = meta.InstanceMeta;
 
             logger.Information("**********[Liftr]**********[https://aka.ms/liftr]**********[Liftr]**********[https://aka.ms/liftr]**********[Liftr]**********");

@@ -4,6 +4,7 @@
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.DataSource;
+using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Queue;
 using System;
 using System.Net.Http;
@@ -45,7 +46,7 @@ namespace Microsoft.Liftr.Sample.WorkerService
         {
             _cnt++;
             _logger.Information("Timed Background Service is working.");
-            await _logger.GetMetaInfoAsync();
+            await InstanceMetaHelper.GetMetaInfoAsync();
             using (var op = _logger.StartTimedOperation("GetMSWebPage"))
             {
                 op.SetContextProperty("CntVal", _cnt);

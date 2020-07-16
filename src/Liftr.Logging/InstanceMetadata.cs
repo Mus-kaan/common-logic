@@ -28,30 +28,21 @@ namespace Microsoft.Liftr.Logging
         public string MachineNameEnv { get; private set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
-        internal static async Task<InstanceMetadata> LoadAsync(Serilog.ILogger logger)
+        internal static async Task<InstanceMetadata> LoadAsync()
         {
-            if (logger == null)
-            {
-                throw new ArgumentNullException(nameof(logger));
-            }
-
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Add("Metadata", "True");
 
                 try
                 {
-                    logger.Debug("Start loading Azure Instance Metadata ...");
                     var metaResponse = await httpClient.GetStringAsync(c_imdsUri);
                     var instanceMetadata = JsonConvert.DeserializeObject<InstanceMetadata>(metaResponse);
                     instanceMetadata.MachineNameEnv = Environment.MachineName;
-                    logger.Information("loaded Inatance Metadata: VMName: {VMName}, Location: {Location}", instanceMetadata.Compute.Name, instanceMetadata.Compute.Location);
-                    logger.Debug("Metadata content: instanceMetadata: {@instanceMetadata}", instanceMetadata);
                     return instanceMetadata;
                 }
                 catch
                 {
-                    logger.Debug("Call to Azure Instance Metadata Service failed. This is excepted in non-Azure environments.");
                     return null;
                 }
             }

@@ -66,6 +66,18 @@ namespace Microsoft.Liftr.Logging.GenericHosting
                     }
 
                     serilogConfig = serilogConfig.Enrich.FromLogContext();
+
+                    var meta = InstanceMetaHelper.GetMetaInfoAsync().Result;
+                    var instanceMeta = meta?.InstanceMeta;
+                    if (instanceMeta != null)
+                    {
+                        serilogConfig = serilogConfig
+                        .Enrich.WithProperty("AppVer", meta.Version)
+                        .Enrich.WithProperty("vmRegion", instanceMeta.Compute.Location)
+                        .Enrich.WithProperty("vmName", instanceMeta.Compute.Name)
+                        .Enrich.WithProperty("vmRG", instanceMeta.Compute.ResourceGroupName);
+                    }
+
                     var logger = serilogConfig.CreateLogger();
                     Log.Logger = logger;
 

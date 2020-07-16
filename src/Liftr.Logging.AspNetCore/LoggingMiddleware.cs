@@ -116,9 +116,13 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 {
                 }
 
-                var meta = await _logger.GetMetaInfoAsync();
+                var meta = await InstanceMetaHelper.GetMetaInfoAsync();
                 httpContext.Response.StatusCode = (int)HttpStatusCode.OK;
-                await httpContext.Response.WriteAsync(meta.ToJson(indented: true));
+                if (meta != null)
+                {
+                    await httpContext.Response.WriteAsync(meta.ToJson(indented: true));
+                }
+
                 return;
             }
 

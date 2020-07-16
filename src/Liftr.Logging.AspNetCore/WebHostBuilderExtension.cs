@@ -51,6 +51,17 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                         config.ReadFrom.Configuration(host.Configuration).Enrich.FromLogContext();
                     }
 
+                    var meta = InstanceMetaHelper.GetMetaInfoAsync().Result;
+                    var instanceMeta = meta?.InstanceMeta;
+                    if (instanceMeta != null)
+                    {
+                        config
+                        .Enrich.WithProperty("AppVer", meta.Version)
+                        .Enrich.WithProperty("vmRegion", instanceMeta.Compute.Location)
+                        .Enrich.WithProperty("vmName", instanceMeta.Compute.Name)
+                        .Enrich.WithProperty("vmRG", instanceMeta.Compute.ResourceGroupName);
+                    }
+
                     if (!host.Configuration.ContainsSerilogWriteToConsole())
                     {
                         config = config.WriteTo.Console(new CompactJsonFormatter());
