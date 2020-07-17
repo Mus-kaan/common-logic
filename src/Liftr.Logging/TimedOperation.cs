@@ -53,6 +53,7 @@ namespace Microsoft.Liftr.Logging
                 var parentId = CallContextHolder.CorrelationId.Value;
                 _parentCorrelationIdScope = new LogContextPropertyScope("ParentLiftrCorrelationId", parentId);
                 CallContextHolder.CorrelationId.Value = operationId;
+                _correlationIdScope = new LogContextPropertyScope("LiftrCorrelationId", operationId);
             }
 
             _logger = logger;
