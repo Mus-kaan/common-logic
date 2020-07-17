@@ -92,6 +92,7 @@ namespace Microsoft.Liftr.Queue.Tests
                 catch (Exception ex)
                 {
                     scope.Logger.Error(ex, "Failed.");
+                    scope.TimedOperation.FailOperation(ex.Message);
                     throw;
                 }
             }
