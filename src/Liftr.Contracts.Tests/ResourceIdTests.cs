@@ -10,11 +10,42 @@ namespace Microsoft.Liftr.Contracts.Tests
     public class ResourceIdTests
     {
         [Fact]
+        public void CanParseSubscriptionId()
+        {
+            string resourceIdString = "/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a";
+            var rid = new ResourceId(resourceIdString);
+
+            Assert.True(rid.IsSubsriptionId);
+            Assert.Equal("d21a525e-7c86-486d-a79e-a4f3622f639a", rid.SubscriptionId);
+            Assert.Null(rid.ResourceGroup);
+            Assert.Null(rid.Provider);
+            Assert.Null(rid.ResourceType);
+            Assert.Null(rid.ResourceName);
+            Assert.Null(rid.TypedNames);
+        }
+
+        [Fact]
+        public void CanParseResourceGroupId()
+        {
+            string resourceIdString = "/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service";
+            var rid = new ResourceId(resourceIdString);
+
+            Assert.True(rid.IsResourceGroupId);
+            Assert.Equal("d21a525e-7c86-486d-a79e-a4f3622f639a", rid.SubscriptionId);
+            Assert.Equal("private-link-service", rid.ResourceGroup);
+            Assert.Null(rid.Provider);
+            Assert.Null(rid.ResourceType);
+            Assert.Null(rid.ResourceName);
+            Assert.Null(rid.TypedNames);
+        }
+
+        [Fact]
         public void CanParseResourceId()
         {
             string resourceIdString = "/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/providers/Microsoft.Compute/availabilitySets/AvSet";
             var rid = new ResourceId(resourceIdString);
 
+            Assert.True(rid.IsFullResourceId);
             Assert.Equal(resourceIdString, rid.ToString());
             Assert.Equal("d21a525e-7c86-486d-a79e-a4f3622f639a", rid.SubscriptionId);
             Assert.Equal("private-link-service", rid.ResourceGroup);
@@ -28,7 +59,6 @@ namespace Microsoft.Liftr.Contracts.Tests
 
             var rid2 = new ResourceId(rid.SubscriptionId, rid.ResourceGroup, rid.Provider, rid.ResourceType, rid.ResourceName);
             Assert.Equal(rid.ToString(), rid2.ToString());
-
             Assert.Equal(rid.ToString(), new ResourceId(rid2.ToString()).ToString());
         }
 
@@ -87,6 +117,8 @@ namespace Microsoft.Liftr.Contracts.Tests
         }
 
         [Theory]
+        [InlineData("/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/")]
+        [InlineData("/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/")]
         [InlineData("/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/providers/Microsoft.Compute/")]
         [InlineData("asdasasfdsf")]
         [InlineData("/subscriptionss/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/providers/Microsoft.Compute/availabilitySets/AvSet")]
@@ -101,6 +133,15 @@ namespace Microsoft.Liftr.Contracts.Tests
             {
                 new ResourceId(resourceIdString);
             });
+        }
+
+        [Theory]
+        [InlineData("/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a")]
+        [InlineData("/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service")]
+        [InlineData("/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/providers/Microsoft.Compute")]
+        public void TryParseValidResrouceIds(string resourceIdString)
+        {
+            Assert.True(ResourceId.TryParse(resourceIdString, out var parsedResourceIdString));
         }
     }
 }
