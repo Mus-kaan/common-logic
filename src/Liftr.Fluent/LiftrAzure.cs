@@ -1081,7 +1081,7 @@ namespace Microsoft.Liftr.Fluent
         #endregion
 
         #region Deployments
-        public async Task<IDeployment> CreateDeploymentAsync(Region location, string rgName, string template, string templateParameters = null, bool noLogging = false)
+        public async Task<IDeployment> CreateDeploymentAsync(Region location, string rgName, string template, string templateParameters = null, bool noLogging = false, CancellationToken cancellationToken = default)
         {
             var deploymentName = SdkContext.RandomResourceName("LiftrFluentSDK", 24);
             if (string.IsNullOrEmpty(template))
@@ -1109,7 +1109,7 @@ namespace Microsoft.Liftr.Fluent
                     .WithTemplate(template)
                     .WithParameters(templateParameters)
                     .WithMode(DeploymentMode.Incremental)
-                    .CreateAsync();
+                    .CreateAsync(cancellationToken);
 
                 _logger.Information($"Finished the ARM deployment with name {deploymentName} ...");
                 return deployment;

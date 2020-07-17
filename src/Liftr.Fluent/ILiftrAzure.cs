@@ -197,7 +197,7 @@ namespace Microsoft.Liftr.Fluent
         #endregion
 
         #region Deployments
-        Task<IDeployment> CreateDeploymentAsync(Region location, string rgName, string template, string templateParameters = null, bool noLogging = false);
+        Task<IDeployment> CreateDeploymentAsync(Region location, string rgName, string template, string templateParameters = null, bool noLogging = false, CancellationToken cancellationToken = default);
         #endregion
 
         #region Monitoring
