@@ -9,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Liftr.Configuration;
 using Microsoft.Liftr.DiagnosticSource;
 using Serilog;
-using Serilog.Context;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
 using System;

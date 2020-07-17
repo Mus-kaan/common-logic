@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,21 +14,16 @@ namespace Microsoft.Liftr.Queue
     {
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
-        public QueueMessageLeaseScope(QueueClient queue, string msgId, string msgPopReceipt, Serilog.ILogger logger)
+        public QueueMessageLeaseScope(QueueClient queue, QueueMessage msg, Serilog.ILogger logger)
         {
             if (queue == null)
             {
                 throw new ArgumentNullException(nameof(queue));
             }
 
-            if (string.IsNullOrEmpty(msgId))
+            if (msg == null)
             {
-                throw new ArgumentNullException(nameof(msgId));
-            }
-
-            if (string.IsNullOrEmpty(msgPopReceipt))
-            {
-                throw new ArgumentNullException(nameof(msgPopReceipt));
+                throw new ArgumentNullException(nameof(msg));
             }
 
             if (logger == null)
@@ -35,7 +31,7 @@ namespace Microsoft.Liftr.Queue
                 throw new ArgumentNullException(nameof(logger));
             }
 
-            PopReceipt = msgPopReceipt;
+            PopReceipt = msg.PopReceipt;
             SyncMutex = new SemaphoreSlim(1, 1);
 
             Func<Task> func = async () =>
@@ -44,11 +40,11 @@ namespace Microsoft.Liftr.Queue
                 {
                     try
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(10.0), _cts.Token);
+                        await Task.Delay(QueueParameters.MessageLeaseRenewInterval, _cts.Token);
                         try
                         {
                             await SyncMutex.WaitAsync(_cts.Token);
-                            var response = await queue.UpdateMessageAsync(msgId, PopReceipt, null, TimeSpan.FromSeconds(60.0));
+                            var response = await queue.UpdateMessageAsync(msg.MessageId, PopReceipt, msg.MessageText, visibilityTimeout: QueueParameters.VisibilityTimeout);
                             PopReceipt = response.Value.PopReceipt;
                         }
                         finally

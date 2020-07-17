@@ -17,6 +17,7 @@ namespace Microsoft.Liftr.Queue.Tests
 {
     public class WriteReadQueueTests
     {
+        private const string c_throwMsg = "Throw message";
         private readonly ITestOutputHelper _output;
 
         public WriteReadQueueTests(ITestOutputHelper output)
@@ -44,10 +45,20 @@ namespace Microsoft.Liftr.Queue.Tests
 
                     Func<LiftrQueueMessage, QueueMessageProcessingResult, CancellationToken, Task> func = async (msg, result, cancellationToken) =>
                     {
-                        await Task.Yield();
-                        ts.Add(TimeSpan.FromSeconds(30));
-                        await Task.Delay(TimeSpan.FromSeconds(15.0));
                         receivedMessages.Add(msg);
+                        await Task.Yield();
+                        if (msg.Content.OrdinalEquals(c_throwMsg) && msg.DequeueCount == 1)
+                        {
+                            result.SuccessfullyProcessed = false;
+                            ts.Add(TimeSpan.FromSeconds(60));
+                            await Task.Delay(TimeSpan.FromSeconds(60.0));
+                        }
+                        else
+                        {
+                            ts.Add(TimeSpan.FromSeconds(30));
+                            await Task.Delay(TimeSpan.FromSeconds(15.0));
+                        }
+
                         semophore.Release();
                     };
 
@@ -85,6 +96,23 @@ namespace Microsoft.Liftr.Queue.Tests
                         Assert.False(string.IsNullOrEmpty(msg.MsgTelemetryContext.CorrelationId));
                         Assert.Equal(msgContent1, msg.Content);
                         Assert.Equal("2019-01-20T08:01:00.0000000Z", msg.CreatedAt);
+                    }
+
+                    // The first process will fail.
+                    await writer.AddMessageAsync(c_throwMsg);
+
+                    // Wait for the first process.
+                    await semophore.WaitAsync();
+
+                    // Wait for the second process.
+                    await Task.Delay(TimeSpan.FromSeconds(120));
+
+                    Assert.Equal(4, receivedMessages.Count);
+                    {
+                        var msg = receivedMessages.Last();
+                        Assert.NotNull(msg.MsgTelemetryContext);
+                        Assert.False(string.IsNullOrEmpty(msg.MsgTelemetryContext.CorrelationId));
+                        Assert.Equal(c_throwMsg, msg.Content);
                     }
 
                     Assert.Null(reader.ReaderException);

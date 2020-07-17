@@ -25,10 +25,8 @@ namespace Microsoft.Liftr.Queue
         private readonly ITimeSource _timeSource;
         private readonly Serilog.ILogger _logger;
         private readonly object _syncObj = new object();
-        private static readonly TimeSpan s_maxWaitTime = TimeSpan.FromSeconds(30);
-        private static readonly TimeSpan s_minWaitTime = TimeSpan.FromMilliseconds(71);
         private bool _started;
-        private TimeSpan _waitTime = s_minWaitTime;
+        private TimeSpan _waitTime = QueueParameters.ScanMinWaitTime;
 
         public QueueReader(
             QueueClient queue,
@@ -62,17 +60,18 @@ namespace Microsoft.Liftr.Queue
                     TimeSpan waitTime = _waitTime;
                     try
                     {
-                        var messages = (await _queue.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromSeconds(40), cancellationToken: cancellationToken)).Value;
+                        var messages = (await _queue.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: QueueParameters.VisibilityTimeout, cancellationToken: cancellationToken)).Value;
                         var queueMessage = messages?.FirstOrDefault();
 
                         if (queueMessage != null)
                         {
                             var srpMsgId = queueMessage.MessageId;
+                            using var srpMsgIdScope = new LogContextPropertyScope(nameof(srpMsgId), srpMsgId);
 
                             // This is for handling the message with probably invalid format.
-                            if (queueMessage.DequeueCount > _options.MaxDequeueCount + 5)
+                            if (string.IsNullOrEmpty(queueMessage.MessageText) || queueMessage.DequeueCount > _options.MaxDequeueCount + 1)
                             {
-                                _logger.Error("Message exceeded the max dequeue count. Delete message. srpMsgId: {srpMsgId}", srpMsgId);
+                                _logger.Error("[DeleteMessage] Message is empty or invalid format. MsgContent: {MsgContent}", queueMessage.MessageText);
                                 await _queue.DeleteMessageAsync(queueMessage.MessageId, queueMessage.PopReceipt);
                                 continue;
                             }
@@ -82,13 +81,12 @@ namespace Microsoft.Liftr.Queue
                             message.InsertedOn = queueMessage.InsertedOn;
                             message.ExpiresOn = queueMessage.ExpiresOn;
                             message.DequeueCount = queueMessage.DequeueCount;
+                            using var msgIdScope = new LogContextPropertyScope("LiftrQueueMessageId", message.MsgId);
 
                             if (queueMessage.DequeueCount > _options.MaxDequeueCount)
                             {
                                 _logger.Information(
-                                    "Message exceeded the max dequeue count. Delete message. Queue msg info: MsgId '{MsgId}', srpMsgId '{srpMsgId}', DequeueCount '{DequeueCount}', CreatedAt '{CreatedAt}', InsertedOn '{InsertedOn}', ExpiresOn '{ExpiresOn}'",
-                                    message.MsgId,
-                                    srpMsgId,
+                                    "[DeleteMessage] Message exceeded the max dequeue count. DequeueCount '{DequeueCount}', CreatedAt '{CreatedAt}', InsertedOn '{InsertedOn}', ExpiresOn '{ExpiresOn}'",
                                     message.DequeueCount,
                                     message.CreatedAt,
                                     message.InsertedOn,
@@ -118,20 +116,16 @@ namespace Microsoft.Liftr.Queue
 
                             try
                             {
-                                using (var lease = new QueueMessageLeaseScope(_queue, queueMessage.MessageId, queueMessage.PopReceipt, _logger))
+                                using (var lease = new QueueMessageLeaseScope(_queue, queueMessage, _logger))
                                 using (var logFilterOverrideScope = new LogFilterOverrideScope(overrideLevel))
                                 using (new LogContextPropertyScope("LiftrTrackingId", message.MsgTelemetryContext?.ARMRequestTrackingId))
                                 using (new LogContextPropertyScope("LiftrCorrelationId", message.MsgTelemetryContext?.CorrelationId))
-                                using (new LogContextPropertyScope("LiftrQueueMessageId", message.MsgId))
-                                using (new LogContextPropertyScope(nameof(srpMsgId), srpMsgId))
                                 using (var operation = _logger.StartTimedOperation("ProcessQueueMessage", correlationId))
                                 {
                                     operation.SetProperty(nameof(srpMsgId), srpMsgId);
                                     operation.SetProperty(nameof(message.MsgId), message.MsgId);
                                     _logger.Information(
-                                        "Queue msg info: MsgId '{MsgId}', srpMsgId '{srpMsgId}', DequeueCount '{DequeueCount}', CreatedAt '{CreatedAt}', InsertedOn '{InsertedOn}', ExpiresOn '{ExpiresOn}'",
-                                        message.MsgId,
-                                        srpMsgId,
+                                        "Queue msg info: DequeueCount '{DequeueCount}', CreatedAt '{CreatedAt}', InsertedOn '{InsertedOn}', ExpiresOn '{ExpiresOn}'",
                                         message.DequeueCount,
                                         message.CreatedAt,
                                         message.InsertedOn,
@@ -156,7 +150,7 @@ namespace Microsoft.Liftr.Queue
                                         {
                                             var endTme = _timeSource.UtcNow;
                                             var duration = endTme - message.CreatedAt.ParseZuluDateTime();
-                                            _logger.Information("Finished processing queue message. Delete message. DurationInSeconds: {DurationInSeconds}, CreatedAt:{CreatedAt}, FinishedAt: {FinishedAt}", duration.TotalSeconds, message.CreatedAt, endTme.ToZuluString());
+                                            _logger.Information("[DeleteMessage] Finished processing queue message. DurationInSeconds: {DurationInSeconds}, CreatedAt:{CreatedAt}, FinishedAt: {FinishedAt}", duration.TotalSeconds, message.CreatedAt, endTme.ToZuluString());
                                             try
                                             {
                                                 await lease.SyncMutex.WaitAsync(cancellationToken);
@@ -214,15 +208,15 @@ namespace Microsoft.Liftr.Queue
             {
                 if (processedMessage)
                 {
-                    _waitTime = s_minWaitTime;
+                    _waitTime = QueueParameters.ScanMinWaitTime;
                 }
                 else
                 {
                     // Exponential backoff.
                     _waitTime = TimeSpan.FromMilliseconds(1.7 * _waitTime.TotalMilliseconds);
-                    if (_waitTime > s_maxWaitTime)
+                    if (_waitTime > QueueParameters.ScanMaxWaitTime)
                     {
-                        _waitTime = s_maxWaitTime;
+                        _waitTime = QueueParameters.ScanMaxWaitTime;
                     }
                 }
             }
