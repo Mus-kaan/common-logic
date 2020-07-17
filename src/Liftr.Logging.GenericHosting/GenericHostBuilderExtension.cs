@@ -17,6 +17,7 @@ using System;
 
 namespace Microsoft.Liftr.Logging.GenericHosting
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Middleware should fail silently.")]
     public static class GenericHostBuilderExtension
     {
         public static IHostBuilder UseLiftrLogger(this IHostBuilder builder)
@@ -34,6 +35,7 @@ namespace Microsoft.Liftr.Logging.GenericHosting
                 .ConfigureServices((hostContext, services) =>
                 {
                     (var allowOverride, var defaultLevel) = GetOverrideOptions(hostContext);
+                    LoggerExtensions.Options.LogTimedOperation = GetLogTimedOperation(hostContext);
 
                     var serilogConfig = new LoggerConfiguration();
                     serilogConfig = serilogConfig.ReadFrom.Configuration(hostContext.Configuration);
@@ -87,7 +89,6 @@ namespace Microsoft.Liftr.Logging.GenericHosting
                 .UseSerilog();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Middleware should fail silently.")]
         private static (bool allowOverride, LogEventLevel defaultLevel) GetOverrideOptions(HostBuilderContext host)
         {
             bool allowOverride = false;
@@ -111,6 +112,21 @@ namespace Microsoft.Liftr.Logging.GenericHosting
             }
 
             return (allowOverride, defaultLevel);
+        }
+
+        private static bool GetLogTimedOperation(HostBuilderContext host)
+        {
+            bool logTimedOperation = true;
+            try
+            {
+                var allowOverrideStr = host.Configuration.GetSection("Serilog")?.GetSection("LogTimedOperation")?.Value;
+                logTimedOperation = bool.Parse(allowOverrideStr);
+            }
+            catch
+            {
+            }
+
+            return logTimedOperation;
         }
     }
 }

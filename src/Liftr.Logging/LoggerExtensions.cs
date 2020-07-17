@@ -12,6 +12,8 @@ namespace Microsoft.Liftr
 {
     public static class LoggerExtensions
     {
+        public static LiftrLoggingOptions Options { get; } = new LiftrLoggingOptions();
+
         /// <summary>
         /// Start tracking an <see cref="ITimedOperation"/>, which contains two log events:
         /// <para> 1. The 'start' event will be logged when call this function.</para>

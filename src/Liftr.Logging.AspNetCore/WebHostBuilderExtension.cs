@@ -16,6 +16,7 @@ using System;
 
 namespace Microsoft.Liftr.Logging.AspNetCore
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Middleware should fail silently.")]
     public static class WebHostBuilderExtension
     {
         /// <summary>
@@ -70,6 +71,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 .ConfigureServices((host, services) =>
                 {
                     (var allowOverride, var logRequest, var defaultLevel) = GetOverrideOptions(host);
+                    LoggerExtensions.Options.LogTimedOperation = GetLogTimedOperation(host);
 
                     var ikey = host.Configuration.GetSection("ApplicationInsights")?.GetSection("InstrumentationKey")?.Value;
                     if (!string.IsNullOrEmpty(ikey))
@@ -104,7 +106,6 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             return webHostBuilder;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Middleware should fail silently.")]
         private static (bool allowOverride, bool logRequest, LogEventLevel defaultLevel) GetOverrideOptions(WebHostBuilderContext host)
         {
             bool allowOverride = false;
@@ -138,6 +139,21 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             }
 
             return (allowOverride, logRequest, defaultLevel);
+        }
+
+        private static bool GetLogTimedOperation(WebHostBuilderContext host)
+        {
+            bool logTimedOperation = true;
+            try
+            {
+                var allowOverrideStr = host.Configuration.GetSection("Serilog")?.GetSection("LogTimedOperation")?.Value;
+                logTimedOperation = bool.Parse(allowOverrideStr);
+            }
+            catch
+            {
+            }
+
+            return logTimedOperation;
         }
     }
 }

@@ -61,7 +61,10 @@ namespace Microsoft.Liftr.Logging
             _operationId = operationId;
             _generateMetrics = generateMetrics;
             SetContextProperty("LiftrTimedOperationId", operationId);
-            _logger.Information($"Start TimedOperation '{_operationName}' with '{{TimedOperationId}}' at StartTime {{StartTime}}.", _operationId, _startTime);
+            if (LoggerExtensions.Options.LogTimedOperation)
+            {
+                _logger.Information($"Start TimedOperation '{_operationName}' with '{{TimedOperationId}}' at StartTime {{StartTime}}.", _operationId, _startTime);
+            }
         }
 
         public void Dispose()
@@ -73,13 +76,16 @@ namespace Microsoft.Liftr.Logging
             }
 
             _sw.Stop();
-            if (_statusCode == null)
+            if (LoggerExtensions.Options.LogTimedOperation)
             {
-                _logger.Information("Finished TimedOperation '" + _operationName + "' with '{TimedOperationId}'. Successful: {isSuccessful}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationId, _isSuccessful, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
-            }
-            else
-            {
-                _logger.Information("Finished TimedOperation '" + _operationName + "' with '{TimedOperationId}'. Successful: {isSuccessful}. StatusCode: {statusCode}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationId, _isSuccessful, _statusCode.Value, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
+                if (_statusCode == null)
+                {
+                    _logger.Information("Finished TimedOperation '" + _operationName + "' with '{TimedOperationId}'. Successful: {isSuccessful}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationId, _isSuccessful, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
+                }
+                else
+                {
+                    _logger.Information("Finished TimedOperation '" + _operationName + "' with '{TimedOperationId}'. Successful: {isSuccessful}. StatusCode: {statusCode}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationId, _isSuccessful, _statusCode.Value, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
+                }
             }
 
             if (_appInsightsOperation != null && _generateMetrics)
