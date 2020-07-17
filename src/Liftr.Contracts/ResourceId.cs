@@ -17,6 +17,7 @@ namespace Microsoft.Liftr.Contracts
         private const string c_providers = "providers";
 
         private readonly string _resourceIdStr;
+        private readonly ResourceIdType _resourceIdType;
 
         public ResourceId(string resourceId)
         {
@@ -26,39 +27,34 @@ namespace Microsoft.Liftr.Contracts
             }
 
             _resourceIdStr = resourceId;
-
-            bool isValidResourceIdFormat = false;
             var parts = resourceId.Split('/');
-            if (parts.Length >= 7 && parts.Length % 2 == 1)
-            {
-                if (parts[1].OrdinalEquals(c_subscriptions) && parts[3].OrdinalEquals(c_resourceGroups) && parts[5].OrdinalEquals(c_providers))
-                {
-                    isValidResourceIdFormat = true;
-                }
-            }
-
-            if (!isValidResourceIdFormat)
-            {
-                throw new FormatException($"'{resourceId}' is not valid resourceId format.");
-            }
+            _resourceIdType = GetResourceIdType(resourceId, parts);
 
             SubscriptionId = parts[2];
-            ResourceGroup = parts[4];
-            Provider = parts[6];
 
-            if (parts.Length >= 9)
+            if (IsResourceGroupId)
             {
-                ResourceType = parts[7];
-                ResourceName = parts[8];
+                ResourceGroup = parts[4];
             }
 
-            List<ResourceTypeNamePair> names = new List<ResourceTypeNamePair>();
-            for (int i = 7; i < parts.Length; i += 2)
+            if (IsFullResourceId)
             {
-                names.Add(new ResourceTypeNamePair() { ResourceType = parts[i], ResourceName = parts[i + 1] });
-            }
+                ResourceGroup = parts[4];
+                Provider = parts[6];
+                if (parts.Length >= 9)
+                {
+                    ResourceType = parts[7];
+                    ResourceName = parts[8];
+                }
 
-            TypedNames = names.ToArray();
+                List<ResourceTypeNamePair> names = new List<ResourceTypeNamePair>();
+                for (int i = 7; i < parts.Length; i += 2)
+                {
+                    names.Add(new ResourceTypeNamePair() { ResourceType = parts[i], ResourceName = parts[i + 1] });
+                }
+
+                TypedNames = names.ToArray();
+            }
         }
 
         public ResourceId(
@@ -76,6 +72,7 @@ namespace Microsoft.Liftr.Contracts
             ResourceType = resourceType;
             ResourceName = resourceName;
             _resourceIdStr = $"/{c_subscriptions}/{SubscriptionId}/{c_resourceGroups}/{ResourceGroup}/{c_providers}/{Provider}";
+            _resourceIdType = ResourceIdType.FullResourceId;
 
             List<ResourceTypeNamePair> names = new List<ResourceTypeNamePair>();
 
@@ -87,9 +84,6 @@ namespace Microsoft.Liftr.Contracts
 
             if (!string.IsNullOrEmpty(childResourceType) && !string.IsNullOrEmpty(childResourceName))
             {
-                ChildResourceType = childResourceType;
-                ChildResourceName = childResourceName;
-
                 names.Add(new ResourceTypeNamePair() { ResourceType = childResourceType, ResourceName = childResourceName });
                 _resourceIdStr = _resourceIdStr + $"/{childResourceType}/{childResourceName}";
             }
@@ -111,16 +105,12 @@ namespace Microsoft.Liftr.Contracts
         {
             get
             {
-                if (TypedNames.Length < 2)
+                if (TypedNames == null || TypedNames.Length < 2)
                 {
                     return null;
                 }
 
                 return TypedNames[1].ResourceType;
-            }
-
-            private set
-            {
             }
         }
 
@@ -128,20 +118,40 @@ namespace Microsoft.Liftr.Contracts
         {
             get
             {
-                if (TypedNames.Length < 2)
+                if (TypedNames == null || TypedNames.Length < 2)
                 {
                     return null;
                 }
 
                 return TypedNames[1].ResourceName;
             }
-
-            private set
-            {
-            }
         }
 
         public ResourceTypeNamePair[] TypedNames { get; }
+
+        public bool IsSubsriptionId
+        {
+            get
+            {
+                return _resourceIdType == ResourceIdType.SubscriptionId;
+            }
+        }
+
+        public bool IsResourceGroupId
+        {
+            get
+            {
+                return _resourceIdType == ResourceIdType.ResourceGroupId;
+            }
+        }
+
+        public bool IsFullResourceId
+        {
+            get
+            {
+                return _resourceIdType == ResourceIdType.FullResourceId;
+            }
+        }
 
         public override string ToString() => _resourceIdStr;
 
@@ -172,6 +182,29 @@ namespace Microsoft.Liftr.Contracts
                 parsedId = null;
                 return false;
             }
+        }
+
+        private ResourceIdType GetResourceIdType(string resourceId, string[] parts)
+        {
+            if (parts.Length == 3 && parts[1].OrdinalEquals(c_subscriptions))
+            {
+                return ResourceIdType.SubscriptionId;
+            }
+
+            if (parts.Length == 5 && parts[1].OrdinalEquals(c_subscriptions) && parts[3].OrdinalEquals(c_resourceGroups))
+            {
+                return ResourceIdType.ResourceGroupId;
+            }
+
+            if (parts.Length >= 7 && parts.Length % 2 == 1)
+            {
+                if (parts[1].OrdinalEquals(c_subscriptions) && parts[3].OrdinalEquals(c_resourceGroups) && parts[5].OrdinalEquals(c_providers))
+                {
+                    return ResourceIdType.FullResourceId;
+                }
+            }
+
+            throw new FormatException($"'{resourceId}' is not valid resourceId format.");
         }
     }
 }
