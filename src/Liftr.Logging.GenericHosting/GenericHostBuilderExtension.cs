@@ -28,9 +28,6 @@ namespace Microsoft.Liftr.Logging.GenericHosting
                 throw new ArgumentNullException(nameof(builder));
             }
 
-            LogContext.PushProperty("RunningSessionId", Guid.NewGuid().ToString());
-            LogContext.PushProperty("ProcessStartTime", DateTime.UtcNow.ToZuluString());
-
             return builder
                 .ConfigureServices((hostContext, services) =>
                 {

@@ -36,9 +36,6 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 throw new ArgumentNullException(nameof(webHostBuilder));
             }
 
-            LogContext.PushProperty("RunningSessionId", Guid.NewGuid().ToString());
-            LogContext.PushProperty("ProcessStartTime", DateTime.UtcNow.ToZuluString());
-
             webHostBuilder
                 .UseSerilog((host, config) =>
                 {
