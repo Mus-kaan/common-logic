@@ -2,6 +2,9 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Polly;
+using System.Net.Http;
+
 namespace Microsoft.Liftr.Fluent
 {
     public class LiftrAzureOptions
@@ -18,5 +21,7 @@ namespace Microsoft.Liftr.Fluent
         /// https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/README.md
         /// </summary>
         public string KubernetesVersion { get; set; } = "1.17.7";
+
+        public IAsyncPolicy<HttpResponseMessage> HttpPolicy { get; set; } = HttpPolicyHelper.GetDefaultPolicy();
     }
 }

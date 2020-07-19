@@ -101,7 +101,7 @@ namespace Microsoft.Liftr.Fluent
                 uriBuilder.Path = resourceId;
                 uriBuilder.Query = $"api-version={apiVersion}";
                 _logger.Information($"Start getting resource at Uri: {uriBuilder.Uri}");
-                var runOutputResponse = await httpClient.GetAsync(uriBuilder.Uri);
+                var runOutputResponse = await _options.HttpPolicy.ExecuteAsync(() => httpClient.GetAsync(uriBuilder.Uri));
 
                 if (runOutputResponse.StatusCode == HttpStatusCode.OK)
                 {
@@ -146,7 +146,7 @@ namespace Microsoft.Liftr.Fluent
                 uriBuilder.Path = resourceId;
                 uriBuilder.Query = $"api-version={apiVersion}";
                 _logger.Information($"Start deleting resource at Uri: {uriBuilder.Uri}");
-                var deleteResponse = await httpClient.DeleteAsync(uriBuilder.Uri, cancellationToken);
+                var deleteResponse = await _options.HttpPolicy.ExecuteAsync((ct) => httpClient.DeleteAsync(uriBuilder.Uri, ct), cancellationToken);
                 _logger.Information($"DELETE response code: {deleteResponse.StatusCode}");
 
                 if (!deleteResponse.IsSuccessStatusCode)
@@ -1214,7 +1214,7 @@ namespace Microsoft.Liftr.Fluent
         #endregion
 
         public async Task<string> WaitAsyncOperationAsync(
-           HttpClient client,
+           HttpClient httpClient,
            HttpResponseMessage startOperationResponse,
            CancellationToken cancellationToken,
            TimeSpan? pollingTime = null)
@@ -1240,7 +1240,7 @@ namespace Microsoft.Liftr.Fluent
 
             while (true)
             {
-                var statusResponse = await client.GetAsync(new Uri(statusUrl), cancellationToken);
+                var statusResponse = await _options.HttpPolicy.ExecuteAsync((ct) => httpClient.GetAsync(new Uri(statusUrl), ct), cancellationToken);
                 var body = await statusResponse.Content.ReadAsStringAsync();
                 bool keepWaiting = false;
 
