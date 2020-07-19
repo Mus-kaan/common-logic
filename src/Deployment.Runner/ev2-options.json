@@ -1,7 +1,7 @@
 {
   "ServiceTreeName": "Sample Service Tree Name",
   "ServiceTreeId": "c40f3dd2-9bf7-4d98-a2e3-48bcdc77dcd6",
-  "NotificationEmail": "wuweng@microsoft.com",
+  "NotificationEmail": "your-email-address@microsoft.com",
   "TargetEnvironments": [
     {
       "EnvironmentName": "Dev",
