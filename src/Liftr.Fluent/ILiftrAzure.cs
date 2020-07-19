@@ -37,6 +37,8 @@ namespace Microsoft.Liftr.Fluent
 
         AzureCredentials AzureCredentials { get; }
 
+        LiftrAzureOptions Options { get; }
+
         string TenantId { get; }
 
         string SPNObjectId { get; }

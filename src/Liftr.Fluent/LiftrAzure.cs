@@ -82,6 +82,8 @@ namespace Microsoft.Liftr.Fluent
 
         public AzureCredentials AzureCredentials { get; }
 
+        public LiftrAzureOptions Options => _options;
+
         public async Task<string> GetResourceAsync(string resourceId, string apiVersion)
         {
             using (var handler = new AzureApiAuthHandler(AzureCredentials))
