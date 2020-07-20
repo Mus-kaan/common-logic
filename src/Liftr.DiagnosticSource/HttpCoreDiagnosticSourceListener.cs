@@ -50,6 +50,13 @@ namespace Microsoft.Liftr.DiagnosticSource
 
                 var request = _startRequestFetcher.Fetch(value.Value) as HttpRequestMessage;
 
+                if (request == null ||
+                    request.Headers == null ||
+                    request.RequestUri == null)
+                {
+                    return;
+                }
+
                 // Inject the headers to all out-going http requests.
                 if (!string.IsNullOrEmpty(CallContextHolder.LogFilterOverwrite.Value))
                 {
