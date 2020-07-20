@@ -118,6 +118,7 @@ namespace Microsoft.Liftr.Queue
                             {
                                 using (var lease = new QueueMessageLeaseScope(_queue, queueMessage, _logger))
                                 using (var logFilterOverrideScope = new LogFilterOverrideScope(overrideLevel))
+                                using (new LogContextPropertyScope("LiftrClientReqId", message.MsgTelemetryContext?.ClientRequestId))
                                 using (new LogContextPropertyScope("LiftrTrackingId", message.MsgTelemetryContext?.ARMRequestTrackingId))
                                 using (new LogContextPropertyScope("LiftrCorrelationId", message.MsgTelemetryContext?.CorrelationId))
                                 using (var operation = _logger.StartTimedOperation("ProcessQueueMessage", correlationId))

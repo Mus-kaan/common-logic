@@ -12,7 +12,7 @@ namespace Microsoft.Liftr.DiagnosticSource
         /// the Network Controller assumes that last request is a retry and returns the same
         /// result it returned for the previous request.
         /// </summary>
-        public const string ClientRequestId = "X-MS-Client-Request-Id";
+        public const string ARMClientRequestId = "X-MS-Client-Request-Id";
         public const string LiftrClientRequestId = "X-Liftr-Client-Request-Id";
 
         /// <summary>

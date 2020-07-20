@@ -43,7 +43,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
 
             if (string.IsNullOrEmpty(clientRequestId))
             {
-                clientRequestId = GetHeaderValue(httpContext, HeaderConstants.ClientRequestId);
+                clientRequestId = GetHeaderValue(httpContext, HeaderConstants.ARMClientRequestId);
             }
 
             if (string.IsNullOrEmpty(armRequestTrackingId))
@@ -127,6 +127,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             }
 
             using (var logFilterOverrideScope = new LogFilterOverrideScope(overrideLevel))
+            using (new LogContextPropertyScope("LiftrClientReqId", clientRequestId))
             using (new LogContextPropertyScope("LiftrTrackingId", armRequestTrackingId))
             using (new LogContextPropertyScope("LiftrCorrelationId", correlationtId))
             {
