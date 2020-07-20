@@ -9,9 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Configuration;
 using Microsoft.Liftr.DiagnosticSource;
+using Microsoft.Liftr.Logging.Formatter;
 using Serilog;
 using Serilog.Events;
-using Serilog.Formatting.Compact;
 using System;
 
 namespace Microsoft.Liftr.Logging.GenericHosting

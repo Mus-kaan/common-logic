@@ -9,3 +9,4 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.Logging.InstanceMetaHelper.GetMetaInfoAsync~System.Threading.Tasks.Task{Microsoft.Liftr.Logging.MetaInfo}")]
+[assembly: SuppressMessage("Design", "Liftr1201:License header is missing or inconsistent", Justification = "<Pending>")]

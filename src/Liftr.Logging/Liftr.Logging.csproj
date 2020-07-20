@@ -9,7 +9,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights" Version="$(PackageVersion_Microsoft_ApplicationInsights)" />
     <PackageReference Include="Serilog" Version="$(PackageVersion_Serilog)" />
-    <PackageReference Include="Serilog.Formatting.Compact" Version="$(PackageVersion_Serilog_Formatting_Compact)" />
     <PackageReference Include="Serilog.Sinks.Console" Version="$(PackageVersion_Serilog_Sinks_Console)" />
   </ItemGroup>
   <ItemGroup>
