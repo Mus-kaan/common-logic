@@ -1,4 +1,4 @@
-<MonitoringManagement version="1.0" namespace="LiftrDev" timestamp="2019-01-28T00:00:00Z" eventVersion="13">
+<MonitoringManagement version="1.0" namespace="LiftrDev" timestamp="2020-07-16T00:00:00Z" eventVersion="20">
   <Accounts>
     <Account moniker="liftrdevaudit" alias="AuditStore" />
     <Account moniker="liftrdevdiag" isDefault="true" />
@@ -54,6 +54,7 @@
   <Sources>
     <Source name="liftr" dynamic_schema="true" />
     <Source name="k8scontainers" dynamic_schema="true" />
+    <Source name="nginx" dynamic_schema="true" />
     <Source name="kern" schema="syslog" />
     <Source name="auth" schema="syslog" />
     <Source name="authpriv" schema="syslog" />
@@ -83,6 +84,9 @@
       </MdsdEventSource>
       <MdsdEventSource source="k8scontainers">
         <RouteEvent account="liftrdevdiag" priority="Normal" storeType="CentralBond" eventName="KubernetesContainers" />
+      </MdsdEventSource>
+      <MdsdEventSource source="nginx">
+        <RouteEvent account="liftrdevdiag" priority="Normal" storeType="CentralBond" eventName="NginxContainers" />
       </MdsdEventSource>
       <MdsdEventSource source="kern">
         <RouteEvent account="AzSecurityStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmSecurity" duration="PT1M" />
@@ -144,6 +148,11 @@
       </LogAnalytics>
     </EventStreamingAnnotation>
     <EventStreamingAnnotation name="^liftrAksApp$">
+      <LogAnalytics>
+        <Content>LogAnalyticsContent</Content>
+      </LogAnalytics>
+    </EventStreamingAnnotation>
+    <EventStreamingAnnotation name="^NginxContainers$">
       <LogAnalytics>
         <Content>LogAnalyticsContent</Content>
       </LogAnalytics>
