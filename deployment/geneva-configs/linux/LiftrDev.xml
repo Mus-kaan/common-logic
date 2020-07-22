@@ -1,4 +1,4 @@
-<MonitoringManagement version="1.0" namespace="LiftrDev" timestamp="2020-07-16T00:00:00Z" eventVersion="20">
+<MonitoringManagement version="1.0" namespace="LiftrDev" timestamp="2020-07-21T00:00:00Z" eventVersion="21">
   <Accounts>
     <Account moniker="liftrdevaudit" alias="AuditStore" />
     <Account moniker="liftrdevdiag" isDefault="true" />
@@ -55,6 +55,7 @@
     <Source name="liftr" dynamic_schema="true" />
     <Source name="k8scontainers" dynamic_schema="true" />
     <Source name="nginx" dynamic_schema="true" />
+    <Source name="ifxauditlogs" dynamic_schema="true" />
     <Source name="kern" schema="syslog" />
     <Source name="auth" schema="syslog" />
     <Source name="authpriv" schema="syslog" />
@@ -68,16 +69,12 @@
     <Source name="clamav" schema="azsecv1" />
     <Source name="scan_event" schema="azsecv2" />
     <Source name="audit" dynamic_schema="true" />
-    <!-- Create ifxaudit event names depending on the audit type -->
-    <!-- the source names should be exactly as below -->
-    <Source name="local5-ifxauditappl" schema="taggedSyslog" />
-    <!-- application logs -->
-    <Source name="local5-ifxauditmgmt" schema="taggedSyslog" />
-    <!-- management logs -->
-    <Source name="local5-ifxauditfail" schema="taggedSyslog" />
-    <!-- error logs -->
   </Sources>
   <Events>
+    <!-- Heartbeat events supported without change.-->
+    <HeartBeats>
+      <HeartBeat eventName="heartbeat" storeType="CentralBond" duration="PT5M" sampleRateInSeconds="60" />
+    </HeartBeats>
     <MdsdEvents>
       <MdsdEventSource source="liftr">
         <RouteEvent account="liftrdevdiag" priority="Normal" storeType="CentralBond" eventName="liftrAksApp" />
@@ -87,6 +84,9 @@
       </MdsdEventSource>
       <MdsdEventSource source="nginx">
         <RouteEvent account="liftrdevdiag" priority="Normal" storeType="CentralBond" eventName="NginxContainers" />
+      </MdsdEventSource>
+      <MdsdEventSource source="ifxauditlogs">
+        <RouteEvent account="AuditStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmIfxAudit" />
       </MdsdEventSource>
       <MdsdEventSource source="kern">
         <RouteEvent account="AzSecurityStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmSecurity" duration="PT1M" />
@@ -127,19 +127,44 @@
       <MdsdEventSource source="audit">
         <RouteEvent account="AuditStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmAudit" duration="PT1M" />
       </MdsdEventSource>
-      <!-- route ifxaudit application log -->
-      <MdsdEventSource source="local5-ifxauditappl">
-        <RouteEvent priority="Normal" storeType="CentralBond" eventName="LinuxAsmIfxAuditApplication" duration="PT1M" />
-      </MdsdEventSource>
-      <!-- route ifxaudit management log -->
-      <MdsdEventSource source="local5-ifxauditmgmt">
-        <RouteEvent priority="Normal" storeType="CentralBond" eventName="LinuxAsmIfxAuditManagement" duration="PT1M" />
-      </MdsdEventSource>
-      <!-- route ifxaudit error log -->
-      <MdsdEventSource source="local5-ifxauditfail">
-        <RouteEvent priority="Normal" storeType="CentralBond" eventName="LinuxAsmIfxAuditError" duration="PT1M" />
-      </MdsdEventSource>
     </MdsdEvents>
+    <DerivedEvents>
+      <!-- audit application event -->
+      <!-- NOTE: please do not change the event name -->
+      <DerivedEvent duration="PT1M" eventName="LinuxAsmIfxAuditApplication" source="ifxauditlogs" storeType="CentralBond" whereToRun="Local">
+        <Query><![CDATA[
+              where (RegexMatch(log,"^ifxauditappl: .*") != "" && RegexMatch(log,"IFxAuditHeartBeatOperationIFx") == "")
+              let EventData = RegexMatch(log,"(^ifxauditappl: (.*))", 2)
+              select Tenant,Role,MachineName,RoleInstance,EventData
+            ]]></Query>
+      </DerivedEvent>
+      <!-- audit management event -->
+      <!-- NOTE: please do not change the event name -->
+      <DerivedEvent duration="PT1M" eventName="LinuxAsmIfxAuditManagement" source="ifxauditlogs" storeType="CentralBond" whereToRun="Local">
+        <Query><![CDATA[
+              where (RegexMatch(log,"^ifxauditmgmt: .*") != "" && RegexMatch(log,"IFxAuditHeartBeatOperationIFx") == "")
+              let EventData = RegexMatch(log,"(^ifxauditmgmt: (.*))", 2)
+              select Tenant,Role,MachineName,RoleInstance,EventData
+            ]]></Query>
+      </DerivedEvent>
+      <!-- audit heartbeat event -->
+      <!-- NOTE: please do not change the event name -->
+      <DerivedEvent duration="PT1M" eventName="LinuxAsmHeartbeat" source="ifxauditlogs" storeType="CentralBond" whereToRun="Local">
+        <Query><![CDATA[
+              where (RegexMatch(log,"IFxAuditHeartBeatOperationIFx") != "")
+              let EventData = RegexMatch(log,"(^ifxauditappl: (.*))", 2)
+              select Tenant,Role,MachineName,RoleInstance,EventData
+            ]]></Query>
+      </DerivedEvent>
+      <!-- audit errors -->
+      <DerivedEvent duration="PT1M" eventName="LinuxAsmIfxAuditError" source="ifxauditlogs" storeType="CentralBond" whereToRun="Local">
+        <Query><![CDATA[
+              where (RegexMatch(log,"^ifxauditfail: .*") != "")
+              let EventData = RegexMatch(log,"(^ifxauditfail: (.*))", 2)
+              select Tenant,Role,MachineName,RoleInstance,EventData
+            ]]></Query>
+      </DerivedEvent>
+    </DerivedEvents>
   </Events>
   <EventStreamingAnnotations>
     <EventStreamingAnnotation name="^KubernetesContainers$">
@@ -153,6 +178,11 @@
       </LogAnalytics>
     </EventStreamingAnnotation>
     <EventStreamingAnnotation name="^NginxContainers$">
+      <LogAnalytics>
+        <Content>LogAnalyticsContent</Content>
+      </LogAnalytics>
+    </EventStreamingAnnotation>
+    <EventStreamingAnnotation name="^LinuxAsmIfxAudit$">
       <LogAnalytics>
         <Content>LogAnalyticsContent</Content>
       </LogAnalytics>

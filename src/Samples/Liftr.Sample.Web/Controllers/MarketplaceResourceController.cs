@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.IFxAudit;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DataSource.Mongo;
+using Microsoft.Liftr.IFxAuditLinux;
 using Microsoft.Liftr.MarketplaceResource.DataSource.Interfaces;
 using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
@@ -14,13 +16,16 @@ namespace Liftr.Sample.Web.Controllers
     {
         private readonly IMarketplaceResourceContainerEntityDataSource _dataSource;
         private readonly ILogger _logger;
+        private readonly IIfxAuditLogger _ifxAuditLogger;
 
         public MarketplaceResourceController(
             IMarketplaceResourceContainerEntityDataSource resourceMetadataEntityDataSource,
-            ILogger logger)
+            ILogger logger,
+            IIfxAuditLogger ifxAuditLogger)
         {
             _dataSource = resourceMetadataEntityDataSource;
             _logger = logger;
+            _ifxAuditLogger = ifxAuditLogger;
         }
 
         // PUT api/resourceMetadata/{resourceId}/{subscriptionId}
@@ -34,6 +39,12 @@ namespace Liftr.Sample.Web.Controllers
             var entity = new MarketplaceResourceContainerEntity(saasResource, resourceId, "tenantId");
             var addedEntity = await _dataSource.AddAsync(entity);
             _logger.Information("Added entity with resource id: {resourceId}", entity.ResourceId);
+            _ifxAuditLogger.LogAudit(
+                    new IFxAuditCallerId[] { new IFxAuditCallerId { Type = IFxAuditCallerIdType.TENANT_ID, Value = "tenantId" }, },
+                    IFxAuditEventCategories.RESORUCE_MANAGEMENT,
+                    $"Put",
+                    new IFxAuditTargetResource[] { new IFxAuditTargetResource() { Name = resourceId, Type = Constants.DatadogResourceProvider } },
+                    IFxAuditResultType.SUCCESS);
             return Ok(addedEntity);
         }
 
@@ -44,6 +55,12 @@ namespace Liftr.Sample.Web.Controllers
         {
             var entity = await _dataSource.GetEntityForMarketplaceSubscriptionAsync(MarketplaceSubscription.From(marketplaceSubId));
             _logger.Information("Got entity with marketplace subscription id: {@mpSub}", entity.MarketplaceSaasResource.MarketplaceSubscription);
+            _ifxAuditLogger.LogAudit(
+                    new IFxAuditCallerId[] { new IFxAuditCallerId { Type = IFxAuditCallerIdType.TENANT_ID, Value = "tenantId" }, },
+                    IFxAuditEventCategories.RESORUCE_MANAGEMENT,
+                    $"Get",
+                    new IFxAuditTargetResource[] { new IFxAuditTargetResource() { Name = marketplaceSubId, Type = Constants.DatadogResourceProvider } },
+                    IFxAuditResultType.SUCCESS);
             return Ok(entity);
         }
     }
