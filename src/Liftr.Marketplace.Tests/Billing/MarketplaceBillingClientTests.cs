@@ -280,30 +280,6 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
         }
 
         [Fact]
-        public async Task BillingClient_Send_Usage_Event_WebException_Exception_Async()
-        {
-            var correlationId = Guid.NewGuid().ToString();
-            var resourceId = Guid.NewGuid().ToString();
-
-            var request = new UsageEventRequest
-            {
-                ResourceId = resourceId,
-                Quantity = 4,
-                Dimension = "Meter1",
-                EffectiveStartTime = DateTime.Now.AddHours(-1),
-                PlanId = "Basic",
-            };
-
-            var expectedResponse = MockMeteredBillingSuccessResponse(resourceId);
-
-            using var handler = new MockHttpMessageHandlerThrowWebException();
-            using var httpClient = new HttpClient(handler, false);
-
-            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, httpClient);
-            await Assert.ThrowsAsync<MarketplaceBillingException>(async () => await billingClient.SendUsageEventAsync(request, CancellationToken.None));
-        }
-
-        [Fact]
         public async Task BillingClient_Send_Usage_Event_MarketplaceBillingException_Exception_Async()
         {
             var correlationId = Guid.NewGuid().ToString();
@@ -325,36 +301,6 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
 
             var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, httpClient);
             await Assert.ThrowsAsync<MarketplaceBillingException>(async () => await billingClient.SendUsageEventAsync(request, CancellationToken.None));
-        }
-
-        [Fact]
-        public async Task BillingClient_Send_Batch_Usage_Event_WebException_Exception_Async()
-        {
-            var correlationId = Guid.NewGuid().ToString();
-            var resourceId = Guid.NewGuid().ToString();
-
-            var request = new BatchUsageEventRequest
-            {
-                Request = new List<UsageEventRequest>
-                {
-                    new UsageEventRequest
-                    {
-                        ResourceId = resourceId,
-                        Quantity = 4,
-                        Dimension = "Meter1",
-                        EffectiveStartTime = DateTime.Now.AddHours(-1),
-                        PlanId = "Basic",
-                    },
-                },
-            };
-
-            var expectedResponse = MockMeteredBillingSuccessResponse(resourceId);
-
-            using var handler = new MockHttpMessageHandlerThrowWebException();
-            using var httpClient = new HttpClient(handler, false);
-
-            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, httpClient);
-            await Assert.ThrowsAsync<MarketplaceBillingException>(async () => await billingClient.SendBatchUsageEventAsync(request, CancellationToken.None));
         }
 
         [Fact]
@@ -537,16 +483,6 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
                     StatusCode = _mockResponse.StatusCode,
                     Content = new StringContent(_mockResponse.RawResponse, Encoding.UTF8, "application/json"),
                 };
-            }
-        }
-
-        private class MockHttpMessageHandlerThrowWebException : HttpMessageHandler
-        {
-            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            {
-                await Task.Yield();
-
-                throw new WebException();
             }
         }
 

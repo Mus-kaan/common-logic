@@ -51,34 +51,21 @@ namespace Microsoft.Liftr.Marketplace.Billing
         public async Task<MeteredBillingRequestResponse> SendUsageEventAsync(UsageEventRequest marketplaceUsageEventRequest, CancellationToken cancellationToken = default)
         {
             var requestId = Guid.NewGuid(); // Every request should have a different requestId
-            try
-            {
-                var accessToken = await _authenticationTokenCallback();
-                var requestPath = Constants.UsageEventPath;
-                using var request = CreateRequestWithHeaders(HttpMethod.Post, requestPath, requestId, accessToken);
-                var stringContent = JsonConvert.SerializeObject(marketplaceUsageEventRequest);
-                request.Content = new StringContent(stringContent, Encoding.UTF8, "application/json");
+            var accessToken = await _authenticationTokenCallback();
+            var requestPath = Constants.UsageEventPath;
+            using var request = CreateRequestWithHeaders(HttpMethod.Post, requestPath, requestId, accessToken);
+            var stringContent = JsonConvert.SerializeObject(marketplaceUsageEventRequest);
+            request.Content = new StringContent(stringContent, Encoding.UTF8, "application/json");
 
-                _logger.Information("Sending request for usageevent: requestUri: {@requestUrl}, requestId: {requestId}", request.RequestUri, requestId);
+            _logger.Information("Sending request for usageevent: requestUri: {@requestUrl}, requestId: {requestId}", request.RequestUri, requestId);
 
-                HttpResponseMessage httpResponse = await _httpClient.SendAsync(request, cancellationToken);
+            HttpResponseMessage httpResponse = await _httpClient.SendAsync(request, cancellationToken);
 
-                return httpResponse.StatusCode switch
-                {
-                    HttpStatusCode.OK => await AzureMarketplaceRequestResult.ParseAsync<MeteredBillingSuccessResponse>(httpResponse),
-                    _ => await BillingUtility.GetMeteredBillingNonSuccessResponseAsync(httpResponse),
-                };
-            }
-            catch (WebException ex)
+            return httpResponse.StatusCode switch
             {
-                _logger.Error(ex, messageTemplate: $"The call: {ex.Message} failed");
-                throw new MarketplaceBillingException($"Failed to send marketplace usage event request. Response: {ex.Message}", ex);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, messageTemplate: $"The call: {ex.Message} failed");
-                throw new MarketplaceBillingException($"Failed to send marketplace usage event request. General exception caught. Response: {ex.Message}", ex);
-            }
+                HttpStatusCode.OK => await AzureMarketplaceRequestResult.ParseAsync<MeteredBillingSuccessResponse>(httpResponse),
+                _ => await BillingUtility.GetMeteredBillingNonSuccessResponseAsync(httpResponse),
+            };
         }
 
         /// <summary>
@@ -91,33 +78,20 @@ namespace Microsoft.Liftr.Marketplace.Billing
         public async Task<MeteredBillingRequestResponse> SendBatchUsageEventAsync(BatchUsageEventRequest marketplaceBatchUsageEventRequest, CancellationToken cancellationToken = default)
         {
             var requestId = Guid.NewGuid(); // Every request should have a different requestId
-            try
-            {
-                var accessToken = await _authenticationTokenCallback();
-                var requestPath = Constants.BatchUsageEventPath;
-                using var request = CreateRequestWithHeaders(HttpMethod.Post, requestPath, requestId, accessToken);
-                var stringContent = JsonConvert.SerializeObject(marketplaceBatchUsageEventRequest);
-                request.Content = new StringContent(stringContent, Encoding.UTF8, "application/json");
+            var accessToken = await _authenticationTokenCallback();
+            var requestPath = Constants.BatchUsageEventPath;
+            using var request = CreateRequestWithHeaders(HttpMethod.Post, requestPath, requestId, accessToken);
+            var stringContent = JsonConvert.SerializeObject(marketplaceBatchUsageEventRequest);
+            request.Content = new StringContent(stringContent, Encoding.UTF8, "application/json");
 
-                _logger.Information("Sending request for usageevent: requestUri: {@requestUrl}, requestId: {requestId}", request.RequestUri, requestId);
+            _logger.Information("Sending request for usageevent: requestUri: {@requestUrl}, requestId: {requestId}", request.RequestUri, requestId);
 
-                var response = await _httpClient.SendAsync(request, cancellationToken);
-                return response.StatusCode switch
-                {
-                    HttpStatusCode.OK => await AzureMarketplaceRequestResult.ParseAsync<MeteredBillingBatchUsageSuccessResponse>(response),
-                    _ => await BillingUtility.GetMeteredBillingNonSuccessResponseAsync(response),
-                };
-            }
-            catch (WebException ex)
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            return response.StatusCode switch
             {
-                _logger.Error(ex, messageTemplate: $"The call: {ex.Message} failed");
-                throw new MarketplaceBillingException($"Failed to send marketplace batch usage event request. Response: {ex.Message}", ex);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, messageTemplate: $"The call: {ex.Message} failed");
-                throw new MarketplaceBillingException($"Failed to send marketplace batch usage event request. General exception caught. Response: {ex.Message}", ex);
-            }
+                HttpStatusCode.OK => await AzureMarketplaceRequestResult.ParseAsync<MeteredBillingBatchUsageSuccessResponse>(response),
+                _ => await BillingUtility.GetMeteredBillingNonSuccessResponseAsync(response),
+            };
         }
 
         private HttpRequestMessage CreateRequestWithHeaders(HttpMethod method, string requestPath, Guid requestId, string accessToken)

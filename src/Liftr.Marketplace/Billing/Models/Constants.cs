@@ -6,7 +6,7 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
 {
     public static class Constants
     {
-        public const string UsageEventPath = "usageEvent";
-        public const string BatchUsageEventPath = "batchUsageEvent";
+        public const string UsageEventPath = "/api/usageEvent";
+        public const string BatchUsageEventPath = "/api/batchUsageEvent";
     }
 }
