@@ -12,7 +12,7 @@ namespace Microsoft.Liftr
 {
     public static class LoggerExtensions
     {
-        public static LiftrLoggingOptions Options { get; } = new LiftrLoggingOptions();
+        public static LiftrLoggingOptions Options { get; internal set; } = new LiftrLoggingOptions();
 
         /// <summary>
         /// Start tracking an <see cref="ITimedOperation"/>, which contains two log events:

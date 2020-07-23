@@ -3,13 +3,15 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Extensions.Configuration;
+using Microsoft.Liftr.Logging;
+using Serilog.Events;
 using System;
 
 namespace Microsoft.Liftr.Configuration
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
     public static class ConfigurationExtensions
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Middleware should fail silently.")]
         public static bool ContainsSerilogWriteToConsole(this IConfiguration configuration)
         {
             if (configuration == null)
@@ -39,6 +41,66 @@ namespace Microsoft.Liftr.Configuration
             }
 
             return false;
+        }
+
+        public static LiftrLoggingOptions ExtractLoggingOptions(this IConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException(nameof(configuration));
+            }
+
+            var options = new LiftrLoggingOptions()
+            {
+                WriteToConsole = configuration.ContainsSerilogWriteToConsole(),
+                RenderMessage = ExtractValue(configuration, nameof(LiftrLoggingOptions.RenderMessage), defaultValue: false),
+                LogTimedOperation = ExtractValue(configuration, nameof(LiftrLoggingOptions.LogTimedOperation), defaultValue: true),
+                LogRequest = ExtractValue(configuration, nameof(LiftrLoggingOptions.LogRequest), defaultValue: false),
+                AllowFilterDynamicOverride = ExtractValue(configuration, nameof(LiftrLoggingOptions.AllowFilterDynamicOverride), defaultValue: false),
+                MinimumLevel = ExtractMinimumLevel(configuration),
+                AppInsigthsInstrumentationKey = ExtractAppInsightsKey(configuration),
+            };
+
+            return options;
+        }
+
+        private static bool ExtractValue(IConfiguration configuration, string propertyName, bool defaultValue = false)
+        {
+            try
+            {
+                var valueStr = configuration.GetSection("Serilog")?.GetSection(propertyName)?.Value;
+                if (string.IsNullOrEmpty(valueStr))
+                {
+                    return defaultValue;
+                }
+
+                return bool.Parse(valueStr);
+            }
+            catch
+            {
+            }
+
+            return defaultValue;
+        }
+
+        private static LogEventLevel ExtractMinimumLevel(IConfiguration configuration)
+        {
+            LogEventLevel defaultLevel = LogEventLevel.Information;
+            try
+            {
+                var defaultLevelStr = configuration.GetSection("Serilog")?.GetSection("MinimumLevel")?.GetSection("Default")?.Value;
+                defaultLevel = (LogEventLevel)Enum.Parse(typeof(LogEventLevel), defaultLevelStr);
+            }
+            catch
+            {
+            }
+
+            return defaultLevel;
+        }
+
+        private static string ExtractAppInsightsKey(IConfiguration configuration)
+        {
+            return configuration.GetSection("ApplicationInsights")?.GetSection("InstrumentationKey")?.Value;
         }
     }
 }

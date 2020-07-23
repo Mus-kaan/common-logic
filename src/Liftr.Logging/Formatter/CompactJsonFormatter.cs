@@ -30,15 +30,18 @@ namespace Microsoft.Liftr.Logging.Formatter
     public class CompactJsonFormatter : ITextFormatter
     {
         private readonly JsonValueFormatter _valueFormatter;
+        private readonly bool _renderMessage;
 
         /// <summary>
         /// Construct a <see cref="CompactJsonFormatter"/>, optionally supplying a formatter for
         /// <see cref="LogEventPropertyValue"/>s on the event.
         /// </summary>
         /// <param name="valueFormatter">A value formatter, or null.</param>
-        public CompactJsonFormatter(JsonValueFormatter valueFormatter = null)
+        /// <param name="renderMessage">show rendered messsage or not.</param>
+        public CompactJsonFormatter(JsonValueFormatter valueFormatter = null, bool renderMessage = false)
         {
             _valueFormatter = valueFormatter ?? new JsonValueFormatter(typeTagName: "$type");
+            _renderMessage = renderMessage;
         }
 
         /// <summary>
@@ -58,7 +61,7 @@ namespace Microsoft.Liftr.Logging.Formatter
         /// <param name="logEvent">The event to format.</param>
         /// <param name="output">The output.</param>
         /// <param name="valueFormatter">A value formatter for <see cref="LogEventPropertyValue"/>s on the event.</param>
-        public static void FormatEvent(LogEvent logEvent, TextWriter output, JsonValueFormatter valueFormatter)
+        public void FormatEvent(LogEvent logEvent, TextWriter output, JsonValueFormatter valueFormatter)
         {
             if (logEvent == null)
             {
@@ -77,8 +80,17 @@ namespace Microsoft.Liftr.Logging.Formatter
 
             output.Write("{\"t\":\"");
             output.Write(logEvent.Timestamp.UtcDateTime.ToString("O", CultureInfo.InvariantCulture));
-            output.Write("\",\"mt\":");
-            JsonValueFormatter.WriteQuotedJsonString(logEvent.MessageTemplate.Text, output);
+
+            if (_renderMessage)
+            {
+                output.Write("\",\"msg\":");
+                JsonValueFormatter.WriteQuotedJsonString(logEvent.RenderMessage(), output);
+            }
+            else
+            {
+                output.Write("\",\"mt\":");
+                JsonValueFormatter.WriteQuotedJsonString(logEvent.MessageTemplate.Text, output);
+            }
 
             var tokensWithFormat = logEvent.MessageTemplate.Tokens
                 .OfType<PropertyToken>()

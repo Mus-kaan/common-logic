@@ -10,7 +10,6 @@ using Microsoft.Liftr.Configuration;
 using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Logging.Formatter;
 using Serilog;
-using Serilog.Events;
 using System;
 
 namespace Microsoft.Liftr.Logging.AspNetCore
@@ -38,10 +37,12 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             webHostBuilder
                 .UseSerilog((host, config) =>
                 {
-                    (var allowOverride, var logRequest, var defaultLevel) = GetOverrideOptions(host);
-                    if (allowOverride)
+                    LoggerExtensions.Options = host.Configuration.ExtractLoggingOptions();
+                    var options = LoggerExtensions.Options;
+
+                    if (options.AllowFilterDynamicOverride)
                     {
-                        config.ReadFrom.Configuration(host.Configuration).MinimumLevel.ControlledBy(LogFilterOverrideScope.EnableFilterOverride(defaultLevel)).Enrich.FromLogContext();
+                        config.ReadFrom.Configuration(host.Configuration).MinimumLevel.ControlledBy(LogFilterOverrideScope.EnableFilterOverride(options.MinimumLevel)).Enrich.FromLogContext();
                     }
                     else
                     {
@@ -61,16 +62,15 @@ namespace Microsoft.Liftr.Logging.AspNetCore
 
                     if (!host.Configuration.ContainsSerilogWriteToConsole())
                     {
-                        config = config.WriteTo.Console(new CompactJsonFormatter());
+                        config = config.WriteTo.Console(new CompactJsonFormatter(renderMessage: options.RenderMessage));
                     }
                 })
                 .ConfigureServices((host, services) =>
                 {
-                    (var allowOverride, var logRequest, var defaultLevel) = GetOverrideOptions(host);
-                    LoggerExtensions.Options.LogTimedOperation = GetLogTimedOperation(host);
+                    LoggerExtensions.Options = host.Configuration.ExtractLoggingOptions();
+                    var options = LoggerExtensions.Options;
 
-                    var ikey = host.Configuration.GetSection("ApplicationInsights")?.GetSection("InstrumentationKey")?.Value;
-                    if (!string.IsNullOrEmpty(ikey))
+                    if (!string.IsNullOrEmpty(options.AppInsigthsInstrumentationKey))
                     {
 #pragma warning disable CS0618 // Type or member is obsolete
                         var builder = TelemetryConfiguration.Active.TelemetryProcessorChainBuilder;
@@ -84,12 +84,12 @@ namespace Microsoft.Liftr.Logging.AspNetCore
 
                     services.AddSingleton<IStartupFilter>((sp) =>
                     {
-                        return new LoggingMiddlewareStartupFilter(logRequest);
+                        return new LoggingMiddlewareStartupFilter(options.LogRequest);
                     });
 
                     services.AddSingleton<Serilog.ILogger>((sp) =>
                     {
-                        if (!string.IsNullOrEmpty(ikey))
+                        if (!string.IsNullOrEmpty(options.AppInsigthsInstrumentationKey))
                         {
                             var appInsightsClient = sp.GetService<TelemetryClient>();
                             AppInsightsHelper.AppInsightsClient = appInsightsClient;
@@ -100,56 +100,6 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 });
 
             return webHostBuilder;
-        }
-
-        private static (bool allowOverride, bool logRequest, LogEventLevel defaultLevel) GetOverrideOptions(WebHostBuilderContext host)
-        {
-            bool allowOverride = false;
-            bool logRequest = false;
-            try
-            {
-                var allowOverrideStr = host.Configuration.GetSection("Serilog")?.GetSection("AllowFilterDynamicOverride")?.Value;
-                allowOverride = bool.Parse(allowOverrideStr);
-            }
-            catch
-            {
-            }
-
-            try
-            {
-                var allowOverrideStr = host.Configuration.GetSection("Serilog")?.GetSection("LogRequest")?.Value;
-                logRequest = bool.Parse(allowOverrideStr);
-            }
-            catch
-            {
-            }
-
-            LogEventLevel defaultLevel = LogEventLevel.Information;
-            try
-            {
-                var defaultLevelStr = host.Configuration.GetSection("Serilog")?.GetSection("MinimumLevel")?.GetSection("Default")?.Value;
-                defaultLevel = (LogEventLevel)Enum.Parse(typeof(LogEventLevel), defaultLevelStr);
-            }
-            catch
-            {
-            }
-
-            return (allowOverride, logRequest, defaultLevel);
-        }
-
-        private static bool GetLogTimedOperation(WebHostBuilderContext host)
-        {
-            bool logTimedOperation = true;
-            try
-            {
-                var allowOverrideStr = host.Configuration.GetSection("Serilog")?.GetSection("LogTimedOperation")?.Value;
-                logTimedOperation = bool.Parse(allowOverrideStr);
-            }
-            catch
-            {
-            }
-
-            return logTimedOperation;
         }
     }
 }
