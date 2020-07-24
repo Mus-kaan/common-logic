@@ -129,6 +129,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Marketplace", "Liftr.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Marketplace.Tests", "Liftr.Marketplace.Tests\Liftr.Marketplace.Tests.csproj", "{05E0BE6E-0634-4FA1-A744-8DBDF5CEE3FA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.JwtLibrary", "Liftr.JwtLibrary\Liftr.JwtLibrary.csproj", "{5347A710-ECCD-4749-ABD4-49FD7ABA3D11}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.JwtLibrary.Tests", "Liftr.JwtLibrary.Tests\Liftr.JwtLibrary.Tests.csproj", "{747D0F4D-F631-4104-931E-0ED87F751BBC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -363,6 +367,14 @@ Global
 		{05E0BE6E-0634-4FA1-A744-8DBDF5CEE3FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05E0BE6E-0634-4FA1-A744-8DBDF5CEE3FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05E0BE6E-0634-4FA1-A744-8DBDF5CEE3FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5347A710-ECCD-4749-ABD4-49FD7ABA3D11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5347A710-ECCD-4749-ABD4-49FD7ABA3D11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5347A710-ECCD-4749-ABD4-49FD7ABA3D11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5347A710-ECCD-4749-ABD4-49FD7ABA3D11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{747D0F4D-F631-4104-931E-0ED87F751BBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{747D0F4D-F631-4104-931E-0ED87F751BBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{747D0F4D-F631-4104-931E-0ED87F751BBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{747D0F4D-F631-4104-931E-0ED87F751BBC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

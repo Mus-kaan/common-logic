@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.JwtLibrary</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.JwtLibrary</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="$(PackageVersion_Serilog)" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="$(PackageVersion_System_IdentityModel_Tokens_Jwt)" />
+  </ItemGroup>
+
+</Project>

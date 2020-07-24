@@ -4,6 +4,7 @@
     <PackageVersion_Azure_Identity>1.1.1</PackageVersion_Azure_Identity>
     <PackageVersion_Azure_Storage_Blobs>12.4.4</PackageVersion_Azure_Storage_Blobs>
     <PackageVersion_Azure_Storage_Queues>12.3.2</PackageVersion_Azure_Storage_Queues>
+    <PackageVersion_BouncyCastle_NetCore>1.8.6</PackageVersion_BouncyCastle_NetCore>
     <PackageVersion_CommandLineParser>2.8.0</PackageVersion_CommandLineParser>
     <PackageVersion_coverlet_collector>1.2.0</PackageVersion_coverlet_collector>
     <PackageVersion_FluentAssertions>5.9.0</PackageVersion_FluentAssertions>
