@@ -5,7 +5,6 @@
 using Flurl;
 using Flurl.Http;
 using Microsoft.Liftr.Marketplace.Billing.Contracts;
-using Microsoft.Liftr.Marketplace.Billing.Exceptions;
 using Microsoft.Liftr.Marketplace.Billing.Models;
 using Microsoft.Liftr.Marketplace.Billing.Utils;
 using Microsoft.Liftr.Marketplace.Saas.Options;
