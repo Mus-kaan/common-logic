@@ -52,8 +52,6 @@ spec:
         name: geneva-services
         environmentName: {{ required "environmentName must be provided." .Values.environmentName }}
         region: {{ required "compactRegion must be provided." .Values.compactRegion }}
-        partnerName: {{ required "partnerName must be provided." .Values.partnerName }}
-        hostAKS: {{ required "hostAKS must be provided." .Values.hostAKS }}
         hostResourceGroup: {{ required "hostResourceGroup must be provided." .Values.hostResourceGroup }}
     spec:
       hostNetwork: true
@@ -70,12 +68,8 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: spec.nodeName
-          - name: GENEVA_PARTNER_NAME
-            value: {{ required "partnerName must be provided." .Values.partnerName | quote }}
           - name: GENEVA_HOST_RESOURCE_GROUP
             value: {{ required "hostResourceGroup must be provided." .Values.hostResourceGroup | quote }}
-          - name: GENEVA_HOST_AKS
-            value: {{ required "hostAKS must be provided." .Values.hostAKS | quote }}
           - name: GENEVA_HOST_REGION
             value: {{ required "hostRegion must be provided." .Values.hostRegion | quote }}
           - name: MONITORING_GCS_ENVIRONMENT

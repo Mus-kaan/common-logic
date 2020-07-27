@@ -157,9 +157,7 @@ $Helm upgrade aks-geneva --install --wait --force \
 --values "$GenevaParametersFile" \
 --set genevaTenant="$PartnerName" \
 --set genevaRole="$AKSName" \
---set partnerName="$PartnerName" \
 --set hostResourceGroup="$AKSRGName" \
---set hostAKS="$AKSName" \
 --set hostRegion="$Region" \
 --set compactRegion="$compactRegion" \
 --set environmentName="$environmentName" \

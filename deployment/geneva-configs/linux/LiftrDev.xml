@@ -1,4 +1,4 @@
-<MonitoringManagement version="1.0" namespace="LiftrDev" timestamp="2020-07-21T00:00:00Z" eventVersion="21">
+<MonitoringManagement version="1.0" namespace="LiftrDev" timestamp="2020-07-21T00:00:00Z" eventVersion="22">
   <Accounts>
     <Account moniker="liftrdevaudit" alias="AuditStore" />
     <Account moniker="liftrdevdiag" isDefault="true" />
@@ -9,10 +9,7 @@
       <IdentityComponent name="Tenant" envariable="TENANT" />
       <IdentityComponent name="Role" envariable="ROLE" />
       <IdentityComponent name="RoleInstance" envariable="ROLEINSTANCE" />
-      <IdentityComponent name="GenevaPodName" useComputerName="true" />
-      <IdentityComponent name="PartnerName" envariable="GENEVA_PARTNER_NAME" />
       <IdentityComponent name="HostResourceGroup" envariable="GENEVA_HOST_RESOURCE_GROUP" />
-      <IdentityComponent name="HostAKS" envariable="GENEVA_HOST_AKS" />
       <IdentityComponent name="HostRegion" envariable="GENEVA_HOST_REGION" />
     </Identity>
     <AgentResourceUsage diskQuotaInMB="8000" />
@@ -178,11 +175,6 @@
       </LogAnalytics>
     </EventStreamingAnnotation>
     <EventStreamingAnnotation name="^NginxContainers$">
-      <LogAnalytics>
-        <Content>LogAnalyticsContent</Content>
-      </LogAnalytics>
-    </EventStreamingAnnotation>
-    <EventStreamingAnnotation name="^LinuxAsmIfxAudit$">
       <LogAnalytics>
         <Content>LogAnalyticsContent</Content>
       </LogAnalytics>

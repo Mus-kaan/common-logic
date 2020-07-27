@@ -73,6 +73,7 @@ namespace Microsoft.Liftr.Sample.WorkerService
                 catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
+                    Console.Error.WriteLine("stderr_test: " + ex.Message);
                     _logger.Error(ex, "Do work failed.");
                     op.FailOperation("Do work failed.");
                 }

@@ -1,9 +1,0 @@
-gcs_account: LiftrDev
-gcs_namespace: LiftrDev
-mdm_account: LiftrDevHot
-azsecpackmoniker: liftrdevsecurity
-gcs_environment: Test
-gcs_config_version: 21.0 #This need to be the same as version in geneva config
-azsecpack_eventversion: 21 #This need to the same as version in geneva config
-metricEndpoint: https://global.metrics.nsatc.net/
-# mdsd_debug_log_flags: "-T 0x220000" # can enable this for mdsd debugging purposes

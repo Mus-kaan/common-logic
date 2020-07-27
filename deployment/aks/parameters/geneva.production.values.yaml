@@ -1,8 +1,0 @@
-gcs_account: LiftrProd
-gcs_namespace: LiftrProd
-mdm_account: LiftrProdHot
-azsecpackmoniker: liftrprodsecurity
-gcs_environment: DiagnosticsProd
-gcs_config_version: 1.0 # This need to be the same as version in geneva config
-azsecpack_eventversion: 1 # This need to the same as version in geneva config
-metricEndpoint: https://global.metrics.nsatc.net/

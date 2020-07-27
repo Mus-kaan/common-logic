@@ -53,7 +53,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                     var instanceMeta = meta?.InstanceMeta;
                     if (instanceMeta != null)
                     {
-                        config
+                        config = config
                         .Enrich.WithProperty("AppVer", meta.Version)
                         .Enrich.WithProperty("vmRegion", instanceMeta.Compute.Location)
                         .Enrich.WithProperty("vmName", instanceMeta.Compute.Name)
