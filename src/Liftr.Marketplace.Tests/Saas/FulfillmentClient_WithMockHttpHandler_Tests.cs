@@ -3,18 +3,20 @@
 //-----------------------------------------------------------------------------
 
 using FluentAssertions;
-using Flurl.Http.Testing;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.Marketplace.Exceptions;
 using Microsoft.Liftr.Marketplace.Saas.Contracts;
 using Microsoft.Liftr.Marketplace.Saas.Models;
 using Microsoft.Liftr.Marketplace.Tests;
 using Moq;
+using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -28,30 +30,27 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
     {
         private const string marketplaceEndpoint = "https://test.com";
         private const string marketplaceSaasApiVersion = "2020-02-03";
-        private readonly MarketplaceFulfillmentClient _fulfillmentClient;
+        private static MarketplaceSubscription s_marketplaceSubscription = new MarketplaceSubscription(Guid.NewGuid());
+        private static Guid s_operationId = Guid.NewGuid();
+        private ILogger _logger;
+        private MarketplaceFulfillmentClient _fulfillmentClient;
 
         public FulfillmentClient_WithMockHttpHandler_Tests()
         {
-            var logger = new Mock<ILogger>().Object;
-            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, logger, () => Task.FromResult("mockToken")), logger);
+            _logger = new Mock<ILogger>().Object;
         }
 
         [Fact]
         public async Task Can_resolve_subscription_Async()
         {
             var cancellationToken = CancellationToken.None;
-            using var httpTest = new HttpTest();
-            var expectedSubscription = new ResolvedMarketplaceSubscription()
-            {
-                OfferId = "FabrikamDisasterRevovery",
-                PlanId = "Gold",
-                MarketplaceSubscription = new MarketplaceSubscription(Guid.NewGuid()),
-                SubscriptionName = "Fabrikam solution for Joe's team",
-            };
+            var expectedSubscription = GetResolvedSubscription();
 
-            httpTest.RespondWithJson(expectedSubscription);
-
+            using var handler = new MockHttpMessageHandler();
+            using var httpClient = new HttpClient(handler, false);
             var resolveToken = "testResolveToken";
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
+
             var resolvedSubscription = await _fulfillmentClient.ResolveSaaSSubscriptionAsync(resolveToken, cancellationToken);
             resolvedSubscription.Should().BeEquivalentTo(expectedSubscription);
         }
@@ -60,173 +59,204 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
         public async Task Throws_if_subscription_not_resolved_Async()
         {
             var cancellationToken = CancellationToken.None;
-            using var httpTest = new HttpTest();
-            using var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
-            httpTest.ResponseQueue.Enqueue(httpResponseMessage);
-
+            using var handler = new MockHttpMessageHandler(true);
+            using var httpClient = new HttpClient(handler, false);
             var resolveToken = "testResolveToken";
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
+
             await Assert.ThrowsAsync<MarketplaceException>(async () => await _fulfillmentClient.ResolveSaaSSubscriptionAsync(resolveToken, cancellationToken));
-        }
-
-        [Fact]
-        public async Task Calls_the_resolve_api_with_token_header_Async()
-        {
-            var cancellationToken = CancellationToken.None;
-            using var httpTest = new HttpTest();
-            var expectedSubscription = new ResolvedMarketplaceSubscription()
-            {
-                OfferId = "FabrikamDisasterRevovery",
-                PlanId = "Gold",
-                MarketplaceSubscription = new MarketplaceSubscription(Guid.NewGuid()),
-                SubscriptionName = "Fabrikam solution for Joe's team",
-            };
-
-            httpTest.RespondWithJson(expectedSubscription);
-            var resolveToken = "testResolveToken";
-            var resolvedSubscription = await _fulfillmentClient.ResolveSaaSSubscriptionAsync(resolveToken, cancellationToken);
-
-            httpTest.ShouldHaveCalled($"{marketplaceEndpoint}/api/saas/subscriptions/resolve")
-                    .WithVerb(HttpMethod.Post)
-                    .WithContentType("application/json")
-                    .WithHeader("x-ms-marketplace-token", resolveToken)
-                    .Times(1);
         }
 
         [Fact]
         public async Task Can_activate_subscription_Async()
         {
             var cancellationToken = CancellationToken.None;
-            using var httpTest = new HttpTest();
-            using var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(string.Empty) };
-            httpTest.ResponseQueue.Enqueue(httpResponseMessage);
-            var subscription = new MarketplaceSubscription(Guid.Parse("37f9dea2-4345-438f-b0bd-03d40d28c7e0"));
+            using var handler = new MockHttpMessageHandler();
+            using var httpClient = new HttpClient(handler, false);
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
 
-            Func<Task> act = async () => { await _fulfillmentClient.ActivateSaaSSubscriptionAsync(new ActivateSubscriptionRequest(subscription, "Gold", 100), cancellationToken); };
+            Func<Task> act = async () => { await _fulfillmentClient.ActivateSaaSSubscriptionAsync(new ActivateSubscriptionRequest(s_marketplaceSubscription, "Gold", 100), cancellationToken); };
 
             await act.Should().NotThrowAsync();
-            httpTest.ShouldHaveCalled($"{marketplaceEndpoint}/api/saas/subscriptions/{subscription}/activate")
-                    .WithVerb(HttpMethod.Post)
-                    .Times(1);
         }
 
         [Fact]
         public async Task Throws_if_activation_doesnot_succeed_Async()
         {
             var cancellationToken = CancellationToken.None;
-            using var httpTest = new HttpTest();
-            using var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
-            httpTest.ResponseQueue.Enqueue(httpResponseMessage);
+            using var handler = new MockHttpMessageHandler(true);
+            using var httpClient = new HttpClient(handler, false);
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
 
-            var subscription = new MarketplaceSubscription(Guid.Parse("37f9dea2-4345-438f-b0bd-03d40d28c7e0"));
-            await Assert.ThrowsAsync<MarketplaceException>(async () => await _fulfillmentClient.ActivateSaaSSubscriptionAsync(new ActivateSubscriptionRequest(subscription, "Gold", 100), cancellationToken));
+            await Assert.ThrowsAsync<MarketplaceException>(async () => await _fulfillmentClient.ActivateSaaSSubscriptionAsync(new ActivateSubscriptionRequest(s_marketplaceSubscription, "Gold", 100), cancellationToken));
         }
 
         [Fact]
         public async Task Can_get_subscription_operation_Async()
         {
-            var operationId = Guid.NewGuid();
-            var subscription = new MarketplaceSubscription(Guid.NewGuid());
+            var expectedOperation = GetSubscriptionOperation();
 
-            var expectedOperation = new SubscriptionOperation()
-            {
-                Id = operationId,
-                MarketplaceSubscription = subscription,
-                OfferId = "testOfferId",
-                PlanId = "plan",
-                PublisherId = "publisher",
-            };
+            using var handler = new MockHttpMessageHandler();
+            using var httpClient = new HttpClient(handler, false);
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
 
-            using var httpTest = new HttpTest();
-            httpTest.RespondWithJson(expectedOperation);
+            var actualOperation = await _fulfillmentClient.GetOperationAsync(s_marketplaceSubscription, s_operationId);
 
-            await _fulfillmentClient.GetOperationAsync(subscription, operationId);
-
-            httpTest.ShouldHaveCalled($"{marketplaceEndpoint}/api/saas/subscriptions/{subscription.Id}/operations/{operationId}")
-                    .WithVerb(HttpMethod.Get)
-                    .Times(1);
+            Assert.Equal(expectedOperation.Id, actualOperation.Id);
         }
 
         [Fact]
         public async Task Can_get_pending_operations_Async()
         {
-            var subscription = new MarketplaceSubscription(Guid.NewGuid());
-            var operationId = Guid.NewGuid();
+            var expectedOperation = GetSubscriptionOperation();
 
-            var expectedOperation = new SubscriptionOperation()
-            {
-                Id = operationId,
-                MarketplaceSubscription = subscription,
-                OfferId = "testOfferId",
-                PlanId = "plan",
-                PublisherId = "publisher",
-            };
-            using var httpTest = new HttpTest();
-            httpTest.RespondWithJson(new List<SubscriptionOperation>() { expectedOperation });
+            using var handler = new MockHttpMessageHandler();
+            using var httpClient = new HttpClient(handler, false);
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
 
-            var subscriptionOperation = await _fulfillmentClient.ListPendingOperationsAsync(subscription);
+            var subscriptionOperationList = await _fulfillmentClient.ListPendingOperationsAsync(s_marketplaceSubscription);
+            var actualOperation = subscriptionOperationList.FirstOrDefault();
 
-            subscriptionOperation.Should().HaveCount(1);
-            httpTest.ShouldHaveCalled($"{marketplaceEndpoint}/api/saas/subscriptions/{subscription.Id}/operations")
-                    .WithVerb(HttpMethod.Get)
-                    .Times(1);
+            Assert.Equal(expectedOperation.Id, actualOperation.Id);
         }
 
         [Fact]
         public async Task Can_update_operation_Async()
         {
-            var operationId = Guid.NewGuid();
-            var subscription = new MarketplaceSubscription(Guid.NewGuid());
+            using var handler = new MockHttpMessageHandler();
+            using var httpClient = new HttpClient(handler, false);
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
 
             var operationUpdate = new OperationUpdate("plan", 0, OperationUpdateStatus.Success);
 
-            using var httpTest = new HttpTest();
-            using var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(string.Empty) };
-            httpTest.ResponseQueue.Enqueue(httpResponseMessage);
-
-            await _fulfillmentClient.UpdateOperationAsync(subscription, operationId, operationUpdate);
-
-            httpTest.ShouldHaveCalled($"{marketplaceEndpoint}/api/saas/subscriptions/{subscription.Id}/operations/{operationId}")
-                    .WithVerb(HttpMethod.Patch)
-                    .WithRequestBody(operationUpdate.ToJson())
-                    .Times(1);
+            await _fulfillmentClient.UpdateOperationAsync(s_marketplaceSubscription, s_operationId, operationUpdate);
         }
 
         [Fact]
         public async Task Throws_exception_if_update_doesnot_succeed_Async()
         {
-            var operationId = Guid.NewGuid();
-            var subscription = new MarketplaceSubscription(Guid.NewGuid());
+            using var handler = new MockHttpMessageHandler(true);
+            using var httpClient = new HttpClient(handler, false);
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
 
             var operationUpdate = new OperationUpdate("BAD_PLAN", 0, OperationUpdateStatus.Success);
 
-            using var httpTest = new HttpTest();
-            using var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
-            httpTest.ResponseQueue.Enqueue(httpResponseMessage);
-
-            await Assert.ThrowsAsync<MarketplaceException>(async () => await _fulfillmentClient.UpdateOperationAsync(subscription, operationId, operationUpdate));
+            await Assert.ThrowsAsync<MarketplaceException>(async () => await _fulfillmentClient.UpdateOperationAsync(s_marketplaceSubscription, s_operationId, operationUpdate));
         }
 
         [Fact]
         public async Task Can_delete_subscription_Async()
         {
             var subscription = new MarketplaceSubscription(Guid.NewGuid());
+            using var handler = new MockHttpMessageHandler();
+            using var httpClient = new HttpClient(handler, false);
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
 
-            var operationLocation = "https://mockoperationlocation.com";
-            using var httpTest = new HttpTest();
-            using var response1 = MockAsyncOperationHelper.AcceptedResponseWithOperationLocation(operationLocation);
-            using var response2 = MockAsyncOperationHelper.SuccessResponseWithSucceededStatus(new SubscriptionOperation());
-            httpTest.ResponseQueue.Enqueue(response1);
-            httpTest.ResponseQueue.Enqueue(response2);
+            Func<Task> act = async () => { await _fulfillmentClient.DeleteSubscriptionAsync(subscription); };
+            await act.Should().NotThrowAsync();
+        }
 
-            await _fulfillmentClient.DeleteSubscriptionAsync(subscription);
+        internal static ResolvedMarketplaceSubscription GetResolvedSubscription()
+        {
+            return new ResolvedMarketplaceSubscription()
+            {
+                OfferId = "FabrikamDisasterRevovery",
+                PlanId = "Gold",
+                MarketplaceSubscription = s_marketplaceSubscription,
+                SubscriptionName = "Fabrikam solution for Joe's team",
+            };
+        }
 
-            httpTest.ShouldHaveCalled(operationLocation)
-                .WithVerb(HttpMethod.Get)
-                .Times(1);
+        internal static SubscriptionOperation GetSubscriptionOperation()
+        {
+            return new SubscriptionOperation()
+            {
+                Id = s_operationId,
+                MarketplaceSubscription = s_marketplaceSubscription,
+                OfferId = "testOfferId",
+                PlanId = "plan",
+                PublisherId = "publisher",
+            };
+        }
 
-            httpTest.ShouldHaveCalled($"{marketplaceEndpoint}/api/saas/subscriptions/{subscription}")
-                .WithVerb(HttpMethod.Delete)
-                .Times(1);
+        internal class MockHttpMessageHandler : HttpMessageHandler
+        {
+            private bool _failure;
+
+            public MockHttpMessageHandler(bool failure = false)
+            {
+                _failure = failure;
+            }
+
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                await Task.Yield();
+                var response = new HttpResponseMessage();
+
+                if (request.RequestUri.ToString().OrdinalContains("resolve") && request.Method == HttpMethod.Post && request.Headers.Contains("x-ms-marketplace-token") && !_failure)
+                {
+                    var resolvedSubscription = GetResolvedSubscription();
+                    var resolvedSubscriptionResponse = JsonConvert.SerializeObject(resolvedSubscription);
+                    response.StatusCode = HttpStatusCode.OK;
+                    response.Content = new StringContent(resolvedSubscriptionResponse, Encoding.UTF8, "application/json");
+                }
+                else if (request.RequestUri.ToString().OrdinalContains("resolve") && request.Method == HttpMethod.Post && request.Headers.Contains("x-ms-marketplace-token") && _failure)
+                {
+                    response.RequestMessage = new HttpRequestMessage();
+                    response.RequestMessage.RequestUri = request.RequestUri;
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                }
+                else if (request.RequestUri.ToString().OrdinalContains("activate") && request.Method == HttpMethod.Post && !_failure)
+                {
+                    var activateResponse = JsonConvert.SerializeObject("activated");
+                    response.Content = new StringContent(activateResponse, Encoding.UTF8, "application/json");
+                    response.StatusCode = HttpStatusCode.OK;
+                }
+                else if (request.RequestUri.ToString().OrdinalContains("activate") && request.Method == HttpMethod.Post && _failure)
+                {
+                    response.RequestMessage = new HttpRequestMessage();
+                    response.RequestMessage.RequestUri = request.RequestUri;
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                }
+                else if (request.RequestUri.ToString().OrdinalContains("operations/") && request.Method == HttpMethod.Get && !_failure)
+                {
+                    var subscriptionOperation = GetSubscriptionOperation();
+                    var subscriptionOperationResponse = JsonConvert.SerializeObject(subscriptionOperation);
+                    response.StatusCode = HttpStatusCode.OK;
+                    response.Content = new StringContent(subscriptionOperationResponse, Encoding.UTF8, "application/json");
+                }
+                else if (request.RequestUri.ToString().OrdinalContains("operations") && request.Method == HttpMethod.Get && !_failure)
+                {
+                    var subscriptionOperation = GetSubscriptionOperation();
+                    var subscriptionOperationList = new List<SubscriptionOperation>() { subscriptionOperation };
+                    var subscriptionOperationListResponse = JsonConvert.SerializeObject(subscriptionOperationList);
+                    response.StatusCode = HttpStatusCode.OK;
+                    response.Content = new StringContent(subscriptionOperationListResponse, Encoding.UTF8, "application/json");
+                }
+                else if (request.RequestUri.ToString().OrdinalContains("operations/") && request.Method == HttpMethod.Patch && !_failure)
+                {
+                    var activateResponse = JsonConvert.SerializeObject("updated");
+                    response.Content = new StringContent(activateResponse, Encoding.UTF8, "application/json");
+                    response.StatusCode = HttpStatusCode.OK;
+                }
+                else if (request.RequestUri.ToString().OrdinalContains("operations/") && request.Method == HttpMethod.Patch && _failure)
+                {
+                    response.RequestMessage = new HttpRequestMessage();
+                    response.RequestMessage.RequestUri = request.RequestUri;
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                }
+                else if (request.Method == HttpMethod.Delete)
+                {
+                    var operationLocation = "https://mockoperationlocation.com";
+                    response = MockAsyncOperationHelper.AcceptedResponseWithOperationLocation(operationLocation);
+                }
+                else if (request.RequestUri.ToString().OrdinalContains("mockoperationlocation") && request.Method == HttpMethod.Get)
+                {
+                    response = MockAsyncOperationHelper.SuccessResponseWithSucceededStatus(new SubscriptionOperation());
+                }
+
+                return response;
+            }
         }
     }
 }

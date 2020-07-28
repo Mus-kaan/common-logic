@@ -56,7 +56,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 var operation = await _fulfillmentClient.GetOperationAsync(payload.MarketplaceSubscription, payload.OperationId, cancellationToken);
                 _logger.Information("Successfully retrieved details for operation {operation} for webhook action {action} on Subsciption:{subscriptionId}", payload.OperationId, payload.Action, payload.MarketplaceSubscription);
             }
-            catch (MarketplaceException ex)
+            catch (MarketplaceHttpException ex)
             {
                 _logger.Error(ex, "Failed to get operation for operation id: {operationId}. Cannot proceed with processing the webhook.", payload.OperationId);
                 throw;
@@ -75,7 +75,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                     break;
                 default:
                     _logger.Error("Action {action} is not supported", payload.Action, payload.MarketplaceSubscription);
-                    throw new MarketplaceException($"Action {payload.Action} is not supported");
+                    throw new MarketplaceHttpException($"Action {payload.Action} is not supported");
             }
         }
     }

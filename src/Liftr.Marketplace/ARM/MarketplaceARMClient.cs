@@ -54,12 +54,12 @@ namespace Microsoft.Liftr.Marketplace.ARM
                 _logger.Information($"Marketplace resource has been successfully created. Id: {createdResource.Id} Name: {createdResource.Name}");
                 return createdResource.Id;
             }
-            catch (MarketplaceException ex)
+            catch (MarketplaceHttpException ex)
             {
                 string errorMessage = $"Failed to create marketplace saas resource while making create request. Error: {ex.Message}";
                 _logger.Error(ex, errorMessage);
                 op.FailOperation(errorMessage);
-                throw new MarketplaceARMException(errorMessage);
+                throw new MarketplaceException(errorMessage, ex);
             }
         }
 
@@ -72,7 +72,7 @@ namespace Microsoft.Liftr.Marketplace.ARM
                 var response = await _marketplaceRestClient.SendRequestAsync<MarketplaceSaasTokenResponse>(HttpMethod.Post, resourcePath);
                 return response;
             }
-            catch (MarketplaceException ex)
+            catch (MarketplaceHttpException ex)
             {
                 var errorMessage = $"Failed to get access token for saas resource {resourceId}. Error: {ex.Message}";
                 _logger.Error(ex, errorMessage);

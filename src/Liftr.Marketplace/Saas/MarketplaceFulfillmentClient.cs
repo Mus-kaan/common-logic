@@ -34,7 +34,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
             CancellationToken cancellationToken = default)
         {
             using var op = _logger.StartTimedOperation(nameof(ResolveSaaSSubscriptionAsync));
-            var requestPath = "/api/saas/subscriptions/resolve";
+            var requestPath = MarketplaceUrlHelper.GetRequestPath(MarketplaceEnum.ResolveToken);
 
             try
             {
@@ -42,18 +42,18 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 HttpMethod.Post,
                 requestPath,
                 new Dictionary<string, string>() { { "x-ms-marketplace-token", marketplaceToken } },
-                string.Empty,
-                cancellationToken);
+                cancellationToken: cancellationToken);
 
                 _logger.Information("Subscription: {@resolvedSubscription} resolved", response);
                 op.SetResultDescription($"Subscription: {response} resolved");
                 return response;
             }
-            catch (MarketplaceException ex)
+            catch (MarketplaceHttpException ex)
             {
-                _logger.Error(ex, "Failed to resolve subscription");
-                op.FailOperation("Failed to resolve subscription");
-                throw new MarketplaceException("Failed to resolve subscription", ex);
+                var errorMessage = "Failed to resolve subscription";
+                _logger.Error(ex, errorMessage);
+                op.FailOperation(errorMessage);
+                throw new MarketplaceException(errorMessage, ex);
             }
         }
 
@@ -67,7 +67,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
             }
 
             using var op = _logger.StartTimedOperation(nameof(ActivateSaaSSubscriptionAsync));
-            var requestPath = $"/api/saas/subscriptions/{activateSubscriptionRequest.MarketplaceSubscription}/activate";
+            var requestPath = MarketplaceUrlHelper.GetRequestPath(MarketplaceEnum.ActivateSubscription, activateSubscriptionRequest.MarketplaceSubscription);
 
             try
             {
@@ -80,11 +80,12 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 _logger.Information("Subscription: {@subscription} activated", activateSubscriptionRequest.MarketplaceSubscription);
                 op.SetResultDescription($"Subscription: {activateSubscriptionRequest.MarketplaceSubscription} activated");
             }
-            catch (MarketplaceException ex)
+            catch (MarketplaceHttpException ex)
             {
-                _logger.Error(ex, "Subscription: {@subscription} could not be activated", activateSubscriptionRequest.MarketplaceSubscription);
+                var errorMessage = $"Failed to activate subscription: {activateSubscriptionRequest.MarketplaceSubscription}";
+                _logger.Error(ex, errorMessage);
                 op.FailOperation($"Subscription: {activateSubscriptionRequest.MarketplaceSubscription} could not be activated");
-                throw new MarketplaceException($"Failed to activate subscription: {activateSubscriptionRequest.MarketplaceSubscription}", ex);
+                throw new MarketplaceException(errorMessage, ex);
             }
         }
 
@@ -94,7 +95,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
             CancellationToken cancellationToken = default)
         {
             using var op = _logger.StartTimedOperation(nameof(GetOperationAsync));
-            var requestPath = $"/api/saas/subscriptions/{marketplaceSubscription}/operations/{operationId}";
+            var requestPath = MarketplaceUrlHelper.GetRequestPath(MarketplaceEnum.GetOperation, marketplaceSubscription, operationId);
 
             try
             {
@@ -108,7 +109,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 op.SetResultDescription(message);
                 return operation;
             }
-            catch (MarketplaceException ex)
+            catch (MarketplaceHttpException ex)
             {
                 var errorMessage = $"Subscription: {marketplaceSubscription}: Failed to get operation for operation id {operationId}";
                 _logger.Error(ex, errorMessage);
@@ -122,7 +123,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
             CancellationToken cancellationToken = default)
         {
             using var op = _logger.StartTimedOperation(nameof(ListPendingOperationsAsync));
-            var requestPath = $"/api/saas/subscriptions/{marketplaceSubscription}/operations";
+            var requestPath = MarketplaceUrlHelper.GetRequestPath(MarketplaceEnum.ListOperations, marketplaceSubscription);
 
             try
             {
@@ -136,7 +137,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 op.SetResultDescription(message);
                 return operations;
             }
-            catch (MarketplaceException ex)
+            catch (MarketplaceHttpException ex)
             {
                 var errorMessage = $"Subscription {marketplaceSubscription}: Failed to get operations";
                 _logger.Error(ex, errorMessage);
@@ -157,7 +158,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
             }
 
             using var op = _logger.StartTimedOperation(nameof(UpdateOperationAsync));
-            var requestPath = $"/api/saas/subscriptions/{marketplaceSubscription}/operations/{operationId}";
+            var requestPath = MarketplaceUrlHelper.GetRequestPath(MarketplaceEnum.UpdateOperation, marketplaceSubscription, operationId);
 
             try
             {
@@ -171,7 +172,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 _logger.Information(message);
                 op.SetResultDescription(message);
             }
-            catch (MarketplaceException ex)
+            catch (MarketplaceHttpException ex)
             {
                 var errorMessage = $"Subscription: {marketplaceSubscription}: Failed to update operation for operation id {operationId}";
                 _logger.Error(ex, errorMessage);
@@ -185,7 +186,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
             CancellationToken cancellationToken = default)
         {
             using var op = _logger.StartTimedOperation(nameof(DeleteSubscriptionAsync));
-            var requestPath = $"/api/saas/subscriptions/{marketplaceSubscription}";
+            var requestPath = MarketplaceUrlHelper.GetRequestPath(MarketplaceEnum.DeleteSubscription, marketplaceSubscription);
 
             try
             {
@@ -198,7 +199,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 _logger.Information(message);
                 op.SetResultDescription(message);
             }
-            catch (MarketplaceException marketplaceException)
+            catch (MarketplaceHttpException marketplaceException)
             {
                 var errorMessage = $"Subscription: {marketplaceSubscription}: Failed to delete subscription {marketplaceSubscription}";
                 _logger.Error(marketplaceException, errorMessage);

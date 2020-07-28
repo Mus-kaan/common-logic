@@ -23,6 +23,28 @@ namespace Microsoft.Liftr.Marketplace.Tests
             return asyncOperation;
         }
 
+        public static HttpResponseMessage AcceptedResponseWithoutOperationLocation()
+        {
+            var asyncOperation = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.Accepted,
+            };
+
+            asyncOperation.Headers.RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(new TimeSpan(0, 0, 1));
+            return asyncOperation;
+        }
+
+        public static HttpResponseMessage AcceptedResponseWithoutRetryAfter(string operationLocation)
+        {
+            var asyncOperation = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.Accepted,
+            };
+
+            asyncOperation.Headers.Add("Operation-Location", operationLocation);
+            return asyncOperation;
+        }
+
         public static HttpResponseMessage SuccessResponseWithInProgressStatus()
         {
             var response = new HttpResponseMessage()

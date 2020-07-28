@@ -7,11 +7,10 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Flurl" Version="$(PackageVersion_Flurl)" />
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="$(PackageVersion_Microsoft_Azure_KeyVault)" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="$(PackageVersion_Microsoft_Extensions_Http)" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions)" />
-    <PackageReference Include="Flurl" Version="$(PackageVersion_Flurl)" />
-    <PackageReference Include="Flurl.Http" Version="$(PackageVersion_Flurl_Http)" />
     <PackageReference Include="System.Text.Json" Version="$(PackageVersion_System_Text_Json)" />
   </ItemGroup>
   <ItemGroup>

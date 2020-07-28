@@ -3,17 +3,19 @@
 //-----------------------------------------------------------------------------
 
 using Flurl;
-using Flurl.Http;
 using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Marketplace.Contracts;
 using Microsoft.Liftr.Marketplace.Exceptions;
+using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,11 +31,13 @@ namespace Microsoft.Liftr.Marketplace
         private readonly string _apiVersion;
         private readonly ILogger _logger;
         private readonly AuthenticationTokenCallback _authenticationTokenCallback;
+        private readonly HttpClient _httpClient;
 
         public MarketplaceRestClient(
             Uri endpoint,
             string apiVersion,
             ILogger logger,
+            HttpClient httpClient,
             AuthenticationTokenCallback authenticationTokenCallback)
         {
             if (endpoint is null)
@@ -49,6 +53,7 @@ namespace Microsoft.Liftr.Marketplace
             _endpoint = endpoint.ToString();
             _apiVersion = apiVersion;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _authenticationTokenCallback = authenticationTokenCallback ?? throw new ArgumentNullException(nameof(authenticationTokenCallback));
         }
 
@@ -74,36 +79,42 @@ namespace Microsoft.Liftr.Marketplace
 
             var accessToken = await _authenticationTokenCallback();
 
-            var request = CreateRequestWithHeaders(requestPath, requestId, additionalHeaders, accessToken);
-            _logger.Information("Sending request method: {@method}, requestUri: {@requestUrl}, requestId: {requestId}", method, request.Url, requestId);
+            using var request = CreateRequestWithHeaders(method, requestPath, requestId, additionalHeaders, accessToken);
+            _logger.Information("Sending request method: {@method}, requestUri: {@requestUrl}, requestId: {requestId}", method, request.RequestUri, requestId);
+            HttpResponseMessage? httpResponse = null;
 
             try
             {
-                HttpResponseMessage httpResponse;
-
                 if (content != null)
                 {
-                    httpResponse = await request.SendJsonAsync(method, content, cancellationToken: cancellationToken);
+                    var requestBody = JsonConvert.SerializeObject(content);
+                    request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+                    httpResponse = await _httpClient.SendAsync(request, cancellationToken);
                 }
                 else
                 {
-                    httpResponse = await request.SendAsync(method, cancellationToken: cancellationToken);
+                    httpResponse = await _httpClient.SendAsync(request, cancellationToken);
+                }
+
+                if (!httpResponse.IsSuccessStatusCode)
+                {
+                    throw await GetRequestFailedExceptionAsync(httpResponse);
                 }
 
                 var response = (await httpResponse.Content.ReadAsStringAsync()).FromJson<T>();
-                _logger.Information("Request: {@requestUrl} succeded", request.Url);
+                _logger.Information("Request: {@requestUrl} succeded", request.RequestUri);
 
                 return response;
             }
-            catch (FlurlHttpException ex)
+            catch (HttpRequestException ex)
             {
-                var errorMessage = $"The request: {method}:{request.Url} failed.";
-                if (ex.Call.Response != null && !string.IsNullOrEmpty(ex.Call.Response.ReasonPhrase))
+                var errorMessage = $"The request: {method}:{request.RequestUri} failed.";
+                if (ex.Message != null)
                 {
-                    errorMessage += $"Reason: {ex.Call.Response.ReasonPhrase}";
+                    errorMessage += $"Reason: {ex?.Message}";
                 }
 
-                var marketplaceException = await MarketplaceException.CreateMarketplaceExceptionAsync(ex.Call.Response, errorMessage);
+                var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(httpResponse, errorMessage);
                 _logger.Error(marketplaceException, errorMessage);
                 throw marketplaceException;
             }
@@ -121,20 +132,26 @@ namespace Microsoft.Liftr.Marketplace
 
             var accessToken = await _authenticationTokenCallback();
 
-            var request = CreateRequestWithHeaders(requestPath, requestId, additionalHeaders, accessToken);
-            _logger.Information("Sending request method: {@method}, requestUri: {@requestUrl}, requestId: {requestId}", method, request.Url, requestId);
+            using var request = CreateRequestWithHeaders(method, requestPath, requestId, additionalHeaders, accessToken);
+            _logger.Information("Sending request method: {@method}, requestUri: {@requestUrl}, requestId: {requestId}", method, request.RequestUri, requestId);
+            HttpResponseMessage? httpResponse = null;
 
             try
             {
-                HttpResponseMessage httpResponse;
-
                 if (content != null)
                 {
-                    httpResponse = await request.SendJsonAsync(method, content, cancellationToken: cancellationToken);
+                    var requestBody = JsonConvert.SerializeObject(content);
+                    request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+                    httpResponse = await _httpClient.SendAsync(request, cancellationToken);
                 }
                 else
                 {
-                    httpResponse = await request.SendAsync(method, cancellationToken: cancellationToken);
+                    httpResponse = await _httpClient.SendAsync(request, cancellationToken);
+                }
+
+                if (!httpResponse.IsSuccessStatusCode)
+                {
+                    throw await GetRequestFailedExceptionAsync(httpResponse);
                 }
 
                 if (httpResponse.StatusCode == HttpStatusCode.Accepted)
@@ -144,41 +161,44 @@ namespace Microsoft.Liftr.Marketplace
                 }
 
                 var response = (await httpResponse.Content.ReadAsStringAsync()).FromJson<T>();
-                _logger.Information("Request: {@requestUrl} succeded", request.Url);
+                _logger.Information("Request: {@requestUrl} succeded", request.RequestUri);
                 return response;
             }
-            catch (FlurlHttpException ex)
+            catch (HttpRequestException ex)
             {
-                var errorMessage = $"The request: {method}:{request.Url} failed.";
-                if (ex.Call.Response != null && !string.IsNullOrEmpty(ex.Call.Response.ReasonPhrase))
+                var errorMessage = $"The request: {method}:{request.RequestUri} failed.";
+                if (ex.Message != null)
                 {
-                    errorMessage += $"Reason: {ex.Call.Response.ReasonPhrase}";
+                    errorMessage += $"Reason: {ex?.Message}";
                 }
 
-                var marketplaceException = await MarketplaceException.CreateMarketplaceExceptionAsync(ex.Call.Response, errorMessage);
+                var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(httpResponse, errorMessage);
                 _logger.Error(marketplaceException, errorMessage);
                 throw marketplaceException;
             }
         }
 
-        private IFlurlRequest CreateRequestWithHeaders(
+        private HttpRequestMessage CreateRequestWithHeaders(
+           HttpMethod method,
            string requestPath,
            Guid requestId,
            Dictionary<string, string>? additionalHeaders,
            string accessToken)
         {
-            var request = _endpoint
+            var requestUrl = _endpoint
                 .AppendPathSegment(requestPath)
-                .SetQueryParam(DefaultApiVersionParameterName, _apiVersion)
-                .WithHeaders(new
-                {
-                    x_ms_requestid = requestId.ToString(),
-                })
-                .WithOAuthBearerToken(accessToken);
+                .SetQueryParam(DefaultApiVersionParameterName, _apiVersion);
+
+            var request = new HttpRequestMessage(method, requestUrl);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            request.Headers.Add("x-ms-requestid", requestId.ToString());
 
             if (additionalHeaders != null)
             {
-                request = request.WithHeaders(additionalHeaders);
+                foreach (KeyValuePair<string, string> entry in additionalHeaders)
+                {
+                    request.Headers.Add(entry.Key, entry.Value);
+                }
             }
 
             return request;
@@ -192,8 +212,8 @@ namespace Microsoft.Liftr.Marketplace
             }
             else
             {
-                string errorMessage = $"Could not get Operation-Location header from response of request {response.RequestMessage.RequestUri}";
-                throw new MarketplaceException(errorMessage);
+                string errorMessage = $"Could not get Operation-Location header from response of request {response?.RequestMessage?.RequestUri}";
+                throw new MarketplaceHttpException(errorMessage);
             }
         }
 
@@ -202,8 +222,8 @@ namespace Microsoft.Liftr.Marketplace
             var retryAfter = response.Headers.RetryAfter?.Delta;
             if (retryAfter == null)
             {
-                var errorMessage = $"Could not parse correct headers from operation response. Request Uri : {response.RequestMessage.RequestUri}";
-                var marketplaceException = new MarketplaceException(errorMessage);
+                var errorMessage = $"Could not parse correct headers from operation response. Request Uri : {response?.RequestMessage?.RequestUri}";
+                var marketplaceException = new MarketplaceHttpException(errorMessage);
                 _logger.Error(marketplaceException, errorMessage);
                 throw marketplaceException;
             }
@@ -211,7 +231,7 @@ namespace Microsoft.Liftr.Marketplace
             return retryAfter.Value;
         }
 
-        private async Task<T> PollOperationAsync<T>(IFlurlRequest originalRequest, HttpResponseMessage response, int retryCounter) where T : class
+        private async Task<T> PollOperationAsync<T>(HttpRequestMessage originalRequest, HttpResponseMessage response, int retryCounter) where T : class
         {
             // Read all the relevant headers from the original 202 response
             var retryAfter = GetRetryAfterValue(response);
@@ -220,7 +240,7 @@ namespace Microsoft.Liftr.Marketplace
             if (retryCounter == 0)
             {
                 string errorMessage = $"Maximum retries has been reached so terminating the polling requests. Operation Id : {resultLocation}";
-                var marketplaceException = await MarketplaceException.CreateMarketplaceExceptionAsync(response, errorMessage);
+                var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(response, errorMessage);
                 _logger.Error(marketplaceException, errorMessage);
                 throw marketplaceException;
             }
@@ -228,7 +248,13 @@ namespace Microsoft.Liftr.Marketplace
             // Wait as long as was requested
             await Task.Delay(retryAfter);
 
-            var asyncOperationResponse = await GetSubrequestMessage(originalRequest, resultLocation).GetAsync();
+            using var operationLocationRequest = GetSubrequestMessage(originalRequest, resultLocation);
+            var asyncOperationResponse = await _httpClient.SendAsync(operationLocationRequest);
+
+            if (!asyncOperationResponse.IsSuccessStatusCode)
+            {
+                throw await GetRequestFailedExceptionAsync(asyncOperationResponse);
+            }
 
             // you will have to check here the response and if that says complete then you can proceed or "status": "InProgress" then do it again.
             if (asyncOperationResponse.StatusCode == HttpStatusCode.OK)
@@ -244,7 +270,7 @@ namespace Microsoft.Liftr.Marketplace
 
                     case OperationStatus.Failed:
                         string errorMessage = $"Async operation failed while polling the operation. Operation Id : {resultLocation}";
-                        var marketplaceException = await MarketplaceException.CreateMarketplaceExceptionAsync(asyncOperationResponse, errorMessage);
+                        var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(asyncOperationResponse, errorMessage);
                         _logger.Error(marketplaceException, errorMessage);
                         throw marketplaceException;
 
@@ -255,7 +281,7 @@ namespace Microsoft.Liftr.Marketplace
 
                     default:
                         errorMessage = $"Unknown operation is detected for async polling of marketplace API. Operation Id : {resultLocation} and status : {asyncResponseObj.Status}";
-                        marketplaceException = await MarketplaceException.CreateMarketplaceExceptionAsync(asyncOperationResponse, errorMessage);
+                        marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(asyncOperationResponse, errorMessage);
                         _logger.Error(marketplaceException, errorMessage);
                         throw marketplaceException;
                 }
@@ -263,15 +289,31 @@ namespace Microsoft.Liftr.Marketplace
             else
             {
                 string errorMessage = $"Can not get the status of operation. Operation Id : {resultLocation}";
-                var marketplaceException = await MarketplaceException.CreateMarketplaceExceptionAsync(asyncOperationResponse, errorMessage);
+                var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(asyncOperationResponse, errorMessage);
                 _logger.Error(marketplaceException, errorMessage);
                 throw marketplaceException;
             }
         }
 
-        private static IFlurlRequest GetSubrequestMessage(IFlurlRequest originalRequest, Uri resultLocation)
+        private static HttpRequestMessage GetSubrequestMessage(HttpRequestMessage originalRequest, Uri resultLocation)
         {
-            return resultLocation.ToString().WithHeaders(originalRequest.Headers);
+            var request = new HttpRequestMessage(HttpMethod.Get, resultLocation);
+
+            foreach (var header in originalRequest.Headers)
+            {
+                request.Headers.Add(header.Key, header.Value);
+            }
+
+            return request;
+        }
+
+        private async Task<MarketplaceHttpException> GetRequestFailedExceptionAsync(HttpResponseMessage httpResponse)
+        {
+            var responseContent = httpResponse.Content?.ReadAsStringAsync();
+            var errorMessage = $"Request Failed with status code: {httpResponse.StatusCode} and content: {responseContent}";
+            var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(httpResponse, errorMessage);
+            _logger.Error(marketplaceException, errorMessage);
+            return marketplaceException;
         }
 #nullable disable
     }

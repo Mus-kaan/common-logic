@@ -10,6 +10,7 @@ using Microsoft.Liftr.Marketplace.Saas.Models;
 using Moq;
 using Serilog;
 using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -30,7 +31,9 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
         public FulfillmentClient_WithMarketplaceMockAPIs_Tests()
         {
             var logger = new Mock<ILogger>().Object;
-            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(_marketplaceSaasUri, marketplaceSaasApiVersion, logger, () => Task.FromResult("mockToken")), logger);
+#pragma warning disable CA2000 // Dispose objects before losing scope
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(_marketplaceSaasUri, marketplaceSaasApiVersion, logger, new HttpClient(), () => Task.FromResult("mockToken")), logger);
+#pragma warning restore CA2000 // Dispose objects before losing scope
         }
 
         // TO DO: Should be skipped in official build as it needs internet

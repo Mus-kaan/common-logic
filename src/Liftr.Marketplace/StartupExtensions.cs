@@ -15,6 +15,7 @@ using Microsoft.Liftr.Marketplace.Billing.Contracts;
 using Microsoft.Liftr.Marketplace.Saas.Interfaces;
 using Microsoft.Liftr.Marketplace.Saas.Options;
 using Microsoft.Liftr.TokenManager;
+using Microsoft.Liftr.TokenManager.Options;
 using Serilog;
 using System;
 using System.Net.Http;
@@ -57,13 +58,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 }
 
                 var saasTechnicalConfig = marketplaceOptions.SaasOfferTechnicalConfig;
-                if (saasTechnicalConfig == null
-                || saasTechnicalConfig.KeyVaultEndpoint == null
-                || string.IsNullOrEmpty(saasTechnicalConfig.AadEndpoint)
-                || string.IsNullOrEmpty(saasTechnicalConfig.TargetResource)
-                || string.IsNullOrEmpty(saasTechnicalConfig.ApplicationId)
-                || string.IsNullOrEmpty(saasTechnicalConfig.CertificateName)
-                || string.IsNullOrEmpty(saasTechnicalConfig.TenantId))
+                if (!Validate(saasTechnicalConfig))
                 {
                     var ex = new InvalidOperationException($"Please make sure '{nameof(MarketplaceSaasOptions.SaasOfferTechnicalConfig)}' is set under the '{nameof(MarketplaceSaasOptions)}' section.");
                     logger.LogError(ex.Message);
@@ -78,8 +73,16 @@ namespace Microsoft.Liftr.Marketplace.Saas
                     throw ex;
                 }
 
+                var httpClientFactory = sp.GetService<IHttpClientFactory>();
+                if (httpClientFactory == null)
+                {
+                    var ex = new InvalidOperationException("[Marketplace Fulfillment Init] Cannot find a httpClientFactory instance to initizlize Marketplace ARM client.");
+                    logger.Fatal(ex, ex.Message);
+                    throw ex;
+                }
+
                 var tokenProvider = new SingleTenantAppTokenProvider(saasTechnicalConfig, kvClient, logger);
-                var marketplaceRestClient = new MarketplaceRestClient(marketplaceOptions.API.Endpoint, marketplaceOptions.API.ApiVersion, logger, async () => await tokenProvider.GetTokenAsync());
+                var marketplaceRestClient = new MarketplaceRestClient(marketplaceOptions.API.Endpoint, marketplaceOptions.API.ApiVersion, logger, httpClientFactory.CreateClient(), async () => await tokenProvider.GetTokenAsync());
                 return new MarketplaceFulfillmentClient(marketplaceRestClient, logger);
             });
         }
@@ -108,13 +111,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 var logger = sp.GetService<ILogger>();
 
                 var fpaOptions = options.MarketplaceFPAOptions;
-                if (fpaOptions == null
-                || fpaOptions.KeyVaultEndpoint == null
-                || string.IsNullOrEmpty(fpaOptions.AadEndpoint)
-                || string.IsNullOrEmpty(fpaOptions.TargetResource)
-                || string.IsNullOrEmpty(fpaOptions.ApplicationId)
-                || string.IsNullOrEmpty(fpaOptions.CertificateName)
-                || string.IsNullOrEmpty(fpaOptions.TenantId))
+                if (!Validate(fpaOptions))
                 {
                     var ex = new InvalidOperationException($"Please make sure '{nameof(MarketplaceARMClientOptions.MarketplaceFPAOptions)}' is set under the '{nameof(MarketplaceARMClientOptions)}' section.");
                     logger.LogError(ex.Message);
@@ -129,7 +126,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                     throw ex;
                 }
 
-                var httpClientFactory = sp.GetService<System.Net.Http.IHttpClientFactory>();
+                var httpClientFactory = sp.GetService<IHttpClientFactory>();
                 if (httpClientFactory == null)
                 {
                     var ex = new InvalidOperationException("[Marketplace ARM Init] Cannot find a httpClientFactory instance to initizlize Marketplace ARM client.");
@@ -138,7 +135,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 }
 
                 var tokenProvider = new SingleTenantAppTokenProvider(fpaOptions, kvClient, logger);
-                var marketplaceRestClient = new MarketplaceRestClient(options.API.Endpoint, options.API.ApiVersion, logger, () => tokenProvider.GetTokenAsync());
+                var marketplaceRestClient = new MarketplaceRestClient(options.API.Endpoint, options.API.ApiVersion,  logger, httpClientFactory.CreateClient(), () => tokenProvider.GetTokenAsync());
                 return new MarketplaceARMClient(
                     logger,
                     marketplaceRestClient);
@@ -179,13 +176,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 }
 
                 var saasTechnicalConfig = marketplaceOptions.SaasOfferTechnicalConfig;
-                if (saasTechnicalConfig == null
-                || saasTechnicalConfig.KeyVaultEndpoint == null
-                || string.IsNullOrEmpty(saasTechnicalConfig.AadEndpoint)
-                || string.IsNullOrEmpty(saasTechnicalConfig.TargetResource)
-                || string.IsNullOrEmpty(saasTechnicalConfig.ApplicationId)
-                || string.IsNullOrEmpty(saasTechnicalConfig.CertificateName)
-                || string.IsNullOrEmpty(saasTechnicalConfig.TenantId))
+                if (!Validate(saasTechnicalConfig))
                 {
                     var ex = new InvalidOperationException($"Please make sure '{nameof(MarketplaceSaasOptions.SaasOfferTechnicalConfig)}' is set under the '{nameof(MarketplaceSaasOptions)}' section.");
                     logger.LogError(ex.Message);
@@ -200,7 +191,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                     throw ex;
                 }
 
-                var httpClientFactory = sp.GetService<System.Net.Http.IHttpClientFactory>();
+                var httpClientFactory = sp.GetService<IHttpClientFactory>();
                 if (httpClientFactory == null)
                 {
                     var ex = new InvalidOperationException("[Marketplace Billing Init] Cannot find a httpClientFactory instance to initizlize Marketplace Billing client.");
@@ -211,6 +202,22 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 var tokenProvider = new SingleTenantAppTokenProvider(saasTechnicalConfig, kvClient, logger);
                 return new MarketplaceBillingClient(marketplaceOptions, () => tokenProvider.GetTokenAsync(), logger, httpClientFactory.CreateClient());
             });
+        }
+
+        private static bool Validate(SingleTenantAADAppTokenProviderOptions options)
+        {
+            if (options == null
+                || options.KeyVaultEndpoint == null
+                || string.IsNullOrWhiteSpace(options.AadEndpoint)
+                || string.IsNullOrWhiteSpace(options.TargetResource)
+                || string.IsNullOrWhiteSpace(options.ApplicationId)
+                || string.IsNullOrWhiteSpace(options.CertificateName)
+                || string.IsNullOrWhiteSpace(options.TenantId))
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

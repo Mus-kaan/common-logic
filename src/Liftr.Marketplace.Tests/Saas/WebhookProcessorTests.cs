@@ -23,9 +23,9 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             var webhookProcessor = new TestWebhookProcessor();
             var payload = CreateWebhook(WebhookAction.Unsubscribe);
 
-            webhookProcessor.FulfillmentClientMock.Setup(client => client.GetOperationAsync(payload.MarketplaceSubscription, payload.OperationId, It.IsAny<CancellationToken>())).ThrowsAsync(new MarketplaceException());
+            webhookProcessor.FulfillmentClientMock.Setup(client => client.GetOperationAsync(payload.MarketplaceSubscription, payload.OperationId, It.IsAny<CancellationToken>())).ThrowsAsync(new MarketplaceHttpException());
 
-            await Assert.ThrowsAsync<MarketplaceException>(async () => await webhookProcessor.ProcessWebhookAsync(payload));
+            await Assert.ThrowsAsync<MarketplaceHttpException>(async () => await webhookProcessor.ProcessWebhookAsync(payload));
 
             webhookProcessor.VerifyGetOperationsIsCalled(payload);
             webhookProcessor.VerifyNoOtherFulfillmentCalls();
