@@ -1,0 +1,14 @@
+# Create azure identities and bindings
+azureIdentities:
+  - name: "azure-identity"
+    # if not defined, then the azure identity will be deployed in the same namespace as the chart
+    # namespace: "default"
+    # type 0: MSI, type 1: Service Principal
+    type: 0
+    # /subscriptions/subscription-id/resourcegroups/resource-group/providers/Microsoft.ManagedIdentity/userAssignedIdentities/identity-name
+    resourceID: "MSI_RESOURCE_ID_PLACEHOLDER"
+    clientID: "MSI_CLIENT_ID_PLACEHOLDER"
+    binding:
+      name: "azure-identity-binding"
+      # The selector will also need to be included in labels for app deployment
+      selector: "liftr-aad-pod-identity"

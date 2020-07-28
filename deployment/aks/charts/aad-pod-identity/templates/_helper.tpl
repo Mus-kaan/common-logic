@@ -39,28 +39,19 @@ Create chart name and version as used by the chart label.
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "aad-pod-identity.azureidentity.namespace" -}}
-{{- if .Values.azureIdentity.namespace -}}
-{{ .Values.azureIdentity.namespace }}
-{{- else -}}
-{{ .Release.Namespace }}
-{{- end -}}
-{{- end -}}
-
-{{- define "aad-pod-identity.azureidentitybinding.namespace" -}}
-{{- if .Values.azureIdentity.namespace -}}
-{{ .Values.azureIdentity.namespace }}
-{{- else -}}
-{{ .Release.Namespace }}
-{{- end -}}
+{{/*
+Common selectors.
+*/}}
+{{- define "aad-pod-identity.selectors" -}}
+app.kubernetes.io/name: {{ template "aad-pod-identity.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{/*
 Common labels.
 */}}
 {{- define "aad-pod-identity.labels" -}}
-app.kubernetes.io/name: {{ template "aad-pod-identity.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{- include "aad-pod-identity.selectors" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-helm.sh/chart: aad-pod-identity
+helm.sh/chart: {{ template "aad-pod-identity.chart" . }}
 {{- end -}}

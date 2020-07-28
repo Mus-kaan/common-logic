@@ -59,13 +59,13 @@ fi
 echo "MSIClientId: $MSIClientId"
 set -x
 
+sed -i "s|MSI_RESOURCE_ID_PLACEHOLDER|$MSIResourceId|g" pod-id-values.yaml
+sed -i "s|MSI_CLIENT_ID_PLACEHOLDER|$MSIClientId|g" pod-id-values.yaml
+
 $Helm upgrade aad-pod-id-rel aad-pod-identity-*.tgz --install --create-namespace \
 --wait --force \
 --namespace $namespace \
---set azureIdentity.enabled=true \
---set azureIdentity.resourceID=$MSIResourceId \
---set azureIdentity.clientID=$MSIClientId \
---set azureIdentityBinding.selector="liftr-aad-pod-identity" \
+-f pod-id-values.yaml
 
 set +x
 echo "-------------------------------------"
