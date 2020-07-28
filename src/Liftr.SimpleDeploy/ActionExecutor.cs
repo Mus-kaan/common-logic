@@ -324,7 +324,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 LogAnalyticsWorkspaceResourceId = targetOptions.LogAnalyticsWorkspaceId,
                             };
 
-                            (var kv, var msi, var aks) = await infra.CreateOrUpdateRegionalComputeRGAsync(
+                            (var kv, var msi, var aks, var aksMIObjectId) = await infra.CreateOrUpdateRegionalComputeRGAsync(
                                 regionalNamingContext,
                                 regionalComputeOptions,
                                 targetOptions.AKSConfigurations,
@@ -336,10 +336,10 @@ namespace Microsoft.Liftr.SimpleDeploy
                             {
                                 try
                                 {
-                                    _logger.Information("Granting the Network contrinutor over the public IP '{pipId}' to the AKS SPN with object Id '{AKSobjectId}' ...", pip.Id, targetOptions.AKSConfigurations.AKSSPNObjectId);
+                                    _logger.Information("Granting the Network contrinutor over the public IP '{pipId}' to the AKS SPN with object Id '{AKSobjectId}' ...", pip.Id, aksMIObjectId);
                                     await liftrAzure.Authenticated.RoleAssignments
                                         .Define(SdkContext.RandomGuid())
-                                        .ForObjectId(targetOptions.AKSConfigurations.AKSSPNObjectId)
+                                        .ForObjectId(aksMIObjectId)
                                         .WithBuiltInRole(BuiltInRole.NetworkContributor)
                                         .WithResourceScope(pip)
                                         .CreateAsync();
@@ -350,7 +350,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 }
                                 catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
                                 {
-                                    _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", targetOptions.AKSConfigurations.AKSSPNObjectId);
+                                    _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", aksMIObjectId);
                                     throw;
                                 }
                             }

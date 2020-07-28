@@ -171,8 +171,6 @@ namespace Microsoft.Liftr.Fluent
             string aksName,
             string rootUserName,
             string sshPublicKey,
-            string servicePrincipalClientId,
-            string servicePrincipalSecret,
             ContainerServiceVMSizeTypes vmSizeType,
             int vmCount,
             IDictionary<string, string> tags,
@@ -181,7 +179,13 @@ namespace Microsoft.Liftr.Fluent
 
         Task<IKubernetesCluster> GetAksClusterAsync(string aksResourceId);
 
+        Task<IKubernetesCluster> GetAksClusterAsync(string rgName, string aksName);
+
         Task<IEnumerable<IKubernetesCluster>> ListAksClusterAsync(string rgName);
+
+        Task<string> GetAKSMIAsync(string rgName, string aksName);
+
+        Task<IEnumerable<IIdentity>> ListAKSMCMIAsync(string AKSRGName, string AKSName, Region location);
         #endregion AKS
 
         #region Identity

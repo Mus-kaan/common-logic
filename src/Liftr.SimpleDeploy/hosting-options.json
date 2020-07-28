@@ -16,9 +16,7 @@
         "FirstPartyAppCert": "test-first-party-certificate.liftr-dev.net"
       },
       "AKSConfigurations": {
-        "AKSMachineType": "Standard_DS2_v2",
-        "AKSSPNClientId": "16735b89-eb3b-483c-b8bd-3e33e89ba1a4", // liftr-test-rp-aks-ms
-        "AKSSPNObjectId": "e3403f25-cf71-4bb1-a390-ffeb5f57fd75"
+        "AKSMachineType": "Standard_DS2_v2"
       },
       "Global": {
         "Location": "centralus",
@@ -28,7 +26,7 @@
         {
           "Location": "eastus",
           "DataBaseName": "data191002",
-          "ComputeBaseName": "com191003",
+          "ComputeBaseName": "com191005",
           "DataPlaneSubscriptions": [
             "eebfbfdb-4167-49f6-be43-466a6709609f"
           ]
@@ -36,7 +34,7 @@
         {
           "Location": "westcentralus",
           "DataBaseName": "data191002",
-          "ComputeBaseName": "com191003",
+          "ComputeBaseName": "com191005",
           "DataPlaneSubscriptions": [
             "eebfbfdb-4167-49f6-be43-466a6709609f"
           ]

@@ -9,7 +9,7 @@
       "TenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", // ms
       "AzureSubscription": "eebfbfdb-4167-49f6-be43-466a6709609f", // 'Liftr - TEST'
       "EnableVNet": false,
-      "IPPerRegion": 3,
+      "IPPerRegion": 5,
       "LogAnalyticsWorkspaceId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.OperationalInsights/workspaces/sample-partner-log",
       "DiagnosticsStorageId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.Storage/storageAccounts/liftrdiagonstics",
       "OneCertCertificates": { // key is certificate name, value is certificate subject
@@ -20,9 +20,7 @@
       },
       "AKSConfigurations": {
         "AKSMachineCount": 3,
-        "AKSMachineType": "Standard_DS2_v2",
-        "AKSSPNClientId": "16735b89-eb3b-483c-b8bd-3e33e89ba1a4", // liftr-test-rp-aks-ms
-        "AKSSPNObjectId": "e3403f25-cf71-4bb1-a390-ffeb5f57fd75"
+        "AKSMachineType": "Standard_DS2_v2"
       },
       "Global": {
         "Location": "centralus",
@@ -32,12 +30,12 @@
         {
           "Location": "westus2",
           "DataBaseName": "data20200501",
-          "ComputeBaseName": "com20200607"
+          "ComputeBaseName": "com20200615"
         },
         {
           "Location": "eastus",
           "DataBaseName": "data20200501",
-          "ComputeBaseName": "com20200607"
+          "ComputeBaseName": "com20200615"
         }
       ]
     },
@@ -57,9 +55,7 @@
       },
       "AKSConfigurations": {
         "AKSMachineCount": 3,
-        "AKSMachineType": "Standard_DS2_v2",
-        "AKSSPNClientId": "16735b89-eb3b-483c-b8bd-3e33e89ba1a4", // liftr-test-rp-aks-ms
-        "AKSSPNObjectId": "e3403f25-cf71-4bb1-a390-ffeb5f57fd75"
+        "AKSMachineType": "Standard_DS2_v2"
       },
       "Global": {
         "Location": "centralus",
@@ -69,12 +65,12 @@
         {
           "Location": "westus2",
           "DataBaseName": "data20200501",
-          "ComputeBaseName": "com20200607"
+          "ComputeBaseName": "com20200615"
         },
         {
           "Location": "eastus",
           "DataBaseName": "data20200501",
-          "ComputeBaseName": "com20200607"
+          "ComputeBaseName": "com20200615"
         }
       ]
     }

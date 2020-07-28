@@ -358,7 +358,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             return provisionedResources;
         }
 
-        public async Task<(IVault kv, IIdentity msi, IKubernetesCluster aks)> CreateOrUpdateRegionalComputeRGAsync(
+        public async Task<(IVault kv, IIdentity msi, IKubernetesCluster aks, string aksObjectId)> CreateOrUpdateRegionalComputeRGAsync(
             NamingContext namingContext,
             RegionalComputeOptions computeOptions,
             AKSInfo aksInfo,
@@ -429,47 +429,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 throw ex;
             }
 
-            try
-            {
-                _logger.Information("Granting the identity binding access for the MSI {MSIResourceId} to the AKS SPN with object Id '{AKSobjectId}' ...", msi.Id, aksInfo.AKSSPNObjectId);
-                await liftrAzure.Authenticated.RoleAssignments
-                    .Define(SdkContext.RandomGuid())
-                    .ForObjectId(aksInfo.AKSSPNObjectId)
-                    .WithBuiltInRole(BuiltInRole.Contributor)
-                    .WithResourceScope(msi)
-                    .CreateAsync();
-                _logger.Information("Granted the identity binding access for the MSI {MSIResourceId} to the AKS SPN with object Id '{AKSobjectId}'.", msi.Id, aksInfo.AKSSPNObjectId);
-            }
-            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
-            {
-            }
-            catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
-            {
-                _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", aksInfo.AKSSPNObjectId);
-                throw;
-            }
-
-            try
-            {
-                // ACR Pull
-                var roleDefinitionId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d";
-                _logger.Information("Granting ACR pull role to the AKS SPN {AKSSPNObjectId} for the subscription {subscrptionId} ...", aksInfo.AKSSPNObjectId, liftrAzure.FluentClient.SubscriptionId);
-                await liftrAzure.Authenticated.RoleAssignments
-                    .Define(SdkContext.RandomGuid())
-                    .ForObjectId(aksInfo.AKSSPNObjectId)
-                    .WithRoleDefinition(roleDefinitionId)
-                    .WithSubscriptionScope(liftrAzure.FluentClient.SubscriptionId)
-                    .CreateAsync();
-            }
-            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
-            {
-            }
-            catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
-            {
-                _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", aksInfo.AKSSPNObjectId);
-                throw;
-            }
-
             var globalKeyVault = await liftrAzure.GetKeyVaultByIdAsync(computeOptions.GlobalKeyVaultResourceId);
             if (globalKeyVault == null)
             {
@@ -478,19 +437,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 throw ex;
             }
 
-            string aksSPNClientSecret = null;
             string sshUserName = null;
             string sshPublicKey = null;
             using (var globalKVValet = new KeyVaultConcierge(globalKeyVault.VaultUri, _kvClient, _logger))
             {
-                aksSPNClientSecret = (await globalKVValet.GetSecretAsync(aksInfo.AKSSPNClientSecretName))?.Value;
-                if (aksSPNClientSecret == null)
-                {
-                    var errorMsg = $"Cannot find the AKS SPN client secret in key vault with secret name: {aksInfo.AKSSPNClientSecretName}";
-                    _logger.Error(errorMsg);
-                    throw new InvalidOperationException(errorMsg);
-                }
-
                 sshUserName = (await globalKVValet.GetSecretAsync(SSHUserNameSecretName))?.Value ?? throw new InvalidOperationException("Cannot find ssh user name in key vault");
                 sshPublicKey = (await globalKVValet.GetSecretAsync(SSHPublicKeySecretName))?.Value ?? throw new InvalidOperationException("Cannot find ssh public key in key vault");
             }
@@ -522,30 +472,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                         await db.Update().WithVirtualNetworkRule(vnet.Id, subnet.Name).ApplyAsync();
                     }
                 }
-
-                try
-                {
-                    _logger.Information("Make sure the AKS SPN '{AKSSPNObjectId}' has write access to the subnet '{subnetId}'.", aksInfo.AKSSPNObjectId, subnet.Inner.Id);
-                    await liftrAzure.Authenticated.RoleAssignments
-                        .Define(SdkContext.RandomGuid())
-                        .ForObjectId(aksInfo.AKSSPNObjectId)
-                        .WithBuiltInRole(BuiltInRole.NetworkContributor)
-                        .WithScope(subnet.Inner.Id)
-                        .CreateAsync();
-                    _logger.Information("Network contributor role is assigned to the AKS SPN '{AKSSPNObjectId}' for the subnet '{subnetId}'.", aksInfo.AKSSPNObjectId, subnet.Inner.Id);
-                }
-                catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
-                {
-                }
-                catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
-                {
-                    _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", aksInfo.AKSSPNObjectId);
-                    throw;
-                }
             }
 
-            var aksId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.ContainerService/managedClusters/{aksName}";
-            var aks = await liftrAzure.GetAksClusterAsync(aksId);
+            var aks = await liftrAzure.GetAksClusterAsync(rgName, aksName);
             if (aks == null)
             {
                 var agentPoolName = (namingContext.ShortPartnerName + namingContext.ShortEnvironmentName + namingContext.Location.ShortName()).ToLowerInvariant();
@@ -563,8 +492,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     aksName,
                     sshUserName,
                     sshPublicKey,
-                    aksInfo.AKSSPNClientId,
-                    aksSPNClientSecret,
                     aksInfo.AKSMachineType,
                     aksInfo.AKSMachineCount,
                     namingContext.Tags,
@@ -591,7 +518,111 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 await aks.Update().WithAddOnProfiles(aksAddOns).ApplyAsync();
             }
 
-            return (regionalKeyVault, msi, aks);
+            var aksMIObjectId = await liftrAzure.GetAKSMIAsync(rgName, aksName);
+            if (string.IsNullOrEmpty(aksMIObjectId))
+            {
+                var errMsg = "Cannot find the system assigned managed identity of the AKS cluster: " + aks.Id;
+                var ex = new InvalidOperationException(errMsg);
+                _logger.Error(ex, errMsg);
+                throw ex;
+            }
+
+            var mcMIList = await liftrAzure.ListAKSMCMIAsync(rgName, aksName, namingContext.Location);
+
+            // e.g. sp-test-com20200608-wus2-aks-agentpool
+            var kubeletMI = mcMIList.FirstOrDefault(id => id.Name.OrdinalStartsWith(aksName));
+            if (kubeletMI == null)
+            {
+                var errMsg = "There should be exactly one kubelet MI for aks: " + aks.Id;
+                var ex = new InvalidOperationException(errMsg);
+                _logger.Error(ex, errMsg);
+                throw ex;
+            }
+
+            var kubeletObjectId = kubeletMI.GetObjectId();
+
+            try
+            {
+                _logger.Information("Granting the identity binding access for the MSI {MSIResourceId} to the AKS MI with object Id '{AKSobjectId}' ...", msi.Id, aksMIObjectId);
+                await liftrAzure.Authenticated.RoleAssignments
+                    .Define(SdkContext.RandomGuid())
+                    .ForObjectId(aksMIObjectId)
+                    .WithBuiltInRole(BuiltInRole.Contributor)
+                    .WithResourceScope(msi)
+                    .CreateAsync();
+                _logger.Information("Granted the identity binding access for the MSI {MSIResourceId} to the AKS MI with object Id '{AKSobjectId}'.", msi.Id, aksMIObjectId);
+            }
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
+            {
+            }
+
+            try
+            {
+                _logger.Information("Granting the identity binding access for the MSI {MSIResourceId} to the kubelet MI with object Id '{AKSobjectId}' ...", msi.Id, kubeletObjectId);
+                await liftrAzure.Authenticated.RoleAssignments
+                    .Define(SdkContext.RandomGuid())
+                    .ForObjectId(kubeletObjectId)
+                    .WithBuiltInRole(BuiltInRole.Contributor)
+                    .WithResourceScope(msi)
+                    .CreateAsync();
+                _logger.Information("Granted the identity binding access for the MSI {MSIResourceId} to the kubelet MI with object Id '{AKSobjectId}'.", msi.Id, kubeletObjectId);
+            }
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
+            {
+            }
+
+            // Assign contributor to the kublet MI over the MC_ resource group. It need this to bind MI to the VM/VMSS.
+            try
+            {
+                var mcRGName = NamingContext.AKSMCResourceGroupName(rgName, aksName, namingContext.Location);
+                var mcRG = await liftrAzure.GetResourceGroupAsync(mcRGName);
+                _logger.Information("Granting the contributor role over the AKS MC_ RG '{mcRGName}' to the kubelet MI with object Id '{kubeletObjectId}' ...", mcRGName, kubeletObjectId);
+                await liftrAzure.Authenticated.RoleAssignments
+                    .Define(SdkContext.RandomGuid())
+                    .ForObjectId(kubeletObjectId)
+                    .WithBuiltInRole(BuiltInRole.Contributor)
+                    .WithResourceGroupScope(mcRG)
+                    .CreateAsync();
+            }
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
+            {
+            }
+
+            try
+            {
+                // ACR Pull
+                var roleDefinitionId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d";
+                _logger.Information("Granting ACR pull role to the kubelet MI for the subscription {subscrptionId} ...", liftrAzure.FluentClient.SubscriptionId);
+                await liftrAzure.Authenticated.RoleAssignments
+                    .Define(SdkContext.RandomGuid())
+                    .ForObjectId(kubeletObjectId)
+                    .WithRoleDefinition(roleDefinitionId)
+                    .WithSubscriptionScope(liftrAzure.FluentClient.SubscriptionId)
+                    .CreateAsync();
+            }
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
+            {
+            }
+
+            if (subnet != null)
+            {
+                try
+                {
+                    _logger.Information("Make sure the AKS MI '{AKSSPNObjectId}' has write access to the subnet '{subnetId}'.", aksMIObjectId, subnet.Inner.Id);
+                    await liftrAzure.Authenticated.RoleAssignments
+                        .Define(SdkContext.RandomGuid())
+                        .ForObjectId(aksMIObjectId)
+                        .WithBuiltInRole(BuiltInRole.NetworkContributor)
+                        .WithScope(subnet.Inner.Id)
+                        .CreateAsync();
+                    _logger.Information("Network contributor role is assigned to the AKS MI '{AKSSPNObjectId}' for the subnet '{subnetId}'.", aksMIObjectId, subnet.Inner.Id);
+                }
+                catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
+                {
+                }
+            }
+
+            return (regionalKeyVault, msi, aks, aksMIObjectId);
         }
 
         public async Task<IVault> GetKeyVaultAsync(string baseName, NamingContext namingContext, bool enableVNet)

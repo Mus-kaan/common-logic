@@ -1,0 +1,41 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.1",
+  "resources": [
+    {
+      "apiVersion": "2020-04-01",
+      "type": "Microsoft.ContainerService/managedClusters",
+      "location": "WILL_BE_CHANGED [parameters('location')]",
+      "name": "PLACEHOLDER_AKS_NAME",
+      "tags": {
+        "WILL_BE_CHANGED_displayName": "Key Vault with logging"
+      },
+      "properties": {
+        "kubernetesVersion": "WILL_BE_CHANGED 1.17",
+        "dnsPrefix": "WILL_BE_CHANGED sample_dns",
+        "agentPoolProfiles": [
+          {
+            "name": "WILL_BE_CHANGED agentpool",
+            "vmSize": "WILL_BE_CHANGED [parameters('agentVMSize')]",
+            "count": "WILL_BE_CHANGED [parameters('agentCount')]",
+            "mode": "System",
+            "osType": "Linux"
+          }
+        ],
+        "linuxProfile": {
+          "adminUsername": "WILL_BE_CHANGED [parameters('linuxAdminUsername')]",
+          "ssh": {
+            "publicKeys": [
+              {
+                "keyData": "WILL_BE_CHANGED [parameters('sshRSAPublicKey')]"
+              }
+            ]
+          }
+        }
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      }
+    }
+  ]
+}

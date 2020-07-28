@@ -154,6 +154,9 @@ namespace Microsoft.Liftr.Fluent.Contracts
         public static string PublicIPName(string vmOrServiceName)
             => $"{vmOrServiceName}-pip";
 
+        public static string AKSMCResourceGroupName(string AKSRGName, string AKSName, Region location)
+            => $"MC_{AKSRGName}_{AKSName}_{location}";
+
         public string LeafDomainName(string baseName)
             => SdkContext.RandomResourceName($"{ShortPartnerName}-{baseName}-{Environment.ShortName()}-{Location.ShortName()}-", 25);
 

@@ -16,9 +16,7 @@
         "FirstPartyAppCert": "test-first-party-certificate.liftr-dev.net"
       },
       "AKSConfigurations": {
-        "AKSMachineType": "Standard_DS2_v2",
-        "AKSSPNClientId": "935ea9b7-b232-417a-96b8-b2a51d88b2f5",
-        "AKSSPNObjectId": "77413952-924e-4098-8318-2c9f46b10b2f"
+        "AKSMachineType": "Standard_DS2_v2"
       },
       "Global": {
         "Location": "centralus",

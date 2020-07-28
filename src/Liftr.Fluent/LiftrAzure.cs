@@ -20,7 +20,9 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Models;
 using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Azure.Management.TrafficManager.Fluent;
+using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Rest.Azure;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -953,8 +955,6 @@ namespace Microsoft.Liftr.Fluent
             string aksName,
             string rootUserName,
             string sshPublicKey,
-            string servicePrincipalClientId,
-            string servicePrincipalSecret,
             ContainerServiceVMSizeTypes vmSizeType,
             int vmCount,
             IDictionary<string, string> tags,
@@ -969,38 +969,21 @@ namespace Microsoft.Liftr.Fluent
 
             _logger.Information("Creating a Kubernetes cluster of version {kubernetesVersion} with name {aksName} ...", _options.KubernetesVersion, aksName);
 
-            var creatable = FluentClient.KubernetesClusters
-                             .Define(aksName)
-                             .WithRegion(region)
-                             .WithExistingResourceGroup(rgName)
-                             .WithVersion(_options.KubernetesVersion)
-                             .WithRootUsername(rootUserName)
-                             .WithSshKey(sshPublicKey)
-                             .WithServicePrincipalClientId(servicePrincipalClientId)
-                             .WithServicePrincipalSecret(servicePrincipalSecret)
-                             .DefineAgentPool(agentPoolProfileName)
-                             .WithVirtualMachineSize(vmSizeType)
-                             .WithAgentPoolVirtualMachineCount(vmCount);
+            var templateContent = AKSHelper.GenerateAKSTemplate(
+                region,
+                aksName,
+                _options.KubernetesVersion,
+                rootUserName,
+                sshPublicKey,
+                vmSizeType.Value,
+                vmCount,
+                agentPoolProfileName,
+                tags,
+                subnet);
 
-            IKubernetesCluster k8s = null;
-            if (subnet == null)
-            {
-                k8s = await creatable
-                    .Attach()
-                    .WithDnsPrefix(aksName)
-                    .WithTags(tags)
-                    .CreateAsync();
-            }
-            else
-            {
-                _logger.Information("Restrict the AKS agent pool in subnet '{subnetName}' of VNet '{vnetId}'", subnet.Name, subnet.Parent.Id);
-                k8s = await creatable
-                    .WithVirtualNetwork(subnet.Parent.Id, subnet.Name)
-                    .Attach()
-                    .WithDnsPrefix(aksName)
-                    .WithTags(tags)
-                    .CreateAsync();
-            }
+            await CreateDeploymentAsync(region, rgName, templateContent);
+
+            var k8s = await GetAksClusterAsync(rgName, aksName);
 
             _logger.Information("Created Kubernetes cluster with resource Id {resourceId}", k8s.Id);
             return k8s;
@@ -1013,12 +996,48 @@ namespace Microsoft.Liftr.Fluent
                 .GetByIdAsync(aksResourceId);
         }
 
+        public Task<IKubernetesCluster> GetAksClusterAsync(string rgName, string aksName)
+        {
+            var aksId = $"subscriptions/{FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.ContainerService/managedClusters/{aksName}";
+            return GetAksClusterAsync(aksId);
+        }
+
         public async Task<IEnumerable<IKubernetesCluster>> ListAksClusterAsync(string rgName)
         {
             _logger.Information($"Listing Aks cluster in resource group {rgName} ...");
             return await FluentClient
                 .KubernetesClusters
                 .ListByResourceGroupAsync(rgName);
+        }
+
+        public async Task<string> GetAKSMIAsync(string rgName, string aksName)
+        {
+            // https://docs.microsoft.com/en-us/azure/aks/use-managed-identity
+            var aksId = $"subscriptions/{FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.ContainerService/managedClusters/{aksName}";
+            var aksContent = await GetResourceAsync(aksId, "2020-04-01");
+            if (string.IsNullOrEmpty(aksContent))
+            {
+                return null;
+            }
+
+            try
+            {
+                dynamic aksObject = JObject.Parse(aksContent);
+                return aksObject.identity.principalId;
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return null;
+            }
+        }
+
+        public async Task<IEnumerable<IIdentity>> ListAKSMCMIAsync(string AKSRGName, string AKSName, Region location)
+        {
+            // https://docs.microsoft.com/en-us/azure/aks/use-managed-identity
+            var mcRG = NamingContext.AKSMCResourceGroupName(AKSRGName, AKSName, location);
+            return await FluentClient.Identities.ListByResourceGroupAsync(mcRG);
         }
         #endregion AKS
 
