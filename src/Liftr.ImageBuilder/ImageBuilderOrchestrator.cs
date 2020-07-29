@@ -504,19 +504,36 @@ namespace Microsoft.Liftr.ImageBuilder
                 string vhdSASToken = null;
                 using (var httpClient = new HttpClient())
                 {
-                    var response = await httpClient.GetAsync(sbiSASToken);
-                    if (!response.IsSuccessStatusCode)
+                    string sbiRegistryContent = null;
+
+                    try
                     {
-                        _logger.Error("Cannot download the registry.json file from SBI storage account. Error response: {@SBIResponse}", response);
-                        if (response.Content != null)
+                        var response = await httpClient.GetAsync(sbiSASToken);
+                        if (!response.IsSuccessStatusCode)
                         {
-                            _logger.Error("Error content:" + await response.Content.ReadAsStringAsync());
+                            _logger.Error("Cannot download the registry.json file from SBI storage account. Error response: {@SBIResponse}", response);
+                            if (response.Content != null)
+                            {
+                                _logger.Error("Error content:" + await response.Content.ReadAsStringAsync());
+                            }
+
+                            throw new InvalidOperationException("Failed of getting registry.json file from SBI storage account.");
                         }
 
-                        throw new InvalidOperationException("Failed of getting registry.json file from SBI storage account.");
+                        sbiRegistryContent = await response.Content.ReadAsStringAsync();
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        var errMsg = "Failed of getting registry.json file from SBI storage account.";
+                        if (ex.Message.OrdinalStartsWith("Cannot write more bytes to the buffer than the configured maximum buffer size:"))
+                        {
+                            errMsg = "The content of 'SBISASToken' seems too big. Please make sure it is the SAS Token to the 'registry.json' instead of the SAS to a specific VHD. Details: https://aka.ms/liftr/sbi-sas";
+                        }
+
+                        _logger.Error(ex, errMsg);
+                        throw new InvalidOperationException(errMsg, ex);
                     }
 
-                    var sbiRegistryContent = await response.Content.ReadAsStringAsync();
                     var vhdRegistry = JsonConvert.DeserializeObject<Dictionary<string, SBIVersionInfo>>(sbiRegistryContent);
                     latestVersion = FindLastestSBIVersionTag(vhdRegistry, sourceImageType, _options.Location);
                     _logger.Information("Resolved {region} latest SBI version: {latestVersion}", _options.Location.Name, latestVersion);
