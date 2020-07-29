@@ -13,5 +13,7 @@ namespace Microsoft.Liftr.Logging
         public string LiftrLibraryVersion { get; set; }
 
         public InstanceMetadata InstanceMeta { get; set; }
+
+        public string Timestamp { get; set; }
     }
 }

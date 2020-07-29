@@ -38,6 +38,7 @@ namespace Microsoft.Liftr.Logging
                         AssemblyName = assemblyName,
                         Version = assemblyProductVersion,
                         LiftrLibraryVersion = currentAssemblyProductVersion,
+                        Timestamp = DateTime.UtcNow.ToZuluString(),
                     };
                 }
 
