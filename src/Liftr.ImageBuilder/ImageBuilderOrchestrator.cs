@@ -375,6 +375,7 @@ namespace Microsoft.Liftr.ImageBuilder
             }
             catch (Exception ex)
             {
+                _logger.Error(ex, "Failed at building SBI.");
                 rootOperation.FailOperation(ex.Message);
                 throw;
             }
