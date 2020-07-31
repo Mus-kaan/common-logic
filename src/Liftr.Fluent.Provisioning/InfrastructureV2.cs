@@ -322,6 +322,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
                 _logger.Information("Puting the RPAssetOptions in the key vault ...");
                 await regionalKVValet.SetSecretAsync($"{dataOptions.SecretPrefix}-{nameof(RPAssetOptions)}", rpAssets.ToJson(), namingContext.Tags);
+                provisionedResources.RPAssetOptions = rpAssets;
 
                 var envOptions = new RunningEnvironmentOptions()
                 {

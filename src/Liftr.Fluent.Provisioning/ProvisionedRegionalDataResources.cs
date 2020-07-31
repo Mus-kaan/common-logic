@@ -10,6 +10,7 @@ using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Azure.Management.TrafficManager.Fluent;
+using Microsoft.Liftr.Contracts;
 
 namespace Microsoft.Liftr.Fluent.Provisioning
 {
@@ -30,5 +31,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         public IStorageAccount StorageAccount { get; set; }
 
         public ICosmosDBAccount CosmosDBAccount { get; set; }
+
+        public RPAssetOptions RPAssetOptions { get; set; }
     }
 }
