@@ -4,7 +4,6 @@
 
 using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Marketplace.ARM.Contracts;
-using Microsoft.Liftr.Marketplace.ARM.Exceptions;
 using Microsoft.Liftr.Marketplace.ARM.Interfaces;
 using Microsoft.Liftr.Marketplace.ARM.Models;
 using Microsoft.Liftr.Marketplace.Exceptions;

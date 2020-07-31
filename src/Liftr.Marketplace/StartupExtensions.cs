@@ -135,7 +135,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 }
 
                 var tokenProvider = new SingleTenantAppTokenProvider(fpaOptions, kvClient, logger);
-                var marketplaceRestClient = new MarketplaceRestClient(options.API.Endpoint, options.API.ApiVersion,  logger, httpClientFactory.CreateClient(), () => tokenProvider.GetTokenAsync());
+                var marketplaceRestClient = new MarketplaceRestClient(options.API.Endpoint, options.API.ApiVersion, logger, httpClientFactory.CreateClient(), () => tokenProvider.GetTokenAsync());
                 return new MarketplaceARMClient(
                     logger,
                     marketplaceRestClient);

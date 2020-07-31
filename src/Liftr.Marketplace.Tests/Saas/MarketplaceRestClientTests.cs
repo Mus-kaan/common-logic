@@ -5,7 +5,6 @@
 using FluentAssertions;
 using Microsoft.Liftr.Marketplace.Contracts;
 using Microsoft.Liftr.Marketplace.Exceptions;
-using Microsoft.Liftr.Marketplace.Saas.Contracts;
 using Microsoft.Liftr.Marketplace.Tests;
 using Moq;
 using Newtonsoft.Json;
@@ -73,7 +72,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
         [Fact]
         public async Task SendRequestWithPollingAsync_adds_the_additional_headers_to_subrequest_Async()
         {
-            using var handler = new MockHttpMessageHandler(extraHeader: true,  progress: true);
+            using var handler = new MockHttpMessageHandler(extraHeader: true, progress: true);
             using var httpClient = new HttpClient(handler, false);
             _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, httpClient, () => Task.FromResult("mockToken"));
 
