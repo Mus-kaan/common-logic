@@ -1,4 +1,4 @@
-<MonitoringManagement version="1.0" namespace="LiftrDev" timestamp="2020-07-21T00:00:00Z" eventVersion="22">
+<MonitoringManagement version="1.0" namespace="LiftrDev" timestamp="2020-07-29T00:00:00Z" eventVersion="26">
   <Accounts>
     <Account moniker="liftrdevaudit" alias="AuditStore" />
     <Account moniker="liftrdevdiag" isDefault="true" />
@@ -83,7 +83,16 @@
         <RouteEvent account="liftrdevdiag" priority="Normal" storeType="CentralBond" eventName="NginxContainers" />
       </MdsdEventSource>
       <MdsdEventSource source="ifxauditlogs">
-        <RouteEvent account="AuditStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmIfxAudit" />
+        <RouteEvent account="AuditStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmIfxAuditApplication" />
+      </MdsdEventSource>
+      <MdsdEventSource source="ifxauditlogs">
+        <RouteEvent account="AuditStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmIfxAuditManagement" />
+      </MdsdEventSource>
+      <MdsdEventSource source="ifxauditlogs">
+        <RouteEvent account="AuditStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmHeartbeat" />
+      </MdsdEventSource>
+      <MdsdEventSource source="ifxauditlogs">
+        <RouteEvent account="AuditStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmIfxAuditError" />
       </MdsdEventSource>
       <MdsdEventSource source="kern">
         <RouteEvent account="AzSecurityStore" priority="Normal" storeType="CentralBond" eventName="LinuxAsmSecurity" duration="PT1M" />
@@ -132,7 +141,7 @@
         <Query><![CDATA[
               where (RegexMatch(log,"^ifxauditappl: .*") != "" && RegexMatch(log,"IFxAuditHeartBeatOperationIFx") == "")
               let EventData = RegexMatch(log,"(^ifxauditappl: (.*))", 2)
-              select Tenant,Role,MachineName,RoleInstance,EventData
+              select Tenant,Role,PodName,ContainerName,RoleInstance,EventData
             ]]></Query>
       </DerivedEvent>
       <!-- audit management event -->
@@ -141,7 +150,7 @@
         <Query><![CDATA[
               where (RegexMatch(log,"^ifxauditmgmt: .*") != "" && RegexMatch(log,"IFxAuditHeartBeatOperationIFx") == "")
               let EventData = RegexMatch(log,"(^ifxauditmgmt: (.*))", 2)
-              select Tenant,Role,MachineName,RoleInstance,EventData
+              select Tenant,Role,PodName,ContainerName,RoleInstance,EventData
             ]]></Query>
       </DerivedEvent>
       <!-- audit heartbeat event -->
@@ -150,7 +159,7 @@
         <Query><![CDATA[
               where (RegexMatch(log,"IFxAuditHeartBeatOperationIFx") != "")
               let EventData = RegexMatch(log,"(^ifxauditappl: (.*))", 2)
-              select Tenant,Role,MachineName,RoleInstance,EventData
+              select Tenant,Role,PodName,ContainerName,RoleInstance,EventData
             ]]></Query>
       </DerivedEvent>
       <!-- audit errors -->
@@ -158,7 +167,7 @@
         <Query><![CDATA[
               where (RegexMatch(log,"^ifxauditfail: .*") != "")
               let EventData = RegexMatch(log,"(^ifxauditfail: (.*))", 2)
-              select Tenant,Role,MachineName,RoleInstance,EventData
+              select Tenant,Role,PodName,ContainerName,RoleInstance,EventData
             ]]></Query>
       </DerivedEvent>
     </DerivedEvents>

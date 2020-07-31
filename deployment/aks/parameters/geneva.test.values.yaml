@@ -3,6 +3,6 @@ gcs_namespace: LiftrDev
 mdm_account: LiftrDevHot
 azsecpackmoniker: liftrdevsecurity
 gcs_environment: Test
-gcs_config_version: 22.0 #This need to be the same as version in geneva config
-azsecpack_eventversion: 22 #This need to the same as version in geneva config
+gcs_config_version: 26.0 #This need to be the same as version in geneva config
+azsecpack_eventversion: 26 #This need to the same as version in geneva config
 metricEndpoint: https://global.metrics.nsatc.net/
