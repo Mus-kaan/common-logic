@@ -15,7 +15,7 @@ namespace Microsoft.Liftr.KeyVault
     {
         private readonly bool _needDispose = false;
         private readonly string _vaultBaseUrl;
-        private readonly KeyVaultClient _keyVaultClient;
+        private readonly IKeyVaultClient _keyVaultClient;
         private readonly Serilog.ILogger _logger;
 
         public KeyVaultConcierge(string vaultBaseUrl, string clientId, string clientSecret, Serilog.ILogger logger)
@@ -37,7 +37,7 @@ namespace Microsoft.Liftr.KeyVault
             _needDispose = true;
         }
 
-        public KeyVaultConcierge(string vaultBaseUrl, KeyVaultClient kvClient, Serilog.ILogger logger)
+        public KeyVaultConcierge(string vaultBaseUrl, IKeyVaultClient kvClient, Serilog.ILogger logger)
         {
             if (string.IsNullOrEmpty(vaultBaseUrl))
             {
