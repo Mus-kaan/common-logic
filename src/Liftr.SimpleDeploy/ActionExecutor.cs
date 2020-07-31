@@ -264,7 +264,8 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 DataPlaneSubscriptions = regionOptions.DataPlaneSubscriptions,
                                 DataPlaneStorageCountPerSubscription = _hostingOptions.StorageCountPerDataPlaneSubscription,
                                 EnableVNet = targetOptions.EnableVNet,
-                                GlobalKeyVaultResourceId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
+                                GlobalKeyVaultResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
+                                GlobalStorageResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}",
                                 LogAnalyticsWorkspaceId = targetOptions.LogAnalyticsWorkspaceId,
                                 DomainName = targetOptions.DomainName,
                                 DNSZoneId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{globalRGName}/providers/Microsoft.Network/dnszones/{targetOptions.DomainName}",
@@ -324,12 +325,28 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 LogAnalyticsWorkspaceResourceId = targetOptions.LogAnalyticsWorkspaceId,
                             };
 
-                            (var kv, var msi, var aks, var aksMIObjectId) = await infra.CreateOrUpdateRegionalComputeRGAsync(
+                            (var kv, var msi, var aks, var aksMIObjectId, var kubeletObjectId) = await infra.CreateOrUpdateRegionalComputeRGAsync(
                                 regionalNamingContext,
                                 regionalComputeOptions,
                                 targetOptions.AKSConfigurations,
                                 kvClient,
                                 targetOptions.EnableVNet);
+
+                            try
+                            {
+                                // ACR Pull
+                                var roleDefinitionId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d";
+                                _logger.Information("Granting ACR pull role to the kubelet MI over the acr '{acrLogin}' ...", acr.LoginServerUrl);
+                                await liftrAzure.Authenticated.RoleAssignments
+                                    .Define(SdkContext.RandomGuid())
+                                    .ForObjectId(kubeletObjectId)
+                                    .WithRoleDefinition(roleDefinitionId)
+                                    .WithResourceScope(acr)
+                                    .CreateAsync();
+                            }
+                            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
+                            {
+                            }
 
                             var pip = await WriteReservedIPToDiskAsync(azFactory, aksRGName, aksName, regionalNamingContext, targetOptions, ipPool);
                             if (pip?.Name?.OrdinalContains(IPPoolManager.c_reservedNamePart) == true)

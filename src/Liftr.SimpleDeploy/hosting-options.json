@@ -7,9 +7,8 @@
     {
       "EnvironmentName": "Test",
       "DomainName": "sample-partner-test.azliftr-test.io",
-      "TenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", // ms
       "AzureSubscription": "d21a525e-7c86-486d-a79e-a4f3622f639a",
-      "EnableVNet": true,
+      "EnableVNet": false,
       "IPPerRegion": 3,
       "OneCertCertificates": { // key is certificate name, value is certificate subject
         "GenevaClientCert": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
@@ -25,7 +24,7 @@
       "Regions": [
         {
           "Location": "eastus",
-          "DataBaseName": "data191002",
+          "DataBaseName": "data191003",
           "ComputeBaseName": "com191005",
           "DataPlaneSubscriptions": [
             "eebfbfdb-4167-49f6-be43-466a6709609f"
@@ -33,7 +32,7 @@
         },
         {
           "Location": "westcentralus",
-          "DataBaseName": "data191002",
+          "DataBaseName": "data191003",
           "ComputeBaseName": "com191005",
           "DataPlaneSubscriptions": [
             "eebfbfdb-4167-49f6-be43-466a6709609f"

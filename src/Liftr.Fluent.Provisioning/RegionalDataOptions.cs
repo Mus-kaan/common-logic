@@ -22,6 +22,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string GlobalKeyVaultResourceId { get; set; }
 
+        public string GlobalStorageResourceId { get; set; }
+
         public Dictionary<string, string> OneCertCertificates { get; set; } = new Dictionary<string, string>();
 
         public IEnumerable<string> DataPlaneSubscriptions { get; set; }

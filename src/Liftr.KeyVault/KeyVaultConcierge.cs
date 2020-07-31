@@ -115,6 +115,20 @@ namespace Microsoft.Liftr.KeyVault
             return issuer;
         }
 
+        public async Task<CertificateOperation> CreateCertificateIfNotExistAsync(string certName, string issuerName, string certificateSubject, IList<string> subjectAlternativeNames, IDictionary<string, string> tags = null)
+        {
+            var existingCert = await GetCertAsync(certName);
+            if (existingCert != null)
+            {
+                _logger.Information("There already exist a certificate with name {certificateName} in vault '{vaultBaseUrl}'. Skip creating a new one.", certName, _vaultBaseUrl);
+                return null;
+            }
+            else
+            {
+                return await CreateCertificateAsync(certName, issuerName, certificateSubject, subjectAlternativeNames, tags);
+            }
+        }
+
         public async Task<CertificateOperation> CreateCertificateAsync(string certName, string issuerName, string certificateSubject, IList<string> subjectAlternativeNames, IDictionary<string, string> tags = null)
         {
             if (string.IsNullOrEmpty(certificateSubject))
@@ -199,12 +213,19 @@ namespace Microsoft.Liftr.KeyVault
         /// </summary>
         /// <param name="certName">Name of the cert.</param>
         /// <returns>Value is base64 encoded pfx data</returns>
-        public async Task<SecretBundle> DownloadCertAsync(string certName)
+        public async Task<SecretBundle> GetCertAsync(string certName)
         {
-            _logger.Information("Start getting certificate with name {@certificateName} in vault '{vaultBaseUrl}' ...", certName, _vaultBaseUrl);
-            SecretBundle secret = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, certName);
-            _logger.Information("Finished getting certificate with name {@certificateName} .", certName);
-            return secret;
+            try
+            {
+                _logger.Information("Start getting certificate with name {certificateName} in vault '{vaultBaseUrl}' ...", certName, _vaultBaseUrl);
+                SecretBundle secret = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, certName);
+                _logger.Information("Finished getting certificate with name {certificateName} .", certName);
+                return secret;
+            }
+            catch (KeyVaultErrorException ex) when (ex.Response?.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return null;
+            }
         }
 
         public void Dispose()

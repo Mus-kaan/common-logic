@@ -284,6 +284,18 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     Description = c.Description,
                 });
 
+                if (!string.IsNullOrEmpty(dataOptions.GlobalStorageResourceId))
+                {
+                    var storId = new ResourceId(dataOptions.GlobalStorageResourceId);
+                    var gblStor = await liftrAzure.GetStorageAccountAsync(storId.ResourceGroup, storId.ResourceName);
+                    if (gblStor == null)
+                    {
+                        throw new InvalidOperationException("Cannot find the global storage account with Id: " + dataOptions.GlobalStorageResourceId);
+                    }
+
+                    rpAssets.GlobalStorageAccountName = gblStor.Name;
+                }
+
                 if (dataOptions.DataPlaneSubscriptions != null)
                 {
                     var dataPlaneSubscriptionInfos = new List<DataPlaneSubscriptionInfo>();
@@ -358,7 +370,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             return provisionedResources;
         }
 
-        public async Task<(IVault kv, IIdentity msi, IKubernetesCluster aks, string aksObjectId)> CreateOrUpdateRegionalComputeRGAsync(
+        public async Task<(IVault kv, IIdentity msi, IKubernetesCluster aks, string aksObjectId, string kubeletObjectId)> CreateOrUpdateRegionalComputeRGAsync(
             NamingContext namingContext,
             RegionalComputeOptions computeOptions,
             AKSInfo aksInfo,
@@ -543,37 +555,26 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             try
             {
-                _logger.Information("Granting the identity binding access for the MSI {MSIResourceId} to the AKS MI with object Id '{AKSobjectId}' ...", msi.Id, aksMIObjectId);
-                await liftrAzure.Authenticated.RoleAssignments
-                    .Define(SdkContext.RandomGuid())
-                    .ForObjectId(aksMIObjectId)
-                    .WithBuiltInRole(BuiltInRole.Contributor)
-                    .WithResourceScope(msi)
-                    .CreateAsync();
-                _logger.Information("Granted the identity binding access for the MSI {MSIResourceId} to the AKS MI with object Id '{AKSobjectId}'.", msi.Id, aksMIObjectId);
-            }
-            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
-            {
-            }
-
-            try
-            {
-                _logger.Information("Granting the identity binding access for the MSI {MSIResourceId} to the kubelet MI with object Id '{AKSobjectId}' ...", msi.Id, kubeletObjectId);
+                // Managed Identity Operator
+                var roleDefinitionId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/c7393b34-138c-406f-901b-d8cf2b17e6ae";
+                _logger.Information("Granting Managed Identity Operator for the MSI {MSIResourceId} to the kubelet MI with object Id '{AKSobjectId}' ...", msi.Id, kubeletObjectId);
                 await liftrAzure.Authenticated.RoleAssignments
                     .Define(SdkContext.RandomGuid())
                     .ForObjectId(kubeletObjectId)
                     .WithBuiltInRole(BuiltInRole.Contributor)
                     .WithResourceScope(msi)
                     .CreateAsync();
-                _logger.Information("Granted the identity binding access for the MSI {MSIResourceId} to the kubelet MI with object Id '{AKSobjectId}'.", msi.Id, kubeletObjectId);
+                _logger.Information("Granted Managed Identity Operator for the MSI {MSIResourceId} to the kubelet MI with object Id '{AKSobjectId}'.", msi.Id, kubeletObjectId);
             }
             catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
             }
 
-            // Assign contributor to the kublet MI over the MC_ resource group. It need this to bind MI to the VM/VMSS.
+            // Assign Virtual Machine Contributor to the kublet MI over the MC_ resource group. It need this to bind MI to the VM/VMSS.
             try
             {
+                // Virtual Machine Contributor
+                var roleDefinitionId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c";
                 var mcRGName = NamingContext.AKSMCResourceGroupName(rgName, aksName, namingContext.Location);
                 var mcRG = await liftrAzure.GetResourceGroupAsync(mcRGName);
                 _logger.Information("Granting the contributor role over the AKS MC_ RG '{mcRGName}' to the kubelet MI with object Id '{kubeletObjectId}' ...", mcRGName, kubeletObjectId);
@@ -582,22 +583,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     .ForObjectId(kubeletObjectId)
                     .WithBuiltInRole(BuiltInRole.Contributor)
                     .WithResourceGroupScope(mcRG)
-                    .CreateAsync();
-            }
-            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
-            {
-            }
-
-            try
-            {
-                // ACR Pull
-                var roleDefinitionId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d";
-                _logger.Information("Granting ACR pull role to the kubelet MI for the subscription {subscrptionId} ...", liftrAzure.FluentClient.SubscriptionId);
-                await liftrAzure.Authenticated.RoleAssignments
-                    .Define(SdkContext.RandomGuid())
-                    .ForObjectId(kubeletObjectId)
-                    .WithRoleDefinition(roleDefinitionId)
-                    .WithSubscriptionScope(liftrAzure.FluentClient.SubscriptionId)
                     .CreateAsync();
             }
             catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
@@ -622,7 +607,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 }
             }
 
-            return (regionalKeyVault, msi, aks, aksMIObjectId);
+            return (regionalKeyVault, msi, aks, aksMIObjectId, kubeletObjectId);
         }
 
         public async Task<IVault> GetKeyVaultAsync(string baseName, NamingContext namingContext, bool enableVNet)
@@ -681,7 +666,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             NamingContext namingContext,
             string domainName)
         {
-            _logger.Information("Creating SSL certificate in Key Vault with name {certName} ...", CertificateName.DefaultSSL);
+            _logger.Information("Checking SSL certificate in Key Vault with name {certName} ...", CertificateName.DefaultSSL);
             var hostName = $"{namingContext.Location.ShortName()}.{domainName}";
             var sslCert = new CertificateOptions()
             {
@@ -696,7 +681,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                                     },
             };
             await kvValet.SetCertificateIssuerAsync(OneCertIssuerName, OneCertProvider);
-            await kvValet.CreateCertificateAsync(sslCert.CertificateName, OneCertIssuerName, sslCert.SubjectName, sslCert.SubjectAlternativeNames, namingContext.Tags);
+            await kvValet.CreateCertificateIfNotExistAsync(sslCert.CertificateName, OneCertIssuerName, sslCert.SubjectName, sslCert.SubjectAlternativeNames, namingContext.Tags);
 
             foreach (var cert in certificates)
             {
@@ -707,7 +692,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     continue;
                 }
 
-                _logger.Information("Creating OneCert certificate in Key Vault with name '{certName}' and subject '{certSubject}'...", certName, certSubject);
+                _logger.Information("Checking OneCert certificate in Key Vault with name '{certName}' and subject '{certSubject}'...", certName, certSubject);
                 var certOptions = new CertificateOptions()
                 {
                     CertificateName = certName,
@@ -716,7 +701,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 };
 
                 await kvValet.SetCertificateIssuerAsync(OneCertIssuerName, OneCertProvider);
-                await kvValet.CreateCertificateAsync(certOptions.CertificateName, OneCertIssuerName, certOptions.SubjectName, certOptions.SubjectAlternativeNames, namingContext.Tags);
+                await kvValet.CreateCertificateIfNotExistAsync(certOptions.CertificateName, OneCertIssuerName, certOptions.SubjectName, certOptions.SubjectAlternativeNames, namingContext.Tags);
             }
         }
 

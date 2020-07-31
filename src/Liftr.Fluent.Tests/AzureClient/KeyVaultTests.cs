@@ -171,7 +171,7 @@ namespace Microsoft.Liftr.Fluent.Tests
 
                         await valet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
                         await valet.CreateCertificateAsync(certName, certIssuerName, subjectName, subjectAlternativeNames, TestCommon.Tags);
-                        var cert = await valet.DownloadCertAsync(certName);
+                        var cert = await valet.GetCertAsync(certName);
                     }
 
                     // Verify AME OneCert creations.
@@ -184,7 +184,7 @@ namespace Microsoft.Liftr.Fluent.Tests
 
                         await valet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
                         await valet.CreateCertificateAsync(certName, certIssuerName, subjectName, subjectAlternativeNames, TestCommon.Tags);
-                        var cert = await valet.DownloadCertAsync(certName);
+                        var cert = await valet.GetCertAsync(certName);
                     }
 
                     await azure.RemoveAccessPolicyAsync(kv.Id, TestCredentials.ObjectId);
