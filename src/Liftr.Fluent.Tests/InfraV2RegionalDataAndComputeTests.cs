@@ -25,7 +25,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [Fact]
+        [SkipInOfficialBuild(skipLinux: true)]
         public async Task VerifyRegionalDataAndComputeCreationAsync()
         {
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);
