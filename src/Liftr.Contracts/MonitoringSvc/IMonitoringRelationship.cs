@@ -9,23 +9,8 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
     /// <summary>
     /// This entity represent each monitored resource
     /// </summary>
-    public interface IMonitoringRelationship
+    public interface IMonitoringRelationship : IMonitoringBaseEntity
     {
-        /// <summary>
-        /// Resource id of the azure resource which has been monitored
-        /// </summary>
-        string MonitoredResourceId { get; set; }
-
-        /// <summary>
-        /// Object id of the corresponding partner resource entity
-        /// </summary>
-        string PartnerEntityId { get; set; }
-
-        /// <summary>
-        /// Monitored resource tenant id
-        /// </summary>
-        string TenantId { get; set; }
-
         /// <summary>
         /// Eventhub namespace AuthorizationRuleId for the monitored resource dignostic settings
         /// </summary>

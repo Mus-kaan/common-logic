@@ -10,6 +10,8 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
 
         public string MonitoringRelationshipCollectionName { get; set; } = "metadata-monitoring-relationship";
 
+        public string MonitoringStatusCollectionName { get; set; } = "metadata-monitoring-status";
+
         public string PartnerResourceEntityCollectionName { get; set; } = "metadata-partner";
     }
 }

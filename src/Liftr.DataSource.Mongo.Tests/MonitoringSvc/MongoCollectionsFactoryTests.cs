@@ -20,7 +20,8 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             _monitoringSvcMongoOptions = new MonitoringSvcMongoOptions()
             {
                 EventHubSourceEntityCollectionName = "mockEventHubSourceEntityCollection",
-                MonitoringRelationshipCollectionName = "mockMonitoredEntityCollection",
+                MonitoringRelationshipCollectionName = "mockMonitoringRelationshipCollection",
+                MonitoringStatusCollectionName = "mockMonitoringStatusCollection",
                 PartnerResourceEntityCollectionName = "mockPartnerResourceEntityCollection",
             };
             _factory = new MongoCollectionsFactory(option, Logger.None);
@@ -34,7 +35,8 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             await _factory.DeleteCollectionAsync(_monitoringSvcMongoOptions.PartnerResourceEntityCollectionName);
 
             await _factory.GetOrCreateEventHubEntityCollectionAsync(_monitoringSvcMongoOptions.EventHubSourceEntityCollectionName);
-            await _factory.GetOrCreateMonitoringRelationshipCollectionAsync(_monitoringSvcMongoOptions.MonitoringRelationshipCollectionName);
+            await _factory.GetOrCreateMonitoringCollectionAsync<MonitoringRelationship>(_monitoringSvcMongoOptions.MonitoringRelationshipCollectionName);
+            await _factory.GetOrCreateMonitoringCollectionAsync<MonitoringStatus>(_monitoringSvcMongoOptions.MonitoringStatusCollectionName);
             await _factory.GetOrCreatePartnerResourceEntityCollectionAsync(_monitoringSvcMongoOptions.PartnerResourceEntityCollectionName);
 
             await _factory.GetCollectionAsync<EventHubEntity>(_monitoringSvcMongoOptions.EventHubSourceEntityCollectionName);
@@ -42,6 +44,9 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
 
             await _factory.GetCollectionAsync<MonitoringRelationship>(_monitoringSvcMongoOptions.MonitoringRelationshipCollectionName);
             await _factory.DeleteCollectionAsync(_monitoringSvcMongoOptions.MonitoringRelationshipCollectionName);
+
+            await _factory.GetCollectionAsync<MonitoringStatus>(_monitoringSvcMongoOptions.MonitoringStatusCollectionName);
+            await _factory.DeleteCollectionAsync(_monitoringSvcMongoOptions.MonitoringStatusCollectionName);
 
             await _factory.GetCollectionAsync<PartnerResourceEntity>(_monitoringSvcMongoOptions.PartnerResourceEntityCollectionName);
             await _factory.DeleteCollectionAsync(_monitoringSvcMongoOptions.PartnerResourceEntityCollectionName);

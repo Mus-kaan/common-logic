@@ -9,19 +9,16 @@ using System;
 
 namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
 {
-    public class MonitoringRelationship : MonitoringBaseEntity, IMonitoringRelationship
+    public class MonitoringStatus : MonitoringBaseEntity, IMonitoringStatus
     {
-        [BsonElement("authRuleId")]
-        public string AuthorizationRuleId { get; set; }
+        [BsonElement("isMonitored")]
+        public bool IsMonitored { get; set; }
 
-        [BsonElement("ehName")]
-        public string EventhubName { get; set; }
-
-        [BsonElement("diagSet")]
-        public string DiagnosticSettingsName { get; set; }
+        [BsonElement("reason")]
+        public string Reason { get; set; }
 
         [BsonRequired]
-        [BsonElement("createdAt")]
-        public DateTime CreatedAtUTC { get; set; }
+        [BsonElement("lastModified")]
+        public DateTime LastModifiedAtUTC { get; set; }
     }
 }

@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 namespace Microsoft.Liftr.DataSource.MonitoringSvc
 {
     /// <summary>
-    /// DataSource for managing monitored entity.
+    /// DataSource for managing monitoring status entity.
     /// </summary>
-    public interface IMonitoringRelationshipDataSource<TMonitoringEntity>
-        : IMonitoringBaseEntityDataSource<TMonitoringEntity> where TMonitoringEntity : IMonitoringRelationship
+    public interface IMonitoringStatusDataSource<TMonitoringEntity>
+        : IMonitoringBaseEntityDataSource<TMonitoringEntity> where TMonitoringEntity : IMonitoringStatus
     {
         /// <summary>
-        /// Add the monitoring relationship record.
+        /// Add or update the monitoring status record.
         /// </summary>
-        Task<IMonitoringRelationship> AddAsync(IMonitoringRelationship entity);
+        Task<IMonitoringStatus> AddOrUpdateAsync(IMonitoringStatus entity);
     }
 }

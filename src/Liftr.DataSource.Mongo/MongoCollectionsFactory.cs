@@ -181,10 +181,10 @@ namespace Microsoft.Liftr.DataSource.Mongo
             }
         }
 
-        public async Task<IMongoCollection<MonitoringRelationship>> GetOrCreateMonitoringRelationshipCollectionAsync(string collectionName)
+        public async Task<IMongoCollection<T>> GetOrCreateMonitoringCollectionAsync<T>(string collectionName) where T : MonitoringBaseEntity, new()
         {
-            var instance = new MonitoringRelationship();
-            var tenantProperty = typeof(MonitoringRelationship).GetProperty(nameof(instance.TenantId));
+            var instance = new T();
+            var tenantProperty = typeof(T).GetProperty(nameof(instance.TenantId));
             var bsonElementAttribute = tenantProperty?.CustomAttributes?.FirstOrDefault(attr => attr.AttributeType == typeof(BsonElementAttribute));
             if (bsonElementAttribute == null)
             {
@@ -214,19 +214,19 @@ namespace Microsoft.Liftr.DataSource.Mongo
                     throw new InvalidOperationException(message, ex);
                 }
 
-                var collection = await GetCollectionAsync<MonitoringRelationship>(collectionName);
+                var collection = await GetCollectionAsync<T>(collectionName);
 
-                var monitorIdIdx = new CreateIndexModel<MonitoringRelationship>(Builders<MonitoringRelationship>.IndexKeys.Ascending(item => item.MonitoredResourceId), new CreateIndexOptions<MonitoringRelationship> { Unique = false });
+                var monitorIdIdx = new CreateIndexModel<T>(Builders<T>.IndexKeys.Ascending(item => item.MonitoredResourceId), new CreateIndexOptions<T> { Unique = false });
                 collection.Indexes.CreateOne(monitorIdIdx);
 
-                var partnerIdIdx = new CreateIndexModel<MonitoringRelationship>(Builders<MonitoringRelationship>.IndexKeys.Ascending(item => item.PartnerEntityId), new CreateIndexOptions<MonitoringRelationship> { Unique = false });
+                var partnerIdIdx = new CreateIndexModel<T>(Builders<T>.IndexKeys.Ascending(item => item.PartnerEntityId), new CreateIndexOptions<T> { Unique = false });
                 collection.Indexes.CreateOne(partnerIdIdx);
 
                 return collection;
             }
             else
             {
-                return await GetCollectionAsync<MonitoringRelationship>(collectionName);
+                return await GetCollectionAsync<T>(collectionName);
             }
         }
 
