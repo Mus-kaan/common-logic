@@ -5,6 +5,8 @@
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.Liftr
 {
@@ -46,7 +48,7 @@ namespace Microsoft.Liftr
             }
         }
 
-        public static void AddCommonTags(IDictionary<string, string> tags)
+        public static void AddCommonTags(IDictionary<string, string> tags, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "")
         {
             if (tags == null)
             {
@@ -56,6 +58,18 @@ namespace Microsoft.Liftr
             foreach (var kvp in Tags)
             {
                 tags[kvp.Key] = kvp.Value;
+            }
+
+            if (string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(memberName))
+            {
+                return;
+            }
+
+            var fileName = Path.GetFileNameWithoutExtension(filePath);
+            if (fileName.OrdinalContains("test"))
+            {
+                tags["TestFile"] = fileName;
+                tags["TestMethod"] = memberName;
             }
         }
     }
