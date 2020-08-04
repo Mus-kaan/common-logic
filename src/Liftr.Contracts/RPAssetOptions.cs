@@ -4,6 +4,7 @@
 
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Liftr.Contracts
 {
@@ -23,5 +24,13 @@ namespace Microsoft.Liftr.Contracts
 
         [JsonProperty("dpSubs")]
         public IEnumerable<DataPlaneSubscriptionInfo> DataPlaneSubscriptions { get; set; }
+
+        public string GetActiveCosmosDBConnectionString()
+        {
+            return CosmosDBConnectionStrings
+                .Where(cs => cs.Description.OrdinalEquals(ActiveKeyName))
+                .FirstOrDefault()
+                ?.ConnectionString;
+        }
     }
 }
