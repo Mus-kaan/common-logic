@@ -22,7 +22,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 {
     public partial class InfrastructureV2
     {
-        public async Task<(IVault kv, IIdentity msi, IKubernetesCluster aks, string aksObjectId, string kubeletObjectId)> CreateOrUpdateRegionalComputeRGAsync(
+        public async Task<(IVault kv, IIdentity msi, IKubernetesCluster aks, string aksObjectId, string kubeletObjectId)> CreateOrUpdateRegionalAKSRGAsync(
             NamingContext namingContext,
             RegionalComputeOptions computeOptions,
             AKSInfo aksInfo,

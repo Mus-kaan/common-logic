@@ -618,19 +618,24 @@ namespace Microsoft.Liftr.Fluent
             return vnet.Subnets[subnetName];
         }
 
-        public async Task<IPublicIPAddress> GetOrCreatePublicIPAsync(Region location, string rgName, string pipName, IDictionary<string, string> tags)
+        public async Task<IPublicIPAddress> GetOrCreatePublicIPAsync(Region location, string rgName, string pipName, IDictionary<string, string> tags, PublicIPSkuType skuType = null)
         {
             var pip = await GetPublicIPAsync(rgName, pipName);
             if (pip == null)
             {
-                pip = await CreatePublicIPAsync(location, rgName, pipName, tags);
+                pip = await CreatePublicIPAsync(location, rgName, pipName, tags, skuType);
             }
 
             return pip;
         }
 
-        public async Task<IPublicIPAddress> CreatePublicIPAsync(Region location, string rgName, string pipName, IDictionary<string, string> tags)
+        public async Task<IPublicIPAddress> CreatePublicIPAsync(Region location, string rgName, string pipName, IDictionary<string, string> tags, PublicIPSkuType skuType = null)
         {
+            if (skuType == null)
+            {
+                skuType = PublicIPSkuType.Basic;
+            }
+
             _logger.Information("Start creating Publib IP address with name: {pipName} in RG: {rgName} ...", pipName, rgName);
 
             var pip = await FluentClient
@@ -638,6 +643,7 @@ namespace Microsoft.Liftr.Fluent
                 .Define(pipName)
                 .WithRegion(location)
                 .WithExistingResourceGroup(rgName)
+                .WithSku(skuType)
                 .WithStaticIP()
                 .WithLeafDomainLabel(pipName)
                 .WithTags(tags)

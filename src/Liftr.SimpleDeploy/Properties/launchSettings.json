@@ -28,6 +28,34 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
+    "1_vmss-global": {
+      "commandName": "Project",
+      "commandLineArgs": "-a CreateOrUpdateGlobal -e Test -r global -f vmss-hosting-options.json --authFile my.azureauth-ms.auth.json",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "2_vmss-westus2-data": {
+      "commandName": "Project",
+      "commandLineArgs": "-a CreateOrUpdateRegionalData -e Test -r westus2 -f vmss-hosting-options.json --authFile my.azureauth-ms.auth.json",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "3_vmss-westus2-compute": {
+      "commandName": "Project",
+      "commandLineArgs": "-a CreateOrUpdateRegionalCompute -e Test -r westus2 -f vmss-hosting-options.json --authFile my.azureauth-ms.auth.json",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "4_vmss-westus2-TM": {
+      "commandName": "Project",
+      "commandLineArgs": "-a UpdateComputeIPInTrafficManager -e Test -r westus2 -f vmss-hosting-options.json --authFile my.azureauth-ms.auth.json",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
     "0_output-subscription": {
       "commandName": "Project",
       "commandLineArgs": "-a OutputSubscriptionId -e Test -r global --authFile my.azureauth-ms.auth.json",

@@ -1,74 +1,71 @@
 {
-  "PartnerName": "SamplePartner",
-  "ShortPartnerName": "sp",
+  "PartnerName": "SamplePartnerVMSS",
+  "ShortPartnerName": "spvm",
   "SecretPrefix": "SampleRP",
+  "DBSupport": false,
   "Environments": [
     {
       "EnvironmentName": "Dev",
-      "DomainName": "sp-dev.azliftr-test.io",
+      "DomainName": "sp-dev-vmss.azliftr-test.io",
       "AzureSubscription": "eebfbfdb-4167-49f6-be43-466a6709609f", // 'Liftr - TEST'
       "EnableVNet": false,
       "IPPerRegion": 5,
       "LogAnalyticsWorkspaceId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.OperationalInsights/workspaces/sample-partner-log",
       "DiagnosticsStorageId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.Storage/storageAccounts/liftrdiagonstics",
       "OneCertCertificates": { // key is certificate name, value is certificate subject
-        "GenevaClientCert": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net",
-        "FirstPartyAppCert": "liftr-monitoring.first-party.liftr-dev.net",
-        "SampleFirstPartyAppCert": "sample-rp.first-party.liftr-dev.net",
-        "SampleMPCert": "market-place.sample.liftr-dev.net"
+        "GenevaClientCert": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net"
       },
-      "AKSConfigurations": {
-        "AKSMachineCount": 3,
-        "AKSMachineType": "Standard_DS2_v2"
+      "VMSSConfigurations": {
+        "VMSize": "Standard_DS2_v2",
+        "MachineCount": 3,
+        "GalleryImageVersionId": "/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/LiftrImgRG/providers/Microsoft.Compute/galleries/LiftrSIG/images/SBI18Validation/versions/0.6.13080007"
       },
       "Global": {
         "Location": "centralus",
-        "BaseName": "gbl20200102"
+        "BaseName": "vmgbl200501"
       },
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "data20200502",
-          "ComputeBaseName": "com20200619"
+          "DataBaseName": "vmdata200601",
+          "ComputeBaseName": "vmcom200701"
         },
         {
           "Location": "eastus",
-          "DataBaseName": "data20200502",
-          "ComputeBaseName": "com20200619"
+          "DataBaseName": "vmdata200601",
+          "ComputeBaseName": "vmcom200701"
         }
       ]
     },
     {
       "EnvironmentName": "Test",
-      "DomainName": "sp-test.azliftr-test.io",
+      "DomainName": "sp-test-vmss.azliftr-test.io",
       "AzureSubscription": "eebfbfdb-4167-49f6-be43-466a6709609f", // 'Liftr - TEST'
       "EnableVNet": true,
       "LogAnalyticsWorkspaceId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.OperationalInsights/workspaces/sample-partner-log",
       "DiagnosticsStorageId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.Storage/storageAccounts/liftrdiagonstics",
       "OneCertCertificates": { // key is certificate name, value is certificate subject
-        "GenevaClientCert": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net",
-        "FirstPartyAppCert": "liftr-monitoring.first-party.liftr-dev.net",
-        "SampleFirstPartyAppCert": "sample-rp.first-party.liftr-dev.net",
-        "SampleMPCert": "market-place.sample.liftr-dev.net"
+        "GenevaClientCert": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net"
       },
-      "AKSConfigurations": {
-        "AKSMachineCount": 3,
-        "AKSMachineType": "Standard_DS2_v2"
+      "VMSSConfigurations": {
+        "VMSize": "Standard_DS2_v2",
+        "MachineCount": 3,
+        "GalleryImageVersionId": "/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/LiftrImgRG/providers/Microsoft.Compute/galleries/LiftrSIG/images/SBI18Validation/versions/0.6.13080007"
       },
       "Global": {
         "Location": "centralus",
-        "BaseName": "gbl20200102"
+        "BaseName": "vmgbl200501"
       },
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "data20200502",
-          "ComputeBaseName": "com20200619"
+          "DataBaseName": "vmdata200601",
+          "ComputeBaseName": "vmcom200701"
         },
         {
           "Location": "eastus",
-          "DataBaseName": "data20200502",
-          "ComputeBaseName": "com20200619"
+          "DataBaseName": "vmdata200601",
+          "ComputeBaseName": "vmcom200701"
         }
       ]
     }

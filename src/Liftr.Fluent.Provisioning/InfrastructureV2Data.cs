@@ -22,7 +22,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         public async Task<ProvisionedRegionalDataResources> CreateOrUpdateRegionalDataRGAsync(
             string baseName,
             NamingContext namingContext,
-            RegionalDataOptions dataOptions)
+            RegionalDataOptions dataOptions,
+            bool createVNet)
         {
             if (namingContext == null)
             {
@@ -60,12 +61,16 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             provisionedResources.ManagedIdentity = await liftrAzure.GetOrCreateMSIAsync(namingContext.Location, rgName, msiName, namingContext.Tags);
 
             ISubnet subnet = null;
-            if (dataOptions.EnableVNet)
+            if (createVNet)
             {
                 var vnetName = namingContext.NetworkName(baseName);
                 var nsgName = $"{vnetName}-default-nsg";
                 var nsg = await liftrAzure.GetOrCreateDefaultNSGAsync(namingContext.Location, rgName, nsgName, namingContext.Tags);
                 provisionedResources.VNet = await liftrAzure.GetOrCreateVNetAsync(namingContext.Location, rgName, vnetName, namingContext.Tags, nsg.Id);
+            }
+
+            if (dataOptions.EnableVNet)
+            {
                 await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(provisionedResources.VNet, dataOptions.LogAnalyticsWorkspaceId);
                 subnet = provisionedResources.VNet.Subnets[liftrAzure.DefaultSubnetName];
                 provisionedResources.KeyVault = await liftrAzure.GetKeyVaultAsync(rgName, kvName);
@@ -139,14 +144,17 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 .ApplyAsync();
             _logger.Information("Added access policy for msi to regional kv.");
 
-            var targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.DocumentDB/databaseAccounts/{cosmosName}";
-            provisionedResources.CosmosDBAccount = await liftrAzure.GetCosmosDBAsync(targetResourceId);
-            if (provisionedResources.CosmosDBAccount == null)
+            if (dataOptions.DBSupport)
             {
-                (var createdDb, _) = await liftrAzure.CreateCosmosDBAsync(namingContext.Location, rgName, cosmosName, namingContext.Tags, subnet);
-                provisionedResources.CosmosDBAccount = createdDb;
-                await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(provisionedResources.CosmosDBAccount, dataOptions.LogAnalyticsWorkspaceId);
-                _logger.Information("Created CosmosDB with Id {ResourceId}", provisionedResources.CosmosDBAccount.Id);
+                var dbId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.DocumentDB/databaseAccounts/{cosmosName}";
+                provisionedResources.CosmosDBAccount = await liftrAzure.GetCosmosDBAsync(dbId);
+                if (provisionedResources.CosmosDBAccount == null)
+                {
+                    (var createdDb, _) = await liftrAzure.CreateCosmosDBAsync(namingContext.Location, rgName, cosmosName, namingContext.Tags, subnet);
+                    provisionedResources.CosmosDBAccount = createdDb;
+                    await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(provisionedResources.CosmosDBAccount, dataOptions.LogAnalyticsWorkspaceId);
+                    _logger.Information("Created CosmosDB with Id {ResourceId}", provisionedResources.CosmosDBAccount.Id);
+                }
             }
 
             if (dataOptions.DataPlaneStorageCountPerSubscription > 0 && dataOptions.DataPlaneSubscriptions != null)
@@ -170,15 +178,18 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 var rpAssets = new RPAssetOptions()
                 {
                     StorageAccountName = provisionedResources.StorageAccount.Name,
-                    ActiveKeyName = dataOptions.ActiveDBKeyName,
                 };
 
-                var dbConnectionStrings = await provisionedResources.CosmosDBAccount.ListConnectionStringsAsync();
-                rpAssets.CosmosDBConnectionStrings = dbConnectionStrings.ConnectionStrings.Select(c => new CosmosDBConnectionString()
+                if (dataOptions.DBSupport)
                 {
-                    ConnectionString = c.ConnectionString,
-                    Description = c.Description,
-                });
+                    rpAssets.ActiveKeyName = dataOptions.ActiveDBKeyName;
+                    var dbConnectionStrings = await provisionedResources.CosmosDBAccount.ListConnectionStringsAsync();
+                    rpAssets.CosmosDBConnectionStrings = dbConnectionStrings.ConnectionStrings.Select(c => new CosmosDBConnectionString()
+                    {
+                        ConnectionString = c.ConnectionString,
+                        Description = c.Description,
+                    });
+                }
 
                 if (!string.IsNullOrEmpty(dataOptions.GlobalStorageResourceId))
                 {

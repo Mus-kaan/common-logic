@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.Network.Fluent;
+using Microsoft.Azure.Management.Network.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Serilog;
@@ -47,6 +48,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         public async Task ProvisionIPPoolAsync(
             Region poolLocation,
             int ipPerRegion,
+            PublicIPSkuType ipSku,
             IEnumerable<Region> regions,
             IDictionary<string, string> tags)
         {
@@ -71,7 +73,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     var currentCount = existingIPs.Count();
                     for (int i = currentCount + 1; i <= ipPerRegion; i++)
                     {
-                        var pip = await az.GetOrCreatePublicIPAsync(region, rg.Name, GetIPName(region, i), tags);
+                        var pip = await az.GetOrCreatePublicIPAsync(region, rg.Name, GetIPName(region, i), tags, ipSku);
                         _logger.Information("Created public IP: {pipAddress}", pip.Inner.IpAddress);
                         createdCount++;
                     }

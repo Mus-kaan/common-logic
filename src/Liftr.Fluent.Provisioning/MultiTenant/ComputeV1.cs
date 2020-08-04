@@ -77,7 +77,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning.MultiTenant
             var plbBackendPoolName = "publiLBBackendPool";
             var rdpNATPool = "rdp-nat-pool";
             {
-                var lbName = NamingContext.InternalLoadBalancerName("private-link");
+                var lbName = "private-link-ilb";
                 _logger.Information("Start creating an Internal Load Balancer with name {@loadBalancerName} for private endpoint to connect ...", lbName);
                 var ilbProbName = lbName + "tcp3389";
                 privateLinkLB = await _azure.FluentClient
@@ -119,7 +119,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning.MultiTenant
             }
 
             {
-                var lbName = NamingContext.PublicLoadBalancerName("internet");
+                var lbName = "internet-plb";
                 _logger.Information("Start creating an Internet Load Balancer with name {@loadBalancerName} for public access ...", lbName);
                 var frontendName = "internetFrontend";
                 var probName = lbName + "tcp3389";

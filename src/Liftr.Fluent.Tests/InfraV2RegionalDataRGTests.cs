@@ -53,7 +53,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var logAnalytics = await client.GetOrCreateLogAnalyticsWorkspaceAsync(context.Location, rgName, laName, context.Tags);
                     dataOptions.LogAnalyticsWorkspaceId = $"/subscriptions/{client.FluentClient.SubscriptionId}/resourcegroups/{rgName}/providers/microsoft.operationalinsights/workspaces/{laName}";
 
-                    var resources = await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dataOptions);
+                    var resources = await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dataOptions, dataOptions.EnableVNet);
 
                     // Check regional data resources.
                     {
@@ -71,7 +71,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     }
 
                     // Same deployment will not throw exception.
-                    await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dataOptions);
+                    await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dataOptions, dataOptions.EnableVNet);
                 }
                 catch (Exception ex)
                 {

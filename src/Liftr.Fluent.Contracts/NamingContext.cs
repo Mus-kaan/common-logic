@@ -88,6 +88,12 @@ namespace Microsoft.Liftr.Fluent.Contracts
         public string SubnetName(string baseName)
             => GenerateCommonName(baseName, delimiter: string.Empty);
 
+        public string NSGName(string baseName)
+            => GenerateCommonName(baseName, "nsg");
+
+        public string PublicLoadBalancerName(string baseName)
+           => GenerateCommonName(baseName, "plb");
+
         public string MSIName(string baseName)
             => GenerateCommonName(baseName, "msi");
 
@@ -99,6 +105,9 @@ namespace Microsoft.Liftr.Fluent.Contracts
 
         public string AKSName(string baseName)
             => GenerateCommonName(baseName, "aks");
+
+        public string VMSSName(string baseName)
+            => GenerateCommonName(baseName, "vmss");
 
         public string TrafficManagerName(string baseName)
             => GenerateCommonName(baseName, "tm");
@@ -124,6 +133,9 @@ namespace Microsoft.Liftr.Fluent.Contracts
         public static string DiskName(string diskType, string identifier)
             => $"{diskType}-disk{identifier}";
 
+        public static string VMSSName(string baseName, string role = null)
+            => role == null ? $"{baseName}-vmss" : $"{baseName}-{role}-vmss";
+
         public static string VMName(string baseName, string role, int number)
             => $"{baseName}-{role}-vm{number}";
 
@@ -144,12 +156,6 @@ namespace Microsoft.Liftr.Fluent.Contracts
 
         public static string NSGName(string baseName, string context)
             => $"{baseName}-{context}-nsg";
-
-        public static string InternalLoadBalancerName(string baseName)
-            => $"{baseName}-ilb";
-
-        public static string PublicLoadBalancerName(string baseName)
-            => $"{baseName}-lb";
 
         public static string PublicIPName(string vmOrServiceName)
             => $"{vmOrServiceName}-pip";

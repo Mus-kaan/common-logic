@@ -13,6 +13,8 @@ namespace Microsoft.Liftr.Fluent.Tests
 
         public AKSInfo AKS { get; set; }
 
+        public VMSSMachineInfo VMSS { get; set; }
+
         public CertificateOptions GenevaCert { get; set; }
 
         public CertificateOptions SSLCert { get; set; }

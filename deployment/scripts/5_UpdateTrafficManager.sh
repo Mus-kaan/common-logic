@@ -12,7 +12,7 @@ APP_ASPNETCORE_ENVIRONMENT="Production"
 fi
 
 ./ExecuteDeploymentRunner.sh \
---ProvisionAction="UpdateAKSPublicIpInTrafficManager" \
+--ProvisionAction="UpdateComputeIPInTrafficManager" \
 --EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
 --Region="$REGION"
 

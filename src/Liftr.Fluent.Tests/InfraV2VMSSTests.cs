@@ -2,25 +2,27 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Azure.Management.Network.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
+using Microsoft.Liftr.KeyVault;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Fluent.Tests
 {
-    public sealed class InfraV2RegionalDataAndComputeTests
+    public sealed class InfraV2VMSSTests
     {
         private readonly ITestOutputHelper _output;
 
-        public InfraV2RegionalDataAndComputeTests(ITestOutputHelper output)
+        public InfraV2VMSSTests(ITestOutputHelper output)
         {
             _output = output;
         }
@@ -28,10 +30,19 @@ namespace Microsoft.Liftr.Fluent.Tests
         [Fact]
         public async Task VerifyRegionalDataAndComputeCreationAsync()
         {
+            var rootUserName = "aksuser";
+            var sshPublicKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIoUCnmwyMDFAf0Ia/OnCTR3g9uxp6uxU/"
+            + "Sa4VwFEFpOmMH9fUZcSGPMlAZLtXYUrgsNDLDr22wXI8wd8AXQJTxnxmgSISENVVFntC+1WCETQFMZ4BkEeLCGL0s"
+            + "CoAEKnWNjlE4qBbZUfkShGCmj50YC9R0zHcqpCbMCz3BjEGrqttlIHaYGKD1v7g2vHEaDj459cqyQw3yBr3l9erS6"
+            + "/vJSe5tBtZPimTTUKhLYP+ZXdqldLa/TI7e6hkZHQuMOe2xXCqMfJXp4HtBszIua7bM3rQFlGuBe7+Vv+NzL5wJyy"
+            + "y6KnZjoLknnRoeJUSyZE2UtRF6tpkoGu3PhqZBmx7 limingu@Limins-MacBook-Pro.local";
+
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);
             var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USEast);
             TestCommon.AddCommonTags(context.Tags);
 
+            var globalBaseName = "gbl";
+            var globalRGName = context.ResourceGroupName(globalBaseName);
             var dataBaseName = "data";
             var dataRGName = context.ResourceGroupName(dataBaseName);
             var computeBaseName = "comp";
@@ -42,23 +53,39 @@ namespace Microsoft.Liftr.Fluent.Tests
             model.Options.ComputeBaseName = computeBaseName;
 
             var dataOptions = JsonConvert.DeserializeObject<RegionalDataOptions>(File.ReadAllText("TestDataOptions.json"));
-            dataOptions.EnableVNet = true;
+            dataOptions.EnableVNet = false;
+            dataOptions.DBSupport = false;
 
+            using (var globalScope = new TestResourceGroupScope(globalRGName))
             using (var regionalDataScope = new TestResourceGroupScope(dataRGName))
             using (var regionalComputeScope = new TestResourceGroupScope(computeRGName))
             {
-                var logger = regionalDataScope.Logger;
+                var logger = globalScope.Logger;
                 try
                 {
                     var infra = new InfrastructureV2(regionalDataScope.AzFactory, TestCredentials.KeyVaultClient, regionalDataScope.Logger);
                     var client = regionalDataScope.Client;
 
+                    var ipNamePrefix = context.GenerateCommonName(globalBaseName, noRegion: true);
+                    var poolRG = ipNamePrefix + "-ip-pool-rg";
+                    var ipPool = new IPPoolManager(poolRG, ipNamePrefix, regionalDataScope.AzFactory, logger);
+
+                    var gblResources = await infra.CreateOrUpdateGlobalRGAsync(globalBaseName, context, $"{shortPartnerName}-{globalBaseName}.dummy.com");
+
+                    var regions = new List<Region>() { context.Location };
+                    await ipPool.ProvisionIPPoolAsync(context.Location, 3, PublicIPSkuType.Standard, regions, context.Tags);
+
                     await client.GetOrCreateResourceGroupAsync(context.Location, dataRGName, context.Tags);
                     var laName = context.LogAnalyticsName("gbl001");
                     var logAnalytics = await client.GetOrCreateLogAnalyticsWorkspaceAsync(context.Location, dataRGName, laName, context.Tags);
                     dataOptions.LogAnalyticsWorkspaceId = $"/subscriptions/{client.FluentClient.SubscriptionId}/resourcegroups/{dataRGName}/providers/microsoft.operationalinsights/workspaces/{laName}";
+                    {
+                        using var globalKVValet = new KeyVaultConcierge(gblResources.KeyVault.VaultUri, TestCredentials.KeyVaultClient, logger);
+                        await globalKVValet.SetSecretAsync("SSHUserName", rootUserName, context.Tags);
+                        await globalKVValet.SetSecretAsync("SSHPublicKey", sshPublicKey, context.Tags);
+                    }
 
-                    var resources = await infra.CreateOrUpdateRegionalDataRGAsync(dataBaseName, context, dataOptions, dataOptions.EnableVNet);
+                    var dataResources = await infra.CreateOrUpdateRegionalDataRGAsync(dataBaseName, context, dataOptions, createVNet: true);
 
                     // Check regional data resources.
                     {
@@ -67,36 +94,36 @@ namespace Microsoft.Liftr.Fluent.Tests
                         TestCommon.CheckCommonTags(rg.Inner.Tags);
 
                         var dbs = await client.ListCosmosDBAsync(regionalDataScope.ResourceGroupName);
-                        Assert.Single(dbs);
-                        var db = dbs.First();
-                        TestCommon.CheckCommonTags(db.Inner.Tags);
+                        Assert.Empty(dbs);
 
-                        var retrievedTM = await client.GetTrafficManagerAsync(resources.TrafficManager.Id);
+                        var retrievedTM = await client.GetTrafficManagerAsync(dataResources.TrafficManager.Id);
                         TestCommon.CheckCommonTags(retrievedTM.Inner.Tags);
                     }
 
-                    // This will take a long time. Be patient.
-                    await infra.CreateOrUpdateRegionalAKSRGAsync(
+                    var vmssResources = await infra.CreateOrUpdateRegionalVMSSRGAsync(
                         context,
                         model.Options,
-                        model.AKS,
+                        model.VMSS,
                         TestCredentials.KeyVaultClient,
+                        ipPool,
                         enableVNet: false);
 
-                    // Check compute resource group.
+                    // Validate VMSS resources
                     {
-                        var rg = await client.GetResourceGroupAsync(regionalComputeScope.ResourceGroupName);
-                        Assert.Equal(regionalComputeScope.ResourceGroupName, rg.Name);
-                        TestCommon.CheckCommonTags(rg.Inner.Tags);
+                        Assert.NotNull(vmssResources);
+                        Assert.NotNull(vmssResources.ResourceGroup);
+                        Assert.NotNull(vmssResources.VNet);
+                        Assert.NotNull(vmssResources.Subnet);
                     }
 
                     // Same deployment will not throw exception.
-                    await infra.CreateOrUpdateRegionalAKSRGAsync(
-                        context,
-                        model.Options,
-                        model.AKS,
-                        TestCredentials.KeyVaultClient,
-                        enableVNet: false);
+                    await infra.CreateOrUpdateRegionalVMSSRGAsync(
+                       context,
+                       model.Options,
+                       model.VMSS,
+                       TestCredentials.KeyVaultClient,
+                       ipPool,
+                       enableVNet: false);
                 }
                 catch (Exception ex)
                 {

@@ -32,9 +32,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public bool EnableVNet { get; set; }
 
+        public bool DBSupport { get; set; } = true;
+
         public void CheckValid()
         {
-            if (string.IsNullOrEmpty(ActiveDBKeyName))
+            if (DBSupport && string.IsNullOrEmpty(ActiveDBKeyName))
             {
                 throw new InvalidOperationException($"{nameof(ActiveDBKeyName)} should not be null.");
             }
@@ -72,7 +74,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 }
             }
 
-            if (ActiveDBKeyName.OrdinalEquals("Primary MongoDB Connection String")
+            if (!DBSupport || ActiveDBKeyName.OrdinalEquals("Primary MongoDB Connection String")
             || ActiveDBKeyName.OrdinalEquals("Secondary MongoDB Connection String")
             || ActiveDBKeyName.OrdinalEquals("Primary Read-Only MongoDB Connection String")
             || ActiveDBKeyName.OrdinalEquals("Secondary Read-Only MongoDB Connection String"))

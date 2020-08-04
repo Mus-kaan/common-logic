@@ -7,6 +7,7 @@ using Azure.Identity;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
+using Microsoft.Azure.Management.Network.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
@@ -208,7 +209,8 @@ namespace Microsoft.Liftr.SimpleDeploy
                         if (targetOptions.IPPerRegion > 0)
                         {
                             var regions = targetOptions.Regions.Select(r => r.Location);
-                            await ipPool.ProvisionIPPoolAsync(targetOptions.Global.Location, targetOptions.IPPerRegion, regions, globalNamingContext.Tags);
+                            var ipSku = targetOptions.IsAKS ? PublicIPSkuType.Basic : PublicIPSkuType.Standard;
+                            await ipPool.ProvisionIPPoolAsync(targetOptions.Global.Location, targetOptions.IPPerRegion, ipSku, regions, globalNamingContext.Tags);
                         }
 
                         var globalResources = await infra.CreateOrUpdateGlobalRGAsync(
@@ -252,6 +254,14 @@ namespace Microsoft.Liftr.SimpleDeploy
                         var aksName = regionalNamingContext.AKSName(regionOptions.ComputeBaseName);
                         regionalNamingContext.Tags["GlobalRG"] = globalRGName;
 
+                        RegionalComputeOptions regionalComputeOptions = new RegionalComputeOptions()
+                        {
+                            DataBaseName = regionOptions.DataBaseName,
+                            ComputeBaseName = regionOptions.ComputeBaseName,
+                            GlobalKeyVaultResourceId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
+                            LogAnalyticsWorkspaceResourceId = targetOptions.LogAnalyticsWorkspaceId,
+                        };
+
                         if (_commandOptions.Action == ActionType.CreateOrUpdateRegionalData)
                         {
                             regionalNamingContext.Tags["DataRG"] = regionalNamingContext.ResourceGroupName(regionOptions.DataBaseName);
@@ -264,6 +274,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 DataPlaneSubscriptions = regionOptions.DataPlaneSubscriptions,
                                 DataPlaneStorageCountPerSubscription = _hostingOptions.StorageCountPerDataPlaneSubscription,
                                 EnableVNet = targetOptions.EnableVNet,
+                                DBSupport = _hostingOptions.DBSupport,
                                 GlobalKeyVaultResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
                                 GlobalStorageResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}",
                                 LogAnalyticsWorkspaceId = targetOptions.LogAnalyticsWorkspaceId,
@@ -271,7 +282,8 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 DNSZoneId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{globalRGName}/providers/Microsoft.Network/dnszones/{targetOptions.DomainName}",
                             };
 
-                            var dataResources = await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions);
+                            bool createVNet = targetOptions.IsAKS ? targetOptions.EnableVNet : true;
+                            var dataResources = await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions, createVNet);
 
                             if (SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync != null)
                             {
@@ -317,67 +329,89 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                             await GetDiagnosticsStorageAccountAsync(azFactory, targetOptions.DiagnosticsStorageId);
 
-                            RegionalComputeOptions regionalComputeOptions = new RegionalComputeOptions()
+                            if (targetOptions.AKSConfigurations != null)
                             {
-                                DataBaseName = regionOptions.DataBaseName,
-                                ComputeBaseName = regionOptions.ComputeBaseName,
-                                GlobalKeyVaultResourceId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
-                                LogAnalyticsWorkspaceResourceId = targetOptions.LogAnalyticsWorkspaceId,
-                            };
+                                (var kv, var msi, var aks, var aksMIObjectId, var kubeletObjectId) = await infra.CreateOrUpdateRegionalAKSRGAsync(
+                                    regionalNamingContext,
+                                    regionalComputeOptions,
+                                    targetOptions.AKSConfigurations,
+                                    kvClient,
+                                    targetOptions.EnableVNet);
 
-                            (var kv, var msi, var aks, var aksMIObjectId, var kubeletObjectId) = await infra.CreateOrUpdateRegionalComputeRGAsync(
-                                regionalNamingContext,
-                                regionalComputeOptions,
-                                targetOptions.AKSConfigurations,
-                                kvClient,
-                                targetOptions.EnableVNet);
-
-                            try
-                            {
-                                // ACR Pull
-                                var roleDefinitionId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d";
-                                _logger.Information("Granting ACR pull role to the kubelet MI over the acr '{acrLogin}' ...", acr.LoginServerUrl);
-                                await liftrAzure.Authenticated.RoleAssignments
-                                    .Define(SdkContext.RandomGuid())
-                                    .ForObjectId(kubeletObjectId)
-                                    .WithRoleDefinition(roleDefinitionId)
-                                    .WithResourceScope(acr)
-                                    .CreateAsync();
-                            }
-                            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
-                            {
-                            }
-
-                            var pip = await WriteReservedIPToDiskAsync(azFactory, aksRGName, aksName, regionalNamingContext, targetOptions, ipPool);
-                            if (pip?.Name?.OrdinalContains(IPPoolManager.c_reservedNamePart) == true)
-                            {
                                 try
                                 {
-                                    _logger.Information("Granting the Network contrinutor over the public IP '{pipId}' to the AKS SPN with object Id '{AKSobjectId}' ...", pip.Id, aksMIObjectId);
+                                    // ACR Pull
+                                    var roleDefinitionId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d";
+                                    _logger.Information("Granting ACR pull role to the kubelet MI over the acr '{acrLogin}' ...", acr.LoginServerUrl);
                                     await liftrAzure.Authenticated.RoleAssignments
                                         .Define(SdkContext.RandomGuid())
-                                        .ForObjectId(aksMIObjectId)
-                                        .WithBuiltInRole(BuiltInRole.NetworkContributor)
-                                        .WithResourceScope(pip)
+                                        .ForObjectId(kubeletObjectId)
+                                        .WithRoleDefinition(roleDefinitionId)
+                                        .WithResourceScope(acr)
                                         .CreateAsync();
-                                    _logger.Information("Granted Network contrinutor.");
                                 }
                                 catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
                                 {
                                 }
-                                catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
+
+                                var pip = await WriteReservedIPToDiskAsync(azFactory, aksRGName, aksName, regionalNamingContext, targetOptions, ipPool);
+                                if (pip?.Name?.OrdinalContains(IPPoolManager.c_reservedNamePart) == true)
                                 {
-                                    _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", aksMIObjectId);
-                                    throw;
+                                    try
+                                    {
+                                        _logger.Information("Granting the Network contrinutor over the public IP '{pipId}' to the AKS SPN with object Id '{AKSobjectId}' ...", pip.Id, aksMIObjectId);
+                                        await liftrAzure.Authenticated.RoleAssignments
+                                            .Define(SdkContext.RandomGuid())
+                                            .ForObjectId(aksMIObjectId)
+                                            .WithBuiltInRole(BuiltInRole.NetworkContributor)
+                                            .WithResourceScope(pip)
+                                            .CreateAsync();
+                                        _logger.Information("Granted Network contrinutor.");
+                                    }
+                                    catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
+                                    {
+                                    }
+                                    catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
+                                    {
+                                        _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", aksMIObjectId);
+                                        throw;
+                                    }
+                                }
+
+                                File.WriteAllText("vault-name.txt", kv.Name);
+                                File.WriteAllText("aks-domain.txt", $"{aks.Name}.{targetOptions.DomainName}");
+                                File.WriteAllText("aks-name.txt", aks.Name);
+                                File.WriteAllText("aks-rg.txt", aks.ResourceGroupName);
+                                File.WriteAllText("msi-resourceId.txt", msi.Id);
+                                File.WriteAllText("msi-clientId.txt", msi.ClientId);
+                            }
+                            else
+                            {
+                                var vmss = await infra.CreateOrUpdateRegionalVMSSRGAsync(
+                                    regionalNamingContext,
+                                    regionalComputeOptions,
+                                    targetOptions.VMSSConfigurations,
+                                    kvClient,
+                                    ipPool,
+                                    targetOptions.EnableVNet);
+
+                                if (SimpleDeployExtension.AfterProvisionRegionalVMSSResourcesAsync != null)
+                                {
+                                    using (_logger.StartTimedOperation(nameof(SimpleDeployExtension.AfterProvisionRegionalVMSSResourcesAsync)))
+                                    {
+                                        var parameters = new VMSSCallbackParameters()
+                                        {
+                                            CallbackConfigurations = callBackConfigs,
+                                            BaseName = regionOptions.DataBaseName,
+                                            NamingContext = regionalNamingContext,
+                                            ComputeOptions = regionalComputeOptions,
+                                            Resources = vmss,
+                                        };
+
+                                        await SimpleDeployExtension.AfterProvisionRegionalVMSSResourcesAsync.Invoke(parameters);
+                                    }
                                 }
                             }
-
-                            File.WriteAllText("vault-name.txt", kv.Name);
-                            File.WriteAllText("aks-domain.txt", $"{aks.Name}.{targetOptions.DomainName}");
-                            File.WriteAllText("aks-name.txt", aks.Name);
-                            File.WriteAllText("aks-rg.txt", aks.ResourceGroupName);
-                            File.WriteAllText("msi-resourceId.txt", msi.Id);
-                            File.WriteAllText("msi-clientId.txt", msi.ClientId);
 
                             _logger.Information("-----------------------------------------------------------------------");
                             _logger.Information($"Successfully finished managing regional compute resources.");
@@ -428,8 +462,8 @@ namespace Microsoft.Liftr.SimpleDeploy
                             _logger.Information("Successfully retrieved Key Vault endpoint.");
                         }
 
-                        if (_commandOptions.Action == ActionType.UpdateAKSPublicIpInTrafficManager ||
-                            _commandOptions.Action == ActionType.CreateOrUpdateRegionalCompute ||
+                        if ((_commandOptions.Action == ActionType.UpdateComputeIPInTrafficManager && targetOptions.IsAKS) ||
+                            (_commandOptions.Action == ActionType.CreateOrUpdateRegionalCompute && targetOptions.IsAKS) ||
                             _commandOptions.Action == ActionType.PrepareK8SAppDeployment)
                         {
                             var az = liftrAzure.FluentClient;
@@ -443,14 +477,14 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 throw new InvalidOperationException(errMsg);
                             }
 
-                            var aksHelper = new AKSHelper(_logger);
+                            var aksHelper = new AKSNetworkHelper(_logger);
                             var pip = await aksHelper.GetAKSPublicIPAsync(liftrAzure, aksRGName, aksName, regionalNamingContext.Location);
                             if (pip == null)
                             {
                                 var errMsg = $"Cannot find the public Ip address for the AKS cluster. aksRGName:{aksRGName}, aksName:{aksName}, region:{regionalNamingContext.Location}.";
                                 _logger.Warning(errMsg);
 
-                                if (_commandOptions.Action == ActionType.UpdateAKSPublicIpInTrafficManager)
+                                if (_commandOptions.Action == ActionType.UpdateComputeIPInTrafficManager)
                                 {
                                     throw new InvalidOperationException(errMsg);
                                 }
@@ -471,7 +505,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                                 await dnsZone.Update().DefineARecordSet("thanos-1-" + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
                                 _logger.Information("Successfully added DNS A record '{recordName}' to IP '{ipAddress}'.", aksName, pip.IPAddress);
 
-                                if (_commandOptions.Action == ActionType.UpdateAKSPublicIpInTrafficManager)
+                                if (_commandOptions.Action == ActionType.UpdateComputeIPInTrafficManager)
                                 {
                                     var epName = $"{aksRGName}-{SdkContext.RandomResourceName(string.Empty, 5).Substring(0, 3)}";
                                     _logger.Information("New endpoint name: {epName}", epName);
@@ -479,6 +513,27 @@ namespace Microsoft.Liftr.SimpleDeploy
                                     _logger.Information("Successfully updated AKS public IP in the traffic manager.");
                                 }
                             }
+                        }
+                        else if (_commandOptions.Action == ActionType.UpdateComputeIPInTrafficManager && !targetOptions.IsAKS)
+                        {
+                            var az = liftrAzure.FluentClient;
+                            var tmId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{regionalNamingContext.ResourceGroupName(regionOptions.DataBaseName)}/providers/Microsoft.Network/trafficmanagerprofiles/{regionalNamingContext.TrafficManagerName(regionOptions.DataBaseName)}";
+
+                            var dnsZone = await liftrAzure.GetDNSZoneAsync(globalRGName, targetOptions.DomainName);
+                            if (dnsZone == null)
+                            {
+                                var errMsg = $"Cannot find the DNS zone for domina '{targetOptions.DomainName}' in RG '{globalRGName}'.";
+                                _logger.Error(errMsg);
+                                throw new InvalidOperationException(errMsg);
+                            }
+
+                            var vmssResources = await infra.GetRegionalVMSSResourcesAsync(
+                                    regionalNamingContext,
+                                    regionalComputeOptions);
+
+                            var epName = $"{aksRGName}-{SdkContext.RandomResourceName(string.Empty, 5).Substring(0, 3)}";
+                            await NetworkHelper.AddPulicIpToTrafficManagerAsync(az, tmId, epName, vmssResources.pip.IPAddress, enabled: true, logger: _logger);
+                            _logger.Information("Successfully updated VMSS public IP in the traffic manager.");
                         }
                     }
 
@@ -542,7 +597,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 return null;
             }
 
-            var aksHelper = new AKSHelper(_logger);
+            var aksHelper = new AKSNetworkHelper(_logger);
             var pip = await aksHelper.GetAKSPublicIPAsync(azFactory.GenerateLiftrAzure(), aksRGName, aksName, regionalNamingContext.Location);
             if (pip == null)
             {

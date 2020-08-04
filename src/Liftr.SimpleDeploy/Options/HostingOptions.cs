@@ -30,6 +30,8 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public int StorageCountPerDataPlaneSubscription { get; set; }
 
+        public bool DBSupport { get; set; } = true;
+
         /// <summary>
         /// See more at: https://thanos.io/
         /// </summary>
@@ -95,10 +97,15 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public Dictionary<string, string> OneCertCertificates { get; set; } = new Dictionary<string, string>();
 
-        public AKSInfo AKSConfigurations { get; set; } = new AKSInfo();
+        public AKSInfo AKSConfigurations { get; set; }
 
-        public int IPPerRegion { get; set; } = 0;
+        public VMSSMachineInfo VMSSConfigurations { get; set; }
 
+        public int IPPerRegion { get; set; } = 3;
+
+        /// <summary>
+        /// Restrict network access only to spcific VNet subnets.
+        /// </summary>
         public bool EnableVNet { get; set; } = true;
 
         public string DomainName { get; set; }
@@ -106,6 +113,8 @@ namespace Microsoft.Liftr.SimpleDeploy
         public string LogAnalyticsWorkspaceId { get; set; }
 
         public string DiagnosticsStorageId { get; set; }
+
+        public bool IsAKS => AKSConfigurations != null;
 
         public void CheckValid()
         {
@@ -131,9 +140,19 @@ namespace Microsoft.Liftr.SimpleDeploy
                 region.CheckValid();
             }
 
-            if (AKSConfigurations == null)
+            if (AKSConfigurations == null && VMSSConfigurations == null)
             {
-                throw new InvalidHostingOptionException($"{nameof(AKSConfigurations)} cannot be null.");
+                throw new InvalidHostingOptionException($"{nameof(AKSConfigurations)} and {nameof(VMSSConfigurations)} cannot be null at the same time.");
+            }
+
+            if (AKSConfigurations != null)
+            {
+                AKSConfigurations.CheckValues();
+            }
+
+            if (VMSSConfigurations != null)
+            {
+                VMSSConfigurations.CheckValues();
             }
 
             if (OneCertCertificates == null ||
@@ -142,13 +161,9 @@ namespace Microsoft.Liftr.SimpleDeploy
                 throw new InvalidHostingOptionException($"Please specify the Geneva certificate in the '{nameof(OneCertCertificates)}' section. The certification name must be '{CertificateName.GenevaClientCert}' and please specific a subject name.");
             }
 
-            if (IPPerRegion < 0)
+            if (IPPerRegion < 3)
             {
-                throw new InvalidHostingOptionException($"{nameof(IPPerRegion)} cannot be less than 0.");
-            }
-            else if (IPPerRegion == 1)
-            {
-                throw new InvalidHostingOptionException($"{nameof(IPPerRegion)} cannot be 1, since there will be no room for swap deployment.");
+                throw new InvalidHostingOptionException($"{nameof(IPPerRegion)} cannot be less than 3, since there will be no room for swap deployment..");
             }
             else if (IPPerRegion > 100)
             {

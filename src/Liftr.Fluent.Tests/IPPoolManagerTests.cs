@@ -4,6 +4,7 @@
 
 using Microsoft.Azure.Management.Compute.Fluent;
 using Microsoft.Azure.Management.Compute.Fluent.Models;
+using Microsoft.Azure.Management.Network.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
@@ -51,7 +52,7 @@ namespace Microsoft.Liftr.Fluent.Tests
 
                 var pool = new IPPoolManager(rgName, prefix, clientFactory, testScope.Logger);
 
-                await pool.ProvisionIPPoolAsync(location, 5, regions, context.Tags);
+                await pool.ProvisionIPPoolAsync(location, 5, PublicIPSkuType.Basic, regions, context.Tags);
 
                 var allIPs = await pool.ListAllIPAsync(location);
                 Assert.Equal(5, allIPs.Count());
