@@ -9,7 +9,7 @@ linuxgenevaACR:
 # The version are referenced at three places. You need to update all of them. Please search for this sentence.
 # Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/references/linuxcontainers.html
 mdsd:
-  dockerTag: master_295
+  dockerTag: master_299
 
 mdm:
   dockerTag: master_41
@@ -18,7 +18,7 @@ fluentd:
   dockerTag: master_139
 
 secpack:
-  dockerTag: master_53
+  dockerTag: master_55
 
 promMdmConverter:
   name: prom-mdm-converter
