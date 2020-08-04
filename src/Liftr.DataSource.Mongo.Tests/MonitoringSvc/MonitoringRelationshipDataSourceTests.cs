@@ -26,7 +26,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             _collectionScope = new TestCollectionScope<MonitoringRelationship>((db, collectionName) =>
             {
 #pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-                var collection = collectionFactory.GetOrCreateMonitoringRelationshipCollectionAsync(collectionName).Result;
+                var collection = collectionFactory.GetOrCreateMonitoringCollectionAsync<MonitoringRelationship>(collectionName).Result;
 #pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
                 return collection;
             });
@@ -44,7 +44,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             {
                 var ts = new MockTimeSource();
                 using var rateLimiter = new MongoWaitQueueRateLimiter(100, TestLogger.VoidLogger);
-                IMonitoringRelationshipDataSource s = new MonitoringRelationshipDataSource(_collectionScope.Collection, rateLimiter, ts);
+                IMonitoringRelationshipDataSource<MonitoringRelationship> s = new MonitoringRelationshipDataSource(_collectionScope.Collection, rateLimiter, ts);
 
                 var tenantId = Guid.NewGuid().ToString();
                 var authId = $"/subscriptions/{Guid.NewGuid()}/resourceGroups/5e-ms-dev-machines-wus2-rg/providers/Microsoft.Compute/virtualMachines/eventhujahsfu";

@@ -20,7 +20,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
         Task<IMongoCollection<EventHubEntity>> GetOrCreateEventHubEntityCollectionAsync(string collectionName);
 
-        Task<IMongoCollection<MonitoringRelationship>> GetOrCreateMonitoringRelationshipCollectionAsync(string collectionName);
+        Task<IMongoCollection<T>> GetOrCreateMonitoringCollectionAsync<T>(string collectionName) where T : MonitoringBaseEntity, new();
 
         Task<IMongoCollection<PartnerResourceEntity>> GetOrCreatePartnerResourceEntityCollectionAsync(string collectionName);
 
