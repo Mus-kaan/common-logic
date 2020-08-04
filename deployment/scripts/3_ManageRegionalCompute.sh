@@ -24,6 +24,16 @@ echo "GenevaParametersFile: $GenevaParametersFile"
 --EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
 --Region="$REGION"
 
+if [ "$ComputeType" = "" ]; then
+ComputeType=$(<bin/compute-type.txt)
+fi
+
+if [ "$ComputeType" = "vmss" ]; then
+  echo "Successfully finished running: $currentScriptName"
+  echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"
+  exit 0
+fi
+
 if [ "$DeploymentSubscriptionId" = "" ]; then
 DeploymentSubscriptionId=$(<bin/subscription-id.txt)
     if [ "$DeploymentSubscriptionId" = "" ]; then

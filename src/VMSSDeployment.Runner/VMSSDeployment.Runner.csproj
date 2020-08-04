@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
+    <AssemblyName>Deployment.Runner</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="..\..\deployment\**\*" LinkBase="deployment">

@@ -262,6 +262,8 @@ namespace Microsoft.Liftr.SimpleDeploy
                             LogAnalyticsWorkspaceResourceId = targetOptions.LogAnalyticsWorkspaceId,
                         };
 
+                        File.WriteAllText("compute-type.txt", targetOptions.IsAKS ? "aks" : "vmss");
+
                         if (_commandOptions.Action == ActionType.CreateOrUpdateRegionalData)
                         {
                             regionalNamingContext.Tags["DataRG"] = regionalNamingContext.ResourceGroupName(regionOptions.DataBaseName);

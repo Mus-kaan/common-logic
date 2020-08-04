@@ -14,7 +14,7 @@ echo "Source root folder: $SrcRoot"
 echo "CDP_FILE_VERSION_NUMERIC : $CDP_FILE_VERSION_NUMERIC"
 echo "CDP_PACKAGE_VERSION_NUMERIC: $CDP_PACKAGE_VERSION_NUMERIC"
 
-PublishedRunnerDir="$SrcRoot/src/Deployment.Runner/bin/publish"
+PublishedRunnerDir="$SrcRoot/src/VMSSDeployment.Runner/bin/publish"
 EV2ScriptsDir="$PublishedRunnerDir/deployment/scripts"
 
 EV2GlobalDir="$PublishedRunnerDir/generated-ev2/1_global"
@@ -23,7 +23,7 @@ EV2RegionalComputeDir="$PublishedRunnerDir/generated-ev2/3_regional_compute"
 EV2TMDir="$PublishedRunnerDir/generated-ev2/5_traffic_manager"
 
 # Output folders and files
-OutDir="$SrcRoot/out-ev2"
+OutDir="$SrcRoot/out-ev2-vmss"
 TarTmpDir="$OutDir/tar-tmp"
 ExtTarFile="$OutDir/liftr-deployment.tar"
 
