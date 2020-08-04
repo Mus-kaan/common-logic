@@ -9,6 +9,11 @@
     <PackageProjectUrl>https://msazure.visualstudio.com/Liftr/_git/Liftr.Common?path=%2Fsrc%2FLiftr.RPaaS%2FReadMe.md&amp;version=GBmaster</PackageProjectUrl>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="$(PackageVersion_Microsoft_Extensions_Http)" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="$(PackageVersion_Microsoft_Extensions_Http_Polly)" />
+  <PackageReference Include="Polly.Contrib.WaitAndRetry" Version="$(PackageVersion_Polly_Contrib_WaitAndRetry)" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
     <ProjectReference Include="..\Liftr.RPaaS.Abstractions\Liftr.RPaaS.Abstractions.csproj" />
     <ProjectReference Include="..\Liftr.TokenManager.Abstractions\Liftr.TokenManager.Abstractions.csproj" />

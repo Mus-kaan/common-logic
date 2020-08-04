@@ -7,13 +7,19 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Hosting.Swagger;
 using Microsoft.Liftr.RPaaS;
 using Microsoft.Liftr.RPaaS.Hosting;
 using Microsoft.OpenApi.Models;
+using Polly;
+using Polly.Contrib.WaitAndRetry;
+using Polly.Extensions.Http;
+using Serilog;
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 
 namespace SampleWebApp
@@ -34,7 +40,8 @@ namespace SampleWebApp
             services.AddControllersWithViews();
             services.AddControllers();
 
-            services.AddHttpClient();
+            services.AddHttpClient(Options.DefaultName)
+                .AddPolicyHandler(GetRetryPolicy());
 
             services.Configure<MetaRPOptions>(Configuration.GetSection(nameof(MetaRPOptions)));
             services.Configure<MetaRPOptions>((metaRPOptions) =>
@@ -96,6 +103,24 @@ namespace SampleWebApp
 #pragma warning disable CA1062 // Validate arguments of public methods
             app.ApplicationServices.GetService<IMetaRPStorageClient>();
 #pragma warning restore CA1062 // Validate arguments of public methods
+        }
+
+        private static Func<IServiceProvider, HttpRequestMessage, IAsyncPolicy<HttpResponseMessage>> GetRetryPolicy()
+        {
+            // https://github.com/Polly-Contrib/Polly.Contrib.WaitAndRetry#new-jitter-recommendation
+            var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: 5);
+
+            return
+                (services, request) =>
+                    HttpPolicyExtensions
+                    .HandleTransientHttpError()
+                    .WaitAndRetryAsync(
+                            delay,
+                            onRetry: (outcome, timespan, retryAttempt, context) =>
+                            {
+                                var logger = services.GetService<ILogger>();
+                                logger.Warning("Request: {requestMethod} {requestUrl} failed. Delaying for {delay}ms, then retrying {retry}.", request.Method, request.RequestUri, timespan.TotalMilliseconds, retryAttempt);
+                            });
         }
     }
 }

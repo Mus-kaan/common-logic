@@ -6,8 +6,12 @@ using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.ARM;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Polly;
+using Polly.Contrib.WaitAndRetry;
+using Polly.Retry;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -154,12 +158,18 @@ namespace Microsoft.Liftr.RPaaS
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
 
                 var method = new HttpMethod("PATCH");
-                var request = new HttpRequestMessage(method, url)
-                {
-                    Content = content,
-                };
 
-                var response = await _httpClient.SendAsync(request);
+                // For patch operation we need to retry on 404 as sometimes due to ARM cache replication issue, we get 404 on first attempt
+                var retryPolicy = GetRetryPolicyFor404();
+                var response = await retryPolicy.ExecuteAsync(() =>
+                {
+                    var request = new HttpRequestMessage(method, url)
+                    {
+                        Content = content,
+                    };
+
+                    return _httpClient.SendAsync(request);
+                });
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -356,6 +366,21 @@ namespace Microsoft.Liftr.RPaaS
                         "Bearer",
                         await _tokenCallback(tenantId));
             return authenticationHeader;
+        }
+
+        private AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicyFor404()
+        {
+            // https://github.com/Polly-Contrib/Polly.Contrib.WaitAndRetry#new-jitter-recommendation
+            var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: 5);
+
+            return Policy
+                    .HandleResult<HttpResponseMessage>(r => r.StatusCode == HttpStatusCode.NotFound)
+                    .WaitAndRetryAsync(
+                        delay,
+                        onRetry: (outcome, timespan, retryAttempt, context) =>
+                        {
+                            _logger.Warning("Request: {requestMethod} {requestUrl} failed. Delaying for {delay}ms, then retrying {retry}.", outcome.Result.RequestMessage?.Method, outcome.Result.RequestMessage?.RequestUri, timespan.TotalMilliseconds, retryAttempt);
+                        });
         }
     }
 }

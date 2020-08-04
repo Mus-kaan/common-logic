@@ -65,6 +65,7 @@ namespace SampleWebApp.Controllers
             try
             {
                 var apiVersion = "2020-02-01-preview";
+
                 var userRpSubscription = "f9d7ebed-adbd-4cb4-b973-aaf82c136138";
                 var providerName = "Microsoft.Datadog";
                 var tenantId = "f686d426-8d16-42db-81b7-ab578e110ccd";
