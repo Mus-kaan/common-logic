@@ -86,7 +86,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 return _db.GetCollection<T>(collectionName);
             }
 
-            _logger.Fatal($"Collection with name {nameof(collectionName)} does not exist.", collectionName);
+            _logger.Fatal($"Collection with name {collectionName} does not exist.");
             throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
         }
 
@@ -97,7 +97,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 return _db.GetCollection<T>(collectionName);
             }
 
-            _logger.Fatal($"Collection with name {nameof(collectionName)} does not exist.", collectionName);
+            _logger.Fatal($"Collection with name {collectionName} does not exist.");
             throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
         }
 
@@ -249,7 +249,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 return _db.GetCollection<T>(collectionName);
             }
 
-            _logger.Fatal($"Collection with name {nameof(collectionName)} does not exist.", collectionName);
+            _logger.Fatal($"Collection with name {collectionName} does not exist.");
             throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
         }
 
@@ -261,7 +261,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 return _db.GetCollection<T>(collectionName);
             }
 
-            _logger.Fatal($"Collection with name {nameof(collectionName)} does not exist.", collectionName);
+            _logger.Fatal($"Collection with name {collectionName} does not exist.");
             throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
         }
 
