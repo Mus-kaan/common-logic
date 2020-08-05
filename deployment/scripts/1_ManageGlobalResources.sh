@@ -12,7 +12,7 @@ ssh-keygen -m PEM -t rsa -b 4096 -f bin/liftr_ssh_key -N ""
 ./ExecuteDeploymentRunner.sh \
 --ProvisionAction="OutputSubscriptionId" \
 --EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
---Region="$REGION"
+--Region="Global"
 
 if [ "$DeploymentSubscriptionId" = "" ]; then
 DeploymentSubscriptionId=$(<bin/subscription-id.txt)
@@ -29,7 +29,7 @@ fi
 ./ExecuteDeploymentRunner.sh \
 --ProvisionAction="CreateOrUpdateGlobal" \
 --EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
---Region="$REGION"
+--Region="Global"
 
 ./ImportDependencyImages.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId"

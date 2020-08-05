@@ -14,6 +14,8 @@ echo "Source root folder: $SrcRoot"
 echo "CDP_FILE_VERSION_NUMERIC : $CDP_FILE_VERSION_NUMERIC"
 echo "CDP_PACKAGE_VERSION_NUMERIC: $CDP_PACKAGE_VERSION_NUMERIC"
 
+GenerateDockerImageMetadataDir="$SrcRoot/.docker-images"
+
 PublishedRunnerDir="$SrcRoot/src/VMSSDeployment.Runner/bin/publish"
 EV2ScriptsDir="$PublishedRunnerDir/deployment/scripts"
 
@@ -45,6 +47,10 @@ WorkingDirectory="$( pwd )"
 
 cp -a $PublishedRunnerDir/. "$TarTmpDir/bin"
 cp -a $EV2ScriptsDir/. "$TarTmpDir"
+
+if [ -d "$GenerateDockerImageMetadataDir" ]; then
+  cp -a $GenerateDockerImageMetadataDir/. "$TarTmpDir/cdpx-images"
+fi
 
 for script in "$TarTmpDir"/*.sh
 do

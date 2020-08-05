@@ -14,11 +14,12 @@ namespace Microsoft.Liftr.SimpleDeploy
         PrepareK8SAppDeployment,
         UpdateComputeIPInTrafficManager,
         OutputSubscriptionId,
+        ExportACRInformation,
     }
 
     public class RunnerCommandOptions
     {
-        [Option('a', "action", Required = true, HelpText = "Action type, e.g. CreateOrUpdateGlobal, CreateOrUpdateRegionalData, CreateOrUpdateRegionalCompute, PrepareK8SAppDeployment, UpdateComputeIPInTrafficManager, OutputSubscriptionId.")]
+        [Option('a', "action", Required = true, HelpText = "Action type, e.g. CreateOrUpdateGlobal, CreateOrUpdateRegionalData, CreateOrUpdateRegionalCompute, PrepareK8SAppDeployment, UpdateComputeIPInTrafficManager, OutputSubscriptionId, ExportACRInformation.")]
         public ActionType Action { get; set; }
 
         [Option('f', "file", Required = false, HelpText = "Path to the configuration file.")]

@@ -85,11 +85,24 @@ do
 
     DockerRegistry=$(echo $DockerImageNameWithRegistry | cut -d '/' -f1 | cut -d '.' -f1)
     DockerImageName=$(echo $DockerImageNameWithRegistry | cut -d '/' -f1 --complement)
+    parts=(${DockerImageName//:/ })
+    Repository=${parts[0]}
+    Tag=${parts[1]}
 
     echo "DockerRegistry: $DockerRegistry"
     echo "DockerImageName: $DockerImageName"
+    echo "Repository: $Repository"
+    echo "Tag: $Tag"
 
-    echo "import $DockerImageName"
-    echo "az acr import --name $ACRName --source $DockerImageName --registry $CDPXACRResourceId --force"
-    az acr import --name "$ACRName" --source $DockerImageName --registry "$CDPXACRResourceId" --force
+    echo "Check existing tags for repository $Repository"
+    set +e
+    existingTags=$(az acr repository show-tags --name $ACRName --repository $Repository)
+    set -e
+
+    if echo "$existingTags" | grep $Tag; then
+        echo "'$DockerImageName' already exist, skip import."
+    else
+        echo "az acr import --name $ACRName --source $DockerImageName --registry $CDPXACRResourceId --force"
+        az acr import --name "$ACRName" --source $DockerImageName --registry "$CDPXACRResourceId" --force
+    fi
 done

@@ -204,7 +204,21 @@ namespace Microsoft.Liftr.SimpleDeploy
                         ipPool = new IPPoolManager(poolRG, ipNamePrefix, azFactory, _logger);
                     }
 
-                    if (_commandOptions.Action == ActionType.CreateOrUpdateGlobal)
+                    if (_commandOptions.Action == ActionType.ExportACRInformation)
+                    {
+                        var acr = await infra.GetACRAsync(targetOptions.Global.BaseName, globalNamingContext);
+
+                        if (acr == null)
+                        {
+                            var errMsg = "Cannot find the global ACR.";
+                            _logger.Fatal(errMsg);
+                            throw new InvalidOperationException(errMsg);
+                        }
+
+                        File.WriteAllText("acr-name.txt", acr.Name);
+                        File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
+                    }
+                    else if (_commandOptions.Action == ActionType.CreateOrUpdateGlobal)
                     {
                         if (targetOptions.IPPerRegion > 0)
                         {

@@ -33,7 +33,7 @@ namespace Microsoft.Liftr.EV2.Tests
 
             var folders = Directory.GetDirectories(dir);
 
-            Assert.Equal(5, folders.Length);
+            Assert.Equal(6, folders.Length);
             {
                 var filePath = Path.Combine(dir, "1_global", "ServiceModel.DogFood.json");
                 Assert.True(File.Exists(filePath), $"'{filePath}' should exist.");

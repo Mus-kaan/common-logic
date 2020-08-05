@@ -33,6 +33,7 @@ namespace Microsoft.Liftr.EV2
 
                 Directory.CreateDirectory(outputDirectory);
 
+                GenerateImportAppImgArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_AppImgFolderName));
                 GenerateGlobalArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_GlobalFolderName));
                 GenerateRegionDataArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_RegionalDataFolderName));
                 GenerateRegionComputeArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_RegionalComputeFolderName));
@@ -154,6 +155,34 @@ namespace Microsoft.Liftr.EV2
                 distribute.Cloud,
                 entryScript: "2_ImportVMImage.sh");
             File.WriteAllText(parameterFilePath, parameters.ToJsonString(indented: true));
+        }
+
+        private static void GenerateImportAppImgArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
+        {
+            if (ev2Options == null)
+            {
+                throw new ArgumentNullException(nameof(ev2Options));
+            }
+
+            Directory.CreateDirectory(outputDirectory);
+
+            // The regions will be overwritten as 'global'.
+            // We need the original regions for generating regional artifacts.
+            // Clone the instance then make the change.
+            ev2Options = ev2Options.Clone();
+            var regions = new List<string>() { "Global" };
+
+            foreach (var targetEnvironment in ev2Options.TargetEnvironments)
+            {
+                targetEnvironment.Regions = regions;
+
+                GenerateEnvironmentArtifacts(
+                    ev2Options,
+                    targetEnvironment,
+                    outputDirectory,
+                    description: "Import Application Images",
+                    entryScript: "0_ImportAppImage.sh");
+            }
         }
 
         private static void GenerateGlobalArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
@@ -352,7 +381,7 @@ namespace Microsoft.Liftr.EV2
                                                     Properties = new Dictionary<string, string>()
                                                     {
                                                         ["ImageName"] = "adm-ubuntu-1804-l",
-                                                        ["ImageVersion"] = "v13", // https://ev2docs.azure.net/features/extensibility/shell/intro.html#supported-images-and-availability
+                                                        ["ImageVersion"] = "v14", // https://ev2docs.azure.net/features/extensibility/shell/intro.html#supported-images-and-availability
                                                     },
                                                 },
                                             },
@@ -459,30 +488,34 @@ namespace Microsoft.Liftr.EV2
                 },
                 new ShellEnvironmentVariable()
                 {
-                    Name = "REGION",
-                    Value = region,
-                },
-                new ShellEnvironmentVariable()
-                {
-                    Name = "gcs_region",
-                    Value = ToSimpleName(region),
-                },
-                new ShellEnvironmentVariable()
-                {
-                    Name = "compactRegion",
-                    Value = ToSimpleName(region),
-                },
-                new ShellEnvironmentVariable()
-                {
-                    Name = "GenevaParametersFile",
-                    Value = $"geneva.{ToSimpleName(envName)}.values.yaml",
-                },
-                new ShellEnvironmentVariable()
-                {
                     Name = "RunnerSPNObjectId",
                     Value = runnerInfo.UserAssignedManagedIdentityObjectId.ToString(),
                 },
             };
+
+            if (!region.OrdinalEquals("Global"))
+            {
+                envVariables.Add(new ShellEnvironmentVariable()
+                {
+                    Name = "REGION",
+                    Value = region,
+                });
+                envVariables.Add(new ShellEnvironmentVariable()
+                {
+                    Name = "gcs_region",
+                    Value = ToSimpleName(region),
+                });
+                envVariables.Add(new ShellEnvironmentVariable()
+                {
+                    Name = "compactRegion",
+                    Value = ToSimpleName(region),
+                });
+                envVariables.Add(new ShellEnvironmentVariable()
+                {
+                    Name = "GenevaParametersFile",
+                    Value = $"geneva.{ToSimpleName(envName)}.values.yaml",
+                });
+            }
 
             var shellLaunch = new ShellLaunch()
             {

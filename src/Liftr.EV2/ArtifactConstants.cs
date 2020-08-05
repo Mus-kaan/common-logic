@@ -6,6 +6,8 @@ namespace Microsoft.Liftr.EV2
 {
     public static class ArtifactConstants
     {
+        public const string c_AppImgFolderName = "0_app_img";
+
         public const string c_GlobalFolderName = "1_global";
 
         public const string c_RegionalDataFolderName = "2_regional_data";
