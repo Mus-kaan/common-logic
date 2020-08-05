@@ -371,7 +371,7 @@ namespace Microsoft.Liftr.RPaaS
         private AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicyFor404()
         {
             // https://github.com/Polly-Contrib/Polly.Contrib.WaitAndRetry#new-jitter-recommendation
-            var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(1), retryCount: 5);
+            var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(3), retryCount: 5);
 
             return Policy
                     .HandleResult<HttpResponseMessage>(r => r.StatusCode == HttpStatusCode.NotFound)
