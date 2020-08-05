@@ -14,8 +14,6 @@
     "AKSSPNObjectId": "8b64659c-3d42-4727-8efb-e41aabe7a4d7"
   },
   "VMSS": {
-    "AKSMachineCount": 3,
-    "AKSMachineType": "Standard_DS2_v2",
     "GalleryImageVersionId": "/subscriptions/60fad35b-3a47-4ca0-b691-4a789f737cea/resourceGroups/LIBUnitTestRG/providers/Microsoft.Compute/galleries/LIBUnitTestDIG/images/U1804LTS/versions/0.1.1157598614"
   },
   "GenevaCert": {

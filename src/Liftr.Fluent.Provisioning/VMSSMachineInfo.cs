@@ -11,15 +11,15 @@ namespace Microsoft.Liftr.Fluent.Provisioning
     {
         public int MachineCount { get; set; } = 3;
 
-        public string VMSize { get; set; } = "Standard_F2s_v2";
+        public string VMSize { get; set; } = "Standard_DS2_v2";
 
         public string GalleryImageVersionId { get; set; }
 
         public void CheckValues()
         {
-            if (MachineCount < 3)
+            if (MachineCount < 1)
             {
-                throw new InvalidOperationException($"{nameof(MachineCount)} should >= 3.");
+                throw new InvalidOperationException($"{nameof(MachineCount)} should >= 1.");
             }
 
             VMSSSkuHelper.ParseSkuString(VMSize);
