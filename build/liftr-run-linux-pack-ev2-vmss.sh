@@ -19,6 +19,7 @@ GenerateDockerImageMetadataDir="$SrcRoot/.docker-images"
 PublishedRunnerDir="$SrcRoot/src/VMSSDeployment.Runner/bin/publish"
 EV2ScriptsDir="$PublishedRunnerDir/deployment/scripts"
 
+EV2ImportImageDir="$PublishedRunnerDir/generated-ev2/0_app_img"
 EV2GlobalDir="$PublishedRunnerDir/generated-ev2/1_global"
 EV2RegionalDataDir="$PublishedRunnerDir/generated-ev2/2_regional_data"
 EV2RegionalComputeDir="$PublishedRunnerDir/generated-ev2/3_regional_compute"
@@ -29,6 +30,7 @@ OutDir="$SrcRoot/out-ev2-vmss"
 TarTmpDir="$OutDir/tar-tmp"
 ExtTarFile="$OutDir/liftr-deployment.tar"
 
+ServiceGroupRootImportImage="$OutDir/0_ServiceGroupRootImportImage"
 ServiceGroupRootGlobal="$OutDir/1_ServiceGroupRootGlobal"
 ServiceGroupRootRegionalData="$OutDir/2_ServiceGroupRootRegionalData"
 ServiceGroupRootRegionalCompute="$OutDir/3_ServiceGroupRootRegionalCompute"
@@ -66,17 +68,20 @@ echo "----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]--------
 echo "Start packing EV2 rollout specs ..."
 
 # Create directories.
+mkdir --parent "$ServiceGroupRootImportImage"
 mkdir --parent "$ServiceGroupRootGlobal"
 mkdir --parent "$ServiceGroupRootRegionalData"
 mkdir --parent "$ServiceGroupRootRegionalCompute"
 mkdir --parent "$ServiceGroupRootTM"
 
 # Place deployment artifacts
+cp -r $EV2GlobalDir/* $ServiceGroupRootImportImage/
 cp -r $EV2GlobalDir/* $ServiceGroupRootGlobal/
 cp -r $EV2RegionalDataDir/* $ServiceGroupRootRegionalData/
 cp -r $EV2RegionalComputeDir/* $ServiceGroupRootRegionalCompute/
 cp -r $EV2TMDir/* $ServiceGroupRootTM/
 
+cp $ExtTarFile $ServiceGroupRootImportImage/.
 cp $ExtTarFile $ServiceGroupRootGlobal/.
 cp $ExtTarFile $ServiceGroupRootRegionalData/.
 cp $ExtTarFile $ServiceGroupRootRegionalCompute/.
