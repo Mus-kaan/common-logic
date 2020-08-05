@@ -76,7 +76,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 var httpClientFactory = sp.GetService<IHttpClientFactory>();
                 if (httpClientFactory == null)
                 {
-                    var ex = new InvalidOperationException("[Marketplace Fulfillment Init] Cannot find a httpClientFactory instance to initizlize Marketplace ARM client.");
+                    var ex = new InvalidOperationException("[Marketplace Fulfillment Init] Cannot find a httpClientFactory instance to initialize Marketplace Fulfillment client.");
                     logger.Fatal(ex, ex.Message);
                     throw ex;
                 }
