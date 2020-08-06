@@ -24,14 +24,17 @@ namespace Microsoft.Liftr.Utilities
             {
                 foreach (var tagPart in tagParts)
                 {
-                    var kvp = tagPart.Split(':');
-                    if (kvp == null || kvp.Length != 2)
+                    var delimitIdx = tagPart.IndexOf(':');
+                    if (delimitIdx <= 0 || delimitIdx > tagPart.Length - 2)
                     {
                         Console.WriteLine("Cannot parse tags string since it is in invalid format: " + tagString);
                         return false;
                     }
 
-                    parsedTags[kvp[0]] = kvp[1];
+                    var tagKey = tagPart.Substring(0, delimitIdx);
+                    var tagValue = tagPart.Substring(delimitIdx + 1);
+
+                    parsedTags[tagKey] = tagValue;
                 }
             }
 
