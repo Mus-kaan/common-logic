@@ -134,6 +134,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.JwtLibrary.Tests", "Liftr.JwtLibrary.Tests\Liftr.JwtLibrary.Tests.csproj", "{747D0F4D-F631-4104-931E-0ED87F751BBC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VMSSDeployment.Runner", "VMSSDeployment.Runner\VMSSDeployment.Runner.csproj", "{5971FD68-D0E5-486D-8D06-A88EF68658A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Logging.Metrics", "Liftr.Logging.Metrics\Liftr.Logging.Metrics.csproj", "{24ED9D0C-62DC-4710-A6DA-E5E8D34DFFD1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Logging.Metrics.Test", "Liftr.Logging.Metrics.Test\Liftr.Logging.Metrics.Test.csproj", "{30CF9F7E-47B1-4BD9-801C-EE3DA5CC3D30}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -381,6 +384,14 @@ Global
 		{5971FD68-D0E5-486D-8D06-A88EF68658A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5971FD68-D0E5-486D-8D06-A88EF68658A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5971FD68-D0E5-486D-8D06-A88EF68658A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24ED9D0C-62DC-4710-A6DA-E5E8D34DFFD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24ED9D0C-62DC-4710-A6DA-E5E8D34DFFD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24ED9D0C-62DC-4710-A6DA-E5E8D34DFFD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24ED9D0C-62DC-4710-A6DA-E5E8D34DFFD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30CF9F7E-47B1-4BD9-801C-EE3DA5CC3D30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30CF9F7E-47B1-4BD9-801C-EE3DA5CC3D30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30CF9F7E-47B1-4BD9-801C-EE3DA5CC3D30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30CF9F7E-47B1-4BD9-801C-EE3DA5CC3D30}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

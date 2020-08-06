@@ -10,6 +10,7 @@
     <PackageVersion_FluentAssertions>5.9.0</PackageVersion_FluentAssertions>
     <PackageVersion_Flurl>2.8.2</PackageVersion_Flurl>
     <PackageVersion_Flurl_Http>2.4.2</PackageVersion_Flurl_Http>
+    <PackageVersion_JustEat_StatsD>4.1.0</PackageVersion_JustEat_StatsD>
     <PackageVersion_Microsoft_ApplicationInsights>2.14.0</PackageVersion_Microsoft_ApplicationInsights>
     <PackageVersion_Microsoft_ApplicationInsights_AspNetCore>2.14.0</PackageVersion_Microsoft_ApplicationInsights_AspNetCore>
     <PackageVersion_Microsoft_ApplicationInsights_DependencyCollector>2.14.0</PackageVersion_Microsoft_ApplicationInsights_DependencyCollector>
