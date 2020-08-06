@@ -4,7 +4,7 @@ pipeline {
 	agent any
 
 	options {
-		timeout(time: 100, unit: 'MINUTES')
+		timeout(time: 200, unit: 'MINUTES')
 	}
 
 	environment {
