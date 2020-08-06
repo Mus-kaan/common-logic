@@ -8,6 +8,7 @@ using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Network.Fluent.Models;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.KeyVault;
+using Microsoft.Liftr.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -237,7 +238,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             // Within the VMSS instance, the application can retrieve those information from the instance Metadata service.
             var tags = new Dictionary<string, string>(namingContext.Tags)
             {
-                ["VaultEndpoint"] = provisionedResources.RegionalKeyVault.VaultUri,
+                [nameof(ComputeTagMetadata.VaultEndpoint)] = provisionedResources.RegionalKeyVault.VaultUri,
+                [nameof(ComputeTagMetadata.ASPNETCORE_ENVIRONMENT)] = namingContext.Environment.ToString(),
+                [nameof(ComputeTagMetadata.GCS_REGION)] = namingContext.Location.Name,
             };
 
             var vmSku = VMSSSkuHelper.ParseSkuString(machineInfo.VMSize);

@@ -7,7 +7,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Microsoft.Liftr.Logging
+namespace Microsoft.Liftr.Utilities
 {
     public class InstanceMetadata
     {

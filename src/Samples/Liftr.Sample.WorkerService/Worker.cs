@@ -4,8 +4,8 @@
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.DataSource;
-using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Queue;
+using Microsoft.Liftr.Utilities;
 using System;
 using System.Net.Http;
 using System.Threading;
@@ -50,6 +50,13 @@ namespace Microsoft.Liftr.Sample.WorkerService
             using (var op = _logger.StartTimedOperation("GetMSWebPage"))
             {
                 op.SetContextProperty("CntVal", _cnt);
+
+                var instanceMetaInfo = await InstanceMetaHelper.GetMetaInfoAsync();
+                _logger.Information("instanceMetaInfo: {@instanceMetaInfo}", instanceMetaInfo);
+
+                var computeTagMeta = instanceMetaInfo.GetComputeTagMetadata();
+                _logger.Information("computeTagMeta: {@computeTagMeta}", computeTagMeta);
+
                 try
                 {
                     _logger.Information("Before start http get.");

@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Logging;
+using Microsoft.Liftr.Utilities;
 using Serilog;
 using System;
 using System.IO;

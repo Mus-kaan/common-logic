@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Microsoft.Liftr.Logging
+namespace Microsoft.Liftr.Utilities
 {
     public static class InstanceMetaHelper
     {

@@ -5,6 +5,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.KeyVault;
+using Microsoft.Liftr.Utilities;
 using System;
 
 namespace Microsoft.Liftr.Configuration
@@ -24,6 +25,18 @@ namespace Microsoft.Liftr.Configuration
             var builtConfig = config.Build();
 
             string vaultEndpoint = builtConfig[GlobalSettingConstants.VaultEndpoint];
+
+            if (string.IsNullOrEmpty(vaultEndpoint))
+            {
+                var meta = InstanceMetaHelper.GetMetaInfoAsync().Result;
+                vaultEndpoint = meta?.GetComputeTagMetadata()?.VaultEndpoint;
+
+                if (!string.IsNullOrEmpty(vaultEndpoint))
+                {
+                    Console.WriteLine($"Loaded key vault endpoint '{vaultEndpoint}' from compute tag.");
+                }
+            }
+
             if (!string.IsNullOrEmpty(vaultEndpoint))
             {
                 string clientId = builtConfig[GlobalSettingConstants.ClientId];

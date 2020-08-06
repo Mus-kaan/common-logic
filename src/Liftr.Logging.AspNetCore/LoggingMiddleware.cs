@@ -5,6 +5,7 @@
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Liftr.DiagnosticSource;
+using Microsoft.Liftr.Utilities;
 using Serilog.Events;
 using System;
 using System.Linq;
