@@ -8,7 +8,6 @@ using Microsoft.Liftr.DataSource.MonitoringSvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc

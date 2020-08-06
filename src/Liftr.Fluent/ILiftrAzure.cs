@@ -14,6 +14,7 @@ using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Network.Fluent.Models;
+using Microsoft.Azure.Management.Redis.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
@@ -164,6 +165,16 @@ namespace Microsoft.Liftr.Fluent
 
         Task RemoveSelfKeyVaultAccessAsync(IVault kv);
         #endregion Key Vault
+
+        #region Redis Cache
+        Task<IRedisCache> GetOrCreateRedisCacheAsync(Region location, string rgName, string redisCacheName, IDictionary<string, string> tags, IDictionary<string, string> redisConfig = null);
+
+        Task<IRedisCache> GetRedisCachesAsync(string rgName, string redisCacheName);
+
+        Task<IEnumerable<IRedisCache>> ListRedisCacheAsync(string rgName);
+
+        Task<IRedisCache> CreateRedisCacheAsync(Region location, string rgName, string redisCacheName, IDictionary<string, string> tags, IDictionary<string, string> redisConfig = null);
+        #endregion
 
         #region AKS
         Task<IKubernetesCluster> CreateAksClusterAsync(

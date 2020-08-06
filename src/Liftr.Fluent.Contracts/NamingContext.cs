@@ -100,6 +100,9 @@ namespace Microsoft.Liftr.Fluent.Contracts
         public string KeyVaultName(string baseName)
             => GenerateCommonName(baseName, "kv", delimiter: string.Empty);
 
+        public string RedisName(string baseName)
+            => GenerateCommonName(baseName, "redis", delimiter: string.Empty);
+
         public string WebAppName(string baseName)
             => GenerateCommonName(baseName);
 
