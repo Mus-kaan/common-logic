@@ -78,7 +78,26 @@ namespace Microsoft.Liftr.Logging.Metrics
 
         public void Gauge(string mdmNamespace, string metric, double value, Dictionary<string, string> dimension = null)
         {
-            var dims = dimension ?? _defaultDimensions;
+            Dictionary<string, string> dims;
+            if (dimension != null && _defaultDimensions != null)
+            {
+                dims = new Dictionary<string, string>();
+
+                foreach (var dimensionPairs in _defaultDimensions)
+                {
+                    dims[dimensionPairs.Key] = dimensionPairs.Value;
+                }
+
+                foreach (var dimensionPairs in dimension)
+                {
+                    dims[dimensionPairs.Key] = dimensionPairs.Value;
+                }
+            }
+            else
+            {
+                dims = dimension ?? _defaultDimensions;
+            }
+
             _publisher.Gauge(value, new Bucket(mdmNamespace, metric, dims).ToJson());
         }
     }
