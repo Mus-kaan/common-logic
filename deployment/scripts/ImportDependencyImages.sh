@@ -70,8 +70,13 @@ else
     LiftrACRResourceId="/subscriptions/d8f298fb-60f5-4676-a7d3-25442ec5ce1e/resourceGroups/liftr-acr-rg/providers/Microsoft.ContainerRegistry/registries/LiftrAMEACR"
 fi
 
+if [ "$ComputeType" = "" ]; then
+ComputeType=$(<bin/compute-type.txt)
+fi
+
 set -x
 
+if [ "$ComputeType" = "aks" ]; then
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "import 'nginx-ingress' chart images"
 echo "import quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.32.0"
@@ -115,6 +120,7 @@ az acr import --name "$ACRName" --source k8s.gcr.io/hyperkube:v1.12.1 --force
 
 echo "import quay.io/prometheus/prometheus:v2.15.2"
 az acr import --name "$ACRName" --source quay.io/prometheus/prometheus:v2.15.2 --force
+fi
 
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/environments/linuxcontainers.html"
