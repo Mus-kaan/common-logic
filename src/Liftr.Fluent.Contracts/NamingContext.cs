@@ -76,7 +76,7 @@ namespace Microsoft.Liftr.Fluent.Contracts
             name = name.ToLowerInvariant();
             if (name.Length > 24)
             {
-                throw new InvalidOperationException($"{nameof(StorageAccountName)} cannot be longer than 24 characters.");
+                throw new InvalidOperationException($"{nameof(StorageAccountName)} cannot be longer than 24 characters. name: " + name);
             }
 
             return name;
