@@ -60,10 +60,9 @@ namespace Microsoft.Liftr.Utilities.Tests
         }
 
         [Theory]
-        [InlineData("2019-07-05T15:50:54.1793804")]
-        [InlineData("asda:asd:")]
         [InlineData("asda:asd;")]
         [InlineData("asda")]
+        [InlineData("asda:")]
         public void ParseZuluStringWillThrow(string tagString)
         {
             Assert.False(TagStringParser.TryParse(tagString, out _));
