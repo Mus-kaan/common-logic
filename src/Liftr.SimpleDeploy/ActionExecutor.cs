@@ -311,6 +311,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                                         BaseName = regionOptions.DataBaseName,
                                         NamingContext = regionalNamingContext,
                                         DataOptions = dataOptions,
+                                        RegionOptions = regionOptions,
                                         Resources = dataResources,
                                     };
 
@@ -421,6 +422,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                                             BaseName = regionOptions.DataBaseName,
                                             NamingContext = regionalNamingContext,
                                             ComputeOptions = regionalComputeOptions,
+                                            RegionOptions = regionOptions,
                                             Resources = vmss,
                                         };
 

@@ -10,6 +10,8 @@ namespace Microsoft.Liftr.SimpleDeploy
     {
         public RegionalComputeOptions ComputeOptions { get; set; }
 
+        public RegionOptions RegionOptions { get; set; }
+
         public ProvisionedVMSSResources Resources { get; set; }
     }
 }

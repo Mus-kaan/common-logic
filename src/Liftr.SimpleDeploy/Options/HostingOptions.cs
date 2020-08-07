@@ -199,6 +199,8 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public IEnumerable<string> DataPlaneSubscriptions { get; set; }
 
+        public Dictionary<string, string> Properties { get; set; }
+
         public void CheckValid()
         {
             if (string.IsNullOrEmpty(DataBaseName))

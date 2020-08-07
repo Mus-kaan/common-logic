@@ -10,6 +10,8 @@ namespace Microsoft.Liftr.SimpleDeploy
     {
         public RegionalDataOptions DataOptions { get; set; }
 
+        public RegionOptions RegionOptions { get; set; }
+
         public ProvisionedRegionalDataResources Resources { get; set; }
     }
 }
