@@ -122,7 +122,7 @@ namespace Microsoft.Liftr.Fluent.Contracts
             => GenerateCommonName(baseName, "log");
 
         public string EventHubNamespaceName(string baseName)
-            => GenerateCommonName(baseName, "evh");
+            => GenerateCommonName(baseName, "evh").ToLowerInvariant();
 
         public string SharedImageGalleryName(string baseName)
            => GenerateCommonName(baseName, "sig", noRegion: false, delimiter: "_");
