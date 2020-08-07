@@ -168,6 +168,8 @@ namespace Microsoft.Liftr.SimpleDeploy
         private async Task RunActionAsync(HostingEnvironmentOptions targetOptions, KeyVaultClient kvClient, LiftrAzureFactory azFactory)
         {
             _logger.Information("Target environment options: {@targetOptions}", targetOptions);
+            File.WriteAllText("compute-type.txt", targetOptions.IsAKS ? "aks" : "vmss");
+
             var liftrAzure = azFactory.GenerateLiftrAzure();
 
             var callBackConfigs = new SimpleDeployConfigurations()
@@ -275,8 +277,6 @@ namespace Microsoft.Liftr.SimpleDeploy
                             GlobalKeyVaultResourceId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
                             LogAnalyticsWorkspaceResourceId = targetOptions.LogAnalyticsWorkspaceId,
                         };
-
-                        File.WriteAllText("compute-type.txt", targetOptions.IsAKS ? "aks" : "vmss");
 
                         if (_commandOptions.Action == ActionType.CreateOrUpdateRegionalData)
                         {
