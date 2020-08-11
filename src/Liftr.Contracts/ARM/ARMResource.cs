@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Utilities;
 using System.Collections.Generic;
 
 namespace Microsoft.Liftr.Contracts.ARM
@@ -12,13 +13,15 @@ namespace Microsoft.Liftr.Contracts.ARM
     public abstract class ARMResource : IARMResource
     {
         /// <summary>
-        /// The resource ID.
+        /// The ARM id of the resource.
         /// </summary>
+        [SwaggerExtension(MarkAsReadOnly = true)]
         public string Id { get; set; }
 
         /// <summary>
         /// The name of the resource.
         /// </summary>
+        [SwaggerExtension(MarkAsReadOnly = true)]
         public string Name { get; set; }
 
         /// <summary>
