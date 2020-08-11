@@ -133,5 +133,24 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 _rateLimiter.Release();
             }
         }
+
+        public async Task<TResource> UpdateAsync(TResource entity)
+        {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                await _collection.ReplaceOneAsync(e => e.EntityId == entity.EntityId, entity);
+                return entity;
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
+        }
     }
 }

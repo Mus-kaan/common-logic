@@ -31,5 +31,10 @@ namespace Microsoft.Liftr.DataSource
         /// Delete an entity by the entity Id (Mongo DB Object Id).
         /// </summary>
         Task<bool> DeleteAsync(string entityId);
+
+        /// <summary>
+        /// Update a resource entity
+        /// </summary>
+        Task<TResource> UpdateAsync(TResource entity);
     }
 }

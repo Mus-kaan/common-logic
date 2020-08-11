@@ -105,6 +105,16 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
                 var allEntities = await s.ListAsync(rid, showActiveOnly: false);
                 Assert.Equal(3, allEntities.Count());
             }
+
+            // can update entity
+            {
+                var newVnet = "newVnet";
+                mockEntity.VNet = newVnet;
+                await s.UpdateAsync(mockEntity);
+
+                var retrieved = await s.ListAsync(entity1.ResourceId);
+                Assert.Equal(retrieved.First().VNet, newVnet);
+            }
         }
     }
 }
