@@ -15,6 +15,8 @@ echo "CDP_FILE_VERSION_NUMERIC : $CDP_FILE_VERSION_NUMERIC"
 echo "CDP_PACKAGE_VERSION_NUMERIC: $CDP_PACKAGE_VERSION_NUMERIC"
 echo "CDP_FILE_VERSION_SEMANTIC: $CDP_FILE_VERSION_SEMANTIC"
 
+GenerateDockerImageMetadataDir="$SrcRoot/.docker-images"
+
 PublishedImageBuilderDir="$SrcRoot/src/BaseImageBuilder/bin/publish"
 SupportingFilesDir="$PublishedImageBuilderDir/supporting-files"
 EV2ScriptsDir="$SupportingFilesDir/ev2-scripts"
@@ -48,6 +50,11 @@ mkdir --parent "$ServiceGroupRootWindowsBaseImage"
 echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
 echo "Prepare packer files ..."
 cp -a "$SupportingFilesDir/packer-files/." "$PackerFilesDir"
+chmod +x $PackerFilesDir/*.sh
+
+if [ -d "$GenerateDockerImageMetadataDir" ]; then
+  cp -a $GenerateDockerImageMetadataDir/. "$PackerFilesDir/cdpx-images"
+fi
 
 cd "$OutDir"
 zip -r $PackerZipFileName $PackerFilesDirName
