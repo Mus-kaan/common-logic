@@ -14,6 +14,16 @@ echo "Source root folder: $SrcRoot"
 echo "CDP_FILE_VERSION_NUMERIC : $CDP_FILE_VERSION_NUMERIC"
 echo "CDP_PACKAGE_VERSION_NUMERIC: $CDP_PACKAGE_VERSION_NUMERIC"
 
+# CDPx Versioning: https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/325/Versioning
+if [ -v CDP_PACKAGE_VERSION_NUMERIC ]; then
+    ReleaseVersion="$CDP_PACKAGE_VERSION_NUMERIC"
+else
+    # Use a fake version when building locally.
+    CURRENTEPOCTIME=`date +'%y%m%d%H%M'`
+    ReleaseVersion="0.1.$CURRENTEPOCTIME"
+fi
+echo "ReleaseVersion: $ImageVerion"
+
 GenerateDockerImageMetadataDir="$SrcRoot/.docker-images"
 
 PublishedRunnerDir="$SrcRoot/src/VMSSDeployment.Runner/bin/publish"
@@ -73,6 +83,12 @@ mkdir --parent "$ServiceGroupRootGlobal"
 mkdir --parent "$ServiceGroupRootRegionalData"
 mkdir --parent "$ServiceGroupRootRegionalCompute"
 mkdir --parent "$ServiceGroupRootTM"
+
+echo -n "$ReleaseVersion" > "$ServiceGroupRootImportImage/version.txt"
+echo -n "$ReleaseVersion" > "$ServiceGroupRootGlobal/version.txt"
+echo -n "$ReleaseVersion" > "$ServiceGroupRootRegionalData/version.txt"
+echo -n "$ReleaseVersion" > "$ServiceGroupRootRegionalCompute/version.txt"
+echo -n "$ReleaseVersion" > "$ServiceGroupRootTM/version.txt"
 
 # Place deployment artifacts
 cp -r $EV2GlobalDir/* $ServiceGroupRootImportImage/
