@@ -91,7 +91,7 @@ echo -n "$ReleaseVersion" > "$ServiceGroupRootRegionalCompute/version.txt"
 echo -n "$ReleaseVersion" > "$ServiceGroupRootTM/version.txt"
 
 # Place deployment artifacts
-cp -r $EV2GlobalDir/* $ServiceGroupRootImportImage/
+cp -r $EV2ImportImageDir/* $ServiceGroupRootImportImage/
 cp -r $EV2GlobalDir/* $ServiceGroupRootGlobal/
 cp -r $EV2RegionalDataDir/* $ServiceGroupRootRegionalData/
 cp -r $EV2RegionalComputeDir/* $ServiceGroupRootRegionalCompute/
