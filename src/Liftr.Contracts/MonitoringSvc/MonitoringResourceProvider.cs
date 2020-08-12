@@ -8,5 +8,6 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
     {
         Datadog,
         Logz,
+        Elastic,
     }
 }
