@@ -12,6 +12,8 @@ namespace Microsoft.Liftr.Utilities
 
         public string ASPNETCORE_ENVIRONMENT { get; set; }
 
+        public string DOTNET_ENVIRONMENT { get; set; }
+
         public string GCS_REGION { get; set; }
 
         public IDictionary<string, string> Tags { get; set; }

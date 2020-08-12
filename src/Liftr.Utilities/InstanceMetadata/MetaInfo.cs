@@ -23,19 +23,24 @@ namespace Microsoft.Liftr.Utilities
             {
                 result.Tags = parsedTags;
 
-                if (parsedTags.ContainsKey(nameof(result.ASPNETCORE_ENVIRONMENT)))
+                if (parsedTags.ContainsKey("ENV_" + nameof(result.ASPNETCORE_ENVIRONMENT)))
                 {
-                    result.ASPNETCORE_ENVIRONMENT = parsedTags[nameof(result.ASPNETCORE_ENVIRONMENT)];
+                    result.ASPNETCORE_ENVIRONMENT = parsedTags["ENV_" + nameof(result.ASPNETCORE_ENVIRONMENT)];
                 }
 
-                if (parsedTags.ContainsKey(nameof(result.VaultEndpoint)))
+                if (parsedTags.ContainsKey("ENV_" + nameof(result.DOTNET_ENVIRONMENT)))
                 {
-                    result.VaultEndpoint = parsedTags[nameof(result.VaultEndpoint)];
+                    result.DOTNET_ENVIRONMENT = parsedTags["ENV_" + nameof(result.DOTNET_ENVIRONMENT)];
                 }
 
-                if (parsedTags.ContainsKey(nameof(result.GCS_REGION)))
+                if (parsedTags.ContainsKey("ENV_" + nameof(result.VaultEndpoint)))
                 {
-                    result.VaultEndpoint = parsedTags[nameof(result.GCS_REGION)];
+                    result.VaultEndpoint = parsedTags["ENV_" + nameof(result.VaultEndpoint)];
+                }
+
+                if (parsedTags.ContainsKey("ENV_" + nameof(result.GCS_REGION)))
+                {
+                    result.VaultEndpoint = parsedTags["ENV_" + nameof(result.GCS_REGION)];
                 }
 
                 return result;

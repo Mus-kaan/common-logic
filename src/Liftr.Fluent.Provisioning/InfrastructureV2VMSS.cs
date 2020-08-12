@@ -238,9 +238,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             // Within the VMSS instance, the application can retrieve those information from the instance Metadata service.
             var tags = new Dictionary<string, string>(namingContext.Tags)
             {
-                [nameof(ComputeTagMetadata.VaultEndpoint)] = provisionedResources.RegionalKeyVault.VaultUri,
-                [nameof(ComputeTagMetadata.ASPNETCORE_ENVIRONMENT)] = namingContext.Environment.ToString(),
-                [nameof(ComputeTagMetadata.GCS_REGION)] = namingContext.Location.Name,
+                ["ENV_" + nameof(ComputeTagMetadata.VaultEndpoint)] = provisionedResources.RegionalKeyVault.VaultUri,
+                ["ENV_" + nameof(ComputeTagMetadata.ASPNETCORE_ENVIRONMENT)] = namingContext.Environment.ToString(),
+                ["ENV_" + nameof(ComputeTagMetadata.DOTNET_ENVIRONMENT)] = namingContext.Environment.ToString(),
+                ["ENV_" + nameof(ComputeTagMetadata.GCS_REGION)] = namingContext.Location.Name,
             };
 
             var vmSku = VMSSSkuHelper.ParseSkuString(machineInfo.VMSize);
