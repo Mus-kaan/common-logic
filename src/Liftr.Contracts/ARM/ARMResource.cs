@@ -16,13 +16,13 @@ namespace Microsoft.Liftr.Contracts.ARM
         /// The ARM id of the resource.
         /// </summary>
         [SwaggerExtension(MarkAsReadOnly = true)]
-        public string Id { get; set; }
+        public virtual string Id { get; set; }
 
         /// <summary>
         /// The name of the resource.
         /// </summary>
         [SwaggerExtension(MarkAsReadOnly = true)]
-        public string Name { get; set; }
+        public virtual string Name { get; set; }
 
         /// <summary>
         /// The type of the resource.
