@@ -23,5 +23,7 @@ namespace Microsoft.Liftr.DataSource.MonitoringSvc
         Task<IEnumerable<IEventHubEntity>> ListAsync(MonitoringResourceProvider resourceProvider, string location);
 
         Task<int> DeleteAsync(MonitoringResourceProvider resourceProvider);
+
+        Task<bool> DeleteAsync(string documentId);
     }
 }

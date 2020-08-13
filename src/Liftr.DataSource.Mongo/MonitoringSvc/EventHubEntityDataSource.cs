@@ -119,5 +119,21 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
                 _rateLimiter.Release();
             }
         }
+
+        public async Task<bool> DeleteAsync(string documentId)
+        {
+            var filter = Builders<EventHubEntity>.Filter.Eq(i => i.DocumentObjectId, documentId);
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var deleteResult = await _collection.DeleteOneAsync(filter);
+                return (int)deleteResult.DeletedCount == 1;
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
+        }
     }
 }
