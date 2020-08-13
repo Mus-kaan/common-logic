@@ -11,6 +11,8 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
     /// </summary>
     public interface IEventHubEntity
     {
+        public string DocumentObjectId { get; set; }
+
         /// <summary>
         /// Resource provider name i.e. Microsoft.Datadog
         /// </summary>
