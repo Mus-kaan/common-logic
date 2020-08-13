@@ -30,11 +30,6 @@ namespace Microsoft.Liftr.Logging.Metrics
             Dictionary<string, string> defaultDimensions,
             int port = 8125)
         {
-            if (string.IsNullOrWhiteSpace(host))
-            {
-                throw new ArgumentNullException(nameof(host));
-            }
-
             if (string.IsNullOrWhiteSpace(defaultNamespace))
             {
                 throw new ArgumentNullException(nameof(defaultNamespace));
@@ -47,6 +42,12 @@ namespace Microsoft.Liftr.Logging.Metrics
             _defaultNamespace = defaultNamespace;
 
             _defaultDimensions = defaultDimensions;
+
+            if (string.IsNullOrWhiteSpace(host))
+            {
+                _logger.Warning("host is null. Create a dummy null metric sender.");
+                return;
+            }
 
             _publisher = new StatsDPublisher(new StatsDConfiguration()
             {
@@ -72,12 +73,22 @@ namespace Microsoft.Liftr.Logging.Metrics
 
         public void Gauge(string metric, double value, Dictionary<string, string> dimension = null)
         {
+            if (_publisher == null)
+            {
+                return;
+            }
+
             var dims = dimension ?? _defaultDimensions;
             Gauge(_defaultNamespace, metric, value, dims);
         }
 
         public void Gauge(string mdmNamespace, string metric, double value, Dictionary<string, string> dimension = null)
         {
+            if (_publisher == null)
+            {
+                return;
+            }
+
             Dictionary<string, string> dims;
             if (dimension != null && _defaultDimensions != null)
             {
