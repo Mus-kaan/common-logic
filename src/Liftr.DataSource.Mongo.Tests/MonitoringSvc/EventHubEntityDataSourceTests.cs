@@ -35,7 +35,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             _collectionScope.Dispose();
         }
 
-        [SkipInOfficialBuild]
+        [JenkinsOnly]
         public async Task BasicDataSourceUsageAsync()
         {
             var ts = new MockTimeSource();
