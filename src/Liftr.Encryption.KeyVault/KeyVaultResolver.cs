@@ -31,17 +31,24 @@ namespace Microsoft.Liftr.Encryption
             }
 
             IKey symmetricKey = null;
-            using (var operation = _logger.StartTimedOperation("Resolving key from KeyVault"))
+            using var operation = _logger.StartTimedOperation(nameof(ResolveKeyAsSymmetricKeyAsync));
+            try
             {
                 symmetricKey = await _cloudResolver.ResolveKeyAsync(keyIdentifier, cancellationToken);
-            }
 
-            if (symmetricKey == null)
+                if (symmetricKey == null)
+                {
+                    throw new InvalidOperationException("Secret is not a valid symmetricKey");
+                }
+
+                return symmetricKey;
+            }
+            catch (Exception ex)
             {
-                throw new InvalidOperationException("Secret is not a valid symmetricKey");
+                _logger.Error(ex, "err_resolve_key");
+                operation.FailOperation(ex.Message);
+                throw;
             }
-
-            return symmetricKey;
         }
     }
 }
