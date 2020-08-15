@@ -187,6 +187,15 @@ namespace Microsoft.Liftr.ImageBuilder
             using var rootOperation = _logger.StartTimedOperation(nameof(BuildCustomizedSBIAsync));
             try
             {
+                rootOperation.SetProperty(nameof(imageName), imageName);
+                rootOperation.SetProperty(nameof(imageVersion), imageVersion);
+                rootOperation.SetProperty(nameof(sourceImageType), sourceImageType.ToString());
+                rootOperation.SetProperty(nameof(_options.Location), _options.Location.Name);
+                rootOperation.SetProperty(nameof(_options.ResourceGroupName), _options.ResourceGroupName);
+                rootOperation.SetProperty(nameof(_options.ImageGalleryName), _options.ImageGalleryName);
+                rootOperation.SetProperty(nameof(_options.SubscriptionId), _options.SubscriptionId.ToString());
+                rootOperation.SetProperty(nameof(_options.ImageReplicationRegions), string.Join(", ", _options.ImageReplicationRegions.Select(r => r.Name)));
+
                 var artifactUrlWithSAS = await _artifactStore.UploadBuildArtifactsToSupportingStorageAsync(artifactPath);
                 _logger.Information("uploaded the file '{filePath}' and generated the url with the SAS token.", artifactPath);
                 if (isZip)

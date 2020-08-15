@@ -37,6 +37,11 @@ namespace Microsoft.Liftr.ImageBuilder
             string templateContent,
             CancellationToken cancellationToken = default)
         {
+            if (location == null)
+            {
+                throw new ArgumentNullException(nameof(location));
+            }
+
             _logger.Information("Start uploading AIB template in RG {rgName} ...", rgName);
             try
             {
@@ -55,6 +60,10 @@ namespace Microsoft.Liftr.ImageBuilder
             using (var handler = new AzureApiAuthHandler(_liftrAzure.AzureCredentials))
             using (var httpClient = new HttpClient(handler))
             {
+                operation.SetProperty(nameof(templateName), templateName);
+                operation.SetProperty(nameof(rgName), rgName);
+                operation.SetProperty(nameof(location), location.Name);
+
                 _logger.Information("Run AIB template. rgName: {rgName}. templateName: {templateName}", rgName, templateName);
                 _logger.Information("The Azure VM Image Builder logs can be found in the storage account in {AIBRGName}", RunAzureVMImageBuilderException.PackaerLogLocaionMessage(_liftrAzure.FluentClient.SubscriptionId, rgName, templateName));
 

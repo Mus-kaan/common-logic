@@ -80,6 +80,10 @@ namespace Microsoft.Liftr.ImageBuilder
             using var ops = _logger.StartTimedOperation(nameof(ImportImageVHDAsync));
             ops.SetContextProperty(nameof(imageName), imageName);
             ops.SetContextProperty(nameof(imageVersion), imageVersion);
+            ops.SetProperty(nameof(_options.ResourceGroupName), _options.ResourceGroupName);
+            ops.SetProperty(nameof(_options.ImageGalleryName), _options.ImageGalleryName);
+            ops.SetProperty(nameof(_options.SubscriptionId), _options.SubscriptionId.ToString());
+            ops.SetProperty(nameof(_options.ImageReplicationRegions), string.Join(", ", _options.ImageReplicationRegions.Select(r => r.Name)));
 
             _logger.Information($"Start importing VHD image from blob. imageName: {imageName}, imageVersion: {imageVersion}.");
 

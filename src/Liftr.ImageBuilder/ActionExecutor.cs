@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -196,6 +197,14 @@ namespace Microsoft.Liftr.ImageBuilder
             {
                 _logger.Information("Current correlation Id is: {correlationId}", TelemetryContext.GetOrGenerateCorrelationId());
                 _logger.Information("You can use correlation Id '{correlationId}' to query all the related ARM logs and Azure Image Builder logs.", TelemetryContext.GetOrGenerateCorrelationId());
+
+                operation.SetProperty(nameof(_options.ImageName), _options.ImageName);
+                operation.SetProperty(nameof(_options.ImageVersion), _options.ImageVersion);
+                operation.SetProperty(nameof(config.ImageGalleryName), config.ImageGalleryName);
+                operation.SetProperty(nameof(config.ResourceGroupName), config.ResourceGroupName);
+                operation.SetProperty(nameof(config.Location), config.Location.Name);
+                operation.SetProperty(nameof(config.SubscriptionId), config.SubscriptionId.ToString());
+                operation.SetProperty(nameof(config.ImageReplicationRegions), string.Join(", ", config.ImageReplicationRegions.Select(r => r.Name)));
 
                 try
                 {
