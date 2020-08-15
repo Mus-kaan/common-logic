@@ -26,7 +26,7 @@
         {
           "Location": "westus2",
           "DataBaseName": "vmdata200601",
-          "ComputeBaseName": "vmcom200701"
+          "ComputeBaseName": "vmcom200706"
         }
       ]
     }

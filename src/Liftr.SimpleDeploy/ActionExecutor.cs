@@ -404,13 +404,17 @@ namespace Microsoft.Liftr.SimpleDeploy
                             }
                             else
                             {
+                                var certNameList = targetOptions.OneCertCertificates.Select(kvp => kvp.Key).ToList();
+                                certNameList.Add(CertificateName.DefaultSSL);
+
                                 var vmss = await infra.CreateOrUpdateRegionalVMSSRGAsync(
                                     regionalNamingContext,
                                     regionalComputeOptions,
                                     targetOptions.VMSSConfigurations,
                                     kvClient,
                                     ipPool,
-                                    targetOptions.EnableVNet);
+                                    targetOptions.EnableVNet,
+                                    certNameList);
 
                                 if (SimpleDeployExtension.AfterProvisionRegionalVMSSResourcesAsync != null)
                                 {

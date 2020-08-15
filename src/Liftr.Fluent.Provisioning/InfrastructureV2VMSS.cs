@@ -18,13 +18,16 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 {
     public partial class InfrastructureV2
     {
+        private const string c_certDiskLocation = "/var/lib/waagent/Microsoft.Azure.KeyVault";
+
         public async Task<ProvisionedVMSSResources> CreateOrUpdateRegionalVMSSRGAsync(
             NamingContext namingContext,
             RegionalComputeOptions computeOptions,
             VMSSMachineInfo machineInfo,
             KeyVaultClient _kvClient,
             IPPoolManager ipPool,
-            bool enableVNet)
+            bool enableVNet,
+            IEnumerable<string> certificateNameList = null)
         {
             if (namingContext == null)
             {
@@ -56,6 +59,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             _logger.Information("VMSS machine type: {AKSMachineType}", machineInfo.VMSize);
             _logger.Information("VMSS machine count: {AKSMachineCount}", machineInfo.MachineCount);
             _logger.Information("VMSS image: {GalleryImageVersionId}", machineInfo.GalleryImageVersionId);
+
+            namingContext.Tags[nameof(machineInfo.GalleryImageVersionId)] = machineInfo.GalleryImageVersionId;
 
             var rgName = namingContext.ResourceGroupName(computeOptions.ComputeBaseName);
             var vmssName = namingContext.VMSSName(computeOptions.ComputeBaseName);
@@ -110,6 +115,27 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             {
                 sshUserName = (await globalKVValet.GetSecretAsync(SSHUserNameSecretName))?.Value ?? throw new InvalidOperationException("Cannot find ssh user name in key vault");
                 sshPublicKey = (await globalKVValet.GetSecretAsync(SSHPublicKeySecretName))?.Value ?? throw new InvalidOperationException("Cannot find ssh public key in key vault");
+            }
+
+            var certList = new List<string>();
+            if (certificateNameList != null && certificateNameList.Any())
+            {
+                using var regionalKVValet = new KeyVaultConcierge(provisionedResources.RegionalKeyVault.VaultUri, _kvClient, _logger);
+
+                foreach (var certName in certificateNameList)
+                {
+                    var bundle = await regionalKVValet.GetCertAsync(certName);
+                    if (bundle == null)
+                    {
+                        var ex = new InvalidOperationException($"Cannot find certificate with name '{certName}' in Key Vault '{provisionedResources.RegionalKeyVault.VaultUri}'.");
+                        _logger.Error(ex, ex.Message);
+                        throw ex;
+                    }
+
+                    certList.Add($"{provisionedResources.RegionalKeyVault.VaultUri}secrets/{certName}");
+                }
+
+                _logger.Information("Key vault VM extension managed certificate list: {@certList}", certList);
             }
 
             provisionedResources.Subnet = await liftrAzure.CreateNewSubnetAsync(provisionedResources.VNet, namingContext.SubnetName(computeOptions.ComputeBaseName));
@@ -246,8 +272,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             var vmSku = VMSSSkuHelper.ParseSkuString(machineInfo.VMSize);
 
-            _logger.Information($"Start creating VMSS with name '{vmssName}' and SKU '{machineInfo.VMSize}' ...");
-            provisionedResources.VMSS = await liftrAzure.FluentClient
+            var vmssCreatable = liftrAzure.FluentClient
                 .VirtualMachineScaleSets
                 .Define(vmssName)
                 .WithRegion(namingContext.Location)
@@ -265,8 +290,35 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 .WithCapacity(machineInfo.MachineCount)
                 .WithBootDiagnostics()
                 .WithExistingNetworkSecurityGroup(nsg)
-                .WithTags(tags)
-                .CreateAsync();
+                .WithTags(tags);
+
+            if (certList != null && certList.Count > 0)
+            {
+                // https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/key-vault-linux
+                var secretsManagementSettings = new Dictionary<string, object>()
+                {
+                    ["pollingIntervalInS"] = "600", // polling interval in seconds
+                    ["certificateStoreName"] = string.Empty, // It is ignored on Linux
+                    ["linkOnRenewal"] = false, // Not available on Linux e.g.: false
+                    ["certificateStoreLocation"] = c_certDiskLocation, // disk path where certificate is stored, default: "/var/lib/waagent/Microsoft.Azure.KeyVault"
+                    ["requireInitialSync"] = true, // initial synchronization of certificates e..g: true
+                    ["observedCertificates"] = certList, // list of KeyVault URIs representing monitored certificates, e.g.: "https://myvault.vault.azure.net/secrets/mycertificate"
+                };
+
+                vmssCreatable = vmssCreatable
+                    .DefineNewExtension("KVVMExtensionForLinux")
+                    .WithPublisher("Microsoft.Azure.KeyVault")
+                    .WithType("KeyVaultForLinux")
+                    .WithVersion("1.0")
+                    .WithMinorVersionAutoUpgrade()
+                    .WithPublicSetting("secretsManagementSettings", secretsManagementSettings)
+                    .Attach();
+
+                _logger.Information($"VMSS Key Vault extension is configured. It will automatically download the certificates to this location: '{c_certDiskLocation}', cert list: '{certificateNameList}'");
+            }
+
+            _logger.Information($"Start creating VMSS with name '{vmssName}', SKU '{machineInfo.VMSize}', image version '{machineInfo.GalleryImageVersionId}'...");
+            provisionedResources.VMSS = await vmssCreatable.CreateAsync();
 
             _logger.Information("Created VM Scale Set with Id {resourceId}", provisionedResources.VMSS.Id);
 
