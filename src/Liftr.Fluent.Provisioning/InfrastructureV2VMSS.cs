@@ -265,6 +265,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var tags = new Dictionary<string, string>(namingContext.Tags)
             {
                 ["ENV_" + nameof(ComputeTagMetadata.VaultEndpoint)] = provisionedResources.RegionalKeyVault.VaultUri,
+                ["ENV_VaultName"] = provisionedResources.RegionalKeyVault.Name,
                 ["ENV_" + nameof(ComputeTagMetadata.ASPNETCORE_ENVIRONMENT)] = namingContext.Environment.ToString(),
                 ["ENV_" + nameof(ComputeTagMetadata.DOTNET_ENVIRONMENT)] = namingContext.Environment.ToString(),
                 ["ENV_" + nameof(ComputeTagMetadata.GCS_REGION)] = namingContext.Location.Name,
