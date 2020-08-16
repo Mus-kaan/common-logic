@@ -1,6 +1,20 @@
 #!/bin/bash
 set -e
 
+installJQLibrary() {
+  echo "Checking jq ..."
+  set +e
+  jqInstalled="$(jq --version)"
+  set -e
+  if [ "$jqInstalled" = "" ]; then
+      echo "Installing jq ..."
+      apt-get update
+      apt-get install jq -y
+  else
+      echo "jq is already installed. Skip."
+  fi
+}
+
 echo "Starting restore dependency packages ..."
 SrcRoot="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 echo "SrcRoot $SrcRoot"
@@ -20,6 +34,10 @@ do
   echo "Finished dotnet restore $solution"
   echo "==========[Liftr]==========[https://aka.ms/liftr]==========[Liftr]==========[https://aka.ms/liftr]=========="
 done
+
+if [ -z ${LOGFORWARDER_SHOULD_SKIP_JQ_INSTALL+x} ]; then
+    installJQLibrary
+fi
 
 # download helm
 HelmTarUri="https://get.helm.sh/helm-v3.2.1-linux-amd64.tar.gz"
