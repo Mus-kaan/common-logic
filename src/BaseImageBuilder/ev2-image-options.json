@@ -48,10 +48,10 @@
           // The EV2 rollout caller's access token will be used to provision a resource group 'liftr-ev2-shell-<Location>-rg' in this subscription.
           // Meanwhile the caller token will be used create an ACI to run the EV2 shell extension.
           // The caller token also need MI assign access over the 'UserAssignedManagedIdentityResourceId' to assign the MI to the EV2 shell extension ACI.
-          "SubscriptionId": "d21a525e-7c86-486d-a79e-a4f3622f639a",
+          "SubscriptionId": "eebfbfdb-4167-49f6-be43-466a6709609f",
           // 2. Please make sure this identity has owner role over the resource group you specified in the configs file.
-          "UserAssignedManagedIdentityResourceId": "/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/5e-ev2-msi-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/5e-ev2-msi",
-          "UserAssignedManagedIdentityObjectId": "2de0ece1-7346-4dc1-9688-13f67d009795"
+          "UserAssignedManagedIdentityResourceId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/ms-ev2-msi-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/liftr-ev2-ms-msi",
+          "UserAssignedManagedIdentityObjectId": "bb8eb613-5ffd-4ece-b7c2-6821b19a69c2"
         }
       }
     }
