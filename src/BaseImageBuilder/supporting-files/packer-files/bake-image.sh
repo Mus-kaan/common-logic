@@ -34,6 +34,10 @@ sudo apt-get update
 sudo apt-get install dotnet-sdk-3.1 -y -q
 
 echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+echo "[bake-image.sh] Installing jq ..."
+sudo apt-get install jq -y
+
+echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
 echo "[bake-image.sh] Installing az cli ..."
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
