@@ -35,6 +35,25 @@
           }
         }
       ]
+    },
+    {
+      "ImageName": "ComDevSBI", // Name of the image, this will be used as the Shared Image Gallery image name.
+      "SourceImage": "U1804LTS", // Source base image. The generating VM image will be customized from this source image.
+      "Bake": {
+        "Name": "BakeComSBI", // [Optional] Name of the EV2 rollout step. This will be part of the rollout artifacts' name.
+        "ConfigurationPath": "configs/com-dev-sig-wus2.json", // Path to the configuration file. Each Cloud need its own configuration file.
+        "RunnerInformation": { // Define the Managed Identity used by the EV2 shell extension. https://ev2docs.azure.net/features/extensibility/shell/intro.html#managed-identity
+          "Location": "West US",
+          // 1. Please make sure the EV2 caller has access over the resource group 'liftr-ev2-shell-<Location>-rg' in this subscription. e.g. 'liftr-ev2-shell-westus-rg'
+          // The EV2 rollout caller's access token will be used to provision a resource group 'liftr-ev2-shell-<Location>-rg' in this subscription.
+          // Meanwhile the caller token will be used create an ACI to run the EV2 shell extension.
+          // The caller token also need MI assign access over the 'UserAssignedManagedIdentityResourceId' to assign the MI to the EV2 shell extension ACI.
+          "SubscriptionId": "d21a525e-7c86-486d-a79e-a4f3622f639a",
+          // 2. Please make sure this identity has owner role over the resource group you specified in the configs file.
+          "UserAssignedManagedIdentityResourceId": "/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/5e-ev2-msi-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/5e-ev2-msi",
+          "UserAssignedManagedIdentityObjectId": "2de0ece1-7346-4dc1-9688-13f67d009795"
+        }
+      }
     }
   ]
 }
