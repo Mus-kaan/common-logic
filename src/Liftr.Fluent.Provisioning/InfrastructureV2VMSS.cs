@@ -315,7 +315,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     .WithPublicSetting("secretsManagementSettings", secretsManagementSettings)
                     .Attach();
 
-                _logger.Information($"VMSS Key Vault extension is configured. It will automatically download the certificates to this location: '{c_certDiskLocation}', cert list: '{certificateNameList}'");
+                _logger.Information($"VMSS Key Vault extension is configured. It will automatically download the certificates to this location: '{c_certDiskLocation}', cert list: '{certificateNameList.ToJsonString()}'");
             }
 
             _logger.Information($"Start creating VMSS with name '{vmssName}', SKU '{machineInfo.VMSize}', image version '{machineInfo.GalleryImageVersionId}'...");
