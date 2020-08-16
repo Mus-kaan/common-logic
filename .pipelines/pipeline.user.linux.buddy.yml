@@ -2,10 +2,10 @@
 # https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki?pagePath=%2FCDPx%20%252D%20Cross%252DPlatform%20Cloud%20Delivery%20Pipeline%2FUsage%2FPipeline%20Spec%20YAML%20Concepts%2FAnnotated%20Example&wikiVersion=GBwikiMaster&pageId=302
 
 version:
-  name: 'Liftr.Common'
-  major: 0                                                              # The major version number.
-  minor: 6                                                              # The minor version number
-  system: 'buildrevision'
+  name: "Liftr.Common"
+  major: 0 # The major version number.
+  minor: 6 # The minor version number
+  system: "revisioncounter"
 
 test:
   commands:
