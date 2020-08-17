@@ -17,14 +17,14 @@ namespace Microsoft.Liftr.DataSource.Mongo
         public MarketplaceSaasResourceEntity(
             MarketplaceSubscription marketplaceSubscription,
             string name,
-            string plan,
+            string planId,
             string billingTermId,
             BillingTermTypes billingTermType,
             int? quantity = null)
         {
             MarketplaceSubscription = marketplaceSubscription;
             Name = name;
-            Plan = plan;
+            PlanId = planId;
             BillingTermId = billingTermId;
             BillingTermType = billingTermType;
             Quantity = quantity;
@@ -37,8 +37,14 @@ namespace Microsoft.Liftr.DataSource.Mongo
         [BsonElement("name")]
         public string Name { get; set; }
 
-        [BsonElement("plan")]
-        public string Plan { get; set; }
+        [BsonElement("planId")]
+        public string PlanId { get; set; }
+
+        [BsonElement("offerId")]
+        public string OfferId { get; set; }
+
+        [BsonElement("publisherId")]
+        public string PublisherId { get; set; }
 
         [BsonElement("bill_tid")]
         public string BillingTermId { get; set; }

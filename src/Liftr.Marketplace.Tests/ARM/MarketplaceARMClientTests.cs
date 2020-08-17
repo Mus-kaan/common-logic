@@ -77,9 +77,9 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
             _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _logger, httpClient, () => Task.FromResult("mockToken"));
             var armClient = new MarketplaceARMClient(_logger, _marketplaceRestClient);
 
-            var createdResourceId = await armClient.CreateSaaSResourceAsync(marketplaceOfferDetail, _marketplaceRequestMetadata);
+            var createdResource = await armClient.CreateSaaSResourceAsync(marketplaceOfferDetail, _marketplaceRequestMetadata);
 
-            Assert.Equal(createdResourceId, saasResource.Id);
+            Assert.Equal(createdResource.Id, saasResource.Id);
         }
 
         [Fact]
@@ -103,9 +103,9 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
             _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _logger, httpClient, () => Task.FromResult("mockToken"));
             var armClient = new MarketplaceARMClient(_logger, _marketplaceRestClient);
 
-            var createdResourceId = await armClient.CreateSaaSResourceAsync(marketplaceOfferDetail, _marketplaceRequestMetadata);
+            var createdResource = await armClient.CreateSaaSResourceAsync(marketplaceOfferDetail, _marketplaceRequestMetadata);
 
-            Assert.Equal(createdResourceId, saasResource.Id);
+            Assert.Equal(createdResource.Id, saasResource.Id);
         }
 
         /* [Fact(Skip = "Not implemented")]

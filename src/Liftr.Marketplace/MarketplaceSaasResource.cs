@@ -34,7 +34,7 @@ namespace Microsoft.Liftr.Marketplace
             }
 
             MarketplaceSubscription = marketplaceSubscription ?? throw new System.ArgumentNullException(nameof(marketplaceSubscription));
-            Plan = plan;
+            PlanId = plan;
             BillingTermId = billingTermId;
             BillingTermType = billingTermType;
             Quantity = quantity ?? throw new System.ArgumentNullException(nameof(quantity));
@@ -45,7 +45,7 @@ namespace Microsoft.Liftr.Marketplace
 
         public MarketplaceSubscription MarketplaceSubscription { get; set; }
 
-        public string Plan { get; set; }
+        public string PlanId { get; set; }
 
         public int? Quantity { get; set; }
 

@@ -20,7 +20,7 @@ namespace Microsoft.Liftr.Contracts.Marketplace
 
         MarketplaceSubscription MarketplaceSubscription { get; set; }
 
-        string Plan { get; set; }
+        string PlanId { get; set; }
 
         string BillingTermId { get; set; }
 

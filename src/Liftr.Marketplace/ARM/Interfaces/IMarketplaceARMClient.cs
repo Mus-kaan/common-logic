@@ -14,8 +14,8 @@ namespace Microsoft.Liftr.Marketplace.ARM.Interfaces
         /// <summary>
         /// Creates a Marketplace Saas resource
         /// </summary>
-        /// <returns>Resource Id of the created saas resource</returns>
-        Task<string> CreateSaaSResourceAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata);
+        /// <returns>Created Saas resource</returns>
+        Task<SaasCreationResponse> CreateSaaSResourceAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata);
 
         /// <summary>
         /// Fetch access token for the given market place resource id.

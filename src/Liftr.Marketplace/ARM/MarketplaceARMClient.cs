@@ -32,7 +32,7 @@ namespace Microsoft.Liftr.Marketplace.ARM
             _marketplaceRestClient = marketplaceRestClient ?? throw new ArgumentNullException(nameof(marketplaceRestClient));
         }
 
-        public async Task<string> CreateSaaSResourceAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata)
+        public async Task<SaasCreationResponse> CreateSaaSResourceAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata)
         {
             if (saasResourceProperties is null || !saasResourceProperties.IsValid())
             {
@@ -50,8 +50,8 @@ namespace Microsoft.Liftr.Marketplace.ARM
                 var additionalHeaders = GetAdditionalMarketplaceHeaders(requestMetadata);
                 var json = saasResourceProperties.ToJObject();
                 var createdResource = await _marketplaceRestClient.SendRequestWithPollingAsync<SaasCreationResponse>(HttpMethod.Put, ResourceTypePath, additionalHeaders, json);
-                _logger.Information($"Marketplace resource has been successfully created. Id: {createdResource.Id} Name: {createdResource.Name}");
-                return createdResource.Id;
+                _logger.Information("Marketplace resource has been successfully created. {@resource}", createdResource);
+                return createdResource;
             }
             catch (MarketplaceHttpException ex)
             {

@@ -70,7 +70,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
                 Assert.Equal(rid.ToUpperInvariant(), retrieved.ResourceId);
                 Assert.Equal(marketplaceSubscription.Id, retrieved.MarketplaceSaasResource.MarketplaceSubscription.Id);
                 Assert.Equal(saasResource.Name, retrieved.MarketplaceSaasResource.Name);
-                Assert.Equal(saasResource.Plan, retrieved.MarketplaceSaasResource.Plan);
+                Assert.Equal(saasResource.PlanId, retrieved.MarketplaceSaasResource.PlanId);
                 Assert.Equal(tenantId, retrieved.TenantId);
             }
         }

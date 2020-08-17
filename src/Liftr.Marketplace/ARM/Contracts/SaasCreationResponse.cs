@@ -3,16 +3,35 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Marketplace.Contracts;
+using Newtonsoft.Json;
 
 namespace Microsoft.Liftr.Marketplace.ARM.Contracts
 {
 #nullable disable
 
+    // https://msazure.visualstudio.com/One/_git/AAPT-SPZA?path=%2Fsrc%2Fsource%2FMicrosoft.MarketPlace.Common.Models%2FSaasV2%2FSubscriptionV2.cs&_a=contents&version=GBmaster
     public class SaasCreationResponse : MarketplaceAsyncOperationResponse
     {
+        [JsonProperty("name")]
         public string Name { get; set; }
 
+        [JsonProperty("id")]
         public string Id { get; set; }
+
+        [JsonProperty("planId")]
+        public string PlanId { get; set; }
+
+        [JsonProperty("offerId")]
+        public string OfferId { get; set; }
+
+        [JsonProperty("publisherId")]
+        public string PublisherId { get; set; }
+
+        [JsonProperty("beneficiary")]
+        public Beneficiary Beneficiary { get; set; }
+
+        [JsonProperty("term")]
+        public SubscriptionTerm Term { get; set; }
 
         #region sampleresponse
         /* Sample response
@@ -68,5 +87,31 @@ namespace Microsoft.Liftr.Marketplace.ARM.Contracts
                     }
          */
         #endregion
+    }
+
+    // https://msazure.visualstudio.com/One/_git/AAPT-SPZA?path=%2Fsrc%2Fsource%2FMicrosoft.MarketPlace.Common.Models%2FAadEntity.cs&_a=contents&version=GBmaster
+    public class Beneficiary
+    {
+        [JsonProperty("emailId")]
+        public string EmailId { get; set; }
+
+        [JsonProperty("objectId")]
+        public string ObjectId { get; set; }
+
+        [JsonProperty("tenantId")]
+        public string TenantId { get; set; }
+
+        [JsonProperty("puid")]
+        public string Puid { get; set; }
+    }
+
+    // https://msazure.visualstudio.com/One/_git/AAPT-SPZA?path=%2Fsrc%2Fsource%2FMicrosoft.MarketPlace.Common.Models%2FSaasV2%2FSubscriptionTerm.cs&_a=contents&version=GBmaster
+    public class SubscriptionTerm
+    {
+        /// <summary>
+        /// Gets or sets the term unit.
+        /// </summary>
+        [JsonProperty("termUnit")]
+        public string TermUnit { get; set; }
     }
 }

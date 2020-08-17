@@ -277,6 +277,9 @@ namespace Microsoft.Liftr.Marketplace
                     case OperationStatus.Succeeded:
                         var message = $"Async operation has beeen successful. Operation Id : {resultLocation}";
                         _logger.Information(message);
+
+                        // to do: temporarily print the content
+                        _logger.Information("Returned content : {@content}", await asyncOperationResponse.Content.ReadAsStringAsync());
                         return (await asyncOperationResponse.Content.ReadAsStringAsync()).FromJson<T>();
 
                     default:
