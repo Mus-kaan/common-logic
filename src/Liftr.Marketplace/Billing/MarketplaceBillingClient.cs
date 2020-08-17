@@ -6,6 +6,7 @@ using Flurl;
 using Microsoft.Liftr.Marketplace.Billing.Contracts;
 using Microsoft.Liftr.Marketplace.Billing.Models;
 using Microsoft.Liftr.Marketplace.Billing.Utils;
+using Microsoft.Liftr.Marketplace.Saas;
 using Microsoft.Liftr.Marketplace.Saas.Options;
 using Newtonsoft.Json;
 using Serilog;
@@ -50,7 +51,7 @@ namespace Microsoft.Liftr.Marketplace.Billing
         {
             var requestId = Guid.NewGuid(); // Every request should have a different requestId
             var accessToken = await _authenticationTokenCallback();
-            var requestPath = Constants.UsageEventPath;
+            var requestPath = MarketplaceUrlHelper.GetRequestPath(MarketplaceEnum.BillingUsageEvent);
             using var request = CreateRequestWithHeaders(HttpMethod.Post, requestPath, requestId, accessToken);
             var stringContent = JsonConvert.SerializeObject(marketplaceUsageEventRequest);
             request.Content = new StringContent(stringContent, Encoding.UTF8, "application/json");
@@ -77,7 +78,7 @@ namespace Microsoft.Liftr.Marketplace.Billing
         {
             var requestId = Guid.NewGuid(); // Every request should have a different requestId
             var accessToken = await _authenticationTokenCallback();
-            var requestPath = Constants.BatchUsageEventPath;
+            var requestPath = MarketplaceUrlHelper.GetRequestPath(MarketplaceEnum.BillingBatchUsageEvent);
             using var request = CreateRequestWithHeaders(HttpMethod.Post, requestPath, requestId, accessToken);
             var stringContent = JsonConvert.SerializeObject(marketplaceBatchUsageEventRequest);
             request.Content = new StringContent(stringContent, Encoding.UTF8, "application/json");

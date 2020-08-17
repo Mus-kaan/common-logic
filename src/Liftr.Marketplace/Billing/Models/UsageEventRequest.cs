@@ -97,7 +97,7 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
                     Details = validationDetails,
                     RawResponse = JsonConvert.SerializeObject(this),
                     Success = false,
-                    Target = Constants.UsageEventPath,
+                    Target = MarketplaceConstants.BillingUsageEventPath,
                 };
             }
             else

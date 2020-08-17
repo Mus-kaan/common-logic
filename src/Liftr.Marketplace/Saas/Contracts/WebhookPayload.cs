@@ -34,30 +34,36 @@ namespace Microsoft.Liftr.Marketplace.Saas.Contracts
     /// </summary>
     public class WebhookPayload
     {
+        [JsonProperty("action")]
         public WebhookAction Action { get; set; }
 
+        [JsonProperty("activityId")]
         public Guid ActivityId { get; set; }
 
+        [JsonProperty("offerId")]
         public string OfferId { get; set; }
 
         // Operation Id is presented as Id property on the json payload
-        [JsonProperty("Id")]
+        [JsonProperty("id")]
         public Guid OperationId { get; set; }
 
+        [JsonProperty("planId")]
         public string PlanId { get; set; }
 
+        [JsonProperty("publisherId")]
         public string PublisherId { get; set; }
 
+        [JsonProperty("quantity")]
         public int Quantity { get; set; }
 
+        [JsonProperty("status")]
         public OperationStatus Status { get; set; }
 
         [JsonProperty("subscriptionId")]
         [JsonConverter(typeof(MarketplaceSubscriptionConverter))]
         public MarketplaceSubscription MarketplaceSubscription { get; set; }
 
+        [JsonProperty("timeStamp")]
         public DateTimeOffset TimeStamp { get; set; }
-
-        public string RawPayload { get; set; }
     }
 }

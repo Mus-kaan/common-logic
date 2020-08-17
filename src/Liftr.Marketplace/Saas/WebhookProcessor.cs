@@ -18,18 +18,18 @@ namespace Microsoft.Liftr.Marketplace.Saas
     /// </summary>
     public class WebhookProcessor : IWebhookProcessor
     {
-        private readonly IMarketplaceFulfillmentClient _fulfillmentClient;
+        private readonly IWebhookMarketplaceCaller _marketplaceCaller;
         private readonly IWebhookHandler _webhookHandler;
         private readonly ILogger _logger;
 
         public WebhookProcessor(
-            IMarketplaceFulfillmentClient fulfillmentClient,
+            IWebhookMarketplaceCaller marketplaceCaller,
             IWebhookHandler webhookHandler,
             ILogger logger)
         {
-            _fulfillmentClient = fulfillmentClient;
-            _webhookHandler = webhookHandler;
-            _logger = logger;
+            _marketplaceCaller = marketplaceCaller ?? throw new ArgumentNullException(nameof(marketplaceCaller));
+            _webhookHandler = webhookHandler ?? throw new ArgumentNullException(nameof(webhookHandler));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -50,32 +50,70 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 throw new ArgumentNullException(nameof(payload));
             }
 
+            if (payload.OperationId == Guid.Empty)
+            {
+                throw new FormatException("OperationId Guid is not in required Format");
+            }
+
+            if (!Enum.IsDefined(typeof(WebhookAction), payload.Action))
+            {
+                throw new InvalidOperationException("Invalid Action type");
+            }
+
+            if (payload.MarketplaceSubscription is null)
+            {
+                throw new ArgumentNullException(nameof(payload));
+            }
+
             try
             {
-                // Since webhook endpoint is unauthenticated, call the operations api to confirm that the operation has been initaited from the marketplace
-                var operation = await _fulfillmentClient.GetOperationAsync(payload.MarketplaceSubscription, payload.OperationId, cancellationToken);
+                // Since webhook endpoint is unauthorized, call the operations api to confirm that the operation has been initaited from the marketplace
+                var operation = await _marketplaceCaller.AuthorizeWebhookWithMarketplaceAsync(payload.MarketplaceSubscription, payload.OperationId, cancellationToken);
                 _logger.Information("Successfully retrieved details for operation {operation} for webhook action {action} on Subsciption:{subscriptionId}", payload.OperationId, payload.Action, payload.MarketplaceSubscription);
             }
-            catch (MarketplaceHttpException ex)
+            catch (MarketplaceException ex)
             {
-                _logger.Error(ex, "Failed to get operation for operation id: {operationId}. Cannot proceed with processing the webhook.", payload.OperationId);
-                throw;
+                var errorMessage = $"Failed to get operation for operation id: {payload.OperationId}. Cannot proceed with processing the webhook with Exception {ex.Message}";
+                _logger.Error(ex, errorMessage);
+                throw new InvalidOperationException(errorMessage, ex);
             }
 
-            switch (payload.Action)
+            try
             {
-                case WebhookAction.Unsubscribe:
-                    var operationStatus = await _webhookHandler.ProcessDeleteAsync(payload.MarketplaceSubscription);
+                OperationUpdateStatus operationStatus;
+                switch (payload.Action)
+                {
+                    case WebhookAction.Unsubscribe:
+                        operationStatus = await _webhookHandler.ProcessDeleteAsync(payload);
+                        break;
+                    case WebhookAction.ChangePlan:
+                        operationStatus = await _webhookHandler.ProcessChangePlanAsync(payload);
+                        break;
+                    case WebhookAction.ChangeQuantity:
+                        operationStatus = await _webhookHandler.ProcessChangeQuantityAsync(payload);
+                        break;
+                    case WebhookAction.Suspend:
+                        operationStatus = await _webhookHandler.ProcessSuspendAsync(payload);
+                        break;
+                    case WebhookAction.Reinstate:
+                        operationStatus = await _webhookHandler.ProcessReinstateAsync(payload);
+                        break;
+                    default:
+                        _logger.Error("Action {action} is not supported", payload.Action, payload.MarketplaceSubscription);
+                        throw new MarketplaceException($"Action {payload.Action} is not supported");
+                }
 
-                    // Once the delete is successful, patch the operation
-                    await _fulfillmentClient.UpdateOperationAsync(
-                        payload.MarketplaceSubscription,
-                        payload.OperationId,
-                        new OperationUpdate(payload.PlanId, payload.Quantity, operationStatus));
-                    break;
-                default:
-                    _logger.Error("Action {action} is not supported", payload.Action, payload.MarketplaceSubscription);
-                    throw new MarketplaceHttpException($"Action {payload.Action} is not supported");
+                // After Success/Failure, Patch the operation to Marketplace
+                await _marketplaceCaller.UpdateMarketplaceAsync(
+                    payload.MarketplaceSubscription,
+                    payload.OperationId,
+                    new OperationUpdate(payload.PlanId, payload.Quantity, operationStatus));
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"Failed to Handle Webhook Notification. Exception is ex: {ex.Message}";
+                _logger.Error(ex, errorMessage);
+                throw new MarketplaceException(errorMessage, ex);
             }
         }
     }

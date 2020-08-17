@@ -75,7 +75,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
                 PlanId = "Basic",
             };
 
-            var expectedResponse = MockMeteredBillingBadRequestResponse("One or more error occured.", "ReosourceId is invalid.", Constants.UsageEventPath, "ResourceId");
+            var expectedResponse = MockMeteredBillingBadRequestResponse("One or more error occured.", "ReosourceId is invalid.", MarketplaceConstants.BillingUsageEventPath, "ResourceId");
 
             using var handler = new MockHttpMessageHandler(expectedResponse);
             using var httpClient = new HttpClient(handler, false);
@@ -190,7 +190,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
                 },
             };
 
-            var expectedResponse = MockMeteredBillingBadRequestResponse("One or more error occured.", "ReosourceId is invalid.", Constants.UsageEventPath, "ResourceId");
+            var expectedResponse = MockMeteredBillingBadRequestResponse("One or more error occured.", "ReosourceId is invalid.", MarketplaceConstants.BillingBatchUsageEventPath, "ResourceId");
 
             using var handler = new MockHttpMessageHandler(expectedResponse);
             using var httpClient = new HttpClient(handler, false);
