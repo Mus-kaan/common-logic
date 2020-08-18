@@ -47,7 +47,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
             var rid = "/subscriptions/b0a321d2-3073-44f0-b012-6e60db53ae22/resourceGroups/ngx-test-sbi0920-eus-rg/providers/Microsoft.Storage/storageAccounts/stngxtestsbi0920eus";
             var marketplaceSubscription = new MarketplaceSubscription(Guid.NewGuid());
             var tenantId = "testTenantId";
-            var saasResource = new MarketplaceSaasResourceEntity(marketplaceSubscription, "test-name", "planid", "hjdtn7tfnxcy", BillingTermTypes.Monthly);
+            var saasResource = new MarketplaceSaasResourceEntity(marketplaceSubscription, "test-name", "planid", "offerId", "publisherId", "hjdtn7tfnxcy", BillingTermTypes.Monthly, new SaasBeneficiary() { TenantId = "tenantId" });
 
             var marketplaceResourceEntity = new MarketplaceResourceContainerEntity(saasResource, rid, tenantId);
             var entity1 = await dataSource.AddAsync(marketplaceResourceEntity);
