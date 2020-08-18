@@ -27,6 +27,11 @@ namespace Microsoft.Liftr.Contracts
         U1604LTS,
 
         /// <summary>
+        /// Azure Linux Secure Base Image Ubuntu 1604 FIPS
+        /// </summary>
+        U1604FIPS,
+
+        /// <summary>
         /// Azure Linux Secure Base Image Ubuntu 1804
         /// </summary>
         U1804LTS,
@@ -37,6 +42,7 @@ namespace Microsoft.Liftr.Contracts
         public static bool IsPlatformImage(this SourceImageType type)
         {
             if (type == SourceImageType.U1604LTS ||
+                type == SourceImageType.U1604FIPS ||
                 type == SourceImageType.U1804LTS)
             {
                 return false;

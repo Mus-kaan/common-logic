@@ -181,7 +181,7 @@ namespace Microsoft.Liftr.ImageBuilder
 
                 if (_options.SourceImage == null)
                 {
-                    var ex = new InvalidOperationException("Please make sure you provided Source image type, one of: [WindowsServer2016Datacenter, WindowsServer2016DatacenterCore, WindowsServer2016DatacenterContainers, WindowsServer2019Datacenter, WindowsServer2019DatacenterCore, WindowsServer2019DatacenterContainers, U1604LTS, U1804LTS]");
+                    var ex = new InvalidOperationException("Please make sure you provided Source image type, one of: [WindowsServer2016Datacenter, WindowsServer2016DatacenterCore, WindowsServer2016DatacenterContainers, WindowsServer2019Datacenter, WindowsServer2019DatacenterCore, WindowsServer2019DatacenterContainers, U1604LTS, U1604FIPS, U1804LTS]");
                     _logger.Fatal(ex.Message);
                     throw ex;
                 }

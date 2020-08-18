@@ -4,6 +4,10 @@
       "commandName": "Project",
       "commandLineArgs": "-f configs\\ms-test-sig-eastus.json --srcImg U1804LTS -n 5ETestImg -v 1.5.120 --artifactPath configs\\packer-files-ub18.zip --authFile my.azureauth-ms.auth.json"
     },
+    "ms-fips-linux-img-test": {
+      "commandName": "Project",
+      "commandLineArgs": "-f configs\\ms-test-sig-eastus.json --srcImg U1604FIPS -n 5ETestImgFIPS -v 1.5.120 --artifactPath configs\\packer-files-ub18.zip --authFile my.azureauth-ms.auth.json"
+    },
     "vanilla-ubuntu-img-test": {
       "commandName": "Project",
       "commandLineArgs": "-f configs\\ms-vanilla-ub-test-sig-eastus.json --srcImg UbuntuServer1804 -n 5EVanUB18 -v 1.5.120 --artifactPath configs\\packer-files-ub18.zip --authFile my.azureauth-ms.auth.json"

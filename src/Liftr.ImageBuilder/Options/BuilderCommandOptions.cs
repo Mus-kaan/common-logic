@@ -30,7 +30,7 @@ namespace Microsoft.Liftr.ImageBuilder
         [Option('v', "imageVersion", Required = true, HelpText = "The generating Shared Image Gallery Image Version Name, e.g. '0.9.2326'")]
         public string ImageVersion { get; set; }
 
-        [Option("srcImg", Required = false, HelpText = "Source image type, one of: [ UbuntuServer1804, RedHat7LVM, CentOS, WindowsServer2016Datacenter, WindowsServer2016DatacenterCore, WindowsServer2016DatacenterContainers, WindowsServer2019Datacenter, WindowsServer2019DatacenterCore, WindowsServer2019DatacenterContainers, U1604LTS, U1804LTS ]")]
+        [Option("srcImg", Required = false, HelpText = "Source image type, one of: [ UbuntuServer1804, RedHat7LVM, CentOS, WindowsServer2016Datacenter, WindowsServer2016DatacenterCore, WindowsServer2016DatacenterContainers, WindowsServer2019Datacenter, WindowsServer2019DatacenterCore, WindowsServer2019DatacenterContainers, U1604LTS, U1604FIPS, U1804LTS ]")]
         public SourceImageType? SourceImage { get; set; } = null;
 
         [Option("cloud", Required = false, HelpText = "Azure cloud type, one of: [ Public, DogFood, Fairfax, Mooncake, USNat, USSec ]")]

@@ -115,13 +115,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 (var copiedVHD, var meta) = await _artifactStore.CopyVHDToImportAsync(vhdSAS, metaSAS, imageName, imageVersion);
                 var tags = meta.GenerateTags();
 
-                bool isLinux = true;
-                if (meta.SourceImageType != SourceImageType.U1604LTS &&
-                    meta.SourceImageType != SourceImageType.U1804LTS)
-                {
-                    isLinux = false;
-                }
-
+                bool isLinux = !meta.SourceImageType.IsWindows();
                 var customVMImgName = $"{imageName}-{imageVersion}";
                 var customImage = await galleryClient.CreateCustomImageFromVHDAsync(az.FluentClient, _options.Location, _options.ResourceGroupName, customVMImgName, copiedVHD, isLinux, tags);
 
