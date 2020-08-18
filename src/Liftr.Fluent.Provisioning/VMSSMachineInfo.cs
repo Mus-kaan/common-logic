@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts;
-using System;
 
 namespace Microsoft.Liftr.Fluent.Provisioning
 {
@@ -19,7 +18,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         {
             if (MachineCount < 1)
             {
-                throw new InvalidOperationException($"{nameof(MachineCount)} should >= 1.");
+                throw new InvalidHostingOptionException($"{nameof(MachineCount)} should >= 1.");
             }
 
             VMSSSkuHelper.ParseSkuString(VMSize);

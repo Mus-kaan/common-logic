@@ -63,6 +63,19 @@ namespace Microsoft.Liftr.Contracts.Tests
         }
 
         [Fact]
+        public void CanParse3PartResourceId()
+        {
+            string resourceIdString = "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/LiftrComDevImgRG/providers/Microsoft.Compute/galleries/LiftrComDevSIG/images/ComDevSBI/versions/0.6.13241130";
+            var rid = new ResourceId(resourceIdString);
+
+            Assert.True(rid.IsFullResourceId);
+            Assert.Equal(resourceIdString, rid.ToString());
+            Assert.Equal("eebfbfdb-4167-49f6-be43-466a6709609f", rid.SubscriptionId);
+            Assert.Equal("images", rid.ChildResourceType);
+            Assert.Equal("ComDevSBI", rid.ChildResourceName);
+        }
+
+        [Fact]
         public void CanParseResourceUri()
         {
             string resourceUri = "https://portal.azure.com/?feature.customportal=false#@microsoft.onmicrosoft.com/resource/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/providers/Microsoft.Compute/availabilitySets/AvSet";

@@ -411,6 +411,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                                     regionalNamingContext,
                                     regionalComputeOptions,
                                     targetOptions.VMSSConfigurations,
+                                    targetOptions.Geneva,
                                     kvClient,
                                     ipPool,
                                     targetOptions.EnableVNet,

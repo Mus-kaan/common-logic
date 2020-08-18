@@ -18,6 +18,12 @@
         "MachineCount": 1,
         "GalleryImageVersionId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/LiftrComDevImgRG/providers/Microsoft.Compute/galleries/LiftrComDevSIG/images/ComDevSBI/versions/0.6.13241130"
       },
+      "Geneva": {
+        "MONITORING_GCS_ENVIRONMENT": "Test",
+        "MONITORING_GCS_ACCOUNT": "LiftrDev",
+        "MONITORING_GCS_NAMESPACE": "LiftrDev",
+        "MONITORING_CONFIG_VERSION": "26.0"
+      },
       "Global": {
         "Location": "centralus",
         "BaseName": "gbl200801"
@@ -42,6 +48,12 @@
         "VMSize": "Standard_D4s_v3",
         "MachineCount": 1,
         "GalleryImageVersionId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/LiftrComDevImgRG/providers/Microsoft.Compute/galleries/LiftrComDevSIG/images/ComDevSBI/versions/0.6.13241130"
+      },
+      "Geneva": {
+        "MONITORING_GCS_ENVIRONMENT": "Test",
+        "MONITORING_GCS_ACCOUNT": "LiftrDev",
+        "MONITORING_GCS_NAMESPACE": "LiftrDev",
+        "MONITORING_CONFIG_VERSION": "26.0"
       },
       "Global": {
         "Location": "centralus",

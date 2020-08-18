@@ -36,5 +36,11 @@
     "SubjectAlternativeNames": [
       "antares-mds-agent.geneva.keyvault.liftr-dev.net"
     ]
+  },
+  "Geneva": {
+    "MONITORING_GCS_ENVIRONMENT": "Test",
+    "MONITORING_GCS_ACCOUNT": "LiftrDev",
+    "MONITORING_GCS_NAMESPACE": "LiftrDev",
+    "MONITORING_CONFIG_VERSION": "26"
   }
 }

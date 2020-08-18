@@ -306,3 +306,8 @@ out-ev2/
 out-ev2-vmss/
 out-ev2-base-image/
 .docker-images/
+
+# Image builder scripts
+image-builder/packer-files/startup/mdsd
+image-builder/packer-files/startup/vm-global.env
+image-builder/packer-files/startup/vault-name.txt

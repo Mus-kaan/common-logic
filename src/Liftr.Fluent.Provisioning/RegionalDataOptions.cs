@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -38,39 +37,39 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         {
             if (DBSupport && string.IsNullOrEmpty(ActiveDBKeyName))
             {
-                throw new InvalidOperationException($"{nameof(ActiveDBKeyName)} should not be null.");
+                throw new InvalidHostingOptionException($"{nameof(ActiveDBKeyName)} should not be null.");
             }
 
             if (string.IsNullOrEmpty(DomainName))
             {
-                throw new InvalidOperationException($"{nameof(DomainName)} should not be null.");
+                throw new InvalidHostingOptionException($"{nameof(DomainName)} should not be null.");
             }
 
             if (string.IsNullOrEmpty(DNSZoneId))
             {
-                throw new InvalidOperationException($"{nameof(DNSZoneId)} should not be null.");
+                throw new InvalidHostingOptionException($"{nameof(DNSZoneId)} should not be null.");
             }
 
             if (string.IsNullOrEmpty(SecretPrefix))
             {
-                throw new InvalidOperationException($"{nameof(SecretPrefix)} should not be null.");
+                throw new InvalidHostingOptionException($"{nameof(SecretPrefix)} should not be null.");
             }
 
             if (string.IsNullOrEmpty(LogAnalyticsWorkspaceId))
             {
-                throw new InvalidOperationException($"{nameof(LogAnalyticsWorkspaceId)} should not be null.");
+                throw new InvalidHostingOptionException($"{nameof(LogAnalyticsWorkspaceId)} should not be null.");
             }
 
             if (DataPlaneStorageCountPerSubscription < 0)
             {
-                throw new InvalidOperationException($"{DataPlaneStorageCountPerSubscription} should not be non-negative.");
+                throw new InvalidHostingOptionException($"{DataPlaneStorageCountPerSubscription} should not be non-negative.");
             }
 
             if (DataPlaneStorageCountPerSubscription > 0)
             {
                 if (DataPlaneSubscriptions == null || !DataPlaneSubscriptions.Any())
                 {
-                    throw new InvalidOperationException("data plane Subscriptions cannot be empty.");
+                    throw new InvalidHostingOptionException("data plane Subscriptions cannot be empty.");
                 }
             }
 
@@ -83,7 +82,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
             else
             {
-                throw new InvalidOperationException($"{nameof(ActiveDBKeyName)} must be one of the following: 'Primary MongoDB Connection String', 'Secondary MongoDB Connection String', 'Primary Read-Only MongoDB Connection String', 'Secondary Read-Only MongoDB Connection String'.");
+                throw new InvalidHostingOptionException($"{nameof(ActiveDBKeyName)} must be one of the following: 'Primary MongoDB Connection String', 'Secondary MongoDB Connection String', 'Primary Read-Only MongoDB Connection String', 'Secondary Read-Only MongoDB Connection String'.");
             }
         }
     }

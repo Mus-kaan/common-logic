@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Liftr.SimpleDeploy
+namespace Microsoft.Liftr.Fluent.Provisioning
 {
     public class InvalidHostingOptionException : Exception
     {

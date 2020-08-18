@@ -5,7 +5,6 @@
 using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Liftr.Fluent.Contracts;
 using Newtonsoft.Json;
-using System;
 
 namespace Microsoft.Liftr.Fluent.Provisioning
 {
@@ -20,12 +19,12 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         {
             if (AKSMachineCount < 3)
             {
-                throw new InvalidOperationException($"{nameof(AKSMachineCount)} should >= 3.");
+                throw new InvalidHostingOptionException($"{nameof(AKSMachineCount)} should >= 3.");
             }
 
             if (AKSMachineType == null)
             {
-                throw new InvalidOperationException($"{nameof(AKSMachineType)} is not valid.");
+                throw new InvalidHostingOptionException($"{nameof(AKSMachineType)} is not valid.");
             }
         }
     }

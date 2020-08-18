@@ -6,6 +6,7 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.Compute.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Network.Fluent.Models;
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.KeyVault;
 using Microsoft.Liftr.Utilities;
@@ -24,6 +25,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             NamingContext namingContext,
             RegionalComputeOptions computeOptions,
             VMSSMachineInfo machineInfo,
+            GenevaOptions genevaOptions,
             KeyVaultClient _kvClient,
             IPPoolManager ipPool,
             bool enableVNet,
@@ -48,6 +50,13 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             {
                 throw new ArgumentNullException(nameof(ipPool));
             }
+
+            if (genevaOptions == null)
+            {
+                throw new ArgumentNullException(nameof(genevaOptions));
+            }
+
+            genevaOptions.CheckValid();
 
             ProvisionedVMSSResources provisionedResources = new ProvisionedVMSSResources();
 
@@ -177,9 +186,30 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             provisionedResources.VMSS = await liftrAzure.FluentClient.VirtualMachineScaleSets.GetByResourceGroupAsync(rgName, vmssName);
 
+            var imgVersionId = new ResourceId(machineInfo.GalleryImageVersionId);
+
+            // We need to set the customization information in the VMSS tags.
+            // Within the VMSS instance, the application can retrieve those information from the instance Metadata service.
+            var tags = new Dictionary<string, string>(namingContext.Tags)
+            {
+                ["ENV_" + nameof(ComputeTagMetadata.VaultEndpoint)] = provisionedResources.RegionalKeyVault.VaultUri,
+                ["ENV_VaultName"] = provisionedResources.RegionalKeyVault.Name,
+                ["ENV_" + nameof(ComputeTagMetadata.ASPNETCORE_ENVIRONMENT)] = namingContext.Environment.ToString(),
+                ["ENV_" + nameof(ComputeTagMetadata.DOTNET_ENVIRONMENT)] = namingContext.Environment.ToString(),
+                ["ENV_" + nameof(ComputeTagMetadata.GCS_REGION)] = namingContext.Location.Name,
+                ["ENV_MONITORING_GCS_REGION"] = namingContext.Location.Name,
+                ["ENV_" + nameof(genevaOptions.MONITORING_GCS_ENVIRONMENT)] = genevaOptions.MONITORING_GCS_ENVIRONMENT,
+                ["ENV_" + nameof(genevaOptions.MONITORING_GCS_ACCOUNT)] = genevaOptions.MONITORING_GCS_ACCOUNT,
+                ["ENV_" + nameof(genevaOptions.MONITORING_GCS_NAMESPACE)] = genevaOptions.MONITORING_GCS_NAMESPACE,
+                ["ENV_" + nameof(genevaOptions.MONITORING_CONFIG_VERSION)] = genevaOptions.MONITORING_CONFIG_VERSION,
+                ["ENV_VMSS_NAME"] = vmssName,
+                ["ENV_IMG_NAME"] = imgVersionId.ChildResourceName,
+            };
+
             if (provisionedResources.VMSS != null)
             {
-                _logger.Information("Using the existing VMSS with Id: " + provisionedResources.VMSS.Id);
+                _logger.Information($"Using the existing VMSS with Id: {provisionedResources.VMSS.Id}. Updating tags ...");
+                await provisionedResources.VMSS.Update().WithTags(tags).ApplyAsync();
                 return provisionedResources;
             }
 
@@ -259,17 +289,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 // TODO: add the SSH rules here.
                 nsg = await liftrAzure.GetOrCreateDefaultNSGAsync(namingContext.Location, rgName, nsgName, namingContext.Tags);
             }
-
-            // We need to set the customization information in the VMSS tags.
-            // Within the VMSS instance, the application can retrieve those information from the instance Metadata service.
-            var tags = new Dictionary<string, string>(namingContext.Tags)
-            {
-                ["ENV_" + nameof(ComputeTagMetadata.VaultEndpoint)] = provisionedResources.RegionalKeyVault.VaultUri,
-                ["ENV_VaultName"] = provisionedResources.RegionalKeyVault.Name,
-                ["ENV_" + nameof(ComputeTagMetadata.ASPNETCORE_ENVIRONMENT)] = namingContext.Environment.ToString(),
-                ["ENV_" + nameof(ComputeTagMetadata.DOTNET_ENVIRONMENT)] = namingContext.Environment.ToString(),
-                ["ENV_" + nameof(ComputeTagMetadata.GCS_REGION)] = namingContext.Location.Name,
-            };
 
             var vmSku = VMSSSkuHelper.ParseSkuString(machineInfo.VMSize);
 

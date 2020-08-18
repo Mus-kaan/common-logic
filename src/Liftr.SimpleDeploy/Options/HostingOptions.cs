@@ -101,6 +101,8 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public VMSSMachineInfo VMSSConfigurations { get; set; }
 
+        public GenevaOptions Geneva { get; set; }
+
         public int IPPerRegion { get; set; } = 3;
 
         /// <summary>
@@ -169,6 +171,8 @@ namespace Microsoft.Liftr.SimpleDeploy
             {
                 throw new InvalidHostingOptionException($"{nameof(IPPerRegion)} cannot be large than 100.");
             }
+
+            Geneva?.CheckValid();
         }
     }
 

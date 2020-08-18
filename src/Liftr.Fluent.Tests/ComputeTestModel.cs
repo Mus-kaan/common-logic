@@ -15,6 +15,8 @@ namespace Microsoft.Liftr.Fluent.Tests
 
         public VMSSMachineInfo VMSS { get; set; }
 
+        public GenevaOptions Geneva { get; set; }
+
         public CertificateOptions GenevaCert { get; set; }
 
         public CertificateOptions SSLCert { get; set; }

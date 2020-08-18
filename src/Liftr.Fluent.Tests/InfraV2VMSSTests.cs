@@ -104,6 +104,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                         context,
                         model.Options,
                         model.VMSS,
+                        model.Geneva,
                         TestCredentials.KeyVaultClient,
                         ipPool,
                         enableVNet: false);
@@ -121,6 +122,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                        context,
                        model.Options,
                        model.VMSS,
+                       model.Geneva,
                        TestCredentials.KeyVaultClient,
                        ipPool,
                        enableVNet: false);
