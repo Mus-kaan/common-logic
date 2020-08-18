@@ -22,6 +22,9 @@ if [ ! -f /mnt/swapfile ]; then
   echo `date`[startup_entry.sh] re-created swap file | tee -a $logfile
 fi
 
+# Not having /mnt/containers will result in docker start failure.
+# Create /mnt/containers folder when Linux VM is reallocated.
+# /mnt/* is local disk, which is discarded when Linux VM is deallocated.
 echo "=======================================================================================================================" | tee -a $logfile
 echo `date`[startup_entry.sh] start docker | tee -a $logfile
 sudo mkdir -p /mnt/containers

@@ -15,6 +15,7 @@ do
     break
   fi
   # wait for 10 seconds before asking if it's running again
+  echo "`date` failed to start $serviceName . Retry in 10 seconds." | tee -a $logfile
   sleep 10
 done
 
