@@ -11,7 +11,7 @@ do
   let maxiterations-=1
   # if we've reached zero, break the loop
   if [ $maxiterations -lt 1 ]; then
-    echo "`date` failed to start $serviceName" >> $logfile
+    echo "`date` failed to start $serviceName" | tee -a $logfile
     break
   fi
   # wait for 10 seconds before asking if it's running again
@@ -19,5 +19,7 @@ do
 done
 
 if [ $maxiterations -ge 1 ]; then
-    echo "`date` $serviceName started" >> $logfile
+    echo "`date` $serviceName started" | tee -a $logfile
+else
+    echo "`date` $serviceName cannot be started" | tee -a $logfile
 fi
