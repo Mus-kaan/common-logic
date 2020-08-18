@@ -8,7 +8,6 @@ installJQLibrary() {
   set -e
   if [ "$jqInstalled" = "" ]; then
       echo "Installing jq ..."
-      apt-get update
       apt-get install jq -y
   else
       echo "jq is already installed. Skip."
