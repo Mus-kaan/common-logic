@@ -8,22 +8,30 @@ logfile="/startup/vmstartup.log"
 vmEnvFile="$currentDir/vm-global.env"
 mdsdConfigFile="$currentDir/mdsd"
 mdsdConfigTemplate="$currentDir/mdsd-template.sh"
+mdmConfigFile="$currentDir/mdm/mdm.env"
+mdmConfigTemplate="$currentDir/mdm-template.env"
 vaultNameFile="$currentDir/vault-name.txt"
 
 echo "----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------" | tee -a $logfile
 echo [`date`] currentDir: $currentDir | tee -a $logfile
 
 sudo mkdir -p /startup
+sudo mkdir -p /startup/mdm
+
 sudo rm -rf $vmEnvFile
 sudo rm -rf $mdsdConfigFile
+sudo rm -rf $mdmConfigFile
 sudo rm -rf $vaultNameFile
+
 sudo touch $vmEnvFile
 sudo touch $vaultNameFile
 sudo cp $mdsdConfigTemplate $mdsdConfigFile
+sudo cp $mdmConfigTemplate $mdmConfigFile
 
 chmod u=rw,g=rw,o=r $vmEnvFile
 chmod u=rw,g=rw,o=r $vaultNameFile
 chmod u=rw,g=rw,o=r $mdsdConfigFile
+chmod u=rw,g=rw,o=r $mdmConfigFile
 chmod u=rw,g=rw,o=r $logfile
 chmod u=rwx,g=rwx,o=rx /startup
 
@@ -86,6 +94,21 @@ do
         then
             echo "$tagValue" >> $vaultNameFile
         fi
+
+        if  [[ $tagName =~ ^ENV_MDM_ACCOUNT ]] ;
+        then
+            MDM_ACCOUNT=$tagValue
+        fi
+
+        if  [[ $tagName =~ ^ENV_MDM_NAMESPACE ]] ;
+        then
+            MDM_NAMESPACE=$tagValue
+        fi
+
+        if  [[ $tagName =~ ^ENV_MDM_ENDPOINT ]] ;
+        then
+            MDM_ENDPOINT=$tagValue
+        fi
     fi
 done
 
@@ -105,6 +128,10 @@ echo MONITORING_TENANT:             $MONITORING_TENANT | tee -a $logfile
 echo MONITORING_ROLE:               $MONITORING_ROLE | tee -a $logfile
 echo MONITORING_ROLE_INSTANCE:      $MONITORING_ROLE_INSTANCE | tee -a $logfile
 
+echo MDM_ACCOUNT:                   $MDM_ACCOUNT | tee -a $logfile
+echo MDM_NAMESPACE:                 $MDM_NAMESPACE | tee -a $logfile
+echo MDM_ENDPOINT:                  $MDM_ENDPOINT | tee -a $logfile
+
 
 sed -i "s|PLACEHOLDER_MONITORING_GCS_ENVIRONMENT|$MONITORING_GCS_ENVIRONMENT|g" $mdsdConfigFile
 sed -i "s|PLACEHOLDER_MONITORING_GCS_ACCOUNT|$MONITORING_GCS_ACCOUNT|g" $mdsdConfigFile
@@ -115,3 +142,5 @@ sed -i "s|PLACEHOLDER_MONITORING_CONFIG_VERSION|$MONITORING_CONFIG_VERSION|g" $m
 sed -i "s|PLACEHOLDER_MONITORING_TENANT|$MONITORING_TENANT|g" $mdsdConfigFile
 sed -i "s|PLACEHOLDER_MONITORING_ROLE_INSTANCE|$MONITORING_ROLE_INSTANCE|g" $mdsdConfigFile
 sed -i "s|PLACEHOLDER_MONITORING_ROLE|$MONITORING_ROLE|g" $mdsdConfigFile
+
+sed -i "s|PLACEHOLDER_MDM_ACCOUNT|$MDM_ACCOUNT|g" $mdmConfigFile
