@@ -41,21 +41,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             {
                 throw new InvalidHostingOptionException($"{nameof(MONITORING_CONFIG_VERSION)} cannot be null or empty.");
             }
-
-            if (string.IsNullOrEmpty(MDM_ACCOUNT))
-            {
-                throw new InvalidHostingOptionException($"{nameof(MDM_ACCOUNT)} cannot be null or empty.");
-            }
-
-            if (string.IsNullOrEmpty(MDM_NAMESPACE))
-            {
-                throw new InvalidHostingOptionException($"{nameof(MDM_NAMESPACE)} cannot be null or empty.");
-            }
-
-            if (string.IsNullOrEmpty(MDM_ENDPOINT))
-            {
-                throw new InvalidHostingOptionException($"{nameof(MDM_ENDPOINT)} cannot be null or empty.");
-            }
         }
     }
 }
