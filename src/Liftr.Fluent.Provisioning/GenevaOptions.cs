@@ -14,6 +14,12 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string MONITORING_CONFIG_VERSION { get; set; }
 
+        public string MDM_ACCOUNT { get; set; }
+
+        public string MDM_NAMESPACE { get; set; }
+
+        public string MDM_ENDPOINT { get; set; } = "https://global.metrics.nsatc.net/";
+
         public void CheckValid()
         {
             if (string.IsNullOrEmpty(MONITORING_GCS_ENVIRONMENT))
@@ -34,6 +40,21 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             if (string.IsNullOrEmpty(MONITORING_CONFIG_VERSION))
             {
                 throw new InvalidHostingOptionException($"{nameof(MONITORING_CONFIG_VERSION)} cannot be null or empty.");
+            }
+
+            if (string.IsNullOrEmpty(MDM_ACCOUNT))
+            {
+                throw new InvalidHostingOptionException($"{nameof(MDM_ACCOUNT)} cannot be null or empty.");
+            }
+
+            if (string.IsNullOrEmpty(MDM_NAMESPACE))
+            {
+                throw new InvalidHostingOptionException($"{nameof(MDM_NAMESPACE)} cannot be null or empty.");
+            }
+
+            if (string.IsNullOrEmpty(MDM_ENDPOINT))
+            {
+                throw new InvalidHostingOptionException($"{nameof(MDM_ENDPOINT)} cannot be null or empty.");
             }
         }
     }

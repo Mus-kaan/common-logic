@@ -202,6 +202,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 ["ENV_" + nameof(genevaOptions.MONITORING_GCS_ACCOUNT)] = genevaOptions.MONITORING_GCS_ACCOUNT,
                 ["ENV_" + nameof(genevaOptions.MONITORING_GCS_NAMESPACE)] = genevaOptions.MONITORING_GCS_NAMESPACE,
                 ["ENV_" + nameof(genevaOptions.MONITORING_CONFIG_VERSION)] = genevaOptions.MONITORING_CONFIG_VERSION,
+                ["ENV_" + nameof(genevaOptions.MDM_ACCOUNT)] = genevaOptions.MDM_ACCOUNT,
+                ["ENV_" + nameof(genevaOptions.MDM_NAMESPACE)] = genevaOptions.MDM_NAMESPACE,
+                ["ENV_" + nameof(genevaOptions.MDM_ENDPOINT)] = genevaOptions.MDM_ENDPOINT,
                 ["ENV_VMSS_NAME"] = vmssName,
                 ["ENV_IMG_NAME"] = imgVersionId.ChildResourceName,
             };

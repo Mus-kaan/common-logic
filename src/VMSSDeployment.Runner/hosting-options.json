@@ -53,7 +53,9 @@
         "MONITORING_GCS_ENVIRONMENT": "Test",
         "MONITORING_GCS_ACCOUNT": "LiftrDev",
         "MONITORING_GCS_NAMESPACE": "LiftrDev",
-        "MONITORING_CONFIG_VERSION": "26.0"
+        "MONITORING_CONFIG_VERSION": "26.0",
+        "MDM_ACCOUNT": "LiftrDevHot",
+        "MDM_NAMESPACE": "LiftrDevHot"
       },
       "Global": {
         "Location": "centralus",
