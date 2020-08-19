@@ -15,8 +15,7 @@ vaultNameFile="$currentDir/vault-name.txt"
 echo "----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------" | tee -a $logfile
 echo [`date`] currentDir: $currentDir | tee -a $logfile
 
-sudo mkdir -p /startup
-sudo mkdir -p /startup/mdm
+sudo mkdir -p $currentDir/mdm
 
 sudo rm -rf $vmEnvFile
 sudo rm -rf $mdsdConfigFile
@@ -33,7 +32,7 @@ chmod u=rw,g=rw,o=r $vaultNameFile
 chmod u=rw,g=rw,o=r $mdsdConfigFile
 chmod u=rw,g=rw,o=r $mdmConfigFile
 chmod u=rw,g=rw,o=r $logfile
-chmod u=rwx,g=rwx,o=rx /startup
+chmod u=rwx,g=rwx,o=rx $currentDir
 
 echo [`date`] Starting GET tags from VM instance metadata service | tee -a $logfile
 # https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#vm-tags

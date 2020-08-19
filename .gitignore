@@ -311,3 +311,4 @@ out-ev2-base-image/
 image-builder/packer-files/startup/mdsd
 image-builder/packer-files/startup/vm-global.env
 image-builder/packer-files/startup/vault-name.txt
+image-builder/packer-files/startup/mdm
