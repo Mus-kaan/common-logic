@@ -57,7 +57,7 @@ fi
 if [[ -z $(command -v kubectl) ]]; then
     echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
     echo "[bake-image.sh] Installing kubectl ..."
-    az aks install-cli
+    sudo az aks install-cli
 else
     echo "kubectl already installed."
 fi
