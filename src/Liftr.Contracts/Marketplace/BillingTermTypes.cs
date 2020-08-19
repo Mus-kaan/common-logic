@@ -13,19 +13,4 @@ namespace Microsoft.Liftr.Contracts.Marketplace
         Monthly,
         Yearly,
     }
-
-    public interface IMarketplaceSaasResource
-    {
-        string Name { get; set; }
-
-        MarketplaceSubscription MarketplaceSubscription { get; set; }
-
-        string PlanId { get; set; }
-
-        string BillingTermId { get; set; }
-
-        BillingTermTypes BillingTermType { get; set; }
-
-        int? Quantity { get; set; }
-    }
 }

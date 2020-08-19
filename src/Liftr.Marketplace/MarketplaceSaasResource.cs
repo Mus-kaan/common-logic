@@ -8,7 +8,7 @@ using Microsoft.Liftr.Utilities;
 namespace Microsoft.Liftr.Marketplace
 {
     [SwaggerExtension(ExcludeFromSwagger = true)]
-    public class MarketplaceSaasResource : IMarketplaceSaasResource
+    public class MarketplaceSaasResource
     {
         public MarketplaceSaasResource(
             MarketplaceSubscription marketplaceSubscription,

@@ -11,6 +11,7 @@
     <PackageReference Include="xunit" Version="$(PackageVersion_xunit)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(PackageVersion_xunit_runner_visualstudio)" />
     <PackageReference Include="coverlet.collector" Version="$(PackageVersion_coverlet_collector)" />
+    <PackageReference Include="FluentAssertions" Version="$(PackageVersion_FluentAssertions)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.DataSource.Mongo.Tests.Common\Liftr.DataSource.Mongo.Tests.Common.csproj" />

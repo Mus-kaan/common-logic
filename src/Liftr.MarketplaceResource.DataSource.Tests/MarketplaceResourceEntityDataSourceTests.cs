@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using FluentAssertions;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DataSource.Mongo;
@@ -47,7 +48,18 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
             var rid = "/subscriptions/b0a321d2-3073-44f0-b012-6e60db53ae22/resourceGroups/ngx-test-sbi0920-eus-rg/providers/Microsoft.Storage/storageAccounts/stngxtestsbi0920eus";
             var marketplaceSubscription = new MarketplaceSubscription(Guid.NewGuid());
             var tenantId = "testTenantId";
-            var saasResource = new MarketplaceSaasResourceEntity(marketplaceSubscription, "test-name", "planid", "offerId", "publisherId", "hjdtn7tfnxcy", BillingTermTypes.Monthly, new SaasBeneficiary() { TenantId = "tenantId" });
+            var saasResource = new MarketplaceSaasResourceEntity(
+                marketplaceSubscription,
+                new MarketplaceSubscriptionDetails()
+                {
+                    Name = "test-name",
+                    PlanId = "planid",
+                    OfferId = "offerId",
+                    PublisherId = "publisherId",
+                    Beneficiary = new SaasBeneficiary() { TenantId = "tenantId" },
+                    Id = marketplaceSubscription.ToString(),
+                },
+                BillingTermTypes.Monthly);
 
             var marketplaceResourceEntity = new MarketplaceResourceContainerEntity(saasResource, rid, tenantId);
             var entity1 = await dataSource.AddAsync(marketplaceResourceEntity);
@@ -68,9 +80,8 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
             {
                 var retrieved = await dataSource.GetEntityForMarketplaceSubscriptionAsync(marketplaceSubscription);
                 Assert.Equal(rid.ToUpperInvariant(), retrieved.ResourceId);
-                Assert.Equal(marketplaceSubscription.Id, retrieved.MarketplaceSaasResource.MarketplaceSubscription.Id);
-                Assert.Equal(saasResource.Name, retrieved.MarketplaceSaasResource.Name);
-                Assert.Equal(saasResource.PlanId, retrieved.MarketplaceSaasResource.PlanId);
+                Assert.Equal(marketplaceSubscription, retrieved.MarketplaceSaasResource.MarketplaceSubscription);
+                retrieved.MarketplaceSaasResource.SubscriptionDetails.Should().BeEquivalentTo(saasResource.SubscriptionDetails);
                 Assert.Equal(tenantId, retrieved.TenantId);
             }
         }

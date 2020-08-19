@@ -34,7 +34,16 @@ namespace Liftr.Sample.Web.Controllers
         public async Task<IActionResult> AddMarketplaceResourceAsync(string resourceId, string marketplaceSubId)
         {
             var marketplaceSubscription = MarketplaceSubscription.From(marketplaceSubId);
-            var saasResource = new MarketplaceSaasResourceEntity(marketplaceSubscription, "test-name", "planid", "offerId", "publisherId", "hjdtn7tfnxcy", BillingTermTypes.Monthly, new SaasBeneficiary() { TenantId = "tenantId" });
+            var saasResource = new MarketplaceSaasResourceEntity(marketplaceSubscription, new MarketplaceSubscriptionDetails()
+            {
+                Name = "test-name",
+                PlanId = "planid",
+                OfferId = "offerId",
+                PublisherId = "publisherId",
+                Beneficiary = new SaasBeneficiary() { TenantId = "tenantId" },
+                Id = marketplaceSubId
+            },
+            BillingTermTypes.Monthly);
 
             var entity = new MarketplaceResourceContainerEntity(saasResource, resourceId, "tenantId");
             var addedEntity = await _dataSource.AddAsync(entity);

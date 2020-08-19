@@ -12,84 +12,28 @@ using System;
 namespace Microsoft.Liftr.DataSource.Mongo
 {
     [SwaggerExtension(ExcludeFromSwagger = true)]
-    public class MarketplaceSaasResourceEntity : IMarketplaceSaasResource
+    public class MarketplaceSaasResourceEntity
     {
         public MarketplaceSaasResourceEntity(
             MarketplaceSubscription marketplaceSubscription,
-            string name,
-            string planId,
-            string offerId,
-            string publisherId,
-            string billingTermId,
-            BillingTermTypes billingTermType,
-            SaasBeneficiary beneficiary,
-            int? quantity = null)
+            MarketplaceSubscriptionDetails subscriptionDetails,
+            BillingTermTypes billingTermType)
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentException("Name cannot be empty", nameof(name));
-            }
-
-            if (string.IsNullOrEmpty(planId))
-            {
-                throw new ArgumentException("PlanId cannot be empty", nameof(planId));
-            }
-
-            if (string.IsNullOrEmpty(offerId))
-            {
-                throw new ArgumentException("OfferId cannot be empty", nameof(offerId));
-            }
-
-            if (string.IsNullOrEmpty(publisherId))
-            {
-                throw new ArgumentException("PublisherId cannot be empty", nameof(publisherId));
-            }
-
-            if (string.IsNullOrEmpty(billingTermId))
-            {
-                throw new ArgumentException("BillingTermId cannot be empty", nameof(billingTermId));
-            }
-
             MarketplaceSubscription = marketplaceSubscription ?? throw new ArgumentNullException(nameof(marketplaceSubscription));
-            Name = name;
-            PlanId = planId;
-            OfferId = offerId;
-            PublisherId = publisherId;
-            BillingTermId = billingTermId;
+            SubscriptionDetails = subscriptionDetails;
             BillingTermType = billingTermType;
-            Quantity = quantity;
-            Beneficiary = beneficiary ?? throw new ArgumentNullException(nameof(beneficiary));
         }
 
         [BsonElement("mp_sub")]
         [BsonSerializer(typeof(MarketplaceSubscriptionSerializer))]
         public MarketplaceSubscription MarketplaceSubscription { get; set; }
 
-        [BsonElement("name")]
-        public string Name { get; set; }
-
-        [BsonElement("planId")]
-        public string PlanId { get; set; }
-
-        [BsonElement("offerId")]
-        public string OfferId { get; set; }
-
-        [BsonElement("publisherId")]
-        public string PublisherId { get; set; }
-
-        [BsonElement("bill_tid")]
-        public string BillingTermId { get; set; }
+        [BsonElement("mp_sub_det")]
+        public MarketplaceSubscriptionDetails SubscriptionDetails { get; set; }
 
         [BsonElement("bill_ttype")]
         [BsonRepresentation(BsonType.String)]
         public BillingTermTypes BillingTermType { get; set; }
-
-        [BsonElement("beneficiary")]
-        public SaasBeneficiary Beneficiary { get; set; }
-
-        [BsonElement("quantity")]
-        [BsonIgnoreIfNull]
-        public int? Quantity { get; set; }
     }
 
     public class MarketplaceSubscriptionSerializer : IBsonSerializer<MarketplaceSubscription>

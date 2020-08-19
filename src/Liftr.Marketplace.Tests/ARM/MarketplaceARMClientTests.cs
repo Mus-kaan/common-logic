@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.Marketplace.ARM.Contracts;
 using Microsoft.Liftr.Marketplace.ARM.Models;
 using Microsoft.Liftr.Marketplace.Contracts;
@@ -65,8 +66,11 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
             var resourceName = $"test-{Guid.NewGuid()}";
             var saasResource = new SaasCreationResponse()
             {
-                Name = resourceName,
-                Id = Guid.NewGuid().ToString(),
+                SubscriptionDetails = new MarketplaceSubscriptionDetails()
+                {
+                    Name = resourceName,
+                    Id = Guid.NewGuid().ToString(),
+                },
             };
             var marketplaceOfferDetail = CreateSaasResourceProperties(resourceName);
             var operationLocation = "https://mockoperationlocation.com";
@@ -79,7 +83,7 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
 
             var createdResource = await armClient.CreateSaaSResourceAsync(marketplaceOfferDetail, _marketplaceRequestMetadata);
 
-            Assert.Equal(createdResource.Id, saasResource.Id);
+            Assert.Equal(createdResource.Id, saasResource.SubscriptionDetails.Id);
         }
 
         [Fact]
@@ -90,9 +94,12 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
 
             var saasResource = new SaasCreationResponse()
             {
-                Name = resourceName,
+                SubscriptionDetails = new MarketplaceSubscriptionDetails()
+                {
+                    Name = resourceName,
+                    Id = Guid.NewGuid().ToString(),
+                },
                 Status = OperationStatus.Succeeded,
-                Id = Guid.NewGuid().ToString(),
             };
 
             var operationLocation = "https://mockoperationlocation.com";
@@ -105,7 +112,7 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
 
             var createdResource = await armClient.CreateSaaSResourceAsync(marketplaceOfferDetail, _marketplaceRequestMetadata);
 
-            Assert.Equal(createdResource.Id, saasResource.Id);
+            Assert.Equal(createdResource.Id, saasResource.SubscriptionDetails.Id);
         }
 
         /* [Fact(Skip = "Not implemented")]
