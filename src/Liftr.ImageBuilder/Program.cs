@@ -6,6 +6,7 @@ using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.GenericHosting;
 using Microsoft.Liftr.Logging.GenericHosting;
@@ -29,6 +30,21 @@ namespace Microsoft.Liftr.ImageBuilder
                 if (!string.IsNullOrEmpty(rollOutId))
                 {
                     LogContext.PushProperty("EV2RolloutId ", rollOutId);
+                }
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+            }
+
+            try
+            {
+                var ev2CorrelationId = Environment.GetEnvironmentVariable("CorrelationId");
+                if (!string.IsNullOrEmpty(ev2CorrelationId))
+                {
+                    LogContext.PushProperty("EV2CorrelationId", ev2CorrelationId);
+                    TelemetryContext.GetOrGenerateCorrelationId(ev2CorrelationId);
                 }
             }
 #pragma warning disable CA1031 // Do not catch general exception types

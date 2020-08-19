@@ -69,11 +69,16 @@ namespace Microsoft.Liftr.DiagnosticSource
         /// <summary>
         /// Get the current correlation Id if it is set, or return a new GUID.
         /// </summary>
-        public static string GetOrGenerateCorrelationId()
+        public static string GetOrGenerateCorrelationId(string correlationId = null)
         {
             if (string.IsNullOrEmpty(CallContextHolder.CorrelationId.Value))
             {
-                CallContextHolder.CorrelationId.Value = Guid.NewGuid().ToString();
+                if (string.IsNullOrEmpty(correlationId))
+                {
+                    correlationId = Guid.NewGuid().ToString();
+                }
+
+                CallContextHolder.CorrelationId.Value = correlationId;
             }
 
             return CallContextHolder.CorrelationId.Value;

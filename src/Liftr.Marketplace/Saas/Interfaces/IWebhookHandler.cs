@@ -2,9 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.Marketplace.Saas.Contracts;
-using System;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Marketplace.Saas.Interfaces
