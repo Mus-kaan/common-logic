@@ -4,7 +4,7 @@ set -e
 echo "Starting restore dependency packages ..."
 SrcRoot="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 echo "SrcRoot $SrcRoot"
-echo "CDP_DEFAULT_CLIENT_PACKAGE_PAT: $CDP_DEFAULT_CLIENT_PACKAGE_PAT"
+# echo "CDP_DEFAULT_CLIENT_PACKAGE_PAT: $CDP_DEFAULT_CLIENT_PACKAGE_PAT"
 
 for solution in $SrcRoot/src/*.sln
 do
