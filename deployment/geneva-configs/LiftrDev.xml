@@ -188,5 +188,10 @@
         <Content>LogAnalyticsContent</Content>
       </LogAnalytics>
     </EventStreamingAnnotation>
+    <EventStreamingAnnotation name="^LinuxAsm.*$">
+      <Cosmos>
+        <Content><![CDATA[ <Config /> ]]></Content>
+      </Cosmos>
+    </EventStreamingAnnotation>
   </EventStreamingAnnotations>
 </MonitoringManagement>
