@@ -14,7 +14,7 @@ configure_gcs(){
     sudo systemctl stop mdsd
 
     mdsdDir="/etc/mdsd.d"
-    mdmDir="/startup/mdm"
+    mdmDir="$currentDir/mdm"
     gcsCertCertFileName="gcscert.pem"
     gcsCertKeyFileName="gcskey.pem"
     mdsdStartupScript="/etc/default/mdsd"

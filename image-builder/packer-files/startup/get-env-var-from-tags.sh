@@ -33,6 +33,7 @@ chmod u=rw,g=rw,o=r $mdsdConfigFile
 chmod u=rw,g=rw,o=r $mdmConfigFile
 chmod u=rw,g=rw,o=r $logfile
 chmod u=rwx,g=rwx,o=rx $currentDir
+chmod u=rwx,g=rwx,o=rx $currentDir/mdm
 
 echo [`date`] Starting GET tags from VM instance metadata service | tee -a $logfile
 # https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#vm-tags
