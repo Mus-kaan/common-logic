@@ -54,5 +54,8 @@ namespace Microsoft.Liftr.Contracts.Marketplace
 
         [JsonProperty("term")]
         public SubscriptionTerm Term { get; set; }
+
+        [JsonProperty("quantity")]
+        public int? Quantity { get; set; }
     }
 }
