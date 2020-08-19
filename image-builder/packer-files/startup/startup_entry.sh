@@ -28,10 +28,7 @@ fi
 echo "=======================================================================================================================" | tee -a $logfile
 echo `date`[startup_entry.sh] start docker | tee -a $logfile
 sudo mkdir -p /mnt/containers
-sudo systemctl restart docker
-echo `date`[startup_entry.sh] wait 20 second and check docker status | tee -a $logfile
-sleep 20
-sudo ./start-service.sh docker
+sudo /bin/bash $currentDir/start-service.sh docker
 
 echo "=======================================================================================================================" | tee -a $logfile
 echo `date`[startup_entry.sh] Populate container environment variables from compute tags | tee -a $logfile
