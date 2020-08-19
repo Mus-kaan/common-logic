@@ -14,6 +14,7 @@ configure_gcs(){
     sudo systemctl stop mdsd
 
     mdsdDir="/etc/mdsd.d"
+    mdmDir="/startup/mdm"
     gcsCertCertFileName="gcscert.pem"
     gcsCertKeyFileName="gcskey.pem"
     mdsdStartupScript="/etc/default/mdsd"
@@ -32,10 +33,14 @@ configure_gcs(){
     pemFileName="$kvName.GenevaClientCert"
     sudo cp $kvCertFolder/$pemFileName $mdsdDir/$gcsCertCertFileName
     sudo cp $kvCertFolder/$pemFileName $mdsdDir/$gcsCertKeyFileName
+    sudo cp $kvCertFolder/$pemFileName $mdmDir/$gcsCertCertFileName
+    sudo cp $kvCertFolder/$pemFileName $mdmDir/$gcsCertKeyFileName
 
-    sudo chown syslog /etc/mdsd.d/gcskey.pem
-    sudo chmod 644 /etc/mdsd.d/gcskey.pem
-    sudo chmod 644 /etc/mdsd.d/gcscert.pem
+    sudo chown syslog $mdsdDir/$gcsCertKeyFileName
+    sudo chmod 644 $mdsdDir/$gcsCertCertFileName
+    sudo chmod 644 $mdsdDir/$gcsCertKeyFileName
+    sudo chmod 644 $mdmDir/$gcsCertCertFileName
+    sudo chmod 644 $mdmDir/$gcsCertKeyFileName
 
     echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" | tee -a $logfile
     echo `date`[startgeneva.sh] sudo ls -l $mdsdDir | tee -a $logfile
