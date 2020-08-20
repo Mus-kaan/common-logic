@@ -163,6 +163,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     agentPoolProfileName: agentPoolName);
 
                 _logger.Information("Created AKS cluster with Id {ResourceId}", aks.Id);
+
+                // Wait for 1 minutes to make sure the AKS MIs can be listed.
+                await Task.Delay(TimeSpan.FromMinutes(1));
             }
             else
             {
