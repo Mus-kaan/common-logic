@@ -155,7 +155,7 @@ namespace Microsoft.Liftr.SimpleDeploy
             }
             catch (Exception ex)
             {
-                _logger.Fatal(ex, "ActionExecutor Failed.");
+                _logger.Fatal(ex, "Failed at running the deployment runner. Touble-shooting guide: https://aka.ms/liftr/ev2-failure");
                 throw;
             }
         }
@@ -570,18 +570,16 @@ namespace Microsoft.Liftr.SimpleDeploy
                 }
                 catch (Exception ex)
                 {
+                    _logger.Fatal(ex, "Failed at running the deployment runner. Touble-shooting guide: https://aka.ms/liftr/ev2-failure");
+
                     if (ex is CloudException)
                     {
                         var cloudEx = ex as CloudException;
                         _logger.Fatal(ex, "Failed with CloudException. Status code: {statusCode}, Response: {@response}, Request: {requestUri}", cloudEx.Response.StatusCode, cloudEx.Response, cloudEx.Request.RequestUri.ToString());
                     }
-                    else
-                    {
-                        _logger.Fatal(ex, "Failed.");
-                    }
 
                     Environment.ExitCode = -1;
-                    operation.FailOperation();
+                    operation.FailOperation(ex.Message);
                     throw;
                 }
                 finally
