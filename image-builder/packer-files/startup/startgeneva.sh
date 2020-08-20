@@ -24,7 +24,7 @@ configure_gcs(){
         echo "Cannot find the key vault name in file vault-name.txt"  | tee -a $logfile
         exit 1 # terminate and indicate error
     fi
-    echo `date`[startgeneva.sh] Certificates on disk:  | tee -a $logfile
+    echo `date`[liftr | startgeneva.sh] Certificates on disk:  | tee -a $logfile
     sudo ls $kvCertFolder  | tee -a $logfile
 
     sudo rm -f $mdsdDir/$gcsCertCertFileName
@@ -43,7 +43,7 @@ configure_gcs(){
     sudo chmod 644 $mdmDir/$gcsCertKeyFileName
 
     echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" | tee -a $logfile
-    echo `date`[startgeneva.sh] sudo ls -l $mdsdDir | tee -a $logfile
+    echo `date`[liftr | startgeneva.sh] sudo ls -l $mdsdDir | tee -a $logfile
     sudo ls -l $mdsdDir | tee -a $logfile
     echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" | tee -a $logfile
 
@@ -59,7 +59,7 @@ force_restart_mdsd(){
 	# query to see if mdsd is actually running
 	until sudo service mdsd status | grep "active (running)"
 	do
-		echo `date`[startgeneva.sh] force_restart_mdsd restart mdsd maxiterations $maxiterations | tee -a $logfile
+		echo `date`[liftr | startgeneva.sh] force_restart_mdsd restart mdsd maxiterations $maxiterations | tee -a $logfile
 		# we entered the loop, which means mdsd wasn't running, so try to restart it:
 		sudo service mdsd restart
 		# count this iteration
@@ -73,16 +73,16 @@ force_restart_mdsd(){
 	done
 }
 
-echo `date`[startgeneva.sh] configure_gcs started | tee -a $logfile
+echo `date`[liftr | startgeneva.sh] configure_gcs started | tee -a $logfile
 configure_gcs
 
-echo `date`[startgeneva.sh] force_restart_mdsd started | tee -a $logfile
+echo `date`[liftr | startgeneva.sh] force_restart_mdsd started | tee -a $logfile
 force_restart_mdsd
-echo `date`[startgeneva.sh] force_restart_mdsd finished | tee -a $logfile
+echo `date`[liftr | startgeneva.sh] force_restart_mdsd finished | tee -a $logfile
 
-echo `date`[startgeneva.sh] Config and restart az secpack started | tee -a $logfile
+echo `date`[liftr | startgeneva.sh] Config and restart az secpack started | tee -a $logfile
 sudo azsecd config -s baseline -d P1D
 sudo azsecd config -s software -d P1D
 sudo azsecd config -s clamav -d P1D
 sudo service azsecd restart
-echo `date`[startgeneva.sh] Config and restart az secpack finished | tee -a $logfile
+echo `date`[liftr | startgeneva.sh] Config and restart az secpack finished | tee -a $logfile

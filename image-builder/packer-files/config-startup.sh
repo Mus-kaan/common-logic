@@ -37,7 +37,7 @@ EOF
 	done
 }
 
-echo "configstartup.sh configure_startup started"
+echo "[liftr | configstartup.sh] configure_startup started"
 configure_startup
-echo "configstartup.sh configure_startup finished"
+echo "[liftr | configstartup.sh] configure_startup finished"
 
