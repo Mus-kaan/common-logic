@@ -1081,6 +1081,7 @@ namespace Microsoft.Liftr.Fluent
         public async Task<string> GetAKSMIAsync(string rgName, string aksName)
         {
             // https://docs.microsoft.com/en-us/azure/aks/use-managed-identity
+            _logger.Information($"Getting the AKS control plane managed idenity of cluster '{aksName}'");
             var aksId = $"subscriptions/{FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.ContainerService/managedClusters/{aksName}";
             var aksContent = await GetResourceAsync(aksId, "2020-04-01");
             if (string.IsNullOrEmpty(aksContent))
@@ -1104,6 +1105,7 @@ namespace Microsoft.Liftr.Fluent
         public async Task<IEnumerable<IIdentity>> ListAKSMCMIAsync(string AKSRGName, string AKSName, Region location)
         {
             // https://docs.microsoft.com/en-us/azure/aks/use-managed-identity
+            _logger.Information($"Listing the AKS managed identities in 'MC_' resource group '{AKSRGName}'");
             var mcRG = NamingContext.AKSMCResourceGroupName(AKSRGName, AKSName, location);
             return await FluentClient.Identities.ListByResourceGroupAsync(mcRG);
         }
