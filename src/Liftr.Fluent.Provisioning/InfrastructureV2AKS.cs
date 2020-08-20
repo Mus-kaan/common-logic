@@ -197,7 +197,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var kubeletMI = mcMIList.FirstOrDefault(id => id.Name.OrdinalStartsWith(aksName));
             if (kubeletMI == null)
             {
-                var errMsg = "There should be exactly one kubelet MI for aks: " + aks.Id;
+                var errMsg = "Cannot find the kubelet managed identity. There should be exactly one kubelet MI for aks: " + aks.Id;
                 var ex = new InvalidOperationException(errMsg);
                 _logger.Error(ex, errMsg);
                 throw ex;
