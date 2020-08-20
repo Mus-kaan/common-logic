@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <AssemblyName>Microsoft.Liftr.EventHubManager</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.EventHubManager</RootNamespace>
+	<IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="$(PackageVersion_Serilog)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
+    <ProjectReference Include="..\Liftr.DataSource.Abstractions\Liftr.DataSource.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>
