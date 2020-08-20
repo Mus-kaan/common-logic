@@ -570,7 +570,14 @@ namespace Microsoft.Liftr.SimpleDeploy
                 }
                 catch (Exception ex)
                 {
-                    _logger.Fatal(ex, "Failed at running the deployment runner. Touble-shooting guide: https://aka.ms/liftr/ev2-failure");
+                    if (ex is CredentialUnavailableException)
+                    {
+                        _logger.Fatal(ex, "If this is running inside EV2, please redeploy the release step. The EV2 ACI might be having some transient issues.");
+                    }
+                    else
+                    {
+                        _logger.Fatal(ex, "Failed at running the deployment runner. Touble-shooting guide: https://aka.ms/liftr/ev2-failure");
+                    }
 
                     if (ex is CloudException)
                     {

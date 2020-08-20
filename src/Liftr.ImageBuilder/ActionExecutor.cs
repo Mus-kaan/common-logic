@@ -256,7 +256,11 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
                 catch (Exception ex)
                 {
-                    if (ex is CloudException)
+                    if (ex is CredentialUnavailableException)
+                    {
+                        _logger.Fatal(ex, "If this is running inside EV2, please redeploy the release step. The EV2 ACI might be having some transient issues.");
+                    }
+                    else if (ex is CloudException)
                     {
                         var cloudEx = ex as CloudException;
                         _logger.Fatal(ex, "Failed with CloudException. Status code: {statusCode}, Response: {@response}, Request: {requestUri}", cloudEx.Response.StatusCode, cloudEx.Response, cloudEx.Request.RequestUri.ToString());
