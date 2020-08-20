@@ -24,7 +24,7 @@ configure_startup(){
 @reboot $startupsh &
 EOF
 
-	sudo cp ./startup/* $startupDir
+	sudo cp -r ./startup/* $startupDir
 	sudo touch /startup/vmstartup.log
 	sudo chmod u=rwx,g=rwx,o=rx /startup
 	sudo chmod u=rwx,g=rwx,o=rx /startup/vmstartup.log
