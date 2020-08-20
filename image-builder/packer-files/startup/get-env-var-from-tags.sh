@@ -13,7 +13,7 @@ mdmConfigTemplate="$currentDir/mdm-template.env"
 vaultNameFile="$currentDir/vault-name.txt"
 
 echo "----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------" | tee -a $logfile
-echo `date` [liftr | get-tags] currentDir: $currentDir | tee -a $logfile
+echo `date` "[liftr | get-tags] currentDir: $currentDir" | tee -a $logfile
 
 sudo mkdir -p $currentDir/mdm
 
@@ -35,15 +35,14 @@ chmod u=rw,g=rw,o=r $logfile
 chmod u=rwx,g=rwx,o=rx $currentDir
 chmod u=rwx,g=rwx,o=rx $currentDir/mdm
 
-echo `date` [liftr | get-tags] Starting GET tags from VM instance metadata service | tee -a $logfile
+echo `date` "[liftr | get-tags] Starting GET tags from VM instance metadata service" | tee -a $logfile
 # https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service#vm-tags
 tagList=$(curl -H "Metadata:true" --silent "http://169.254.169.254/metadata/instance/compute/tagsList?api-version=2019-06-04")
-# echo `date` [liftr | get-tags] tagList: $tagList  | tee -a $logfile
+# echo `date` "[liftr | get-tags] tagList: $tagList " | tee -a $logfile
 
 tagObjectList=$(echo "$tagList" | jq -c '.[]')
 
 echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" | tee -a $logfile
-echo `date` [liftr | get-tags] Generating docker compose Env file vm-global.env | tee -a $logfile
 for tagKvp in ${tagObjectList}
 do
 	# echo "Parsing tagKvp: $tagKvp"
@@ -112,12 +111,14 @@ do
     fi
 done
 
-echo `date` [liftr | get-tags] Generated docker compose Env file vm-global.env: | tee -a $logfile
+MONITORING_ROLE_INSTANCE=$(hostname)
+
+echo `date` "[liftr | get-tags] Generated docker compose Env file vm-global.env:" | tee -a $logfile
 cat $vmEnvFile | tee -a $logfile
 
 echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" | tee -a $logfile
-echo `date` [liftr | get-tags] Generating mdsd config file ... | tee -a $logfile
-MONITORING_ROLE_INSTANCE=$(hostname)
+echo `date` "[liftr | get-tags] Generating mdsd config file ..." | tee -a $logfile
+
 echo MONITORING_GCS_ENVIRONMENT:    $MONITORING_GCS_ENVIRONMENT | tee -a $logfile
 echo MONITORING_GCS_ACCOUNT:        $MONITORING_GCS_ACCOUNT | tee -a $logfile
 echo MONITORING_GCS_NAMESPACE:      $MONITORING_GCS_NAMESPACE | tee -a $logfile
