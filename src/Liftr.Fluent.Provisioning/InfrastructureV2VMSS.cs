@@ -298,6 +298,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
 
             var vmSku = VMSSSkuHelper.ParseSkuString(machineInfo.VMSize);
+            var computerNamePrefix = vmssName.Replace("-", string.Empty) + "-";
 
             var vmssCreatable = liftrAzure.FluentClient
                 .VirtualMachineScaleSets
@@ -317,6 +318,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 .WithCapacity(machineInfo.MachineCount)
                 .WithBootDiagnostics()
                 .WithExistingNetworkSecurityGroup(nsg)
+                .WithComputerNamePrefix(computerNamePrefix)
                 .WithTags(tags);
 
             if (certList != null && certList.Count > 0)
