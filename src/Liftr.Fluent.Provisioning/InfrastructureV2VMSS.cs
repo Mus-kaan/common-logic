@@ -4,6 +4,7 @@
 
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.Compute.Fluent;
+using Microsoft.Azure.Management.Locks.Fluent.Models;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Network.Fluent.Models;
 using Microsoft.Liftr.Contracts;
@@ -187,6 +188,34 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             provisionedResources.VMSS = await liftrAzure.FluentClient.VirtualMachineScaleSets.GetByResourceGroupAsync(rgName, vmssName);
 
             var imgVersionId = new ResourceId(machineInfo.GalleryImageVersionId);
+            {
+                var az = _azureClientFactory.GenerateLiftrAzure(imgVersionId.SubscriptionId);
+                var imgVersion = await az.GetImageVersionAsync(imgVersionId.ResourceGroup, imgVersionId.ResourceName, imgVersionId.ChildResourceName, imgVersionId.GrandChildResourceName);
+                if (imgVersion == null)
+                {
+                    var ex = new InvalidOperationException($"Cannot find sharded image gallery image version with Id '{imgVersionId}'");
+                    _logger.Error(ex, ex.Message);
+                    throw ex;
+                }
+
+                if (!namingContext.Environment.IsNonProduction())
+                {
+                    try
+                    {
+                        _logger.Information("Adding a lock to avoid accidental delete of the image version '{imgVersionId}'", imgVersionId);
+                        await az.FluentClient.ManagementLocks
+                            .Define(vmssName)
+                            .WithLockedResource(machineInfo.GalleryImageVersionId)
+                            .WithLevel(LockLevel.CanNotDelete)
+                            .WithNotes($"[{DateTime.UtcNow.ToZuluString()}] Used for VMSS '{vmssName}', RG '{rgName}', subscription '{liftrAzure.FluentClient.SubscriptionId}'")
+                            .CreateAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Failed at adding lock to image version.");
+                    }
+                }
+            }
 
             // We need to set the customization information in the VMSS tags.
             // Within the VMSS instance, the application can retrieve those information from the instance Metadata service.

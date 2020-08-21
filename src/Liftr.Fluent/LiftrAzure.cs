@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Azure.Core;
+using Microsoft.Azure.Management.Compute.Fluent;
 using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent.Models;
@@ -1301,6 +1302,33 @@ namespace Microsoft.Liftr.Fluent
             }
 
             return eventhub;
+        }
+        #endregion
+
+        #region Shared Image Gallery
+        public async Task<IGalleryImageVersion> GetImageVersionAsync(
+            string rgName,
+            string galleryName,
+            string imageName,
+            string imageVersionName)
+        {
+            if (imageName == null)
+            {
+                throw new ArgumentNullException(nameof(imageName));
+            }
+
+            _logger.Information("Getting image verion. imageVersionName:{imageVersionName}, galleryName: {galleryName}, imageName: {imageName}", imageVersionName, galleryName, imageName);
+
+            try
+            {
+                var galleryImageVersion = await FluentClient.GalleryImageVersions
+                .GetByGalleryImageAsync(rgName, galleryName, imageName, imageVersionName);
+                return galleryImageVersion;
+            }
+            catch (CloudException ex) when (ex.IsNotFound())
+            {
+                return null;
+            }
         }
         #endregion
 

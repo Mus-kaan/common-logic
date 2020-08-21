@@ -44,5 +44,18 @@ namespace Microsoft.Liftr
                     throw new ArgumentOutOfRangeException(nameof(env));
             }
         }
+
+        public static bool IsNonProduction(this EnvironmentType env)
+        {
+            switch (env)
+            {
+                case EnvironmentType.DogFood:
+                case EnvironmentType.Dev:
+                case EnvironmentType.Test:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 }

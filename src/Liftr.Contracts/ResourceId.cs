@@ -127,6 +127,32 @@ namespace Microsoft.Liftr.Contracts
             }
         }
 
+        public string GrandChildResourceType
+        {
+            get
+            {
+                if (TypedNames == null || TypedNames.Length < 3)
+                {
+                    return null;
+                }
+
+                return TypedNames[2].ResourceType;
+            }
+        }
+
+        public string GrandChildResourceName
+        {
+            get
+            {
+                if (TypedNames == null || TypedNames.Length < 3)
+                {
+                    return null;
+                }
+
+                return TypedNames[2].ResourceName;
+            }
+        }
+
         public ResourceTypeNamePair[] TypedNames { get; }
 
         public bool IsSubsriptionId

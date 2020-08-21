@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Azure.Core;
+using Microsoft.Azure.Management.Compute.Fluent;
 using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent.Models;
@@ -228,6 +229,14 @@ namespace Microsoft.Liftr.Fluent
         Task<IEventHubNamespace> GetOrCreateEventHubNamespaceAsync(Region location, string rgName, string name, IDictionary<string, string> tags);
 
         Task<IEventHub> GetOrCreateEventHubAsync(Region location, string rgName, string namespaceName, string hubName, int partitionCount, IList<string> consumerGroups, IDictionary<string, string> tags);
+        #endregion
+
+        #region Shared Image Gallery
+        Task<IGalleryImageVersion> GetImageVersionAsync(
+            string rgName,
+            string galleryName,
+            string imageName,
+            string imageVersionName);
         #endregion
     }
 }
