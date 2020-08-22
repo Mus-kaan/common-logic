@@ -406,6 +406,10 @@ namespace Microsoft.Liftr.SimpleDeploy
                             {
                                 var certNameList = targetOptions.OneCertCertificates.Select(kvp => kvp.Key).ToList();
                                 certNameList.Add(CertificateName.DefaultSSL);
+                                if (targetOptions.OneCertCertificates?.ContainsKey(CertificateName.GenevaClientCert) == true)
+                                {
+                                    targetOptions.Geneva.GENEVA_CERT_SAN = targetOptions.OneCertCertificates[CertificateName.GenevaClientCert];
+                                }
 
                                 var vmss = await infra.CreateOrUpdateRegionalVMSSRGAsync(
                                     regionalNamingContext,

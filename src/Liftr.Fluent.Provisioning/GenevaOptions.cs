@@ -20,6 +20,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string MDM_ENDPOINT { get; set; } = "https://global.metrics.nsatc.net/";
 
+        public string GENEVA_CERT_SAN { get; set; }
+
         public void CheckValid()
         {
             if (string.IsNullOrEmpty(MONITORING_GCS_ENVIRONMENT))

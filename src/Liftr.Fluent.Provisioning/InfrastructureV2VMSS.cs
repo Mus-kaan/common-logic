@@ -235,6 +235,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 ["ENV_IMG_NAME"] = imgVersionId.ChildResourceName,
             };
 
+            if (!string.IsNullOrEmpty(genevaOptions.GENEVA_CERT_SAN))
+            {
+                tags["ENV_" + nameof(genevaOptions.GENEVA_CERT_SAN)] = genevaOptions.GENEVA_CERT_SAN;
+            }
+
             if (!string.IsNullOrEmpty(genevaOptions.MDM_ACCOUNT) && !string.IsNullOrEmpty(genevaOptions.MDM_NAMESPACE))
             {
                 tags["ENV_" + nameof(genevaOptions.MDM_ACCOUNT)] = genevaOptions.MDM_ACCOUNT;
