@@ -20,7 +20,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 {
     public partial class InfrastructureV2
     {
-        private const string c_certDiskLocation = "/var/lib/waagent/Microsoft.Azure.KeyVault";
+        private const string c_certDiskLocation = "/var/lib/waagent/Microsoft.Azure.KeyVault.Store";
 
         public async Task<ProvisionedVMSSResources> CreateOrUpdateRegionalVMSSRGAsync(
             NamingContext namingContext,
