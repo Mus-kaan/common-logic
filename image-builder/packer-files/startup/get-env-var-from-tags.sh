@@ -108,6 +108,11 @@ do
         then
             MDM_ENDPOINT=$tagValue
         fi
+
+        if  [[ $tagName =~ ^ENV_GENEVA_CERT_SAN ]] ;
+        then
+            GENEVA_CERT_SAN=$tagValue
+        fi
     fi
 done
 
@@ -132,6 +137,7 @@ echo MONITORING_ROLE_INSTANCE:      $MONITORING_ROLE_INSTANCE | tee -a $logfile
 echo MDM_ACCOUNT:                   $MDM_ACCOUNT | tee -a $logfile
 echo MDM_NAMESPACE:                 $MDM_NAMESPACE | tee -a $logfile
 echo MDM_ENDPOINT:                  $MDM_ENDPOINT | tee -a $logfile
+echo GENEVA_CERT_SAN:               $GENEVA_CERT_SAN | tee -a $logfile
 
 
 sed -i "s|PLACEHOLDER_MONITORING_GCS_ENVIRONMENT|$MONITORING_GCS_ENVIRONMENT|g" $mdsdConfigFile
@@ -139,6 +145,7 @@ sed -i "s|PLACEHOLDER_MONITORING_GCS_ACCOUNT|$MONITORING_GCS_ACCOUNT|g" $mdsdCon
 sed -i "s|PLACEHOLDER_MONITORING_GCS_NAMESPACE|$MONITORING_GCS_NAMESPACE|g" $mdsdConfigFile
 sed -i "s|PLACEHOLDER_MONITORING_GCS_REGION|$MONITORING_GCS_REGION|g" $mdsdConfigFile
 sed -i "s|PLACEHOLDER_MONITORING_CONFIG_VERSION|$MONITORING_CONFIG_VERSION|g" $mdsdConfigFile
+sed -i "s|PLACEHOLDER_GENEVA_CERT_SAN|$GENEVA_CERT_SAN|g" $mdsdConfigFile
 
 sed -i "s|PLACEHOLDER_MONITORING_TENANT|$MONITORING_TENANT|g" $mdsdConfigFile
 sed -i "s|PLACEHOLDER_MONITORING_ROLE_INSTANCE|$MONITORING_ROLE_INSTANCE|g" $mdsdConfigFile

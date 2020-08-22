@@ -1,25 +1,22 @@
 #!/bin/bash
 # This script configs and starts mdsd
-# Ref:https://genevamondocs.azurewebsites.net/collect/environments/linuxvm.html
+# https://genevamondocs.azurewebsites.net/collect/environments/linuxvm.html
+# https://genevamondocs.azurewebsites.net/collect/authentication/keyvault.html
 
 set -e
 
 currentScriptName=`basename "$0"`
 currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 logfile="/startup/vmstartup.log"
-kvCertFolder="/var/lib/waagent/Microsoft.Azure.KeyVault"
+kvCertFolder="/var/lib/waagent/Microsoft.Azure.KeyVault.Store"
 msdsPort=8130
 
 configure_gcs(){
     sudo systemctl stop mdsd
 
-    mdsdDir="/etc/mdsd.d"
     mdmDir="$currentDir/mdm"
-    gcsCertCertFileName="gcscert.pem"
-    gcsCertKeyFileName="gcskey.pem"
     mdmCertCertFileName="mdm-cert.pem"
     mdmCertKeyFileName="mdm-key.pem"
-    mdsdStartupScript="/etc/default/mdsd"
 
     kvName=$(<$currentDir/vault-name.txt)
     if [ "$kvName" = "" ]; then
@@ -29,25 +26,12 @@ configure_gcs(){
     echo `date` "[liftr | startgeneva.sh] Certificates on disk:" | tee -a $logfile
     sudo ls $kvCertFolder  | tee -a $logfile
 
-    sudo rm -f $mdsdDir/$gcsCertCertFileName
-    sudo rm -f $mdsdDir/$gcsCertKeyFileName
-
     pemFileName="$kvName.GenevaClientCert"
-    sudo cp $kvCertFolder/$pemFileName $mdsdDir/$gcsCertCertFileName
-    sudo cp $kvCertFolder/$pemFileName $mdsdDir/$gcsCertKeyFileName
     sudo cp $kvCertFolder/$pemFileName $mdmDir/$mdmCertCertFileName
     sudo cp $kvCertFolder/$pemFileName $mdmDir/$mdmCertKeyFileName
 
-    sudo chown syslog $mdsdDir/$gcsCertKeyFileName
-    sudo chmod 644 $mdsdDir/$gcsCertCertFileName
-    sudo chmod 644 $mdsdDir/$gcsCertKeyFileName
     sudo chmod 644 $mdmDir/$mdmCertCertFileName
     sudo chmod 644 $mdmDir/$mdmCertKeyFileName
-
-    echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" | tee -a $logfile
-    echo `date` "[liftr | startgeneva.sh] sudo ls -l $mdsdDir" | tee -a $logfile
-    sudo ls -l $mdsdDir | tee -a $logfile
-    echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" | tee -a $logfile
 
     # Remove old MDSD startup file
     sudo rm -f /etc/default/mdsd | tee -a $logfile

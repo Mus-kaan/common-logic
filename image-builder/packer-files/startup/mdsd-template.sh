@@ -44,16 +44,6 @@ export MONITORING_GCS_ACCOUNT=PLACEHOLDER_MONITORING_GCS_ACCOUNT
 #export MONITORING_GCS_REGION="$(curl -H Metadata:True --silent $imdsURL)"
 export MONITORING_GCS_REGION=PLACEHOLDER_MONITORING_GCS_REGION
 
-# REQUIRED
-# Full path to public certificate file used to authenticate mdsd with GCS service.
-#
-export MONITORING_GCS_CERT_CERTFILE=/etc/mdsd.d/gcscert.pem
-
-# REQUIRED
-# Full path to the private key file used to authenticate mdsd with GCS service.
-#
-export MONITORING_GCS_CERT_KEYFILE=/etc/mdsd.d/gcskey.pem
-
 # Below are to enable GCS config download. Update for your namespace and config version.
 export MONITORING_GCS_NAMESPACE=PLACEHOLDER_MONITORING_GCS_NAMESPACE
 export MONITORING_CONFIG_VERSION=PLACEHOLDER_MONITORING_CONFIG_VERSION
@@ -62,3 +52,9 @@ export MONITORING_USE_GENEVA_CONFIG_SERVICE=true
 export MONITORING_TENANT=PLACEHOLDER_MONITORING_TENANT
 export MONITORING_ROLE=PLACEHOLDER_MONITORING_ROLE
 export MONITORING_ROLE_INSTANCE=PLACEHOLDER_MONITORING_ROLE_INSTANCE
+
+# The below uses the key vault extension to load the GCS certificate.
+#  mdsd will automatically use the new rotated certificate.
+# https://genevamondocs.azurewebsites.net/collect/authentication/keyvault.html#use-the-akv-certificate-in-geneva-logs
+export MONITORING_GCS_AUTH_ID_TYPE=AuthKeyVault
+export MONITORING_GCS_AUTH_ID=PLACEHOLDER_GENEVA_CERT_SAN
