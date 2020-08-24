@@ -544,7 +544,7 @@ namespace Microsoft.Liftr.EV2
                         Type = ArtifactConstants.c_EV2ShellExtensionType,
                         Properties = new ShellProperties()
                         {
-                            MaxExecutionTime = "PT40M",
+                            MaxExecutionTime = "PT100M",
                         },
                         Package = new ShellPackage()
                         {
