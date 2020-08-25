@@ -68,6 +68,8 @@ else
     CDPXACRResourceId="/subscriptions/e9d570ed-cf13-4347-83e3-3938b8d65a41/resourceGroups/cdpx-acr-ame-wus/providers/Microsoft.ContainerRegistry/registries/cdpxlinuxame"
 fi
 
+echo "Start importing docker images from CDPx's ACR. The access need to be granted for the EV2 MI: https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/1909/Self-serve-ACR-Access"
+
 for imgMetaData in $ImageMetadataDir/*.json
 do
     fileName="$(basename $imgMetaData)"
