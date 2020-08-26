@@ -38,7 +38,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             + "y6KnZjoLknnRoeJUSyZE2UtRF6tpkoGu3PhqZBmx7 limingu@Limins-MacBook-Pro.local";
 
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);
-            var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USEast);
+            var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USWest2);
             TestCommon.AddCommonTags(context.Tags);
 
             var globalBaseName = "gbl";
