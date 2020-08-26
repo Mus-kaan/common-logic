@@ -47,7 +47,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                         name,
                         rootUserName,
                         sshPublicKey,
-                        ContainerServiceVMSizeTypes.StandardDS2,
+                        ContainerServiceVMSizeTypes.StandardDS2V2,
                         vmCount,
                         TestCommon.Tags,
                         agentPoolProfileName: "sp-dev");
@@ -59,7 +59,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                         name,
                         rootUserName,
                         sshPublicKey,
-                        ContainerServiceVMSizeTypes.StandardDS2,
+                        ContainerServiceVMSizeTypes.StandardDS2V2,
                         vmCount,
                         TestCommon.Tags,
                         agentPoolProfileName: "spdev");
@@ -109,7 +109,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     name,
                     rootUserName,
                     sshPublicKey,
-                    ContainerServiceVMSizeTypes.StandardDS2,
+                    ContainerServiceVMSizeTypes.StandardDS2V2,
                     vmCount,
                     TestCommon.Tags,
                     subnet: subnet1,
