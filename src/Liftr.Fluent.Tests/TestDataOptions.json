@@ -1,10 +1,9 @@
 {
   "ActiveDBKeyName": "Primary MongoDB Connection String",
-  "GlobalKeyVaultResourceId": "/subscriptions/60fad35b-3a47-4ca0-b691-4a789f737cea/resourceGroups/ib-test-gbl1910-cus-rg/providers/Microsoft.KeyVault/vaults/ibtestgbl1910cuskv",
-  "DomainName": "sample-12345.liftr-dev.net",
-  "DNSZoneId": "/subscriptions/60fad35b-3a47-4ca0-b691-4a789f737cea/resourceGroups/ib-test-gbl1910-cus-rg/providers/Microsoft.Network/dnszones/sample-12345.liftr-dev.net",
-  "CopyKVSecretsWithPrefix": "Nginx",
-  "SecretPrefix": "NginxRP",
+  "GlobalKeyVaultResourceId": "/subscriptions/f885cf14-b751-43c1-9536-dc5b1be02bc0/resourceGroups/ut-test-gbl200701-cus-rg/providers/Microsoft.KeyVault/vaults/uttestgbl200701cuskv",
+  "DomainName": "sample-partner-test-ame.azliftr-test.io",
+  "DNSZoneId": "/subscriptions/f885cf14-b751-43c1-9536-dc5b1be02bc0/resourceGroups/ut-test-gbl200701-cus-rg/providers/Microsoft.Network/dnszones/sample-partner-test-ame.azliftr-test.io",
+  "SecretPrefix": "UnitTestRP",
   "OneCertCertificates": {
     "GenevaClientCert": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
     "ClientCert": "antares-mds-agent.geneva.keyvault.liftr-dev.net"

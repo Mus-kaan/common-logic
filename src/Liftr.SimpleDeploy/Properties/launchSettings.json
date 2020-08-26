@@ -65,21 +65,21 @@
     },
     "ut_1_global-resource": {
       "commandName": "Project",
-      "commandLineArgs": "-a CreateOrUpdateGlobal -f unit-test-hosting-options.json -e Test -r global --authFile liftr-unit-test-20191001-ame.auth.json",
+      "commandLineArgs": "-a CreateOrUpdateGlobal -f unit-test-hosting-options.json -e Test -r global --authFile liftr-ms-unit-test-only.auth.json",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "AMEDev"
       }
     },
     "ut_2_eastus-data": {
       "commandName": "Project",
-      "commandLineArgs": "-a CreateOrUpdateRegionalData -f unit-test-hosting-options.json -e Test -r eastus --authFile liftr-unit-test-20191001-ame.auth.json --activeKey \"Primary MongoDB Connection String\"",
+      "commandLineArgs": "-a CreateOrUpdateRegionalData -f unit-test-hosting-options.json -e Test -r eastus --authFile liftr-ms-unit-test-only.auth.json --activeKey \"Primary MongoDB Connection String\"",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "AMEDev"
       }
     },
     "ut_3_eastus-compute": {
       "commandName": "Project",
-      "commandLineArgs": "-a CreateOrUpdateRegionalCompute -f unit-test-hosting-options.json -e Test -r eastus --authFile liftr-unit-test-20191001-ame.auth.json",
+      "commandLineArgs": "-a CreateOrUpdateRegionalCompute -f unit-test-hosting-options.json -e Test -r eastus --authFile liftr-ms-unit-test-only.auth.json",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "AMEDev"
       }
