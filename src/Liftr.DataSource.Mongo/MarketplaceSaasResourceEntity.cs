@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.Utilities;
 using MongoDB.Bson;
@@ -24,6 +25,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
             BillingTermType = billingTermType;
         }
 
+        [BsonId]
         [BsonElement("mp_sub")]
         [BsonSerializer(typeof(MarketplaceSubscriptionSerializer))]
         public MarketplaceSubscription MarketplaceSubscription { get; set; }
@@ -34,6 +36,19 @@ namespace Microsoft.Liftr.DataSource.Mongo
         [BsonElement("bill_ttype")]
         [BsonRepresentation(BsonType.String)]
         public BillingTermTypes BillingTermType { get; set; }
+
+        [BsonElement("createdAt")]
+        public DateTime CreatedUTC { get; set; } = LiftrDateTime.MinValue;
+
+        [BsonElement("lastModified")]
+        public DateTime LastModifiedUTC { get; set; } = LiftrDateTime.MinValue;
+
+        /// <summary>
+        /// When the entity is deleted, this will be marked as false.
+        /// The actual deletion happened after a fixed time interval.
+        /// </summary>
+        [BsonElement("active")]
+        public bool Active { get; set; } = true;
     }
 
     public class MarketplaceSubscriptionSerializer : IBsonSerializer<MarketplaceSubscription>

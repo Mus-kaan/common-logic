@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.Contracts.Marketplace;
 
 namespace Microsoft.Liftr.DataSource.Mongo
 {
@@ -11,6 +12,6 @@ namespace Microsoft.Liftr.DataSource.Mongo
     /// </summary>
     public interface IMarketplaceResourceContainerEntity : IResourceEntity
     {
-        MarketplaceSaasResourceEntity MarketplaceSaasResource { get; set; }
+        MarketplaceSubscription MarketplaceSubscription { get; set; }
     }
 }

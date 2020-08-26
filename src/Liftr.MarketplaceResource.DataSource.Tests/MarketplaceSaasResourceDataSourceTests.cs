@@ -14,19 +14,19 @@ using Xunit;
 
 namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
 {
-    public sealed class MarketplaceResourceEntityDataSourceTests : IDisposable
+    public sealed class MarketplaceSaasResourceDataSourceTests : IDisposable
     {
-        private readonly TestCollectionScope<MarketplaceResourceContainerEntity> _collectionScope;
+        private readonly TestCollectionScope<MarketplaceSaasResourceEntity> _collectionScope;
 
-        public MarketplaceResourceEntityDataSourceTests()
+        public MarketplaceSaasResourceDataSourceTests()
         {
             var option = new MockMongoOptions() { ConnectionString = TestDBConnection.TestMongodbConStr, DatabaseName = TestDBConnection.TestDatabaseName };
             var collectionFactory = new MongoCollectionsFactory(option, LoggerFactory.VoidLogger);
-            _collectionScope = new TestCollectionScope<MarketplaceResourceContainerEntity>((db, collectionName) =>
+            _collectionScope = new TestCollectionScope<MarketplaceSaasResourceEntity>((db, collectionName) =>
             {
 #pragma warning disable CS0618 // Type or member is obsolete
 #pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-                var collection = collectionFactory.GetOrCreateEntityCollectionAsync<MarketplaceResourceContainerEntity>(collectionName).Result;
+                var collection = collectionFactory.GetOrCreateMarketplaceEntityCollectionAsync(collectionName).Result;
 #pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
 #pragma warning restore CS0618 // Type or member is obsolete
                 return collection;
@@ -43,11 +43,9 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
         {
             var ts = new MockTimeSource();
             using var rateLimiter = new MongoWaitQueueRateLimiter(100, TestLogger.VoidLogger);
-            var dataSource = new MarketplaceResourceContainerEntityDataSource(_collectionScope.Collection, rateLimiter, ts);
+            var dataSource = new MarketplaceSaasResourceDataSource(_collectionScope.Collection, rateLimiter, ts);
 
-            var rid = "/subscriptions/b0a321d2-3073-44f0-b012-6e60db53ae22/resourceGroups/ngx-test-sbi0920-eus-rg/providers/Microsoft.Storage/storageAccounts/stngxtestsbi0920eus";
             var marketplaceSubscription = new MarketplaceSubscription(Guid.NewGuid());
-            var tenantId = "testTenantId";
             var saasResource = new MarketplaceSaasResourceEntity(
                 marketplaceSubscription,
                 new MarketplaceSubscriptionDetails()
@@ -61,28 +59,18 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
                 },
                 BillingTermTypes.Monthly);
 
-            var marketplaceResourceEntity = new MarketplaceResourceContainerEntity(saasResource, rid, tenantId);
-            var entity1 = await dataSource.AddAsync(marketplaceResourceEntity);
+            var entity1 = await dataSource.AddAsync(saasResource);
 
             // Can retrieve.
             {
-                var retrieved = await dataSource.GetAsync(entity1.EntityId);
+                var retrieved = await dataSource.GetAsync(marketplaceSubscription);
 
-                Assert.Equal(rid.ToUpperInvariant(), retrieved.ResourceId);
-                Assert.Equal(marketplaceSubscription.Id, retrieved.MarketplaceSaasResource.MarketplaceSubscription.Id);
+                Assert.Equal(marketplaceSubscription, retrieved.MarketplaceSubscription);
+                retrieved.SubscriptionDetails.Should().BeEquivalentTo(saasResource.SubscriptionDetails);
 
                 var exceptedStr = entity1.ToJson();
                 var actualStr = retrieved.ToJson();
                 Assert.Equal(exceptedStr, actualStr);
-            }
-
-            // Can retrieve by marketplace subscription id.
-            {
-                var retrieved = await dataSource.GetEntityForMarketplaceSubscriptionAsync(marketplaceSubscription);
-                Assert.Equal(rid.ToUpperInvariant(), retrieved.ResourceId);
-                Assert.Equal(marketplaceSubscription, retrieved.MarketplaceSaasResource.MarketplaceSubscription);
-                retrieved.MarketplaceSaasResource.SubscriptionDetails.Should().BeEquivalentTo(saasResource.SubscriptionDetails);
-                Assert.Equal(tenantId, retrieved.TenantId);
             }
         }
     }

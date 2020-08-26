@@ -18,7 +18,6 @@ using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.Hosting.Swagger;
 using Microsoft.Liftr.IFxAuditLinux;
 using Microsoft.Liftr.MarketplaceResource.DataSource;
-using Microsoft.Liftr.MarketplaceResource.DataSource.Interfaces;
 using Microsoft.Liftr.Queue;
 using Microsoft.Liftr.TokenManager;
 using Microsoft.Liftr.TokenManager.Options;
@@ -113,7 +112,7 @@ namespace Microsoft.Liftr.Sample.Web
                 }
             });
 
-            services.AddSingleton<IMarketplaceResourceContainerEntityDataSource, MarketplaceResourceContainerEntityDataSource>((sp) =>
+            services.AddSingleton<IMarketplaceSaasResourceDataSource, MarketplaceSaasResourceDataSource>((sp) =>
             {
                 var logger = sp.GetService<Serilog.ILogger>();
 
@@ -122,13 +121,10 @@ namespace Microsoft.Liftr.Sample.Web
                     var timeSource = sp.GetService<ITimeSource>();
                     var factory = sp.GetService<MongoCollectionsFactory>();
 #pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-                    var collection = factory.GetOrCreateMarketplaceEntityCollectionAsync<MarketplaceResourceContainerEntity>("resource-metadata-entity").Result;
+                    var collection = factory.GetOrCreateMarketplaceEntityCollectionAsync("resource-metadata-entity").Result;
 #pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
 
-                    var marketplaceSubscriptionIdx = new CreateIndexModel<MarketplaceResourceContainerEntity>(Builders<MarketplaceResourceContainerEntity>.IndexKeys.Ascending(item => item.MarketplaceSaasResource.MarketplaceSubscription.Id), new CreateIndexOptions<MarketplaceResourceContainerEntity> { Unique = false });
-                    collection.Indexes.CreateOne(marketplaceSubscriptionIdx);
-
-                    return new MarketplaceResourceContainerEntityDataSource(collection, factory.MongoWaitQueueProtector, timeSource);
+                    return new MarketplaceSaasResourceDataSource(collection, factory.MongoWaitQueueProtector, timeSource);
                 }
                 catch (Exception ex)
                 {
