@@ -12,6 +12,12 @@ namespace Microsoft.Liftr
     {
         public SkipInOfficialBuildAttribute(bool skipLinux = false)
         {
+            // Local debug will not skip the unit test.
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                return;
+            }
+
             SkipLinux = skipLinux;
 
             if (skipLinux && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
