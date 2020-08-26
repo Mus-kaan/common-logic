@@ -7,6 +7,7 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using System;
 using System.Threading.Tasks;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Fluent.Tests
@@ -34,9 +35,9 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var st = await az.GetOrCreateStorageAccountAsync(TestCommon.Location, scope.ResourceGroupName, name, TestCommon.Tags);
                     var containerName1 = "test-containername1";
 
-                    await az.DelegateStorageKeyOperationToKeyVaultAsync(rg);
-                    await az.DelegateStorageKeyOperationToKeyVaultAsync(st);
-
+                    // The kv FPA object Id is no configured programatically for now.
+                    // await az.DelegateStorageKeyOperationToKeyVaultAsync(rg);
+                    // await az.DelegateStorageKeyOperationToKeyVaultAsync(st);
                     var connectionStr = await st.GetPrimaryConnectionStringAsync();
                     var stor = CloudStorageAccount.Parse(connectionStr);
                     CloudBlobClient blobClient = stor.CreateCloudBlobClient();
