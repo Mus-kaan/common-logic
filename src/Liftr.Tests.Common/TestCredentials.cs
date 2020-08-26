@@ -14,9 +14,9 @@ namespace Microsoft.Liftr
 {
     public static class TestCredentials
     {
-        public const string SharedKeyVaultResourceId = "/subscriptions/60fad35b-3a47-4ca0-b691-4a789f737cea/resourcegroups/unit-test-shared-rg/providers/Microsoft.KeyVault/vaults/tests-shared-eus-rg";
+        public const string SharedKeyVaultResourceId = "/subscriptions/f885cf14-b751-43c1-9536-dc5b1be02bc0/resourceGroups/unit-test-shared-wus2-rg/providers/Microsoft.KeyVault/vaults/tests-shared-wus2-kv";
 
-        public const string SharedKeyVaultUri = "https://tests-shared-eus-rg.vault.azure.net/";
+        public const string SharedKeyVaultUri = "https://tests-shared-wus2-kv.vault.azure.net/";
 
         // TODO: figure out a better way to access the credentials in CDPx.
         // This is the auth file for a totally separated subscription. It only contains unit test related stuffs.

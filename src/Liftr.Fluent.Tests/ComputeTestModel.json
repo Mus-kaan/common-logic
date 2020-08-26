@@ -9,7 +9,7 @@
     "AKSMachineType": "Standard_DS2_v2"
   },
   "VMSS": {
-    "GalleryImageVersionId": "/subscriptions/60fad35b-3a47-4ca0-b691-4a789f737cea/resourceGroups/LIBUnitTestRG/providers/Microsoft.Compute/galleries/LIBUnitTestDIG/images/U1804LTS/versions/0.1.1157598614"
+    "GalleryImageVersionId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/LiftrComDevImgRG/providers/Microsoft.Compute/galleries/LiftrComDevSIG/images/ComDevSBI/versions/0.6.13331211"
   },
   "GenevaCert": {
     "CertificateName": "GenevaClientCert",
