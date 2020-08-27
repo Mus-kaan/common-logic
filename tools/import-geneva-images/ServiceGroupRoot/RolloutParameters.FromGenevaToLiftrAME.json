@@ -1,0 +1,37 @@
+{
+  "shellExtensions": [
+    {
+      "name": "liftr-shell-action",
+      "type": "LiftrCustomShellExtension",
+      "properties": {
+        "skipDeleteAfterExecution": false,
+        "maxExecutionTime": "PT120M"
+      },
+      "package": {
+        "reference": {
+          "path": "ev2-extension.tar",
+          "parameters": {}
+        }
+      },
+      "launch": {
+        "command": [
+          "ImportGenevaImages.sh"
+        ],
+        "environmentVariables": [
+          {
+            "name": "IsFromGeneva2AME",
+            "value": "true"
+          }
+        ],
+        "identity": {
+          "type": "UserAssigned",
+          "userAssignedIdentities": [
+            "/subscriptions/d8f298fb-60f5-4676-a7d3-25442ec5ce1e/resourceGroups/ev2-df-wus-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ev2-df-shell-wus-msi"
+          ]
+        }
+      }
+    }
+  ],
+  "$schema": "http://schema.express.azure.com/schemas/2015-01-01-alpha/RolloutParameters.json",
+  "contentVersion": "1.0.0.0"
+}

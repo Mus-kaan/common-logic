@@ -100,6 +100,14 @@ package:
           to: "ev2-base-image"
           include:
             - "**/*"
+    - !!buildcommand
+      name: "Pack EV2 import Geneva image shell extension"
+      command: "build/liftr-run-linux-pack-import-geneva.sh"
+      artifacts:
+        - from: "out-ev2-import-geneva"
+          to: "ev2-import-geneva"
+          include:
+            - "**/*"
 
 static_analysis_options: # OPTIONAL: If you wish to add options to FxCop, ModernCop, PoliCheck, or BinSkim
   binskim_options: # OPTIONAL: If you want to add options for BinSkim.
