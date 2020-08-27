@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Newtonsoft.Json;
+using System;
 
 namespace Microsoft.Liftr.Contracts.Marketplace
 {
@@ -30,32 +31,11 @@ namespace Microsoft.Liftr.Contracts.Marketplace
         /// </summary>
         [JsonProperty("termUnit")]
         public string TermUnit { get; set; }
-    }
 
-    public class MarketplaceSubscriptionDetails
-    {
-        [JsonProperty("name")]
-        public string Name { get; set; }
+        [JsonProperty("startDate")]
+        public DateTime? StartDate { get; set; }
 
-        [JsonProperty("id")]
-        public string Id { get; set; }
-
-        [JsonProperty("planId")]
-        public string PlanId { get; set; }
-
-        [JsonProperty("offerId")]
-        public string OfferId { get; set; }
-
-        [JsonProperty("publisherId")]
-        public string PublisherId { get; set; }
-
-        [JsonProperty("beneficiary")]
-        public SaasBeneficiary Beneficiary { get; set; }
-
-        [JsonProperty("term")]
-        public SubscriptionTerm Term { get; set; }
-
-        [JsonProperty("quantity")]
-        public int? Quantity { get; set; }
+        [JsonProperty("endDate")]
+        public DateTime? EndDate { get; set; }
     }
 }
