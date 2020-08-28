@@ -48,7 +48,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
             var marketplaceSubscription = new MarketplaceSubscription(Guid.NewGuid());
             var saasResource = new MarketplaceSaasResourceEntity(
                 marketplaceSubscription,
-                new MarketplaceSubscriptionDetails()
+                new MarketplaceSubscriptionDetailsEntity()
                 {
                     Name = "test-name",
                     PlanId = "planid",

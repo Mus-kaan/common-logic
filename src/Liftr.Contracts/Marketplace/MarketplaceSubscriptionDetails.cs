@@ -47,10 +47,10 @@ namespace Microsoft.Liftr.Contracts.Marketplace
         public int? Quantity { get; set; }
 
         [JsonProperty("saasSubscriptionStatus")]
-        public SaasSubscriptionStatus SaasSubscriptionStatus { get; set; }
+        public virtual SaasSubscriptionStatus SaasSubscriptionStatus { get; set; }
 
         [JsonProperty("additionalMetadata")]
-        public SaasAdditionalMetadata AdditionalMetadata { get; set; }
+        public virtual SaasAdditionalMetadata AdditionalMetadata { get; set; }
 
         #region sample
         /*
@@ -109,6 +109,6 @@ namespace Microsoft.Liftr.Contracts.Marketplace
 
     public class SaasAdditionalMetadata
     {
-        public Guid AzureSubscriptionId { get; set; }
+        public string AzureSubscriptionId { get; set; }
     }
 }

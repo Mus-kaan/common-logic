@@ -8,6 +8,7 @@ using Microsoft.Liftr.Utilities;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
 using System;
 
 namespace Microsoft.Liftr.DataSource.Mongo
@@ -17,7 +18,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
     {
         public MarketplaceSaasResourceEntity(
             MarketplaceSubscription marketplaceSubscription,
-            MarketplaceSubscriptionDetails subscriptionDetails,
+            MarketplaceSubscriptionDetailsEntity subscriptionDetails,
             BillingTermTypes billingTermType)
         {
             MarketplaceSubscription = marketplaceSubscription ?? throw new ArgumentNullException(nameof(marketplaceSubscription));
@@ -88,6 +89,43 @@ namespace Microsoft.Liftr.DataSource.Mongo
         object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
             return Deserialize(context, args);
+        }
+    }
+
+    /// <summary>
+    /// This class is used to add the BsonSerialization properties to the MarketplaceSubscriptionDetails
+    /// </summary>
+    public class MarketplaceSubscriptionDetailsEntity : MarketplaceSubscriptionDetails
+    {
+        [JsonProperty("saasSubscriptionStatus")]
+        [BsonElement("saas_sub_status")]
+        [BsonRepresentation(BsonType.String)]
+        public override SaasSubscriptionStatus SaasSubscriptionStatus { get; set; }
+
+        [JsonProperty("additionalMetadata")]
+        [BsonElement("add_metadata")]
+        public override SaasAdditionalMetadata AdditionalMetadata { get; set; }
+
+        public static MarketplaceSubscriptionDetailsEntity From(MarketplaceSubscriptionDetails marketplaceSubscriptionDetails)
+        {
+            if (marketplaceSubscriptionDetails == null)
+            {
+                throw new ArgumentNullException(nameof(marketplaceSubscriptionDetails));
+            }
+
+            return new MarketplaceSubscriptionDetailsEntity()
+            {
+                Name = marketplaceSubscriptionDetails.Name,
+                OfferId = marketplaceSubscriptionDetails.OfferId,
+                PublisherId = marketplaceSubscriptionDetails.PublisherId,
+                SaasSubscriptionStatus = marketplaceSubscriptionDetails.SaasSubscriptionStatus,
+                AdditionalMetadata = marketplaceSubscriptionDetails.AdditionalMetadata,
+                Term = marketplaceSubscriptionDetails.Term,
+                Id = marketplaceSubscriptionDetails.Id,
+                PlanId = marketplaceSubscriptionDetails.PlanId,
+                Beneficiary = marketplaceSubscriptionDetails.Beneficiary,
+                Quantity = marketplaceSubscriptionDetails.Quantity,
+            };
         }
     }
 }
