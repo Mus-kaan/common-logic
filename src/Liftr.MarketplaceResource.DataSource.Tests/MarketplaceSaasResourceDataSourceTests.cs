@@ -46,17 +46,20 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
             var dataSource = new MarketplaceSaasResourceDataSource(_collectionScope.Collection, rateLimiter, ts);
 
             var marketplaceSubscription = new MarketplaceSubscription(Guid.NewGuid());
+            var subscriptionDetails = new MarketplaceSubscriptionDetails()
+            {
+                Name = "test-name",
+                PlanId = "planid",
+                OfferId = "offerId",
+                PublisherId = "publisherId",
+                Beneficiary = new SaasBeneficiary() { TenantId = "tenantId" },
+                Id = marketplaceSubscription.ToString(),
+                SaasSubscriptionStatus = SaasSubscriptionStatus.Subscribed,
+            };
+
             var saasResource = new MarketplaceSaasResourceEntity(
                 marketplaceSubscription,
-                new MarketplaceSubscriptionDetailsEntity()
-                {
-                    Name = "test-name",
-                    PlanId = "planid",
-                    OfferId = "offerId",
-                    PublisherId = "publisherId",
-                    Beneficiary = new SaasBeneficiary() { TenantId = "tenantId" },
-                    Id = marketplaceSubscription.ToString(),
-                },
+                MarketplaceSubscriptionDetailsEntity.From(subscriptionDetails),
                 BillingTermTypes.Monthly);
 
             var entity1 = await dataSource.AddAsync(saasResource);
@@ -66,7 +69,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
                 var retrieved = await dataSource.GetAsync(marketplaceSubscription);
 
                 Assert.Equal(marketplaceSubscription, retrieved.MarketplaceSubscription);
-                retrieved.SubscriptionDetails.Should().BeEquivalentTo(saasResource.SubscriptionDetails);
+                retrieved.SubscriptionDetails.ToJson().Should().Be(subscriptionDetails.ToJson());
 
                 var exceptedStr = entity1.ToJson();
                 var actualStr = retrieved.ToJson();

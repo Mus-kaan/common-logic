@@ -32,7 +32,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
         public MarketplaceSubscription MarketplaceSubscription { get; set; }
 
         [BsonElement("mp_sub_det")]
-        public MarketplaceSubscriptionDetails SubscriptionDetails { get; set; }
+        public MarketplaceSubscriptionDetailsEntity SubscriptionDetails { get; set; }
 
         [BsonElement("bill_ttype")]
         [BsonRepresentation(BsonType.String)]
@@ -95,16 +95,47 @@ namespace Microsoft.Liftr.DataSource.Mongo
     /// <summary>
     /// This class is used to add the BsonSerialization properties to the MarketplaceSubscriptionDetails
     /// </summary>
-    public class MarketplaceSubscriptionDetailsEntity : MarketplaceSubscriptionDetails
+    public class MarketplaceSubscriptionDetailsEntity
     {
+        [JsonProperty("name")]
+        [BsonElement("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("planId")]
+        [BsonElement("plan_id")]
+        public string PlanId { get; set; }
+
+        [JsonProperty("offerId")]
+        [BsonElement("offer_id")]
+        public string OfferId { get; set; }
+
+        [JsonProperty("publisherId")]
+        [BsonElement("publisher_id")]
+        public string PublisherId { get; set; }
+
+        [JsonProperty("beneficiary")]
+        [BsonElement("beneficiary")]
+        public SaasBeneficiary Beneficiary { get; set; }
+
+        [JsonProperty("term")]
+        [BsonElement("term")]
+        public SubscriptionTerm Term { get; set; }
+
+        [JsonProperty("quantity")]
+        [BsonElement("qty")]
+        public int? Quantity { get; set; }
+
         [JsonProperty("saasSubscriptionStatus")]
         [BsonElement("saas_sub_status")]
         [BsonRepresentation(BsonType.String)]
-        public override SaasSubscriptionStatus SaasSubscriptionStatus { get; set; }
+        public SaasSubscriptionStatus SaasSubscriptionStatus { get; set; }
 
         [JsonProperty("additionalMetadata")]
         [BsonElement("add_metadata")]
-        public override SaasAdditionalMetadata AdditionalMetadata { get; set; }
+        public SaasAdditionalMetadata AdditionalMetadata { get; set; }
 
         public static MarketplaceSubscriptionDetailsEntity From(MarketplaceSubscriptionDetails marketplaceSubscriptionDetails)
         {
