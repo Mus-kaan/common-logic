@@ -4,8 +4,6 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using System;
-using System.Dynamic;
 
 namespace Microsoft.Liftr.Contracts.Marketplace
 {
