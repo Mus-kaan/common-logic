@@ -11,6 +11,7 @@ using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
+using Microsoft.Liftr.Hosting.Contracts;
 using Microsoft.Liftr.KeyVault;
 using Microsoft.Rest.Azure;
 using System;

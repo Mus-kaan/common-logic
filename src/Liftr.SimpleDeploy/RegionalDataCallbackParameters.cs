@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Fluent.Provisioning;
+using Microsoft.Liftr.Hosting.Contracts;
 
 namespace Microsoft.Liftr.SimpleDeploy
 {

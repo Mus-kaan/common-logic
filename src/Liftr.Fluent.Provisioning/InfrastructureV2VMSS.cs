@@ -9,6 +9,7 @@ using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Network.Fluent.Models;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent.Contracts;
+using Microsoft.Liftr.Hosting.Contracts;
 using Microsoft.Liftr.KeyVault;
 using Microsoft.Liftr.Utilities;
 using System;

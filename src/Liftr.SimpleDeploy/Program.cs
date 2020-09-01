@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.GenericHosting;
+using Microsoft.Liftr.Hosting.Contracts;
 using Microsoft.Liftr.Logging.GenericHosting;
 using Serilog.Context;
 using System;

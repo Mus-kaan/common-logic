@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
+using Microsoft.Liftr.Hosting.Contracts;
 using System;
 using System.IO;
 using System.Threading.Tasks;

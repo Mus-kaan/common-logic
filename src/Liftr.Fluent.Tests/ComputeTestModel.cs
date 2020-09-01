@@ -4,6 +4,7 @@
 
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
+using Microsoft.Liftr.Hosting.Contracts;
 
 namespace Microsoft.Liftr.Fluent.Tests
 {

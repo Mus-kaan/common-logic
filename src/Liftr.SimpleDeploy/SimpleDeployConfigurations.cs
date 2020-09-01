@@ -4,6 +4,7 @@
 
 using Microsoft.Azure.KeyVault;
 using Microsoft.Liftr.Fluent;
+using Microsoft.Liftr.Hosting.Contracts;
 
 namespace Microsoft.Liftr.SimpleDeploy
 {

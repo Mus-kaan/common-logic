@@ -10,6 +10,7 @@ using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent.Contracts;
+using Microsoft.Liftr.Hosting.Contracts;
 using Microsoft.Liftr.KeyVault;
 using Serilog;
 using System;

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
+using Microsoft.Liftr.Hosting.Contracts;
 using Microsoft.Rest.Azure;
 using System;
 using System.IO;

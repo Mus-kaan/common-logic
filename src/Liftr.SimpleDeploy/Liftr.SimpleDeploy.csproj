@@ -18,6 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Fluent.Provisioning\Liftr.Fluent.Provisioning.csproj" />
+    <ProjectReference Include="..\Liftr.Hosting.Contracts\Liftr.Hosting.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.Logging.GenericHosting\Liftr.Logging.GenericHosting.csproj" />
   </ItemGroup>
   <ItemGroup>
