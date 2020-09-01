@@ -5,8 +5,10 @@
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DataSource.Mongo;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.MarketplaceResource.DataSource
@@ -67,15 +69,14 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource
             }
         }
 
-        /* To do: Needs to be added
-        public virtual async Task<IEnumerable<MarketplaceSaasResourceEntity>> ListAsync(bool showActiveOnly = true)
+        public virtual async Task<IEnumerable<MarketplaceSaasResourceEntity>> GetAllResourcesAsync(bool showActiveOnly = true)
         {
             var builder = Builders<MarketplaceSaasResourceEntity>.Filter;
-            var filter = builder.
+            var filter = builder.Empty;
 
             if (showActiveOnly)
             {
-                var filter = builder.Eq(u => u.Active, true);
+                filter = builder.Eq(u => u.Active, true);
             }
 
             await _rateLimiter.WaitAsync();
@@ -88,7 +89,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource
             {
                 _rateLimiter.Release();
             }
-        } */
+        }
 
         public virtual async Task<bool> SoftDeleteAsync(MarketplaceSubscription marketplaceSubscription)
         {
