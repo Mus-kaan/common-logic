@@ -303,6 +303,7 @@ contentFiles
 *.auth.json
 buildtools/
 out-ev2/
+out-ev2-global/
 out-ev2-vmss/
 out-ev2-base-image/
 out-ev2-import-geneva/

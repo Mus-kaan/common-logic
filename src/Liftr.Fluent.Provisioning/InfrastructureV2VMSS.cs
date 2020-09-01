@@ -388,28 +388,26 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             return provisionedResources;
         }
 
-        public async Task<(IVirtualMachineScaleSet vmss, ILoadBalancer lb, IPublicIPAddress pip)> GetRegionalVMSSResourcesAsync(
-            NamingContext namingContext,
-            RegionalComputeOptions computeOptions)
+        public async Task<(IVirtualMachineScaleSet vmss, ILoadBalancer lb, IPublicIPAddress pip)> GetRegionalVMSSResourcesAsync(NamingContext namingContext, string computeBaseName)
         {
             if (namingContext == null)
             {
                 throw new ArgumentNullException(nameof(namingContext));
             }
 
-            if (computeOptions == null)
+            if (string.IsNullOrEmpty(computeBaseName))
             {
-                throw new ArgumentNullException(nameof(computeOptions));
+                throw new ArgumentNullException(nameof(computeBaseName));
             }
 
-            var rgName = namingContext.ResourceGroupName(computeOptions.ComputeBaseName);
-            var vmssName = namingContext.VMSSName(computeOptions.ComputeBaseName);
+            var rgName = namingContext.ResourceGroupName(computeBaseName);
+            var vmssName = namingContext.VMSSName(computeBaseName);
 
             var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
 
             await liftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
 
-            var lbName = namingContext.PublicLoadBalancerName(computeOptions.ComputeBaseName);
+            var lbName = namingContext.PublicLoadBalancerName(computeBaseName);
             var publicLoadBalancer = await liftrAzure.FluentClient.LoadBalancers.GetByResourceGroupAsync(rgName, lbName);
 
             IPublicIPAddress pip = null;

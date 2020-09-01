@@ -83,6 +83,27 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "AMEDev"
       }
+    },
+    "gbl_1_global-resource": {
+      "commandName": "Project",
+      "commandLineArgs": "-a CreateOrUpdateGlobal -f global-hosting-options.json -e Dev -r global --authFile liftr-ms-unit-test-only.auth.json",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "gbl_2_data_westus2": {
+      "commandName": "Project",
+      "commandLineArgs": "-a CreateOrUpdateRegionalData -f global-hosting-options.json -e Dev -r westus2 --authFile liftr-ms-unit-test-only.auth.json --activeKey \"Primary MongoDB Connection String\"",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "gbl_3_compute-southcentralus": {
+      "commandName": "Project",
+      "commandLineArgs": "-a CreateOrUpdateRegionalCompute -f global-hosting-options.json -e Dev -r southcentralus --authFile liftr-ms-unit-test-only.auth.json",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     }
   }
 }

@@ -1,0 +1,20 @@
+{
+  "ServiceTreeName": "Sample Service Tree Name",
+  "ServiceTreeId": "c40f3dd2-9bf7-4d98-a2e3-48bcdc77dcd6",
+  "NotificationEmail": "your-email-address@microsoft.com",
+  "TargetEnvironments": [
+    {
+      "EnvironmentName": "Dev",
+      "RunnerInformation": {
+        "Location": "West US",
+        "SubscriptionId": "eebfbfdb-4167-49f6-be43-466a6709609f",
+        "UserAssignedManagedIdentityResourceId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/ms-ev2-msi-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/liftr-ev2-ms-msi",
+        "UserAssignedManagedIdentityObjectId": "bb8eb613-5ffd-4ece-b7c2-6821b19a69c2"
+      },
+      "Regions": [
+        "South Central US",
+        "East US"
+      ]
+    }
+  ]
+}

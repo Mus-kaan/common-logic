@@ -4,12 +4,17 @@
 
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.ContainerRegistry.Fluent;
+using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
+using Microsoft.Azure.Management.Msi.Fluent;
+using Microsoft.Azure.Management.Storage.Fluent;
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.KeyVault;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent.Provisioning
@@ -83,7 +88,95 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
         }
 
-        private async Task CreateCertificatesAsync(
+        private async Task<RPAssetOptions> AddKeyVaultSecretsAsync(
+            NamingContext namingContext,
+            IVault keyVault,
+            string secretPrefix,
+            IStorageAccount regionalStorageAccount,
+            string cosmosDBActiveKeyName,
+            ICosmosDBAccount cosmosDB,
+            string globalStorageResourceId,
+            string globalKeyVaultResourceId,
+            IIdentity msi)
+        {
+            var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
+
+            using (var regionalKVValet = new KeyVaultConcierge(keyVault.VaultUri, _kvClient, _logger))
+            {
+                var rpAssets = new RPAssetOptions()
+                {
+                    StorageAccountName = regionalStorageAccount.Name,
+                };
+
+                if (cosmosDB != null)
+                {
+                    rpAssets.ActiveKeyName = cosmosDBActiveKeyName;
+                    var dbConnectionStrings = await cosmosDB.ListConnectionStringsAsync();
+                    rpAssets.CosmosDBConnectionStrings = dbConnectionStrings.ConnectionStrings.Select(c => new CosmosDBConnectionString()
+                    {
+                        ConnectionString = c.ConnectionString,
+                        Description = c.Description,
+                    });
+                }
+
+                if (!string.IsNullOrEmpty(globalStorageResourceId))
+                {
+                    var storId = new ResourceId(globalStorageResourceId);
+                    var gblStor = await liftrAzure.GetStorageAccountAsync(storId.ResourceGroup, storId.ResourceName);
+                    if (gblStor == null)
+                    {
+                        throw new InvalidOperationException("Cannot find the global storage account with Id: " + globalStorageResourceId);
+                    }
+
+                    rpAssets.GlobalStorageAccountName = gblStor.Name;
+                }
+
+                _logger.Information("Puting the RPAssetOptions in the key vault ...");
+                await regionalKVValet.SetSecretAsync($"{secretPrefix}-{nameof(RPAssetOptions)}", rpAssets.ToJson(), namingContext.Tags);
+
+                var envOptions = new RunningEnvironmentOptions()
+                {
+                    TenantId = msi.TenantId,
+                    SPNObjectId = msi.GetObjectId(),
+                };
+
+                _logger.Information($"Puting the {nameof(RunningEnvironmentOptions)} in the key vault ...");
+                await regionalKVValet.SetSecretAsync($"{secretPrefix}-{nameof(RunningEnvironmentOptions)}--{nameof(envOptions.TenantId)}", envOptions.TenantId, namingContext.Tags);
+                await regionalKVValet.SetSecretAsync($"{secretPrefix}-{nameof(RunningEnvironmentOptions)}--{nameof(envOptions.SPNObjectId)}", envOptions.SPNObjectId, namingContext.Tags);
+
+                // Move the secrets from global key vault to regional key vault.
+                var globalKv = await liftrAzure.GetKeyVaultByIdAsync(globalKeyVaultResourceId);
+                if (globalKv == null)
+                {
+                    throw new InvalidOperationException($"Cannot find the global key vault with resource Id '{globalKeyVaultResourceId}'");
+                }
+
+                using (var globalKVValet = new KeyVaultConcierge(globalKv.VaultUri, _kvClient, _logger))
+                {
+                    _logger.Information($"Start copying the secrets from global key vault ...");
+                    int cnt = 0;
+                    var secretsToCopy = await globalKVValet.ListSecretsAsync();
+                    foreach (var secret in secretsToCopy)
+                    {
+                        if (s_secretsAvoidCopy.Contains(secret.Identifier.Name))
+                        {
+                            continue;
+                        }
+
+                        var secretBundle = await globalKVValet.GetSecretAsync(secret.Identifier.Name);
+                        await regionalKVValet.SetSecretAsync(secret.Identifier.Name, secretBundle.Value, secretBundle.Tags);
+                        _logger.Information("Copied secert with name: {secretName}", secret.Identifier.Name);
+                        cnt++;
+                    }
+
+                    _logger.Information("Copied {copiedSecretCount} secrets from central key vault to local key vault.", cnt);
+                }
+
+                return rpAssets;
+            }
+        }
+
+        private async Task CreateKeyVaultCertificatesAsync(
             KeyVaultConcierge kvValet,
             Dictionary<string, string> certificates,
             NamingContext namingContext,

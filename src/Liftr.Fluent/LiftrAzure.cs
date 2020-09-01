@@ -1208,7 +1208,13 @@ namespace Microsoft.Liftr.Fluent
             }
             catch (Exception ex)
             {
-                _logger.Error("ARM deployment failed", ex);
+                _logger.Error(ex, "ARM deployment failed");
+                if (ex is CloudException)
+                {
+                    var cloudEx = ex as CloudException;
+                    _logger.Error("Failure details: " + cloudEx.Response.Content);
+                }
+
                 var error = await DeploymentExtensions.GetDeploymentErrorDetailsAsync(FluentClient.SubscriptionId, rgName, deploymentName, AzureCredentials);
                 _logger.Error("ARM deployment with name {@deploymentName} Failed with Error: {@DeploymentError}", deploymentName, error);
                 throw new ARMDeploymentFailureException("ARM deployment failed", ex) { Details = error };

@@ -16,7 +16,7 @@
       "VMSSConfigurations": {
         "VMSize": "Standard_D4s_v3",
         "MachineCount": 1,
-        "GalleryImageVersionId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/LiftrComDevImgRG/providers/Microsoft.Compute/galleries/LiftrComDevSIG/images/ComDevSBI/versions/0.6.13241130"
+        "GalleryImageVersionId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/LiftrComDevImgRG/providers/Microsoft.Compute/galleries/LiftrComDevSIG/images/ComDevSBI/versions/0.6.13331211"
       },
       "Geneva": {
         "MONITORING_GCS_ENVIRONMENT": "Test",
@@ -26,13 +26,13 @@
       },
       "Global": {
         "Location": "centralus",
-        "BaseName": "gbl200801"
+        "BaseName": "gbl200802"
       },
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "da200801",
-          "ComputeBaseName": "co200801"
+          "DataBaseName": "da200803",
+          "ComputeBaseName": "co200804"
         }
       ]
     },
@@ -47,7 +47,7 @@
       "VMSSConfigurations": {
         "VMSize": "Standard_D4s_v3",
         "MachineCount": 1,
-        "GalleryImageVersionId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/LiftrComDevImgRG/providers/Microsoft.Compute/galleries/LiftrComDevSIG/images/ComDevSBI/versions/0.6.13241130"
+        "GalleryImageVersionId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/LiftrComDevImgRG/providers/Microsoft.Compute/galleries/LiftrComDevSIG/images/ComDevSBI/versions/0.6.13331211"
       },
       "Geneva": {
         "MONITORING_GCS_ENVIRONMENT": "Test",
@@ -59,13 +59,13 @@
       },
       "Global": {
         "Location": "centralus",
-        "BaseName": "gbl200801"
+        "BaseName": "gbl200802"
       },
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "da200801",
-          "ComputeBaseName": "co200801"
+          "DataBaseName": "da200803",
+          "ComputeBaseName": "co200804"
         }
       ]
     }

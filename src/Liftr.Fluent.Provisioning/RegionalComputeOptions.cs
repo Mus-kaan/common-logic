@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 namespace Microsoft.Liftr.Fluent.Provisioning
 {
     public class RegionalComputeOptions
@@ -13,6 +15,16 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         public string DataBaseName { get; set; }
 
         public string ComputeBaseName { get; set; }
+
+        public string ActiveDBKeyName { get; set; }
+
+        public string SecretPrefix { get; set; }
+
+        public string GlobalStorageResourceId { get; set; }
+
+        public string DomainName { get; set; }
+
+        public Dictionary<string, string> OneCertCertificates { get; set; } = new Dictionary<string, string>();
 
         public void CheckValues()
         {
