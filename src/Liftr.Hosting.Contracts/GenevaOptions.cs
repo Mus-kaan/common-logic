@@ -4,7 +4,7 @@
 
 using Microsoft.Liftr.Fluent.Contracts;
 
-namespace Microsoft.Liftr.Fluent.Provisioning
+namespace Microsoft.Liftr.Hosting.Contracts
 {
     public class GenevaOptions
     {

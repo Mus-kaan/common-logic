@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Fluent.Contracts;
 using System.Collections.Generic;
 using System.Linq;
 

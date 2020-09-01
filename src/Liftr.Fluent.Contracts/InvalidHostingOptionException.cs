@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Liftr.Fluent.Provisioning
+namespace Microsoft.Liftr.Fluent.Contracts
 {
     public class InvalidHostingOptionException : Exception
     {

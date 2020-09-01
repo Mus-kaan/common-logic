@@ -7,7 +7,7 @@ using Microsoft.Liftr.Fluent.Contracts;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Microsoft.Liftr.SimpleDeploy
+namespace Microsoft.Liftr.Hosting.Contracts
 {
     public class ComputeRegionOptions
     {

@@ -5,24 +5,21 @@
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 
-namespace Microsoft.Liftr.SimpleDeploy
+namespace Microsoft.Liftr.Hosting.Contracts
 {
-    public class ComputeRegionOptions
+    public class GlobalOptions
     {
         [JsonConverter(typeof(RegionConverter))]
         public Region Location { get; set; }
 
-        public string ComputeBaseName { get; set; }
-
-        public Dictionary<string, string> Properties { get; set; }
+        public string BaseName { get; set; }
 
         public void CheckValid()
         {
-            if (string.IsNullOrEmpty(ComputeBaseName))
+            if (string.IsNullOrEmpty(BaseName))
             {
-                throw new InvalidHostingOptionException($"{nameof(ComputeBaseName)} cannot be null or empty.");
+                throw new InvalidHostingOptionException($"{nameof(BaseName)} cannot be null or empty.");
             }
         }
     }

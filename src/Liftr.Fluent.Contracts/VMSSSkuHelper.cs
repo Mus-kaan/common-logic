@@ -5,7 +5,7 @@
 using Microsoft.Azure.Management.Compute.Fluent;
 using System;
 
-namespace Microsoft.Liftr.Fluent
+namespace Microsoft.Liftr.Fluent.Contracts
 {
     public static class VMSSSkuHelper
     {

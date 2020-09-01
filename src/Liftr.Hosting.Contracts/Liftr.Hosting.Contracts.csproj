@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.Hosting.Contracts</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Hosting.Contracts</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Fluent.Contracts\Liftr.Fluent.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>
