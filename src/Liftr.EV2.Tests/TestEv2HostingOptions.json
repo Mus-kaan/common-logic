@@ -10,11 +10,7 @@
         "SubscriptionId": "0e8673f6-fc02-42b2-b5ce-1b1bf81329d9",
         "UserAssignedManagedIdentityResourceId": "/subscriptions/0e8673f6-fc02-42b2-b5ce-1b1bf81329d9/resourceGroups/ev2-wus-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ev2-prod-shell-wus-msi",
         "UserAssignedManagedIdentityObjectId": "0e8673f6-fc02-42b2-b5ce-1b1bf81329d9"
-      },
-      "Regions": [
-        "East US",
-        "West US"
-      ]
+      }
     },
     {
       "EnvironmentName": "DogFood",
@@ -23,11 +19,7 @@
         "SubscriptionId": "d8f298fb-60f5-4676-a7d3-25442ec5ce1e",
         "UserAssignedManagedIdentityResourceId": "/subscriptions/d8f298fb-60f5-4676-a7d3-25442ec5ce1e/resourceGroups/ev2-df-wus-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ev2-df-shell-wus-msi",
         "UserAssignedManagedIdentityObjectId": "0e8673f6-fc02-42b2-b5ce-1b1bf81329d9"
-      },
-      "Regions": [
-        "East US",
-        "West US"
-      ]
+      }
     }
   ]
 }

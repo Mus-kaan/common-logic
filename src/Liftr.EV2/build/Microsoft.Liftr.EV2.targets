@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<Project TreatAsLocalProperty="LiftrEV2GeneratorExe;LiftrEV2OptionsPath;LiftrEV2ImageOptionsPath">
+<Project TreatAsLocalProperty="LiftrEV2GeneratorExe;LiftrHostingOptionsPath;LiftrEV2OptionsPath;LiftrEV2ImageOptionsPath">
 
   <PropertyGroup>
     <LiftrEV2GeneratorExe>dotnet "$(MSBuildThisFileDirectory)../tools/netcoreapp3.1/Microsoft.Liftr.EV2.dll"</LiftrEV2GeneratorExe>
+    <LiftrHostingOptionsPath>$(MSBuildProjectDirectory)/hosting-options.json</LiftrHostingOptionsPath>
     <LiftrEV2OptionsPath>$(MSBuildProjectDirectory)/ev2-options.json</LiftrEV2OptionsPath>
     <LiftrEV2ImageOptionsPath>$(MSBuildProjectDirectory)/ev2-image-options.json</LiftrEV2ImageOptionsPath>
   </PropertyGroup>
 
   <Target Name="GenerateLiftrEV2Artifacts" AfterTargets="Build">
-    <Exec Command="$(LiftrEV2GeneratorExe) --hostingOptionsFile $(LiftrEV2OptionsPath) --imgOptionsFile $(LiftrEV2ImageOptionsPath) -o $(OutputPath)generated-ev2" />
+    <Exec Command="$(LiftrEV2GeneratorExe) --hostingOptionsFile $(LiftrHostingOptionsPath) --ev2OptionsFile $(LiftrEV2OptionsPath) --ev2ImgOptionsFile $(LiftrEV2ImageOptionsPath) -o $(OutputPath)generated-ev2" />
   </Target>
 
   <Target Name="CopyGeneratedEV2Artifacts" BeforeTargets="Publish">

@@ -104,6 +104,13 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    },
+    "gbl_5_TM-southcentralus": {
+      "commandName": "Project",
+      "commandLineArgs": "-a UpdateComputeIPInTrafficManager -f global-hosting-options.json -e Dev -r southcentralus --authFile liftr-ms-unit-test-only.auth.json",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     }
   }
 }

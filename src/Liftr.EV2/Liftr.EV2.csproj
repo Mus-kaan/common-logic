@@ -25,6 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.EV2.Contracts\Liftr.EV2.Contracts.csproj" />
+    <ProjectReference Include="..\Liftr.Hosting.Contracts\Liftr.Hosting.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
   </ItemGroup>
   <Target Name="PackTaskDependencies" BeforeTargets="GenerateNuspec">

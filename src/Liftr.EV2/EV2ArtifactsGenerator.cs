@@ -4,6 +4,7 @@
 
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.EV2.Contracts;
+using Microsoft.Liftr.Hosting.Contracts;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,11 +21,16 @@ namespace Microsoft.Liftr.EV2
             _logger = logger;
         }
 
-        public void GenerateArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
+        public void GenerateArtifacts(EV2HostingOptions ev2Options, HostingOptions hostingOptions, string outputDirectory)
         {
             if (ev2Options == null)
             {
                 throw new ArgumentNullException(nameof(ev2Options));
+            }
+
+            if (hostingOptions == null)
+            {
+                throw new ArgumentNullException(nameof(hostingOptions));
             }
 
             try
@@ -33,12 +39,12 @@ namespace Microsoft.Liftr.EV2
 
                 Directory.CreateDirectory(outputDirectory);
 
-                GenerateImportAppImgArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_AppImgFolderName));
-                GenerateGlobalArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_GlobalFolderName));
-                GenerateRegionDataArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_RegionalDataFolderName));
-                GenerateRegionComputeArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_RegionalComputeFolderName));
-                GenerateAKSAppArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_ApplicationFolderName));
-                GenerateTMArtifacts(ev2Options, Path.Combine(outputDirectory, ArtifactConstants.c_TMFolderName));
+                GenerateImportAppImgArtifacts(ev2Options, hostingOptions, Path.Combine(outputDirectory, ArtifactConstants.c_AppImgFolderName));
+                GenerateGlobalArtifacts(ev2Options, hostingOptions, Path.Combine(outputDirectory, ArtifactConstants.c_GlobalFolderName));
+                GenerateRegionDataArtifacts(ev2Options, hostingOptions, Path.Combine(outputDirectory, ArtifactConstants.c_RegionalDataFolderName));
+                GenerateRegionComputeArtifacts(ev2Options, hostingOptions, Path.Combine(outputDirectory, ArtifactConstants.c_RegionalComputeFolderName));
+                GenerateAKSAppArtifacts(ev2Options, hostingOptions, Path.Combine(outputDirectory, ArtifactConstants.c_ApplicationFolderName));
+                GenerateTMArtifacts(ev2Options, hostingOptions, Path.Combine(outputDirectory, ArtifactConstants.c_TMFolderName));
 
                 _logger.Information("Generated EV2 rollout artifacts and stored in directory: {outputDirectory}", outputDirectory);
             }
@@ -157,7 +163,7 @@ namespace Microsoft.Liftr.EV2
             File.WriteAllText(parameterFilePath, parameters.ToJsonString(indented: true));
         }
 
-        private static void GenerateImportAppImgArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
+        private static void GenerateImportAppImgArtifacts(EV2HostingOptions ev2Options, HostingOptions hostingOptions, string outputDirectory)
         {
             if (ev2Options == null)
             {
@@ -174,18 +180,17 @@ namespace Microsoft.Liftr.EV2
 
             foreach (var targetEnvironment in ev2Options.TargetEnvironments)
             {
-                targetEnvironment.Regions = regions;
-
                 GenerateEnvironmentArtifacts(
                     ev2Options,
                     targetEnvironment,
+                    regions,
                     outputDirectory,
                     description: "Import Application Images",
                     entryScript: "0_ImportAppImage.sh");
             }
         }
 
-        private static void GenerateGlobalArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
+        private static void GenerateGlobalArtifacts(EV2HostingOptions ev2Options, HostingOptions hostingOptions, string outputDirectory)
         {
             if (ev2Options == null)
             {
@@ -202,18 +207,17 @@ namespace Microsoft.Liftr.EV2
 
             foreach (var targetEnvironment in ev2Options.TargetEnvironments)
             {
-                targetEnvironment.Regions = regions;
-
                 GenerateEnvironmentArtifacts(
                     ev2Options,
                     targetEnvironment,
+                    regions,
                     outputDirectory,
                     description: "Global resources",
                     entryScript: "1_ManageGlobalResources.sh");
             }
         }
 
-        private static void GenerateRegionDataArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
+        private static void GenerateRegionDataArtifacts(EV2HostingOptions ev2Options, HostingOptions hostingOptions, string outputDirectory)
         {
             if (ev2Options == null)
             {
@@ -222,16 +226,19 @@ namespace Microsoft.Liftr.EV2
 
             foreach (var targetEnvironment in ev2Options.TargetEnvironments)
             {
+                var regions = ParseRegions(targetEnvironment, hostingOptions, checkComputeRegion: false);
+
                 GenerateEnvironmentArtifacts(
                     ev2Options,
                     targetEnvironment,
+                    regions,
                     outputDirectory,
                     description: "Regional data resources",
                     entryScript: "2_ManageRegionalData.sh");
             }
         }
 
-        private static void GenerateRegionComputeArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
+        private static void GenerateRegionComputeArtifacts(EV2HostingOptions ev2Options, HostingOptions hostingOptions, string outputDirectory)
         {
             if (ev2Options == null)
             {
@@ -240,16 +247,19 @@ namespace Microsoft.Liftr.EV2
 
             foreach (var targetEnvironment in ev2Options.TargetEnvironments)
             {
+                var regions = ParseRegions(targetEnvironment, hostingOptions, checkComputeRegion: true);
+
                 GenerateEnvironmentArtifacts(
                     ev2Options,
                     targetEnvironment,
+                    regions,
                     outputDirectory,
                     description: "Regional compute resources (AKS, Geneva, Pod identity, Nginx Ingress)",
                     entryScript: "3_ManageRegionalCompute.sh");
             }
         }
 
-        private static void GenerateAKSAppArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
+        private static void GenerateAKSAppArtifacts(EV2HostingOptions ev2Options, HostingOptions hostingOptions, string outputDirectory)
         {
             if (ev2Options == null)
             {
@@ -258,16 +268,19 @@ namespace Microsoft.Liftr.EV2
 
             foreach (var targetEnvironment in ev2Options.TargetEnvironments)
             {
+                var regions = ParseRegions(targetEnvironment, hostingOptions, checkComputeRegion: true);
+
                 GenerateEnvironmentArtifacts(
                     ev2Options,
                     targetEnvironment,
+                    regions,
                     outputDirectory,
                     description: "Deploy AKS applications",
                     entryScript: "4_DeployAKSApp.sh");
             }
         }
 
-        private static void GenerateTMArtifacts(EV2HostingOptions ev2Options, string outputDirectory)
+        private static void GenerateTMArtifacts(EV2HostingOptions ev2Options, HostingOptions hostingOptions, string outputDirectory)
         {
             if (ev2Options == null)
             {
@@ -276,18 +289,40 @@ namespace Microsoft.Liftr.EV2
 
             foreach (var targetEnvironment in ev2Options.TargetEnvironments)
             {
+                var regions = ParseRegions(targetEnvironment, hostingOptions, checkComputeRegion: true);
+
                 GenerateEnvironmentArtifacts(
                     ev2Options,
                     targetEnvironment,
+                    regions,
                     outputDirectory,
                     description: "Update the AKS Public IP in Traffic Manager",
                     entryScript: "5_UpdateTrafficManager.sh");
             }
         }
 
+        private static IEnumerable<string> ParseRegions(TargetEnvironment targetEnvironment, HostingOptions hostingOptions, bool checkComputeRegion)
+        {
+            var hostEnv = hostingOptions.Environments.FirstOrDefault(e => e.EnvironmentName == targetEnvironment.EnvironmentName);
+            if (hostEnv == null)
+            {
+                throw new InvalidOperationException($"Cannot find environment '{targetEnvironment.EnvironmentName}' in hosting options.");
+            }
+
+            var regions = hostEnv.Regions.Select(r => r.Location.Name);
+
+            if (checkComputeRegion && hostEnv.Regions.First().IsSeparatedDataAndComputeRegion)
+            {
+                regions = hostEnv.Regions.SelectMany(r => r.ComputeRegions).Select(r => r.Location.Name);
+            }
+
+            return regions;
+        }
+
         private static void GenerateEnvironmentArtifacts(
             EV2HostingOptions ev2Options,
             TargetEnvironment targetEnvironment,
+            IEnumerable<string> regions,
             string outputDirectory,
             string description,
             string entryScript)
@@ -308,7 +343,7 @@ namespace Microsoft.Liftr.EV2
 
             var serviceModel = AssembleServiceModel(
                 envName,
-                targetEnvironment.Regions,
+                regions,
                 ev2Options.ServiceTreeName,
                 ev2Options.ServiceTreeId,
                 targetEnvironment.RunnerInformation.Location,
@@ -316,7 +351,7 @@ namespace Microsoft.Liftr.EV2
                 ArtifactConstants.RolloutParametersPath);
             File.WriteAllText(Path.Combine(outputDirectory, ArtifactConstants.ServiceModelFileName(targetEnvironment.EnvironmentName)), serviceModel.ToJsonString(indented: true));
 
-            foreach (var region in targetEnvironment.Regions)
+            foreach (var region in regions)
             {
                 var simplifiedRegion = ToSimpleName(region);
                 var rollputSpec = AssembleRolloutSpec(

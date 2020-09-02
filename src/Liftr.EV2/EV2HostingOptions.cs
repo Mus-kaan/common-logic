@@ -38,16 +38,8 @@ namespace Microsoft.Liftr.EV2
 
         public EV2RunnerInfomation RunnerInformation { get; set; }
 
-        public IEnumerable<string> Regions { get; set; }
-
         public void CheckValid()
         {
-            if (Regions == null || !Regions.Any())
-            {
-                var ex = new InvalidOperationException($"Please make sure {nameof(Regions)} is not empty for environment {EnvironmentName}.");
-                throw ex;
-            }
-
             if (RunnerInformation == null)
             {
                 var ex = new InvalidOperationException($"Please make sure '{nameof(RunnerInformation)}' is not empty for environment {EnvironmentName}.");

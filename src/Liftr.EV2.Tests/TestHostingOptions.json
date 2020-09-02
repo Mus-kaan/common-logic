@@ -1,0 +1,83 @@
+{
+  "PartnerName": "SamplePartnerVMSS",
+  "ShortPartnerName": "covm",
+  "SecretPrefix": "SampleRP",
+  "DBSupport": false,
+  "Environments": [
+    {
+      "EnvironmentName": "DogFood",
+      "DomainName": "com-dev-vmss.azliftr-test.io",
+      "AzureSubscription": "d21a525e-7c86-486d-a79e-a4f3622f639a",
+      "EnableVNet": false,
+      "IPPerRegion": 5,
+      "OneCertCertificates": { // key is certificate name, value is certificate subject
+        "GenevaClientCert": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net"
+      },
+      "VMSSConfigurations": {
+        "VMSize": "Standard_D4s_v3",
+        "MachineCount": 1,
+        "GalleryImageVersionId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/LiftrComDevImgRG/providers/Microsoft.Compute/galleries/LiftrComDevSIG/images/ComDevSBI/versions/0.6.13331211"
+      },
+      "Geneva": {
+        "MONITORING_GCS_ENVIRONMENT": "Test",
+        "MONITORING_GCS_ACCOUNT": "LiftrDev",
+        "MONITORING_GCS_NAMESPACE": "LiftrDev",
+        "MONITORING_CONFIG_VERSION": "26.0"
+      },
+      "Global": {
+        "Location": "centralus",
+        "BaseName": "gbl200802"
+      },
+      "Regions": [
+        {
+          "Location": "eastus",
+          "DataBaseName": "da200803",
+          "ComputeBaseName": "co200804"
+        },
+        {
+          "Location": "westus",
+          "DataBaseName": "da200803",
+          "ComputeBaseName": "co200804"
+        }
+      ]
+    },
+    {
+      "EnvironmentName": "Production",
+      "DomainName": "com-test-vmss.azliftr-test.io",
+      "AzureSubscription": "eebfbfdb-4167-49f6-be43-466a6709609f", // 'Liftr - TEST'
+      "EnableVNet": true,
+      "OneCertCertificates": { // key is certificate name, value is certificate subject
+        "GenevaClientCert": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net"
+      },
+      "VMSSConfigurations": {
+        "VMSize": "Standard_D4s_v3",
+        "MachineCount": 1,
+        "GalleryImageVersionId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/LiftrComDevImgRG/providers/Microsoft.Compute/galleries/LiftrComDevSIG/images/ComDevSBI/versions/0.6.13331211"
+      },
+      "Geneva": {
+        "MONITORING_GCS_ENVIRONMENT": "Test",
+        "MONITORING_GCS_ACCOUNT": "LiftrDev",
+        "MONITORING_GCS_NAMESPACE": "LiftrDev",
+        "MONITORING_CONFIG_VERSION": "26.0",
+        "MDM_ACCOUNT": "LiftrDevHot",
+        "MDM_NAMESPACE": "LiftrDevHot"
+      },
+      "Global": {
+        "Location": "centralus",
+        "BaseName": "gbl200802"
+      },
+      "Regions": [
+        {
+          "Location": "westus2",
+          "DataBaseName": "da200803",
+          "ComputeBaseName": "co200804"
+        },
+        {
+          "Location": "eastus2",
+          "DataBaseName": "da200803",
+          "ComputeBaseName": "co200804"
+        }
+      ]
+    }
+  ]
+}

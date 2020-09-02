@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using CommandLine;
+using Microsoft.Liftr.Hosting.Contracts;
 using System;
 using System.IO;
 
@@ -49,7 +50,14 @@ namespace Microsoft.Liftr.EV2
 
                 if (File.Exists(options.HostingEV2OptionsFile))
                 {
-                    logger.Information("Load EV2 options file from: {InputFile}", options.HostingEV2OptionsFile);
+                    if (!File.Exists(options.HostingOptionsFile))
+                    {
+                        var errMsg = $"Cannot find the 'hosting-options.json' at path: {options.HostingOptionsFile}.";
+                        logger.Fatal(errMsg);
+                        throw new InvalidOperationException(errMsg);
+                    }
+
+                    logger.Information("Load EV2 options file from: {InputFile}. Hosting options from file: {hostingOptionsFile}", options.HostingEV2OptionsFile, options.HostingOptionsFile);
 
                     using (var op = logger.StartTimedOperation("GenerateEV2Artifacts"))
                     {
@@ -57,7 +65,11 @@ namespace Microsoft.Liftr.EV2
                         {
                             var ev2Options = File.ReadAllText(options.HostingEV2OptionsFile).FromJson<EV2HostingOptions>();
                             ev2Options.CheckValid();
-                            generator.GenerateArtifacts(ev2Options, options.OuputDir);
+
+                            var hostingOptions = File.ReadAllText(options.HostingOptionsFile).FromJson<HostingOptions>();
+                            hostingOptions.CheckValid();
+
+                            generator.GenerateArtifacts(ev2Options, hostingOptions, options.OuputDir);
                         }
                         catch (Exception ex)
                         {

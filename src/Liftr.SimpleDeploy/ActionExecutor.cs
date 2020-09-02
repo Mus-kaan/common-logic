@@ -323,7 +323,8 @@ namespace Microsoft.Liftr.SimpleDeploy
 
             if (targetOptions.Regions.First().IsSeparatedDataAndComputeRegion &&
                 (_commandOptions.Action == ActionType.CreateOrUpdateRegionalCompute ||
-                _commandOptions.Action == ActionType.PrepareK8SAppDeployment))
+                _commandOptions.Action == ActionType.PrepareK8SAppDeployment ||
+                _commandOptions.Action == ActionType.UpdateComputeIPInTrafficManager))
             {
                 options.RegionOptions = targetOptions.Regions.FirstOrDefault(r => r.ComputeRegions.Any(computeRegion => computeRegion.Location.Name.OrdinalEquals(location.Name)));
                 options.ComputeRegionOptions = targetOptions.Regions.SelectMany(r => r.ComputeRegions).FirstOrDefault(r => r.Location.Name.OrdinalEquals(location.Name));
