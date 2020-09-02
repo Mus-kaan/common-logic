@@ -36,7 +36,7 @@ fi
 
 ./DeployAKSApp.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId" \
---compactRegion="$compactRegion" \
+--compactRegion="$REGION" \
 --APP_ASPNETCORE_ENVIRONMENT="$APP_ASPNETCORE_ENVIRONMENT" \
 --AKSAppChartPackage="$AKSAppChartPackage"
 

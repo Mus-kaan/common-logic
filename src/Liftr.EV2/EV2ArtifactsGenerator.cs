@@ -533,16 +533,6 @@ namespace Microsoft.Liftr.EV2
                 envVariables.Add(new ShellEnvironmentVariable()
                 {
                     Name = "REGION",
-                    Value = region,
-                });
-                envVariables.Add(new ShellEnvironmentVariable()
-                {
-                    Name = "gcs_region",
-                    Value = ToSimpleName(region),
-                });
-                envVariables.Add(new ShellEnvironmentVariable()
-                {
-                    Name = "compactRegion",
                     Value = ToSimpleName(region),
                 });
                 envVariables.Add(new ShellEnvironmentVariable()
