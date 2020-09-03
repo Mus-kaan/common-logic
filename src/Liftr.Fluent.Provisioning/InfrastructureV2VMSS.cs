@@ -4,6 +4,7 @@
 
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.Compute.Fluent;
+using Microsoft.Azure.Management.Compute.Fluent.VirtualMachineScaleSet.Definition;
 using Microsoft.Azure.Management.Locks.Fluent.Models;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Network.Fluent.Models;
@@ -16,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Microsoft.Azure.Management.ResourceManager.Fluent.Core.AvailabilityZoneId;
 
 namespace Microsoft.Liftr.Fluent.Provisioning
 {
@@ -335,7 +337,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var vmSku = VMSSSkuHelper.ParseSkuString(machineInfo.VMSize);
             var computerNamePrefix = vmssName.Replace("-", string.Empty) + "-";
 
-            var vmssCreatable = liftrAzure.FluentClient
+            var vmssManagedCreatable = liftrAzure.FluentClient
                 .VirtualMachineScaleSets
                 .Define(vmssName)
                 .WithRegion(namingContext.Location)
@@ -348,13 +350,25 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 .WithoutPrimaryInternalLoadBalancer()
                 .WithLinuxGalleryImageVersion(machineInfo.GalleryImageVersionId)
                 .WithRootUsername(sshUserName)
-                .WithSsh(sshPublicKey)
-                .WithExistingUserAssignedManagedServiceIdentity(provisionedResources.ManagedIdentity)
-                .WithCapacity(machineInfo.MachineCount)
-                .WithBootDiagnostics()
-                .WithExistingNetworkSecurityGroup(nsg)
-                .WithComputerNamePrefix(computerNamePrefix)
-                .WithTags(tags);
+                .WithSsh(sshPublicKey);
+
+            IWithCreate vmssCreatable = vmssManagedCreatable;
+
+            if (computeOptions.ZoneRedundant)
+            {
+                vmssCreatable = vmssManagedCreatable
+                .WithAvailabilityZone(Zone_1)
+                .WithAvailabilityZone(Zone_2)
+                .WithAvailabilityZone(Zone_3);
+            }
+
+            vmssCreatable = vmssCreatable
+            .WithExistingUserAssignedManagedServiceIdentity(provisionedResources.ManagedIdentity)
+            .WithCapacity(machineInfo.MachineCount)
+            .WithBootDiagnostics()
+            .WithExistingNetworkSecurityGroup(nsg)
+            .WithComputerNamePrefix(computerNamePrefix)
+            .WithTags(tags);
 
             if (certList != null && certList.Count > 0)
             {

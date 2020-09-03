@@ -53,6 +53,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 SecretPrefix = _hostingOptions.SecretPrefix,
                 GlobalStorageResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}",
                 DomainName = targetOptions.DomainName,
+                ZoneRedundant = regionOptions.ZoneRedundant,
                 OneCertCertificates = targetOptions.OneCertCertificates,
             };
 

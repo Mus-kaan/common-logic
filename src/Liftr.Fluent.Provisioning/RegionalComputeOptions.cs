@@ -25,6 +25,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string DomainName { get; set; }
 
+        public bool ZoneRedundant { get; set; }
+
         public Dictionary<string, string> OneCertCertificates { get; set; } = new Dictionary<string, string>();
 
         public void CheckValues()
