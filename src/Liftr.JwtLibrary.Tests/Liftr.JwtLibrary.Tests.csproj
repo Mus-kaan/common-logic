@@ -1,12 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
     <IsPackable>false</IsPackable>
     <AssemblyName>Microsoft.Liftr.JwtLibrary.Tests</AssemblyName>
     <RootNamespace>Microsoft.Liftr.JwtLibrary.Tests</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="BouncyCastle.NetCore" Version="$(PackageVersion_BouncyCastle_NetCore)" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(PackageVersion_Microsoft_NET_Test_Sdk)" />
@@ -14,9 +13,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="$(PackageVersion_xunit_runner_visualstudio)" />
     <PackageReference Include="coverlet.collector" Version="$(PackageVersion_coverlet_collector)" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Liftr.JwtLibrary\Liftr.JwtLibrary.csproj" />
   </ItemGroup>
-
 </Project>

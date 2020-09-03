@@ -26,6 +26,7 @@
     <PackageVersion_Microsoft_Extensions_Configuration_EnvironmentVariables>3.1.4</PackageVersion_Microsoft_Extensions_Configuration_EnvironmentVariables>
     <PackageVersion_Microsoft_Extensions_Configuration_Json>3.1.4</PackageVersion_Microsoft_Extensions_Configuration_Json>
     <PackageVersion_Microsoft_Extensions_Configuration_UserSecrets>3.1.4</PackageVersion_Microsoft_Extensions_Configuration_UserSecrets>
+    <PackageVersion_Microsoft_Extensions_DependencyInjection_Abstractions>3.1.4</PackageVersion_Microsoft_Extensions_DependencyInjection_Abstractions>
     <PackageVersion_Microsoft_Extensions_Hosting>3.1.4</PackageVersion_Microsoft_Extensions_Hosting>
     <PackageVersion_Microsoft_Extensions_Http>3.1.4</PackageVersion_Microsoft_Extensions_Http>
     <PackageVersion_Microsoft_Extensions_Http_Polly>3.1.4</PackageVersion_Microsoft_Extensions_Http_Polly>

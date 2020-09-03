@@ -145,7 +145,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.EventHubManager.Tests
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Deployment.Runner.GlobalService", "Deployment.Runner.GlobalService\Deployment.Runner.GlobalService.csproj", "{7BCF77DC-81FE-451E-AD6D-161310A0F90E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Hosting.Contracts", "Liftr.Hosting.Contracts\Liftr.Hosting.Contracts.csproj", "{3ACB0F08-39FA-49D1-A842-47B5BCEC0020}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Hosting.Contracts", "Liftr.Hosting.Contracts\Liftr.Hosting.Contracts.csproj", "{3ACB0F08-39FA-49D1-A842-47B5BCEC0020}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Polly", "Liftr.Polly\Liftr.Polly.csproj", "{364EC7F9-D29C-4A7E-AF8B-B1B34FF15D38}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -417,6 +419,10 @@ Global
 		{3ACB0F08-39FA-49D1-A842-47B5BCEC0020}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3ACB0F08-39FA-49D1-A842-47B5BCEC0020}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3ACB0F08-39FA-49D1-A842-47B5BCEC0020}.Release|Any CPU.Build.0 = Release|Any CPU
+		{364EC7F9-D29C-4A7E-AF8B-B1B34FF15D38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{364EC7F9-D29C-4A7E-AF8B-B1B34FF15D38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{364EC7F9-D29C-4A7E-AF8B-B1B34FF15D38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{364EC7F9-D29C-4A7E-AF8B-B1B34FF15D38}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
