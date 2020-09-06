@@ -44,13 +44,13 @@ namespace Microsoft.Liftr.Configuration
 
                 if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
                 {
-                    Console.WriteLine($"Using Managed Identity to load key vault '{vaultEndpoint}' secret into configuration.");
+                    Console.WriteLine($"Using Managed Identity to load key vault '{vaultEndpoint}' secrets with prefix '{secretsPrefix}' into configuration.");
                     var kvClient = KeyVaultClientFactory.FromMSI();
                     config.AddAzureKeyVault(vaultEndpoint, kvClient, new PrefixKeyVaultSecretManager(secretsPrefix));
                 }
                 else
                 {
-                    Console.WriteLine($"Using client Id '{clientId}' and client secret to to load key vault '{vaultEndpoint}' secret into configuration.");
+                    Console.WriteLine($"Using client Id '{clientId}' and client secret to to load key vault '{vaultEndpoint}' secrets with prefix '{secretsPrefix}' into configuration.");
                     config.AddAzureKeyVault(vaultEndpoint, clientId, clientSecret, new PrefixKeyVaultSecretManager(secretsPrefix));
                 }
             }
