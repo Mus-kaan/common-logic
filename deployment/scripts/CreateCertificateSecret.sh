@@ -120,3 +120,6 @@ kubectl create secret tls -n "$Namespace" "$tlsSecretName" --key "$KeyVaultSecre
 # a secret to be used for client authenticating using the same CA
 echo "kubectl create secret generic -n $Namespace $caSecretName --from-file=ca.crt=$KeyVaultSecretName.cacerts.cer"
 kubectl create secret generic -n "$Namespace" "$caSecretName" --from-file=ca.crt="$KeyVaultSecretName.cacerts.cer"
+
+rm -f "$KeyVaultSecretName.txt"
+rm -f "$KeyVaultSecretName.pfx"
