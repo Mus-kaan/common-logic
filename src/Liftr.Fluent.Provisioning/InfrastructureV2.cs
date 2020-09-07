@@ -180,25 +180,17 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         private async Task CreateKeyVaultCertificatesAsync(
             KeyVaultConcierge kvValet,
             Dictionary<string, string> certificates,
-            NamingContext namingContext,
-            string domainName)
+            IList<string> sslSubjectNames,
+            IDictionary<string, string> certificateTags)
         {
             _logger.Information("Checking SSL certificate in Key Vault with name {certName} ...", CertificateName.DefaultSSL);
-            var hostName = $"{namingContext.Location.ShortName()}.{domainName}";
             var sslCert = new CertificateOptions()
             {
                 CertificateName = CertificateName.DefaultSSL,
-                SubjectName = hostName,
-                SubjectAlternativeNames = new List<string>()
-                                    {
-                                        hostName,
-                                        $"*.{hostName}",
-                                        domainName,
-                                        $"*.{domainName}",
-                                    },
+                SubjectName = sslSubjectNames.First(),
             };
             await kvValet.SetCertificateIssuerAsync(OneCertIssuerName, OneCertProvider);
-            await kvValet.CreateCertificateIfNotExistAsync(sslCert.CertificateName, OneCertIssuerName, sslCert.SubjectName, sslCert.SubjectAlternativeNames, namingContext.Tags);
+            await kvValet.CreateCertificateIfNotExistAsync(sslCert.CertificateName, OneCertIssuerName, sslCert.SubjectName, sslSubjectNames, certificateTags);
 
             foreach (var cert in certificates)
             {
@@ -218,7 +210,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 };
 
                 await kvValet.SetCertificateIssuerAsync(OneCertIssuerName, OneCertProvider);
-                await kvValet.CreateCertificateIfNotExistAsync(certOptions.CertificateName, OneCertIssuerName, certOptions.SubjectName, certOptions.SubjectAlternativeNames, namingContext.Tags);
+                await kvValet.CreateCertificateIfNotExistAsync(certOptions.CertificateName, OneCertIssuerName, certOptions.SubjectName, certOptions.SubjectAlternativeNames, certificateTags);
             }
         }
 

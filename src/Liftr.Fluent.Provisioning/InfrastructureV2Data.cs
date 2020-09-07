@@ -10,6 +10,7 @@ using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.KeyVault;
 using Microsoft.Rest.Azure;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent.Provisioning
@@ -131,9 +132,17 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 dataOptions.GlobalKeyVaultResourceId,
                 provisionedResources.ManagedIdentity);
 
+            var sslSubjects = new List<string>()
+            {
+                dataOptions.DomainName,
+                $"*.{dataOptions.DomainName}",
+                $"{namingContext.Location.ShortName()}.{dataOptions.DomainName}",
+                $"*.{namingContext.Location.ShortName()}.{dataOptions.DomainName}",
+            };
+
             using (var regionalKVValet = new KeyVaultConcierge(provisionedResources.KeyVault.VaultUri, _kvClient, _logger))
             {
-                await CreateKeyVaultCertificatesAsync(regionalKVValet, dataOptions.OneCertCertificates, namingContext, dataOptions.DomainName);
+                await CreateKeyVaultCertificatesAsync(regionalKVValet, dataOptions.OneCertCertificates, sslSubjects, namingContext.Tags);
             }
 
             return provisionedResources;

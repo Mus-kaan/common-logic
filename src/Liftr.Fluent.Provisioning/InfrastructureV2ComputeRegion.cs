@@ -295,9 +295,19 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 computeOptions.GlobalKeyVaultResourceId,
                 provisionedResources.ManagedIdentity);
 
+            var sslSubjects = new List<string>()
+            {
+                computeOptions.DomainName,
+                $"*.{computeOptions.DomainName}",
+                $"{dataNamingContext.Location.ShortName()}.{computeOptions.DomainName}",
+                $"*.{dataNamingContext.Location.ShortName()}.{computeOptions.DomainName}",
+                $"{computeNamingContext.Location.ShortName()}.{computeOptions.DomainName}",
+                $"*.{computeNamingContext.Location.ShortName()}.{computeOptions.DomainName}",
+            };
+
             using (var regionalKVValet = new KeyVaultConcierge(provisionedResources.KeyVault.VaultUri, _kvClient, _logger))
             {
-                await CreateKeyVaultCertificatesAsync(regionalKVValet, computeOptions.OneCertCertificates, computeNamingContext, computeOptions.DomainName);
+                await CreateKeyVaultCertificatesAsync(regionalKVValet, computeOptions.OneCertCertificates, sslSubjects, computeNamingContext.Tags);
             }
 
             return provisionedResources;
