@@ -16,6 +16,8 @@ namespace Microsoft.Liftr.Hosting.Contracts
 
         public string GalleryImageVersionId { get; set; }
 
+        public bool UseSSHPassword { get; set; } = false;
+
         public void CheckValues()
         {
             if (MachineCount < 1)

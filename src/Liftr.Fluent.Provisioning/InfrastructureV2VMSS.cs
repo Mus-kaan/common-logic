@@ -124,10 +124,12 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             string sshUserName = null;
             string sshPublicKey = null;
+            string sshPassword = null;
             using (var globalKVValet = new KeyVaultConcierge(provisionedResources.GlobalKeyVault.VaultUri, _kvClient, _logger))
             {
                 sshUserName = (await globalKVValet.GetSecretAsync(SSHUserNameSecretName))?.Value ?? throw new InvalidOperationException("Cannot find ssh user name in key vault");
                 sshPublicKey = (await globalKVValet.GetSecretAsync(SSHPublicKeySecretName))?.Value ?? throw new InvalidOperationException("Cannot find ssh public key in key vault");
+                sshPassword = (await globalKVValet.GetSecretAsync(SSHPasswordSecretName))?.Value ?? throw new InvalidOperationException("Cannot find ssh user password in key vault");
             }
 
             var certList = new List<string>();
@@ -337,7 +339,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var vmSku = VMSSSkuHelper.ParseSkuString(machineInfo.VMSize);
             var computerNamePrefix = vmssName.Replace("-", string.Empty) + "-";
 
-            var vmssManagedCreatable = liftrAzure.FluentClient
+            var vmssWithoutCred = liftrAzure.FluentClient
                 .VirtualMachineScaleSets
                 .Define(vmssName)
                 .WithRegion(namingContext.Location)
@@ -349,26 +351,34 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 .WithPrimaryInternetFacingLoadBalancerInboundNatPools(lbSshNat)
                 .WithoutPrimaryInternalLoadBalancer()
                 .WithLinuxGalleryImageVersion(machineInfo.GalleryImageVersionId)
-                .WithRootUsername(sshUserName)
-                .WithSsh(sshPublicKey);
+                .WithRootUsername(sshUserName);
 
-            IWithCreate vmssCreatable = vmssManagedCreatable;
+            IWithLinuxCreateManaged vmssWithCred = null;
+            if (machineInfo.UseSSHPassword)
+            {
+                vmssWithCred = vmssWithoutCred.WithRootPassword(sshPassword);
+            }
+            else
+            {
+                vmssWithCred = vmssWithoutCred.WithSsh(sshPublicKey);
+            }
 
+            IWithCreate vmssCreatable = vmssWithCred;
             if (computeOptions.ZoneRedundant)
             {
-                vmssCreatable = vmssManagedCreatable
-                .WithAvailabilityZone(Zone_1)
-                .WithAvailabilityZone(Zone_2)
-                .WithAvailabilityZone(Zone_3);
+                vmssCreatable = vmssWithCred
+                    .WithAvailabilityZone(Zone_1)
+                    .WithAvailabilityZone(Zone_2)
+                    .WithAvailabilityZone(Zone_3);
             }
 
             vmssCreatable = vmssCreatable
-            .WithExistingUserAssignedManagedServiceIdentity(provisionedResources.ManagedIdentity)
-            .WithCapacity(machineInfo.MachineCount)
-            .WithBootDiagnostics()
-            .WithExistingNetworkSecurityGroup(nsg)
-            .WithComputerNamePrefix(computerNamePrefix)
-            .WithTags(tags);
+                .WithExistingUserAssignedManagedServiceIdentity(provisionedResources.ManagedIdentity)
+                .WithCapacity(machineInfo.MachineCount)
+                .WithBootDiagnostics()
+                .WithExistingNetworkSecurityGroup(nsg)
+                .WithComputerNamePrefix(computerNamePrefix)
+                .WithTags(tags);
 
             if (certList != null && certList.Count > 0)
             {

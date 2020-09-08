@@ -23,6 +23,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
     public partial class InfrastructureV2
     {
         private const string SSHUserNameSecretName = "SSHUserName";
+        private const string SSHPasswordSecretName = "SSHPassword";
         private const string SSHPublicKeySecretName = "SSHPublicKey";
         private const string SSHPrivateKeySecretName = "SSHPrivateKey";
         private const string OneCertIssuerName = "one-cert-issuer";

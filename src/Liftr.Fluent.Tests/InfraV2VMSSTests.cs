@@ -83,6 +83,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                         using var globalKVValet = new KeyVaultConcierge(gblResources.KeyVault.VaultUri, TestCredentials.KeyVaultClient, logger);
                         await globalKVValet.SetSecretAsync("SSHUserName", rootUserName, context.Tags);
                         await globalKVValet.SetSecretAsync("SSHPublicKey", sshPublicKey, context.Tags);
+                        await globalKVValet.SetSecretAsync("SSHPassword", Guid.NewGuid().ToString(), context.Tags);
                     }
 
                     var dataResources = await infra.CreateOrUpdateRegionalDataRGAsync(dataBaseName, context, dataOptions, createVNet: true);

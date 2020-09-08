@@ -64,7 +64,13 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     if (!await kvValet.ContainsSecretAsync(SSHUserNameSecretName))
                     {
                         _logger.Information("Storing SSH user name in global key vault.");
-                        await kvValet.SetSecretAsync(SSHUserNameSecretName, "liftraksvmuser", namingContext.Tags);
+                        await kvValet.SetSecretAsync(SSHUserNameSecretName, "liftrvmuser", namingContext.Tags);
+                    }
+
+                    if (!await kvValet.ContainsSecretAsync(SSHPasswordSecretName))
+                    {
+                        _logger.Information("Storing SSH password in global key vault.");
+                        await kvValet.SetSecretAsync(SSHPasswordSecretName, Guid.NewGuid().ToString(), namingContext.Tags);
                     }
 
                     if (File.Exists("liftr_ssh_key") && !await kvValet.ContainsSecretAsync(SSHPrivateKeySecretName))
