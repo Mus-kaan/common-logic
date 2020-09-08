@@ -222,7 +222,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var kubeletMI = mcMIList.FirstOrDefault(id => id.Name.OrdinalStartsWith(aksName));
             if (kubeletMI == null)
             {
-                var errMsg = "Cannot find the kubelet managed identity. There should be exactly one kubelet MI for aks: " + provisionedResources.AKS.Id;
+                var errMsg = $"Cannot find the kubelet managed identity. There should be exactly one kubelet MI for aks: '{provisionedResources.AKS.Id}'. If the AKS cluster is just created, please wait for several minutes and retry.";
                 var ex = new InvalidOperationException(errMsg);
                 _logger.Error(ex, errMsg);
                 throw ex;
