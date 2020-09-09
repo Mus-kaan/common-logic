@@ -1245,7 +1245,7 @@ namespace Microsoft.Liftr.Fluent
         #endregion
 
         #region Event Hub
-        public async Task<IEventHubNamespace> GetOrCreateEventHubNamespaceAsync(Region location, string rgName, string name, IDictionary<string, string> tags)
+        public async Task<IEventHubNamespace> GetOrCreateEventHubNamespaceAsync(Region location, string rgName, string name, int throughtputUnits, int maxThroughtputUnits, IDictionary<string, string> tags)
         {
             _logger.Information("Getting Event hub namespace. rgName: {rgName}, name: {name} ...", rgName, name);
             IEventHubNamespace eventHubNamespace = null;
@@ -1263,6 +1263,9 @@ namespace Microsoft.Liftr.Fluent
                     .Define(name)
                     .WithRegion(location)
                     .WithExistingResourceGroup(rgName)
+                    .WithAutoScaling()
+                    .WithCurrentThroughputUnits(throughtputUnits)
+                    .WithThroughputUnitsUpperLimit(maxThroughtputUnits)
                     .WithTags(tags)
                     .CreateAsync();
             }
@@ -1270,7 +1273,7 @@ namespace Microsoft.Liftr.Fluent
             return eventHubNamespace;
         }
 
-        public async Task<IEventHub> GetOrCreateEventHubAsync(Region location, string rgName, string namespaceName, string hubName, int partitionCount, IList<string> consumerGroups, IDictionary<string, string> tags)
+        public async Task<IEventHub> GetOrCreateEventHubAsync(Region location, string rgName, string namespaceName, string hubName, int partitionCount, int throughtputUnits, int maxThroughtputUnits, IList<string> consumerGroups, IDictionary<string, string> tags)
         {
             _logger.Information("Getting Event Hub. rgName: {rgName}, namespaceName: {namespaceName}, hubName: {hubName} ...", rgName, namespaceName, hubName);
             IEventHub eventhub = null;
@@ -1289,7 +1292,7 @@ namespace Microsoft.Liftr.Fluent
             catch (Azure.Management.EventHub.Fluent.Models.ErrorResponseException ex) when (ex.Response?.StatusCode == HttpStatusCode.NotFound)
             {
                 _logger.Information("Cannot find Event Hub. rgName: {rgName}, namespaceName: {namespaceName}, hubName: {hubName} ...", rgName, namespaceName, hubName);
-                IEventHubNamespace eventHubNamespace = await GetOrCreateEventHubNamespaceAsync(location, rgName, namespaceName, tags);
+                IEventHubNamespace eventHubNamespace = await GetOrCreateEventHubNamespaceAsync(location, rgName, namespaceName, throughtputUnits, maxThroughtputUnits, tags);
 
                 _logger.Information($"Creating a Event Hub with namespaceName {namespaceName}, name {hubName} ...", namespaceName, hubName);
 

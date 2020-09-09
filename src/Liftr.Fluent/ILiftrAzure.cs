@@ -226,9 +226,9 @@ namespace Microsoft.Liftr.Fluent
         #endregion
 
         #region Event Hub
-        Task<IEventHubNamespace> GetOrCreateEventHubNamespaceAsync(Region location, string rgName, string name, IDictionary<string, string> tags);
+        Task<IEventHubNamespace> GetOrCreateEventHubNamespaceAsync(Region location, string rgName, string name, int throughtputUnits, int maxThroughtputUnits, IDictionary<string, string> tags);
 
-        Task<IEventHub> GetOrCreateEventHubAsync(Region location, string rgName, string namespaceName, string hubName, int partitionCount, IList<string> consumerGroups, IDictionary<string, string> tags);
+        Task<IEventHub> GetOrCreateEventHubAsync(Region location, string rgName, string namespaceName, string hubName, int partitionCount, int throughtputUnits, int maxThroughtputUnits, IList<string> consumerGroups, IDictionary<string, string> tags);
         #endregion
 
         #region Shared Image Gallery

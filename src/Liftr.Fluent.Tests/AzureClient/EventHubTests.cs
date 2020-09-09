@@ -30,32 +30,32 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var az = scope.Client;
                     var rg = await az.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
                     var namespaceName = SdkContext.RandomResourceName("evn", 15);
-                    var ehn = await az.GetOrCreateEventHubNamespaceAsync(TestCommon.Location, scope.ResourceGroupName, namespaceName, TestCommon.Tags);
+                    var ehn = await az.GetOrCreateEventHubNamespaceAsync(TestCommon.Location, scope.ResourceGroupName, namespaceName, TestCommon.EventHubThroughputUnits, TestCommon.EventHubMaxThroughputUnits, TestCommon.Tags);
                     Assert.Equal(namespaceName, ehn.Name);
 
                     // Second deployment will not fail.
-                    await az.GetOrCreateEventHubNamespaceAsync(TestCommon.Location, scope.ResourceGroupName, namespaceName, TestCommon.Tags);
+                    await az.GetOrCreateEventHubNamespaceAsync(TestCommon.Location, scope.ResourceGroupName, namespaceName, TestCommon.EventHubThroughputUnits, TestCommon.EventHubMaxThroughputUnits, TestCommon.Tags);
 
                     var hubName = SdkContext.RandomResourceName("hub", 15);
-                    var eh = await az.GetOrCreateEventHubAsync(TestCommon.Location, scope.ResourceGroupName, namespaceName, hubName, TestCommon.EventHubPartitionCount, TestCommon.EventHubConsumerGroups, TestCommon.Tags);
+                    var eh = await az.GetOrCreateEventHubAsync(TestCommon.Location, scope.ResourceGroupName, namespaceName, hubName, TestCommon.EventHubPartitionCount, TestCommon.EventHubThroughputUnits, TestCommon.EventHubMaxThroughputUnits, TestCommon.EventHubConsumerGroups, TestCommon.Tags);
                     Assert.Equal(hubName, eh.Name);
                     Assert.Equal(TestCommon.EventHubPartitionCount, eh.PartitionIds.Count);
                     var actualConsumerGroups = eh.ListConsumerGroups().Select(s => s.Name).ToList();
                     Assert.All(TestCommon.EventHubConsumerGroups, item => Assert.Contains(item, actualConsumerGroups));
 
                     // Second deployment will not fail.
-                    await az.GetOrCreateEventHubAsync(TestCommon.Location, scope.ResourceGroupName, namespaceName, hubName, TestCommon.EventHubPartitionCount, TestCommon.EventHubConsumerGroups, TestCommon.Tags);
+                    await az.GetOrCreateEventHubAsync(TestCommon.Location, scope.ResourceGroupName, namespaceName, hubName, TestCommon.EventHubPartitionCount, TestCommon.EventHubThroughputUnits, TestCommon.EventHubMaxThroughputUnits, TestCommon.EventHubConsumerGroups, TestCommon.Tags);
 
-                    var created = await az.GetOrCreateEventHubNamespaceAsync(TestCommon.Location, scope.ResourceGroupName, namespaceName, TestCommon.Tags);
+                    var created = await az.GetOrCreateEventHubNamespaceAsync(TestCommon.Location, scope.ResourceGroupName, namespaceName, TestCommon.EventHubThroughputUnits, TestCommon.EventHubMaxThroughputUnits, TestCommon.Tags);
                     Assert.Equal(namespaceName, created.Name);
                     Assert.Equal(hubName, created.ListEventHubs().First().Name);
 
                     // Create another event hub in the same namespace
                     var hubName2 = SdkContext.RandomResourceName("hub", 15);
-                    var eh2 = await az.GetOrCreateEventHubAsync(TestCommon.Location, scope.ResourceGroupName, namespaceName, hubName2, TestCommon.EventHubPartitionCount, TestCommon.EventHubConsumerGroups, TestCommon.Tags);
+                    var eh2 = await az.GetOrCreateEventHubAsync(TestCommon.Location, scope.ResourceGroupName, namespaceName, hubName2, TestCommon.EventHubPartitionCount, TestCommon.EventHubThroughputUnits, TestCommon.EventHubMaxThroughputUnits, TestCommon.EventHubConsumerGroups, TestCommon.Tags);
                     Assert.Equal(hubName2, eh2.Name);
 
-                    var created2 = await az.GetOrCreateEventHubNamespaceAsync(TestCommon.Location, scope.ResourceGroupName, namespaceName, TestCommon.Tags);
+                    var created2 = await az.GetOrCreateEventHubNamespaceAsync(TestCommon.Location, scope.ResourceGroupName, namespaceName, TestCommon.EventHubThroughputUnits, TestCommon.EventHubMaxThroughputUnits, TestCommon.Tags);
                     Assert.Equal(2, created.ListEventHubs().Count());
                 }
                 catch (Exception ex)
