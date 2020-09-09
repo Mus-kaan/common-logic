@@ -56,7 +56,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
 
             var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, httpClient);
-            var response = await billingClient.SendUsageEventAsync(request, CancellationToken.None);
+            var response = await billingClient.SendUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
             response.Should().BeEquivalentTo(expectedResponse);
         }
@@ -81,7 +81,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
 
             var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, httpClient);
-            var response = await billingClient.SendUsageEventAsync(request, CancellationToken.None);
+            var response = await billingClient.SendUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
             response.Should().BeEquivalentTo(expectedResponse);
         }
@@ -107,9 +107,10 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
 
             var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, httpClient);
-            var response = await billingClient.SendUsageEventAsync(request, CancellationToken.None);
+            var response = await billingClient.SendUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
-            response.Should().BeEquivalentTo(expectedResponse);
+            response.RawResponse.Should().BeEquivalentTo(expectedResponse.RawResponse);
+            response.StatusCode.Should().BeEquivalentTo(expectedResponse.StatusCode);
         }
 
         [Fact]
@@ -133,7 +134,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
 
             var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, httpClient);
-            var response = await billingClient.SendUsageEventAsync(request, CancellationToken.None);
+            var response = await billingClient.SendUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
             response.Should().BeEquivalentTo(expectedResponse);
         }
@@ -165,7 +166,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
 
             var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, httpClient);
-            var response = await billingClient.SendBatchUsageEventAsync(request, CancellationToken.None);
+            var response = await billingClient.SendBatchUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
             response.Should().BeEquivalentTo(expectedResponse);
         }
@@ -196,7 +197,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
 
             var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, httpClient);
-            var response = await billingClient.SendBatchUsageEventAsync(request, CancellationToken.None);
+            var response = await billingClient.SendBatchUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
             response.Should().BeEquivalentTo(expectedResponse);
         }
@@ -228,9 +229,10 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
 
             var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, httpClient);
-            var response = await billingClient.SendBatchUsageEventAsync(request, CancellationToken.None);
+            var response = await billingClient.SendBatchUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
-            response.Should().BeEquivalentTo(expectedResponse);
+            response.RawResponse.Should().BeEquivalentTo(expectedResponse.RawResponse);
+            response.StatusCode.Should().BeEquivalentTo(expectedResponse.StatusCode);
         }
 
         [Fact]
@@ -260,7 +262,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
 
             var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, httpClient);
-            var response = await billingClient.SendBatchUsageEventAsync(request, CancellationToken.None);
+            var response = await billingClient.SendBatchUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
             response.Should().BeEquivalentTo(expectedResponse);
         }
@@ -300,7 +302,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
 
             var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, httpClient);
-            await Assert.ThrowsAsync<MarketplaceBillingException>(async () => await billingClient.SendUsageEventAsync(request, CancellationToken.None));
+            await Assert.ThrowsAsync<MarketplaceBillingException>(async () => await billingClient.SendUsageEventAsync(request, cancellationToken: CancellationToken.None));
         }
 
         [Fact]
@@ -330,7 +332,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
 
             var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, httpClient);
-            await Assert.ThrowsAsync<MarketplaceBillingException>(async () => await billingClient.SendBatchUsageEventAsync(request, CancellationToken.None));
+            await Assert.ThrowsAsync<MarketplaceBillingException>(async () => await billingClient.SendBatchUsageEventAsync(request, cancellationToken: CancellationToken.None));
         }
 
         private void SetupLogger()

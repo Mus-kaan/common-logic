@@ -15,8 +15,6 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
 {
     public class AzureMarketplaceRequestResult
     {
-        private const string RequestIdKey = "x-ms-requestid";
-
         public AzureMarketplaceRequestResult()
         {
             Success = false;
@@ -27,6 +25,9 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
 
         [JsonIgnore]
         public Guid RequestId { get; set; }
+
+        [JsonIgnore]
+        public Guid CorrelationId { get; set; }
 
         [JsonIgnore]
         public HttpStatusCode StatusCode { get; set; }
@@ -45,7 +46,7 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
 
             T result;
 
-            if (!string.IsNullOrWhiteSpace(jsonString))
+            if (!string.IsNullOrWhiteSpace(jsonString) && response.StatusCode != HttpStatusCode.Forbidden)
             {
                 result = JsonConvert.DeserializeObject<T>(jsonString);
             }
@@ -72,10 +73,13 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
                 throw new ArgumentNullException(nameof(headers));
             }
 
-            if (headers.TryGetValues(RequestIdKey, out var values))
-            {
-                RequestId = Guid.Parse(values.First());
-            }
+            RequestId = Guid.Parse(GetIdHeaderValue(headers, MarketplaceConstants.BillingRequestIdHeaderKey));
+            CorrelationId = Guid.Parse(GetIdHeaderValue(headers, MarketplaceConstants.BillingCorrelationIdHeaderKey));
+        }
+
+        private static string GetIdHeaderValue(HttpHeaders headers, string keyName)
+        {
+            return headers.TryGetValues(keyName, out var values) ? values.FirstOrDefault() : Guid.Empty.ToString();
         }
     }
 }

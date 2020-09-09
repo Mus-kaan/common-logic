@@ -77,16 +77,6 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
                 });
             }
 
-            if (string.IsNullOrWhiteSpace(PlanId))
-            {
-                validationDetails.Add(new ErrorDetail
-                {
-                    Message = $"{nameof(PlanId)} cannot be null or empty.",
-                    Code = "ValidationError",
-                    Target = nameof(PlanId),
-                });
-            }
-
             if (validationDetails.Any())
             {
                 return new MeteredBillingBadRequestResponse

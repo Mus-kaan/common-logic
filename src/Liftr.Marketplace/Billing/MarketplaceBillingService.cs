@@ -26,9 +26,10 @@ namespace Microsoft.Liftr.Marketplace.Billing
         /// Service to Send Usage event to Marketplace for metered billing
         /// </summary>
         /// <param name="marketplaceUsageEventRequest">Request payload for usage event</param>
+        /// <param name="requestMetadata">Http request metadata</param>
         /// <param name="cancellationToken"></param>
         /// <returns>Usage event response</returns>
-        public async Task<MeteredBillingRequestResponse> SendUsageEventAsync(UsageEventRequest marketplaceUsageEventRequest, CancellationToken cancellationToken = default)
+        public async Task<MeteredBillingRequestResponse> SendUsageEventAsync(UsageEventRequest marketplaceUsageEventRequest, BillingRequestMetadata requestMetadata = null, CancellationToken cancellationToken = default)
         {
             if (marketplaceUsageEventRequest is null)
             {
@@ -42,7 +43,7 @@ namespace Microsoft.Liftr.Marketplace.Billing
             }
             else
             {
-                return await _marketplaceBillingClient.SendUsageEventAsync(marketplaceUsageEventRequest, cancellationToken);
+                return await _marketplaceBillingClient.SendUsageEventAsync(marketplaceUsageEventRequest, requestMetadata, cancellationToken);
             }
         }
 
@@ -50,9 +51,10 @@ namespace Microsoft.Liftr.Marketplace.Billing
         /// Service to Send Batch usage event to Marketplace for metered billing
         /// </summary>
         /// <param name="marketplaceBatchUsageEventRequest">Request payload for batch usage event</param>
+        /// <param name="requestMetadata">Http request metadata</param>
         /// <param name="cancellationToken"></param>
         /// <returns>Batch usage event response</returns>
-        public async Task<MeteredBillingRequestResponse> SendBatchUsageEventAsync(BatchUsageEventRequest marketplaceBatchUsageEventRequest, CancellationToken cancellationToken = default)
+        public async Task<MeteredBillingRequestResponse> SendBatchUsageEventAsync(BatchUsageEventRequest marketplaceBatchUsageEventRequest, BillingRequestMetadata requestMetadata = null, CancellationToken cancellationToken = default)
         {
             if (marketplaceBatchUsageEventRequest is null)
             {
@@ -66,7 +68,7 @@ namespace Microsoft.Liftr.Marketplace.Billing
             }
             else
             {
-                return await _marketplaceBillingClient.SendBatchUsageEventAsync(marketplaceBatchUsageEventRequest, cancellationToken);
+                return await _marketplaceBillingClient.SendBatchUsageEventAsync(marketplaceBatchUsageEventRequest, requestMetadata, cancellationToken);
             }
         }
     }

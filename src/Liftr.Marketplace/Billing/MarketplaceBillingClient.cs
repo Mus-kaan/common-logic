@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Flurl;
+using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Marketplace.Billing.Contracts;
 using Microsoft.Liftr.Marketplace.Billing.Models;
 using Microsoft.Liftr.Marketplace.Billing.Utils;
@@ -45,18 +46,26 @@ namespace Microsoft.Liftr.Marketplace.Billing
         /// https://docs.microsoft.com/en-us/azure/marketplace/partner-center-portal/marketplace-metering-service-apis#usage-event
         /// </summary>
         /// <param name="marketplaceUsageEventRequest">Request payload for usage event</param>
+        /// <param name="requestMetadata">Http request headers</param>
         /// <param name="cancellationToken"></param>
         /// <returns>Usage event response</returns>
-        public async Task<MeteredBillingRequestResponse> SendUsageEventAsync(UsageEventRequest marketplaceUsageEventRequest, CancellationToken cancellationToken = default)
+        public async Task<MeteredBillingRequestResponse> SendUsageEventAsync(UsageEventRequest marketplaceUsageEventRequest, BillingRequestMetadata requestMetadata = null, CancellationToken cancellationToken = default)
         {
-            var requestId = Guid.NewGuid(); // Every request should have a different requestId
+            requestMetadata = SetBillingRequestMetadata(requestMetadata);
+
             var accessToken = await _authenticationTokenCallback();
             var requestPath = MarketplaceUrlHelper.GetRequestPath(MarketplaceEnum.BillingUsageEvent);
-            using var request = CreateRequestWithHeaders(HttpMethod.Post, requestPath, requestId, accessToken);
+            using var request = CreateRequestWithHeaders(HttpMethod.Post, requestPath, (header) =>
+            {
+                header.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                header.Add(MarketplaceConstants.BillingRequestIdHeaderKey, requestMetadata.MSRequestId);
+                header.Add(MarketplaceConstants.BillingCorrelationIdHeaderKey, requestMetadata.MSCorrelationId);
+            });
+
             var stringContent = JsonConvert.SerializeObject(marketplaceUsageEventRequest);
             request.Content = new StringContent(stringContent, Encoding.UTF8, "application/json");
 
-            _logger.Information("Sending request for usageevent: requestUri: {@requestUrl}, requestId: {requestId}", request.RequestUri, requestId);
+            _logger.Information($"[{MarketplaceConstants.SAASLogTag} {MarketplaceConstants.BillingLogTag}] [{nameof(SendUsageEventAsync)}] Sending request for usageevent: requestUri: {@request.RequestUri}, requestId: {requestMetadata.MSRequestId}");
 
             HttpResponseMessage httpResponse = await _httpClient.SendAsync(request, cancellationToken);
 
@@ -72,18 +81,27 @@ namespace Microsoft.Liftr.Marketplace.Billing
         /// https://docs.microsoft.com/en-us/azure/marketplace/partner-center-portal/marketplace-metering-service-apis#batch-usage-event
         /// </summary>
         /// <param name="marketplaceBatchUsageEventRequest">Request payload for batch usage event</param>
+        /// <param name="requestMetadata">Http request headers</param>
         /// <param name="cancellationToken"></param>
         /// <returns>Batch Usage event response</returns>
-        public async Task<MeteredBillingRequestResponse> SendBatchUsageEventAsync(BatchUsageEventRequest marketplaceBatchUsageEventRequest, CancellationToken cancellationToken = default)
+        public async Task<MeteredBillingRequestResponse> SendBatchUsageEventAsync(BatchUsageEventRequest marketplaceBatchUsageEventRequest, BillingRequestMetadata requestMetadata = null, CancellationToken cancellationToken = default)
         {
-            var requestId = Guid.NewGuid(); // Every request should have a different requestId
+            requestMetadata = SetBillingRequestMetadata(requestMetadata);
+
             var accessToken = await _authenticationTokenCallback();
             var requestPath = MarketplaceUrlHelper.GetRequestPath(MarketplaceEnum.BillingBatchUsageEvent);
-            using var request = CreateRequestWithHeaders(HttpMethod.Post, requestPath, requestId, accessToken);
+
+            using var request = CreateRequestWithHeaders(HttpMethod.Post, requestPath, (header) =>
+            {
+                header.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                header.Add(MarketplaceConstants.BillingRequestIdHeaderKey, requestMetadata.MSRequestId);
+                header.Add(MarketplaceConstants.BillingCorrelationIdHeaderKey, requestMetadata.MSCorrelationId);
+            });
+
             var stringContent = JsonConvert.SerializeObject(marketplaceBatchUsageEventRequest);
             request.Content = new StringContent(stringContent, Encoding.UTF8, "application/json");
 
-            _logger.Information("Sending request for usageevent: requestUri: {@requestUrl}, requestId: {requestId}", request.RequestUri, requestId);
+            _logger.Information($"[{MarketplaceConstants.SAASLogTag} {MarketplaceConstants.BillingLogTag}] [{nameof(SendBatchUsageEventAsync)}] Sending request for usageevent: requestUri: {@request.RequestUri}, requestId: {requestMetadata.MSRequestId}");
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
             return response.StatusCode switch
@@ -93,17 +111,37 @@ namespace Microsoft.Liftr.Marketplace.Billing
             };
         }
 
-        private HttpRequestMessage CreateRequestWithHeaders(HttpMethod method, string requestPath, Guid requestId, string accessToken)
+        private HttpRequestMessage CreateRequestWithHeaders(HttpMethod method, string requestPath, Action<HttpRequestHeaders> headers = null)
         {
             var endpoint = _billingBaseUrl
                 .AppendPathSegment(requestPath)
                 .SetQueryParam(DefaultApiVersionParameterName, _marketplaceOptions.API.ApiVersion);
 
             var request = new HttpRequestMessage(method, endpoint);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            request.Headers.Add("x-ms-requestid", requestId.ToString());
+
+            headers?.Invoke(request.Headers);
 
             return request;
+        }
+
+        private static BillingRequestMetadata SetBillingRequestMetadata(BillingRequestMetadata requestMetadata)
+        {
+            if (requestMetadata == null)
+            {
+                requestMetadata = new BillingRequestMetadata();
+            }
+
+            if (string.IsNullOrWhiteSpace(requestMetadata.MSRequestId))
+            {
+                requestMetadata.MSRequestId = Guid.NewGuid().ToString();
+            }
+
+            if (string.IsNullOrWhiteSpace(requestMetadata.MSCorrelationId))
+            {
+                requestMetadata.MSCorrelationId = TelemetryContext.GetOrGenerateCorrelationId();
+            }
+
+            return requestMetadata;
         }
     }
 }
