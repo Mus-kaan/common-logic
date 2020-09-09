@@ -26,8 +26,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         private const string SSHPasswordSecretName = "SSHPassword";
         private const string SSHPublicKeySecretName = "SSHPublicKey";
         private const string SSHPrivateKeySecretName = "SSHPrivateKey";
-        private const string OneCertIssuerName = "one-cert-issuer";
-        private const string OneCertProvider = "OneCert";
+        private const string OneCertPublicIssuer = "one-cert-public-issuer";
+        private const string OneCertPrivateIssuer = "one-cert-private-issuer";
+        private const string OneCertPublicProvider = "OneCertV2-PublicCA";
+        private const string OneCertPrivateProvider = "OneCertV2-PrivateCA";
 
         private readonly ILiftrAzureFactory _azureClientFactory;
         private readonly KeyVaultClient _kvClient;
@@ -190,8 +192,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 CertificateName = CertificateName.DefaultSSL,
                 SubjectName = sslSubjectNames.First(),
             };
-            await kvValet.SetCertificateIssuerAsync(OneCertIssuerName, OneCertProvider);
-            await kvValet.CreateCertificateIfNotExistAsync(sslCert.CertificateName, OneCertIssuerName, sslCert.SubjectName, sslSubjectNames, certificateTags);
+            await kvValet.SetCertificateIssuerAsync(OneCertPublicIssuer, OneCertPublicProvider);
+            await kvValet.CreateCertificateIfNotExistAsync(sslCert.CertificateName, OneCertPublicIssuer, sslCert.SubjectName, sslSubjectNames, certificateTags);
 
             foreach (var cert in certificates)
             {
@@ -210,8 +212,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     SubjectAlternativeNames = new List<string>() { certSubject },
                 };
 
-                await kvValet.SetCertificateIssuerAsync(OneCertIssuerName, OneCertProvider);
-                await kvValet.CreateCertificateIfNotExistAsync(certOptions.CertificateName, OneCertIssuerName, certOptions.SubjectName, certOptions.SubjectAlternativeNames, certificateTags);
+                await kvValet.SetCertificateIssuerAsync(OneCertPrivateIssuer, OneCertPrivateProvider);
+                await kvValet.CreateCertificateIfNotExistAsync(certOptions.CertificateName, OneCertPrivateIssuer, certOptions.SubjectName, certOptions.SubjectAlternativeNames, certificateTags);
             }
         }
 
