@@ -138,6 +138,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 _logger.Information("Puting the RPAssetOptions in the key vault ...");
                 await regionalKVValet.SetSecretAsync($"{secretPrefix}-{nameof(RPAssetOptions)}", rpAssets.ToJson(), namingContext.Tags);
 
+                _logger.Information($"Puting the key vault Uri '{keyVault.VaultUri}' in the key vault secret ...");
+                await regionalKVValet.SetSecretAsync("vaultUri", keyVault.VaultUri, namingContext.Tags);
+
                 var envOptions = new RunningEnvironmentOptions()
                 {
                     TenantId = msi.TenantId,
