@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts;
-using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 
 namespace Microsoft.Liftr.Hosting.Contracts

@@ -152,9 +152,10 @@ namespace Microsoft.Liftr.Queue
                                             var endTme = _timeSource.UtcNow;
                                             var duration = endTme - message.CreatedAt.ParseZuluDateTime();
                                             _logger.Information("[DeleteMessage] Finished processing queue message. DurationInSeconds: {DurationInSeconds}, CreatedAt:{CreatedAt}, FinishedAt: {FinishedAt}", duration.TotalSeconds, message.CreatedAt, endTme.ToZuluString());
+
+                                            await lease.SyncMutex.WaitAsync(cancellationToken);
                                             try
                                             {
-                                                await lease.SyncMutex.WaitAsync(cancellationToken);
                                                 await _queue.DeleteMessageAsync(queueMessage.MessageId, lease.PopReceipt);
                                             }
                                             finally

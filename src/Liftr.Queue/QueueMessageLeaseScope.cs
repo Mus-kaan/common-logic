@@ -41,9 +41,10 @@ namespace Microsoft.Liftr.Queue
                     try
                     {
                         await Task.Delay(QueueParameters.MessageLeaseRenewInterval, _cts.Token);
+
+                        await SyncMutex.WaitAsync(_cts.Token);
                         try
                         {
-                            await SyncMutex.WaitAsync(_cts.Token);
                             var response = await queue.UpdateMessageAsync(msg.MessageId, PopReceipt, msg.MessageText, visibilityTimeout: QueueParameters.VisibilityTimeout);
                             PopReceipt = response.Value.PopReceipt;
                         }
