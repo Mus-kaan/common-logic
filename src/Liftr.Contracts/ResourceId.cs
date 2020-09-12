@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Liftr.Contracts
 {
@@ -86,7 +87,12 @@ namespace Microsoft.Liftr.Contracts
                 }
 
                 var rootScopeParts = RootScope.Split('/');
-                if (RootScope.OrdinalEquals("/"))
+                if (resourceId.OrdinalSubstringCount(c_scopeDelimiter) > 1)
+                {
+                    // {rootScope}/providers/{parentNamespace}/{parentType}/{parentName}/providers/{extensionNamespace}/{extensionType}/{extensionName}
+                    RootScopeLevel = RootScopeLevel.Extension;
+                }
+                else if (RootScope.OrdinalEquals("/"))
                 {
                     // '/'
                     RootScopeLevel = RootScopeLevel.Tenant;
@@ -95,18 +101,27 @@ namespace Microsoft.Liftr.Contracts
                 {
                     // '/subscriptions/{subscriptionId}/'
                     RootScopeLevel = RootScopeLevel.Subscription;
-                    SubscriptionId = rootScopeParts[2];
                 }
                 else if (rootScopeParts.Length == 6 && rootScopeParts[1].OrdinalEquals(c_subscriptions) && rootScopeParts[3].OrdinalEquals(c_resourceGroups))
                 {
                     // '/subscriptions/{subscriptionId}/resourceGroups/{groupName}/'
                     RootScopeLevel = RootScopeLevel.ResourceGroup;
-                    SubscriptionId = rootScopeParts[2];
-                    ResourceGroup = rootScopeParts[4];
                 }
                 else
                 {
                     throw new FormatException($"Root scope '{RootScope}' in resourceId '{resourceId}' is invalid root scope.");
+                }
+
+                if (rootScopeParts.Length == 4 && rootScopeParts[1].OrdinalEquals(c_subscriptions))
+                {
+                    // '/subscriptions/{subscriptionId}/'
+                    SubscriptionId = rootScopeParts[2];
+                }
+                else if (rootScopeParts.Length == 6 && rootScopeParts[1].OrdinalEquals(c_subscriptions) && rootScopeParts[3].OrdinalEquals(c_resourceGroups))
+                {
+                    // '/subscriptions/{subscriptionId}/resourceGroups/{groupName}/'
+                    SubscriptionId = rootScopeParts[2];
+                    ResourceGroup = rootScopeParts[4];
                 }
             }
 

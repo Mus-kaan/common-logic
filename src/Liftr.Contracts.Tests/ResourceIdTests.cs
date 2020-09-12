@@ -65,6 +65,34 @@ namespace Microsoft.Liftr.Contracts.Tests
         }
 
         [Fact]
+        public void CanParseExtensionResourceId()
+        {
+            string resourceIdString = "/SUBSCRIPTIONS/EEBFBFDB-4167-49F6-BE43-466A6709609F/PROVIDERS/MICROSOFT.FEATURES/PROVIDERS/MICROSOFT.COMPUTE/FEATURES/GALLERYPREVIEW";
+            var rid = new ResourceId(resourceIdString);
+
+            Assert.Equal(RootScopeLevel.Extension, rid.RootScopeLevel);
+            Assert.True(rid.HasRoutingScope);
+            Assert.Equal("EEBFBFDB-4167-49F6-BE43-466A6709609F", rid.SubscriptionId);
+            Assert.Equal("MICROSOFT.COMPUTE", rid.Provider);
+            Assert.Equal("FEATURES", rid.ResourceType);
+            Assert.Equal("GALLERYPREVIEW", rid.ResourceName);
+        }
+
+        [Fact]
+        public void CanParseExtensionResourceId2()
+        {
+            string resourceIdString = "/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/myresourcegroup1/providers/microsoft.web/sites/mysite1/providers/Microsoft.Authorization/roleAssignments/9b6a0af6-a75f-4d3c-b18b-3da1dff7e6f0";
+            var rid = new ResourceId(resourceIdString);
+
+            Assert.Equal(RootScopeLevel.Extension, rid.RootScopeLevel);
+            Assert.True(rid.HasRoutingScope);
+            Assert.Equal("d21a525e-7c86-486d-a79e-a4f3622f639a", rid.SubscriptionId);
+            Assert.Equal("Microsoft.Authorization", rid.Provider);
+            Assert.Equal("roleAssignments", rid.ResourceType);
+            Assert.Equal("9b6a0af6-a75f-4d3c-b18b-3da1dff7e6f0", rid.ResourceName);
+        }
+
+        [Fact]
         public void CanParseSubscriptionId()
         {
             string resourceIdString = "/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a";

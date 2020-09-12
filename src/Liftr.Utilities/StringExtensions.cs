@@ -64,5 +64,25 @@ namespace Microsoft.Liftr
                 .Where(c => !char.IsWhiteSpace(c))
                 .ToArray());
         }
+
+        public static int OrdinalSubstringCount(this string text, string pattern)
+        {
+            Ensure.ArgumentNotNull(text, nameof(text));
+            if (string.IsNullOrEmpty(pattern))
+            {
+                return 0;
+            }
+
+            // Loop through all instances of the string 'text'.
+            int count = 0;
+            int i = 0;
+            while ((i = text.IndexOf(pattern, i, StringComparison.OrdinalIgnoreCase)) != -1)
+            {
+                i += pattern.Length;
+                count++;
+            }
+
+            return count;
+        }
     }
 }
