@@ -80,23 +80,36 @@ namespace Microsoft.Liftr.Marketplace.ARM
             }
         }
 
-        /* public static Task DeleteResourceAsync(MarketplaceSaasResource saasResource, MarketplaceRequestMetadata requestMetadata)
+        public async Task DeleteSaaSResourceAsync(MarketplaceSubscription marketplaceSubscription, MarketplaceRequestMetadata requestMetadata)
         {
-            throw new NotImplementedException("Not ready for use");
+            if (marketplaceSubscription is null)
+            {
+                throw new ArgumentNullException(nameof(marketplaceSubscription));
+            }
 
-             var resourcePath = ResourceTypePath + "/" + saasResource.SaasResourceId;
+            if (requestMetadata is null || !requestMetadata.IsValid())
+            {
+                throw new ArgumentNullException(nameof(requestMetadata), $"Please provide valid {nameof(MarketplaceRequestMetadata)}");
+            }
+
+            var resourcePath = ResourceTypePath + "/" + marketplaceSubscription.Id.ToString();
+
+            using var op = _logger.StartTimedOperation(nameof(DeleteSaaSResourceAsync));
+            op.SetContextProperty(nameof(MarketplaceSubscription), marketplaceSubscription.ToString());
 
             try
             {
                 var response = await _marketplaceRestClient.SendRequestAsync<string>(HttpMethod.Delete, resourcePath, GetAdditionalMarketplaceHeaders(requestMetadata));
+                op.SetResultDescription($"Successfully deleted Marketplace subscription {marketplaceSubscription.ToString()}");
             }
-            catch (MarketplaceException ex)
+            catch (MarketplaceHttpException ex)
             {
                 string errorMessage = $"Failed to delete marketplace saas resource. Error: {ex.Message}";
                 _logger.Error(ex, errorMessage);
-                throw new MarketplaceARMException(errorMessage);
+                op.FailOperation(errorMessage);
+                throw new MarketplaceException(errorMessage, ex);
             }
-        } */
+        }
 
         private Dictionary<string, string> GetAdditionalMarketplaceHeaders(MarketplaceRequestMetadata requestHeaders)
         {

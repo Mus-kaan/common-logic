@@ -9,21 +9,33 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Marketplace.ARM.Interfaces
 {
-#nullable enable
     public interface IMarketplaceARMClient
     {
         /// <summary>
         /// Creates a Marketplace Saas resource
         /// </summary>
         /// <returns>Created Saas resource</returns>
+        /// <remarks>
+        /// https://marketplaceapi.spza-internal.net/swagger/ui/index#!/SubscriptionResourceV2/SubscriptionResourceV2_Put
+        /// </remarks>
         Task<MarketplaceSubscriptionDetails> CreateSaaSResourceAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata);
+
+        /// <summary>
+        /// Deletes a Marketplace Saas resource
+        /// </summary>
+        /// <remarks>
+        /// https://marketplaceapi.spza-internal.net/swagger/ui/index#!/SubscriptionResourceV2/SubscriptionResourceV2_Delete
+        /// </remarks>
+        Task DeleteSaaSResourceAsync(MarketplaceSubscription marketplaceSubscription, MarketplaceRequestMetadata requestMetadata);
 
         /// <summary>
         /// Fetch access token for the given market place resource id.
         /// </summary>
         /// <param name="resourceId"></param>
         /// <returns>The publisherUri and the access token for the given marketplace resource</returns>
+        /// <remarks>
+        /// https://marketplaceapi.spza-internal.net/swagger/ui/index#!/SubscriptionResourceV2/SubscriptionResourceV2_Post_0
+        /// </remarks>
         Task<MarketplaceSaasTokenResponse> GetAccessTokenAsync(string resourceId);
     }
-#nullable disable
 }
