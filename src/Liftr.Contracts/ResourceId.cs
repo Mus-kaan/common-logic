@@ -8,6 +8,15 @@ using System.Collections.Generic;
 namespace Microsoft.Liftr.Contracts
 {
     /// <summary>
+    /// An ARM Resource Identifier (ResourceId) is the unique identifier for a resource or a scope in ARM.
+    /// This uniqueness is only enforced at a given point in time, so it is possible for a resource to be
+    /// deleted and a new resource created with the same ResourceId.
+    ///
+    /// ResourceIds are composed of segments, where the first segment is commonly referred to as the 'root scope',
+    /// and the last segment is referred to as the 'routing scope'. Segments are separated with '/providers/'.
+    ///
+    /// Ownership of the resource belongs to the provider in the routing scope, and ARM will use this provider for routing requests.
+    ///
     /// https://armwiki.azurewebsites.net/introduction/concepts/resourceids.html
     /// </summary>
     public class ResourceId
@@ -15,9 +24,10 @@ namespace Microsoft.Liftr.Contracts
         private const string c_subscriptions = "subscriptions";
         private const string c_resourceGroups = "resourceGroups";
         private const string c_providers = "providers";
+        private const string c_scopeDelimiter = "/providers/";
+        private const string c_managementGroupResourceIdPrefix = "/providers/Microsoft.Management/managementGroups";
 
         private readonly string _resourceIdStr;
-        private readonly ResourceIdType _resourceIdType;
 
         public ResourceId(string resourceId)
         {
@@ -27,33 +37,112 @@ namespace Microsoft.Liftr.Contracts
             }
 
             _resourceIdStr = resourceId;
-            var parts = resourceId.Split('/');
-            _resourceIdType = GetResourceIdType(resourceId, parts);
 
-            SubscriptionId = parts[2];
-
-            if (IsResourceGroupId)
+            // Parse root scope first
+            if (resourceId.OrdinalStartsWith(c_managementGroupResourceIdPrefix))
             {
-                ResourceGroup = parts[4];
+                // Management Group level
+                RootScopeLevel = RootScopeLevel.ManagementGroup;
+                var scopeDelimitIndex = resourceId.LastIndexOf(c_scopeDelimiter, StringComparison.OrdinalIgnoreCase);
+                if (scopeDelimitIndex == 0)
+                {
+                    RootScope = resourceId;
+                }
+                else
+                {
+                    RootScope = resourceId.Substring(0, resourceId.IndexOf(c_scopeDelimiter, 3, StringComparison.OrdinalIgnoreCase) + 1);
+                    RoutingScope = resourceId.Substring(scopeDelimitIndex);
+                }
+
+                if (!RootScope.OrdinalEndsWith("/"))
+                {
+                    RootScope = RootScope + "/";
+                }
+
+                var rootScopeParts = RootScope.Split('/');
+                if (rootScopeParts.Length != 6)
+                {
+                    throw new FormatException($"Root scope '{RootScope}' in resourceId '{resourceId}' is management Group level root scope.");
+                }
+
+                ManagementGroupName = rootScopeParts[4];
+            }
+            else
+            {
+                // Non Management Group level
+                if (resourceId.OrdinalContains(c_scopeDelimiter))
+                {
+                    RootScope = resourceId.Substring(0, resourceId.IndexOf(c_scopeDelimiter, StringComparison.OrdinalIgnoreCase) + 1);
+                    RoutingScope = resourceId.Substring(resourceId.LastIndexOf(c_scopeDelimiter, StringComparison.OrdinalIgnoreCase));
+                }
+                else
+                {
+                    RootScope = resourceId;
+                }
+
+                if (!RootScope.OrdinalEndsWith("/"))
+                {
+                    RootScope = RootScope + "/";
+                }
+
+                var rootScopeParts = RootScope.Split('/');
+                if (RootScope.OrdinalEquals("/"))
+                {
+                    // '/'
+                    RootScopeLevel = RootScopeLevel.Tenant;
+                }
+                else if (rootScopeParts.Length == 4 && rootScopeParts[1].OrdinalEquals(c_subscriptions))
+                {
+                    // '/subscriptions/{subscriptionId}/'
+                    RootScopeLevel = RootScopeLevel.Subscription;
+                    SubscriptionId = rootScopeParts[2];
+                }
+                else if (rootScopeParts.Length == 6 && rootScopeParts[1].OrdinalEquals(c_subscriptions) && rootScopeParts[3].OrdinalEquals(c_resourceGroups))
+                {
+                    // '/subscriptions/{subscriptionId}/resourceGroups/{groupName}/'
+                    RootScopeLevel = RootScopeLevel.ResourceGroup;
+                    SubscriptionId = rootScopeParts[2];
+                    ResourceGroup = rootScopeParts[4];
+                }
+                else
+                {
+                    throw new FormatException($"Root scope '{RootScope}' in resourceId '{resourceId}' is invalid root scope.");
+                }
             }
 
-            if (IsFullResourceId)
+            // Parse routing scope
+            if (HasRoutingScope)
             {
-                ResourceGroup = parts[4];
-                Provider = parts[6];
-                if (parts.Length >= 9)
+                // '/providers/{providerNamespace}
+                // '/providers/{providerNamespace}/{type}/{name}'
+                // '/providers/{providerNamespace}/{type}/{name}/{childType}/{childName}'
+                var routingParts = RoutingScope.Split('/');
+                if (routingParts.Length < 3)
                 {
-                    ResourceType = parts[7];
-                    ResourceName = parts[8];
+                    throw new FormatException($"In resourceId '{resourceId}' the routing parts '{RoutingScope}' are too less.");
                 }
 
-                List<ResourceTypeNamePair> names = new List<ResourceTypeNamePair>();
-                for (int i = 7; i < parts.Length; i += 2)
+                if (routingParts.Length % 2 == 0)
                 {
-                    names.Add(new ResourceTypeNamePair() { ResourceType = parts[i], ResourceName = parts[i + 1] });
+                    throw new FormatException($"In resourceId '{resourceId}' the routing parts '{RoutingScope}' is not in pairs.");
                 }
 
-                TypedNames = names.ToArray();
+                Provider = routingParts[2];
+
+                if (routingParts.Length >= 5)
+                {
+                    ResourceType = routingParts[3];
+                    ResourceName = routingParts[4];
+
+                    List<ResourceTypeNamePair> names = new List<ResourceTypeNamePair>();
+                    names.Add(new ResourceTypeNamePair() { ResourceType = ResourceType, ResourceName = ResourceName });
+                    for (int i = 5; i + 1 < routingParts.Length; i += 2)
+                    {
+                        names.Add(new ResourceTypeNamePair() { ResourceType = routingParts[i], ResourceName = routingParts[i + 1] });
+                    }
+
+                    TypedNames = names.ToArray();
+                }
             }
         }
 
@@ -72,7 +161,6 @@ namespace Microsoft.Liftr.Contracts
             ResourceType = resourceType;
             ResourceName = resourceName;
             _resourceIdStr = $"/{c_subscriptions}/{SubscriptionId}/{c_resourceGroups}/{ResourceGroup}/{c_providers}/{Provider}";
-            _resourceIdType = ResourceIdType.FullResourceId;
 
             List<ResourceTypeNamePair> names = new List<ResourceTypeNamePair>();
 
@@ -90,6 +178,19 @@ namespace Microsoft.Liftr.Contracts
 
             TypedNames = names.ToArray();
         }
+
+        public bool HasRoutingScope => !string.IsNullOrEmpty(RoutingScope);
+
+        /// <summary>
+        /// If this is an extension root scope, this is the first root scope.
+        /// </summary>
+        public string RootScope { get; }
+
+        public string RoutingScope { get; }
+
+        public RootScopeLevel RootScopeLevel { get; }
+
+        public string ManagementGroupName { get; }
 
         public string SubscriptionId { get; }
 
@@ -155,30 +256,6 @@ namespace Microsoft.Liftr.Contracts
 
         public ResourceTypeNamePair[] TypedNames { get; }
 
-        public bool IsSubsriptionId
-        {
-            get
-            {
-                return _resourceIdType == ResourceIdType.SubscriptionId;
-            }
-        }
-
-        public bool IsResourceGroupId
-        {
-            get
-            {
-                return _resourceIdType == ResourceIdType.ResourceGroupId;
-            }
-        }
-
-        public bool IsFullResourceId
-        {
-            get
-            {
-                return _resourceIdType == ResourceIdType.FullResourceId;
-            }
-        }
-
         public override string ToString() => _resourceIdStr;
 
 #pragma warning disable CA1054 // Uri parameters should not be strings
@@ -208,29 +285,6 @@ namespace Microsoft.Liftr.Contracts
                 parsedId = null;
                 return false;
             }
-        }
-
-        private ResourceIdType GetResourceIdType(string resourceId, string[] parts)
-        {
-            if (parts.Length == 3 && parts[1].OrdinalEquals(c_subscriptions))
-            {
-                return ResourceIdType.SubscriptionId;
-            }
-
-            if (parts.Length == 5 && parts[1].OrdinalEquals(c_subscriptions) && parts[3].OrdinalEquals(c_resourceGroups))
-            {
-                return ResourceIdType.ResourceGroupId;
-            }
-
-            if (parts.Length >= 7 && parts.Length % 2 == 1)
-            {
-                if (parts[1].OrdinalEquals(c_subscriptions) && parts[3].OrdinalEquals(c_resourceGroups) && parts[5].OrdinalEquals(c_providers))
-                {
-                    return ResourceIdType.FullResourceId;
-                }
-            }
-
-            throw new FormatException($"'{resourceId}' is not valid resourceId format.");
         }
     }
 }
