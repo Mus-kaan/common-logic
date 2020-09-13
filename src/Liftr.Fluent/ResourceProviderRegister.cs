@@ -5,7 +5,6 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent
@@ -21,14 +20,17 @@ namespace Microsoft.Liftr.Fluent
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task RegisterImageBuilderProvidersAndFeaturesAsync(ILiftrAzure liftrAzure)
+        public async Task RegisterBakeImageProvidersAndFeaturesAsync(ILiftrAzure liftrAzure)
         {
             if (liftrAzure == null)
             {
                 throw new ArgumentNullException(nameof(liftrAzure));
             }
 
-            await RegisterCommonProvidersAsync(liftrAzure, s_commonProviderList);
+            var providers = new List<string>(s_commonProviderList);
+            providers.Add("Microsoft.ManagedIdentity");
+            providers.Add("Microsoft.VirtualMachineImages");
+            await RegisterProvidersAsync(liftrAzure, s_commonProviderList);
 
             bool registered1 = await RegisterFeatureAsync(liftrAzure, "Microsoft.Compute", "GalleryPreview");
             bool registered2 = await RegisterFeatureAsync(liftrAzure, "Microsoft.VirtualMachineImages", "VirtualMachineTemplatePreview");
@@ -40,6 +42,16 @@ namespace Microsoft.Liftr.Fluent
             }
         }
 
+        public async Task RegisterImportImageProvidersAndFeaturesAsync(ILiftrAzure liftrAzure)
+        {
+            if (liftrAzure == null)
+            {
+                throw new ArgumentNullException(nameof(liftrAzure));
+            }
+
+            await RegisterProvidersAsync(liftrAzure, s_commonProviderList);
+        }
+
         public async Task RegisterGenericHostingProvidersAndFeaturesAsync(ILiftrAzure liftrAzure)
         {
             if (liftrAzure == null)
@@ -47,8 +59,8 @@ namespace Microsoft.Liftr.Fluent
                 throw new ArgumentNullException(nameof(liftrAzure));
             }
 
-            await RegisterCommonProvidersAsync(liftrAzure, s_commonProviderList);
-            await RegisterCommonProvidersAsync(liftrAzure, s_genericHostingProviderList);
+            await RegisterProvidersAsync(liftrAzure, s_commonProviderList);
+            await RegisterProvidersAsync(liftrAzure, s_genericHostingProviderList);
 
             bool registered1 = await RegisterFeatureAsync(liftrAzure, "Microsoft.Compute", "GalleryPreview");
 
@@ -59,7 +71,7 @@ namespace Microsoft.Liftr.Fluent
             }
         }
 
-        private async Task RegisterCommonProvidersAsync(ILiftrAzure liftrAzure, List<string> providerList)
+        private async Task RegisterProvidersAsync(ILiftrAzure liftrAzure, List<string> providerList)
         {
             bool registering = false;
             try
@@ -114,12 +126,11 @@ namespace Microsoft.Liftr.Fluent
             "Microsoft.Storage",
             "Microsoft.Network",
             "Microsoft.KeyVault",
-            "Microsoft.ManagedIdentity",
-            "Microsoft.VirtualMachineImages",
         };
 
         private static readonly List<string> s_genericHostingProviderList = new List<string>()
         {
+            "Microsoft.ManagedIdentity",
             "Microsoft.EventHub",
             "Microsoft.DocumentDB",
             "Microsoft.DomainRegistration",

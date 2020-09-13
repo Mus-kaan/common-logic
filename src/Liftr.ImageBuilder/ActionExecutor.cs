@@ -222,11 +222,15 @@ namespace Microsoft.Liftr.ImageBuilder
                         _logger);
 
                     ResourceProviderRegister register = new ResourceProviderRegister(_logger);
-                    await register.RegisterImageBuilderProvidersAndFeaturesAsync(azFactory.GenerateLiftrAzure());
                     InfrastructureType infraType = InfrastructureType.ImportImage;
                     if (_options.Action == ActionType.BakeNewVersion)
                     {
+                        await register.RegisterBakeImageProvidersAndFeaturesAsync(azFactory.GenerateLiftrAzure());
                         infraType = config.ExportVHDToStorage ? InfrastructureType.BakeNewImageAndExport : InfrastructureType.BakeNewImage;
+                    }
+                    else
+                    {
+                        await register.RegisterImportImageProvidersAndFeaturesAsync(azFactory.GenerateLiftrAzure());
                     }
 
                     (var kv, var gallery, var artifactStore, var exportStorageAccount) = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(infraType, _options.SourceImage, tags);
