@@ -208,6 +208,8 @@ namespace Microsoft.Liftr.ImageBuilder
 
                 try
                 {
+                    ResourceProviderRegister register = new ResourceProviderRegister(_logger);
+
                     var tags = new Dictionary<string, string>()
                     {
                         [NamingContext.c_createdAtTagName] = _timeSource.UtcNow.ToZuluString(),
@@ -221,6 +223,7 @@ namespace Microsoft.Liftr.ImageBuilder
                         _timeSource,
                         _logger);
 
+                    await register.RegisterImageBuilderProvidersAndFeaturesAsync(azFactory.GenerateLiftrAzure());
                     InfrastructureType infraType = InfrastructureType.ImportImage;
                     if (_options.Action == ActionType.BakeNewVersion)
                     {
