@@ -39,6 +39,16 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [SkipInOfficialBuild(skipLinux: true)]
+        public async Task CanRegisterRPAsync()
+        {
+            using (var scope = new TestResourceGroupScope("unittest-rg-", _output))
+            {
+                var client = scope.Client;
+                var response = await client.RegisterResourceProviderAsync("microsoft.attestation");
+            }
+        }
+
+        [SkipInOfficialBuild(skipLinux: true)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public async Task CleanUpOldTestRGAsync()
         {

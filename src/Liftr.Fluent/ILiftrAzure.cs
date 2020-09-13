@@ -54,6 +54,12 @@ namespace Microsoft.Liftr.Fluent
 
         Task<string> WaitAsyncOperationAsync(HttpClient client, HttpResponseMessage startOperationResponse, CancellationToken cancellationToken, TimeSpan? pollingTime = null);
 
+        #region Resource provider
+        Task<string> RegisterResourceProviderAsync(string resourceProviderName);
+
+        Task<string> RegisterResourceProviderAsync(string subscriptionId, string resourceProviderName);
+        #endregion
+
         #region Resource Group
         Task<IResourceGroup> GetOrCreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags);
 

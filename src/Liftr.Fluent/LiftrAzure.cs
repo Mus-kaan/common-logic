@@ -50,6 +50,7 @@ namespace Microsoft.Liftr.Fluent
         public const string c_vnetAddressSpace = "10.66.0.0/16";                // 10.66.0.0 - 10.66.255.255 (65536 addresses)
         public const string c_defaultSubnetAddressSpace = "10.66.255.0/24";     // 10.66.255.0 - 10.66.255.255 (256 addresses)
         public const string c_AspEnv = "ASPNETCORE_ENVIRONMENT";
+        private const string c_registerApiVersion = "2014-04-01-preview";
         private readonly LiftrAzureOptions _options;
         private readonly ILogger _logger;
 
@@ -176,6 +177,53 @@ namespace Microsoft.Liftr.Fluent
                 return;
             }
         }
+
+        #region Resource provider
+        public Task<string> RegisterResourceProviderAsync(string resourceProviderName)
+        {
+            return RegisterResourceProviderAsync(FluentClient.SubscriptionId, resourceProviderName);
+        }
+
+        public async Task<string> RegisterResourceProviderAsync(string subscriptionId, string resourceProviderName)
+        {
+            if (string.IsNullOrEmpty(subscriptionId))
+            {
+                throw new ArgumentNullException(nameof(subscriptionId));
+            }
+
+            if (string.IsNullOrEmpty(resourceProviderName))
+            {
+                throw new ArgumentNullException(nameof(resourceProviderName));
+            }
+
+            using (var handler = new AzureApiAuthHandler(AzureCredentials))
+            using (var httpClient = new HttpClient(handler))
+            {
+                var uriBuilder = new UriBuilder(AzureCredentials.Environment.ResourceManagerEndpoint);
+                uriBuilder.Path = $"/subscriptions/{subscriptionId}/providers/{resourceProviderName}/register";
+                uriBuilder.Query = $"api-version={c_registerApiVersion}";
+
+                _logger.Information($"Start registering resource provider '{resourceProviderName}' in subscription '{subscriptionId}'");
+                var response = await _options.HttpPolicy.ExecuteAsync(() => httpClient.PostAsync(uriBuilder.Uri, null));
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errMsg = $"Failed at registering resource provider. Status code: {response.Content}";
+
+                    if (response.Content != null)
+                    {
+                        errMsg += $"Error content: {await response.Content.ReadAsStringAsync()}";
+                    }
+
+                    var ex = new InvalidOperationException(errMsg);
+                    _logger.Error(ex, errMsg);
+                    throw ex;
+                }
+
+                return await response.Content.ReadAsStringAsync();
+            }
+        }
+        #endregion
 
         #region Resource Group
         public async Task<IResourceGroup> GetOrCreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags)
