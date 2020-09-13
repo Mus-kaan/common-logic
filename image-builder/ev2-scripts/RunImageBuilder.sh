@@ -84,15 +84,7 @@ echo "Using Configuration file: $ConfigurationPath"
 
 cd bin
 
-if [ "$OnlyOutputSubscriptionId" = "true" ]; then
-    dotnet BaseImageBuilder.dll \
-    -f "$ConfigurationPath" \
-    --outputSubscriptionIdOnly \
-    -n "$ImageName" \
-    -v "$ImageVersion" \
-    --srcImg "$SourceImage" \
-    --spnObjectId "$RunnerSPNObjectId"
-elif [ "$ImportImage" = "true" ]; then
+if [ "$ImportImage" = "true" ]; then
     dotnet BaseImageBuilder.dll \
     -a ImportOneVersion \
     -f "$ConfigurationPath" \
