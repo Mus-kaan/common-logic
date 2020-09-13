@@ -50,7 +50,6 @@ namespace Microsoft.Liftr.Fluent
         public const string c_vnetAddressSpace = "10.66.0.0/16";                // 10.66.0.0 - 10.66.255.255 (65536 addresses)
         public const string c_defaultSubnetAddressSpace = "10.66.255.0/24";     // 10.66.255.0 - 10.66.255.255 (256 addresses)
         public const string c_AspEnv = "ASPNETCORE_ENVIRONMENT";
-        private const string c_registerApiVersion = "2014-04-01-preview";
         private readonly LiftrAzureOptions _options;
         private readonly ILogger _logger;
 
@@ -179,6 +178,56 @@ namespace Microsoft.Liftr.Fluent
         }
 
         #region Resource provider
+        public Task<string> RegisterFeatureAsync(string resourceProviderName, string featureName)
+        {
+            return RegisterFeatureAsync(FluentClient.SubscriptionId, resourceProviderName, featureName);
+        }
+
+        public async Task<string> RegisterFeatureAsync(string subscriptionId, string resourceProviderName, string featureName)
+        {
+            if (string.IsNullOrEmpty(subscriptionId))
+            {
+                throw new ArgumentNullException(nameof(subscriptionId));
+            }
+
+            if (string.IsNullOrEmpty(resourceProviderName))
+            {
+                throw new ArgumentNullException(nameof(resourceProviderName));
+            }
+
+            if (string.IsNullOrEmpty(featureName))
+            {
+                throw new ArgumentNullException(nameof(featureName));
+            }
+
+            using (var handler = new AzureApiAuthHandler(AzureCredentials))
+            using (var httpClient = new HttpClient(handler))
+            {
+                var uriBuilder = new UriBuilder(AzureCredentials.Environment.ResourceManagerEndpoint);
+                uriBuilder.Path = $"/subscriptions/{subscriptionId}/providers/Microsoft.Features/providers/{resourceProviderName}/features/{featureName}/register";
+                uriBuilder.Query = $"api-version=2015-12-01";
+
+                _logger.Information($"Start registering resource provider '{resourceProviderName}' in subscription '{subscriptionId}'");
+                var response = await _options.HttpPolicy.ExecuteAsync(() => httpClient.PostAsync(uriBuilder.Uri, null));
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errMsg = $"Failed at registering resource provider. Status code: {response.Content}";
+
+                    if (response.Content != null)
+                    {
+                        errMsg += $"Error content: {await response.Content.ReadAsStringAsync()}";
+                    }
+
+                    var ex = new InvalidOperationException(errMsg);
+                    _logger.Error(ex, errMsg);
+                    throw ex;
+                }
+
+                return await response.Content.ReadAsStringAsync();
+            }
+        }
+
         public Task<string> RegisterResourceProviderAsync(string resourceProviderName)
         {
             return RegisterResourceProviderAsync(FluentClient.SubscriptionId, resourceProviderName);
@@ -201,7 +250,7 @@ namespace Microsoft.Liftr.Fluent
             {
                 var uriBuilder = new UriBuilder(AzureCredentials.Environment.ResourceManagerEndpoint);
                 uriBuilder.Path = $"/subscriptions/{subscriptionId}/providers/{resourceProviderName}/register";
-                uriBuilder.Query = $"api-version={c_registerApiVersion}";
+                uriBuilder.Query = $"api-version=2014-04-01-preview";
 
                 _logger.Information($"Start registering resource provider '{resourceProviderName}' in subscription '{subscriptionId}'");
                 var response = await _options.HttpPolicy.ExecuteAsync(() => httpClient.PostAsync(uriBuilder.Uri, null));

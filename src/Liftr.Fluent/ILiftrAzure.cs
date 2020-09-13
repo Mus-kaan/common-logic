@@ -58,6 +58,10 @@ namespace Microsoft.Liftr.Fluent
         Task<string> RegisterResourceProviderAsync(string resourceProviderName);
 
         Task<string> RegisterResourceProviderAsync(string subscriptionId, string resourceProviderName);
+
+        Task<string> RegisterFeatureAsync(string resourceProviderName, string featureName);
+
+        Task<string> RegisterFeatureAsync(string subscriptionId, string resourceProviderName, string featureName);
         #endregion
 
         #region Resource Group

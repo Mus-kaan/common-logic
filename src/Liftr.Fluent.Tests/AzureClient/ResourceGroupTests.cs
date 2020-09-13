@@ -45,6 +45,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             {
                 var client = scope.Client;
                 var response = await client.RegisterResourceProviderAsync("microsoft.attestation");
+                var featureResponse = await client.RegisterFeatureAsync("Microsoft.VirtualMachineImages", "VirtualMachineTemplatePreview");
             }
         }
 
