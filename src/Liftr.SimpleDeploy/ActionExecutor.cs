@@ -209,6 +209,8 @@ namespace Microsoft.Liftr.SimpleDeploy
                     }
                     else if (_commandOptions.Action == ActionType.CreateOrUpdateGlobal)
                     {
+                        ResourceProviderRegister register = new ResourceProviderRegister(_logger);
+                        await register.RegisterGenericHostingProvidersAndFeaturesAsync(azFactory.GenerateLiftrAzure());
                         await ManageGlobalResourcesAsync(targetOptions, kvClient, azFactory);
                     }
                     else

@@ -10,7 +10,7 @@ echo "currentScriptName: $currentScriptName"
 ssh-keygen -m PEM -t rsa -b 4096 -f bin/liftr_ssh_key -N ""
 
 ./ExecuteDeploymentRunner.sh \
---ProvisionAction="OutputSubscriptionId" \
+--ProvisionAction="CreateOrUpdateGlobal" \
 --EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
 --Region="Global"
 
@@ -23,13 +23,6 @@ DeploymentSubscriptionId=$(<bin/subscription-id.txt)
 fi
 
 ./AzLogin.sh
-
-./RegisterFeatureAndProvider.sh --DeploymentSubscriptionId="$DeploymentSubscriptionId"
-
-./ExecuteDeploymentRunner.sh \
---ProvisionAction="CreateOrUpdateGlobal" \
---EnvName="$APP_ASPNETCORE_ENVIRONMENT" \
---Region="Global"
 
 ./ImportDependencyImages.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId"
