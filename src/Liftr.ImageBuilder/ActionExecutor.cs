@@ -227,17 +227,39 @@ namespace Microsoft.Liftr.ImageBuilder
                         infraType = config.ExportVHDToStorage ? InfrastructureType.BakeNewImageAndExport : InfrastructureType.BakeNewImage;
                     }
 
-                    (var kv, var artifactStore) = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(infraType, _options.SourceImage, tags);
+                    (var kv, var gallery, var artifactStore, var exportStorageAccount) = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(infraType, _options.SourceImage, tags);
+                    var extensionParameters = new CallbackParameters()
+                    {
+                        LiftrAzureFactory = azFactory,
+                        KeyVaultClient = kvClient,
+                        Logger = _logger,
+                        BuilderOptions = config,
+                        BuilderCommandOptions = _options,
+                        KeyVault = kv,
+                        VHDStorageAccount = exportStorageAccount,
+                        Gallery = gallery,
+                    };
 
                     if (_options.Action == ActionType.BakeNewVersion)
                     {
-                        await orchestrator.BuildCustomizedSBIAsync(
+                        (var imgVersion, var vhdUri) = await orchestrator.BuildCustomizedSBIAsync(
                             _options.ImageName,
                             _options.ImageVersion,
                             _options.SourceImage.Value,
                             _options.ArtifactPath,
                             tags,
                             cancellationToken);
+
+                        extensionParameters.ImageVersion = imgVersion;
+                        extensionParameters.VHDUri = vhdUri;
+
+                        if (ImageBuilderExtension.AfterBakeImageAsync != null)
+                        {
+                            using (_logger.StartTimedOperation("ImageBuilderExtension.AfterBakeImageAsync"))
+                            {
+                                await ImageBuilderExtension.AfterBakeImageAsync.Invoke(extensionParameters);
+                            }
+                        }
                     }
                     else if (_options.Action == ActionType.ImportOneVersion)
                     {
@@ -252,6 +274,16 @@ namespace Microsoft.Liftr.ImageBuilder
 
                         var imgVersion = await imgImporter.ImportImageVHDAsync(_options.ImageName, _options.ImageVersion, cancellationToken);
                         _logger.Information("The imported image version can be found at Shared Image Gallery Image version resource Id: {sigVerionId}", imgVersion.Id);
+
+                        extensionParameters.ImageVersion = imgVersion;
+
+                        if (ImageBuilderExtension.AfterImportImageAsync != null)
+                        {
+                            using (_logger.StartTimedOperation("ImageBuilderExtension.AfterImportImageAsync"))
+                            {
+                                await ImageBuilderExtension.AfterImportImageAsync.Invoke(extensionParameters);
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)

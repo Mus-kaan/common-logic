@@ -12,6 +12,7 @@ using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
@@ -79,9 +80,10 @@ namespace Microsoft.Liftr.ImageBuilder
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<(IVault, IContentStore)> CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType infraType, SourceImageType? sourceImageType, IDictionary<string, string> tags)
+        public async Task<(IVault, IGallery, IContentStore, IStorageAccount)> CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType infraType, SourceImageType? sourceImageType, IDictionary<string, string> tags)
         {
             using var ops = _logger.StartTimedOperation(nameof(CreateOrUpdateLiftrImageBuilderInfrastructureAsync));
+            IStorageAccount exportStorageAccount = null;
             try
             {
                 var liftrAzure = _azFactory.GenerateLiftrAzure();
@@ -94,16 +96,18 @@ namespace Microsoft.Liftr.ImageBuilder
 
                 _keyVault = await GetOrCreateKeyVaultAsync(c_keyVaultNamePrefix);
 
-                _artifactStore = await GetOrCreateContentStoreAsync(c_artifactStorageNamePrefix);
-
+                (var storageAcct, var contentStore) = await GetOrCreateContentStoreAsync(c_artifactStorageNamePrefix);
+                _artifactStore = contentStore;
                 if (infraType == InfrastructureType.BakeNewImageAndExport)
                 {
-                    _exportStore = await GetOrCreateContentStoreAsync(c_exportingStorageNamePrefix);
+                    (var stor, var exportContentStore) = await GetOrCreateContentStoreAsync(c_exportingStorageNamePrefix);
+                    _exportStore = exportContentStore;
+                    exportStorageAccount = stor;
                 }
 
                 if (infraType == InfrastructureType.ImportImage)
                 {
-                    return (_keyVault, _artifactStore);
+                    return (_keyVault, gallery, _artifactStore, exportStorageAccount);
                 }
 
                 _msi = await GetOrCreateMSIAsync();
@@ -127,7 +131,7 @@ namespace Microsoft.Liftr.ImageBuilder
                     throw;
                 }
 
-                return (_keyVault, _artifactStore);
+                return (_keyVault, gallery, _artifactStore, exportStorageAccount);
             }
             catch (Exception ex)
             {
@@ -136,7 +140,7 @@ namespace Microsoft.Liftr.ImageBuilder
             }
         }
 
-        public async Task BuildCustomizedSBIAsync(
+        public async Task<(IGalleryImageVersion, Uri)> BuildCustomizedSBIAsync(
             string imageName,
             string imageVersion,
             SourceImageType sourceImageType,
@@ -381,6 +385,8 @@ namespace Microsoft.Liftr.ImageBuilder
 
                 _logger.Information("Delete the build artifact in storage blob: {artifactUri}", artifactUrlWithSAS.AbsolutePath);
                 await _artifactStore.DeleteBuildArtifactAsync(artifactUrlWithSAS);
+
+                return (sigImgVersion, vhdUri);
             }
             catch (Exception ex)
             {
@@ -421,7 +427,7 @@ namespace Microsoft.Liftr.ImageBuilder
             }
         }
 
-        private async Task<ContentStore> GetOrCreateContentStoreAsync(string storageNamePrefix)
+        private async Task<(IStorageAccount, ContentStore)> GetOrCreateContentStoreAsync(string storageNamePrefix)
         {
             Dictionary<string, string> tags = new Dictionary<string, string>()
             {
@@ -455,7 +461,7 @@ namespace Microsoft.Liftr.ImageBuilder
                         _timeSource,
                         _logger);
 
-            return store;
+            return (storageAccount, store);
         }
 
         private async Task<IIdentity> GetOrCreateMSIAsync()
