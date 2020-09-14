@@ -6,6 +6,7 @@ using Microsoft.Liftr.Contracts.MonitoringSvc;
 using Microsoft.Liftr.DataSource.MonitoringSvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.EventHubManager
@@ -85,6 +86,7 @@ namespace Microsoft.Liftr.EventHubManager
             try
             {
                 var ehs = await _ehDatasource.ListAsync(_provider);
+                ehs = ehs.Where(eh => eh.IngestionEnabled && eh.Active);
 
                 var newDict = new Dictionary<string, List<IEventHubEntity>>();
 

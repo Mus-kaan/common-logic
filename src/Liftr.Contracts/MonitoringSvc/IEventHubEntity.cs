@@ -54,6 +54,11 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
         DateTime CreatedAtUTC { get; set; }
 
         /// <summary>
+        /// If this event hub is ingestionEnabled
+        /// </summary>
+        bool IngestionEnabled { get; set; }
+
+        /// <summary>
         /// If this event hub is active
         /// </summary>
         bool Active { get; set; }

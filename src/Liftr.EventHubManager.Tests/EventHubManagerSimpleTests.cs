@@ -9,6 +9,7 @@ using Moq;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -36,6 +37,48 @@ namespace Microsoft.Liftr.EventHubManager.Tests
             // validation
             Assert.NotNull(items);
             Assert.Equal(5, items.Count);
+        }
+
+        [SkipInOfficialBuild(skipLinux: true)]
+        public void EventHubManagerGetAllExcludesInactive()
+        {
+            var logger = Log.Logger;
+
+            var testData = GenerateTestData(MonitoringResourceProvider.Datadog, "westus", 5);
+            var testDataLst = testData.ToList();
+            testDataLst[0].Active = false;
+            testDataLst[1].Active = false;
+            var ehDataSource = new Mock<IEventHubEntityDataSource>();
+            ehDataSource.Setup(s => s.ListAsync(It.IsAny<MonitoringResourceProvider>())).Returns(Task.FromResult(testDataLst.AsEnumerable()));
+
+            var ehManager = new EventHubManagerSimple(ehDataSource.Object, MonitoringResourceProvider.Datadog, logger);
+
+            var items = ehManager.GetAll("westus");
+
+            // validation
+            Assert.NotNull(items);
+            Assert.Equal(3, items.Count);
+        }
+
+        [SkipInOfficialBuild(skipLinux: true)]
+        public void EventHubManagerGetAllExcludesIngestionDisabled()
+        {
+            var logger = Log.Logger;
+
+            var testData = GenerateTestData(MonitoringResourceProvider.Datadog, "westus", 5);
+            var testDataLst = testData.ToList();
+            testDataLst[0].IngestionEnabled = false;
+            testDataLst[1].IngestionEnabled = false;
+            var ehDataSource = new Mock<IEventHubEntityDataSource>();
+            ehDataSource.Setup(s => s.ListAsync(It.IsAny<MonitoringResourceProvider>())).Returns(Task.FromResult(testDataLst.AsEnumerable()));
+
+            var ehManager = new EventHubManagerSimple(ehDataSource.Object, MonitoringResourceProvider.Datadog, logger);
+
+            var items = ehManager.GetAll("westus");
+
+            // validation
+            Assert.NotNull(items);
+            Assert.Equal(3, items.Count);
         }
 
         [SkipInOfficialBuild(skipLinux: true)]

@@ -40,6 +40,9 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
         [BsonElement("createdAt")]
         public DateTime CreatedAtUTC { get; set; }
 
+        [BsonElement("ingestionEnabled")]
+        public bool IngestionEnabled { get; set; } = true;
+
         [BsonElement("active")]
         public bool Active { get; set; } = true;
     }
