@@ -384,6 +384,7 @@ namespace Microsoft.Liftr.Fluent
                 .WithRegion(location)
                 .WithExistingResourceGroup(rgName)
                 .WithOnlyHttpsTraffic()
+                .WithGeneralPurposeAccountKindV2()
                 .WithTags(tags);
 
             if (!string.IsNullOrEmpty(accessFromSubnetId))

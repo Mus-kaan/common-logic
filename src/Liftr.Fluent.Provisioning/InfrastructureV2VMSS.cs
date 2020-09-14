@@ -8,6 +8,7 @@ using Microsoft.Azure.Management.Compute.Fluent.VirtualMachineScaleSet.Definitio
 using Microsoft.Azure.Management.Locks.Fluent.Models;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Network.Fluent.Models;
+using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Hosting.Contracts;
@@ -24,6 +25,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
     public partial class InfrastructureV2
     {
         private const string c_certDiskLocation = "/var/lib/waagent/Microsoft.Azure.KeyVault.Store";
+        private const string c_vmStorageAccountPrefix = "vmstor";
 
         public async Task<ProvisionedVMSSResources> CreateOrUpdateRegionalVMSSRGAsync(
             NamingContext namingContext,
@@ -339,6 +341,16 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var vmSku = VMSSSkuHelper.ParseSkuString(machineInfo.VMSize);
             var computerNamePrefix = vmssName.Replace("-", string.Empty) + "-";
 
+            var existingStor = await liftrAzure.ListStorageAccountAsync(rgName, c_vmStorageAccountPrefix);
+            var vmStor = existingStor?.FirstOrDefault();
+
+            if (vmStor == null)
+            {
+                var storageAccountName = SdkContext.RandomResourceName(c_vmStorageAccountPrefix, 24);
+                _logger.Information($"Creating VMSS storage account with name {storageAccountName}");
+                vmStor = await liftrAzure.CreateStorageAccountAsync(namingContext.Location, rgName, storageAccountName, namingContext.Tags);
+            }
+
             var vmssWithoutCred = liftrAzure.FluentClient
                 .VirtualMachineScaleSets
                 .Define(vmssName)
@@ -373,6 +385,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
 
             vmssCreatable = vmssCreatable
+                .WithExistingStorageAccount(vmStor)
                 .WithExistingUserAssignedManagedServiceIdentity(provisionedResources.ManagedIdentity)
                 .WithCapacity(machineInfo.MachineCount)
                 .WithBootDiagnostics()

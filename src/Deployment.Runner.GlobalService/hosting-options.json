@@ -22,15 +22,15 @@
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "da200902",
+          "DataBaseName": "da200903",
           "ComputeRegions": [
             {
               "Location": "southcentralus",
-              "ComputeBaseName": "co200906"
+              "ComputeBaseName": "co200907"
             },
             {
               "Location": "eastus",
-              "ComputeBaseName": "co200906"
+              "ComputeBaseName": "co200907"
             }
           ]
         }
@@ -55,15 +55,15 @@
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "da200902",
+          "DataBaseName": "da200903",
           "ComputeRegions": [
             {
               "Location": "southcentralus",
-              "ComputeBaseName": "co200906"
+              "ComputeBaseName": "co200907"
             },
             {
               "Location": "eastus",
-              "ComputeBaseName": "co200906"
+              "ComputeBaseName": "co200907"
             }
           ]
         }

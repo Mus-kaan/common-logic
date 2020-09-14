@@ -31,8 +31,8 @@
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "da200803",
-          "ComputeBaseName": "co200804"
+          "DataBaseName": "da200805",
+          "ComputeBaseName": "co200901"
         }
       ]
     },
@@ -64,8 +64,8 @@
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "da200803",
-          "ComputeBaseName": "co200804"
+          "DataBaseName": "da200805",
+          "ComputeBaseName": "co200901"
         }
       ]
     }

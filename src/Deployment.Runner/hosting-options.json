@@ -28,13 +28,13 @@
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "data20200505",
-          "ComputeBaseName": "com20200621"
+          "DataBaseName": "data20200506",
+          "ComputeBaseName": "com20200622"
         },
         {
           "Location": "eastus",
-          "DataBaseName": "data20200505",
-          "ComputeBaseName": "com20200621"
+          "DataBaseName": "data20200506",
+          "ComputeBaseName": "com20200622"
         }
       ]
     },
@@ -62,13 +62,13 @@
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "data20200505",
-          "ComputeBaseName": "com20200621"
+          "DataBaseName": "data20200506",
+          "ComputeBaseName": "com20200622"
         },
         {
           "Location": "eastus",
-          "DataBaseName": "data20200505",
-          "ComputeBaseName": "com20200621"
+          "DataBaseName": "data20200506",
+          "ComputeBaseName": "com20200622"
         }
       ]
     }
