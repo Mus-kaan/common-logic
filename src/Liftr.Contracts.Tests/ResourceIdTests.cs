@@ -93,6 +93,18 @@ namespace Microsoft.Liftr.Contracts.Tests
         }
 
         [Fact]
+        public void CanParseTenantResoucrId()
+        {
+            string resourceIdString = "/tenants/7918d4b5-0442-4a97-be2d-36f9f9962ece/providers/Microsoft.aadiam";
+            var rid = new ResourceId(resourceIdString);
+
+            Assert.Equal(RootScopeLevel.Tenant, rid.RootScopeLevel);
+            Assert.True(rid.HasRoutingScope);
+            Assert.Equal("7918d4b5-0442-4a97-be2d-36f9f9962ece", rid.TenantId);
+            Assert.Equal("Microsoft.aadiam", rid.Provider);
+        }
+
+        [Fact]
         public void CanParseSubscriptionId()
         {
             string resourceIdString = "/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a";

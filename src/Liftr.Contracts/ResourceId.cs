@@ -24,6 +24,7 @@ namespace Microsoft.Liftr.Contracts
         private const string c_subscriptions = "subscriptions";
         private const string c_resourceGroups = "resourceGroups";
         private const string c_providers = "providers";
+        private const string c_tenants = "tenants";
         private const string c_scopeDelimiter = "/providers/";
         private const string c_managementGroupResourceIdPrefix = "/providers/Microsoft.Management/managementGroups";
 
@@ -96,6 +97,11 @@ namespace Microsoft.Liftr.Contracts
                     // '/'
                     RootScopeLevel = RootScopeLevel.Tenant;
                 }
+                else if (rootScopeParts.Length == 4 && rootScopeParts[1].OrdinalEquals(c_tenants))
+                {
+                    // '/tenants/{tenantId}/'
+                    RootScopeLevel = RootScopeLevel.Tenant;
+                }
                 else if (rootScopeParts.Length == 4 && rootScopeParts[1].OrdinalEquals(c_subscriptions))
                 {
                     // '/subscriptions/{subscriptionId}/'
@@ -111,15 +117,21 @@ namespace Microsoft.Liftr.Contracts
                     throw new FormatException($"Root scope '{RootScope}' in resourceId '{resourceId}' is invalid root scope.");
                 }
 
-                if (rootScopeParts.Length == 4 && rootScopeParts[1].OrdinalEquals(c_subscriptions))
+                if (rootScopeParts.Length >= 4 && rootScopeParts[1].OrdinalEquals(c_tenants))
+                {
+                    // '/tenants/{tenantId}/'
+                    TenantId = rootScopeParts[2];
+                }
+
+                if (rootScopeParts.Length >= 4 && rootScopeParts[1].OrdinalEquals(c_subscriptions))
                 {
                     // '/subscriptions/{subscriptionId}/'
                     SubscriptionId = rootScopeParts[2];
                 }
-                else if (rootScopeParts.Length == 6 && rootScopeParts[1].OrdinalEquals(c_subscriptions) && rootScopeParts[3].OrdinalEquals(c_resourceGroups))
+
+                if (rootScopeParts.Length >= 6 && rootScopeParts[1].OrdinalEquals(c_subscriptions) && rootScopeParts[3].OrdinalEquals(c_resourceGroups))
                 {
                     // '/subscriptions/{subscriptionId}/resourceGroups/{groupName}/'
-                    SubscriptionId = rootScopeParts[2];
                     ResourceGroup = rootScopeParts[4];
                 }
             }
@@ -205,6 +217,8 @@ namespace Microsoft.Liftr.Contracts
         public RootScopeLevel RootScopeLevel { get; }
 
         public string ManagementGroupName { get; }
+
+        public string TenantId { get; }
 
         public string SubscriptionId { get; }
 
