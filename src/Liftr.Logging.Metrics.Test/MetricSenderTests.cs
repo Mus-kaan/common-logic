@@ -56,7 +56,9 @@ namespace Microsoft.Liftr.Logging.Metrics.Test
                 ["testDimName1"] = "testDimVal1",
                 ["testDimName2"] = "testDimVal2",
             };
-            metricSender.Gauge("testmetric", 100, specificDimension);
+
+            int value = 100;
+            metricSender.Gauge("testmetric", value, specificDimension);
         }
 
         [Fact]

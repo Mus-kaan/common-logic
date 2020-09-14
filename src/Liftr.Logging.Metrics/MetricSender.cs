@@ -71,7 +71,7 @@ namespace Microsoft.Liftr.Logging.Metrics
             });
         }
 
-        public void Gauge(string metric, double value, Dictionary<string, string> dimension = null)
+        public void Gauge(string metric, int value, Dictionary<string, string> dimension = null)
         {
             if (_publisher == null)
             {
@@ -82,7 +82,7 @@ namespace Microsoft.Liftr.Logging.Metrics
             Gauge(_defaultNamespace, metric, value, dims);
         }
 
-        public void Gauge(string mdmNamespace, string metric, double value, Dictionary<string, string> dimension = null)
+        public void Gauge(string mdmNamespace, string metric, int value, Dictionary<string, string> dimension = null)
         {
             if (_publisher == null)
             {
@@ -109,7 +109,7 @@ namespace Microsoft.Liftr.Logging.Metrics
                 dims = dimension ?? _defaultDimensions;
             }
 
-            _publisher.Gauge(value, new Bucket(mdmNamespace, metric, dims).ToJson());
+            _publisher.Gauge(Convert.ToDouble(value), new Bucket(mdmNamespace, metric, dims).ToJson());
         }
     }
 }
