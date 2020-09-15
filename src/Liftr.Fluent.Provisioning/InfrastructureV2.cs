@@ -114,13 +114,25 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
                 if (cosmosDB != null)
                 {
+                    _logger.Information($"Cosmos DB '{cosmosDB.Id}' provisioning state: {cosmosDB.Inner.ProvisioningState}");
                     rpAssets.ActiveKeyName = cosmosDBActiveKeyName;
-                    var dbConnectionStrings = await cosmosDB.ListConnectionStringsAsync();
-                    rpAssets.CosmosDBConnectionStrings = dbConnectionStrings.ConnectionStrings.Select(c => new CosmosDBConnectionString()
+
+                    try
                     {
-                        ConnectionString = c.ConnectionString,
-                        Description = c.Description,
-                    });
+                        var dbConnectionStrings = await cosmosDB.ListConnectionStringsAsync();
+                        rpAssets.CosmosDBConnectionStrings = dbConnectionStrings.ConnectionStrings.Select(c => new CosmosDBConnectionString()
+                        {
+                            ConnectionString = c.ConnectionString,
+                            Description = c.Description,
+                        });
+                    }
+                    catch (Exception dbEx)
+                    {
+                        var errMsg = $"We cannot get the connection string of '{cosmosDB.Id}'. You can open the cosmos DB in portal and view details. You can open a support ticket for help.";
+                        var ex = new InvalidOperationException(errMsg, dbEx);
+                        _logger.Error(dbEx, errMsg);
+                        throw ex;
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(globalStorageResourceId))
