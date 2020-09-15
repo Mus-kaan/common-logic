@@ -48,7 +48,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 var ts = new MockTimeSource();
                 using var rateLimiter = new MongoWaitQueueRateLimiter(100, TestLogger.VoidLogger);
                 IMonitoringStatusDataSource<MonitoringStatus> source = new MonitoringStatusDataSource(
-                    _collectionScope.Collection, rateLimiter, ts);
+                    _collectionScope.Collection, rateLimiter, TestLogger.VoidLogger, ts);
 
                 var tenantId1 = Guid.NewGuid().ToString();
                 var tenantId2 = Guid.NewGuid().ToString();

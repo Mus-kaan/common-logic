@@ -19,8 +19,8 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
         private readonly ITimeSource _timeSource;
 
         public MonitoringStatusDataSource(
-            IMongoCollection<MonitoringStatus> collection, MongoWaitQueueRateLimiter rateLimiter, ITimeSource timeSource)
-            : base(collection, rateLimiter, timeSource)
+            IMongoCollection<MonitoringStatus> collection, MongoWaitQueueRateLimiter rateLimiter, Serilog.ILogger logger, ITimeSource timeSource)
+            : base(collection, rateLimiter, logger, timeSource)
         {
             _collection = collection ?? throw new ArgumentNullException(nameof(collection));
             _rateLimiter = rateLimiter ?? throw new ArgumentNullException(nameof(rateLimiter));
@@ -30,40 +30,49 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
         /// <inheritdoc/>
         public async Task<IMonitoringStatus> AddOrUpdateAsync(IMonitoringStatus entity)
         {
-            if (entity == null)
+            using var dbOperation = _logger.StartTimedOperation("AddOrUpdateMonitoringStatus");
+            try
             {
-                throw new ArgumentNullException(nameof(entity));
-            }
+                if (entity == null)
+                {
+                    throw new ArgumentNullException(nameof(entity));
+                }
 
-            if (string.IsNullOrEmpty(entity.TenantId))
-            {
-                throw new ArgumentException($"'{nameof(entity.TenantId)}' cannot be empty.");
-            }
+                if (string.IsNullOrEmpty(entity.TenantId))
+                {
+                    throw new ArgumentException($"'{nameof(entity.TenantId)}' cannot be empty.");
+                }
 
-            if (!ResourceId.TryParse(entity.MonitoredResourceId, out _) &&
-                !entity.MonitoredResourceId.OrdinalStartsWith("/SUBSCRIPTIONS/"))
-            {
-                throw new ArgumentException($"'{nameof(entity.MonitoredResourceId)}' '{entity.MonitoredResourceId}' is not in valid format.");
-            }
+                if (!ResourceId.TryParse(entity.MonitoredResourceId, out _) &&
+                    !entity.MonitoredResourceId.OrdinalStartsWith("/SUBSCRIPTIONS/"))
+                {
+                    throw new ArgumentException($"'{nameof(entity.MonitoredResourceId)}' '{entity.MonitoredResourceId}' is not in valid format.");
+                }
 
-            if (!ObjectId.TryParse(entity.PartnerEntityId, out _))
-            {
-                throw new ArgumentException($"'{nameof(entity.PartnerEntityId)}' is not in valid object id format.");
-            }
+                if (!ObjectId.TryParse(entity.PartnerEntityId, out _))
+                {
+                    throw new ArgumentException($"'{nameof(entity.PartnerEntityId)}' is not in valid object id format.");
+                }
 
-            // Get existing entity, checking for possible update
-            var existing = await GetAsync(entity.TenantId, entity.PartnerEntityId, entity.MonitoredResourceId);
+                // Get existing entity, checking for possible update
+                var existing = await GetAsync(entity.TenantId, entity.PartnerEntityId, entity.MonitoredResourceId);
 
-            if (existing != null)
-            {
-                // Treat as update request
-                return await UpdateAsync(
-                    existing.TenantId, existing.PartnerEntityId, existing.MonitoredResourceId, entity.IsMonitored, entity.Reason);
+                if (existing != null)
+                {
+                    // Treat as update request
+                    return await UpdateAsync(
+                        existing.TenantId, existing.PartnerEntityId, existing.MonitoredResourceId, entity.IsMonitored, entity.Reason);
+                }
+                else
+                {
+                    // Treat as add request
+                    return await AddAsync(entity);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // Treat as add request
-                return await AddAsync(entity);
+                dbOperation.FailOperation(ex.Message);
+                throw;
             }
         }
 

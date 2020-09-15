@@ -14,12 +14,14 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
     public class MonitoringBaseEntityDataSource<TMonitoringEntity>
         : IMonitoringBaseEntityDataSource<TMonitoringEntity> where TMonitoringEntity : MonitoringBaseEntity
     {
+        protected readonly Serilog.ILogger _logger;
         private readonly IMongoCollection<TMonitoringEntity> _collection;
         private readonly MongoWaitQueueRateLimiter _rateLimiter;
         private readonly ITimeSource _timeSource;
 
-        public MonitoringBaseEntityDataSource(IMongoCollection<TMonitoringEntity> collection, MongoWaitQueueRateLimiter rateLimiter, ITimeSource timeSource)
+        public MonitoringBaseEntityDataSource(IMongoCollection<TMonitoringEntity> collection, MongoWaitQueueRateLimiter rateLimiter, Serilog.ILogger logger, ITimeSource timeSource)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _collection = collection ?? throw new ArgumentNullException(nameof(collection));
             _rateLimiter = rateLimiter ?? throw new ArgumentNullException(nameof(rateLimiter));
             _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
@@ -100,6 +102,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
                 filter = filter & Builders<TMonitoringEntity>.Filter.Eq(u => u.MonitoredResourceId, monitoredResourceId);
             }
 
+            using var dbOperation = _logger.StartTimedOperation("DeteleMonitoringEntity");
             await _rateLimiter.WaitAsync();
             try
             {
