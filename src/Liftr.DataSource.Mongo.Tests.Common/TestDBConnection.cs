@@ -11,8 +11,8 @@ namespace Microsoft.Liftr.DataSource.Mongo
     {
         public const string TestDatabaseName = "unit-test";
 
-        // /subscriptions/60fad35b-3a47-4ca0-b691-4a789f737cea/resourcegroups/unit-test-shared-rg/providers/Microsoft.DocumentDB/databaseAccounts/liftr-unittest-eus-db
-        public static string TestMongodbConStr => "bW9uZ29kYjovL2xpZnRyLXVuaXR0ZXN0LWV1cy1kYjpZMTV5UnhTOHo2dlJZNzdNSlJHY2ZRQzJEcXIyV3BIaGpMYTVVN3NES3J6bXpiSWxwNnhTaTdEOUVSNEMxdUxkNjhudUpKQ2xHMWxRSmE3UnNjdUhuQT09QGxpZnRyLXVuaXR0ZXN0LWV1cy1kYi5kb2N1bWVudHMuYXp1cmUuY29tOjEwMjU1Lz9zc2w9dHJ1ZSZyZXBsaWNhU2V0PWdsb2JhbGRi".FromBase64();
+        // /subscriptions/f885cf14-b751-43c1-9536-dc5b1be02bc0/resourceGroups/liftr-unittest-infra/providers/Microsoft.DocumentDb/databaseAccounts/liftr-unittest-wus-db (Microsoft tenant)
+        public static string TestMongodbConStr => "bW9uZ29kYjovL2xpZnRyLXVuaXR0ZXN0LXd1cy1kYjo4RGlmNHF3TDY2SjJlYWZCWEZGWDNzdU9UUmNNNlRGSklNQnNWeG5DTmFQS05xMlBiSTBmdEdnQkg5RUhXRlJsTlVWZW10elJuR1p4b2hLaVFlUVRpdz09QGxpZnRyLXVuaXR0ZXN0LXd1cy1kYi5kb2N1bWVudHMuYXp1cmUuY29tOjEwMjU1Lz9zc2w9dHJ1ZSZyZXBsaWNhU2V0PWdsb2JhbGRi".FromBase64();
 
         public static IMongoClient TestClient { get; } = new MongoClient(TestMongodbConStr);
 
