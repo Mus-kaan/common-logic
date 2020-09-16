@@ -60,8 +60,17 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
                 if (existing != null)
                 {
                     // Treat as update request
-                    return await UpdateAsync(
-                        existing.TenantId, existing.PartnerEntityId, existing.MonitoredResourceId, entity.IsMonitored, entity.Reason);
+                    if (existing.IsMonitored != entity.IsMonitored || existing.Reason != entity.Reason)
+                    {
+                        // Only update if IsMonitored or Reason properties changed
+                        return await UpdateAsync(
+                            existing.TenantId, existing.PartnerEntityId, existing.MonitoredResourceId, entity.IsMonitored, entity.Reason);
+                    }
+                    else
+                    {
+                        // Existing entity is the same as the new one; return it as we won't update the db
+                        return existing;
+                    }
                 }
                 else
                 {

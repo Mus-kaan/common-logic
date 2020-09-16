@@ -100,6 +100,15 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 Assert.False(retrievedEntity.IsMonitored);
                 Assert.Equal("UnsupportedLocation", retrievedEntity.Reason);
 
+                // Does not modify entity if properties did not change
+                var currentLastModified = retrievedEntity.LastModifiedAtUTC;
+                await Task.Delay(2000);
+                await source.AddOrUpdateAsync(entity);
+
+                retrievedEntity = await source.GetAsync(tenantId1, partnerObjectId1, monitoredResourceId1);
+                var newLastModified = retrievedEntity.LastModifiedAtUTC;
+                Assert.Equal(currentLastModified, newLastModified);
+
                 // List entities for partner one
                 retrievedList = await source.ListByPartnerResourceAsync(tenantId1, partnerObjectId1);
                 Assert.Single(retrievedList);
