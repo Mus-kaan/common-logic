@@ -286,9 +286,10 @@ namespace Microsoft.Liftr.Contracts
 
         public override string ToString() => _resourceIdStr;
 
-#pragma warning disable CA1054 // Uri parameters should not be strings
+        /// <summary>
+        /// Parse the resource Id in Azure portal Uri. This only support the resource Id start with '/subscriptions/'
+        /// </summary>
         public static ResourceId FromResourceUri(string resourceUri)
-#pragma warning restore CA1054 // Uri parameters should not be strings
         {
             try
             {
@@ -297,7 +298,7 @@ namespace Microsoft.Liftr.Contracts
             }
             catch (Exception ex)
             {
-                throw new FormatException($"'{resourceUri}' does not contain valid resource Id part.", ex);
+                throw new FormatException($"'{resourceUri}' does not contain '{c_subscriptions}' for starting parsing the Uri.", ex);
             }
         }
 

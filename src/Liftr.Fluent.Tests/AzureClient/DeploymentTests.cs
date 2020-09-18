@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Fluent.Provisioning;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -29,6 +30,23 @@ namespace Microsoft.Liftr.Fluent.Tests.AzureClient
                 var template = TemplateHelper.GeneratePrivateLinkServiceTemplate(TestCommon.Location, "plsName", "net-rid", "frontend-rid");
 
                 await Assert.ThrowsAsync<ARMDeploymentFailureException>(async () =>
+                {
+                    await client.CreateDeploymentAsync(TestCommon.Location, rg.Name, template);
+                });
+
+                template = TemplateHelper.GeneratePLSVNetTemplate(
+                    TestCommon.Location,
+                    TestCommon.Tags,
+                    "vnetName",
+                    "cidr",
+                    "plsSubNet",
+                    "plsCidr",
+                    "psub",
+                    "pCidr",
+                    "backNet",
+                    "baclCIDR");
+
+                await Assert.ThrowsAsync<HttpRequestException>(async () =>
                 {
                     await client.CreateDeploymentAsync(TestCommon.Location, rg.Name, template);
                 });

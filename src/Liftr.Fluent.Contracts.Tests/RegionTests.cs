@@ -94,6 +94,15 @@ namespace Microsoft.Liftr.Fluent.Contracts.Tests
             Assert.Equal(46, i);
         }
 
+        [Fact]
+        public void InvalidRegionWillThrow()
+        {
+            var r = Region.Create("InvalidRegionName");
+            Assert.Throws<ArgumentOutOfRangeException>(() => { r.ShortName(); });
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => { "InvalidRegionName".ParseShortAzureRegion(); });
+        }
+
         private static void VerifyRegionToTextAndBack(Region location)
         {
             Assert.Equal(location, location.ShortName().ParseShortAzureRegion());

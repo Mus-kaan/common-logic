@@ -105,6 +105,20 @@ namespace Microsoft.Liftr.Contracts.Tests
         }
 
         [Fact]
+        public void CanParseEmptyTenantResoucrId()
+        {
+            string resourceIdString = "/providers/Microsoft.Authorization/roleAssignments/9b6a0af6-a75f-4d3c-b18b-3da1dff7e6f0";
+            var rid = new ResourceId(resourceIdString);
+
+            Assert.Equal(RootScopeLevel.Tenant, rid.RootScopeLevel);
+            Assert.True(rid.HasRoutingScope);
+            Assert.Equal("/", rid.RootScope);
+            Assert.Equal("Microsoft.Authorization", rid.Provider);
+            Assert.Equal("roleAssignments", rid.ResourceType);
+            Assert.Equal("9b6a0af6-a75f-4d3c-b18b-3da1dff7e6f0", rid.ResourceName);
+        }
+
+        [Fact]
         public void CanParseSubscriptionId()
         {
             string resourceIdString = "/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a";
@@ -186,9 +200,19 @@ namespace Microsoft.Liftr.Contracts.Tests
             Assert.Equal("availabilitySets", rid.ResourceType);
             Assert.Equal("AvSet", rid.ResourceName);
 
+            Assert.Null(rid.ChildResourceType);
+            Assert.Null(rid.ChildResourceName);
+            Assert.Null(rid.GrandChildResourceType);
+            Assert.Null(rid.GrandChildResourceName);
+
             Assert.Single(rid.TypedNames);
             Assert.Equal("availabilitySets", rid.TypedNames[0].ResourceType);
             Assert.Equal("AvSet", rid.TypedNames[0].ResourceName);
+
+            Assert.Throws<FormatException>(() =>
+            {
+                ResourceId.FromResourceUri("https://portal.azure.com/?feature.customportal=false#@microsoft.onmicrosoft.com/resource/resourceGroups/private-link-service/providers/Microsoft.Compute/availabilitySets/AvSet");
+            });
         }
 
         [Fact]
@@ -216,6 +240,30 @@ namespace Microsoft.Liftr.Contracts.Tests
             Assert.Equal(rid2.ToString(), rid.ToString());
         }
 
+        [Fact]
+        public void CanParseGrandChildResourceId()
+        {
+            string resourceIdString = "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-acr-rg/providers/Microsoft.ContainerRegistry/registries/liftrmsacr/replication/eastus/grandchild/grandchildname";
+            var rid = new ResourceId(resourceIdString);
+
+            Assert.Equal(resourceIdString, rid.ToString());
+            Assert.Equal("eebfbfdb-4167-49f6-be43-466a6709609f", rid.SubscriptionId);
+            Assert.Equal("liftr-acr-rg", rid.ResourceGroup);
+            Assert.Equal("Microsoft.ContainerRegistry", rid.Provider);
+            Assert.Equal("registries", rid.ResourceType);
+            Assert.Equal("liftrmsacr", rid.ResourceName);
+            Assert.Equal("replication", rid.ChildResourceType);
+            Assert.Equal("eastus", rid.ChildResourceName);
+            Assert.Equal("grandchild", rid.GrandChildResourceType);
+            Assert.Equal("grandchildname", rid.GrandChildResourceName);
+
+            Assert.Equal(3, rid.TypedNames.Length);
+            Assert.Equal("registries", rid.TypedNames[0].ResourceType);
+            Assert.Equal("liftrmsacr", rid.TypedNames[0].ResourceName);
+            Assert.Equal("replication", rid.TypedNames[1].ResourceType);
+            Assert.Equal("eastus", rid.TypedNames[1].ResourceName);
+        }
+
         [Theory]
         [InlineData("/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/providers/Microsoft.Compute/")]
         [InlineData("asdasasfdsf")]
@@ -230,6 +278,37 @@ namespace Microsoft.Liftr.Contracts.Tests
             Assert.Throws<FormatException>(() =>
             {
                 new ResourceId(resourceIdString);
+            });
+
+            Assert.False(ResourceId.TryParse(resourceIdString, out _));
+        }
+
+        [Fact]
+        public void InvalidWillThrow()
+        {
+            Assert.Throws<FormatException>(() =>
+            {
+                new ResourceId("/SUBSCRIPTIONS/EEBFBFDB-4167-49F6-BE43-466A6709609F/PROVIDERS");
+            });
+
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                new ResourceId(null);
+            });
+
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                new ResourceId(string.Empty);
+            });
+
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                new ResourceId("");
+            });
+
+            Assert.Throws<FormatException>(() =>
+            {
+                new ResourceId("/providers/Microsoft.Management/managementGroups/mgname/asdasd");
             });
         }
 
