@@ -308,6 +308,8 @@ out-ev2-vmss/
 out-ev2-base-image/
 out-ev2-import-geneva/
 .docker-images/
+src/TestOutput/
+TestOutput/
 
 # Image builder scripts
 image-builder/packer-files/startup/mdsd

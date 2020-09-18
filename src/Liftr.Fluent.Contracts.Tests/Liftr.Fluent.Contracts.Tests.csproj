@@ -11,6 +11,10 @@
     <PackageReference Include="xunit" Version="$(PackageVersion_xunit)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(PackageVersion_xunit_runner_visualstudio)" />
     <PackageReference Include="coverlet.collector" Version="$(PackageVersion_coverlet_collector)" />
+    <PackageReference Include="coverlet.msbuild" Version="$(PackageVersion_coverlet_msbuild)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Fluent.Contracts\Liftr.Fluent.Contracts.csproj" />

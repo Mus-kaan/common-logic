@@ -40,7 +40,7 @@
       "EnvironmentName": "Test",
       "DomainName": "sample-global-test.azliftr-test.io",
       "AzureSubscription": "f885cf14-b751-43c1-9536-dc5b1be02bc0", // LiftrToolsUnitTestONLY
-      "EnableVNet": true,
+      "EnableVNet": false,
       "OneCertCertificates": { // key is certificate name, value is certificate subject
         "GenevaClientCert": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
         "FirstPartyAppCert": "liftr-monitoring.first-party.liftr-dev.net"

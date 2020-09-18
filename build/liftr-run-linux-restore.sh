@@ -6,6 +6,10 @@ SrcRoot="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 echo "SrcRoot $SrcRoot"
 # echo "CDP_DEFAULT_CLIENT_PACKAGE_PAT: $CDP_DEFAULT_CLIENT_PACKAGE_PAT"
 
+if [ ! -f "$SrcRoot/buildtools/reportgenerator" ]; then
+    dotnet tool install dotnet-reportgenerator-globaltool --tool-path $SrcRoot/buildtools
+fi
+
 for solution in $SrcRoot/src/*.sln
 do
   echo "----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------"

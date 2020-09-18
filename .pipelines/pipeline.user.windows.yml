@@ -3,97 +3,106 @@
 
 environment:
   host:
-    os: 'windows'
+    os: "windows"
   runtime:
-    provider: 'appcontainer'
-    image: 'cdpxwinrs5.azurecr.io/global/vse2019:latest'
+    provider: "appcontainer"
+    image: "cdpxwinrs5.azurecr.io/global/vse2019:latest"
 
 # https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/316/Signing
 # https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/2350/Code-Sign-Validation
 signing_options:
-  profile: 'internal_azure_service'   # This service deploys to Azure!
+  profile: "internal_azure_service" # This service deploys to Azure!
   codesign_validation_glob_pattern: '+:file|**\bin\*\Microsoft.Liftr.*.dll;+:file|**\bin\*\Microsoft.Liftr.*.exe;-:file|**\*.Tests\**'
 
 workspace_options:
-  enable_legacy_networking: true    # Default is false. If false, only the Restore stage enables network connectivity to the user build container.
-                                    # If true, all stages enable network connectivity to user build container.
+  enable_legacy_networking:
+    true # Default is false. If false, only the Restore stage enables network connectivity to the user build container.
+    # If true, all stages enable network connectivity to user build container.
 
 version:
-  name: 'Liftr.Common'
-  major: 3                                                              # The major version number.
-  minor: 0                                                              # The minor version number
-  system: 'buildrevision'
+  name: "Liftr.Common"
+  major: 3 # The major version number.
+  minor: 0 # The minor version number
+  system: "buildrevision"
 
 versioning:
   commands:
 
 package_sources:
   nuget:
-    config_files:                               # A list of glob patterns specifying the configuration files. Use this if you already have NuGet.Config files in your repository.
-      - include:                                # Configuration files to include for automatic inference.
-        - "src/NuGet.Config"
+    config_files: # A list of glob patterns specifying the configuration files. Use this if you already have NuGet.Config files in your repository.
+      - include: # Configuration files to include for automatic inference.
+          - "src/NuGet.Config"
 
 restore:
   commands:
     - !!defaultcommand
-      name: 'Restore Windows'
-      command: 'build/run-windows-restore.cmd'
+      name: "Restore Windows"
+      command: "build/run-windows-restore.cmd"
 
 build:
   commands:
     - !!buildcommand
-      name: 'Build Windows'
-      command: 'build/run-windows-build.cmd'
+      name: "Build Windows"
+      command: "build/run-windows-build.cmd"
       artifacts:
-        - from: 'src'
-          to: 'bin'
+        - from: "src"
+          to: "bin"
           include:
-            - '*/bin/*/*/Microsoft.Liftr.*.dll'
-            - '*/bin/*/*/Microsoft.Liftr.*.exe'
+            - "*/bin/*/*/Microsoft.Liftr.*.dll"
+            - "*/bin/*/*/Microsoft.Liftr.*.exe"
           exclude:
-            - '**/*.Tests/**'
-            - '**/*.Tests.*/**'
-            - '**/*.Test/**'
-            - '**/Samples/**'
-            - '**/BaseImageBuilder/**'
-            - '**/Deployment.Runner/**'
+            - "**/*.Tests/**"
+            - "**/*.Tests.*/**"
+            - "**/*.Test/**"
+            - "**/Samples/**"
+            - "**/BaseImageBuilder/**"
+            - "**/Deployment.Runner/**"
 
 test:
   commands:
     - !!testcommand
-      name: 'Run Windows Tests'
-      command: 'build/run-windows-tests.cmd'
+      name: "Run Windows Tests"
+      command: "build/run-windows-tests.cmd"
       fail_on_stderr: true
       testresults:
-        - title: 'Windows Tests'
-          type: 'vstest'
-          platform: 'Any CPU'
-          configuration: 'Debug'
+        - title: "Windows Tests"
+          type: "vstest"
+          platform: "Any CPU"
+          configuration: "Debug"
           include:
-            - '**/*.trx'
-            - '**/*.coverage'
+            - "**/*.trx"
+            - "**/*.coverage"
+      codecoverage:
+        - summary_file: "TestOutput/CodeCoverage/coverage.cobertura.xml"
+          report_directory: "TestOutput/CoverageReport"
+          coverage_tool: "Cobertura"
+          from: "TestOutput"
+          include:
+            - "**/*.xml"
+            - "*.html"
 
 package:
   commands:
     - !!buildcommand
-      name: 'Package'
-      command: 'build/run-windows-pack.cmd'
+      name: "Package"
+      command: "build/run-windows-pack.cmd"
       artifacts:
-        - from: 'nupkgs'
-          to: 'nupkgs'
+        - from: "nupkgs"
+          to: "nupkgs"
           include:
-            - '**/*'
-        - from: 'exes'
-          to: 'exes'
+            - "**/*"
+        - from: "exes"
+          to: "exes"
           include:
-            - '**/*'
+            - "**/*"
 
 static_analysis_options: # OPTIONAL: If you wish to add options to FxCop, ModernCop, PoliCheck, or BinSkim
-  binskim_options:       # OPTIONAL: If you want to add options for BinSkim.
+  binskim_options: # OPTIONAL: If you want to add options for BinSkim.
     files_to_scan:
-      - from: 'src/**/bin'
+      - from: "src/**/bin"
         include:
-          - '**/Microsoft.Liftr.*.dll'
-          - '**/Microsoft.Liftr.*.exe'
-        exclude:                                    # OPTIONAL: Glob patterns of files to not scan. This is a sequence, so you can have any number of search patterns.
-          - '**/*.Tests/**'
+          - "**/Microsoft.Liftr.*.dll"
+          - "**/Microsoft.Liftr.*.exe"
+        exclude: # OPTIONAL: Glob patterns of files to not scan. This is a sequence, so you can have any number of search patterns.
+          - "**/*.Tests/**"
