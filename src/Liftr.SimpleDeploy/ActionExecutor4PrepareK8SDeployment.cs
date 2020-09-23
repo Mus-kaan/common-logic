@@ -49,9 +49,10 @@ namespace Microsoft.Liftr.SimpleDeploy
 
             await WriteReservedIPToDiskAsync(azFactory, aksRGName, aksName, parsedRegionInfo.AKSRegion, targetOptions, ipPool);
 
-            var hostName = $"{regionalNamingContext.Location.ShortName()}.{targetOptions.DomainName}";
-            File.WriteAllText("rp-hostname.txt", hostName);
+            var regionalSubdomain = $"{regionalNamingContext.Location.ShortName()}.{targetOptions.DomainName}";
             File.WriteAllText("aks-domain.txt", $"{aksName}.{targetOptions.DomainName}");
+            File.WriteAllText("domain-name.txt", targetOptions.DomainName);
+            File.WriteAllText("regional-domain-name.txt", regionalSubdomain);
             File.WriteAllText("aks-name.txt", aksName);
             File.WriteAllText("aks-rg.txt", aksRGName);
             File.WriteAllText("aks-kv.txt", kv.VaultUri);

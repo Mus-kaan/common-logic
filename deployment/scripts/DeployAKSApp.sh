@@ -101,17 +101,28 @@ if [ "$HelmReleaseName" = "" ]; then
 fi
 echo "HelmReleaseName: $HelmReleaseName"
 
-if [ "$RPWebHostname" = "" ]; then
-echo "Read RPWebHostname from file 'bin/rp-hostname.txt'."
-RPWebHostname=$(<bin/rp-hostname.txt)
-    if [ "$RPWebHostname" = "" ]; then
-        echo "Please set svc host name using variable 'RPWebHostname' ..."
+if [ "$DomainName" = "" ]; then
+echo "Read DomainName from file 'bin/domain-name.txt'."
+DomainName=$(<bin/domain-name.txt)
+    if [ "$DomainName" = "" ]; then
+        echo "Please set svc host name using variable 'DomainName' ..."
         exit 1 # terminate and indicate error
     fi
-echo "expand the existing host name '$RPWebHostname' with the helm release name '$HelmReleaseName' ..."
-RPWebHostname="$HelmReleaseName.$RPWebHostname"
 fi
-echo "RPWebHostname: $RPWebHostname"
+echo "DomainName: DomainName"
+
+if [ "$RegionalDomainName" = "" ]; then
+echo "Read RegionalDomainName from file 'bin/regional-domain-name.txt'."
+RegionalDomainName=$(<bin/regional-domain-name.txt)
+    if [ "$RegionalDomainName" = "" ]; then
+        echo "Please set svc host name using variable 'RegionalDomainName' ..."
+        exit 1 # terminate and indicate error
+    fi
+fi
+echo "RegionalDomainName: $RegionalDomainName"
+
+AppReleaseDomainName="$HelmReleaseName.$RegionalDomainName"
+echo "AppReleaseDomainName: $AppReleaseDomainName"
 
 if [ "$ClusterHostname" = "" ]; then
 echo "Read ClusterHostname from file 'bin/aks-domain.txt'."
@@ -164,8 +175,11 @@ fi
 $Helm upgrade $HelmReleaseName --install --wait $DeploymentFlag\
 --set appVersion="$AppVersion" \
 --set vaultEndpoint="$KeyVaultEndpoint" \
---set hostname="$RPWebHostname" \
+--set hostname="$AppReleaseDomainName" \
 --set aksdomain="$ClusterHostname" \
+--set domainName="$DomainName" \
+--set regionalDomainName="$RegionalDomainName" \
+--set appReleaseDomainName="$AppReleaseDomainName" \
 --set sslcertb64="$sslCertB64Content" \
 --set sslkeyb64="$sslKeyB64Content" \
 --set controller.service.omitClusterIP=true \
@@ -179,6 +193,6 @@ $Helm upgrade $HelmReleaseName --install --wait $DeploymentFlag\
 
 echo "-----------------------------------------------------------------"
 echo "Finished helm upgrade AKS APP chart"
-echo "The Application host name (behind TM) will be:        https://$RPWebHostname"
+echo "The Application host name (behind TM) will be:        https://$AppReleaseDomainName"
 echo "The AKS cluster host name will be:                    https://$ClusterHostname"
 echo "-----------------------------------------------------------------"
