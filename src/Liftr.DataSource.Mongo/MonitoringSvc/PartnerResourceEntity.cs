@@ -34,6 +34,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
             TenantId = item.TenantId;
 
             ResourceType = item.ResourceType;
+            IngestEndpoint = item.IngestEndpoint;
             EncryptedContent = item.EncryptedContent;
             EncryptionKeyResourceId = item.EncryptionKeyResourceId;
             EncryptionAlgorithm = item.EncryptionAlgorithm;
@@ -42,6 +43,9 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
 
         [BsonElement("type")]
         public string ResourceType { get; set; }
+
+        [BsonElement("endpoint")]
+        public string IngestEndpoint { get; set; }
 
         [BsonElement("encrypted")]
         public string EncryptedContent { get; set; }

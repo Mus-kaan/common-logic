@@ -15,6 +15,11 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
         string ResourceType { get; set; }
 
         /// <summary>
+        /// Ingest endpoint to forward logs to partner service
+        /// </summary>
+        string IngestEndpoint { get; set; }
+
+        /// <summary>
         /// Partner credential to forward logs to partner service
         /// i.e. in case of datadog, it is api key
         /// </summary>

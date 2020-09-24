@@ -80,6 +80,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             Assert.Equal(encryptionMetaData.EncryptionKeyResourceId, retrieved.EncryptionKeyResourceId);
             Assert.Null(retrieved.TenantId);
             Assert.Null(retrieved.ETag);
+            Assert.Null(retrieved.IngestEndpoint);
 
             // Get by partner resource id
             var entities = await s.ListAsync(partnerResourceId);
@@ -98,10 +99,12 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             mockEntity.EntityId = ObjectId.GenerateNewId().ToString();
             mockEntity.TenantId = Guid.NewGuid().ToString();
             mockEntity.ETag = Guid.NewGuid().ToString();
+            mockEntity.IngestEndpoint = "SampleEndpoint";
             await s.AddAsync(mockEntity);
 
             retrieved = await s.GetAsync(mockEntity.EntityId);
             Assert.Equal(mockEntity.ETag, retrieved.ETag);
+            Assert.Equal(mockEntity.IngestEndpoint, retrieved.IngestEndpoint);
             Assert.Equal(mockEntity.EncryptionKeyResourceId, retrieved.EncryptionKeyResourceId);
 
             // List multiple
