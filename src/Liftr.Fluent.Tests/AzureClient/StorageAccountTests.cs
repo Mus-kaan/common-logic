@@ -2,11 +2,17 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Azure.Identity;
+using Azure.Storage.Blobs;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
+using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.Logging;
+using Microsoft.Liftr.Logging.Blob;
 using System;
 using System.Threading.Tasks;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Fluent.Tests
@@ -23,7 +29,6 @@ namespace Microsoft.Liftr.Fluent.Tests
         [SkipInOfficialBuild(skipLinux: true)]
         public async Task CanStorageAccountAsync()
         {
-            // This test will normally take about 12 minutes.
             using (var scope = new TestResourceGroupScope("ut-stor-", _output))
             {
                 try
@@ -56,10 +61,22 @@ namespace Microsoft.Liftr.Fluent.Tests
                     await az.GrantBlobContainerContributorAsync(st, containerName1, msi2);
                     await az.GrantBlobContainerContributorAsync(st, containerName1, msi3);
                     await az.GrantQueueContributorAsync(st, msi3);
+
+                    // Test blob log store.
+                    {
+                        BlobServiceClient blobServiceClient = new BlobServiceClient(connectionStr);
+                        var container = blobServiceClient.GetBlobContainerClient("log-container");
+                        var ts = new MockTimeSource();
+                        ILogStore logStore = new BlobLogStore(container, ts, scope.Logger);
+                        var logUri = await logStore.UploadLogAsync(Guid.NewGuid().ToString());
+                        scope.Logger.Information("The actual log content is uploaded to blob at: {logContentUri}", logUri.ToString());
+                        Assert.True(logUri.ToString().OrdinalEndsWith("blob.core.windows.net/log-container/2019-01/20/2019-01-20T08:00:00.0000000Z.txt"));
+                    }
                 }
                 catch (Exception ex)
                 {
                     scope.Logger.Error(ex, "Failed.");
+                    scope.TimedOperation.FailOperation(ex.Message);
                     throw;
                 }
             }

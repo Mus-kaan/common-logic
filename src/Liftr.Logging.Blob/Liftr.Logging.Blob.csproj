@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.Logging.Blob</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Logging.Blob</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Blob\Liftr.Blob.csproj" />
+    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
+    <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
+  </ItemGroup>
+</Project>
