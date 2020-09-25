@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Liftr.Tests.Common;
+using Microsoft.Liftr.Tests;
 using System.Threading.Tasks;
 using Xunit;
 

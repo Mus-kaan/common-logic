@@ -11,6 +11,7 @@ using System.Threading;
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.GenericHosting")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Queue")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Tests.Common")]
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Tests.Utilities")]
 
 namespace Microsoft.Liftr.DiagnosticSource
 {

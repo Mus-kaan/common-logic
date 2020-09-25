@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.GenericHosting")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Tests.Common")]
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Tests.Utilities")]
 
 namespace Microsoft.Liftr.Logging
 {

@@ -11,7 +11,7 @@ using Serilog;
 using System;
 using Xunit.Abstractions;
 
-namespace Microsoft.Liftr.Tests.Common
+namespace Microsoft.Liftr.Tests
 {
     public class LiftrTestBase : IDisposable
     {
