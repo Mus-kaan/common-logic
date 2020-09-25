@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
+    <TargetFrameworks>$(LiftrExeTargetFramework);net471</TargetFrameworks>
     <IsPackable>true</IsPackable>
     <AssemblyName>Microsoft.Liftr.Tests.Common</AssemblyName>
     <RootNamespace>Microsoft.Liftr.Tests.Common</RootNamespace>
