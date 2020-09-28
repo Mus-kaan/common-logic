@@ -159,8 +159,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Tests.Utilities", "Li
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Logging.Blob", "Liftr.Logging.Blob\Liftr.Logging.Blob.csproj", "{442AF5E8-AE81-443C-9F91-F4882DA51920}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.TestInfra.Tests", "Liftr.TestInfra.Tests\Liftr.TestInfra.Tests.csproj", "{B135A123-BB52-46BA-BC2B-B684686207F0}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -455,10 +453,6 @@ Global
 		{442AF5E8-AE81-443C-9F91-F4882DA51920}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{442AF5E8-AE81-443C-9F91-F4882DA51920}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{442AF5E8-AE81-443C-9F91-F4882DA51920}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B135A123-BB52-46BA-BC2B-B684686207F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B135A123-BB52-46BA-BC2B-B684686207F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B135A123-BB52-46BA-BC2B-B684686207F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B135A123-BB52-46BA-BC2B-B684686207F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
