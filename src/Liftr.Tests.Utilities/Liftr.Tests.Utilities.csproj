@@ -6,11 +6,15 @@
     <AssemblyName>Microsoft.Liftr.Tests.Utilities</AssemblyName>
     <RootNamespace>Microsoft.Liftr.Tests.Utilities</RootNamespace>
   </PropertyGroup>
+  <PropertyGroup>
+    <DisableLiftrCodeAnalysis>true</DisableLiftrCodeAnalysis>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Serilog.Sinks.Xunit2" Version="$(PackageVersion_Serilog_Sinks_Xunit2)" />
     <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="$(PackageVersion_Serilog_Sinks_ApplicationInsights)" />
     <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="$(PackageVersion_Microsoft_ApplicationInsights_DependencyCollector)" />
-    <PackageReference Include="XunitContext" Version="2.0.1" />
+    <PackageReference Include="xunit.assert" Version="2.4.1" />
+    <PackageReference Include="xunit.extensibility.execution" Version="2.4.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />

@@ -7,23 +7,14 @@ using Microsoft.ApplicationInsights.DependencyCollector;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Logging;
+using Microsoft.Liftr.Tests.Utilities;
 using Serilog;
 using System;
 using System.Runtime.CompilerServices;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Tests
 {
-    [GlobalSetUp]
-    public static class GlobalSetup
-    {
-        public static void Setup()
-        {
-            XunitContext.EnableExceptionCapture();
-        }
-    }
-
     /// <summary>
     /// Add and expose common test functionalities.
     /// xUnit does not provide native TestContext. https://github.com/xunit/xunit/issues/621
@@ -44,7 +35,7 @@ namespace Microsoft.Liftr.Tests
             var currentTest = XunitContext.Context.Test;
             var testClass = GetType().Name;
             GenerateLogger(testClass, output);
-            TimedOperation = Logger.StartTimedOperation(currentTest.DisplayName, generateMetrics: true);
+            TimedOperation = Logger.StartTimedOperation(GetOperationName(currentTest.DisplayName), generateMetrics: true);
             TimedOperation.SetProperty("TestEnv", "CICD");
         }
 
@@ -108,6 +99,19 @@ namespace Microsoft.Liftr.Tests
             }
 
             Logger = loggerConfig.Enrich.FromLogContext().CreateLogger();
+        }
+
+        private static string GetOperationName(string displayName)
+        {
+            try
+            {
+                var parts = displayName.Split('.');
+                return parts[parts.Length - 2] + "-" + parts[parts.Length - 1];
+            }
+            catch
+            {
+            }
+            return displayName;
         }
 
         private static string GetInstrumentationKey()
