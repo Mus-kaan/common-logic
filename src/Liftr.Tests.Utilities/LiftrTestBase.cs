@@ -52,16 +52,23 @@ namespace Microsoft.Liftr.Tests
 
         public ITimedOperation TimedOperation { get; private set; }
 
+        protected Action OnTestFailure { get; set; }
+
         public override void Dispose()
         {
             try
             {
-                if (TimedOperation != null)
+                var theExceptionThrownByTest = Context.TestException;
+                if (theExceptionThrownByTest != null)
                 {
-                    var theExceptionThrownByTest = Context.TestException;
-                    if (theExceptionThrownByTest != null)
+                    if (TimedOperation != null)
                     {
                         TimedOperation.FailOperation(theExceptionThrownByTest.Message);
+                    }
+
+                    if (OnTestFailure != null)
+                    {
+                        OnTestFailure.Invoke();
                     }
                 }
 
