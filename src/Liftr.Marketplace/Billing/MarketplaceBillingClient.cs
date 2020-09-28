@@ -7,6 +7,7 @@ using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Marketplace.Billing.Contracts;
 using Microsoft.Liftr.Marketplace.Billing.Models;
 using Microsoft.Liftr.Marketplace.Billing.Utils;
+using Microsoft.Liftr.Marketplace.Options;
 using Microsoft.Liftr.Marketplace.Saas;
 using Microsoft.Liftr.Marketplace.Saas.Options;
 using Newtonsoft.Json;
@@ -25,18 +26,18 @@ namespace Microsoft.Liftr.Marketplace.Billing
     {
         private const string DefaultApiVersionParameterName = "api-version";
         private readonly string _billingBaseUrl;
-        private readonly MarketplaceSaasOptions _marketplaceOptions;
+        private readonly MarketplaceAPIOptions _marketplaceOptions;
         private readonly AuthenticationTokenCallback _authenticationTokenCallback;
         private readonly ILogger _logger;
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public MarketplaceBillingClient(MarketplaceSaasOptions marketplaceOptions, AuthenticationTokenCallback authenticationTokenCallback, ILogger logger, HttpClient client)
+        public MarketplaceBillingClient(MarketplaceAPIOptions marketplaceOptions, AuthenticationTokenCallback authenticationTokenCallback, ILogger logger, IHttpClientFactory httpClientFactory)
         {
             _marketplaceOptions = marketplaceOptions ?? throw new ArgumentNullException(nameof(marketplaceOptions));
             _authenticationTokenCallback = authenticationTokenCallback ?? throw new ArgumentNullException(nameof(authenticationTokenCallback));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _billingBaseUrl = marketplaceOptions.API.Endpoint.ToString();
-            _httpClient = client ?? throw new ArgumentNullException(nameof(client));
+            _billingBaseUrl = marketplaceOptions.Endpoint.ToString();
+            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         }
 
         public delegate Task<string> AuthenticationTokenCallback();
@@ -51,6 +52,8 @@ namespace Microsoft.Liftr.Marketplace.Billing
         /// <returns>Usage event response</returns>
         public async Task<MeteredBillingRequestResponse> SendUsageEventAsync(UsageEventRequest marketplaceUsageEventRequest, BillingRequestMetadata requestMetadata = null, CancellationToken cancellationToken = default)
         {
+            var httpClient = _httpClientFactory.CreateClient();
+
             requestMetadata = SetBillingRequestMetadata(requestMetadata);
 
             var accessToken = await _authenticationTokenCallback();
@@ -67,7 +70,7 @@ namespace Microsoft.Liftr.Marketplace.Billing
 
             _logger.Information($"[{MarketplaceConstants.SAASLogTag} {MarketplaceConstants.BillingLogTag}] [{nameof(SendUsageEventAsync)}] Sending request for usageevent: requestUri: {@request.RequestUri}, requestId: {requestMetadata.MSRequestId}");
 
-            HttpResponseMessage httpResponse = await _httpClient.SendAsync(request, cancellationToken);
+            HttpResponseMessage httpResponse = await httpClient.SendAsync(request, cancellationToken);
 
             return httpResponse.StatusCode switch
             {
@@ -86,6 +89,7 @@ namespace Microsoft.Liftr.Marketplace.Billing
         /// <returns>Batch Usage event response</returns>
         public async Task<MeteredBillingRequestResponse> SendBatchUsageEventAsync(BatchUsageEventRequest marketplaceBatchUsageEventRequest, BillingRequestMetadata requestMetadata = null, CancellationToken cancellationToken = default)
         {
+            var httpClient = _httpClientFactory.CreateClient();
             requestMetadata = SetBillingRequestMetadata(requestMetadata);
 
             var accessToken = await _authenticationTokenCallback();
@@ -103,7 +107,7 @@ namespace Microsoft.Liftr.Marketplace.Billing
 
             _logger.Information($"[{MarketplaceConstants.SAASLogTag} {MarketplaceConstants.BillingLogTag}] [{nameof(SendBatchUsageEventAsync)}] Sending request for usageevent: requestUri: {@request.RequestUri}, requestId: {requestMetadata.MSRequestId}");
 
-            var response = await _httpClient.SendAsync(request, cancellationToken);
+            var response = await httpClient.SendAsync(request, cancellationToken);
             return response.StatusCode switch
             {
                 HttpStatusCode.OK => await AzureMarketplaceRequestResult.ParseAsync<MeteredBillingBatchUsageSuccessResponse>(response),
@@ -115,7 +119,7 @@ namespace Microsoft.Liftr.Marketplace.Billing
         {
             var endpoint = _billingBaseUrl
                 .AppendPathSegment(requestPath)
-                .SetQueryParam(DefaultApiVersionParameterName, _marketplaceOptions.API.ApiVersion);
+                .SetQueryParam(DefaultApiVersionParameterName, _marketplaceOptions.ApiVersion);
 
             var request = new HttpRequestMessage(method, endpoint);
 

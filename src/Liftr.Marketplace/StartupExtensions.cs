@@ -200,7 +200,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 }
 
                 var tokenProvider = new SingleTenantAppTokenProvider(saasTechnicalConfig, kvClient, logger);
-                return new MarketplaceBillingClient(marketplaceOptions, () => tokenProvider.GetTokenAsync(), logger, httpClientFactory.CreateClient());
+                return new MarketplaceBillingClient(marketplaceOptions.API, () => tokenProvider.GetTokenAsync(), logger, httpClientFactory);
             });
         }
 
