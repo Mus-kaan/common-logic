@@ -10,8 +10,10 @@ using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Tests.Utilities;
 using Serilog;
 using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Microsoft.Liftr.Tests
 {
@@ -34,14 +36,55 @@ namespace Microsoft.Liftr.Tests
             TestExceptionHelper.EnableExceptionCapture();
         }
 
-        public LiftrTestBase(ITestOutputHelper output = null, [CallerFilePath] string sourceFile = "")
+        public LiftrTestBase(ITestOutputHelper output, [CallerFilePath] string sourceFile = "")
         {
+            if (output == null)
+            {
+                throw new ArgumentNullException(nameof(output));
+            }
+
             TestExceptionHelper.Register(sourceFile);
             var testClass = GetType().Name;
             GenerateLogger(testClass, output);
-            TimedOperation = Logger.StartTimedOperation(testClass, generateMetrics: true);
+            string operationName = null;
+
+            try
+            {
+                var testOutputType = output.GetType();
+                FieldInfo cachedTestMember = testOutputType.GetField("test", BindingFlags.Instance | BindingFlags.NonPublic);
+                if (cachedTestMember != null)
+                {
+                    Test = (ITest)cachedTestMember.GetValue(output);
+                    var parts = Test.DisplayName.Split('.');
+                    TestClassName = parts[parts.Length - 2];
+                    TestMethodName = parts[parts.Length - 1];
+                    operationName = $"{TestClassName}-{TestClassName}";
+                }
+            }
+            catch
+            {
+                operationName = testClass;
+            }
+
+            TimedOperation = Logger.StartTimedOperation(operationName, generateMetrics: true);
             TimedOperation.SetProperty("TestEnv", "CICD");
+
+            if (!string.IsNullOrEmpty(TestClassName))
+            {
+                TimedOperation.SetProperty(nameof(TestClassName), TestClassName);
+            }
+
+            if (!string.IsNullOrEmpty(TestMethodName))
+            {
+                TimedOperation.SetProperty(nameof(TestMethodName), TestMethodName);
+            }
         }
+
+        public string TestClassName { get; }
+
+        public string TestMethodName { get; }
+
+        public ITest Test { get; }
 
         public ILogger Logger { get; private set; }
 
