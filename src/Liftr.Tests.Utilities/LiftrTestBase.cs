@@ -20,7 +20,7 @@ namespace Microsoft.Liftr.Tests
     /// xUnit does not provide native TestContext. https://github.com/xunit/xunit/issues/621
     /// This added the test context through 'XunitContext'. https://github.com/SimonCropp/XunitContext#test-failure
     /// </summary>
-    public class LiftrTestBase : XunitContextBase, IDisposable
+    public class LiftrTestBase : IDisposable
     {
         private static readonly string s_appInsightsIntrumentationKey = GetInstrumentationKey();
         private static readonly IDisposable s_httpClientSubscriber = GetHttpCoreDiagnosticSourceSubscriber();
@@ -29,13 +29,17 @@ namespace Microsoft.Liftr.Tests
         private DependencyTrackingTelemetryModule _depModule;
         private TelemetryClient _appInsightsClient;
 
-        public LiftrTestBase(ITestOutputHelper output, [CallerFilePath] string sourceFile = "")
-            : base(output, sourceFile)
+        static LiftrTestBase()
         {
-            var currentTest = XunitContext.Context.Test;
+            TestExceptionHelper.EnableExceptionCapture();
+        }
+
+        public LiftrTestBase(ITestOutputHelper output = null, [CallerFilePath] string sourceFile = "")
+        {
+            TestExceptionHelper.Register(sourceFile);
             var testClass = GetType().Name;
             GenerateLogger(testClass, output);
-            TimedOperation = Logger.StartTimedOperation(GetOperationName(currentTest.DisplayName), generateMetrics: true);
+            TimedOperation = Logger.StartTimedOperation(testClass, generateMetrics: true);
             TimedOperation.SetProperty("TestEnv", "CICD");
         }
 
@@ -45,11 +49,11 @@ namespace Microsoft.Liftr.Tests
 
         protected Action OnTestFailure { get; set; }
 
-        public override void Dispose()
+        public virtual void Dispose()
         {
             try
             {
-                var theExceptionThrownByTest = Context.TestException;
+                var theExceptionThrownByTest = TestExceptionHelper.TestException;
                 if (theExceptionThrownByTest != null)
                 {
                     if (TimedOperation != null)
@@ -75,8 +79,6 @@ namespace Microsoft.Liftr.Tests
             catch
             {
             }
-
-            base.Dispose();
         }
 
         private void GenerateLogger(string testClass, ITestOutputHelper output = null)
@@ -99,19 +101,6 @@ namespace Microsoft.Liftr.Tests
             }
 
             Logger = loggerConfig.Enrich.FromLogContext().CreateLogger();
-        }
-
-        private static string GetOperationName(string displayName)
-        {
-            try
-            {
-                var parts = displayName.Split('.');
-                return parts[parts.Length - 2] + "-" + parts[parts.Length - 1];
-            }
-            catch
-            {
-            }
-            return displayName;
         }
 
         private static string GetInstrumentationKey()

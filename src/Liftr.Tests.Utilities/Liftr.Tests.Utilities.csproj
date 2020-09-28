@@ -14,7 +14,6 @@
     <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="$(PackageVersion_Serilog_Sinks_ApplicationInsights)" />
     <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="$(PackageVersion_Microsoft_ApplicationInsights_DependencyCollector)" />
     <PackageReference Include="xunit.assert" Version="2.4.1" />
-    <PackageReference Include="xunit.extensibility.execution" Version="2.4.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />

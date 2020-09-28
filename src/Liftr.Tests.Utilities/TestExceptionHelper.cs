@@ -5,15 +5,18 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Tests.Utilities
 {
-    internal static class XunitContext
+    /// <summary>
+    /// https://github.com/SimonCropp/XunitContext/blob/master/src/XunitContext/XunitContext.cs
+    /// </summary>
+    internal static class TestExceptionHelper
     {
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-        static AsyncLocal<Context?> local = new AsyncLocal<Context?>();
+        static AsyncLocal<TestContext?> local = new AsyncLocal<TestContext?>();
 #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+
         static bool enableExceptionCapture;
 
         public static void EnableExceptionCapture()
@@ -31,50 +34,26 @@ namespace Microsoft.Liftr.Tests.Utilities
                     return;
                 }
 
-                if (local.Value.flushed)
-                {
-                    return;
-                }
-
                 local.Value.Exception = e.Exception;
             };
         }
 
-        public static Context Context
-        {
-            get
-            {
-                var context = local.Value;
-                if (context != null)
-                {
-                    return context;
-                }
+        /// <summary>
+        /// The <see cref="Exception"/> for the current test if it failed.
+        /// </summary>
+        public static Exception TestException => local.Value?.TestException;
 
-                context = new Context();
-                local.Value = context;
-                return context;
-            }
-        }
-
-        public static Context Register(
-            ITestOutputHelper output,
-            [CallerFilePath] string sourceFile = "")
+        public static TestContext Register([CallerFilePath] string sourceFile = "")
         {
             var existingContext = local.Value;
 
             if (existingContext == null)
             {
-                var context = new Context(output, sourceFile);
+                var context = new TestContext(sourceFile);
                 local.Value = context;
                 return context;
             }
 
-            if (existingContext.TestOutput != null)
-            {
-                throw new Exception("A ITestOutputHelper has already been registered.");
-            }
-
-            existingContext.TestOutput = output;
             existingContext.SourceFile = sourceFile;
             return existingContext;
         }
