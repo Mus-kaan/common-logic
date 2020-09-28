@@ -5,7 +5,6 @@
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.ResourceGraph;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.Liftr.Monitoring.Whale;
 using Microsoft.Liftr.Monitoring.Whale.Interfaces;

@@ -2,9 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Liftr.Contracts;
 using System;
-using System.Reflection;
 
 namespace Microsoft.Liftr.Monitoring.Common
 {

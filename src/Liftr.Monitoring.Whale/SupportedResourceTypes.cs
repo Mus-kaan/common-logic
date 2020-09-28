@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Extensions.Azure;
 using System.Collections.Generic;
 using System.Linq;
 

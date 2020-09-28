@@ -127,7 +127,7 @@ namespace Microsoft.Liftr.Monitoring.Whale
                 else
                 {
                     // We need to create a new diagnostic setting on the resource
-                     DiagnosticSettingName = MonitorTagsAndDiagnosticUtils.GetDiagnosticSettingNameForResource(_diagnosticsSettingPrefix);
+                    DiagnosticSettingName = MonitorTagsAndDiagnosticUtils.GetDiagnosticSettingNameForResource(_diagnosticsSettingPrefix);
                 }
 
                 _logger.Information(

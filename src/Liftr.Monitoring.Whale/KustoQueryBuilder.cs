@@ -4,7 +4,6 @@
 
 using Microsoft.Azure.Management.ResourceGraph.Models;
 using Microsoft.Liftr.Monitoring.Common.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
