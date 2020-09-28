@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.Monitoring.Common</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Monitoring.Common</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="$(PackageVersion_Newtonsoft_Json)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
+  </ItemGroup>
+</Project>

@@ -56,5 +56,6 @@
     <PackageVersion_System_Text_Json>4.7.2</PackageVersion_System_Text_Json>
     <PackageVersion_xunit>2.4.1</PackageVersion_xunit>
     <PackageVersion_xunit_runner_visualstudio>2.4.1</PackageVersion_xunit_runner_visualstudio>
+	<PackageVersion_Microsoft_Azure_Management_ResourceGraph>2.0</PackageVersion_Microsoft_Azure_Management_ResourceGraph>
   </PropertyGroup>
 </Project>
