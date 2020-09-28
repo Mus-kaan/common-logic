@@ -9,11 +9,27 @@ using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Logging;
 using Serilog;
 using System;
+using System.Runtime.CompilerServices;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Tests
 {
-    public class LiftrTestBase : IDisposable
+    [GlobalSetUp]
+    public static class GlobalSetup
+    {
+        public static void Setup()
+        {
+            XunitContext.EnableExceptionCapture();
+        }
+    }
+
+    /// <summary>
+    /// Add and expose common test functionalities.
+    /// xUnit does not provide native TestContext. https://github.com/xunit/xunit/issues/621
+    /// This added the test context through 'XunitContext'. https://github.com/SimonCropp/XunitContext#test-failure
+    /// </summary>
+    public class LiftrTestBase : XunitContextBase, IDisposable
     {
         private static readonly string s_appInsightsIntrumentationKey = GetInstrumentationKey();
         private static readonly IDisposable s_httpClientSubscriber = GetHttpCoreDiagnosticSourceSubscriber();
@@ -22,11 +38,13 @@ namespace Microsoft.Liftr.Tests
         private DependencyTrackingTelemetryModule _depModule;
         private TelemetryClient _appInsightsClient;
 
-        public LiftrTestBase(ITestOutputHelper output = null)
+        public LiftrTestBase(ITestOutputHelper output, [CallerFilePath] string sourceFile = "")
+            : base(output, sourceFile)
         {
+            var currentTest = XunitContext.Context.Test;
             var testClass = GetType().Name;
             GenerateLogger(testClass, output);
-            TimedOperation = Logger.StartTimedOperation(testClass, generateMetrics: true);
+            TimedOperation = Logger.StartTimedOperation(currentTest.DisplayName, generateMetrics: true);
             TimedOperation.SetProperty("TestEnv", "CICD");
         }
 
@@ -34,10 +52,19 @@ namespace Microsoft.Liftr.Tests
 
         public ITimedOperation TimedOperation { get; private set; }
 
-        public void Dispose()
+        public override void Dispose()
         {
             try
             {
+                if (TimedOperation != null)
+                {
+                    var theExceptionThrownByTest = Context.TestException;
+                    if (theExceptionThrownByTest != null)
+                    {
+                        TimedOperation.FailOperation(theExceptionThrownByTest.Message);
+                    }
+                }
+
                 TimedOperation?.Dispose();
                 _appInsightsClient?.Flush();
                 _appInsightsConfig?.Dispose();
@@ -50,6 +77,8 @@ namespace Microsoft.Liftr.Tests
             catch
             {
             }
+
+            base.Dispose();
         }
 
         private void GenerateLogger(string testClass, ITestOutputHelper output = null)

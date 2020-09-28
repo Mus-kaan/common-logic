@@ -5,11 +5,17 @@
 using Microsoft.Liftr.Tests;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Fluent.Tests
 {
     public class LiftrTestBaseTests : LiftrTestBase
     {
+        public LiftrTestBaseTests(ITestOutputHelper output)
+            : base(output)
+        {
+        }
+
         [Fact]
         public void SimpleTest()
         {
