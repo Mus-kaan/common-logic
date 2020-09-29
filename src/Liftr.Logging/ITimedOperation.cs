@@ -9,6 +9,8 @@ namespace Microsoft.Liftr.Logging
 {
     public interface ITimedOperation : IDisposable
     {
+        string Name { get; }
+
         void SetEnvironmentType(string environmentType);
 
         /// <summary>

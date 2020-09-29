@@ -19,6 +19,7 @@ namespace Microsoft.Liftr.Fluent.Tests
         [Fact]
         public void SimpleTest()
         {
+            Logger.Information("TestLogEvent");
 #pragma warning disable Liftr1005 // Avoid calling System.Threading.Tasks.Task.Wait()
             Task.Delay(2000).Wait();
 #pragma warning restore Liftr1005 // Avoid calling System.Threading.Tasks.Task.Wait()

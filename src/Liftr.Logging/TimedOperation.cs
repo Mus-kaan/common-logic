@@ -23,7 +23,6 @@ namespace Microsoft.Liftr.Logging
         private const string FailedOperationCount = nameof(FailedOperationCount);
         private const string StatusCode = nameof(StatusCode);
         private readonly Serilog.ILogger _logger;
-        private readonly string _operationName;
         private readonly bool _skipAppInsights;
         private readonly Dictionary<string, object> _properties = new Dictionary<string, object>();
         private readonly IOperationHolder<RequestTelemetry> _appInsightsOperation;
@@ -64,7 +63,7 @@ namespace Microsoft.Liftr.Logging
             }
 
             _logger = logger;
-            _operationName = operationName;
+            Name = operationName;
             _skipAppInsights = skipAppInsights;
 
             if (!skipAppInsights)
@@ -79,9 +78,11 @@ namespace Microsoft.Liftr.Logging
             if (LoggerExtensions.Options.LogTimedOperation)
             {
                 using var scope = new NoAppInsightsScope(skipAppInsights);
-                _logger.Information($"Start TimedOperation '{_operationName}' with '{{TimedOperationId}}' at StartTime {{StartTime}}.", _operationId, _startTime);
+                _logger.Information($"Start TimedOperation '{Name}' with '{{TimedOperationId}}' at StartTime {{StartTime}}.", _operationId, _startTime);
             }
         }
+
+        public string Name { get; }
 
         public void Dispose()
         {
@@ -97,11 +98,11 @@ namespace Microsoft.Liftr.Logging
                 using var scope = new NoAppInsightsScope(_skipAppInsights);
                 if (_statusCode == null)
                 {
-                    _logger.Information("Finished TimedOperation '" + _operationName + "' with '{TimedOperationId}'. Successful: {isSuccessful}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationId, _isSuccessful, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
+                    _logger.Information("Finished TimedOperation '" + Name + "' with '{TimedOperationId}'. Successful: {isSuccessful}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationId, _isSuccessful, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
                 }
                 else
                 {
-                    _logger.Information("Finished TimedOperation '" + _operationName + "' with '{TimedOperationId}'. Successful: {isSuccessful}. StatusCode: {statusCode}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationId, _isSuccessful, _statusCode.Value, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
+                    _logger.Information("Finished TimedOperation '" + Name + "' with '{TimedOperationId}'. Successful: {isSuccessful}. StatusCode: {statusCode}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationId, _isSuccessful, _statusCode.Value, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
                 }
             }
 
@@ -111,30 +112,30 @@ namespace Microsoft.Liftr.Logging
                 {
                     _appInsightsOperation.Telemetry.Metrics[SucceededOperationCount] = 1;
                     _appInsightsOperation.Telemetry.Metrics[FailedOperationCount] = 0;
-                    _appInsightsOperation.Telemetry.Metrics[_operationName + SucceededOperationCount] = 1;
-                    _appInsightsOperation.Telemetry.Metrics[_operationName + FailedOperationCount] = 0;
+                    _appInsightsOperation.Telemetry.Metrics[Name + SucceededOperationCount] = 1;
+                    _appInsightsOperation.Telemetry.Metrics[Name + FailedOperationCount] = 0;
 
                     if (!string.IsNullOrEmpty(_environmentType))
                     {
                         _appInsightsOperation.Telemetry.Metrics[_environmentType + SucceededOperationCount] = 1;
                         _appInsightsOperation.Telemetry.Metrics[_environmentType + FailedOperationCount] = 0;
-                        _appInsightsOperation.Telemetry.Metrics[_environmentType + _operationName + SucceededOperationCount] = 1;
-                        _appInsightsOperation.Telemetry.Metrics[_environmentType + _operationName + FailedOperationCount] = 0;
+                        _appInsightsOperation.Telemetry.Metrics[_environmentType + Name + SucceededOperationCount] = 1;
+                        _appInsightsOperation.Telemetry.Metrics[_environmentType + Name + FailedOperationCount] = 0;
                     }
                 }
                 else
                 {
                     _appInsightsOperation.Telemetry.Metrics[SucceededOperationCount] = 0;
                     _appInsightsOperation.Telemetry.Metrics[FailedOperationCount] = 1;
-                    _appInsightsOperation.Telemetry.Metrics[_operationName + SucceededOperationCount] = 0;
-                    _appInsightsOperation.Telemetry.Metrics[_operationName + FailedOperationCount] = 1;
+                    _appInsightsOperation.Telemetry.Metrics[Name + SucceededOperationCount] = 0;
+                    _appInsightsOperation.Telemetry.Metrics[Name + FailedOperationCount] = 1;
 
                     if (!string.IsNullOrEmpty(_environmentType))
                     {
                         _appInsightsOperation.Telemetry.Metrics[_environmentType + SucceededOperationCount] = 0;
                         _appInsightsOperation.Telemetry.Metrics[_environmentType + FailedOperationCount] = 1;
-                        _appInsightsOperation.Telemetry.Metrics[_environmentType + _operationName + SucceededOperationCount] = 0;
-                        _appInsightsOperation.Telemetry.Metrics[_environmentType + _operationName + FailedOperationCount] = 1;
+                        _appInsightsOperation.Telemetry.Metrics[_environmentType + Name + SucceededOperationCount] = 0;
+                        _appInsightsOperation.Telemetry.Metrics[_environmentType + Name + FailedOperationCount] = 1;
                     }
                 }
             }

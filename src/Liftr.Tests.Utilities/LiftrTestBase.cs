@@ -101,6 +101,7 @@ namespace Microsoft.Liftr.Tests
                 {
                     if (TimedOperation != null)
                     {
+                        Logger.Error(theExceptionThrownByTest, $"test_failure. {TimedOperation.Name}");
                         TimedOperation.FailOperation(theExceptionThrownByTest.Message);
                     }
 
@@ -141,6 +142,12 @@ namespace Microsoft.Liftr.Tests
             if (output != null)
             {
                 loggerConfig = loggerConfig.WriteTo.Xunit(output);
+            }
+
+            var logToConsole = Environment.GetEnvironmentVariable("LIFTR_TEST_CONSOLE_LOG");
+            if (logToConsole.OrdinalEquals("true"))
+            {
+                loggerConfig = loggerConfig.WriteTo.Console();
             }
 
             Logger = loggerConfig.Enrich.FromLogContext().CreateLogger();
