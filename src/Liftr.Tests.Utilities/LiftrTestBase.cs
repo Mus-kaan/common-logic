@@ -48,6 +48,7 @@ namespace Microsoft.Liftr.Tests
             var testClass = GetType().Name;
             GenerateLogger(testClass, output);
             string operationName = null;
+            DateTimeStr = DateTime.UtcNow.ToString("MMddHmmss", CultureInfo.InvariantCulture);
 
             try
             {
@@ -85,7 +86,7 @@ namespace Microsoft.Liftr.Tests
 
         public string TestMethodName { get; }
 
-        public string DateTimeStr => DateTime.UtcNow.ToString("MMddHmmss", CultureInfo.InvariantCulture);
+        public string DateTimeStr { get; }
 
         public ITest Test { get; }
 
