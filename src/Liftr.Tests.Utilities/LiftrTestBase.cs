@@ -10,6 +10,7 @@ using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Tests.Utilities;
 using Serilog;
 using System;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
@@ -83,6 +84,8 @@ namespace Microsoft.Liftr.Tests
         public string TestClassName { get; }
 
         public string TestMethodName { get; }
+
+        public string DateTimeStr => DateTime.UtcNow.ToString("MMddHmmss", CultureInfo.InvariantCulture);
 
         public ITest Test { get; }
 
