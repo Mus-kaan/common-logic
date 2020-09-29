@@ -4,6 +4,7 @@
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.DataSource;
+using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Queue;
 using Microsoft.Liftr.Utilities;
 using System;
@@ -59,7 +60,13 @@ namespace Microsoft.Liftr.Sample.WorkerService
 
                 try
                 {
-                    _logger.Information("Before start http get.");
+                    using (new NoAppInsightsScope())
+                    {
+                        _logger.Information("Before start http get.");
+                        var ex = new InvalidOperationException("asd");
+                        _logger.Error(ex, "Test exception");
+                    }
+
                     await Task.Delay(300);
                     if (_cnt % 3 == 2)
                     {

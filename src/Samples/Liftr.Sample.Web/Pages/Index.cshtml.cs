@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Liftr;
 using Microsoft.Liftr.DataSource;
+using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Queue;
 using Microsoft.Liftr.TokenManager;
+using System;
 using System.Threading.Tasks;
 
 namespace Liftr.Sample.Web.Pages
@@ -33,12 +36,24 @@ namespace Liftr.Sample.Web.Pages
 
         public async Task OnGetAsync()
         {
+            using (var ops = _logger.StartTimedOperation("TestSkipOperation", skipAppInsights: true))
+            {
+                await Task.Delay(30);
+            }
+
             await _counter.IncreaseCounterAsync(c_countrtName);
             CurrentCounter = await _counter.GetCounterAsync(c_countrtName) ?? 0;
             await _mpApp.GetTokenAsync("f686d426-8d16-42db-81b7-ab578e110ccd"); //dogfood
             await _sinApp.GetTokenAsync();
             await _q.AddMessageAsync($"Hello from Liftr.Sample.Web: PV = {CurrentCounter}");
             _logger.Information("Page view counter value: {pvCounter}.", CurrentCounter);
+
+            using (new NoAppInsightsScope())
+            {
+                _logger.Information("Test skip.");
+                var ex = new InvalidOperationException("asd");
+                _logger.Error(ex, "Test exception");
+            }
         }
     }
 }

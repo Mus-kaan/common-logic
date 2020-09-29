@@ -24,6 +24,7 @@ namespace Microsoft.Liftr.Logging
         private const string StatusCode = nameof(StatusCode);
         private readonly Serilog.ILogger _logger;
         private readonly string _operationName;
+        private readonly bool _skipAppInsights;
         private readonly Dictionary<string, object> _properties = new Dictionary<string, object>();
         private readonly IOperationHolder<RequestTelemetry> _appInsightsOperation;
         private readonly string _operationId;
@@ -36,7 +37,13 @@ namespace Microsoft.Liftr.Logging
         private int? _statusCode = null;
         private string _environmentType = null;
 
-        public TimedOperation(Serilog.ILogger logger, string operationName, string operationId = null, bool generateMetrics = false, bool newCorrelationId = false)
+        public TimedOperation(
+            Serilog.ILogger logger,
+            string operationName,
+            string operationId,
+            bool generateMetrics,
+            bool newCorrelationId,
+            bool skipAppInsights)
         {
             if (string.IsNullOrEmpty(operationId))
             {
@@ -58,12 +65,20 @@ namespace Microsoft.Liftr.Logging
 
             _logger = logger;
             _operationName = operationName;
-            _appInsightsOperation = AppInsightsHelper.AppInsightsClient?.StartOperation<RequestTelemetry>(operationName);
+            _skipAppInsights = skipAppInsights;
+
+            if (!skipAppInsights)
+            {
+                _appInsightsOperation = AppInsightsHelper.AppInsightsClient?.StartOperation<RequestTelemetry>(operationName);
+            }
+
             _operationId = operationId;
             _generateMetrics = generateMetrics;
             SetContextProperty("LiftrTimedOperationId", operationId);
+
             if (LoggerExtensions.Options.LogTimedOperation)
             {
+                using var scope = new NoAppInsightsScope(skipAppInsights);
                 _logger.Information($"Start TimedOperation '{_operationName}' with '{{TimedOperationId}}' at StartTime {{StartTime}}.", _operationId, _startTime);
             }
         }
@@ -79,6 +94,7 @@ namespace Microsoft.Liftr.Logging
             _sw.Stop();
             if (LoggerExtensions.Options.LogTimedOperation)
             {
+                using var scope = new NoAppInsightsScope(_skipAppInsights);
                 if (_statusCode == null)
                 {
                     _logger.Information("Finished TimedOperation '" + _operationName + "' with '{TimedOperationId}'. Successful: {isSuccessful}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationId, _isSuccessful, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());

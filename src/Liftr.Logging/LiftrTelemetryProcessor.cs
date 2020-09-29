@@ -8,19 +8,27 @@ using Microsoft.ApplicationInsights.Extensibility;
 
 namespace Microsoft.Liftr.Logging
 {
-    public class NoSamplingTelemetryProcessor : ITelemetryProcessor
+    public class LiftrTelemetryProcessor : ITelemetryProcessor
     {
         private readonly ITelemetryProcessor _next;
 
-        public NoSamplingTelemetryProcessor(ITelemetryProcessor next)
+        public LiftrTelemetryProcessor(ITelemetryProcessor next)
         {
             _next = next;
         }
 
         public void Process(ITelemetry item)
         {
+            // Skip sending data to AppInsights in scope of 'NoAppInsightsScope'.
+            if (AppInsightsHelper.SkipAppInsightsCount.Value > 0 &&
+                !(item is ExceptionTelemetry))
+            {
+                return;
+            }
+
             if (item is ISupportSampling)
             {
+                // Disable AppInsights telemetry data sampling.
                 ((ISupportSampling)item).SamplingPercentage = 100;
             }
 

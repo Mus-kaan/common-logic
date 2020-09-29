@@ -23,14 +23,20 @@ namespace Microsoft.Liftr
         /// You can add more proerties using <see cref="ITimedOperation.SetProperty(string,string)"/> or <see cref="ITimedOperation.SetContextProperty(string,string)"/>
         /// </summary>
         /// <returns>The <see cref="ITimedOperation"/> object</returns>
-        public static ITimedOperation StartTimedOperation(this ILogger logger, string operationName, string operationId = null, bool generateMetrics = false, bool newCorrelationId = false)
+        public static ITimedOperation StartTimedOperation(
+            this ILogger logger,
+            string operationName,
+            string operationId = null,
+            bool generateMetrics = false,
+            bool newCorrelationId = false,
+            bool skipAppInsights = false)
         {
             if (logger == null)
             {
                 throw new ArgumentNullException(nameof(logger));
             }
 
-            return new TimedOperation(logger, operationName, operationId, generateMetrics, newCorrelationId);
+            return new TimedOperation(logger, operationName, operationId, generateMetrics, newCorrelationId, skipAppInsights);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "Liftr1004:Avoid calling System.Threading.Tasks.Task<TResult>.Result", Justification = "<Pending>")]

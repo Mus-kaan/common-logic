@@ -76,7 +76,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
 #pragma warning disable CS0618 // Type or member is obsolete
                         var builder = TelemetryConfiguration.Active.TelemetryProcessorChainBuilder;
 #pragma warning restore CS0618 // Type or member is obsolete
-                        builder.Use((next) => new NoSamplingTelemetryProcessor(next));
+                        builder.Use((next) => new LiftrTelemetryProcessor(next));
                         builder.Build();
                         services.AddApplicationInsightsTelemetry();
                     }
