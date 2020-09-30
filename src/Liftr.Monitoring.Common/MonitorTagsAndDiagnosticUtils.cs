@@ -19,6 +19,8 @@ namespace Microsoft.Liftr.Monitoring.Common
 
         public static string MonitorResourceType { get; set; } = "monitors";
 
+        private static string DiagnosticsSettingPrefix { get; set; }
+
         // Utility functions.
         public static string GetMonitorsResourceGroupId(string subscriptionId, string resourceGroup)
         {
@@ -42,9 +44,14 @@ namespace Microsoft.Liftr.Monitoring.Common
 
         public static string GetTagRulesDefaultPath(string resourceId) => $"{resourceId}/tagRules/default";
 
-        public static string GetDiagnosticSettingNameForResource(string diagnosticsSettingPrefix)
+        public static string GetDiagnosticSettingNameForResource()
         {
-            return $"{diagnosticsSettingPrefix}_{Guid.NewGuid().ToString().Substring(0, 8)}";
+            return GetDiagnosticSettingNameForResource(DiagnosticsSettingPrefix);
+        }
+
+        public static string GetDiagnosticSettingNameForResource(string prefix)
+        {
+            return $"{prefix}_{Guid.NewGuid().ToString().Substring(0, 8)}";
         }
     }
 }

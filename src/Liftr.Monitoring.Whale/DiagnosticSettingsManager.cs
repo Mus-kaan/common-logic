@@ -24,19 +24,15 @@ namespace Microsoft.Liftr.Monitoring.Whale
     {
         private readonly IAzureClientsProvider _clientProvider;
         private readonly IEventHubManager _eventHubManager;
-        private readonly string _diagnosticsSettingPrefix;
         private readonly ILogger _logger;
 
         public DiagnosticSettingsManager(
             IAzureClientsProvider clientProvider,
             IEventHubManager eventHubManager,
-            string diagnosticsSettingPrefix,
-            string resourceProvider,
             ILogger logger)
         {
             _clientProvider = clientProvider ?? throw new ArgumentNullException(nameof(clientProvider));
             _eventHubManager = eventHubManager ?? throw new ArgumentNullException(nameof(eventHubManager));
-            _diagnosticsSettingPrefix = diagnosticsSettingPrefix ?? throw new ArgumentNullException(nameof(diagnosticsSettingPrefix));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -127,7 +123,7 @@ namespace Microsoft.Liftr.Monitoring.Whale
                 else
                 {
                     // We need to create a new diagnostic setting on the resource
-                    DiagnosticSettingName = MonitorTagsAndDiagnosticUtils.GetDiagnosticSettingNameForResource(_diagnosticsSettingPrefix);
+                    DiagnosticSettingName = MonitorTagsAndDiagnosticUtils.GetDiagnosticSettingNameForResource();
                 }
 
                 _logger.Information(
@@ -335,7 +331,7 @@ namespace Microsoft.Liftr.Monitoring.Whale
                 else
                 {
                     // We need to create a new diagnostic setting on the subscription
-                    DiagnosticSettingName = MonitorTagsAndDiagnosticUtils.GetDiagnosticSettingNameForResource(_diagnosticsSettingPrefix);
+                    DiagnosticSettingName = MonitorTagsAndDiagnosticUtils.GetDiagnosticSettingNameForResource();
                 }
 
                 var logsCategories = await GetLogsCategoriesForSubscriptionAsync(fluentClient);
