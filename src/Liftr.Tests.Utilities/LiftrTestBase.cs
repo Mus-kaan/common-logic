@@ -132,6 +132,10 @@ namespace Microsoft.Liftr.Tests
         private void GenerateLogger(string testClass, ITestOutputHelper output = null)
         {
             _appInsightsConfig = new TelemetryConfiguration(s_appInsightsIntrumentationKey);
+            var builder = _appInsightsConfig.TelemetryProcessorChainBuilder;
+            builder.Use((next) => new LocalHostTelemetryFilter(next));
+            builder.Build();
+
             _depModule = new DependencyTrackingTelemetryModule();
             _depModule.Initialize(_appInsightsConfig);
             _appInsightsClient = new TelemetryClient(_appInsightsConfig);
