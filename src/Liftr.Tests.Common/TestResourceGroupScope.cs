@@ -22,8 +22,8 @@ namespace Microsoft.Liftr
 {
     public class TestResourceGroupScope : IDisposable
     {
-        private static readonly string s_appInsightsIntrumentationKey = GetInstrumentationKey();
         private static readonly IDisposable s_httpClientSubscriber = GetHttpCoreDiagnosticSourceSubscriber();
+        private static readonly string s_appInsightsIntrumentationKey = GetInstrumentationKey();
 
         private TelemetryConfiguration _appInsightsConfig;
         private DependencyTrackingTelemetryModule _depModule;
