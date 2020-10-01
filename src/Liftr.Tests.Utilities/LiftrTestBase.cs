@@ -111,7 +111,13 @@ namespace Microsoft.Liftr.Tests
 
                     if (OnTestFailure != null)
                     {
-                        OnTestFailure.Invoke();
+                        try
+                        {
+                            OnTestFailure.Invoke();
+                        }
+                        catch
+                        {
+                        }
                     }
                 }
 
