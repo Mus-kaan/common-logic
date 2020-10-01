@@ -14,6 +14,8 @@
     <PackageReference Include="xunit.extensibility.execution" Version="$(PackageVersion_xunit_extensibility_execution)" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Liftr.Blob\Liftr.Blob.csproj" />
+    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
     <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
   </ItemGroup>
