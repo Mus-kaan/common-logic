@@ -19,7 +19,7 @@ namespace Microsoft.Liftr.Monitoring.Common
 
         public static string MonitorResourceType { get; set; } = "monitors";
 
-        private static string DiagnosticsSettingPrefix { get; set; }
+        public static string DiagnosticsSettingPrefix { get; set; }
 
         // Utility functions.
         public static string GetMonitorsResourceGroupId(string subscriptionId, string resourceGroup)
