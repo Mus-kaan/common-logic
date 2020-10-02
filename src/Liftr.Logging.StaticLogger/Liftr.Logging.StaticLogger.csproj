@@ -1,19 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
     <IsPackable>true</IsPackable>
     <AssemblyName>Microsoft.Liftr.Logging.StaticLogger</AssemblyName>
     <RootNamespace>Microsoft.Liftr.Logging.StaticLogger</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="$(PackageVersion_Serilog_Sinks_ApplicationInsights)" />
     <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="$(PackageVersion_Microsoft_ApplicationInsights_DependencyCollector)" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
   </ItemGroup>
-
 </Project>
