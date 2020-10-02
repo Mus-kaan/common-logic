@@ -9,6 +9,7 @@ using System.Threading;
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.GenericHosting")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Tests.Common")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Tests.Utilities")]
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.StaticLogger")]
 
 namespace Microsoft.Liftr.Logging
 {
