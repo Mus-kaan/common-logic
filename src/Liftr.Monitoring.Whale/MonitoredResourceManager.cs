@@ -13,7 +13,6 @@ using Microsoft.Liftr.Monitoring.Whale.Interfaces;
 using Microsoft.Liftr.Monitoring.Whale.Models;
 using Serilog;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;

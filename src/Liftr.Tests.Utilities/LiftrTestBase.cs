@@ -14,7 +14,6 @@ using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace Microsoft.Liftr.Tests
 {
