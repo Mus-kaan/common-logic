@@ -21,7 +21,7 @@ namespace Microsoft.Liftr.Logging
         {
             var dependencyTelemetry = item as DependencyTelemetry;
             if (dependencyTelemetry != null &&
-                dependencyTelemetry.Data?.OrdinalContains("localhost") == true)
+                dependencyTelemetry.Data?.Contains("localhost") == true)
             {
                 return;
             }

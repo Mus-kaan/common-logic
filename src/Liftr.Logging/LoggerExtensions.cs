@@ -9,6 +9,11 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.GenericHosting")]
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.StaticLogger")]
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Tests.Common")]
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Tests.Utilities")]
+
 namespace Microsoft.Liftr
 {
     public static class LoggerExtensions

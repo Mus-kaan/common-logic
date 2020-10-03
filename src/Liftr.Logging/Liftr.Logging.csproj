@@ -7,12 +7,12 @@
     <RootNamespace>Microsoft.Liftr.Logging</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.ApplicationInsights" Version="$(PackageVersion_Microsoft_ApplicationInsights)" />
     <PackageReference Include="Serilog" Version="$(PackageVersion_Serilog)" />
     <PackageReference Include="Serilog.Sinks.Console" Version="$(PackageVersion_Serilog_Sinks_Console)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.DiagnosticSource\Liftr.DiagnosticSource.csproj" />
+    <ProjectReference Include="..\Liftr.Logging.Contracts\Liftr.Logging.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
   </ItemGroup>
 </Project>

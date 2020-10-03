@@ -11,6 +11,6 @@
     <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="$(PackageVersion_Microsoft_ApplicationInsights_DependencyCollector)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
+    <ProjectReference Include="..\Liftr.Logging.Contracts\Liftr.Logging.Contracts.csproj" />
   </ItemGroup>
 </Project>

@@ -8,6 +8,7 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Serilog;
 using Serilog.Core;
 using System;
+using System.Globalization;
 
 namespace Microsoft.Liftr.Logging.StaticLogger
 {
@@ -31,7 +32,7 @@ namespace Microsoft.Liftr.Logging.StaticLogger
             }
         }
 
-        public static void Initilize(string appInsightsInstrumentationKey, bool logToConsole = false)
+        public static void Initilize(string appInsightsInstrumentationKey)
         {
             if (s_appInsightsConfig != null)
             {
@@ -50,13 +51,8 @@ namespace Microsoft.Liftr.Logging.StaticLogger
 
             var loggerConfig = new LoggerConfiguration()
                 .Enrich.WithProperty("ProcessSessionId", Guid.NewGuid().ToString())
-                .Enrich.WithProperty("ProcessStartTime", DateTime.UtcNow.ToZuluString())
+                .Enrich.WithProperty("ProcessStartTime", DateTime.UtcNow.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture))
                 .WriteTo.ApplicationInsights(s_appInsightsClient, TelemetryConverter.Traces);
-
-            if (logToConsole)
-            {
-                loggerConfig = loggerConfig.WriteTo.Console();
-            }
 
             s_logger = loggerConfig.Enrich.FromLogContext().CreateLogger();
         }
