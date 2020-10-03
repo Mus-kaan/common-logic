@@ -11,7 +11,7 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="$(PackageVersion_Serilog_Sinks_Console)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Liftr.DiagnosticSource\Liftr.DiagnosticSource.csproj" />
+    <ProjectReference Include="..\Liftr.DiagnosticSource.Contracts\Liftr.DiagnosticSource.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.Logging.Contracts\Liftr.Logging.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
   </ItemGroup>

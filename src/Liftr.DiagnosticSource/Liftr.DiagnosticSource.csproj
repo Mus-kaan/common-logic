@@ -10,6 +10,7 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="$(PackageVersion_System_Diagnostics_DiagnosticSource)" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Liftr.DiagnosticSource.Contracts\Liftr.DiagnosticSource.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
   </ItemGroup>
 </Project>

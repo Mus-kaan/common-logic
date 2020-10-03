@@ -13,6 +13,7 @@
     <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="$(PackageVersion_Serilog_Sinks_ApplicationInsights)" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Liftr.DiagnosticSource\Liftr.DiagnosticSource.csproj" />
     <ProjectReference Include="..\Liftr.GenericHosting\Liftr.GenericHosting.csproj" />
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
     <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />

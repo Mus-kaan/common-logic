@@ -5,6 +5,7 @@
 using System.Runtime.CompilerServices;
 using System.Threading;
 
+[assembly: InternalsVisibleTo("Microsoft.Liftr.DiagnosticSource")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Logging")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.AspNetCore")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.AspNetCore.Tests")]
