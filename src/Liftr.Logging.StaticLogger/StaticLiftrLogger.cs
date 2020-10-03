@@ -47,7 +47,6 @@ namespace Microsoft.Liftr.Logging.StaticLogger
             s_depModule = new DependencyTrackingTelemetryModule();
             s_depModule.Initialize(s_appInsightsConfig);
             s_appInsightsClient = new TelemetryClient(s_appInsightsConfig);
-            AppInsightsHelper.AppInsightsClient = s_appInsightsClient;
 
             var loggerConfig = new LoggerConfiguration()
                 .Enrich.WithProperty("ProcessSessionId", Guid.NewGuid().ToString())
