@@ -66,6 +66,16 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
             return result;
         }
 
+        public static string GetIdHeaderValue(HttpHeaders headers, string keyName)
+        {
+            if (headers is null)
+            {
+                throw new ArgumentNullException(nameof(headers));
+            }
+
+            return headers.TryGetValues(keyName, out var values) ? values.FirstOrDefault() : Guid.Empty.ToString();
+        }
+
         protected virtual void UpdateFromHeaders(HttpHeaders headers)
         {
             if (headers is null)
@@ -75,11 +85,6 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
 
             RequestId = Guid.Parse(GetIdHeaderValue(headers, MarketplaceConstants.BillingRequestIdHeaderKey));
             CorrelationId = Guid.Parse(GetIdHeaderValue(headers, MarketplaceConstants.BillingCorrelationIdHeaderKey));
-        }
-
-        private static string GetIdHeaderValue(HttpHeaders headers, string keyName)
-        {
-            return headers.TryGetValues(keyName, out var values) ? values.FirstOrDefault() : Guid.Empty.ToString();
         }
     }
 }

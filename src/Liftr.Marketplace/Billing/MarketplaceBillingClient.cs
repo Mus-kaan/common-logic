@@ -12,6 +12,7 @@ using Microsoft.Liftr.Marketplace.Saas;
 using Newtonsoft.Json;
 using Serilog;
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -67,9 +68,21 @@ namespace Microsoft.Liftr.Marketplace.Billing
             var stringContent = JsonConvert.SerializeObject(marketplaceUsageEventRequest);
             request.Content = new StringContent(stringContent, Encoding.UTF8, "application/json");
 
-            _logger.Information($"[{MarketplaceConstants.SAASLogTag} {MarketplaceConstants.BillingLogTag}] [{nameof(SendUsageEventAsync)}] Sending request for usageevent: requestUri: {@request.RequestUri}, requestId: {requestMetadata.MSRequestId}");
+            _logger.Information($"[{MarketplaceConstants.SAASLogTag} {MarketplaceConstants.BillingLogTag}] [{nameof(SendUsageEventAsync)}] Sending request for UsageEvent: requestUri: {@request.RequestUri}, requestId: {requestMetadata.MSRequestId}, correlationId: {requestMetadata.MSCorrelationId}");
 
             HttpResponseMessage httpResponse = await httpClient.SendAsync(request, cancellationToken);
+
+            // Temporarily logging Entire Response Headers for Verification
+            foreach (var header in httpResponse.Headers)
+            {
+                _logger.Information($"Header Key: {header.Key}  Header Value: {header.Value.FirstOrDefault()}");
+            }
+
+            // Logging Response Headers RequestId and CorrelationId
+            var responseCorrelationId = AzureMarketplaceRequestResult.GetIdHeaderValue(httpResponse.Headers, MarketplaceConstants.BillingCorrelationIdHeaderKey);
+            var responseRequestId = AzureMarketplaceRequestResult.GetIdHeaderValue(httpResponse.Headers, MarketplaceConstants.BillingRequestIdHeaderKey);
+
+            _logger.Information($"[{MarketplaceConstants.SAASLogTag} {MarketplaceConstants.BillingLogTag}] [{nameof(SendUsageEventAsync)}] Header Response for UsageEvent: requestUri: {@request.RequestUri}, requestId: {responseRequestId}, correlationId: {responseCorrelationId}");
 
             return httpResponse.StatusCode switch
             {
@@ -104,13 +117,26 @@ namespace Microsoft.Liftr.Marketplace.Billing
             var stringContent = JsonConvert.SerializeObject(marketplaceBatchUsageEventRequest);
             request.Content = new StringContent(stringContent, Encoding.UTF8, "application/json");
 
-            _logger.Information($"[{MarketplaceConstants.SAASLogTag} {MarketplaceConstants.BillingLogTag}] [{nameof(SendBatchUsageEventAsync)}] Sending request for usageevent: requestUri: {@request.RequestUri}, requestId: {requestMetadata.MSRequestId}");
+            _logger.Information($"[{MarketplaceConstants.SAASLogTag} {MarketplaceConstants.BillingLogTag}] [{nameof(SendBatchUsageEventAsync)}] Sending request for BatchUsageEvent: requestUri: {@request.RequestUri}, requestId: {requestMetadata.MSRequestId}, correlationId: {requestMetadata.MSCorrelationId}");
 
-            var response = await httpClient.SendAsync(request, cancellationToken);
-            return response.StatusCode switch
+            HttpResponseMessage httpResponse = await httpClient.SendAsync(request, cancellationToken);
+
+            // Temporarily logging Entire Response Headers for Verification
+            foreach (var header in httpResponse.Headers)
             {
-                HttpStatusCode.OK => await AzureMarketplaceRequestResult.ParseAsync<MeteredBillingBatchUsageSuccessResponse>(response),
-                _ => await BillingUtility.GetMeteredBillingNonSuccessResponseAsync(response),
+                _logger.Information($"Header Key: {header.Key}  Header Value: {header.Value.FirstOrDefault()}");
+            }
+
+            // Logging Response Headers RequestId and CorrelationId
+            var responseCorrelationId = AzureMarketplaceRequestResult.GetIdHeaderValue(httpResponse.Headers, MarketplaceConstants.BillingCorrelationIdHeaderKey);
+            var responseRequestId = AzureMarketplaceRequestResult.GetIdHeaderValue(httpResponse.Headers, MarketplaceConstants.BillingRequestIdHeaderKey);
+
+            _logger.Information($"[{MarketplaceConstants.SAASLogTag} {MarketplaceConstants.BillingLogTag}] [{nameof(SendBatchUsageEventAsync)}] Header Response for BatchUsageEvent: requestUri: {@request.RequestUri}, requestId: {responseRequestId}, correlationId: {responseCorrelationId}");
+
+            return httpResponse.StatusCode switch
+            {
+                HttpStatusCode.OK => await AzureMarketplaceRequestResult.ParseAsync<MeteredBillingBatchUsageSuccessResponse>(httpResponse),
+                _ => await BillingUtility.GetMeteredBillingNonSuccessResponseAsync(httpResponse),
             };
         }
 
