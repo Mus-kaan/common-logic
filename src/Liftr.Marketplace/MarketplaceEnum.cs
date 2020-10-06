@@ -2,8 +2,12 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
 namespace Microsoft.Liftr.Marketplace
 {
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum MarketplaceEnum
     {
         ListSubscriptions,
@@ -19,5 +23,6 @@ namespace Microsoft.Liftr.Marketplace
         ReinstateSubscription,
         BillingUsageEvent,
         BillingBatchUsageEvent,
+        GetSubscription,
     }
 }

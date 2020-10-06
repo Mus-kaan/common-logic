@@ -207,5 +207,39 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 throw new MarketplaceException(errorMessage, marketplaceException);
             }
         }
+
+        public async Task<MarketplaceSubscriptionDetails> GetSubscriptionAsync(
+            MarketplaceSubscription marketplaceSubscription,
+            CancellationToken cancellationToken = default)
+        {
+            if (marketplaceSubscription is null)
+            {
+                throw new ArgumentNullException(nameof(marketplaceSubscription));
+            }
+
+            using var op = _logger.StartTimedOperation(nameof(GetSubscriptionAsync));
+            op.SetContextProperty(nameof(marketplaceSubscription), marketplaceSubscription.ToString());
+            var requestPath = MarketplaceUrlHelper.GetRequestPath(MarketplaceEnum.GetSubscription, marketplaceSubscription);
+
+            try
+            {
+                var subscriptionDetails = await _marketplaceRestClient.SendRequestAsync<MarketplaceSubscriptionDetails>(
+                    HttpMethod.Get,
+                    requestPath,
+                    cancellationToken: cancellationToken);
+
+                var message = $"Successfully obtained subscription {marketplaceSubscription} with name {subscriptionDetails.Name}";
+                _logger.Information(message);
+                op.SetResultDescription(message);
+                return subscriptionDetails;
+            }
+            catch (MarketplaceHttpException marketplaceException)
+            {
+                var errorMessage = $"Failed to get subscription";
+                _logger.Error(marketplaceException, errorMessage);
+                op.FailOperation(errorMessage);
+                throw new MarketplaceException(errorMessage, marketplaceException);
+            }
+        }
     }
 }

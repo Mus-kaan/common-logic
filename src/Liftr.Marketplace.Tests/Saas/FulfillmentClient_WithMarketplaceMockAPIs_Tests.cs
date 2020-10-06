@@ -95,5 +95,15 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             var operationUpdate = new OperationUpdate("Gold", 120, OperationUpdateStatus.Success);
             await _fulfillmentClient.UpdateOperationAsync(_marketplaceMockSubscription, operationId, operationUpdate);
         }
+
+        [SkipInOfficialBuild]
+        public async Task Can_get_subscription_Async()
+        {
+            var subscription = await _fulfillmentClient.GetSubscriptionAsync(_marketplaceMockSubscription);
+
+            subscription.Id.Should().Be(_marketplaceMockSubscription.ToString());
+            subscription.PlanId.Should().Be("Gold");
+            subscription.PublisherId.Should().Be("Fabrikam");
+        }
     }
 }
