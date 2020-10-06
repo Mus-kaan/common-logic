@@ -59,7 +59,7 @@ namespace Microsoft.Liftr.Tests
                     var parts = Test.DisplayName.Split('.');
                     TestClassName = parts[parts.Length - 2];
                     TestMethodName = parts[parts.Length - 1];
-                    operationName = $"{TestClassName}-{TestClassName}";
+                    operationName = $"{TestClassName}-{TestMethodName}";
                 }
             }
             catch
