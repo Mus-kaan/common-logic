@@ -4,6 +4,8 @@
 
 using Azure.Storage.Queues;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Storage.Queue;
+using Microsoft.Liftr.ClassicQueue;
 using Microsoft.Liftr.Contracts;
 using System;
 using System.Collections.Generic;
@@ -15,12 +17,12 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Queue.Tests
 {
-    public class WriteReadQueueTests
+    public class ClassicWriteReadQueueTests
     {
         private const string c_throwMsg = "Throw message";
         private readonly ITestOutputHelper _output;
 
-        public WriteReadQueueTests(ITestOutputHelper output)
+        public ClassicWriteReadQueueTests(ITestOutputHelper output)
         {
             _output = output;
         }
@@ -34,12 +36,20 @@ namespace Microsoft.Liftr.Queue.Tests
             {
                 try
                 {
+                    const string queueName = "myqueue";
                     var storageAccount = await scope.GetTestStorageAccountAsync();
-                    var queueUri = new Uri($"https://{storageAccount.Name}.queue.core.windows.net/myqueue");
+                    var queueUri = new Uri($"https://{storageAccount.Name}.queue.core.windows.net/{queueName}");
                     QueueClient queue = new QueueClient(queueUri, TestCredentials.TokenCredential);
                     await queue.CreateAsync();
 
-                    var writer = new QueueWriter(queue, ts, scope.Logger);
+                    IQueueWriter writer = null;
+                    {
+                        var connectionString = await storageAccount.GetPrimaryConnectionStringAsync();
+                        Azure.Storage.CloudStorageAccount classicStorageAccount = Azure.Storage.CloudStorageAccount.Parse(connectionString);
+                        CloudQueueClient queueClient = classicStorageAccount.CreateCloudQueueClient();
+                        var classicQueue = queueClient.GetQueueReference(queueName);
+                        writer = new ClassicQueueWriter(classicQueue, ts, scope.Logger);
+                    }
 
                     List<LiftrQueueMessage> receivedMessages = new List<LiftrQueueMessage>();
 

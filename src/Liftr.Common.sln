@@ -163,7 +163,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Logging.StaticLogger"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Logging.Contracts", "Liftr.Logging.Contracts\Liftr.Logging.Contracts.csproj", "{8C5E1061-1B28-4121-BDBA-A5F00FB345C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.DiagnosticSource.Contracts", "Liftr.DiagnosticSource.Contracts\Liftr.DiagnosticSource.Contracts.csproj", "{1B6BB558-C8EC-442D-88DE-76838C1E1299}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DiagnosticSource.Contracts", "Liftr.DiagnosticSource.Contracts\Liftr.DiagnosticSource.Contracts.csproj", "{1B6BB558-C8EC-442D-88DE-76838C1E1299}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.ClassicQueue", "Liftr.ClassicQueue\Liftr.ClassicQueue.csproj", "{5751D8FD-F7A0-47D4-B462-137B2CDEB043}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -471,6 +473,10 @@ Global
 		{1B6BB558-C8EC-442D-88DE-76838C1E1299}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B6BB558-C8EC-442D-88DE-76838C1E1299}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B6BB558-C8EC-442D-88DE-76838C1E1299}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5751D8FD-F7A0-47D4-B462-137B2CDEB043}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5751D8FD-F7A0-47D4-B462-137B2CDEB043}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5751D8FD-F7A0-47D4-B462-137B2CDEB043}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5751D8FD-F7A0-47D4-B462-137B2CDEB043}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

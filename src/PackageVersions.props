@@ -21,7 +21,7 @@
     <PackageVersion_Microsoft_Azure_Management_ResourceGraph>2.0</PackageVersion_Microsoft_Azure_Management_ResourceGraph>
     <PackageVersion_Microsoft_Azure_Services_AppAuthentication>1.5.0</PackageVersion_Microsoft_Azure_Services_AppAuthentication>
     <PackageVersion_Microsoft_Azure_Storage_Blob>11.1.5</PackageVersion_Microsoft_Azure_Storage_Blob>
-    <PackageVersion_Microsoft_Azure_Storage_Queue>11.1.5</PackageVersion_Microsoft_Azure_Storage_Queue>
+    <PackageVersion_Microsoft_Azure_Storage_Queue>11.2.2</PackageVersion_Microsoft_Azure_Storage_Queue>
     <PackageVersion_Microsoft_CSharp>4.5.0</PackageVersion_Microsoft_CSharp>
     <PackageVersion_Microsoft_Extensions_Configuration_AzureKeyVault>3.1.4</PackageVersion_Microsoft_Extensions_Configuration_AzureKeyVault>
     <PackageVersion_Microsoft_Extensions_Configuration_EnvironmentVariables>3.1.4</PackageVersion_Microsoft_Extensions_Configuration_EnvironmentVariables>

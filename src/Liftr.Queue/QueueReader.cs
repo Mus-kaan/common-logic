@@ -24,7 +24,7 @@ namespace Microsoft.Liftr.Queue
         private readonly QueueReaderOptions _options;
         private readonly ITimeSource _timeSource;
         private readonly Serilog.ILogger _logger;
-        private readonly object _syncObj = new object();
+        private readonly object _waitTimeLock = new object();
         private bool _started;
         private TimeSpan _waitTime = QueueParameters.ScanMinWaitTime;
 
@@ -77,7 +77,15 @@ namespace Microsoft.Liftr.Queue
                             }
 
                             waitTime = GetWaitTime(true);
-                            var message = queueMessage.MessageText.FromJson<LiftrQueueMessage>();
+                            var messageText = queueMessage.MessageText;
+
+                            // The message added by the classic SDK is in base64 format, while new SDK will not encode it.
+                            if (messageText.IsBase64())
+                            {
+                                messageText = messageText.FromBase64();
+                            }
+
+                            var message = messageText.FromJson<LiftrQueueMessage>();
                             message.InsertedOn = queueMessage.InsertedOn;
                             message.ExpiresOn = queueMessage.ExpiresOn;
                             message.DequeueCount = queueMessage.DequeueCount;
@@ -137,9 +145,7 @@ namespace Microsoft.Liftr.Queue
                                     {
                                         await messageProcessingCallback(message, processingResult, cancellationToken);
                                     }
-#pragma warning disable CA1031 // Do not catch general exception types
                                     catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
                                     {
                                         _logger.Error(ex, $"{nameof(messageProcessingCallback)} threw unhandled exception.");
                                         processingResult.SuccessfullyProcessed = false;
@@ -183,11 +189,9 @@ namespace Microsoft.Liftr.Queue
                             waitTime = GetWaitTime(false);
                         }
                     }
-#pragma warning disable CA1031 // Do not catch general exception types
                     catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
                     {
-                        _logger.Error(ex, "Issue happend at processing essage from queue.");
+                        _logger.Error(ex, "Issue happend at processing message from queue.");
                         ReaderException = ex;
                     }
 
@@ -206,7 +210,9 @@ namespace Microsoft.Liftr.Queue
 
         private TimeSpan GetWaitTime(bool processedMessage)
         {
-            lock (_syncObj)
+            // This '_waitTime' is the shared state between multiple workers (threads).
+            // Lock the '_waitTimeLock' to make sure all the '_waitTime' access is in the same critical section.
+            lock (_waitTimeLock)
             {
                 if (processedMessage)
                 {

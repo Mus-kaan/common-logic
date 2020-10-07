@@ -8,5 +8,4 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.Utilities.InstanceMetaHelper.GetMetaInfoAsync~System.Threading.Tasks.Task{Microsoft.Liftr.Utilities.MetaInfo}")]
-[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.StringExtensions.IsBase64(System.String)~System.Boolean")]
+[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.Queue.QueueReader.StartListeningAsync(System.Func{Microsoft.Liftr.Queue.LiftrQueueMessage,Microsoft.Liftr.Queue.QueueMessageProcessingResult,System.Threading.CancellationToken,System.Threading.Tasks.Task},System.Threading.CancellationToken)~System.Threading.Tasks.Task")]

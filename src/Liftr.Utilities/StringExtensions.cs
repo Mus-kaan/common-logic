@@ -44,6 +44,30 @@ namespace Microsoft.Liftr
             return self.IndexOf(value, StringComparison.OrdinalIgnoreCase);
         }
 
+        public static bool IsBase64(this string base64String)
+        {
+            if (string.IsNullOrEmpty(base64String)
+                || base64String.Length % 4 != 0
+                || base64String.Contains("\"")
+                || base64String.Contains(" ")
+                || base64String.Contains("\t")
+                || base64String.Contains("\r")
+                || base64String.Contains("\n"))
+            {
+                return false;
+            }
+
+            try
+            {
+                Convert.FromBase64String(base64String);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public static string ToBase64(this string input)
         {
             var bytes = Encoding.UTF8.GetBytes(input);

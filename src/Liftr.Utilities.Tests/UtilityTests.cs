@@ -37,6 +37,18 @@ namespace Microsoft.Liftr.Utilities.Tests
         }
 
         [Theory]
+        [InlineData("eyJtc2dJZCI6IjVFLUJPWC0yMDE5MDEyMC0wMDAwMDAwMSIsImNvbnRlbnQiOiJIZWxsbyEhIiwibXNnVGVsZW1ldHJ5Q29udGV4dCI6eyJjb3JyZWxhdGlvbklkIjoiMWUyNjkxZmQtMTgyOC00OWQzLWEwYjgtNGY1YzM0N2NjY2I0In0sImNyZWF0ZWRBdCI6IjIwMTktMDEtMjBUMDg6MDA6MDAuMDAwMDAwMFoiLCJkZXF1ZXVlQ291bnQiOjB9", true)]
+        [InlineData("YXNkYXMK", true)]
+        [InlineData("bGl4aGM4OXd5ZWhmYXNkZg==", true)]
+        [InlineData("{asdasd}", false)]
+        [InlineData("{\"msgId\":\"5E-BOX-20190120-00000001\"}", false)]
+        [InlineData("this is not encoded", false)]
+        public void CheckBase64(string a, bool isBase64)
+        {
+            Assert.Equal(isBase64, a.IsBase64());
+        }
+
+        [Theory]
         [InlineData("https://docs.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-dotnet-test", "aHR0cHM6Ly9kb2NzLm1pY3Jvc29mdC5jb20vZW4tdXMvZG90bmV0L2NvcmUvdGVzdGluZy91bml0LXRlc3Rpbmctd2l0aC1kb3RuZXQtdGVzdA==")]
         [InlineData("Now that you've made one test pass, it's time to write more.", "Tm93IHRoYXQgeW91J3ZlIG1hZGUgb25lIHRlc3QgcGFzcywgaXQncyB0aW1lIHRvIHdyaXRlIG1vcmUu")]
         [InlineData("asdasfaffdgfdeg", "YXNkYXNmYWZmZGdmZGVn")]

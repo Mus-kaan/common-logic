@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.ClassicQueue</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.ClassicQueue</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.Storage.Queue" Version="$(PackageVersion_Microsoft_Azure_Storage_Queue)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
+    <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
+    <ProjectReference Include="..\Liftr.Queue.Abstractions\Liftr.Queue.Abstractions.csproj" />
+  </ItemGroup>
+</Project>
