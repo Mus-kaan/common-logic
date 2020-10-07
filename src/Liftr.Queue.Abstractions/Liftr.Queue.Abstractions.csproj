@@ -7,6 +7,6 @@
     <RootNamespace>Microsoft.Liftr.Queue</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Liftr.DiagnosticSource\Liftr.DiagnosticSource.csproj" />
+    <ProjectReference Include="..\Liftr.DiagnosticSource.Contracts\Liftr.DiagnosticSource.Contracts.csproj" />
   </ItemGroup>
 </Project>
