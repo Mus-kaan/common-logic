@@ -14,7 +14,7 @@ namespace Microsoft.Liftr.Queue
     {
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
-        public QueueMessageLeaseScope(QueueClient queue, QueueMessage msg, Serilog.ILogger logger)
+        public QueueMessageLeaseScope(QueueClient queue, QueueMessage msg, TimeSpan messageLeaseRenewInterval, TimeSpan visibilityTimeout, Serilog.ILogger logger)
         {
             if (queue == null)
             {
@@ -40,12 +40,12 @@ namespace Microsoft.Liftr.Queue
                 {
                     try
                     {
-                        await Task.Delay(QueueParameters.MessageLeaseRenewInterval, _cts.Token);
+                        await Task.Delay(messageLeaseRenewInterval, _cts.Token);
 
                         await SyncMutex.WaitAsync(_cts.Token);
                         try
                         {
-                            var response = await queue.UpdateMessageAsync(msg.MessageId, PopReceipt, msg.MessageText, visibilityTimeout: QueueParameters.VisibilityTimeout);
+                            var response = await queue.UpdateMessageAsync(msg.MessageId, PopReceipt, msg.MessageText, visibilityTimeout: visibilityTimeout);
                             PopReceipt = response.Value.PopReceipt;
                         }
                         finally

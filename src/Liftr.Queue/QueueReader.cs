@@ -27,6 +27,8 @@ namespace Microsoft.Liftr.Queue
         private readonly object _waitTimeLock = new object();
         private bool _started;
         private TimeSpan _waitTime = QueueParameters.ScanMinWaitTime;
+        private TimeSpan _visibilityTime = QueueParameters.VisibilityTimeout;
+        private TimeSpan _messageLeaseRenewTime = QueueParameters.MessageLeaseRenewInterval;
 
         public QueueReader(
             QueueClient queue,
@@ -38,7 +40,8 @@ namespace Microsoft.Liftr.Queue
             _options = options ?? throw new ArgumentNullException(nameof(options));
             _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
+            _visibilityTime = TimeSpan.FromSeconds(options.VisibilityTimeoutInSeconds);
+            _messageLeaseRenewTime = TimeSpan.FromSeconds(options.MessageLeaseRenewIntervalInSeconds);
             options.CheckValues();
         }
 
@@ -60,7 +63,7 @@ namespace Microsoft.Liftr.Queue
                     TimeSpan waitTime = _waitTime;
                     try
                     {
-                        var messages = (await _queue.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: QueueParameters.VisibilityTimeout, cancellationToken: cancellationToken)).Value;
+                        var messages = (await _queue.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: _visibilityTime, cancellationToken: cancellationToken)).Value;
                         var queueMessage = messages?.FirstOrDefault();
 
                         if (queueMessage != null)
@@ -124,7 +127,7 @@ namespace Microsoft.Liftr.Queue
 
                             try
                             {
-                                using (var lease = new QueueMessageLeaseScope(_queue, queueMessage, _logger))
+                                using (var lease = new QueueMessageLeaseScope(_queue, queueMessage, _messageLeaseRenewTime, _visibilityTime, _logger))
                                 using (var logFilterOverrideScope = new LogFilterOverrideScope(overrideLevel))
                                 using (new LogContextPropertyScope("LiftrClientReqId", message.MsgTelemetryContext?.ClientRequestId))
                                 using (new LogContextPropertyScope("LiftrTrackingId", message.MsgTelemetryContext?.ARMRequestTrackingId))
