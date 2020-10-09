@@ -15,12 +15,12 @@ namespace Microsoft.Liftr.ACIS.Relay
     /// </summary>
     public class ACISOperation : IACISOperation
     {
-        private readonly ACISOperationStatusEntityDataSource _acisStatusDataSource;
+        private readonly IACISOperationStatusEntityDataSource _acisStatusDataSource;
         private readonly ITimeSource _timeSource;
         private readonly ACISOperationStatusEntity _statusEntity;
         private readonly string _machineName;
 
-        public ACISOperation(ACISOperationStatusEntity statusEntity, ACISOperationStatusEntityDataSource acisStatusDataSource, ITimeSource timeSource, string machineName = null)
+        public ACISOperation(ACISOperationStatusEntity statusEntity, IACISOperationStatusEntityDataSource acisStatusDataSource, ITimeSource timeSource, string machineName = null)
         {
             _statusEntity = statusEntity ?? throw new ArgumentNullException(nameof(statusEntity));
             _acisStatusDataSource = acisStatusDataSource ?? throw new ArgumentNullException(nameof(acisStatusDataSource));

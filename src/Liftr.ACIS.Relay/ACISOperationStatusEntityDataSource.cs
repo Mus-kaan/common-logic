@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.ACIS.Relay
 {
-    public class ACISOperationStatusEntityDataSource
+    public class ACISOperationStatusEntityDataSource : IACISOperationStatusEntityDataSource
     {
         private readonly CloudTable _table;
 
