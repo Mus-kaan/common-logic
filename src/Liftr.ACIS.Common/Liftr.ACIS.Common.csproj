@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.ACIS.Common</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.ACIS.Common</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.ACIS.Logging.Abstractions\Liftr.ACIS.Logging.Abstractions.csproj" />
+    <ProjectReference Include="..\Liftr.ACIS.Relay\Liftr.ACIS.Relay.csproj" />
+    <ProjectReference Include="..\Liftr.ClassicQueue\Liftr.ClassicQueue.csproj" />
+  </ItemGroup>
+</Project>

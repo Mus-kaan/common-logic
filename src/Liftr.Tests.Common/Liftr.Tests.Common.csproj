@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Azure.Storage.Queue" Version="$(PackageVersion_Microsoft_Azure_Storage_Queue)" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Liftr.ACIS.Logging.Abstractions\Liftr.ACIS.Logging.Abstractions.csproj" />
     <ProjectReference Include="..\Liftr.Fluent\Liftr.Fluent.csproj" />
     <ProjectReference Include="..\Liftr.KeyVault\Liftr.KeyVault.csproj" />
     <ProjectReference Include="..\Liftr.Tests.Utilities\Liftr.Tests.Utilities.csproj" />

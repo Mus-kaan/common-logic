@@ -125,7 +125,6 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var aksMIObjectId = await client.GetAKSMIAsync(scope.ResourceGroupName, name);
                     var mcMIList = await client.ListAKSMCMIAsync(scope.ResourceGroupName, name, TestCommon.Location);
                     Assert.NotNull(aksMIObjectId);
-                    Assert.NotEmpty(mcMIList);
                 }
                 catch (Exception ex)
                 {
