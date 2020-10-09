@@ -76,5 +76,14 @@ namespace Microsoft.Liftr.Marketplace.Saas.Interfaces
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task DeleteSubscriptionAsync(MarketplaceSubscription marketplaceSubscription, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Get the marketplace subscription details
+        /// https://docs.microsoft.com/en-us/azure/marketplace/partner-center-portal/pc-saas-fulfillment-api-v2#get-subscription
+        /// </summary>
+        /// <param name="marketplaceSubscription">Marketplace Subscription</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<MarketplaceSubscriptionDetails> GetSubscriptionAsync(MarketplaceSubscription marketplaceSubscription, CancellationToken cancellationToken = default);
     }
 }
