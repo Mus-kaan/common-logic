@@ -2,6 +2,7 @@
   "PartnerName": "SamplePartner",
   "ShortPartnerName": "sp",
   "SecretPrefix": "SamplePartner",
+  "AllowedAcisExtensions": "Liftr",
   "StorageCountPerDataPlaneSubscription": 1,
   "Environments": [
     {

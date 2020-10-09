@@ -6,6 +6,7 @@ using Microsoft.Azure.Management.Graph.RBAC.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent.Models;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.KeyVault;
 using Microsoft.Rest.Azure;
@@ -21,7 +22,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             string baseName,
             NamingContext namingContext,
             RegionalDataOptions dataOptions,
-            bool createVNet)
+            bool createVNet,
+            string allowedAcisExtensions = null)
         {
             if (namingContext == null)
             {
@@ -121,6 +123,14 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 .ApplyAsync();
             _logger.Information("Added access policy for msi to regional kv.");
 
+            IStorageAccount asicStorage = null;
+            if (!string.IsNullOrEmpty(allowedAcisExtensions))
+            {
+                var acis = new ACISProvision(_azureClientFactory, _kvClient, _logger, allowedAcisExtensions);
+                asicStorage = await acis.ProvisionACISResourcesAsync(namingContext);
+                await liftrAzure.GrantQueueContributorAsync(asicStorage, provisionedResources.ManagedIdentity);
+            }
+
             provisionedResources.RPAssetOptions = await AddKeyVaultSecretsAsync(
                 namingContext,
                 provisionedResources.KeyVault,
@@ -130,7 +140,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 provisionedResources.CosmosDBAccount,
                 dataOptions.GlobalStorageResourceId,
                 dataOptions.GlobalKeyVaultResourceId,
-                provisionedResources.ManagedIdentity);
+                provisionedResources.ManagedIdentity,
+                asicStorage);
 
             var sslSubjects = new List<string>()
             {

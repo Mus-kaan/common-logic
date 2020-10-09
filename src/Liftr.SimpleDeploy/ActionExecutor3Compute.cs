@@ -20,7 +20,11 @@ namespace Microsoft.Liftr.SimpleDeploy
 {
     public sealed partial class ActionExecutor : IHostedService
     {
-        private async Task ManageComputeResourcesAsync(HostingEnvironmentOptions targetOptions, KeyVaultClient kvClient, LiftrAzureFactory azFactory)
+        private async Task ManageComputeResourcesAsync(
+            HostingEnvironmentOptions targetOptions,
+            KeyVaultClient kvClient,
+            LiftrAzureFactory azFactory,
+            string allowedAcisExtensions)
         {
             var liftrAzure = azFactory.GenerateLiftrAzure();
             var infra = new InfrastructureV2(azFactory, kvClient, _logger);
@@ -105,7 +109,8 @@ namespace Microsoft.Liftr.SimpleDeploy
                         regionalComputeOptions,
                         targetOptions.AKSConfigurations,
                         kvClient,
-                        targetOptions.EnableVNet);
+                        targetOptions.EnableVNet,
+                        allowedAcisExtensions);
                 }
                 else
                 {

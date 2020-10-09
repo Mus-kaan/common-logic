@@ -101,7 +101,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             ICosmosDBAccount cosmosDB,
             string globalStorageResourceId,
             string globalKeyVaultResourceId,
-            IIdentity msi)
+            IIdentity msi,
+            IStorageAccount acisStorageAccount)
         {
             var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
 
@@ -111,6 +112,12 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 {
                     StorageAccountName = regionalStorageAccount.Name,
                 };
+
+                if (acisStorageAccount != null)
+                {
+                    rpAssets.ACISStorageAccountName = acisStorageAccount.Name;
+                    rpAssets.ACISStorageConnectionString = await acisStorageAccount.GetPrimaryConnectionStringAsync();
+                }
 
                 if (cosmosDB != null)
                 {

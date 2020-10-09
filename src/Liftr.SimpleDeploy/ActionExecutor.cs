@@ -222,11 +222,11 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                         if (_commandOptions.Action == ActionType.CreateOrUpdateRegionalData)
                         {
-                            await ManageDataResourcesAsync(targetOptions, kvClient, azFactory);
+                            await ManageDataResourcesAsync(targetOptions, kvClient, azFactory, _hostingOptions.AllowedAcisExtensions);
                         }
                         else if (_commandOptions.Action == ActionType.CreateOrUpdateRegionalCompute)
                         {
-                            await ManageComputeResourcesAsync(targetOptions, kvClient, azFactory);
+                            await ManageComputeResourcesAsync(targetOptions, kvClient, azFactory, _hostingOptions.AllowedAcisExtensions);
                         }
                         else if (_commandOptions.Action == ActionType.PrepareK8SAppDeployment)
                         {

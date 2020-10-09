@@ -1500,6 +1500,16 @@ namespace Microsoft.Liftr.Fluent
             }
         }
 
+        public bool IsAMETenant()
+        {
+            return TenantId.OrdinalEquals("33e01921-4d64-4f8c-a055-5bdaffd5e33d");
+        }
+
+        public bool IsMicrosoftTenant()
+        {
+            return TenantId.OrdinalEquals("72f988bf-86f1-41af-91ab-2d7cd011db47");
+        }
+
         private TimeSpan GetRetryAfterValue(HttpResponseMessage response)
         {
             var retryAfter = response.Headers.RetryAfter?.Delta;

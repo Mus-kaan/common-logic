@@ -8,6 +8,7 @@ using Microsoft.Azure.Management.Graph.RBAC.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent.Models;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Hosting.Contracts;
 using Microsoft.Liftr.KeyVault;
@@ -27,7 +28,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             RegionalComputeOptions computeOptions,
             AKSInfo aksInfo,
             KeyVaultClient _kvClient,
-            bool enableVNet)
+            bool enableVNet,
+            string allowedAcisExtensions = null)
         {
             if (computeNamingContext == null)
             {
@@ -284,6 +286,14 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 }
             }
 
+            IStorageAccount asicStorage = null;
+            if (!string.IsNullOrEmpty(allowedAcisExtensions))
+            {
+                var acis = new ACISProvision(_azureClientFactory, _kvClient, _logger, allowedAcisExtensions);
+                asicStorage = await acis.ProvisionACISResourcesAsync(computeNamingContext);
+                await liftrAzure.GrantQueueContributorAsync(asicStorage, provisionedResources.ManagedIdentity);
+            }
+
             provisionedResources.RPAssetOptions = await AddKeyVaultSecretsAsync(
                 computeNamingContext,
                 provisionedResources.KeyVault,
@@ -293,7 +303,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 db,
                 computeOptions.GlobalStorageResourceId,
                 computeOptions.GlobalKeyVaultResourceId,
-                provisionedResources.ManagedIdentity);
+                provisionedResources.ManagedIdentity,
+                asicStorage);
 
             var sslSubjects = new List<string>()
             {

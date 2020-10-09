@@ -15,7 +15,11 @@ namespace Microsoft.Liftr.SimpleDeploy
 {
     public sealed partial class ActionExecutor : IHostedService
     {
-        private async Task ManageDataResourcesAsync(HostingEnvironmentOptions targetOptions, KeyVaultClient kvClient, LiftrAzureFactory azFactory)
+        private async Task ManageDataResourcesAsync(
+            HostingEnvironmentOptions targetOptions,
+            KeyVaultClient kvClient,
+            LiftrAzureFactory azFactory,
+            string allowedAcisExtensions)
         {
             var liftrAzure = azFactory.GenerateLiftrAzure();
             var infra = new InfrastructureV2(azFactory, kvClient, _logger);
@@ -74,7 +78,7 @@ namespace Microsoft.Liftr.SimpleDeploy
             }
             else
             {
-                var dataResources = await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions, createVNet);
+                var dataResources = await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions, createVNet, allowedAcisExtensions);
 
                 if (SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync != null)
                 {

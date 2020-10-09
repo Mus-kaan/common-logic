@@ -48,6 +48,10 @@ namespace Microsoft.Liftr.Fluent
 
         string DefaultSubnetName { get; }
 
+        bool IsAMETenant();
+
+        bool IsMicrosoftTenant();
+
         Task<string> GetResourceAsync(string resourceId, string apiVersion);
 
         Task DeleteResourceAsync(string resourceId, string apiVersion, CancellationToken cancellationToken = default);

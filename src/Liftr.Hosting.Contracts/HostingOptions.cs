@@ -24,6 +24,13 @@ namespace Microsoft.Liftr.Hosting.Contracts
 
         public string HelmReleaseName { get; set; }
 
+        /// <summary>
+        /// The ACIS extensions that will be supported.
+        /// When this is not null, it will create ACIS supporting resources in each region.
+        /// See details: https://genevamondocs.azurewebsites.net/actions/How%20Do%20I/keyvault.html
+        /// </summary>
+        public string AllowedAcisExtensions { get; set; }
+
         public int StorageCountPerDataPlaneSubscription { get; set; }
 
         public bool DBSupport { get; set; } = true;

@@ -22,6 +22,12 @@ namespace Microsoft.Liftr.Contracts
         [JsonProperty("gblStorName")]
         public string GlobalStorageAccountName { get; set; }
 
+        [JsonProperty("acisStorName")]
+        public string ACISStorageAccountName { get; set; }
+
+        [JsonProperty("acisStorConn")]
+        public string ACISStorageConnectionString { get; set; }
+
         [JsonProperty("dpSubs")]
         public IEnumerable<DataPlaneSubscriptionInfo> DataPlaneSubscriptions { get; set; }
 
