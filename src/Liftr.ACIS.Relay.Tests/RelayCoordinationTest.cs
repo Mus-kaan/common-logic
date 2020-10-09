@@ -95,7 +95,7 @@ namespace Microsoft.Liftr.ACIS.Relay.Tests
             }
         }
 
-        [Fact]
+        [SkipInOfficialBuild(skipLinux: true)]
         public async Task TestFailureOperationAsync()
         {
             using var scope = new TestResourceGroupScope(SdkContext.RandomResourceName("acis", 15), _output);
