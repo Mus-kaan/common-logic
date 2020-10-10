@@ -188,8 +188,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
                 _logger.Information("Created AKS cluster with Id {ResourceId}", provisionedResources.AKS.Id);
 
-                // Wait for 5 minutes to make sure the AKS MIs can be listed.
-                await Task.Delay(TimeSpan.FromMinutes(5));
+                // Wait for 10 minutes to make sure the AKS MIs can be listed.
+                await Task.Delay(TimeSpan.FromMinutes(10));
             }
             else
             {
