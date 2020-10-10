@@ -6,6 +6,7 @@ using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Liftr.ACIS.Logging;
 using Microsoft.Liftr.ACIS.Relay;
 using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.Logging.StaticLogger;
 using System;
 using System.Globalization;
 using System.Linq;
@@ -116,6 +117,10 @@ namespace Microsoft.Liftr.ACIS.Common
                     Succeeded = false,
                     Result = ex.Message,
                 };
+            }
+            finally
+            {
+                StaticLiftrLogger.Flush();
             }
         }
 

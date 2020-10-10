@@ -55,5 +55,13 @@ namespace Microsoft.Liftr.Logging.StaticLogger
 
             s_logger = loggerConfig.Enrich.FromLogContext().CreateLogger();
         }
+
+        public static void Flush()
+        {
+            if (s_appInsightsClient != null)
+            {
+                s_appInsightsClient.Flush();
+            }
+        }
     }
 }

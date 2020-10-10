@@ -10,5 +10,6 @@
     <ProjectReference Include="..\Liftr.ACIS.Logging.Abstractions\Liftr.ACIS.Logging.Abstractions.csproj" />
     <ProjectReference Include="..\Liftr.ACIS.Relay\Liftr.ACIS.Relay.csproj" />
     <ProjectReference Include="..\Liftr.ClassicQueue\Liftr.ClassicQueue.csproj" />
+    <ProjectReference Include="..\Liftr.Logging.StaticLogger\Liftr.Logging.StaticLogger.csproj" />
   </ItemGroup>
 </Project>
