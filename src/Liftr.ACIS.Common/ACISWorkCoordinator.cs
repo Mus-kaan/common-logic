@@ -61,64 +61,66 @@ namespace Microsoft.Liftr.ACIS.Common
 
             try
             {
-                var ops = _logger.StartTimedOperation(operationName, operationId);
-                try
+                using (var ops = _logger.StartTimedOperation(operationName, operationId))
                 {
-                    var status = await _dataSource.InsertEntityAsync(operationName, operationId);
-                    _logger.LogInfo($"Added ACIS operation status to RP table. operationName: '{operationName}', operationId: '{operationId}'");
-
-                    await _q.NotifyACISOperationAsync(operationName, operationId, parameters);
-                    _logger.LogInfo($"Added to RP notification queue. operationName: '{operationName}', operationId: '{operationId}'");
-
-                    var endTime = _timeSource.UtcNow.Add(_timeout);
-
-                    while (_timeSource.UtcNow < endTime)
+                    try
                     {
-                        await Task.Delay(s_pollingInterval);
-                        var newStatus = await _dataSource.GetEntityAsync(operationName, operationId);
+                        var status = await _dataSource.InsertEntityAsync(operationName, operationId);
+                        _logger.LogInfo($"Added ACIS operation status to RP table. operationName: '{operationName}', operationId: '{operationId}'");
 
-                        if (newStatus == null)
-                        {
-                            throw new InvalidOperationException($"Cannot find the ACIS operation entity with operationId '{operationId}'");
-                        }
+                        await _q.NotifyACISOperationAsync(operationName, operationId, parameters);
+                        _logger.LogInfo($"Added to RP notification queue. operationName: '{operationName}', operationId: '{operationId}'");
 
-                        CheckLogs(status, newStatus);
-                        status = newStatus;
-                        if (status.IsFinished())
+                        var endTime = _timeSource.UtcNow.Add(_timeout);
+
+                        while (_timeSource.UtcNow < endTime)
                         {
-                            if (status.Status == ACISOperationStatusType.Succeeded)
+                            await Task.Delay(s_pollingInterval);
+                            var newStatus = await _dataSource.GetEntityAsync(operationName, operationId);
+
+                            if (newStatus == null)
                             {
-                                await _dataSource.DeleteEntityAsync(operationName, operationId);
+                                throw new InvalidOperationException($"Cannot find the ACIS operation entity with operationId '{operationId}'");
                             }
 
-                            return new ACISWorkResult()
+                            CheckLogs(status, newStatus);
+                            status = newStatus;
+                            if (status.IsFinished())
                             {
-                                Succeeded = status.Status == ACISOperationStatusType.Succeeded,
-                                Result = status.Result,
-                            };
+                                if (status.Status == ACISOperationStatusType.Succeeded)
+                                {
+                                    await _dataSource.DeleteEntityAsync(operationName, operationId);
+                                }
+
+                                return new ACISWorkResult()
+                                {
+                                    Succeeded = status.Status == ACISOperationStatusType.Succeeded,
+                                    Result = status.Result,
+                                };
+                            }
+
+                            _logger.LogVerbose($"[{operationId}] Polling operation status ...");
                         }
 
-                        _logger.LogVerbose($"[{operationId}] Polling operation status ...");
+                        var timeoutMessage = "RP is not responding within the timeout. Abort.";
+                        ops.FailOperation(timeoutMessage);
+                        _logger.LogError(timeoutMessage);
+                        return new ACISWorkResult()
+                        {
+                            Succeeded = false,
+                            Result = timeoutMessage,
+                        };
                     }
-
-                    var timeoutMessage = "RP is not responding within the timeout. Abort.";
-                    ops.FailOperation(timeoutMessage);
-                    _logger.LogError(timeoutMessage);
-                    return new ACISWorkResult()
+                    catch (Exception ex)
                     {
-                        Succeeded = false,
-                        Result = timeoutMessage,
-                    };
-                }
-                catch (Exception ex)
-                {
-                    ops.FailOperation(ex.Message);
-                    _logger.LogError(ex, $"{operationName} failed");
-                    return new ACISWorkResult()
-                    {
-                        Succeeded = false,
-                        Result = ex.Message,
-                    };
+                        ops.FailOperation(ex.Message);
+                        _logger.LogError(ex, $"{operationName} failed");
+                        return new ACISWorkResult()
+                        {
+                            Succeeded = false,
+                            Result = ex.Message,
+                        };
+                    }
                 }
             }
             finally
