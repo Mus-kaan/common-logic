@@ -5,6 +5,7 @@
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.EV2.Contracts;
 using Microsoft.Liftr.Hosting.Contracts;
+using Serilog.Context;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,9 +24,6 @@ namespace Microsoft.Liftr.EV2
 
         public void GenerateArtifacts(EV2HostingOptions ev2Options, HostingOptions hostingOptions, string outputDirectory)
         {
-            _logger.Information("----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------");
-            _logger.Information("Thanks for using Liftr generic hosting! More details: https://aka.ms/liftr/hosting");
-            _logger.Information("==========[Liftr]==========[https://aka.ms/liftr]==========[Liftr]==========[https://aka.ms/liftr]==========");
             if (ev2Options == null)
             {
                 throw new ArgumentNullException(nameof(ev2Options));
@@ -35,6 +33,15 @@ namespace Microsoft.Liftr.EV2
             {
                 throw new ArgumentNullException(nameof(hostingOptions));
             }
+
+            LogContext.PushProperty(nameof(hostingOptions.PartnerName), hostingOptions.PartnerName);
+            LogContext.PushProperty(nameof(ev2Options.ServiceTreeName), ev2Options.ServiceTreeName);
+            LogContext.PushProperty(nameof(ev2Options.NotificationEmail), ev2Options.NotificationEmail);
+            LogContext.PushProperty(nameof(ev2Options.ServiceTreeId), ev2Options.ServiceTreeId.ToString());
+
+            _logger.Information("----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------");
+            _logger.Information("Thanks for using Liftr generic hosting! More details: https://aka.ms/liftr/hosting");
+            _logger.Information("==========[Liftr]==========[https://aka.ms/liftr]==========[Liftr]==========[https://aka.ms/liftr]==========");
 
             try
             {
@@ -60,14 +67,18 @@ namespace Microsoft.Liftr.EV2
 
         public void GenerateImageBuilderArtifacts(EV2ImageBuilderOptions imageBuilderOptions, string outputDirectory)
         {
-            _logger.Information("----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------");
-            _logger.Information("Thanks for using Liftr VM image builder! More details: https://aka.ms/liftr/img");
-            _logger.Information("==========[Liftr]==========[https://aka.ms/liftr]==========[Liftr]==========[https://aka.ms/liftr]==========");
-
             if (imageBuilderOptions == null)
             {
                 throw new ArgumentNullException(nameof(imageBuilderOptions));
             }
+
+            LogContext.PushProperty(nameof(imageBuilderOptions.ServiceTreeName), imageBuilderOptions.ServiceTreeName);
+            LogContext.PushProperty(nameof(imageBuilderOptions.NotificationEmail), imageBuilderOptions.NotificationEmail);
+            LogContext.PushProperty(nameof(imageBuilderOptions.ServiceTreeId), imageBuilderOptions.ServiceTreeId.ToString());
+
+            _logger.Information("----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------");
+            _logger.Information("Thanks for using Liftr VM image builder! More details: https://aka.ms/liftr/img");
+            _logger.Information("==========[Liftr]==========[https://aka.ms/liftr]==========[Liftr]==========[https://aka.ms/liftr]==========");
 
             try
             {
