@@ -23,6 +23,9 @@ namespace Microsoft.Liftr.EV2
 
         public void GenerateArtifacts(EV2HostingOptions ev2Options, HostingOptions hostingOptions, string outputDirectory)
         {
+            _logger.Information("----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------");
+            _logger.Information("Thanks for using Liftr generic hosting! More details: https://aka.ms/liftr/hosting");
+            _logger.Information("==========[Liftr]==========[https://aka.ms/liftr]==========[Liftr]==========[https://aka.ms/liftr]==========");
             if (ev2Options == null)
             {
                 throw new ArgumentNullException(nameof(ev2Options));
@@ -57,6 +60,10 @@ namespace Microsoft.Liftr.EV2
 
         public void GenerateImageBuilderArtifacts(EV2ImageBuilderOptions imageBuilderOptions, string outputDirectory)
         {
+            _logger.Information("----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------");
+            _logger.Information("Thanks for using Liftr VM image builder! More details: https://aka.ms/liftr/img");
+            _logger.Information("==========[Liftr]==========[https://aka.ms/liftr]==========[Liftr]==========[https://aka.ms/liftr]==========");
+
             if (imageBuilderOptions == null)
             {
                 throw new ArgumentNullException(nameof(imageBuilderOptions));
