@@ -83,8 +83,8 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
                 throw new ArgumentNullException(nameof(headers));
             }
 
-            RequestId = Guid.Parse(GetIdHeaderValue(headers, MarketplaceConstants.BillingRequestIdHeaderKey));
-            CorrelationId = Guid.Parse(GetIdHeaderValue(headers, MarketplaceConstants.BillingCorrelationIdHeaderKey));
+            RequestId = Guid.Parse(GetIdHeaderValue(headers, MarketplaceConstants.MarketplaceRequestIdHeaderKey));
+            CorrelationId = Guid.Parse(GetIdHeaderValue(headers, MarketplaceConstants.MarketplaceCorrelationIdHeaderKey));
         }
     }
 }

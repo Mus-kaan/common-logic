@@ -23,6 +23,7 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
         private readonly string _version = "2018-08-31";
         private readonly ILogger _logger;
         private readonly MarketplaceARMClient _armClient;
+        private readonly Mock<IHttpClientFactory> _httpClientFactory;
 
         private readonly MarketplaceRequestMetadata _marketplaceRequestMetadata = new MarketplaceRequestMetadata()
         {
@@ -39,7 +40,8 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
         {
             var mockLogger = new Mock<ILogger>();
             using var httpclient = new HttpClient();
-            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, mockLogger.Object, httpclient, () => Task.FromResult("mockToken"));
+            _httpClientFactory = new Mock<IHttpClientFactory>();
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, mockLogger.Object, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
             _logger = mockLogger.Object;
             _armClient = new MarketplaceARMClient(_logger, _marketplaceRestClient);
         }
@@ -77,8 +79,9 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
 
             using var handler = new MockHttpMessageHandler(saasResource, operationLocation);
             using var httpClient = new HttpClient(handler, false);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _logger, httpClient, () => Task.FromResult("mockToken"));
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
             var armClient = new MarketplaceARMClient(_logger, _marketplaceRestClient);
 
             var createdResource = await armClient.CreateSaaSResourceAsync(marketplaceOfferDetail, _marketplaceRequestMetadata);
@@ -106,8 +109,9 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
 
             using var handler = new MockHttpMessageHandler(saasResource, operationLocation, true);
             using var httpClient = new HttpClient(handler, false);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _logger, httpClient, () => Task.FromResult("mockToken"));
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
             var armClient = new MarketplaceARMClient(_logger, _marketplaceRestClient);
 
             var createdResource = await armClient.CreateSaaSResourceAsync(marketplaceOfferDetail, _marketplaceRequestMetadata);

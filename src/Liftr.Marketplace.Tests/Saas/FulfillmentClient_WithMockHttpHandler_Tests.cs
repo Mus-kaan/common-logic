@@ -30,6 +30,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
     {
         private const string marketplaceEndpoint = "https://test.com";
         private const string marketplaceSaasApiVersion = "2020-02-03";
+        private readonly Mock<IHttpClientFactory> _httpClientFactory;
         private static MarketplaceSubscription s_marketplaceSubscription = new MarketplaceSubscription(Guid.NewGuid());
         private static Guid s_operationId = Guid.NewGuid();
         private ILogger _logger;
@@ -38,6 +39,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
         public FulfillmentClient_WithMockHttpHandler_Tests()
         {
             _logger = new Mock<ILogger>().Object;
+            _httpClientFactory = new Mock<IHttpClientFactory>();
         }
 
         [Fact]
@@ -48,8 +50,9 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
 
             using var handler = new MockHttpMessageHandler();
             using var httpClient = new HttpClient(handler, false);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
             var resolveToken = "testResolveToken";
-            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken")), _logger);
 
             var resolvedSubscription = await _fulfillmentClient.ResolveSaaSSubscriptionAsync(resolveToken, cancellationToken);
             resolvedSubscription.Should().BeEquivalentTo(expectedSubscription);
@@ -61,8 +64,9 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             var cancellationToken = CancellationToken.None;
             using var handler = new MockHttpMessageHandler(true);
             using var httpClient = new HttpClient(handler, false);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
             var resolveToken = "testResolveToken";
-            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken")), _logger);
 
             await Assert.ThrowsAsync<MarketplaceException>(async () => await _fulfillmentClient.ResolveSaaSSubscriptionAsync(resolveToken, cancellationToken));
         }
@@ -73,7 +77,8 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             var cancellationToken = CancellationToken.None;
             using var handler = new MockHttpMessageHandler();
             using var httpClient = new HttpClient(handler, false);
-            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken")), _logger);
 
             Func<Task> act = async () => { await _fulfillmentClient.ActivateSaaSSubscriptionAsync(new ActivateSubscriptionRequest(s_marketplaceSubscription, "Gold", 100), cancellationToken); };
 
@@ -86,7 +91,8 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             var cancellationToken = CancellationToken.None;
             using var handler = new MockHttpMessageHandler(true);
             using var httpClient = new HttpClient(handler, false);
-            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken")), _logger);
 
             await Assert.ThrowsAsync<MarketplaceException>(async () => await _fulfillmentClient.ActivateSaaSSubscriptionAsync(new ActivateSubscriptionRequest(s_marketplaceSubscription, "Gold", 100), cancellationToken));
         }
@@ -98,7 +104,8 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
 
             using var handler = new MockHttpMessageHandler();
             using var httpClient = new HttpClient(handler, false);
-            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken")), _logger);
 
             var actualOperation = await _fulfillmentClient.GetOperationAsync(s_marketplaceSubscription, s_operationId);
 
@@ -112,7 +119,9 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
 
             using var handler = new MockHttpMessageHandler();
             using var httpClient = new HttpClient(handler, false);
-            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken")), _logger);
 
             var subscriptionOperationList = await _fulfillmentClient.ListPendingOperationsAsync(s_marketplaceSubscription);
             var actualOperation = subscriptionOperationList.FirstOrDefault();
@@ -125,7 +134,9 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
         {
             using var handler = new MockHttpMessageHandler();
             using var httpClient = new HttpClient(handler, false);
-            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken")), _logger);
 
             var operationUpdate = new OperationUpdate("plan", 0, OperationUpdateStatus.Success);
 
@@ -137,7 +148,9 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
         {
             using var handler = new MockHttpMessageHandler(true);
             using var httpClient = new HttpClient(handler, false);
-            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken")), _logger);
 
             var operationUpdate = new OperationUpdate("BAD_PLAN", 0, OperationUpdateStatus.Success);
 
@@ -150,7 +163,9 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             var subscription = new MarketplaceSubscription(Guid.NewGuid());
             using var handler = new MockHttpMessageHandler();
             using var httpClient = new HttpClient(handler, false);
-            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, httpClient, () => Task.FromResult("mockToken")), _logger);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken")), _logger);
 
             Func<Task> act = async () => { await _fulfillmentClient.DeleteSubscriptionAsync(subscription); };
             await act.Should().NotThrowAsync();

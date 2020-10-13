@@ -51,12 +51,13 @@ namespace Microsoft.Liftr.Marketplace.ARM
                 var additionalHeaders = GetAdditionalMarketplaceHeaders(requestMetadata);
                 var json = saasResourceProperties.ToJObject();
                 var createdResource = await _marketplaceRestClient.SendRequestWithPollingAsync<SaasCreationResponse>(HttpMethod.Put, ResourceTypePath, additionalHeaders, json);
-                _logger.Information("Marketplace resource has been successfully created. {@resource}", createdResource);
-                return createdResource.SubscriptionDetails;
+                var subscriptionDetails = createdResource.SubscriptionDetails;
+                _logger.Information($"Marketplace SAAS resource has been successfully created. \n SAAS ResourceId: {subscriptionDetails.Id}, Name: {subscriptionDetails.Name}, Plan: {subscriptionDetails.PlanId}, Offer: {subscriptionDetails.OfferId}, Publisher: {subscriptionDetails.PublisherId}, SAAS Subscription Status: {subscriptionDetails.SaasSubscriptionStatus}, Azure Subscription: {subscriptionDetails.AdditionalMetadata?.AzureSubscriptionId}");
+                return subscriptionDetails;
             }
             catch (MarketplaceHttpException ex)
             {
-                string errorMessage = $"Failed to create marketplace saas resource while making create request. Error: {ex.Message}";
+                string errorMessage = $"Failed to create marketplace SAAS resource while making create request. Error: {ex.Message}";
                 _logger.Error(ex, errorMessage);
                 op.FailOperation(errorMessage);
                 throw new MarketplaceException(errorMessage, ex);

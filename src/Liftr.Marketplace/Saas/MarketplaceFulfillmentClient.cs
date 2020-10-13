@@ -77,12 +77,12 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 content: activateSubscriptionRequest.ToJObject(),
                 cancellationToken: token);
 
-                _logger.Information("Subscription: {@subscription} activated", activateSubscriptionRequest.MarketplaceSubscription);
+                _logger.Information($"SAAS Subscription: {activateSubscriptionRequest.MarketplaceSubscription} activated");
                 op.SetResultDescription($"Subscription: {activateSubscriptionRequest.MarketplaceSubscription} activated");
             }
             catch (MarketplaceHttpException ex)
             {
-                var errorMessage = $"Failed to activate subscription: {activateSubscriptionRequest.MarketplaceSubscription}";
+                var errorMessage = $"Failed to activate SAAS subscription: {activateSubscriptionRequest.MarketplaceSubscription} Error: {ex.Message}";
                 _logger.Error(ex, errorMessage);
                 op.FailOperation($"Subscription: {activateSubscriptionRequest.MarketplaceSubscription} could not be activated");
                 throw new MarketplaceException(errorMessage, ex);
@@ -104,14 +104,14 @@ namespace Microsoft.Liftr.Marketplace.Saas
                     requestPath,
                     cancellationToken: cancellationToken);
 
-                var message = $"Subscription: {marketplaceSubscription}: Successfully retrieved operation for operation id: {operationId} with status {operation.Status}";
+                var message = $"SAAS Subscription: {marketplaceSubscription}: Successfully retrieved operation to authorize Webhook notification for operation id: {operationId} with status {operation.Status}";
                 _logger.Information(message);
                 op.SetResultDescription(message);
                 return operation;
             }
             catch (MarketplaceHttpException ex)
             {
-                var errorMessage = $"Subscription: {marketplaceSubscription}: Failed to get operation for operation id {operationId}";
+                var errorMessage = $"SAAS Subscription: {marketplaceSubscription}: Failed to get operation to authorize Webhook notification for operation id {operationId} Error: {ex.Message}";
                 _logger.Error(ex, errorMessage);
                 op.FailOperation(errorMessage);
                 throw new MarketplaceException(errorMessage, ex);
@@ -168,13 +168,13 @@ namespace Microsoft.Liftr.Marketplace.Saas
                     content: operationUpdate.ToJObject(),
                     cancellationToken: cancellationToken);
 
-                var message = $"Subscription: {marketplaceSubscription}: Successfully updated operation for operation id: {operationId} with status {operationUpdate.Status}";
+                var message = $"SAAS Subscription: {marketplaceSubscription}: Successfully updated operation to Marketplace for Webhook notification for operation id: {operationId} with status {operationUpdate.Status}";
                 _logger.Information(message);
                 op.SetResultDescription(message);
             }
             catch (MarketplaceHttpException ex)
             {
-                var errorMessage = $"Subscription: {marketplaceSubscription}: Failed to update operation for operation id {operationId}";
+                var errorMessage = $"SAAS Subscription: {marketplaceSubscription}: Failed to update operation to Marketplace for Webhook notification for operation id {operationId} Error: {ex.Message}";
                 _logger.Error(ex, errorMessage);
                 op.FailOperation(errorMessage);
                 throw new MarketplaceException(errorMessage, ex);
@@ -195,13 +195,13 @@ namespace Microsoft.Liftr.Marketplace.Saas
                     requestPath,
                     cancellationToken: cancellationToken);
 
-                var message = $"Subscription: {marketplaceSubscription}: Successfully deleted subscription {marketplaceSubscription}";
+                var message = $"SAAS Subscription: {marketplaceSubscription}: Successfully deleted subscription {marketplaceSubscription}";
                 _logger.Information(message);
                 op.SetResultDescription(message);
             }
             catch (MarketplaceHttpException marketplaceException)
             {
-                var errorMessage = $"Subscription: {marketplaceSubscription}: Failed to delete subscription {marketplaceSubscription}";
+                var errorMessage = $"SAAS Subscription: {marketplaceSubscription}: Failed to delete subscription {marketplaceSubscription} Error: {marketplaceException.Message}";
                 _logger.Error(marketplaceException, errorMessage);
                 op.FailOperation(errorMessage);
                 throw new MarketplaceException(errorMessage, marketplaceException);

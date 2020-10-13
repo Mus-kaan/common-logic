@@ -24,12 +24,14 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
     {
         private const string ApiVersion = "test-version";
         private readonly Uri _endpoint = new Uri("https://testmock.com/api");
+        private readonly Mock<IHttpClientFactory> _httpClientFactory;
         private MarketplaceRestClient _marketplaceRestClient;
         private ILogger _logger;
 
         public MarketplaceRestClientTests()
         {
             _logger = new Mock<ILogger>().Object;
+            _httpClientFactory = new Mock<IHttpClientFactory>();
         }
 
         [Fact]
@@ -38,7 +40,8 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             var expectedResponse = "headerAndAuthorization";
             using var handler = new MockHttpMessageHandler();
             using var httpClient = new HttpClient(handler, false);
-            _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, httpClient, () => Task.FromResult("mockToken"));
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+            _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
 
             var actualResponse = await _marketplaceRestClient.SendRequestAsync<string>(HttpMethod.Post, "/path/test", content: "somecontent");
             Assert.Equal(expectedResponse, actualResponse);
@@ -50,7 +53,9 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             var expectedResponse = "additionalHeaderAndAuthorization";
             using var handler = new MockHttpMessageHandler(true);
             using var httpClient = new HttpClient(handler, false);
-            _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, httpClient, () => Task.FromResult("mockToken"));
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
 
             Dictionary<string, string> additionalHeaders = new Dictionary<string, string>() { { "test_additional_header", "value" } };
             var actualResponse = await _marketplaceRestClient.SendRequestAsync<string>(HttpMethod.Post, "/path/test", additionalHeaders: additionalHeaders, content: "somecontent");
@@ -63,7 +68,9 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
         {
             using var handler = new MockHttpMessageHandler(progress: true);
             using var httpClient = new HttpClient(handler, false);
-            _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, httpClient, () => Task.FromResult("mockToken"));
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
 
             Func<Task> act = async () => { await _marketplaceRestClient.SendRequestWithPollingAsync<TestResource>(HttpMethod.Put, "/path/test", content: "somecontent"); };
             await act.Should().NotThrowAsync();
@@ -74,7 +81,9 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
         {
             using var handler = new MockHttpMessageHandler(extraHeader: true, progress: true);
             using var httpClient = new HttpClient(handler, false);
-            _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, httpClient, () => Task.FromResult("mockToken"));
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
 
             var additionalHeader = new Dictionary<string, string>
             {
@@ -90,7 +99,9 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
         {
             using var handler = new MockHttpMessageHandler(extraHeader: true, progress: true);
             using var httpClient = new HttpClient(handler, false);
-            _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, httpClient, () => Task.FromResult("mockToken"));
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
 
             await Assert.ThrowsAsync<MarketplaceHttpException>(async () => await _marketplaceRestClient.SendRequestWithPollingAsync<TestResource>(HttpMethod.Put, "/operation/test", content: "somecontent"));
         }
@@ -100,7 +111,9 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
         {
             using var handler = new MockHttpMessageHandler(extraHeader: true, progress: true);
             using var httpClient = new HttpClient(handler, false);
-            _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, httpClient, () => Task.FromResult("mockToken"));
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
 
             await Assert.ThrowsAsync<MarketplaceHttpException>(async () => await _marketplaceRestClient.SendRequestWithPollingAsync<TestResource>(HttpMethod.Put, "/retry/test", content: "somecontent"));
         }

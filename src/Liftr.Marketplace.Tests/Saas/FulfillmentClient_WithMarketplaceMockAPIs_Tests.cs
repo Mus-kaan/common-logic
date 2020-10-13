@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.Marketplace.Exceptions;
 using Microsoft.Liftr.Marketplace.Saas.Contracts;
@@ -31,8 +32,10 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
         public FulfillmentClient_WithMarketplaceMockAPIs_Tests()
         {
             var logger = new Mock<ILogger>().Object;
+            var serviceProvider = new ServiceCollection().AddHttpClient().BuildServiceProvider();
+            var httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();
 #pragma warning disable CA2000 // Dispose objects before losing scope
-            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(_marketplaceSaasUri, marketplaceSaasApiVersion, logger, new HttpClient(), () => Task.FromResult("mockToken")), logger);
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(_marketplaceSaasUri, marketplaceSaasApiVersion, logger, httpClientFactory, () => Task.FromResult("mockToken")), logger);
 #pragma warning restore CA2000 // Dispose objects before losing scope
         }
 

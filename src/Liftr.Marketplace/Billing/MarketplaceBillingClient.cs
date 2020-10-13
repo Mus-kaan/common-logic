@@ -61,8 +61,8 @@ namespace Microsoft.Liftr.Marketplace.Billing
             using var request = CreateRequestWithHeaders(HttpMethod.Post, requestPath, (header) =>
             {
                 header.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-                header.Add(MarketplaceConstants.BillingRequestIdHeaderKey, requestMetadata.MSRequestId);
-                header.Add(MarketplaceConstants.BillingCorrelationIdHeaderKey, requestMetadata.MSCorrelationId);
+                header.Add(MarketplaceConstants.MarketplaceRequestIdHeaderKey, requestMetadata.MSRequestId);
+                header.Add(MarketplaceConstants.MarketplaceCorrelationIdHeaderKey, requestMetadata.MSCorrelationId);
             });
 
             var stringContent = JsonConvert.SerializeObject(marketplaceUsageEventRequest);
@@ -79,8 +79,8 @@ namespace Microsoft.Liftr.Marketplace.Billing
             }
 
             // Logging Response Headers RequestId and CorrelationId
-            var responseCorrelationId = AzureMarketplaceRequestResult.GetIdHeaderValue(httpResponse.Headers, MarketplaceConstants.BillingCorrelationIdHeaderKey);
-            var responseRequestId = AzureMarketplaceRequestResult.GetIdHeaderValue(httpResponse.Headers, MarketplaceConstants.BillingRequestIdHeaderKey);
+            var responseCorrelationId = AzureMarketplaceRequestResult.GetIdHeaderValue(httpResponse.Headers, MarketplaceConstants.MarketplaceCorrelationIdHeaderKey);
+            var responseRequestId = AzureMarketplaceRequestResult.GetIdHeaderValue(httpResponse.Headers, MarketplaceConstants.MarketplaceRequestIdHeaderKey);
 
             _logger.Information($"[{MarketplaceConstants.SAASLogTag} {MarketplaceConstants.BillingLogTag}] [{nameof(SendUsageEventAsync)}] Header Response for UsageEvent: requestUri: {@request.RequestUri}, requestId: {responseRequestId}, correlationId: {responseCorrelationId}");
 
@@ -110,8 +110,8 @@ namespace Microsoft.Liftr.Marketplace.Billing
             using var request = CreateRequestWithHeaders(HttpMethod.Post, requestPath, (header) =>
             {
                 header.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-                header.Add(MarketplaceConstants.BillingRequestIdHeaderKey, requestMetadata.MSRequestId);
-                header.Add(MarketplaceConstants.BillingCorrelationIdHeaderKey, requestMetadata.MSCorrelationId);
+                header.Add(MarketplaceConstants.MarketplaceRequestIdHeaderKey, requestMetadata.MSRequestId);
+                header.Add(MarketplaceConstants.MarketplaceCorrelationIdHeaderKey, requestMetadata.MSCorrelationId);
             });
 
             var stringContent = JsonConvert.SerializeObject(marketplaceBatchUsageEventRequest);
@@ -128,8 +128,8 @@ namespace Microsoft.Liftr.Marketplace.Billing
             }
 
             // Logging Response Headers RequestId and CorrelationId
-            var responseCorrelationId = AzureMarketplaceRequestResult.GetIdHeaderValue(httpResponse.Headers, MarketplaceConstants.BillingCorrelationIdHeaderKey);
-            var responseRequestId = AzureMarketplaceRequestResult.GetIdHeaderValue(httpResponse.Headers, MarketplaceConstants.BillingRequestIdHeaderKey);
+            var responseCorrelationId = AzureMarketplaceRequestResult.GetIdHeaderValue(httpResponse.Headers, MarketplaceConstants.MarketplaceCorrelationIdHeaderKey);
+            var responseRequestId = AzureMarketplaceRequestResult.GetIdHeaderValue(httpResponse.Headers, MarketplaceConstants.MarketplaceRequestIdHeaderKey);
 
             _logger.Information($"[{MarketplaceConstants.SAASLogTag} {MarketplaceConstants.BillingLogTag}] [{nameof(SendBatchUsageEventAsync)}] Header Response for BatchUsageEvent: requestUri: {@request.RequestUri}, requestId: {responseRequestId}, correlationId: {responseCorrelationId}");
 

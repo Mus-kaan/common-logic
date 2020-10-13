@@ -31,13 +31,13 @@ namespace Microsoft.Liftr.Marketplace
         private readonly string _apiVersion;
         private readonly ILogger _logger;
         private readonly AuthenticationTokenCallback _authenticationTokenCallback;
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         public MarketplaceRestClient(
             Uri endpoint,
             string apiVersion,
             ILogger logger,
-            HttpClient httpClient,
+            IHttpClientFactory httpClientFactory,
             AuthenticationTokenCallback authenticationTokenCallback)
         {
             if (endpoint is null)
@@ -53,7 +53,7 @@ namespace Microsoft.Liftr.Marketplace
             _endpoint = endpoint.ToString();
             _apiVersion = apiVersion;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
             _authenticationTokenCallback = authenticationTokenCallback ?? throw new ArgumentNullException(nameof(authenticationTokenCallback));
         }
 
@@ -74,13 +74,14 @@ namespace Microsoft.Liftr.Marketplace
             object? content = null,
             CancellationToken cancellationToken = default) where T : class
         {
+            using var httpClient = _httpClientFactory.CreateClient();
             var requestId = Guid.NewGuid(); // Every request should have a different requestId
             var correlationId = TelemetryContext.GetOrGenerateCorrelationId();
 
             var accessToken = await _authenticationTokenCallback();
 
-            using var request = CreateRequestWithHeaders(method, requestPath, requestId, additionalHeaders, accessToken);
-            _logger.Information("Sending request method: {@method}, requestUri: {@requestUrl}, requestId: {requestId}", method, request.RequestUri, requestId);
+            using var request = CreateRequestWithHeaders(method, requestPath, requestId, correlationId, additionalHeaders, accessToken);
+            _logger.Information($"Sending request method: {method}, requestUri: {request.RequestUri}, requestId: {requestId}, correlationId: {correlationId} for SAAS fulfillment or create");
             HttpResponseMessage? httpResponse = null;
 
             try
@@ -89,11 +90,11 @@ namespace Microsoft.Liftr.Marketplace
                 {
                     var requestBody = JsonConvert.SerializeObject(content);
                     request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
-                    httpResponse = await _httpClient.SendAsync(request, cancellationToken);
+                    httpResponse = await httpClient.SendAsync(request, cancellationToken);
                 }
                 else
                 {
-                    httpResponse = await _httpClient.SendAsync(request, cancellationToken);
+                    httpResponse = await httpClient.SendAsync(request, cancellationToken);
                 }
 
                 if (!httpResponse.IsSuccessStatusCode)
@@ -102,13 +103,13 @@ namespace Microsoft.Liftr.Marketplace
                 }
 
                 var response = (await httpResponse.Content.ReadAsStringAsync()).FromJson<T>();
-                _logger.Information("Request: {@requestUrl} succeded", request.RequestUri);
+                _logger.Information($"Request: {request.RequestUri} succeded for SAAS fulfillment or create");
 
                 return response;
             }
             catch (HttpRequestException ex)
             {
-                var errorMessage = $"The request: {method}:{request.RequestUri} failed.";
+                var errorMessage = $"The request: {method}:{request.RequestUri} failed for SAAS fulfillment or create";
                 if (ex.Message != null)
                 {
                     errorMessage += $"Reason: {ex?.Message}";
@@ -127,13 +128,14 @@ namespace Microsoft.Liftr.Marketplace
             object? content = null,
             CancellationToken cancellationToken = default) where T : MarketplaceAsyncOperationResponse
         {
+            using var httpClient = _httpClientFactory.CreateClient();
             var requestId = Guid.NewGuid(); // Every request should have a different requestId
             var correlationId = TelemetryContext.GetOrGenerateCorrelationId();
 
             var accessToken = await _authenticationTokenCallback();
 
-            using var request = CreateRequestWithHeaders(method, requestPath, requestId, additionalHeaders, accessToken);
-            _logger.Information("Sending request method: {@method}, requestUri: {@requestUrl}, requestId: {requestId}", method, request.RequestUri, requestId);
+            using var request = CreateRequestWithHeaders(method, requestPath, requestId, correlationId, additionalHeaders, accessToken);
+            _logger.Information($"Sending request method: {method}, requestUri: {request.RequestUri}, requestId: {requestId}, correlationId: {correlationId} for SAAS fulfillment or create");
             HttpResponseMessage? httpResponse = null;
 
             try
@@ -142,11 +144,11 @@ namespace Microsoft.Liftr.Marketplace
                 {
                     var requestBody = JsonConvert.SerializeObject(content);
                     request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
-                    httpResponse = await _httpClient.SendAsync(request, cancellationToken);
+                    httpResponse = await httpClient.SendAsync(request, cancellationToken);
                 }
                 else
                 {
-                    httpResponse = await _httpClient.SendAsync(request, cancellationToken);
+                    httpResponse = await httpClient.SendAsync(request, cancellationToken);
                 }
 
                 if (!httpResponse.IsSuccessStatusCode)
@@ -157,16 +159,16 @@ namespace Microsoft.Liftr.Marketplace
                 if (httpResponse.StatusCode == HttpStatusCode.Accepted)
                 {
                     // If the status code is 202 means it is an async operation
-                    return await PollOperationAsync<T>(request, httpResponse, 20);
+                    return await PollOperationAsync<T>(request, httpResponse, httpClient, 20);
                 }
 
                 var response = (await httpResponse.Content.ReadAsStringAsync()).FromJson<T>();
-                _logger.Information("Request: {@requestUrl} succeded", request.RequestUri);
+                _logger.Information($"Request: {request.RequestUri} succeded for SAAS fulfillment or create.");
                 return response;
             }
             catch (HttpRequestException ex)
             {
-                var errorMessage = $"The request: {method}:{request.RequestUri} failed.";
+                var errorMessage = $"The request: {method}:{request.RequestUri} failed for SAAS fulfillment or create.";
                 if (ex.Message != null)
                 {
                     errorMessage += $"Reason: {ex?.Message}";
@@ -182,6 +184,7 @@ namespace Microsoft.Liftr.Marketplace
            HttpMethod method,
            string requestPath,
            Guid requestId,
+           string correlationId,
            Dictionary<string, string>? additionalHeaders,
            string accessToken)
         {
@@ -191,7 +194,8 @@ namespace Microsoft.Liftr.Marketplace
 
             var request = new HttpRequestMessage(method, requestUrl);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            request.Headers.Add("x-ms-requestid", requestId.ToString());
+            request.Headers.Add(MarketplaceConstants.MarketplaceRequestIdHeaderKey, requestId.ToString());
+            request.Headers.Add(MarketplaceConstants.MarketplaceCorrelationIdHeaderKey, correlationId);
 
             if (additionalHeaders != null)
             {
@@ -212,7 +216,7 @@ namespace Microsoft.Liftr.Marketplace
             }
             else
             {
-                string errorMessage = $"Could not get Operation-Location header from response of request {response?.RequestMessage?.RequestUri}";
+                string errorMessage = $"Could not get Operation-Location header from response of async polling for SAAS resource creation. Request Uri : {response?.RequestMessage?.RequestUri}";
                 throw new MarketplaceHttpException(errorMessage);
             }
         }
@@ -222,7 +226,7 @@ namespace Microsoft.Liftr.Marketplace
             var retryAfter = response.Headers.RetryAfter?.Delta;
             if (retryAfter == null)
             {
-                var errorMessage = $"Could not parse correct headers from operation response. Request Uri : {response?.RequestMessage?.RequestUri}";
+                var errorMessage = $"Could not parse correct headers from operation response of async polling for SAAS resource creation. Request Uri : {response?.RequestMessage?.RequestUri}";
                 var marketplaceException = new MarketplaceHttpException(errorMessage);
                 _logger.Error(marketplaceException, errorMessage);
                 throw marketplaceException;
@@ -231,7 +235,7 @@ namespace Microsoft.Liftr.Marketplace
             return retryAfter.Value;
         }
 
-        private async Task<T> PollOperationAsync<T>(HttpRequestMessage originalRequest, HttpResponseMessage response, int retryCounter) where T : class
+        private async Task<T> PollOperationAsync<T>(HttpRequestMessage originalRequest, HttpResponseMessage response, HttpClient httpClient, int retryCounter) where T : class
         {
             // Read all the relevant headers from the original 202 response
             var retryAfter = GetRetryAfterValue(response);
@@ -239,7 +243,7 @@ namespace Microsoft.Liftr.Marketplace
 
             if (retryCounter == 0)
             {
-                string errorMessage = $"Maximum retries has been reached so terminating the polling requests. Operation Id : {resultLocation}";
+                string errorMessage = $"Maximum retries of async polling for SAAS resource creation has been reached. So terminating the polling requests. Operation Id : {resultLocation}";
                 var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(response, errorMessage);
                 _logger.Error(marketplaceException, errorMessage);
                 throw marketplaceException;
@@ -249,7 +253,7 @@ namespace Microsoft.Liftr.Marketplace
             await Task.Delay(retryAfter);
 
             using var operationLocationRequest = GetSubrequestMessage(originalRequest, resultLocation);
-            var asyncOperationResponse = await _httpClient.SendAsync(operationLocationRequest);
+            var asyncOperationResponse = await httpClient.SendAsync(operationLocationRequest);
 
             if (!asyncOperationResponse.IsSuccessStatusCode)
             {
@@ -265,22 +269,22 @@ namespace Microsoft.Liftr.Marketplace
                 {
                     case OperationStatus.InProgress:
                     case OperationStatus.NotStarted:
-                        _logger.Information($"Trying to check the status of operation again. {resultLocation}");
-                        return await PollOperationAsync<T>(originalRequest, response, --retryCounter);
+                        _logger.Information($"Trying to check the status of operation again. {resultLocation}.Operation status for SAAS resource creation is {asyncResponseObj.Status}");
+                        return await PollOperationAsync<T>(originalRequest, response, httpClient, --retryCounter);
 
                     case OperationStatus.Failed:
-                        string errorMessage = $"Async operation failed while polling the operation. Operation Id : {resultLocation}";
+                        string errorMessage = $"Async polling operation failed while polling the operation. Operation Id : {resultLocation} for SAAS resource creation";
                         var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(asyncOperationResponse, errorMessage);
                         _logger.Error(marketplaceException, errorMessage);
                         throw marketplaceException;
 
                     case OperationStatus.Succeeded:
-                        var message = $"Async operation has beeen successful. Operation Id : {resultLocation}";
+                        var message = $"Async polling operation has beeen successful for SAAS resource creation. Operation Id : {resultLocation}";
                         _logger.Information(message);
                         return (await asyncOperationResponse.Content.ReadAsStringAsync()).FromJson<T>();
 
                     default:
-                        errorMessage = $"Unknown operation is detected for async polling of marketplace API. Operation Id : {resultLocation} and status : {asyncResponseObj.Status}";
+                        errorMessage = $"Unknown operation is detected for async polling of marketplace API for SAAS resource creation. Operation Id : {resultLocation} and status : {asyncResponseObj.Status}";
                         marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(asyncOperationResponse, errorMessage);
                         _logger.Error(marketplaceException, errorMessage);
                         throw marketplaceException;
@@ -288,7 +292,7 @@ namespace Microsoft.Liftr.Marketplace
             }
             else
             {
-                string errorMessage = $"Can not get the status of operation. Operation Id : {resultLocation}";
+                string errorMessage = $"Cannot get the status of polling operation for SAAS resource creation. Operation Id : {resultLocation} Status Code: {asyncOperationResponse.StatusCode}";
                 var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(asyncOperationResponse, errorMessage);
                 _logger.Error(marketplaceException, errorMessage);
                 throw marketplaceException;
@@ -310,7 +314,7 @@ namespace Microsoft.Liftr.Marketplace
         private async Task<MarketplaceHttpException> GetRequestFailedExceptionAsync(HttpResponseMessage httpResponse)
         {
             var responseContent = httpResponse.Content?.ReadAsStringAsync();
-            var errorMessage = $"Request Failed with status code: {httpResponse.StatusCode} and content: {responseContent}";
+            var errorMessage = $"SAAS Fulfillment or Create Request Failed with status code: {httpResponse.StatusCode} and content: {responseContent}";
             var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(httpResponse, errorMessage);
             _logger.Error(marketplaceException, errorMessage);
             return marketplaceException;
