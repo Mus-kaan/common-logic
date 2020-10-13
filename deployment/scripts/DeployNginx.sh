@@ -36,6 +36,7 @@ $Helm upgrade $helmReleaseName --install --wait --timeout 25m \
 --set controller.image.repository="$liftrACRURI/kubernetes-ingress-controller/nginx-ingress-controller" \
 --set controller.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
 --set controller.service.enableHttp=false \
+--set controller.addHeaders.X-Content-Type-Options="nosniff" \
 --set defaultBackend.image.repository="$liftrACRURI/defaultbackend-amd64" \
 --namespace "$namespace" nginx-*.tgz
 else
@@ -44,6 +45,7 @@ $Helm upgrade $helmReleaseName --install --wait --timeout 25m \
 --set controller.image.repository="$liftrACRURI/kubernetes-ingress-controller/nginx-ingress-controller" \
 --set controller.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
 --set controller.service.enableHttp=false \
+--set controller.addHeaders.X-Content-Type-Options="nosniff" \
 --set defaultBackend.image.repository="$liftrACRURI/defaultbackend-amd64" \
 --set controller.service.loadBalancerIP=$PublicIP \
 --set controller.service.annotations."service\.beta\.kubernetes\.io\/azure\-load\-balancer\-resource\-group"=$PublicIPRG \
