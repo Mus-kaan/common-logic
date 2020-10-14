@@ -11,6 +11,12 @@ namespace Microsoft.Liftr.Hosting.Contracts
     {
         public int MachineCount { get; set; } = 3;
 
+        public int VMSSDefaultInstanceCount { get; set; } = 3;
+
+        public int VMSSMinimumInstanceCount { get; set; } = 3;
+
+        public int VMSSMaximumInstanceCount { get; set; } = 7;
+
         public string VMSize { get; set; } = "Standard_DS2_v2";
 
         public string GalleryImageVersionId { get; set; }
@@ -27,6 +33,16 @@ namespace Microsoft.Liftr.Hosting.Contracts
             VMSSSkuHelper.ParseSkuString(VMSize);
 
             var rid = new ResourceId(GalleryImageVersionId);
+
+            if (VMSSDefaultInstanceCount < VMSSMinimumInstanceCount)
+            {
+                throw new InvalidHostingOptionException($"{nameof(VMSSDefaultInstanceCount)} cannot be smaller than {nameof(VMSSMinimumInstanceCount)}.");
+            }
+
+            if (VMSSMaximumInstanceCount < VMSSDefaultInstanceCount)
+            {
+                throw new InvalidHostingOptionException($"{nameof(VMSSMaximumInstanceCount)} cannot be smaller than {nameof(VMSSDefaultInstanceCount)}.");
+            }
         }
     }
 }
