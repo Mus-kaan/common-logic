@@ -103,6 +103,12 @@ namespace Microsoft.Liftr.Marketplace
                 }
 
                 var response = (await httpResponse.Content.ReadAsStringAsync()).FromJson<T>();
+                if (method == HttpMethod.Get)
+                {
+                    // Temporarily printing the response content to debug an issue with Saas GET request
+                    _logger.Information($"Request Content for GET request: {await httpResponse.Content.ReadAsStringAsync()}");
+                }
+
                 _logger.Information($"Request: {request.RequestUri} succeded for SAAS fulfillment or create");
 
                 return response;
