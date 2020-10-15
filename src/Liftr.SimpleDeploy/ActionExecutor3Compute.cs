@@ -58,9 +58,6 @@ namespace Microsoft.Liftr.SimpleDeploy
                 GlobalStorageResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}",
                 DomainName = targetOptions.DomainName,
                 ZoneRedundant = regionOptions.ZoneRedundant,
-                VMSSDefaultInstanceCount = targetOptions.VMSSConfigurations.VMSSDefaultInstanceCount,
-                VMSSMinimumInstanceCount = targetOptions.VMSSConfigurations.VMSSMinimumInstanceCount,
-                VMSSMaximumInstanceCount = targetOptions.VMSSConfigurations.VMSSMaximumInstanceCount,
                 OneCertCertificates = targetOptions.OneCertCertificates,
             };
 
