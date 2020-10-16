@@ -91,6 +91,8 @@ spec:
               mountPath: /geneva/geneva_logs
             - name: mdsd-run-vol
               mountPath: /var/run/mdsd
+            - name: var-lib-vsanodescan-vol
+              mountPath: /var/lib/vsanodescan
         # FluentD
         - name: fluentd
           image: {{ .Values.linuxgenevaACR.endpoint }}/genevafluentd_td-agent:{{ .Values.fluentd.dockerTag }}
@@ -205,6 +207,9 @@ spec:
             path: /var/log
         - name: etw-vol
           emptyDir: {}
+        - name: var-lib-vsanodescan-vol
+          hostPath:
+            path: /var/lib/vsanodescan
 ---
 apiVersion: v1
 kind: Service
