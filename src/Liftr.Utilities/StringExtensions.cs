@@ -80,6 +80,9 @@ namespace Microsoft.Liftr
             return Encoding.UTF8.GetString(bytes);
         }
 
+        public static string NormalizedAzRegion(this string input)
+            => input?.Replace(" ", string.Empty)?.ToLowerInvariant(); // https://github.com/Azure/azure-libraries-for-net/blob/f5298f4f9c257dcf113b76ac86bcad25f050af8b/src/ResourceManagement/ResourceManager/Region.cs#L135
+
         public static string RemoveWhitespace(this string input)
         {
             Ensure.ArgumentNotNull(input, nameof(input));

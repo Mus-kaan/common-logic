@@ -177,6 +177,26 @@ namespace Microsoft.Liftr.DataSource.Mongo
             }
         }
 
+        public async Task<IMongoCollection<StorageEntity>> GetOrCreateStorageEntityCollectionAsync(string collectionName)
+        {
+            if (!await CollectionExistsAsync(_db, collectionName))
+            {
+                _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
+#pragma warning disable CS0618 // Type or member is obsolete
+                var collection = await CreateCollectionAsync<StorageEntity>(collectionName);
+#pragma warning restore CS0618 // Type or member is obsolete
+
+                var resourceIdIdx = new CreateIndexModel<StorageEntity>(Builders<StorageEntity>.IndexKeys.Ascending(item => item.ResourceId), new CreateIndexOptions<StorageEntity> { Unique = true });
+                collection.Indexes.CreateOne(resourceIdIdx);
+
+                return collection;
+            }
+            else
+            {
+                return await GetCollectionAsync<StorageEntity>(collectionName);
+            }
+        }
+
         public async Task<IMongoCollection<T>> GetOrCreateMonitoringCollectionAsync<T>(string collectionName) where T : MonitoringBaseEntity, new()
         {
             var instance = new T();
