@@ -399,11 +399,18 @@ namespace Microsoft.Liftr.ImageBuilder
 
         private bool ShouldCleanUpImageVersion(IGalleryImageVersion version, int imageVersionRetentionTimeInDays)
         {
+            bool shouldDelete = false;
             if (version.Tags.TryGetValue(c_deleteAfterTagName, out string deleteAfterStr))
             {
                 if (DateTime.TryParse(deleteAfterStr, out var deleteAfter))
                 {
-                    return deleteAfter < _timeSource.UtcNow;
+                    shouldDelete = deleteAfter < _timeSource.UtcNow;
+                    if (shouldDelete)
+                    {
+                        _logger.Information($"'{version.Id}' should be deleted. Since the '{c_deleteAfterTagName}' tag value '{deleteAfterStr}' is due.");
+                    }
+
+                    return shouldDelete;
                 }
             }
 
@@ -411,11 +418,17 @@ namespace Microsoft.Liftr.ImageBuilder
             {
                 if (DateTime.TryParse(createdAtStr, out var createdAt))
                 {
-                    return createdAt.AddDays(imageVersionRetentionTimeInDays) < _timeSource.UtcNow;
+                    shouldDelete = createdAt.AddDays(imageVersionRetentionTimeInDays) < _timeSource.UtcNow;
+                    if (shouldDelete)
+                    {
+                        _logger.Information($"'{version.Id}' should be deleted. Since the image is created at '{createdAt}' and the clean after {imageVersionRetentionTimeInDays} day has reached.");
+                    }
+
+                    return shouldDelete;
                 }
             }
 
-            return false;
+            return shouldDelete;
         }
     }
 }
