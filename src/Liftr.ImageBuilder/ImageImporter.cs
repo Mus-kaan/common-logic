@@ -138,11 +138,10 @@ namespace Microsoft.Liftr.ImageBuilder
                    imgDefTags,
                    isLinux);
 
-                if (_options.ImageVersionRetentionTimeInDays > 0)
-                {
-                    var deleteAfterStr = _timeSource.UtcNow.AddDays(_options.ImageVersionRetentionTimeInDays).ToZuluString();
-                    tags[ImageGalleryClient.c_deleteAfterTagName] = deleteAfterStr;
-                }
+                // 0 means do not delete. Put a really long date here.
+                int ttlInDays = _options.ImageVersionRetentionTimeInDays == 0 ? 3000 : _options.ImageVersionRetentionTimeInDays;
+                var deleteAfterStr = _timeSource.UtcNow.AddDays(ttlInDays).ToZuluString();
+                tags[ImageGalleryClient.c_deleteAfterTagName] = deleteAfterStr;
 
                 imgVersion = await galleryClient.CreateImageVersionFromCustomImageAsync(
                             az.FluentClient,
