@@ -177,6 +177,24 @@ namespace Microsoft.Liftr.SimpleDeploy
                 File.WriteAllText("aks-rg.txt", computeResources.AKS.ResourceGroupName);
                 File.WriteAllText("msi-resourceId.txt", computeResources.ManagedIdentity.Id);
                 File.WriteAllText("msi-clientId.txt", computeResources.ManagedIdentity.ClientId);
+
+                if (SimpleDeployExtension.AfterProvisionRegionalAKSResourcesAsync != null)
+                {
+                    using (_logger.StartTimedOperation(nameof(SimpleDeployExtension.AfterProvisionRegionalAKSResourcesAsync)))
+                    {
+                        var parameters = new AKSCallbackParameters()
+                        {
+                            CallbackConfigurations = _callBackConfigs,
+                            BaseName = regionalComputeOptions.ComputeBaseName,
+                            NamingContext = regionalNamingContext,
+                            ComputeOptions = regionalComputeOptions,
+                            RegionOptions = regionOptions,
+                            Resources = computeResources,
+                        };
+
+                        await SimpleDeployExtension.AfterProvisionRegionalAKSResourcesAsync.Invoke(parameters);
+                    }
+                }
             }
             else
             {
