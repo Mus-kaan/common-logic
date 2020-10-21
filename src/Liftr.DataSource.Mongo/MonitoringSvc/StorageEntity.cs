@@ -32,10 +32,6 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
         [BsonRepresentation(BsonType.String)]
         public StoragePriority Priority { get; set; }
 
-        [BsonElement("type")]
-        [BsonRepresentation(BsonType.String)]
-        public StorageType Type { get; set; }
-
         [BsonElement("createdAt")]
         public DateTime CreatedAtUTC { get; set; }
 
@@ -44,5 +40,8 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
 
         [BsonElement("ingestionEnabled")]
         public bool IngestionEnabled { get; set; } = true;
+
+        [BsonElement("ver")]
+        public string Version { get; set; } = "v1";
     }
 }

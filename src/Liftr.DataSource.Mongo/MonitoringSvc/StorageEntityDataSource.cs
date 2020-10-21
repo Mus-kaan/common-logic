@@ -39,7 +39,6 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
                 LogForwarderRegion = entity.LogForwarderRegion.NormalizedAzRegion(),
                 StorageRegion = entity.StorageRegion.NormalizedAzRegion(),
                 Priority = entity.Priority,
-                Type = entity.Type,
                 IngestionEnabled = entity.IngestionEnabled,
                 Active = entity.Active,
                 CreatedAtUTC = _timeSource.UtcNow,
@@ -72,7 +71,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
             }
         }
 
-        public async Task<IEnumerable<IStorageEntity>> ListAsync(StoragePriority priority, string logForwarderRegion = null, StorageType? type = null)
+        public async Task<IEnumerable<IStorageEntity>> ListAsync(StoragePriority priority, string logForwarderRegion = null)
         {
             var filter = Builders<StorageEntity>.Filter.Eq(u => u.Priority, priority)
                 & Builders<StorageEntity>.Filter.Eq(u => u.IngestionEnabled, true);
@@ -80,11 +79,6 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
             if (!string.IsNullOrEmpty(logForwarderRegion))
             {
                 filter = filter & Builders<StorageEntity>.Filter.Eq(u => u.LogForwarderRegion, logForwarderRegion.NormalizedAzRegion());
-            }
-
-            if (type != null)
-            {
-                filter = filter & Builders<StorageEntity>.Filter.Eq(u => u.Type, type.Value);
             }
 
             await _rateLimiter.WaitAsync();

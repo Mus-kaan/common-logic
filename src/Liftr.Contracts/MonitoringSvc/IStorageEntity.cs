@@ -40,11 +40,6 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
         StoragePriority Priority { get; }
 
         /// <summary>
-        /// Type of the storage, provide blob or queue.
-        /// </summary>
-        StorageType Type { get; }
-
-        /// <summary>
         /// The last modified timestamp in UTC
         /// </summary>
         DateTime CreatedAtUTC { get; set; }
@@ -58,5 +53,10 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
         /// If this storage is active
         /// </summary>
         bool Active { get; set; }
+
+        /// <summary>
+        /// Version.
+        /// </summary>
+        string Version { get; set; }
     }
 }

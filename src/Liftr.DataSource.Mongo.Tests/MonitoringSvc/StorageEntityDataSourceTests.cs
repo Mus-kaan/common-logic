@@ -57,7 +57,6 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 LogForwarderRegion = location1,
                 StorageRegion = location1,
                 Priority = StoragePriority.Primary,
-                Type = StorageType.Blob,
             };
 
             await s.AddAsync(mockEntity);
@@ -73,7 +72,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 Assert.Equal(mockEntity.LogForwarderRegion, i.LogForwarderRegion);
                 Assert.Equal(mockEntity.StorageRegion, i.StorageRegion);
                 Assert.Equal(mockEntity.Priority, i.Priority);
-                Assert.Equal(mockEntity.Type, i.Type);
+                Assert.Equal("v1", i.Version);
                 Assert.True(i.IngestionEnabled);
                 Assert.True(i.Active);
             }
@@ -155,18 +154,6 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
 
                 list = await s.ListAsync(StoragePriority.Backup, "East US");
                 Assert.Equal(10, list.Count());
-            }
-
-            // Can get by type
-            {
-                var list = await s.ListAsync(StoragePriority.Primary, "West US");
-                Assert.Equal(15, list.Count());
-
-                list = await s.ListAsync(StoragePriority.Primary, "West US", StorageType.Blob);
-                Assert.Equal(15, list.Count());
-
-                list = await s.ListAsync(StoragePriority.Primary, "West US", StorageType.Queue);
-                Assert.Empty(list);
             }
         }
     }

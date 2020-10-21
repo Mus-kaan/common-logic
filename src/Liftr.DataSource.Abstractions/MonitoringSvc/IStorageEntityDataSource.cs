@@ -12,7 +12,7 @@ namespace Microsoft.Liftr.DataSource.MonitoringSvc
     {
         Task AddAsync(IStorageEntity entity);
 
-        Task<IEnumerable<IStorageEntity>> ListAsync(StoragePriority priority, string logForwarderRegion = null, StorageType? type = null);
+        Task<IEnumerable<IStorageEntity>> ListAsync(StoragePriority priority, string logForwarderRegion = null);
 
         Task<bool> DeleteAsync(string documentId);
     }
