@@ -101,6 +101,10 @@ namespace Microsoft.Liftr.Fluent
 
         Task GrantBlobContainerReaderAsync(IStorageAccount storageAccount, string containerName, IIdentity msi);
 
+        Task GrantQueueContributorAsync(IResourceGroup rg, string objectId);
+
+        Task GrantQueueContributorAsync(IResourceGroup rg, IIdentity msi);
+
         Task GrantQueueContributorAsync(IStorageAccount storageAccount, IIdentity msi);
 
         Task GrantQueueContributorAsync(IStorageAccount storageAccount, string objectId);

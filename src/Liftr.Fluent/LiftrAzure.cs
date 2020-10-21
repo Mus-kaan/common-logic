@@ -516,6 +516,33 @@ namespace Microsoft.Liftr.Fluent
         public Task GrantBlobContainerReaderAsync(IStorageAccount storageAccount, string containerName, IIdentity msi)
             => GrantBlobContainerReaderAsync(storageAccount, containerName, msi.GetObjectId());
 
+        public async Task GrantQueueContributorAsync(IResourceGroup rg, string objectId)
+        {
+            try
+            {
+                // Storage Queue Data Contributor
+                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/974c5e8b-45b9-4653-ba55-5f855dd0fb88";
+                await Authenticated.RoleAssignments
+                              .Define(SdkContext.RandomGuid())
+                              .ForObjectId(objectId)
+                              .WithRoleDefinition(roleDefinitionId)
+                              .WithResourceGroupScope(rg)
+                              .CreateAsync();
+                _logger.Information("Granted 'Storage Queue Data Contributor' of Resource Group '{rgId}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}", rg.Id, objectId, roleDefinitionId);
+            }
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
+            {
+            }
+            catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
+            {
+                _logger.Error("The object Id '{objectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", objectId);
+                throw;
+            }
+        }
+
+        public Task GrantQueueContributorAsync(IResourceGroup rg, IIdentity msi)
+            => GrantQueueContributorAsync(rg, msi.GetObjectId());
+
         public Task GrantQueueContributorAsync(IStorageAccount storageAccount, IIdentity msi)
             => GrantQueueContributorAsync(storageAccount, msi.GetObjectId());
 
