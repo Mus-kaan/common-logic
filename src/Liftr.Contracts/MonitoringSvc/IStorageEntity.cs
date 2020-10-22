@@ -40,6 +40,11 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
         StoragePriority Priority { get; }
 
         /// <summary>
+        /// Type of the VNet restrictions.
+        /// </summary>
+        StorageVNetType VNetType { get; }
+
+        /// <summary>
         /// The last modified timestamp in UTC
         /// </summary>
         DateTime CreatedAtUTC { get; set; }

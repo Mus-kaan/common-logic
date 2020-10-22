@@ -32,6 +32,10 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
         [BsonRepresentation(BsonType.String)]
         public StoragePriority Priority { get; set; }
 
+        [BsonElement("vnet")]
+        [BsonRepresentation(BsonType.String)]
+        public StorageVNetType VNetType { get; set; } = StorageVNetType.None;
+
         [BsonElement("createdAt")]
         public DateTime CreatedAtUTC { get; set; }
 

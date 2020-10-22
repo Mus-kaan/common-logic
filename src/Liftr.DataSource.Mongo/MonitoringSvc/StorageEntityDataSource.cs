@@ -39,6 +39,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
                 LogForwarderRegion = entity.LogForwarderRegion.NormalizedAzRegion(),
                 StorageRegion = entity.StorageRegion.NormalizedAzRegion(),
                 Priority = entity.Priority,
+                VNetType = entity.VNetType,
                 IngestionEnabled = entity.IngestionEnabled,
                 Active = entity.Active,
                 CreatedAtUTC = _timeSource.UtcNow,

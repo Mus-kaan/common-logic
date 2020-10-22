@@ -57,6 +57,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 LogForwarderRegion = location1,
                 StorageRegion = location1,
                 Priority = StoragePriority.Primary,
+                VNetType = StorageVNetType.PrivateEndpoint,
             };
 
             await s.AddAsync(mockEntity);
@@ -72,6 +73,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
                 Assert.Equal(mockEntity.LogForwarderRegion, i.LogForwarderRegion);
                 Assert.Equal(mockEntity.StorageRegion, i.StorageRegion);
                 Assert.Equal(mockEntity.Priority, i.Priority);
+                Assert.Equal(StorageVNetType.PrivateEndpoint, i.VNetType);
                 Assert.Equal("v1", i.Version);
                 Assert.True(i.IngestionEnabled);
                 Assert.True(i.Active);
