@@ -5,7 +5,7 @@
     {
       "type": "Microsoft.KeyVault/vaults",
       "name": "WILL_BE_CHANGED [parameters('keyVaultName')]",
-      "apiVersion": "2018-02-14",
+      "apiVersion": "2019-09-01",
       "location": "WILL_BE_CHANGED [parameters('location')]",
       "tags": {
         "WILL_BE_CHANGED_displayName": "Key Vault with logging"
@@ -18,6 +18,9 @@
         "enabledForDeployment": false,
         "enabledForTemplateDeployment": false,
         "enabledForDiskEncryption": false,
+        "enableSoftDelete": true,
+        "softDeleteRetentionInDays": 15,
+        "enableRbacAuthorization": false,
         "tenantId": "WILL_BE_CHANGED_displayName 00000000-0000-0000-0000-000000000000",
         "networkAcls": {
           "defaultAction": "Deny",

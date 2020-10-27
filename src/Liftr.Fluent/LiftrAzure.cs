@@ -973,21 +973,9 @@ namespace Microsoft.Liftr.Fluent
 
         public async Task<IVault> CreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags)
         {
-            _logger.Information("Creating a Key Vault with name {vaultName} ...", vaultName);
-
-            IVault vault = await FluentClient.Vaults
-                        .Define(vaultName)
-                        .WithRegion(location)
-                        .WithExistingResourceGroup(rgName)
-                        .WithEmptyAccessPolicy()
-                        .WithTags(tags)
-                        .WithDeploymentDisabled()
-                        .WithTemplateDeploymentDisabled()
-                        .CreateAsync();
-
-            _logger.Information("Created Key Vault with resourceId {resourceId}", vault.Id);
-
-            return vault;
+            var helper = new KeyVaultHelper(_logger);
+            var kv = await helper.CreateKeyVaultAsync(this, location, rgName, vaultName, tags);
+            return kv;
         }
 
         public async Task<IVault> GetKeyVaultAsync(string rgName, string vaultName)

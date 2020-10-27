@@ -32,6 +32,38 @@ namespace Microsoft.Liftr.Fluent
             Region location,
             string rgName,
             string vaultName,
+            IDictionary<string, string> tags)
+        {
+            if (liftrAzure == null)
+            {
+                throw new ArgumentNullException(nameof(liftrAzure));
+            }
+
+            _logger.Information("Creating a Key Vault with name '{vaultName}' in rg '{rgName}' ...", vaultName, rgName);
+
+            var templateContent = GenerateKeyVaultTemplate(
+                location,
+                vaultName,
+                liftrAzure.TenantId,
+                null,
+                null,
+                null,
+                tags);
+
+            await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true);
+
+            IVault vault = await liftrAzure.GetKeyVaultAsync(rgName, vaultName);
+
+            _logger.Information("Created Key Vault with resourceId {resourceId}", vault.Id);
+
+            return vault;
+        }
+
+        public async Task<IVault> CreateKeyVaultAsync(
+            ILiftrAzure liftrAzure,
+            Region location,
+            string rgName,
+            string vaultName,
             string ipAddress,
             IDictionary<string, string> tags)
         {
@@ -148,8 +180,16 @@ namespace Microsoft.Liftr.Fluent
 
             var templateContent = EmbeddedContentReader.GetContent(c_keyVaultTemplateFile);
 
-            templateContent = templateContent.Replace(c_ipRulesPlaceHolder, ips.ToJson());
-            templateContent = templateContent.Replace(c_vnetRulesPlaceHolder, subnets.ToJson());
+            if (ips != null)
+            {
+                templateContent = templateContent.Replace(c_ipRulesPlaceHolder, ips.ToJson());
+            }
+
+            if (subnets != null)
+            {
+                templateContent = templateContent.Replace(c_vnetRulesPlaceHolder, subnets.ToJson());
+            }
+
             templateContent = templateContent.Replace(c_accessPoliciesPlaceHolder, accessPolicies == null ? "[]" : accessPolicies.ToJson());
 
             dynamic configObj = JObject.Parse(templateContent);
@@ -160,6 +200,11 @@ namespace Microsoft.Liftr.Fluent
 
             var props = r.properties;
             props.tenantId = tenantId;
+
+            if (ips == null && subnets == null)
+            {
+                props.networkAcls = null;
+            }
 
             return JsonConvert.SerializeObject(configObj, Formatting.Indented);
         }
