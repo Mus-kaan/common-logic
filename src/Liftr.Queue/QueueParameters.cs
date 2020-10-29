@@ -6,7 +6,7 @@ using System;
 
 namespace Microsoft.Liftr.Queue
 {
-    internal static class QueueParameters
+    public static class QueueParameters
     {
         /// <summary>
         /// Specifies the new visibility timeout value, in seconds, relative to
