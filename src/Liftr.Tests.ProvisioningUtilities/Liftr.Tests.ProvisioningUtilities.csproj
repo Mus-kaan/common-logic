@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.Tests.ProvisioningUtilities</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Tests.ProvisioningUtilities</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Tests.Common\Liftr.Tests.Common.csproj" />
+    <ProjectReference Include="..\Liftr.Tests.Utilities\Liftr.Tests.Utilities.csproj" />
+  </ItemGroup>
+</Project>
