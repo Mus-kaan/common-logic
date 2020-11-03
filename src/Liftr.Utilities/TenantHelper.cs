@@ -18,9 +18,9 @@ namespace Microsoft.Liftr.Utilities
         private readonly Uri _armEndpoint;
         private readonly HttpClient _httpClient;
 
-        public TenantHelper(Uri armEndpoint)
+        public TenantHelper(Uri armEndpoint = null)
         {
-            _armEndpoint = armEndpoint;
+            _armEndpoint = armEndpoint ?? new Uri("https://management.azure.com");
             _httpClient = new HttpClient();
         }
 
