@@ -4,6 +4,7 @@
 
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DataSource.Mongo;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -15,7 +16,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource
 
         Task<bool> DeleteAsync(MarketplaceSubscription marketplaceSubscription);
 
-        Task<IEnumerable<MarketplaceSaasResourceEntity>> GetAllResourcesAsync(bool showActiveOnly = true);
+        Task<PaginatedResponse> GetPaginatedResourcesAsync(int pageSize = 10, DateTime? timeStamp = null, bool showActiveOnly = true);
 
         Task<MarketplaceSaasResourceEntity> GetAsync(MarketplaceSubscription marketplaceSubscription);
 

@@ -5,9 +5,12 @@
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DataSource.Mongo;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.MarketplaceResource.DataSource
@@ -68,10 +71,13 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource
             }
         }
 
-        public virtual async Task<IEnumerable<MarketplaceSaasResourceEntity>> GetAllResourcesAsync(bool showActiveOnly = true)
+        public virtual async Task<PaginatedResponse> GetPaginatedResourcesAsync(int pageSize = 10, DateTime? timeStamp = null, bool showActiveOnly = true)
         {
             var builder = Builders<MarketplaceSaasResourceEntity>.Filter;
             var filter = builder.Empty;
+            DateTime? lastTimeStamp = null;
+            List<MarketplaceSaasResourceEntity> entities = new List<MarketplaceSaasResourceEntity>();
+            IFindFluent<MarketplaceSaasResourceEntity, MarketplaceSaasResourceEntity> cursor = null;
 
             if (showActiveOnly)
             {
@@ -81,8 +87,24 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource
             await _rateLimiter.WaitAsync();
             try
             {
-                var cursor = await _collection.FindAsync(filter);
-                return await cursor.ToListAsync();
+                if (timeStamp == null)
+                {
+                   cursor = _collection.Find(filter).Limit(pageSize);
+                }
+                else
+                {
+                    if (timeStamp.Value.Kind != DateTimeKind.Utc)
+                    {
+                        throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "{0} should be in UTC", timeStamp));
+                    }
+
+                    var paginationFilter = Builders<MarketplaceSaasResourceEntity>.Filter.Lt(u => u.CreatedUTC, timeStamp);
+                    cursor = _collection.Find(paginationFilter).Limit(pageSize);
+                }
+
+                entities = await cursor.SortByDescending(item => item.CreatedUTC).ToListAsync();
+                lastTimeStamp = GetLastTimeStamp(entities, pageSize);
+                return new PaginatedResponse() { Entities = entities, LastTimeStamp = lastTimeStamp };
             }
             finally
             {
@@ -143,6 +165,18 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource
             {
                 _rateLimiter.Release();
             }
+        }
+
+        private DateTime? GetLastTimeStamp(List<MarketplaceSaasResourceEntity> entities, int pageSize)
+        {
+            DateTime? lastTimeStamp = null;
+
+            if (!(entities.Count < pageSize))
+            {
+                lastTimeStamp = entities.Last().CreatedUTC;
+            }
+
+            return lastTimeStamp;
         }
     }
 }

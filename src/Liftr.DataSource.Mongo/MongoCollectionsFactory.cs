@@ -143,21 +143,26 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
         public async Task<IMongoCollection<MarketplaceSaasResourceEntity>> GetOrCreateMarketplaceEntityCollectionAsync(string collectionName)
         {
+            IMongoCollection<MarketplaceSaasResourceEntity> collection = null;
+
             if (!await CollectionExistsAsync(_db, collectionName))
             {
                 _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
 #pragma warning disable CS0618 // Type or member is obsolete
-                var collection = await CreateCollectionAsync<MarketplaceSaasResourceEntity>(collectionName);
+                collection = await CreateCollectionAsync<MarketplaceSaasResourceEntity>(collectionName);
 #pragma warning restore CS0618 // Type or member is obsolete
+
                 var marketplaceSubscriptionIdx = new CreateIndexModel<MarketplaceSaasResourceEntity>(Builders<MarketplaceSaasResourceEntity>.IndexKeys.Ascending(item => item.MarketplaceSubscription), new CreateIndexOptions<MarketplaceSaasResourceEntity> { Unique = true });
                 collection.Indexes.CreateOne(marketplaceSubscriptionIdx);
-
-                return collection;
             }
             else
             {
-                return await GetCollectionAsync<MarketplaceSaasResourceEntity>(collectionName);
+                collection = await GetCollectionAsync<MarketplaceSaasResourceEntity>(collectionName);
             }
+
+            var createdAtIndex = new CreateIndexModel<MarketplaceSaasResourceEntity>(Builders<MarketplaceSaasResourceEntity>.IndexKeys.Descending(item => item.CreatedUTC), new CreateIndexOptions<MarketplaceSaasResourceEntity> { Unique = false });
+            collection.Indexes.CreateOne(createdAtIndex);
+            return collection;
         }
 
         public async Task<IMongoCollection<EventHubEntity>> GetOrCreateEventHubEntityCollectionAsync(string collectionName)

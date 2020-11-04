@@ -81,6 +81,52 @@
         }
       }
     },
+    "/api/MarketplaceResource/billing/listsaasresources": {
+      "get": {
+        "tags": [
+          "MarketplaceResource"
+        ],
+        "operationId": "Get",
+        "produces": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "page-size",
+            "type": "integer",
+            "format": "int32",
+            "default":  10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/SaasResourcesListResponse"
+            }
+          },
+          "default": {
+            "description": "Default error response.",
+            "schema": {
+              "$ref": "#/definitions/ResourceProviderDefaultErrorResponse"
+            }
+          }
+        },
+        "x-ms-examples": {
+          "Get": {
+            "$ref": "./examples/Get.json"
+          }
+        }
+      }
+    },
     "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Datadog/monitors": {
       "get": {
         "tags": [
@@ -224,6 +270,111 @@
       "properties": {
         "error": {
           "$ref": "#/definitions/ErrorResponseBody"
+        }
+      }
+    },
+    "SaasBeneficiary": {
+      "type": "object",
+      "properties": {
+        "emailId": {
+          "type": "string"
+        },
+        "objectId": {
+          "type": "string"
+        },
+        "tenantId": {
+          "type": "string"
+        },
+        "puid": {
+          "type": "string"
+        }
+      }
+    },
+    "SubscriptionTerm": {
+      "type": "object",
+      "properties": {
+        "termUnit": {
+          "type": "string"
+        },
+        "startDate": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "endDate": {
+          "format": "date-time",
+          "type": "string"
+        }
+      }
+    },
+    "SaasSubscriptionStatus": {
+      "format": "int32",
+      "enum": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "type": "integer",
+      "x-ms-enum": {
+        "modelAsString": true,
+        "name": "SaasSubscriptionStatus"
+      }
+    },
+    "SaasAdditionalMetadata": {
+      "type": "object",
+      "properties": {
+        "azureSubscriptionId": {
+          "type": "string"
+        }
+      }
+    },
+    "MarketplaceSubscriptionDetailsEntity": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "planId": {
+          "type": "string"
+        },
+        "offerId": {
+          "type": "string"
+        },
+        "publisherId": {
+          "type": "string"
+        },
+        "beneficiary": {
+          "$ref": "#/definitions/SaasBeneficiary"
+        },
+        "term": {
+          "$ref": "#/definitions/SubscriptionTerm"
+        },
+        "quantity": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "saasSubscriptionStatus": {
+          "$ref": "#/definitions/SaasSubscriptionStatus"
+        },
+        "additionalMetadata": {
+          "$ref": "#/definitions/SaasAdditionalMetadata"
+        }
+      }
+    },
+    "SaasResourcesListResponse": {
+      "type": "object",
+      "properties": {
+        "subscriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MarketplaceSubscriptionDetailsEntity"
+          }
+        },
+        "nextLink": {
+          "type": "string"
         }
       }
     },

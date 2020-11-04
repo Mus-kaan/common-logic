@@ -1,11 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.IFxAudit;
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.IFxAuditLinux;
 using Microsoft.Liftr.MarketplaceResource.DataSource;
+using MongoDB.Bson;
 using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
+using System;
+using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Liftr.Sample.Web.Controllers
@@ -70,6 +75,36 @@ namespace Liftr.Sample.Web.Controllers
                     new IFxAuditTargetResource[] { new IFxAuditTargetResource() { Name = marketplaceSubId, Type = Constants.DatadogResourceProvider } },
                     IFxAuditResultType.SUCCESS);
             return Ok(entity);
+        }
+
+        [SwaggerOperation(OperationId = "Get")]
+        [HttpGet("billing/listsaasresources")]
+        public async Task<SaasResourcesListResponse> ListSaasResourcesAsync([FromQuery(Name = "token")] string token = null, [FromQuery(Name = "page-size")] int pageSize = 10)
+        {
+            DateTime? timeStamp = null;
+            string continuationToken = null;
+
+            var Request = HttpContext.Request;
+            string baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}{Request.Path}";
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                timeStamp = new DateTime(Convert.ToInt64(token, CultureInfo.InvariantCulture), DateTimeKind.Utc);
+            }
+
+            var paginatedResponse = await _dataSource.GetPaginatedResourcesAsync(pageSize, timeStamp);
+
+            if (paginatedResponse.LastTimeStamp != null)
+            {
+               continuationToken = paginatedResponse.LastTimeStamp.Value.Ticks.ToString(CultureInfo.InvariantCulture);
+            }
+
+            var response = new SaasResourcesListResponse
+            {
+                Subscriptions = paginatedResponse.Entities.Select(entity => entity.SubscriptionDetails),
+                NextLink = string.IsNullOrEmpty(continuationToken) ? null : (baseUrl + '?' + "token=" + continuationToken)
+            };
+            return response;
         }
     }
 }
