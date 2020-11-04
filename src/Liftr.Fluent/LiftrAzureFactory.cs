@@ -7,6 +7,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Serilog;
 using System;
+using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent
 {
@@ -84,6 +85,23 @@ namespace Microsoft.Liftr.Fluent
             var client = new LiftrAzure(_tenantId, _spnObjectId, TokenCredential, _credentialsProvider.Invoke(), azure, authenticated, _options, _logger);
 
             return client;
+        }
+
+        public async Task<string> GetStorageConnectionStringAsync(Liftr.Contracts.ResourceId resourceId)
+        {
+            if (resourceId == null)
+            {
+                throw new ArgumentNullException(nameof(resourceId));
+            }
+
+            var az = GenerateLiftrAzure(resourceId.SubscriptionId);
+            var stor = await az.GetStorageAccountAsync(resourceId.ResourceGroup, resourceId.ResourceName);
+            if (stor == null)
+            {
+                throw new InvalidOperationException($"Cannot find the storage account with Id '{resourceId}'");
+            }
+
+            return await stor.GetPrimaryConnectionStringAsync();
         }
     }
 }
