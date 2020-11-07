@@ -20,7 +20,7 @@ namespace Microsoft.Liftr.Fluent
         /// https://aka.ms/supported-version-list
         /// https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/README.md
         /// </summary>
-        public string KubernetesVersion { get; set; } = "1.17.11";
+        public string KubernetesVersion { get; set; } = "1.19.0";
 
         public IAsyncPolicy<HttpResponseMessage> HttpPolicy { get; set; } = HttpPolicyHelper.GetDefaultPolicy();
     }
