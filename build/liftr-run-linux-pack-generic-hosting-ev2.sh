@@ -106,38 +106,41 @@ for ChartDir in $ChartsDir/*; do
     ChartName="$(basename $ChartDir)"
     ChartTmpDir="$ChartsTmpDir/$ChartName"
 
-    echo "Copying Helm chart from foler '$ChartDir' to temporary directory '$ChartTmpDir'"
-    mkdir --parent "$ChartTmpDir"
-    cp -r $ChartDir/* "$ChartTmpDir"
+    if [ -d "$ChartDir" ]; then
+        echo "Copying Helm chart from foler '$ChartDir' to temporary directory '$ChartTmpDir'"
+        mkdir --parent "$ChartTmpDir"
+        cp -r $ChartDir/* "$ChartTmpDir"
 
-    if [[ "$ChartName" = "$ServiceChartName" ]]; then
-        for imgMetaData in $GenerateDockerImageMetadataDir/*.json
-        do
-            fileName="$(basename $imgMetaData)"
-            fileName=$(echo "$fileName" | cut -f 1 -d '.')
-            echo "Parsing image meta data file: $imgMetaData"
+        if [[ "$ChartName" = "$ServiceChartName" ]]; then
+            for imgMetaData in $GenerateDockerImageMetadataDir/*.json
+            do
+                fileName="$(basename $imgMetaData)"
+                fileName=$(echo "$fileName" | cut -f 1 -d '.')
+                echo "Parsing image meta data file: $imgMetaData"
 
-            # Use grep magic to parse JSON since jq isn't installed on the CDPx build image.
-            # See https://aka.ms/cdpx/yaml/dockerbuildcommand for the metadata file schema.
-            DockerImageNameWithRegistry=$(cat $imgMetaData | grep -Po '"ame_build_image_name": "\K[^"]*')
+                # Use grep magic to parse JSON since jq isn't installed on the CDPx build image.
+                # See https://aka.ms/cdpx/yaml/dockerbuildcommand for the metadata file schema.
+                DockerImageNameWithRegistry=$(cat $imgMetaData | grep -Po '"ame_build_image_name": "\K[^"]*')
 
-            DockerRegistry=$(echo $DockerImageNameWithRegistry | cut -d '/' -f1 | cut -d '.' -f1)
-            DockerImageName=$(echo $DockerImageNameWithRegistry | cut -d '/' -f1 --complement)
+                DockerRegistry=$(echo $DockerImageNameWithRegistry | cut -d '/' -f1 | cut -d '.' -f1)
+                DockerImageName=$(echo $DockerImageNameWithRegistry | cut -d '/' -f1 --complement)
 
-            echo "DockerRegistry: $DockerRegistry"
-            echo "DockerImageName: $DockerImageName"
+                echo "DockerRegistry: $DockerRegistry"
+                echo "DockerImageName: $DockerImageName"
 
-            echo "Injecting build-specific parameters into $AppChartValueFile."
-            echo ""                                 >> $AppChartValueFile # Ensure there is a newline at the end of the file.
-            echo "$fileName:"                       >> $AppChartValueFile
-            echo "  imageRegistry: $DockerRegistry" >> $AppChartValueFile
-            echo "  imageName: $DockerImageName"    >> $AppChartValueFile
-        done
+                echo "Injecting build-specific parameters into $AppChartValueFile."
+                echo ""                                 >> $AppChartValueFile # Ensure there is a newline at the end of the file.
+                echo "$fileName:"                       >> $AppChartValueFile
+                echo "  imageRegistry: $DockerRegistry" >> $AppChartValueFile
+                echo "  imageName: $DockerImageName"    >> $AppChartValueFile
+            done
+        fi
+
+        echo "Packaging Helm chart at '$ChartTmpDir' ..."
+        $Helm package -d "$ChartsOutDir" --version "$ChartVersion" "$ChartTmpDir"
+        echo
+
     fi
-
-    echo "Packaging Helm chart at '$ChartTmpDir' ..."
-    $Helm package -d "$ChartsOutDir" --version "$ChartVersion" "$ChartTmpDir"
-    echo
 done
 
 echo "----------[Liftr]----------[https://aka.ms/liftr]----------[Liftr]----------[https://aka.ms/liftr]----------"

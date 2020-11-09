@@ -33,23 +33,23 @@ echo "helm upgrade $helmReleaseName ..."
 if [ "$PublicIP" = "" ]; then
 $Helm upgrade $helmReleaseName --install --wait --timeout 25m \
 --create-namespace \
---set controller.image.repository="$liftrACRURI/kubernetes-ingress-controller/nginx-ingress-controller" \
+--set controller.image.repository="$liftrACRURI/ingress-nginx/controller" \
 --set controller.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
 --set controller.service.enableHttp=false \
 --set controller.addHeaders.X-Content-Type-Options="nosniff" \
 --set defaultBackend.image.repository="$liftrACRURI/defaultbackend-amd64" \
---namespace "$namespace" nginx-*.tgz
+--namespace "$namespace" ingress-nginx-*.tgz
 else
 $Helm upgrade $helmReleaseName --install --wait --timeout 25m \
 --create-namespace \
---set controller.image.repository="$liftrACRURI/kubernetes-ingress-controller/nginx-ingress-controller" \
+--set controller.image.repository="$liftrACRURI/ingress-nginx/controller" \
 --set controller.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
 --set controller.service.enableHttp=false \
 --set controller.addHeaders.X-Content-Type-Options="nosniff" \
 --set defaultBackend.image.repository="$liftrACRURI/defaultbackend-amd64" \
 --set controller.service.loadBalancerIP=$PublicIP \
 --set controller.service.annotations."service\.beta\.kubernetes\.io\/azure\-load\-balancer\-resource\-group"=$PublicIPRG \
---namespace "$namespace" nginx-*.tgz
+--namespace "$namespace" ingress-nginx-*.tgz
 fi
 
 # Static IP documentation: https://docs.microsoft.com/en-us/azure/aks/static-ip
