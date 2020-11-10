@@ -81,7 +81,7 @@ namespace Microsoft.Liftr.Monitoring.Whale
 
                 if (resourceAlreadyMonitored)
                 {
-                    // Resource is already being monitored by other Datadog resource. We can skip
+                    // Resource is already being monitored by other monitor resource. We can skip
                     // the diagnostic settings logic and just add a new entity to the database.
                     statusEntity.IsMonitored = true;
                     statusEntity.Reason = MonitoringStatusReason.CapturedByRules.GetReasonName();
@@ -90,7 +90,7 @@ namespace Microsoft.Liftr.Monitoring.Whale
                     relationshipEntity.DiagnosticSettingsName = existingMonitoringRelationships.First().DiagnosticSettingsName;
 
                     _logger.Information(
-                        "Resource {resourceId} is already being monitored by other Datadog resource. Reusing diagnostic setting {diagnosticSettingName}.",
+                        "Resource {resourceId} is already being monitored by other monitor resource. Reusing diagnostic setting {diagnosticSettingName}.",
                         resource.Id,
                         relationshipEntity.DiagnosticSettingsName);
                 }
@@ -128,7 +128,7 @@ namespace Microsoft.Liftr.Monitoring.Whale
                 if (statusEntity.IsMonitored)
                 {
                     _logger.Information(
-                        "Adding new entity for resource {resourceId} and Datadog monitor {monitorId}.",
+                        "Adding new entity for resource {resourceId} and monitor {monitorId}.",
                         resource.Id,
                         monitorId);
 
@@ -297,7 +297,7 @@ namespace Microsoft.Liftr.Monitoring.Whale
                         relationshipEntity.DiagnosticSettingsName = existingMonitoringRelationships.First().DiagnosticSettingsName;
 
                         _logger.Information(
-                            "Subscription {subscriptionId} is already being monitored by other Datadog resource. Reusing diagnostic setting {diagnosticSettingName}.",
+                            "Subscription {subscriptionId} is already being monitored by other monitor resource. Reusing diagnostic setting {diagnosticSettingName}.",
                             subscriptionId,
                             relationshipEntity.DiagnosticSettingsName);
                     }
@@ -335,7 +335,7 @@ namespace Microsoft.Liftr.Monitoring.Whale
                     if (diagnosticSettingManager.SuccessfulOperation)
                     {
                         _logger.Information(
-                            "Adding new entity for subscription {subscriptionId} and Datadog monitor {monitorId}.",
+                            "Adding new entity for subscription {subscriptionId} and monitor {monitorId}.",
                             subscriptionMonitoredResource.Id,
                             monitorId);
 

@@ -9,6 +9,9 @@ namespace Microsoft.Liftr.Fluent.Contracts
 {
     public static class RegionExtensions
     {
+        private const string _ShortEASTUS2EUAP = "eus2euap";
+        private static readonly Region s_EASTUS2EUAP = Region.Create("eastus2euap");
+
         public static string ShortName(this Region region)
         {
             // https://github.com/Azure/azure-libraries-for-net/blob/master/src/ResourceManagement/ResourceManager/Region.cs
@@ -195,6 +198,10 @@ namespace Microsoft.Liftr.Fluent.Contracts
             else if (region == Region.GermanyNorthEast)
             {
                 return "nede";
+            }
+            else if (region == s_EASTUS2EUAP)
+            {
+                return _ShortEASTUS2EUAP;
             }
 
             throw new ArgumentOutOfRangeException($"Azure region {region} does not have predefined short name.");
@@ -385,6 +392,10 @@ namespace Microsoft.Liftr.Fluent.Contracts
             else if (location.OrdinalEquals("nede"))
             {
                 return Region.GermanyNorthEast;
+            }
+            else if (location.OrdinalEquals(_ShortEASTUS2EUAP))
+            {
+                return s_EASTUS2EUAP;
             }
 
             throw new ArgumentOutOfRangeException($"Short Azure region {location} is invalid.");
