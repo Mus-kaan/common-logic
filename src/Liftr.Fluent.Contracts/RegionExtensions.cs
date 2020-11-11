@@ -9,7 +9,7 @@ namespace Microsoft.Liftr.Fluent.Contracts
 {
     public static class RegionExtensions
     {
-        private const string _ShortEASTUS2EUAP = "eus2euap";
+        private const string _ShortEASTUS2EUAP = "eus2e";
         private static readonly Region s_EASTUS2EUAP = Region.Create("eastus2euap");
 
         public static string ShortName(this Region region)
