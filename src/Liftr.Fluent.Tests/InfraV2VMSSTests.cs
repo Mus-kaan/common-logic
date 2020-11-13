@@ -70,7 +70,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var poolRG = ipNamePrefix + "-ip-pool-rg";
                     var ipPool = new IPPoolManager(poolRG, ipNamePrefix, regionalDataScope.AzFactory, logger);
 
-                    var gblResources = await infra.CreateOrUpdateGlobalRGAsync(globalBaseName, context, $"{shortPartnerName}-{globalBaseName}.dummy.com");
+                    var gblResources = await infra.CreateOrUpdateGlobalRGAsync(globalBaseName, context, $"{shortPartnerName}-{globalBaseName}.dummy.com", addGlobalDB: false);
 
                     var regions = new List<Region>() { context.Location };
                     await ipPool.ProvisionIPPoolAsync(context.Location, 3, PublicIPSkuType.Standard, regions, context.Tags);

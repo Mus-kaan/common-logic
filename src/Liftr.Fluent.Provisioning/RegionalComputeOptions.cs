@@ -23,6 +23,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string GlobalStorageResourceId { get; set; }
 
+        public string GlobalCosmosDBResourceId { get; set; }
+
         public string DomainName { get; set; }
 
         public bool ZoneRedundant { get; set; }

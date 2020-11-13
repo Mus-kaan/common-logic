@@ -24,6 +24,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string GlobalStorageResourceId { get; set; }
 
+        public string GlobalCosmosDBResourceId { get; set; }
+
         public Dictionary<string, string> OneCertCertificates { get; set; } = new Dictionary<string, string>();
 
         public IEnumerable<string> DataPlaneSubscriptions { get; set; }

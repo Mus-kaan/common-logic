@@ -9,7 +9,6 @@ using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.DataSource.Mongo.Tests.Common;
 using Microsoft.Liftr.Logging;
 using System;
-using System.Globalization;
 using System.Threading.Tasks;
 using Xunit;
 

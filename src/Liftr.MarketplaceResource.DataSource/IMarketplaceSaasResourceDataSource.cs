@@ -5,7 +5,6 @@
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DataSource.Mongo;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.MarketplaceResource.DataSource

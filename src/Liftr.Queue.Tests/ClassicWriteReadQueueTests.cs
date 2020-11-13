@@ -9,7 +9,6 @@ using Microsoft.Liftr.ClassicQueue;
 using Microsoft.Liftr.Contracts;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;

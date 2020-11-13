@@ -51,6 +51,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 targetOptions.Global.BaseName,
                 globalNamingContext,
                 targetOptions.DomainName,
+                targetOptions.Global.AddGlobalDB,
                 targetOptions.LogAnalyticsWorkspaceId);
 
             if (SimpleDeployExtension.AfterProvisionGlobalResourcesAsync != null)

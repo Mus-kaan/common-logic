@@ -304,7 +304,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 computeOptions.GlobalStorageResourceId,
                 computeOptions.GlobalKeyVaultResourceId,
                 provisionedResources.ManagedIdentity,
-                asicStorage);
+                asicStorage,
+                computeOptions.GlobalCosmosDBResourceId);
 
             var sslSubjects = new List<string>()
             {

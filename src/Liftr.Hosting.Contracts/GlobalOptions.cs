@@ -15,6 +15,8 @@ namespace Microsoft.Liftr.Hosting.Contracts
 
         public string BaseName { get; set; }
 
+        public bool AddGlobalDB { get; set; } = false;
+
         public void CheckValid()
         {
             if (string.IsNullOrEmpty(BaseName))

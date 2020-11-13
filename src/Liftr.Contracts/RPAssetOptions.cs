@@ -13,6 +13,9 @@ namespace Microsoft.Liftr.Contracts
         [JsonProperty("dbConns")]
         public IEnumerable<CosmosDBConnectionString> CosmosDBConnectionStrings { get; set; }
 
+        [JsonProperty("gblDbConns")]
+        public IEnumerable<CosmosDBConnectionString> GlobalCosmosDBConnectionStrings { get; set; }
+
         [JsonProperty("activeKey")]
         public string ActiveKeyName { get; set; }
 
@@ -34,6 +37,14 @@ namespace Microsoft.Liftr.Contracts
         public string GetActiveCosmosDBConnectionString()
         {
             return CosmosDBConnectionStrings
+                .Where(cs => cs.Description.OrdinalEquals(ActiveKeyName))
+                .FirstOrDefault()
+                ?.ConnectionString;
+        }
+
+        public string GetActiveGlobalCosmosDBConnectionString()
+        {
+            return GlobalCosmosDBConnectionStrings
                 .Where(cs => cs.Description.OrdinalEquals(ActiveKeyName))
                 .FirstOrDefault()
                 ?.ConnectionString;

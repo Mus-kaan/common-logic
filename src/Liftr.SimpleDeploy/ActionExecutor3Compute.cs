@@ -56,6 +56,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 ActiveDBKeyName = _commandOptions.ActiveKeyName,
                 SecretPrefix = _hostingOptions.SecretPrefix,
                 GlobalStorageResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}",
+                GlobalCosmosDBResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.DocumentDB/databaseAccounts/{globalNamingContext.CosmosDBName(targetOptions.Global.BaseName)}",
                 DomainName = targetOptions.DomainName,
                 ZoneRedundant = regionOptions.ZoneRedundant,
                 OneCertCertificates = targetOptions.OneCertCertificates,

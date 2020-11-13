@@ -102,7 +102,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             string globalStorageResourceId,
             string globalKeyVaultResourceId,
             IIdentity msi,
-            IStorageAccount acisStorageAccount)
+            IStorageAccount acisStorageAccount,
+            string globalCosmosDBResourceId)
         {
             var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
 
@@ -136,6 +137,35 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     catch (Exception dbEx)
                     {
                         var errMsg = $"We cannot get the connection string of '{cosmosDB.Id}'. You can open the cosmos DB in portal and view details. You can open a support ticket for help.";
+                        var ex = new InvalidOperationException(errMsg, dbEx);
+                        _logger.Error(dbEx, errMsg);
+                        throw ex;
+                    }
+                }
+
+                ICosmosDBAccount globalCosmosDB = null;
+                if (!string.IsNullOrEmpty(globalCosmosDBResourceId))
+                {
+                    globalCosmosDB = await liftrAzure.GetCosmosDBAsync(globalCosmosDBResourceId);
+                }
+
+                if (globalCosmosDB != null)
+                {
+                    _logger.Information($"Cosmos DB '{globalCosmosDB.Id}' provisioning state: {globalCosmosDB.Inner.ProvisioningState}");
+                    rpAssets.ActiveKeyName = cosmosDBActiveKeyName;
+
+                    try
+                    {
+                        var dbConnectionStrings = await globalCosmosDB.ListConnectionStringsAsync();
+                        rpAssets.GlobalCosmosDBConnectionStrings = dbConnectionStrings.ConnectionStrings.Select(c => new CosmosDBConnectionString()
+                        {
+                            ConnectionString = c.ConnectionString,
+                            Description = c.Description,
+                        });
+                    }
+                    catch (Exception dbEx)
+                    {
+                        var errMsg = $"We cannot get the connection string of '{globalCosmosDB.Id}'. You can open the cosmos DB in portal and view details. You can open a support ticket for help.";
                         var ex = new InvalidOperationException(errMsg, dbEx);
                         _logger.Error(dbEx, errMsg);
                         throw ex;

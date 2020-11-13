@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.IFxAudit;
-using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.IFxAuditLinux;
 using Microsoft.Liftr.MarketplaceResource.DataSource;
-using MongoDB.Bson;
 using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
 using System;

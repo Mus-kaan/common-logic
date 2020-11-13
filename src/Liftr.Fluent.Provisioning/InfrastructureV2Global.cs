@@ -16,6 +16,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             string baseName,
             NamingContext namingContext,
             string dnsName,
+            bool addGlobalDB,
             string logAnalyticsWorkspaceId = null)
         {
             if (namingContext == null)
@@ -86,6 +87,21 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                         var sshPublicKey = File.ReadAllText("liftr_ssh_key.pub");
                         await kvValet.SetSecretAsync(SSHPublicKeySecretName, sshPublicKey, namingContext.Tags);
                     }
+                }
+
+                if (addGlobalDB)
+                {
+                    var cosmosName = namingContext.CosmosDBName(baseName);
+                    var dbId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.DocumentDB/databaseAccounts/{cosmosName}";
+                    var db = await liftrAzure.GetCosmosDBAsync(dbId);
+                    if (db == null)
+                    {
+                        (db, _) = await liftrAzure.CreateCosmosDBAsync(namingContext.Location, rgName, cosmosName, namingContext.Tags);
+                        await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(db, logAnalyticsWorkspaceId);
+                        _logger.Information("Created CosmosDB with Id {ResourceId}", db.Id);
+                    }
+
+                    result.GlobalCosmosDBAccount = db;
                 }
 
                 return result;
