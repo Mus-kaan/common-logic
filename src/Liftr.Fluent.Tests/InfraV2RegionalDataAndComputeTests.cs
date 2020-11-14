@@ -101,6 +101,14 @@ namespace Microsoft.Liftr.Fluent.Tests
                 catch (Exception ex)
                 {
                     logger.Error(ex, $"{nameof(VerifyRegionalDataAndComputeCreationAsync)} failed.");
+
+                    if (ex is InvalidOperationException
+                        && ex.Message.OrdinalContains("Cannot find the kubelet managed identity"))
+                    {
+                        // swallow exception for flacky AKS MI provisioning time.
+                        return;
+                    }
+
                     throw;
                 }
             }
