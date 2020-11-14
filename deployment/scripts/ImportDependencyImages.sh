@@ -70,7 +70,7 @@ set -x
 
 if [ "$ComputeType" = "aks" ]; then
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
-echo "import 'nginx-ingress' chart images"
+echo "import 'ingress-nginx' chart images"
 echo "import k8s.gcr.io/ingress-nginx/controller:v0.41.0"
 az acr import --name "$ACRName" --source k8s.gcr.io/ingress-nginx/controller:v0.41.0 --force
 
@@ -82,39 +82,33 @@ az acr import --name "$ACRName" --source docker.io/jettech/kube-webhook-certgen:
 
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "import 'kube-state-metrics' chart images"
-echo "import quay.io/coreos/kube-state-metrics:v1.9.5"
-az acr import --name "$ACRName" --source quay.io/coreos/kube-state-metrics:v1.9.5 --force
+echo "import quay.io/coreos/kube-state-metrics:v1.9.7"
+az acr import --name "$ACRName" --source quay.io/coreos/kube-state-metrics:v1.9.7 --force
 
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "import 'prometheus-node-exporter' chart images"
-echo "import quay.io/prometheus/node-exporter:v0.18.1"
-az acr import --name "$ACRName" --source quay.io/prometheus/node-exporter:v0.18.1 --force
+echo "import quay.io/prometheus/node-exporter:v1.0.1"
+az acr import --name "$ACRName" --source quay.io/prometheus/node-exporter:v1.0.1 --force
 
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
-echo "import 'prometheus-operator' chart images"
-echo "import quay.io/prometheus/alertmanager:v0.20.0"
-az acr import --name "$ACRName" --source quay.io/prometheus/alertmanager:v0.20.0 --force
+echo "import 'kube-prometheus-stack' chart images"
+echo "import quay.io/prometheus/alertmanager:v0.21.0"
+az acr import --name "$ACRName" --source quay.io/prometheus/alertmanager:v0.21.0 --force
 
-echo "import docker.io/squareup/ghostunnel:v1.5.2"
-az acr import --name "$ACRName" --source docker.io/squareup/ghostunnel:v1.5.2 --force
+echo "import quay.io/prometheus-operator/prometheus-operator:v0.43.1"
+az acr import --name "$ACRName" --source quay.io/prometheus-operator/prometheus-operator:v0.43.1 --force
 
-echo "import docker.io/jettech/kube-webhook-certgen:v1.0.0"
-az acr import --name "$ACRName" --source docker.io/jettech/kube-webhook-certgen:v1.0.0 --force
+echo "import quay.io/thanos/thanos:v0.15.0"
+az acr import --name "$ACRName" --source quay.io/thanos/thanos:v0.15.0 --force
 
-echo "import quay.io/coreos/prometheus-operator:v0.37.0"
-az acr import --name "$ACRName" --source quay.io/coreos/prometheus-operator:v0.37.0 --force
+echo "import docker.io/jimmidyson/configmap-reload:v0.4.0"
+az acr import --name "$ACRName" --source docker.io/jimmidyson/configmap-reload:v0.4.0 --force
 
-echo "import quay.io/coreos/configmap-reload:v0.0.1"
-az acr import --name "$ACRName" --source quay.io/coreos/configmap-reload:v0.0.1 --force
+echo "import quay.io/prometheus-operator/prometheus-config-reloader:v0.43.1"
+az acr import --name "$ACRName" --source quay.io/prometheus-operator/prometheus-config-reloader:v0.43.1 --force
 
-echo "import quay.io/coreos/prometheus-config-reloader:v0.37.0"
-az acr import --name "$ACRName" --source quay.io/coreos/prometheus-config-reloader:v0.37.0 --force
-
-echo "import k8s.gcr.io/hyperkube:v1.12.1"
-az acr import --name "$ACRName" --source k8s.gcr.io/hyperkube:v1.12.1 --force
-
-echo "import quay.io/prometheus/prometheus:v2.15.2"
-az acr import --name "$ACRName" --source quay.io/prometheus/prometheus:v2.15.2 --force
+echo "import quay.io/prometheus/prometheus:v2.22.1"
+az acr import --name "$ACRName" --source quay.io/prometheus/prometheus:v2.22.1 --force
 fi
 
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"

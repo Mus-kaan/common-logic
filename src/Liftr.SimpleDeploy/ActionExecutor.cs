@@ -10,7 +10,6 @@ using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
-using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Fluent;
@@ -393,25 +392,6 @@ namespace Microsoft.Liftr.SimpleDeploy
             }
 
             return pip;
-        }
-
-        private async Task GetDiagnosticsStorageAccountAsync(LiftrAzureFactory azFactory, string diagnosticsStorageId)
-        {
-            IStorageAccount diagStor = null;
-            var rid = new Liftr.Contracts.ResourceId(diagnosticsStorageId);
-            diagStor = await azFactory.GenerateLiftrAzure(rid.SubscriptionId).FluentClient.StorageAccounts.GetByIdAsync(diagnosticsStorageId);
-
-            if (diagStor == null)
-            {
-                var errMsg = "Cannot find the global diagnostics storage account.";
-                _logger.Fatal(errMsg);
-                throw new InvalidOperationException(errMsg);
-            }
-
-            var storKey = await diagStor.GetPrimaryStorageKeyAsync();
-
-            File.WriteAllText("diag-stor-name.txt", diagStor.Name);
-            File.WriteAllText("diag-stor-key.txt", storKey.Value);
         }
 
         private static string ToSimpleName(string region)

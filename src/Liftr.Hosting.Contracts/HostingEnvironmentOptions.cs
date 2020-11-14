@@ -50,8 +50,6 @@ namespace Microsoft.Liftr.Hosting.Contracts
 
         public string LogAnalyticsWorkspaceId { get; set; }
 
-        public string DiagnosticsStorageId { get; set; }
-
         public bool IsAKS => AKSConfigurations != null;
 
         public void CheckValid()

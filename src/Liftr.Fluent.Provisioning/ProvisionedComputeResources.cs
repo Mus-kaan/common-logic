@@ -20,6 +20,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public IKubernetesCluster AKS { get; set; }
 
+        public IStorageAccount ThanosStorageAccount { get; set; }
+
         public string AKSObjectId { get; set; }
 
         public string KubeletObjectId { get; set; }

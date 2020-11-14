@@ -3,13 +3,11 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.KeyVault;
-using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent;
-using Microsoft.Azure.Management.KeyVault.Fluent;
-using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Hosting.Contracts;
 using Microsoft.Liftr.KeyVault;
@@ -23,7 +21,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 {
     public partial class InfrastructureV2
     {
-        public async Task<(IVault kv, IIdentity msi, IKubernetesCluster aks, string aksObjectId, string kubeletObjectId)> CreateOrUpdateRegionalAKSRGAsync(
+        public async Task<ProvisionedComputeResources> CreateOrUpdateRegionalAKSRGAsync(
             NamingContext namingContext,
             RegionalComputeOptions computeOptions,
             AKSInfo aksInfo,
@@ -137,6 +135,13 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                         await db.Update().WithVirtualNetworkRule(vnet.Id, subnet.Name).ApplyAsync();
                     }
                 }
+            }
+
+            IStorageAccount thanosStorage = null;
+            if (computeOptions.EnableThanos)
+            {
+                var thanosStorageName = namingContext.GenerateCommonName(computeOptions.ComputeBaseName, suffix: "tha", delimiter: string.Empty);
+                thanosStorage = await liftrAzure.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, thanosStorageName, namingContext.Tags);
             }
 
             var aks = await liftrAzure.GetAksClusterAsync(rgName, aksName);
@@ -263,7 +268,17 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 }
             }
 
-            return (regionalKeyVault, msi, aks, aksMIObjectId, kubeletObjectId);
+            ProvisionedComputeResources provisionedResources = new ProvisionedComputeResources()
+            {
+                KeyVault = regionalKeyVault,
+                ManagedIdentity = msi,
+                AKS = aks,
+                AKSObjectId = aksMIObjectId,
+                KubeletObjectId = kubeletObjectId,
+                ThanosStorageAccount = thanosStorage,
+            };
+
+            return provisionedResources;
         }
     }
 }

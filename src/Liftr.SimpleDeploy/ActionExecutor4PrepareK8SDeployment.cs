@@ -58,13 +58,6 @@ namespace Microsoft.Liftr.SimpleDeploy
             File.WriteAllText("aks-kv.txt", kv.VaultUri);
             File.WriteAllText("vault-name.txt", kv.Name);
 
-            if (string.IsNullOrEmpty(targetOptions.DiagnosticsStorageId))
-            {
-                targetOptions.DiagnosticsStorageId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}";
-            }
-
-            await GetDiagnosticsStorageAccountAsync(azFactory, targetOptions.DiagnosticsStorageId);
-
             _logger.Information("Successfully finished k8s deployment preparation work.");
         }
     }

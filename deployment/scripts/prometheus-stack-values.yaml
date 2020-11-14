@@ -1,0 +1,17 @@
+alertmanager:
+  enabled: false
+
+grafana:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+prometheusOperator:
+  tls:
+    enabled: false
+
+  ## Admission webhook support for PrometheusRules resources added in Prometheus Operator 0.30 can be enabled to prevent incorrectly formatted
+  ## rules from making their way into prometheus and potentially preventing the container from starting
+  admissionWebhooks:
+    enabled: false

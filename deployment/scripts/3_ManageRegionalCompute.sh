@@ -48,7 +48,7 @@ fi
 
 ./DeployNginx.sh
 
-./DeployPrometheusOperator.sh \
+./DeployPrometheusStack.sh \
 --environmentName="$APP_ASPNETCORE_ENVIRONMENT" \
 --compactRegion="$REGION" \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId"

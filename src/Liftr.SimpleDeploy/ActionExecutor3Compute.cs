@@ -60,6 +60,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 DomainName = targetOptions.DomainName,
                 ZoneRedundant = regionOptions.ZoneRedundant,
                 OneCertCertificates = targetOptions.OneCertCertificates,
+                EnableThanos = _hostingOptions.EnableThanos,
             };
 
             regionalNamingContext.Tags["DataRG"] = regionalNamingContext.ResourceGroupName(regionOptions.DataBaseName);
@@ -92,13 +93,6 @@ namespace Microsoft.Liftr.SimpleDeploy
                 throw new InvalidOperationException(errMsg);
             }
 
-            if (string.IsNullOrEmpty(targetOptions.DiagnosticsStorageId))
-            {
-                targetOptions.DiagnosticsStorageId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}";
-            }
-
-            await GetDiagnosticsStorageAccountAsync(azFactory, targetOptions.DiagnosticsStorageId);
-
             if (targetOptions.AKSConfigurations != null)
             {
                 ProvisionedComputeResources computeResources = null;
@@ -115,21 +109,20 @@ namespace Microsoft.Liftr.SimpleDeploy
                 }
                 else
                 {
-                    (var kv, var msi, var aks, var aksMIObjectId, var kubeletObjectId) = await infra.CreateOrUpdateRegionalAKSRGAsync(
+                    computeResources = await infra.CreateOrUpdateRegionalAKSRGAsync(
                         regionalNamingContext,
                         regionalComputeOptions,
                         targetOptions.AKSConfigurations,
                         kvClient,
                         targetOptions.EnableVNet);
+                }
 
-                    computeResources = new ProvisionedComputeResources()
-                    {
-                        KeyVault = kv,
-                        ManagedIdentity = msi,
-                        AKS = aks,
-                        AKSObjectId = aksMIObjectId,
-                        KubeletObjectId = kubeletObjectId,
-                    };
+                if (computeResources.ThanosStorageAccount != null)
+                {
+                    // write the Thanos storage credential to disk so the helm deployment can utilize it.
+                    var storKey = await computeResources.ThanosStorageAccount.GetPrimaryStorageKeyAsync();
+                    File.WriteAllText("diag-stor-name.txt", computeResources.ThanosStorageAccount.Name);
+                    File.WriteAllText("diag-stor-key.txt", storKey.Value);
                 }
 
                 try

@@ -29,6 +29,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public bool ZoneRedundant { get; set; }
 
+        public bool EnableThanos { get; set; }
+
         public Dictionary<string, string> OneCertCertificates { get; set; } = new Dictionary<string, string>();
 
         public void CheckValues()
