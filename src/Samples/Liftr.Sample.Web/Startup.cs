@@ -211,7 +211,12 @@ namespace Microsoft.Liftr.Sample.Web
             app.UseCookiePolicy();
 
             app.UseRouting();
-            app.UseHttpMetrics();
+            app.UseHttpMetrics(options =>
+            {
+                // This identifies the page when using Razor Pages.
+                options.AddRouteParameter("page");
+            });
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
