@@ -8,6 +8,9 @@
     <DisableLiftrCodeAnalysis>true</DisableLiftrCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="prometheus-net.AspNetCore" Version="$(PackageVersion_prometheus-net_AspNetCore)" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\Liftr.Hosting.Swagger\Liftr.Hosting.Swagger.csproj" />
     <ProjectReference Include="..\..\Liftr.Contracts\Liftr.Contracts.csproj" />
     <ProjectReference Include="..\..\Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj" />

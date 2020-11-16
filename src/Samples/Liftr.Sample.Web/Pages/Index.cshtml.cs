@@ -4,6 +4,7 @@ using Microsoft.Liftr.DataSource;
 using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Queue;
 using Microsoft.Liftr.TokenManager;
+using Prometheus;
 using System;
 using System.Threading.Tasks;
 
@@ -11,6 +12,8 @@ namespace Liftr.Sample.Web.Pages
 {
     public class IndexModel : PageModel
     {
+        private static readonly Counter IndexPVCounter = Metrics.CreateCounter("index_pv_total", "Index page view.");
+
         private const string c_countrtName = "pv-index";
         private readonly ICounterEntityDataSource _counter;
         private readonly IQueueWriter _q;
@@ -41,6 +44,7 @@ namespace Liftr.Sample.Web.Pages
                 await Task.Delay(30);
             }
 
+            IndexPVCounter.Inc();
             await _counter.IncreaseCounterAsync(c_countrtName);
             CurrentCounter = await _counter.GetCounterAsync(c_countrtName) ?? 0;
             await _mpApp.GetTokenAsync("f686d426-8d16-42db-81b7-ab578e110ccd"); //dogfood

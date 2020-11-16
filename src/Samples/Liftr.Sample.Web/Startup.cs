@@ -23,6 +23,7 @@ using Microsoft.Liftr.TokenManager;
 using Microsoft.Liftr.TokenManager.Options;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
+using Prometheus;
 using System;
 using System.IO;
 using System.Linq;
@@ -210,10 +211,12 @@ namespace Microsoft.Liftr.Sample.Web
             app.UseCookiePolicy();
 
             app.UseRouting();
+            app.UseHttpMetrics();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
                 endpoints.MapRazorPages();
+                endpoints.MapMetrics();
             });
 
             // Warm dependency up
