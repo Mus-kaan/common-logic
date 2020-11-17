@@ -33,6 +33,7 @@ echo "helm upgrade $helmReleaseName ..."
 if [ "$PublicIP" = "" ]; then
 $Helm upgrade $helmReleaseName --install --wait --timeout 25m \
 --create-namespace \
+-f nginx-values.yaml \
 --set controller.image.repository="$liftrACRURI/ingress-nginx/controller" \
 --set controller.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
 --set controller.service.enableHttp=false \
@@ -42,6 +43,7 @@ $Helm upgrade $helmReleaseName --install --wait --timeout 25m \
 else
 $Helm upgrade $helmReleaseName --install --wait --timeout 25m \
 --create-namespace \
+-f nginx-values.yaml \
 --set controller.image.repository="$liftrACRURI/ingress-nginx/controller" \
 --set controller.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
 --set controller.service.enableHttp=false \

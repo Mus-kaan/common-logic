@@ -15,3 +15,32 @@ prometheusOperator:
   ## rules from making their way into prometheus and potentially preventing the container from starting
   admissionWebhooks:
     enabled: false
+
+## Provide custom recording or alerting rules to be deployed into the cluster.
+##
+additionalPrometheusRulesMap:
+  mdm-rule:
+    groups:
+      - name: mdm_counter_conversions
+        interval: 1m
+        rules: # How to identify metrics to collect https://msazure.visualstudio.com/KubernetesSharedTools/_git/prom-mdm-converter?path=%2Fcharts%2Fprom-mdm-converter%2FREADME.md&version=GBmaster&_a=preview
+          - record: node_cpu_usage
+            expr: 100 - (avg by (nodename) (irate(node_cpu_seconds_total{mode="idle"}[5m]) * on(instance) group_left(nodename) node_uname_info * 100))- (avg by (nodename) (irate(node_cpu_seconds_total{mode="iowait"}[5m]) * on(instance) group_left(nodename) node_uname_info * 100))
+          - record: node_network_receive_bytes_total_rate
+            expr: sum by (nodename) (irate(node_network_receive_bytes_total{device="eth0"}[5m]) * 60 * on(instance) group_left(nodename) node_uname_info)
+          - record: node_network_receive_drop_total_rate
+            expr: sum by (nodename) (irate(node_network_receive_drop_total{device="eth0"}[5m]) * 60 * on(instance) group_left(nodename) node_uname_info)
+          - record: node_network_transmit_bytes_total_rate
+            expr: sum by (nodename) (irate(node_network_transmit_bytes_total{device="eth0"}[5m]) * 60 * on(instance) group_left(nodename) node_uname_info)
+          - record: node_network_transmit_drop_total_rate
+            expr: sum by (nodename) (irate(node_network_transmit_drop_total{device="eth0"}[5m]) * 60 * on(instance) group_left(nodename) node_uname_info)
+          - record: kubelet_running_container_count_named
+            expr: label_join(kubelet_running_container_count, "nodename", "", "instance")
+          - record: kubelet_running_pod_count_named
+            expr: label_join(kubelet_running_pod_count, "nodename", "", "instance")
+          - record: node_filesystem_avail_bytes_named
+            expr: node_filesystem_avail_bytes * on(instance) group_left(nodename) node_uname_info
+          - record: node_memory_MemAvailable_bytes_named
+            expr: node_memory_MemAvailable_bytes * on(instance) group_left(nodename) node_uname_info
+          - record: node_memory_Active_bytes_named
+            expr: node_memory_Active_bytes * on(instance) group_left(nodename) node_uname_info
