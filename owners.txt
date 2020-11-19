@@ -7,12 +7,4 @@
 akagarw
 vekurapa
 
-*leti
-*limgu
-*nireis
-*sbanala
-*yuwa
-*xuefwu
-*hashah
-*tarekal
-*wuweng
+*liftrdev

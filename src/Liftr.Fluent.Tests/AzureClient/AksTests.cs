@@ -4,6 +4,7 @@
 
 using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Liftr.Hosting.Contracts;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,7 +38,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     + "CoAEKnWNjlE4qBbZUfkShGCmj50YC9R0zHcqpCbMCz3BjEGrqttlIHaYGKD1v7g2vHEaDj459cqyQw3yBr3l9erS6"
                     + "/vJSe5tBtZPimTTUKhLYP+ZXdqldLa/TI7e6hkZHQuMOe2xXCqMfJXp4HtBszIua7bM3rQFlGuBe7+Vv+NzL5wJyy"
                     + "y6KnZjoLknnRoeJUSyZE2UtRF6tpkoGu3PhqZBmx7 limingu@Limins-MacBook-Pro.local";
-                    var vmCount = 3;
+                    var aksInfo = new AKSInfo();
 
                     await Assert.ThrowsAsync<ArgumentException>(async () =>
                     {
@@ -48,7 +49,8 @@ namespace Microsoft.Liftr.Fluent.Tests
                         rootUserName,
                         sshPublicKey,
                         ContainerServiceVMSizeTypes.StandardDS2V2,
-                        vmCount,
+                        aksInfo.KubernetesVersion,
+                        aksInfo.AKSMachineCount,
                         TestCommon.Tags,
                         agentPoolProfileName: "sp-dev");
                     });
@@ -60,7 +62,8 @@ namespace Microsoft.Liftr.Fluent.Tests
                         rootUserName,
                         sshPublicKey,
                         ContainerServiceVMSizeTypes.StandardDS2V2,
-                        vmCount,
+                        aksInfo.KubernetesVersion,
+                        aksInfo.AKSMachineCount,
                         TestCommon.Tags,
                         agentPoolProfileName: "spdev");
 
@@ -98,7 +101,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     + "CoAEKnWNjlE4qBbZUfkShGCmj50YC9R0zHcqpCbMCz3BjEGrqttlIHaYGKD1v7g2vHEaDj459cqyQw3yBr3l9erS6"
                     + "/vJSe5tBtZPimTTUKhLYP+ZXdqldLa/TI7e6hkZHQuMOe2xXCqMfJXp4HtBszIua7bM3rQFlGuBe7+Vv+NzL5wJyy"
                     + "y6KnZjoLknnRoeJUSyZE2UtRF6tpkoGu3PhqZBmx7 limingu@Limins-MacBook-Pro.local";
-                    var vmCount = 3;
+                    var aksInfo = new AKSInfo();
 
                     var vnet = await client.GetOrCreateVNetAsync(TestCommon.Location, scope.ResourceGroupName, vnetName, TestCommon.Tags);
                     var subnet1 = await client.CreateNewSubnetAsync(vnet, "subnet1");
@@ -110,7 +113,8 @@ namespace Microsoft.Liftr.Fluent.Tests
                     rootUserName,
                     sshPublicKey,
                     ContainerServiceVMSizeTypes.StandardDS2V2,
-                    vmCount,
+                    aksInfo.KubernetesVersion,
+                    aksInfo.AKSMachineCount,
                     TestCommon.Tags,
                     subnet: subnet1,
                     agentPoolProfileName: "spdev");

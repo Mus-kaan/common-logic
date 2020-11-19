@@ -203,6 +203,7 @@ namespace Microsoft.Liftr.Fluent
             string rootUserName,
             string sshPublicKey,
             ContainerServiceVMSizeTypes vmSizeType,
+            string k8sVersion,
             int vmCount,
             IDictionary<string, string> tags,
             ISubnet subnet = null,

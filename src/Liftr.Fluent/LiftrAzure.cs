@@ -1138,6 +1138,7 @@ namespace Microsoft.Liftr.Fluent
             string rootUserName,
             string sshPublicKey,
             ContainerServiceVMSizeTypes vmSizeType,
+            string k8sVersion,
             int vmCount,
             IDictionary<string, string> tags,
             ISubnet subnet = null,
@@ -1149,12 +1150,12 @@ namespace Microsoft.Liftr.Fluent
                 throw new ArgumentException("Agent pool profile name does not match pattern '^[a-z][a-z0-9]{0,11}$'");
             }
 
-            _logger.Information("Creating a Kubernetes cluster of version {kubernetesVersion} with name {aksName} ...", _options.KubernetesVersion, aksName);
+            _logger.Information("Creating a Kubernetes cluster of version {kubernetesVersion} with name {aksName} ...", k8sVersion, aksName);
 
             var templateContent = AKSHelper.GenerateAKSTemplate(
                 region,
                 aksName,
-                _options.KubernetesVersion,
+                k8sVersion,
                 rootUserName,
                 sshPublicKey,
                 vmSizeType.Value,

@@ -187,6 +187,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     sshUserName,
                     sshPublicKey,
                     aksInfo.AKSMachineType,
+                    aksInfo.KubernetesVersion,
                     aksInfo.AKSMachineCount,
                     computeNamingContext.Tags,
                     subnet,
