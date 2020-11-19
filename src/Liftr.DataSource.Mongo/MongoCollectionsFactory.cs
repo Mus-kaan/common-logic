@@ -165,6 +165,25 @@ namespace Microsoft.Liftr.DataSource.Mongo
             return collection;
         }
 
+        public async Task<IMongoCollection<AgreementResourceEntity>> GetOrCreateAgreementEntityCollectionAsync(string collectionName)
+        {
+            IMongoCollection<AgreementResourceEntity> collection = null;
+
+            if (!await CollectionExistsAsync(_db, collectionName))
+            {
+                _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
+#pragma warning disable CS0618 // Type or member is obsolete
+                collection = await CreateCollectionAsync<AgreementResourceEntity>(collectionName);
+#pragma warning restore CS0618 // Type or member is obsolete
+
+                return collection;
+            }
+            else
+            {
+                return await GetCollectionAsync<AgreementResourceEntity>(collectionName);
+            }
+        }
+
         public async Task<IMongoCollection<EventHubEntity>> GetOrCreateEventHubEntityCollectionAsync(string collectionName)
         {
             if (!await CollectionExistsAsync(_db, collectionName))
