@@ -17,6 +17,8 @@ namespace Microsoft.Liftr.Queue.Tests
 {
     public class WriteReadQueueTests
     {
+        private const string c_englishMsg = "Hello!";
+        private const string c_chineseMsg = "我的名字是：白毛浮绿水，红掌拨清波";
         private const string c_throwMsg = "Throw message";
         private readonly ITestOutputHelper _output;
 
@@ -67,9 +69,7 @@ namespace Microsoft.Liftr.Queue.Tests
                     var reader = new QueueReader(queue, new QueueReaderOptions() { MaxConcurrentCalls = 1 }, ts, scope.Logger);
                     var readerTask = reader.StartListeningAsync(func);
 
-                    var msgContent1 = "Hello!!";
-
-                    await writer.AddMessageAsync(msgContent1);
+                    await writer.AddMessageAsync(c_chineseMsg);
 
                     await semaphore.WaitAsync();
 
@@ -80,14 +80,14 @@ namespace Microsoft.Liftr.Queue.Tests
                     {
                         var msg = receivedMessages.Last();
                         Assert.NotNull(msg.MsgTelemetryContext);
-                        Assert.Equal(msgContent1, msg.Content);
+                        Assert.Equal(c_chineseMsg, msg.Content);
                         Assert.Equal("2019-01-20T08:00:00.0000000Z", msg.CreatedAt);
                     }
 
                     ts.Add(TimeSpan.FromSeconds(30));
                     using (scope.Logger.StartTimedOperation($"{nameof(CanEnqueueAndDequeueAsync)}Operation"))
                     {
-                        await writer.AddMessageAsync(msgContent1);
+                        await writer.AddMessageAsync(c_englishMsg);
                     }
 
                     await semaphore.WaitAsync();
@@ -100,7 +100,7 @@ namespace Microsoft.Liftr.Queue.Tests
                         var msg = receivedMessages.Last();
                         Assert.NotNull(msg.MsgTelemetryContext);
                         Assert.False(string.IsNullOrEmpty(msg.MsgTelemetryContext.CorrelationId));
-                        Assert.Equal(msgContent1, msg.Content);
+                        Assert.Equal(c_englishMsg, msg.Content);
                         Assert.Equal("2019-01-20T08:01:00.0000000Z", msg.CreatedAt);
                     }
 

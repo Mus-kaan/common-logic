@@ -61,9 +61,10 @@ namespace Microsoft.Liftr.Queue
             var msg = new LiftrQueueMessage()
             {
                 MsgId = $"{_msgIdPrefix}{_timeSource.UtcNow.ToDateString()}-{i:D8}",
-                Content = message,
+                Content = message.ToBase64(),
                 MsgTelemetryContext = TelemetryContext.GetCurrent(),
                 CreatedAt = _timeSource.UtcNow.ToZuluString(),
+                Version = QueueMessageVersion.v2,
             };
 
             await _queue.SendMessageAsync(

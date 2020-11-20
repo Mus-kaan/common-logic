@@ -94,6 +94,11 @@ namespace Microsoft.Liftr.Queue
                             message.DequeueCount = queueMessage.DequeueCount;
                             using var msgIdScope = new LogContextPropertyScope("LiftrQueueMessageId", message.MsgId);
 
+                            if (QueueMessageVersion.v2.StrictEquals(message.Version))
+                            {
+                                message.Content = message.Content.FromBase64();
+                            }
+
                             if (queueMessage.DequeueCount > _options.MaxDequeueCount)
                             {
                                 _logger.Information(

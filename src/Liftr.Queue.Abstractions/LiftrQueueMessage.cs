@@ -34,5 +34,12 @@ namespace Microsoft.Liftr.Queue
         /// The number of times the message has been dequeued.
         /// </summary>
         public long DequeueCount { get; set; }
+
+        public string Version { get; set; }
+    }
+
+    public static class QueueMessageVersion
+    {
+        public const string v2 = nameof(v2);
     }
 }
