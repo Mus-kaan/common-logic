@@ -19,86 +19,11 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.DataSource.Mongo
 {
-    public class MongoCollectionsFactory : IMongoCollectionsFactory
+    public class MongoCollectionsFactory : MongoCollectionsBaseFactory, IMongoCollectionsFactory
     {
-        private readonly ILogger _logger;
-        private readonly IMongoDatabase _db;
-        private readonly string _dbName;
-
         public MongoCollectionsFactory(MongoOptions options, ILogger logger)
+            : base(options, logger)
         {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
-            if (string.IsNullOrEmpty(options.ConnectionString))
-            {
-                throw new ArgumentException($"Need valid {nameof(options.ConnectionString)}.");
-            }
-
-            if (string.IsNullOrEmpty(options.DatabaseName))
-            {
-                throw new ArgumentException($"Need valid {nameof(options.DatabaseName)}.");
-            }
-
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-            var mongoClientSettings = MongoClientSettings.FromUrl(new MongoUrl(options.ConnectionString));
-            mongoClientSettings.SslSettings = new SslSettings() { EnabledSslProtocols = SslProtocols.Tls12 };
-
-            if (options.LogDBOperation)
-            {
-                mongoClientSettings.ClusterConfigurator = clusterConfigurator =>
-                {
-                    clusterConfigurator.Subscribe<CommandSucceededEvent>(eventData =>
-                    {
-                        _logger.Debug("[ Mongo | CommandSucceeded ] StartTime: {StartTime}, Event:{@CommandSucceededEvent}.", DateTime.Now.Subtract(eventData.Duration).ToZuluString(), eventData);
-                    });
-
-                    clusterConfigurator.Subscribe<CommandFailedEvent>(eventData =>
-                    {
-                        _logger.Information("[ Mongo | CommandFailed ] StartTime: {StartTime}, Event:{@CommandFailedEvent}.", DateTime.Now.Subtract(eventData.Duration).ToZuluString(), eventData);
-                    });
-                };
-            }
-
-            var client = new MongoClient(mongoClientSettings);
-            _db = client.GetDatabase(options.DatabaseName);
-            _dbName = options.DatabaseName;
-
-            _logger.Information("mongoClientSettings.MaxConnectionPoolSize: {MaxConnectionPoolSize}", mongoClientSettings.MaxConnectionPoolSize);
-            var maxDBConcurrency = mongoClientSettings.MaxConnectionPoolSize;
-            if (maxDBConcurrency > 50)
-            {
-                maxDBConcurrency = maxDBConcurrency - 10;
-            }
-
-            MongoWaitQueueProtector = new MongoWaitQueueRateLimiter(maxDBConcurrency, _logger);
-        }
-
-        public MongoWaitQueueRateLimiter MongoWaitQueueProtector { get; }
-
-        public async Task<IMongoCollection<T>> GetCollectionAsync<T>(string collectionName)
-        {
-            if (await CollectionExistsAsync(_db, collectionName))
-            {
-                return _db.GetCollection<T>(collectionName);
-            }
-
-            _logger.Fatal($"Collection with name {collectionName} does not exist.");
-            throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
-        }
-
-        public IMongoCollection<T> GetCollection<T>(string collectionName)
-        {
-            if (CollectionExists(_db, collectionName))
-            {
-                return _db.GetCollection<T>(collectionName);
-            }
-
-            _logger.Fatal($"Collection with name {collectionName} does not exist.");
-            throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
         }
 
         public async Task<IMongoCollection<T>> GetOrCreateEntityCollectionAsync<T>(string collectionName) where T : BaseResourceEntity
@@ -163,25 +88,6 @@ namespace Microsoft.Liftr.DataSource.Mongo
             var createdAtIndex = new CreateIndexModel<MarketplaceSaasResourceEntity>(Builders<MarketplaceSaasResourceEntity>.IndexKeys.Descending(item => item.CreatedUTC), new CreateIndexOptions<MarketplaceSaasResourceEntity> { Unique = false });
             collection.Indexes.CreateOne(createdAtIndex);
             return collection;
-        }
-
-        public async Task<IMongoCollection<AgreementResourceEntity>> GetOrCreateAgreementEntityCollectionAsync(string collectionName)
-        {
-            IMongoCollection<AgreementResourceEntity> collection = null;
-
-            if (!await CollectionExistsAsync(_db, collectionName))
-            {
-                _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
-#pragma warning disable CS0618 // Type or member is obsolete
-                collection = await CreateCollectionAsync<AgreementResourceEntity>(collectionName);
-#pragma warning restore CS0618 // Type or member is obsolete
-
-                return collection;
-            }
-            else
-            {
-                return await GetCollectionAsync<AgreementResourceEntity>(collectionName);
-            }
         }
 
         public async Task<IMongoCollection<EventHubEntity>> GetOrCreateEventHubEntityCollectionAsync(string collectionName)
@@ -275,11 +181,6 @@ namespace Microsoft.Liftr.DataSource.Mongo
             return GetOrCreateEntityCollectionAsync<PartnerResourceEntity>(collectionName);
         }
 
-        public async Task DeleteCollectionAsync(string collectionName)
-        {
-            await _db.DropCollectionAsync(collectionName);
-        }
-
         #region Internal and Private
         private async Task<IMongoCollection<T>> CreateCollectionAsync<T>(string collectionName)
         {
@@ -303,28 +204,6 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
             _logger.Fatal($"Collection with name {collectionName} does not exist.");
             throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
-        }
-
-        private static async Task<bool> CollectionExistsAsync(IMongoDatabase db, string collectionName)
-        {
-            var filter = new BsonDocument("name", collectionName);
-
-            // filter by collection name
-            var collections = await db.ListCollectionsAsync(new ListCollectionsOptions { Filter = filter });
-
-            // check for existence
-            return await collections.AnyAsync();
-        }
-
-        private static bool CollectionExists(IMongoDatabase db, string collectionName)
-        {
-            var filter = new BsonDocument("name", collectionName);
-
-            // filter by collection name
-            var collections = db.ListCollections(new ListCollectionsOptions { Filter = filter });
-
-            // check for existence
-            return collections.Any();
         }
         #endregion
     }

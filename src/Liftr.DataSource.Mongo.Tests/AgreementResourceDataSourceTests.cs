@@ -19,7 +19,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
         public AgreementResourceDataSourceTests()
         {
             var option = new MockMongoOptions() { ConnectionString = TestDBConnection.TestMongodbConStr, DatabaseName = TestDBConnection.TestDatabaseName };
-            var collectionFactory = new MongoCollectionsFactory(option, LoggerFactory.VoidLogger);
+            var collectionFactory = new GlobalMongoCollectionsFactory(option, LoggerFactory.VoidLogger);
             _collectionScope = new TestCollectionScope<AgreementResourceEntity>((db, collectionName) =>
             {
 #pragma warning disable CS0618 // Type or member is obsolete

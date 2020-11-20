@@ -8,12 +8,8 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.DataSource.Mongo
 {
-    public interface IMongoCollectionsFactory
+    public interface IMongoCollectionsFactory : IMongoCollectionsBaseFactory
     {
-        Task<IMongoCollection<T>> GetCollectionAsync<T>(string collectionName);
-
-        IMongoCollection<T> GetCollection<T>(string collectionName);
-
         Task<IMongoCollection<T>> GetOrCreateEntityCollectionAsync<T>(string collectionName) where T : BaseResourceEntity;
 
         Task<IMongoCollection<CounterEntity>> GetOrCreateCounterEntityCollectionAsync(string collectionName);
@@ -23,7 +19,5 @@ namespace Microsoft.Liftr.DataSource.Mongo
         Task<IMongoCollection<T>> GetOrCreateMonitoringCollectionAsync<T>(string collectionName) where T : MonitoringBaseEntity, new();
 
         Task<IMongoCollection<PartnerResourceEntity>> GetOrCreatePartnerResourceEntityCollectionAsync(string collectionName);
-
-        Task DeleteCollectionAsync(string collectionName);
     }
 }
