@@ -70,6 +70,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             _logger.Information("MachineInfo: {@machineInfo}", machineInfo);
             computeOptions.CheckValues();
             machineInfo.CheckValues();
+            machineInfo.UseParsedImageVersion();
 
             _logger.Information("VMSS machine type: {AKSMachineType}", machineInfo.VMSize);
             _logger.Information("VMSS machine count: {AKSMachineCount}", machineInfo.MachineCount);
