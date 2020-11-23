@@ -29,6 +29,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <None Update="AzureClient\MetricAlertOptionsTests.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="HostingOptions\aks-hosting-options.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -12,6 +12,7 @@ using Microsoft.Azure.Management.Dns.Fluent;
 using Microsoft.Azure.Management.Eventhub.Fluent;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
+using Microsoft.Azure.Management.Monitor.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Network.Fluent.Models;
@@ -21,6 +22,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Azure.Management.TrafficManager.Fluent;
+using Microsoft.Liftr.Fluent.Contracts.AzureMonitor;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -242,6 +244,10 @@ namespace Microsoft.Liftr.Fluent
         Task<string> GetOrCreateLogAnalyticsWorkspaceAsync(Region location, string rgName, string name, IDictionary<string, string> tags);
 
         Task<string> GetLogAnalyticsWorkspaceAsync(string rgName, string name);
+
+        Task<IActionGroup> GetOrUpdateActionGroupAsync(string rgName, string name, string receiverName, string email);
+
+        Task<IMetricAlert> GetOrUpdateMetricAlertAsync(string rgName, MetricAlertOptions alertOptions);
         #endregion
 
         #region Event Hub

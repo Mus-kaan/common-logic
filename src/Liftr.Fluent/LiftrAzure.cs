@@ -12,6 +12,8 @@ using Microsoft.Azure.Management.Dns.Fluent;
 using Microsoft.Azure.Management.Eventhub.Fluent;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
+using Microsoft.Azure.Management.Monitor.Fluent;
+using Microsoft.Azure.Management.Monitor.Fluent.Models;
 using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Network.Fluent.Models;
@@ -24,6 +26,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Models;
 using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Azure.Management.TrafficManager.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
+using Microsoft.Liftr.Fluent.Contracts.AzureMonitor;
 using Microsoft.Rest.Azure;
 using Newtonsoft.Json.Linq;
 using Serilog;
@@ -1355,6 +1358,60 @@ namespace Microsoft.Liftr.Fluent
         {
             var helper = new LogAnalyticsHelper(_logger);
             return helper.GetLogAnalyticsWorkspaceAsync(this, rgName, name);
+        }
+
+        public async Task<IActionGroup> GetOrUpdateActionGroupAsync(string rgName, string name, string receiverName, string email)
+        {
+            _logger.Information("Getting Action Group. rgName: {rgName}, name: {name} ...", rgName, name);
+            IActionGroup ag;
+            try
+            {
+                var subId = FluentClient.GetCurrentSubscription();
+                ag = await FluentClient
+                    .ActionGroups.GetByIdAsync($"/subscriptions/{subId}/resourceGroups/{rgName}/providers/microsoft.insights/actionGroups/{name}");
+            }
+            catch (Azure.Management.Monitor.Fluent.Models.ErrorResponseException ex) when (ex.Response?.StatusCode == HttpStatusCode.NotFound)
+            {
+                _logger.Information("Creating a Action Group. rgName: {rgName}, name: {name} ...", rgName, name);
+                ag = await FluentClient.ActionGroups.Define(name)
+                    .WithExistingResourceGroup(rgName)
+                    .DefineReceiver(receiverName)
+                    .WithEmail(email)
+                    .Attach()
+                    .CreateAsync();
+            }
+
+            return ag;
+        }
+
+        public async Task<IMetricAlert> GetOrUpdateMetricAlertAsync(string rgName, MetricAlertOptions alertOptions)
+        {
+            _logger.Information("Getting Metric Alert. rgName: {rgName}, name: {name} ...", rgName, alertOptions.Name);
+            IMetricAlert ma;
+            try
+            {
+                var subId = FluentClient.GetCurrentSubscription();
+                ma = await FluentClient
+                    .AlertRules.MetricAlerts.GetByIdAsync($"/subscriptions/{subId}/resourceGroups/{rgName}/providers/microsoft.insights/scheduledqueryrules/{alertOptions.Name}");
+            }
+            catch (Azure.Management.Monitor.Fluent.Models.ErrorResponseException ex) when (ex.Response?.StatusCode == HttpStatusCode.NotFound)
+            {
+                _logger.Information("Creating a Metric Alert. rgName: {rgName}, name: {name} ...", rgName, alertOptions.Name);
+                ma = await FluentClient.AlertRules.MetricAlerts.Define(alertOptions.Name)
+                    .WithExistingResourceGroup(rgName)
+                    .WithTargetResource(alertOptions.TargetResourceId)
+                    .WithPeriod(TimeSpan.FromMinutes(alertOptions.AggregationPeriod))
+                    .WithFrequency(TimeSpan.FromMinutes(alertOptions.FrequencyOfEvaluation))
+                    .WithAlertDetails(alertOptions.Severity, alertOptions.Description)
+                    .WithActionGroups(alertOptions.ActionGroupResourceId)
+                    .DefineAlertCriteria(alertOptions.AlertConditionName)
+                    .WithMetricName(alertOptions.MetricName, alertOptions.MetricNamespace)
+                    .WithCondition(MetricAlertRuleTimeAggregation.Parse(alertOptions.TimeAggregationType), MetricAlertRuleCondition.Parse(alertOptions.ConditionOperator), alertOptions.Threshold)
+                    .Attach()
+                    .CreateAsync();
+            }
+
+            return ma;
         }
         #endregion
 

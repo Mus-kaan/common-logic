@@ -1,0 +1,32 @@
+[
+  {
+    "Name": "metric-alert-incoming-bytes",
+    "Severity": 3,
+    "Description": "This alert is triggered when the incoming throughput (bytes) is above a certain threshold.",
+    "TargetResourceId": "",
+    "ActionGroupResourceId": "",
+    "AlertConditionName": "MetricAlertCondition",
+    "AggregationPeriod": 5,
+    "FrequencyOfEvaluation": 1,
+    "MetricName": "IncomingBytes",
+    "MetricNamespace": "Microsoft.EventHub/namespaces",
+    "TimeAggregationType": "Total",
+    "ConditionOperator": "GreaterThan",
+    "Threshold": 400000000
+  },
+  {
+    "Name": "metric-alert-outgoing-bytes",
+    "Severity": 3,
+    "Description": "This alert is triggered when the outgoing throughput (bytes) is above a certain threshold.",
+    "TargetResourceId": "",
+    "ActionGroupResourceId": "",
+    "AlertConditionName": "MetricAlertCondition",
+    "AggregationPeriod": 5,
+    "FrequencyOfEvaluation": 1,
+    "MetricName": "OutgoingBytes",
+    "MetricNamespace": "Microsoft.EventHub/namespaces",
+    "TimeAggregationType": "Total",
+    "ConditionOperator": "GreaterThan",
+    "Threshold": 400000000
+  },
+]
