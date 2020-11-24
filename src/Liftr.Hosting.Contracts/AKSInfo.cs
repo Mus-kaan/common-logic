@@ -17,11 +17,11 @@ namespace Microsoft.Liftr.Hosting.Contracts
 
         /// <summary>
         /// Kubenetes version. This need to be updated every few months.
-        /// az aks get-versions
+        /// az aks get-versions --location westcentralus --output table
         /// https://aka.ms/supported-version-list
         /// https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/README.md
         /// </summary>
-        public string KubernetesVersion { get; set; } = "1.19.0";
+        public string KubernetesVersion { get; set; } = "1.19.3";
 
         public void CheckValues()
         {

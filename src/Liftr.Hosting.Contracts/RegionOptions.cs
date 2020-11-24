@@ -20,6 +20,11 @@ namespace Microsoft.Liftr.Hosting.Contracts
         public string ComputeBaseName { get; set; }
 
         /// <summary>
+        /// Kubenetes version. This one will overwrite the global setting of <seealso cref="AKSInfo.KubernetesVersion"/>.
+        /// </summary>
+        public string KubernetesVersion { get; set; }
+
+        /// <summary>
         /// A list of compute regions.
         /// </summary>
         public IEnumerable<ComputeRegionOptions> ComputeRegions { get; set; }

@@ -109,6 +109,16 @@ namespace Microsoft.Liftr.SimpleDeploy
                 }
                 else
                 {
+                    if (!string.IsNullOrEmpty(regionOptions.KubernetesVersion))
+                    {
+                        _logger.Information(
+                            "For region {aksRegion}, overwritting the default k8s version {defaultK8sVersion} with regional version {k8sVersion}",
+                            regionalNamingContext.Location.Name,
+                            targetOptions.AKSConfigurations.KubernetesVersion,
+                            regionOptions.KubernetesVersion);
+                        targetOptions.AKSConfigurations.KubernetesVersion = regionOptions.KubernetesVersion;
+                    }
+
                     computeResources = await infra.CreateOrUpdateRegionalAKSRGAsync(
                         regionalNamingContext,
                         regionalComputeOptions,
