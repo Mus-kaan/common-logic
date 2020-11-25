@@ -21,7 +21,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task VerifyResourcesProvisioningAsync()
         {
             MockTimeSource timeSource = new MockTimeSource();

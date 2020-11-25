@@ -18,17 +18,22 @@ namespace Microsoft.Liftr
 
         public const string SharedKeyVaultUri = "https://tests-shared-wus2-kv.vault.azure.net/";
 
-        // TODO: figure out a better way to access the credentials in CDPx.
-        // This is the auth file for a totally separated subscription. It only contains unit test related stuffs.
         // 'liftr-ms-unit-test-only' https://portal.azure.com/?feature.customportal=false#blade/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/Overview/appId/72086f7d-aa29-466a-8daa-91a787d1f6e4/isMSAApp/
-        private const string c_b64AuthFileContent = "ewogICJjbGllbnRJZCI6ICI3MjA4NmY3ZC1hYTI5LTQ2NmEtOGRhYS05MWE3ODdkMWY2ZTQiLAogICJjbGllbnRTZWNyZXQiOiAiN2ExODJhOTItOWMwNS00Mzc2LTk4NWUtOWM4OThkODI5M2Y5IiwKICAic3Vic2NyaXB0aW9uSWQiOiAiZjg4NWNmMTQtYjc1MS00M2MxLTk1MzYtZGM1YjFiZTAyYmMwIiwKICAidGVuYW50SWQiOiAiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3IiwKICAiYWN0aXZlRGlyZWN0b3J5RW5kcG9pbnRVcmwiOiAiaHR0cHM6Ly9sb2dpbi5taWNyb3NvZnRvbmxpbmUuY29tIiwKICAicmVzb3VyY2VNYW5hZ2VyRW5kcG9pbnRVcmwiOiAiaHR0cHM6Ly9tYW5hZ2VtZW50LmF6dXJlLmNvbS8iLAogICJhY3RpdmVEaXJlY3RvcnlHcmFwaFJlc291cmNlSWQiOiAiaHR0cHM6Ly9ncmFwaC53aW5kb3dzLm5ldC8iLAogICJzcWxNYW5hZ2VtZW50RW5kcG9pbnRVcmwiOiAiaHR0cHM6Ly9tYW5hZ2VtZW50LmNvcmUud2luZG93cy5uZXQ6ODQ0My8iLAogICJnYWxsZXJ5RW5kcG9pbnRVcmwiOiAiaHR0cHM6Ly9nYWxsZXJ5LmF6dXJlLmNvbS8iLAogICJtYW5hZ2VtZW50RW5kcG9pbnRVcmwiOiAiaHR0cHM6Ly9tYW5hZ2VtZW50LmNvcmUud2luZG93cy5uZXQvIiwKICAiU2VydmljZVByaW5jaXBhbE9iamVjdElkIjogIjY0OGY3ZTE4LTU4ODgtNDIzZi04ODZiLWQwOWVkOGEwMDY0ZCIKfQ==";
+        private const string LIFTR_UNIT_TEST_AUTH_FILE_BASE64 = nameof(LIFTR_UNIT_TEST_AUTH_FILE_BASE64);
 
-        static TestCredentials()
+        public static AuthFileContract AuthFileContract
         {
-            AuthFileContract = AuthFileContract.FromFileContent(c_b64AuthFileContent.FromBase64());
-        }
+            get
+            {
+                var encodedAuthFile = Environment.GetEnvironmentVariable(LIFTR_UNIT_TEST_AUTH_FILE_BASE64);
+                if (string.IsNullOrEmpty(encodedAuthFile))
+                {
+                    throw new InvalidOperationException($"Cannot find the credential for running the unit tests. It should be set in the environment variable with name {LIFTR_UNIT_TEST_AUTH_FILE_BASE64}. Details: https://aka.ms/liftr-test-cred");
+                }
 
-        public static AuthFileContract AuthFileContract { get; }
+                return AuthFileContract.FromFileContent(encodedAuthFile.FromBase64());
+            }
+        }
 
         public static Func<AzureCredentials> GetAzureCredentials
         {

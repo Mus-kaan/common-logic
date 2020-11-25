@@ -28,7 +28,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
 #pragma warning disable CA2000 // Dispose objects before losing scope
             _collectionScope = new TestCollectionScope<PartnerResourceEntity>((db, collectionName) =>
             {
-                var collection = collectionFactory.GetOrCreatePartnerResourceEntityCollectionAsync(collectionName).Result;
+                var collection = collectionFactory.GetOrCreatePartnerResourceEntityCollection(collectionName);
                 return collection;
             });
 #pragma warning restore CA2000 // Dispose objects before losing scope
@@ -39,7 +39,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             _collectionScope.Dispose();
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task BasicDataSourceUsageAsync()
         {
             var ts = new MockTimeSource();

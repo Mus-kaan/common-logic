@@ -20,7 +20,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task CanCreateAndDeleteGroupAsync()
         {
             using (var scope = new TestResourceGroupScope("unittest-rg-", _output))
@@ -38,7 +38,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             }
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task CanRegisterRPAsync()
         {
             using (var scope = new TestResourceGroupScope("unittest-rg-", _output))
@@ -49,7 +49,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             }
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public async Task CleanUpOldTestRGAsync()
         {

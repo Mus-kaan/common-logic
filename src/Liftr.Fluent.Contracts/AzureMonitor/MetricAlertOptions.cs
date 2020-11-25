@@ -2,10 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Management.Monitor.Fluent.Models;
-using System;
-using System.Linq;
-
 namespace Microsoft.Liftr.Fluent.Contracts.AzureMonitor
 {
     public class MetricAlertOptions

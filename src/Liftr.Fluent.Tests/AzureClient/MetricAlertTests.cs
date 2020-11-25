@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Management.Monitor.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Liftr.Fluent.Contracts.AzureMonitor;
 using Newtonsoft.Json;
@@ -25,7 +24,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task CreateMetricAlertsAsync()
         {
             using (var scope = new TestResourceGroupScope("ut-stor-", _output))

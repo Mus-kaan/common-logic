@@ -18,7 +18,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task CanCreateAsync()
         {
             using (var scope = new TestResourceGroupScope("unittest-msi-", _output))

@@ -2,9 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Liftr.DataSource.Mongo.MonitoringSvc;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Events;
 using Serilog;
@@ -106,7 +104,24 @@ namespace Microsoft.Liftr.DataSource.Mongo
             await _db.DropCollectionAsync(collectionName);
         }
 
+        public void DeleteCollection(string collectionName)
+        {
+            _db.DropCollection(collectionName);
+        }
+
         #region Internal and Private
+        protected IMongoCollection<T> CreateCollection<T>(string collectionName)
+        {
+            if (!CollectionExists(_db, collectionName))
+            {
+                _db.CreateCollection(collectionName);
+                return _db.GetCollection<T>(collectionName);
+            }
+
+            _logger.Fatal($"Collection with name {collectionName} does not exist.");
+            throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
+        }
+
         protected static async Task<bool> CollectionExistsAsync(IMongoDatabase db, string collectionName)
         {
             if (db == null)

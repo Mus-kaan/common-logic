@@ -19,7 +19,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task CreateLogAnalyticsWorkspaceAsync()
         {
             using (var scope = new TestResourceGroupScope("ut-log-anal-", _output))
@@ -51,7 +51,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             }
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task CreateLogAnalyticsWorkspace2Async()
         {
             using (var scope = new TestResourceGroupScope("ut-log-anal-", _output))

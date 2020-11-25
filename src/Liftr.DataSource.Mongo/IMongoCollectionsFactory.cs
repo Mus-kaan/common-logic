@@ -4,20 +4,19 @@
 
 using Microsoft.Liftr.DataSource.Mongo.MonitoringSvc;
 using MongoDB.Driver;
-using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.DataSource.Mongo
 {
     public interface IMongoCollectionsFactory : IMongoCollectionsBaseFactory
     {
-        Task<IMongoCollection<T>> GetOrCreateEntityCollectionAsync<T>(string collectionName) where T : BaseResourceEntity;
+        IMongoCollection<T> GetOrCreateEntityCollection<T>(string collectionName) where T : BaseResourceEntity;
 
-        Task<IMongoCollection<CounterEntity>> GetOrCreateCounterEntityCollectionAsync(string collectionName);
+        IMongoCollection<CounterEntity> GetOrCreateCounterEntityCollection(string collectionName);
 
-        Task<IMongoCollection<EventHubEntity>> GetOrCreateEventHubEntityCollectionAsync(string collectionName);
+        IMongoCollection<EventHubEntity> GetOrCreateEventHubEntityCollection(string collectionName);
 
-        Task<IMongoCollection<T>> GetOrCreateMonitoringCollectionAsync<T>(string collectionName) where T : MonitoringBaseEntity, new();
+        IMongoCollection<T> GetOrCreateMonitoringCollection<T>(string collectionName) where T : MonitoringBaseEntity, new();
 
-        Task<IMongoCollection<PartnerResourceEntity>> GetOrCreatePartnerResourceEntityCollectionAsync(string collectionName);
+        IMongoCollection<PartnerResourceEntity> GetOrCreatePartnerResourceEntityCollection(string collectionName);
     }
 }

@@ -22,7 +22,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task CanCreateAksAsync()
         {
             using (var scope = new TestResourceGroupScope("ut-aks-", _output))
@@ -84,7 +84,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             }
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task CanCreateAksInVNetAsync()
         {
             using (var scope = new TestResourceGroupScope("ut-aks-vnet-", _output))

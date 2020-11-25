@@ -28,9 +28,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
 
             _collectionScope = new TestCollectionScope<MonitoringStatus>((db, collectionName) =>
             {
-                var collection = collectionFactory.GetOrCreateMonitoringCollectionAsync<MonitoringStatus>(collectionName)
-                    .GetAwaiter().GetResult();
-
+                var collection = collectionFactory.GetOrCreateMonitoringCollection<MonitoringStatus>(collectionName);
                 return collection;
             });
         }
@@ -40,7 +38,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             _collectionScope.Dispose();
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task BasicDataSourceUsageAsync()
         {
             try

@@ -22,7 +22,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task CanCreateKeyVaultAsync()
         {
             using (var scope = new TestResourceGroupScope("unittest-kv-", _output))
@@ -72,7 +72,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             }
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task CanCreateKeyVaultInVNetAsync()
         {
             using (var scope = new TestResourceGroupScope("unittest-kv-", _output))
@@ -119,7 +119,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             }
         }
 
-        [SkipInOfficialBuild(Skip = "Certificate creation is flacky recently.")]
+        [CheckInValidation(Skip = "Certificate creation is flacky recently.")]
         public async Task CanCreateCertificateInKeyVaultAsync()
         {
             using (var scope = new TestResourceGroupScope("unittest-kv-", _output))

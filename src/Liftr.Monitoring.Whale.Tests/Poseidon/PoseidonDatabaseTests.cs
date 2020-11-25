@@ -33,7 +33,7 @@ namespace Microsoft.Liftr.Monitoring.Whale.Poseidon.Tests
         [Fact(Skip = "For local testing")]
         public async Task EventHubDataSource_EventHubEntity_EnsureEntityExistsAsync()
         {
-            var eventHubDataSource = await PoseidonDatabaseProvider.GetEventHubDataSourceAsync();
+            var eventHubDataSource = PoseidonDatabaseProvider.GetEventHubDataSource();
             var eventHubEntities = await eventHubDataSource.ListAsync(
               MonitoringResourceProvider.Datadog, PoseidonConstants.TestLocationName);
 
@@ -80,7 +80,7 @@ namespace Microsoft.Liftr.Monitoring.Whale.Poseidon.Tests
         [Fact(Skip = "For local testing")]
         public async Task PartnerDataSource_PartnerResourceEntity_EnsureEntityExistsAsync()
         {
-            var partnerDataSource = await PoseidonDatabaseProvider.GetPartnerDataSourceAsync();
+            var partnerDataSource = PoseidonDatabaseProvider.GetPartnerDataSource();
 
             var existingEntity1 = await partnerDataSource.GetAsync(PoseidonConstants.DatadogEntityId1);
             if (existingEntity1 == null)

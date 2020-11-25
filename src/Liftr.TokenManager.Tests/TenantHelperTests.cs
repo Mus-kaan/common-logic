@@ -11,7 +11,7 @@ namespace Microsoft.Liftr.TokenManager.Tests
 {
     public class TenantHelperTests
     {
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task CanGetTenantIdAsync()
         {
             using var tenantHelper = new TenantHelper(new Uri("https://management.azure.com"));

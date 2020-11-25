@@ -21,9 +21,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
             var collectionFactory = new MongoCollectionsFactory(option, LoggerFactory.VoidLogger);
             _collectionScope = new TestCollectionScope<CounterEntity>((db, collectionName) =>
             {
-#pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-                var collection = collectionFactory.GetOrCreateCounterEntityCollectionAsync(collectionName).Result;
-#pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
+                var collection = collectionFactory.GetOrCreateCounterEntityCollection(collectionName);
                 return collection;
             });
         }
@@ -33,7 +31,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
             _collectionScope.Dispose();
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task BasicCounterUsageTestAsync()
         {
             var ts = new MockTimeSource();

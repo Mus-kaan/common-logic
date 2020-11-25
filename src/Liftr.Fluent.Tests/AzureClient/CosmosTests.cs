@@ -19,7 +19,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task CanCreateCosmosDBAsync()
         {
             // This test will normally take about 12 minutes.

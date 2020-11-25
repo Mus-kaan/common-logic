@@ -21,7 +21,7 @@ namespace Microsoft.Liftr.EventHubManager.Tests
         {
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public void EventHubManagerGetAll()
         {
             var logger = Log.Logger;
@@ -39,7 +39,7 @@ namespace Microsoft.Liftr.EventHubManager.Tests
             Assert.Equal(5, items.Count);
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public void EventHubManagerGetAllExcludesInactive()
         {
             var logger = Log.Logger;
@@ -60,7 +60,7 @@ namespace Microsoft.Liftr.EventHubManager.Tests
             Assert.Equal(3, items.Count);
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public void EventHubManagerGetAllExcludesIngestionDisabled()
         {
             var logger = Log.Logger;
@@ -81,7 +81,7 @@ namespace Microsoft.Liftr.EventHubManager.Tests
             Assert.Equal(3, items.Count);
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public void EventHubManagerInvalidRegionGetAll()
         {
             var logger = Log.Logger;
@@ -98,7 +98,7 @@ namespace Microsoft.Liftr.EventHubManager.Tests
             Assert.Null(items);
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public void EventHubManagerGet()
         {
             var logger = Log.Logger;
@@ -125,7 +125,7 @@ namespace Microsoft.Liftr.EventHubManager.Tests
             Assert.NotNull(item);
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public void EventHubManagerInvalidRegionGet()
         {
             var logger = Log.Logger;
@@ -142,7 +142,7 @@ namespace Microsoft.Liftr.EventHubManager.Tests
             Assert.Null(item);
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public void EventHubManagerMoreThanAvailableGet()
         {
             var logger = Log.Logger;
@@ -159,7 +159,7 @@ namespace Microsoft.Liftr.EventHubManager.Tests
             Assert.Null(item);
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public void EventHubManagerGetSome()
         {
             var logger = Log.Logger;
@@ -177,7 +177,7 @@ namespace Microsoft.Liftr.EventHubManager.Tests
             Assert.Equal(3, item.Count);
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public void EventHubManagerInvalidRegionGetSome()
         {
             var logger = Log.Logger;
@@ -194,7 +194,7 @@ namespace Microsoft.Liftr.EventHubManager.Tests
             Assert.Null(item);
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public void EventHubManagerMoreThanAvailableGetSome()
         {
             var logger = Log.Logger;

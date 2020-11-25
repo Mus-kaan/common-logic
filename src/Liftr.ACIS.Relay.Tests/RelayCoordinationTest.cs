@@ -26,7 +26,7 @@ namespace Microsoft.Liftr.ACIS.Relay.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task TestSuccessfulOperationAsync()
         {
             using var scope = new TestResourceGroupScope(SdkContext.RandomResourceName("acis", 15), _output);
@@ -95,7 +95,7 @@ namespace Microsoft.Liftr.ACIS.Relay.Tests
             }
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task TestFailureOperationAsync()
         {
             using var scope = new TestResourceGroupScope(SdkContext.RandomResourceName("acis", 15), _output);

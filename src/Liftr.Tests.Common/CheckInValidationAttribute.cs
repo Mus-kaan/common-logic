@@ -8,9 +8,9 @@ using Xunit;
 
 namespace Microsoft.Liftr
 {
-    public sealed class SkipInOfficialBuildTheoryAttribute : TheoryAttribute
+    public sealed class CheckInValidationAttribute : FactAttribute
     {
-        public SkipInOfficialBuildTheoryAttribute(bool skipLinux = false)
+        public CheckInValidationAttribute(bool skipLinux = false)
         {
             // Local debug will not skip the unit test.
             if (System.Diagnostics.Debugger.IsAttached)
@@ -24,18 +24,18 @@ namespace Microsoft.Liftr
             {
                 Skip = "Ignored for Linux builds";
             }
-            else if (IsOfficialBuild())
+            else if (!IsCheckInValidation())
             {
-                Skip = "Ignored for offical builds";
+                Skip = "Ignored for non check in validation builds";
             }
         }
 
         public bool SkipLinux { get; }
 
-        private static bool IsOfficialBuild()
+        public static bool IsCheckInValidation()
         {
-            var buildType = Environment.GetEnvironmentVariable("CDP_BUILD_TYPE");
-            return buildType?.OrdinalEquals("Official") == true;
+            var testType = Environment.GetEnvironmentVariable("LIFTR_TEST_TYPE");
+            return testType?.OrdinalEquals("CHECK_IN_TEST") == true;
         }
     }
 }

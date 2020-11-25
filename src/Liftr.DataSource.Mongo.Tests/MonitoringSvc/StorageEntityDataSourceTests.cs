@@ -25,7 +25,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             var collectionFactory = new MongoCollectionsFactory(option, LoggerFactory.VoidLogger);
             _collectionScope = new TestCollectionScope<StorageEntity>((db, collectionName) =>
             {
-                var collection = collectionFactory.GetOrCreateStorageEntityCollectionAsync(collectionName).Result;
+                var collection = collectionFactory.GetOrCreateStorageEntityCollection(collectionName);
                 return collection;
             });
         }
@@ -35,7 +35,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             _collectionScope.Dispose();
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public async Task BasicDataSourceUsageAsync()
         {

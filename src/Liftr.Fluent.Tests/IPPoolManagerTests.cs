@@ -29,7 +29,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task VerifyProvisioningIPPoolAsync()
         {
             var shortPartnerName = "ip-pool";

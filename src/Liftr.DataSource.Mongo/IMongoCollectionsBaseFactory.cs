@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Liftr.DataSource.Mongo.MonitoringSvc;
 using MongoDB.Driver;
 using System.Threading.Tasks;
 
@@ -15,5 +14,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
         IMongoCollection<T> GetCollection<T>(string collectionName);
 
         Task DeleteCollectionAsync(string collectionName);
+
+        void DeleteCollection(string collectionName);
     }
 }

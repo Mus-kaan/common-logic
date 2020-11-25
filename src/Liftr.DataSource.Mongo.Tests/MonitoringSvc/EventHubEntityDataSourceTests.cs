@@ -25,7 +25,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             var collectionFactory = new MongoCollectionsFactory(option, LoggerFactory.VoidLogger);
             _collectionScope = new TestCollectionScope<EventHubEntity>((db, collectionName) =>
             {
-                var collection = collectionFactory.GetOrCreateEventHubEntityCollectionAsync(collectionName).Result;
+                var collection = collectionFactory.GetOrCreateEventHubEntityCollection(collectionName);
                 return collection;
             });
         }
@@ -35,7 +35,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             _collectionScope.Dispose();
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task BasicDataSourceUsageAsync()
         {
             var ts = new MockTimeSource();

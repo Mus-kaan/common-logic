@@ -4,6 +4,7 @@
 
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System;
 
 namespace Microsoft.Liftr.DataSource.Mongo
 {
@@ -11,8 +12,21 @@ namespace Microsoft.Liftr.DataSource.Mongo
     {
         public const string TestDatabaseName = "unit-test";
 
-        // /subscriptions/f885cf14-b751-43c1-9536-dc5b1be02bc0/resourceGroups/liftr-unittest-infra/providers/Microsoft.DocumentDb/databaseAccounts/liftr-unittest-wus-db (Microsoft tenant)
-        public static string TestMongodbConStr => "bW9uZ29kYjovL2xpZnRyLXVuaXR0ZXN0LXd1cy1kYjo4RGlmNHF3TDY2SjJlYWZCWEZGWDNzdU9UUmNNNlRGSklNQnNWeG5DTmFQS05xMlBiSTBmdEdnQkg5RUhXRlJsTlVWZW10elJuR1p4b2hLaVFlUVRpdz09QGxpZnRyLXVuaXR0ZXN0LXd1cy1kYi5kb2N1bWVudHMuYXp1cmUuY29tOjEwMjU1Lz9zc2w9dHJ1ZSZyZXBsaWNhU2V0PWdsb2JhbGRi".FromBase64();
+        private const string LIFTR_UNIT_TEST_MONGODB_CONNSTR_BASE64 = nameof(LIFTR_UNIT_TEST_MONGODB_CONNSTR_BASE64);
+
+        public static string TestMongodbConStr
+        {
+            get
+            {
+                var encodedConnStr = Environment.GetEnvironmentVariable(LIFTR_UNIT_TEST_MONGODB_CONNSTR_BASE64);
+                if (string.IsNullOrEmpty(encodedConnStr))
+                {
+                    throw new InvalidOperationException($"Cannot find the credential for running the unit tests. It should be set in the environment variable with name {LIFTR_UNIT_TEST_MONGODB_CONNSTR_BASE64}. Details: https://aka.ms/liftr-test-cred");
+                }
+
+                return encodedConnStr.FromBase64();
+            }
+        }
 
         public static IMongoClient TestClient { get; } = new MongoClient(TestMongodbConStr);
 

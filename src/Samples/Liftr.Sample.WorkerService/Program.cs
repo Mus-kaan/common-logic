@@ -64,9 +64,7 @@ namespace Microsoft.Liftr.Sample.WorkerService
                     {
                         var timeSource = sp.GetService<ITimeSource>();
                         var factory = sp.GetService<MongoCollectionsFactory>();
-#pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-                        IMongoCollection<CounterEntity> collection = factory.GetOrCreateCounterEntityCollectionAsync("counter-entity").Result;
-#pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
+                        IMongoCollection<CounterEntity> collection = factory.GetOrCreateCounterEntityCollection("counter-entity");
                         return new CounterEntityDataSource(collection, factory.MongoWaitQueueProtector, timeSource);
                     }
                     catch (Exception ex)

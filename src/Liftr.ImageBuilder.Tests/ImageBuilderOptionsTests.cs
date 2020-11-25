@@ -16,7 +16,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
         {
             var options = new BuilderOptions()
             {
-                SubscriptionId = new Guid(TestCredentials.SubscriptionId),
+                SubscriptionId = new Guid("d8f298fb-60f2-4676-a7d3-25442ec5ce1a"),
                 Location = TestCommon.Location,
                 ResourceGroupName = "testRGName",
                 ImageGalleryName = "testsig",

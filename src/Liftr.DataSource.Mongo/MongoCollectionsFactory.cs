@@ -6,13 +6,10 @@ using Microsoft.Liftr.DataSource.Mongo.MonitoringSvc;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
-using MongoDB.Driver.Core.Events;
 using Serilog;
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Security.Authentication;
-using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("Microsoft.Lift.AzureAsyncOperation.DataSource.Test")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.DataSource.Mongo.Tests")]
@@ -26,14 +23,12 @@ namespace Microsoft.Liftr.DataSource.Mongo
         {
         }
 
-        public async Task<IMongoCollection<T>> GetOrCreateEntityCollectionAsync<T>(string collectionName) where T : BaseResourceEntity
+        public IMongoCollection<T> GetOrCreateEntityCollection<T>(string collectionName) where T : BaseResourceEntity
         {
-            if (!await CollectionExistsAsync(_db, collectionName))
+            if (!CollectionExists(_db, collectionName))
             {
                 _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
-#pragma warning disable CS0618 // Type or member is obsolete
-                var collection = await CreateCollectionAsync<T>(collectionName);
-#pragma warning restore CS0618 // Type or member is obsolete
+                var collection = CreateCollection<T>(collectionName);
 
                 var resourceIdIdx = new CreateIndexModel<T>(Builders<T>.IndexKeys.Ascending(item => item.ResourceId), new CreateIndexOptions<T> { Unique = false });
                 collection.Indexes.CreateOne(resourceIdIdx);
@@ -42,18 +37,16 @@ namespace Microsoft.Liftr.DataSource.Mongo
             }
             else
             {
-                return await GetCollectionAsync<T>(collectionName);
+                return GetCollection<T>(collectionName);
             }
         }
 
-        public async Task<IMongoCollection<CounterEntity>> GetOrCreateCounterEntityCollectionAsync(string collectionName)
+        public IMongoCollection<CounterEntity> GetOrCreateCounterEntityCollection(string collectionName)
         {
-            if (!await CollectionExistsAsync(_db, collectionName))
+            if (!CollectionExists(_db, collectionName))
             {
                 _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
-#pragma warning disable CS0618 // Type or member is obsolete
-                var collection = await CreateCollectionAsync<CounterEntity>(collectionName);
-#pragma warning restore CS0618 // Type or member is obsolete
+                var collection = CreateCollection<CounterEntity>(collectionName);
 
                 var resourceIdIdx = new CreateIndexModel<CounterEntity>(Builders<CounterEntity>.IndexKeys.Ascending(item => item.CounterKey), new CreateIndexOptions<CounterEntity> { Unique = true });
                 collection.Indexes.CreateOne(resourceIdIdx);
@@ -62,27 +55,25 @@ namespace Microsoft.Liftr.DataSource.Mongo
             }
             else
             {
-                return await GetCollectionAsync<CounterEntity>(collectionName);
+                return GetCollection<CounterEntity>(collectionName);
             }
         }
 
-        public async Task<IMongoCollection<MarketplaceSaasResourceEntity>> GetOrCreateMarketplaceEntityCollectionAsync(string collectionName)
+        public IMongoCollection<MarketplaceSaasResourceEntity> GetOrCreateMarketplaceEntityCollection(string collectionName)
         {
             IMongoCollection<MarketplaceSaasResourceEntity> collection = null;
 
-            if (!await CollectionExistsAsync(_db, collectionName))
+            if (!CollectionExists(_db, collectionName))
             {
                 _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
-#pragma warning disable CS0618 // Type or member is obsolete
-                collection = await CreateCollectionAsync<MarketplaceSaasResourceEntity>(collectionName);
-#pragma warning restore CS0618 // Type or member is obsolete
+                collection = CreateCollection<MarketplaceSaasResourceEntity>(collectionName);
 
                 var marketplaceSubscriptionIdx = new CreateIndexModel<MarketplaceSaasResourceEntity>(Builders<MarketplaceSaasResourceEntity>.IndexKeys.Ascending(item => item.MarketplaceSubscription), new CreateIndexOptions<MarketplaceSaasResourceEntity> { Unique = true });
                 collection.Indexes.CreateOne(marketplaceSubscriptionIdx);
             }
             else
             {
-                collection = await GetCollectionAsync<MarketplaceSaasResourceEntity>(collectionName);
+                collection = GetCollection<MarketplaceSaasResourceEntity>(collectionName);
             }
 
             var createdAtIndex = new CreateIndexModel<MarketplaceSaasResourceEntity>(Builders<MarketplaceSaasResourceEntity>.IndexKeys.Descending(item => item.CreatedUTC), new CreateIndexOptions<MarketplaceSaasResourceEntity> { Unique = false });
@@ -90,31 +81,27 @@ namespace Microsoft.Liftr.DataSource.Mongo
             return collection;
         }
 
-        public async Task<IMongoCollection<EventHubEntity>> GetOrCreateEventHubEntityCollectionAsync(string collectionName)
+        public IMongoCollection<EventHubEntity> GetOrCreateEventHubEntityCollection(string collectionName)
         {
-            if (!await CollectionExistsAsync(_db, collectionName))
+            if (!CollectionExists(_db, collectionName))
             {
                 _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
-#pragma warning disable CS0618 // Type or member is obsolete
-                var collection = await CreateCollectionAsync<EventHubEntity>(collectionName);
-#pragma warning restore CS0618 // Type or member is obsolete
+                var collection = CreateCollection<EventHubEntity>(collectionName);
 
                 return collection;
             }
             else
             {
-                return await GetCollectionAsync<EventHubEntity>(collectionName);
+                return GetCollection<EventHubEntity>(collectionName);
             }
         }
 
-        public async Task<IMongoCollection<StorageEntity>> GetOrCreateStorageEntityCollectionAsync(string collectionName)
+        public IMongoCollection<StorageEntity> GetOrCreateStorageEntityCollection(string collectionName)
         {
-            if (!await CollectionExistsAsync(_db, collectionName))
+            if (!CollectionExists(_db, collectionName))
             {
                 _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
-#pragma warning disable CS0618 // Type or member is obsolete
-                var collection = await CreateCollectionAsync<StorageEntity>(collectionName);
-#pragma warning restore CS0618 // Type or member is obsolete
+                var collection = CreateCollection<StorageEntity>(collectionName);
 
                 var resourceIdIdx = new CreateIndexModel<StorageEntity>(Builders<StorageEntity>.IndexKeys.Ascending(item => item.ResourceId), new CreateIndexOptions<StorageEntity> { Unique = true });
                 collection.Indexes.CreateOne(resourceIdIdx);
@@ -123,11 +110,11 @@ namespace Microsoft.Liftr.DataSource.Mongo
             }
             else
             {
-                return await GetCollectionAsync<StorageEntity>(collectionName);
+                return GetCollection<StorageEntity>(collectionName);
             }
         }
 
-        public async Task<IMongoCollection<T>> GetOrCreateMonitoringCollectionAsync<T>(string collectionName) where T : MonitoringBaseEntity, new()
+        public IMongoCollection<T> GetOrCreateMonitoringCollection<T>(string collectionName) where T : MonitoringBaseEntity, new()
         {
             var instance = new T();
             var tenantProperty = typeof(T).GetProperty(nameof(instance.TenantId));
@@ -138,7 +125,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
             }
 
             string shardingKeyName = bsonElementAttribute.ConstructorArguments.FirstOrDefault().Value.ToString();
-            if (!await CollectionExistsAsync(_db, collectionName))
+            if (!CollectionExists(_db, collectionName))
             {
                 _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
                 var bson = new BsonDocument
@@ -151,7 +138,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
                 try
                 {
-                    var commandResult = await _db.RunCommandAsync(shellCommand);
+                    var commandResult = _db.RunCommand(shellCommand);
                 }
                 catch (MongoCommandException ex)
                 {
@@ -160,7 +147,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
                     throw new InvalidOperationException(message, ex);
                 }
 
-                var collection = await GetCollectionAsync<T>(collectionName);
+                var collection = GetCollection<T>(collectionName);
 
                 var monitorIdIdx = new CreateIndexModel<T>(Builders<T>.IndexKeys.Ascending(item => item.MonitoredResourceId), new CreateIndexOptions<T> { Unique = false });
                 collection.Indexes.CreateOne(monitorIdIdx);
@@ -172,39 +159,13 @@ namespace Microsoft.Liftr.DataSource.Mongo
             }
             else
             {
-                return await GetCollectionAsync<T>(collectionName);
+                return GetCollection<T>(collectionName);
             }
         }
 
-        public Task<IMongoCollection<PartnerResourceEntity>> GetOrCreatePartnerResourceEntityCollectionAsync(string collectionName)
+        public IMongoCollection<PartnerResourceEntity> GetOrCreatePartnerResourceEntityCollection(string collectionName)
         {
-            return GetOrCreateEntityCollectionAsync<PartnerResourceEntity>(collectionName);
+            return GetOrCreateEntityCollection<PartnerResourceEntity>(collectionName);
         }
-
-        #region Internal and Private
-        private async Task<IMongoCollection<T>> CreateCollectionAsync<T>(string collectionName)
-        {
-            if (!await CollectionExistsAsync(_db, collectionName))
-            {
-                _db.CreateCollection(collectionName);
-                return _db.GetCollection<T>(collectionName);
-            }
-
-            _logger.Fatal($"Collection with name {collectionName} does not exist.");
-            throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
-        }
-
-        private IMongoCollection<T> CreateCollection<T>(string collectionName)
-        {
-            if (!CollectionExists(_db, collectionName))
-            {
-                _db.CreateCollection(collectionName);
-                return _db.GetCollection<T>(collectionName);
-            }
-
-            _logger.Fatal($"Collection with name {collectionName} does not exist.");
-            throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
-        }
-        #endregion
     }
 }

@@ -2,15 +2,14 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using System;
 using System.Runtime.InteropServices;
 using Xunit;
 
 namespace Microsoft.Liftr
 {
-    public sealed class SkipInOfficialBuildAttribute : FactAttribute
+    public sealed class CheckInValidationTheoryAttribute : TheoryAttribute
     {
-        public SkipInOfficialBuildAttribute(bool skipLinux = false)
+        public CheckInValidationTheoryAttribute(bool skipLinux = false)
         {
             // Local debug will not skip the unit test.
             if (System.Diagnostics.Debugger.IsAttached)
@@ -24,18 +23,12 @@ namespace Microsoft.Liftr
             {
                 Skip = "Ignored for Linux builds";
             }
-            else if (IsOfficialBuild())
+            else if (!CheckInValidationAttribute.IsCheckInValidation())
             {
-                Skip = "Ignored for offical builds";
+                Skip = "Ignored for non check in validation builds";
             }
         }
 
         public bool SkipLinux { get; }
-
-        private static bool IsOfficialBuild()
-        {
-            var buildType = Environment.GetEnvironmentVariable("CDP_BUILD_TYPE");
-            return buildType?.OrdinalEquals("Official") == true;
-        }
     }
 }

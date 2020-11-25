@@ -101,9 +101,7 @@ namespace Microsoft.Liftr.Sample.Web
                 {
                     var timeSource = sp.GetService<ITimeSource>();
                     var factory = sp.GetService<MongoCollectionsFactory>();
-#pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-                    IMongoCollection<CounterEntity> collection = factory.GetOrCreateCounterEntityCollectionAsync("counter-entity").Result;
-#pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
+                    IMongoCollection<CounterEntity> collection = factory.GetOrCreateCounterEntityCollection("counter-entity");
                     return new CounterEntityDataSource(collection, factory.MongoWaitQueueProtector, timeSource);
                 }
                 catch (Exception ex)
@@ -121,9 +119,7 @@ namespace Microsoft.Liftr.Sample.Web
                 {
                     var timeSource = sp.GetService<ITimeSource>();
                     var factory = sp.GetService<MongoCollectionsFactory>();
-#pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-                    var collection = factory.GetOrCreateMarketplaceEntityCollectionAsync("resource-metadata-entity").Result;
-#pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
+                    var collection = factory.GetOrCreateMarketplaceEntityCollection("resource-metadata-entity");
 
                     return new MarketplaceSaasResourceDataSource(collection, factory.MongoWaitQueueProtector, timeSource);
                 }

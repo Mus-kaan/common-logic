@@ -10,7 +10,7 @@ namespace Microsoft.Liftr.Utilities.Tests
 {
     public class TenantHelperTest
     {
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task CanGetTenantIdAsync()
         {
             using var helper = new TenantHelper(new Uri("https://management.azure.com"));

@@ -78,7 +78,7 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
             }
         }
 
-        [Fact]
+        [CheckInValidation]
         public async Task VerifyImageVersionWillThrowAsync()
         {
             MockTimeSource timeSource = new MockTimeSource();

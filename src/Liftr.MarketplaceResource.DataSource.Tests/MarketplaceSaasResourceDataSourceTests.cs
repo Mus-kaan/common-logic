@@ -25,11 +25,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
             var collectionFactory = new MongoCollectionsFactory(option, LoggerFactory.VoidLogger);
             _collectionScope = new TestCollectionScope<MarketplaceSaasResourceEntity>((db, collectionName) =>
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-#pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-                var collection = collectionFactory.GetOrCreateMarketplaceEntityCollectionAsync(collectionName).Result;
-#pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-#pragma warning restore CS0618 // Type or member is obsolete
+                var collection = collectionFactory.GetOrCreateMarketplaceEntityCollection(collectionName);
                 return collection;
             });
         }
@@ -39,7 +35,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
             _collectionScope.Dispose();
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task BasicDataSourceUsageAsync()
         {
             using var rateLimiter = new MongoWaitQueueRateLimiter(100, TestLogger.VoidLogger);
@@ -78,7 +74,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
             }
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task PaginatedDataSourceResourcesAsync()
         {
             using var rateLimiter = new MongoWaitQueueRateLimiter(100, TestLogger.VoidLogger);

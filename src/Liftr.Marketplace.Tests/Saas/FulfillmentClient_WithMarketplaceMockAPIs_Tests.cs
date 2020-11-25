@@ -40,7 +40,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
         }
 
         // TO DO: Should be skipped in official build as it needs internet
-        [SkipInOfficialBuild]
+        [CheckInValidation]
         public async Task Can_resolve_subscription_Async()
         {
             var expectedSubscription = new ResolvedMarketplaceSubscription()
@@ -56,14 +56,14 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             resolvedSubscription.Should().BeEquivalentTo(expectedSubscription);
         }
 
-        [SkipInOfficialBuild]
+        [CheckInValidation]
         public async Task Can_activate_subscription_Async()
         {
             Func<Task> act = async () => { await _fulfillmentClient.ActivateSaaSSubscriptionAsync(new ActivateSubscriptionRequest(_marketplaceMockSubscription, "Gold", 100)); };
             await act.Should().NotThrowAsync();
         }
 
-        [SkipInOfficialBuild]
+        [CheckInValidation]
         public async Task Throws_exception_if_activation_doesnot_succeed_Async()
         {
             var marketplaceSubscription = new MarketplaceSubscription(Guid.NewGuid());
@@ -72,7 +72,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
                 new ActivateSubscriptionRequest(marketplaceSubscription, "NOT_EXISTING_PLAN", 100), CancellationToken.None));
         }
 
-        [SkipInOfficialBuild]
+        [CheckInValidation]
         public async Task Can_get_subscription_operation_Async()
         {
             var operationId = Guid.Parse("529f53e1-c04b-49c8-881c-c49fb5c6fada");
@@ -83,14 +83,14 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             Assert.Equal(subscriptionOperation.Id, operationId);
         }
 
-        [SkipInOfficialBuild]
+        [CheckInValidation]
         public async Task Can_get_pending_operations_Async()
         {
             var subscriptionOperation = await _fulfillmentClient.ListPendingOperationsAsync(_marketplaceMockSubscription);
             subscriptionOperation.Should().HaveCount(2);
         }
 
-        [SkipInOfficialBuild]
+        [CheckInValidation]
         public async Task Can_update_operation_Async()
         {
             var operationId = Guid.Parse("529f53e1-c04b-49c8-881c-c49fb5c6fada");
@@ -99,7 +99,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             await _fulfillmentClient.UpdateOperationAsync(_marketplaceMockSubscription, operationId, operationUpdate);
         }
 
-        [SkipInOfficialBuild]
+        [CheckInValidation]
         public async Task Can_get_subscription_Async()
         {
             var subscription = await _fulfillmentClient.GetSubscriptionAsync(_marketplaceMockSubscription);

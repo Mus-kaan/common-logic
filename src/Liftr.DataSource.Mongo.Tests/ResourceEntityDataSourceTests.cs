@@ -23,11 +23,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
             var collectionFactory = new MongoCollectionsFactory(option, LoggerFactory.VoidLogger);
             _collectionScope = new TestCollectionScope<MockResourceEntity>((db, collectionName) =>
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-#pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-                var collection = collectionFactory.GetOrCreateEntityCollectionAsync<MockResourceEntity>(collectionName).Result;
-#pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-#pragma warning restore CS0618 // Type or member is obsolete
+                var collection = collectionFactory.GetOrCreateEntityCollection<MockResourceEntity>(collectionName);
                 return collection;
             });
         }
@@ -37,7 +33,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
             _collectionScope.Dispose();
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task BasicDataSourceUsageAsync()
         {
             var ts = new MockTimeSource();

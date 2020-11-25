@@ -25,7 +25,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             _output = output;
         }
 
-        [SkipInOfficialBuild(skipLinux: true)]
+        [CheckInValidation(skipLinux: true)]
         public async Task CanStorageAccountAsync()
         {
             using (var scope = new TestResourceGroupScope("ut-stor-", _output))
