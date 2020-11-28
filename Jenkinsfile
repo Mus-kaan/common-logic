@@ -5,6 +5,7 @@ pipeline {
 
 	options {
 		timeout(time: 200, unit: 'MINUTES')
+		azureKeyVault([[envVariable: 'LIFTR_UNIT_TEST_AUTH_FILE_BASE64', name: 'LIFTR-UNIT-TEST-AUTH-FILE-BASE64', secretType: 'Secret']])
 	}
 
 	environment {
