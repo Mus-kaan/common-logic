@@ -40,6 +40,21 @@ namespace Microsoft.Liftr.GenericHosting
                 config.AddKeyVaultConfigurations(keyVaultPrefix);
             });
 
+            return builder.AddCredentials();
+        }
+
+        /// <summary>
+        /// 1. Add the TokenCredential for the identity that used to load the secrets.
+        /// 2. Add a Key Vault client of that identity.
+        /// </summary>
+        /// <param name="builder">generic host builder</param>
+        public static IHostBuilder AddCredentials(this IHostBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
             return builder.ConfigureServices((context, services) =>
             {
                 TokenCredential tokenCredential = null;
@@ -53,11 +68,13 @@ namespace Microsoft.Liftr.GenericHosting
                 string.IsNullOrEmpty(tenantId) ||
                 string.IsNullOrEmpty(clientSecret))
                 {
+                    Console.WriteLine("Using Managed Identity to initialized key vault client and tokenCredential. Then add them to dependency injection container.");
                     kvClient = KeyVaultClientFactory.FromMSI();
                     tokenCredential = new ManagedIdentityCredential();
                 }
                 else
                 {
+                    Console.WriteLine($"Using client Id '{clientId}' and client secret to initialized key vault client and tokenCredential. Then add them to dependency injection container.");
                     kvClient = KeyVaultClientFactory.FromClientIdAndSecret(clientId, clientSecret);
                     tokenCredential = new ClientSecretCredential(tenantId, clientId, clientSecret);
                 }

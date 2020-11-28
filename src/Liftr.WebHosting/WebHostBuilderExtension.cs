@@ -36,6 +36,22 @@ namespace Microsoft.Liftr.WebHosting
                   config.AddKeyVaultConfigurations(secretsPrefix);
               });
 
+            return builder.AddCredentials();
+        }
+
+        /// <summary>
+        /// 1. Add the TokenCredential for the identity that used to load the secrets.
+        /// 2. Add a Key Vault client of that identity.
+        /// </summary>
+        /// <param name="builder">web host builder</param>
+        /// <returns></returns>
+        public static IWebHostBuilder AddCredentials(this IWebHostBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
             return builder.ConfigureServices((context, services) =>
             {
                 TokenCredential tokenCredential = null;
