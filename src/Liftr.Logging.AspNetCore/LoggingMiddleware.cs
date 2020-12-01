@@ -106,7 +106,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 CallContextHolder.CorrelationId.Value = correlationtId;
             }
 
-            if (httpContext.Request?.Path.Value?.OrdinalStartsWith("/api/liveness-probe") == true)
+            if (httpContext.Request?.Path.Value?.OrdinalStartsWith("/api/liveness-probe") == true ||
+                httpContext.Request?.Path.Value?.OrdinalStartsWith("/metrics") == true)
             {
                 try
                 {
@@ -116,7 +117,10 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 catch
                 {
                 }
+            }
 
+            if (httpContext.Request?.Path.Value?.OrdinalStartsWith("/api/liveness-probe") == true)
+            {
                 var meta = await InstanceMetaHelper.GetMetaInfoAsync();
                 httpContext.Response.StatusCode = (int)HttpStatusCode.OK;
                 if (meta != null)
