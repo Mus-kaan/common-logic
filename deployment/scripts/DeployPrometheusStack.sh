@@ -170,11 +170,16 @@ kubectl apply --namespace $namespace -f ./prometheus-operator-crd/monitoring.cor
 kubectl apply --namespace $namespace -f ./prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
 kubectl apply --namespace $namespace -f ./prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
 
+PromConfigFile=prometheus-stack-values.yaml
+if [ -f bin/icm-connector-id.txt ]; then
+    PromConfigFile=prometheus-stack-values-with-icm.yaml
+fi
+
 # https: //itnext.io/monitoring-kubernetes-workloads-with-prometheus-and-thanos-4ddb394b32c
-echo "helm upgrade $helmReleaseName ..."
+echo "helm upgrade $helmReleaseName. PromConfigFile: $PromConfigFile ..."
 $Helm upgrade $helmReleaseName kube-prometheus-stack-*.tgz --install --wait \
 --namespace $namespace \
--f prometheus-stack-values.yaml \
+-f $PromConfigFile \
 --set prometheusOperator.createCustomResource=false \
 --set prometheusOperator.admissionWebhooks.enabled=false \
 --set prometheusOperator.tlsProxy.enabled=false \

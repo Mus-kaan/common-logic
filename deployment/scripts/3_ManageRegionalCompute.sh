@@ -48,6 +48,8 @@ fi
 
 ./DeployNginx.sh
 
+./DeployProm2IcM.sh
+
 ./DeployPrometheusStack.sh \
 --environmentName="$APP_ASPNETCORE_ENVIRONMENT" \
 --compactRegion="$REGION" \

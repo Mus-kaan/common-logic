@@ -46,6 +46,8 @@ namespace Microsoft.Liftr.Hosting.Contracts
         /// </summary>
         public bool EnableVNet { get; set; } = true;
 
+        public bool EnablePromIcM { get; set; } = true;
+
         public string DomainName { get; set; }
 
         public string LogAnalyticsWorkspaceId { get; set; }

@@ -176,6 +176,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 }
 
                 File.WriteAllText("vault-name.txt", computeResources.KeyVault.Name);
+                File.WriteAllText("aks-kv.txt", computeResources.KeyVault.VaultUri);
                 File.WriteAllText("aks-domain.txt", $"{computeResources.AKS.Name}.{targetOptions.DomainName}");
                 File.WriteAllText("aks-name.txt", computeResources.AKS.Name);
                 File.WriteAllText("aks-rg.txt", computeResources.AKS.ResourceGroupName);

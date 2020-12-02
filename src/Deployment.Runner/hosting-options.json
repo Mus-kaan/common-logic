@@ -2,6 +2,8 @@
   "PartnerName": "SamplePartner",
   "ShortPartnerName": "sp",
   "SecretPrefix": "SampleRP",
+  //"IcMConnectorId": "2bb00c56-1a2d-477b-9b02-05562eb1f8b2",
+  //"IcMNotificationEmail": "your_email@microsoft.com",
   "Environments": [
     {
       "EnvironmentName": "Dev",
@@ -15,7 +17,8 @@
         "GenevaClientCert": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net",
         "FirstPartyAppCert": "liftr-monitoring.first-party.liftr-dev.net",
         "SampleFirstPartyAppCert": "sample-rp.first-party.liftr-dev.net",
-        "SampleMPCert": "market-place.sample.liftr-dev.net"
+        "SampleMPCert": "market-place.sample.liftr-dev.net",
+        "icm-cert": "prom2icm-sample.icm.liftr-dev.net"
       },
       "AKSConfigurations": {
         "AKSMachineCount": 3,

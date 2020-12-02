@@ -191,6 +191,14 @@ namespace Microsoft.Liftr.SimpleDeploy
                     _logger.Information("Current correlation Id is: {correlationId}", TelemetryContext.GetOrGenerateCorrelationId());
                     _logger.Information("You can use correlation Id '{correlationId}' to query all the related ARM logs.", TelemetryContext.GetOrGenerateCorrelationId());
 
+                    if (targetOptions.EnablePromIcM &&
+                        !string.IsNullOrEmpty(_hostingOptions.IcMConnectorId) &&
+                        !string.IsNullOrEmpty(_hostingOptions.IcMNotificationEmail))
+                    {
+                        File.WriteAllText("icm-connector-id.txt", _hostingOptions.IcMConnectorId);
+                        File.WriteAllText("icm-email.txt", _hostingOptions.IcMNotificationEmail);
+                    }
+
                     IPPoolManager ipPool = null;
                     var globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
                     var globalRGName = globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);

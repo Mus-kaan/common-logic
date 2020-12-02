@@ -40,6 +40,16 @@ namespace Microsoft.Liftr.Hosting.Contracts
         /// </summary>
         public bool EnableThanos { get; set; } = false;
 
+        /// <summary>
+        /// The IcM connector Id. https://aka.ms/prom2icm
+        /// </summary>
+        public string IcMConnectorId { get; set; }
+
+        /// <summary>
+        /// The IcM notification email. https://aka.ms/prom2icm
+        /// </summary>
+        public string IcMNotificationEmail { get; set; }
+
         public IEnumerable<HostingEnvironmentOptions> Environments { get; set; }
 
         public void CheckValid()

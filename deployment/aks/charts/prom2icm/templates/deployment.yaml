@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "prom2icm.fullname" . }}-icm-connector
+  labels:
+    {{- include "prom2icm.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "prom2icm.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        aadpodidbinding: liftr-aad-pod-identity
+        {{- include "prom2icm.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          env:
+            - name: ICMClientOptions__ICMConnectorEndpoint
+              value: {{ required "The IcM connector endpoint must be provided." .Values.icm.connectorEndpoint }}
+            - name: ICMClientOptions__KeyVaultEndpoint
+              value: {{ required "The Key Vault endpoint for loading the IcM connector certificate must be provided." .Values.icm.certificateKeyVault }}
+            - name: ICMClientOptions__IcmConnectorCertificateName
+              value: {{ required "The Key Vault certificate name of the IcM connector certificate must be provided." .Values.icm.certificateName }}
+            - name: ICMClientOptions__IcmConnectorId
+              value: {{ required "The IcM connector Id must be provided." .Values.icm.connectorId }}
+            - name: ICMClientOptions__NotificationEmail
+              value: {{ required "Please provide an email for receiving notifications." .Values.icm.notificatEmail }}
+          livenessProbe:
+            httpGet:
+              path: /api/liveness-probe
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /api/liveness-probe
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
