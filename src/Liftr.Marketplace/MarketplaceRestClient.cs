@@ -250,9 +250,9 @@ namespace Microsoft.Liftr.Marketplace
             if (retryCounter == 0)
             {
                 string errorMessage = $"Maximum retries of async polling for SAAS resource creation has been reached. So terminating the polling requests. Operation Id : {resultLocation}";
-                var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(response, errorMessage);
-                _logger.Error(marketplaceException, errorMessage);
-                throw marketplaceException;
+                var terminalException = new MarketplaceTerminalException(errorMessage);
+                _logger.Error(terminalException, errorMessage);
+                throw terminalException;
             }
 
             // Wait as long as was requested

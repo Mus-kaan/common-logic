@@ -55,6 +55,13 @@ namespace Microsoft.Liftr.Marketplace.ARM
                 _logger.Information($"Marketplace SAAS resource has been successfully created. \n SAAS ResourceId: {subscriptionDetails.Id}, Name: {subscriptionDetails.Name}, Plan: {subscriptionDetails.PlanId}, Offer: {subscriptionDetails.OfferId}, Publisher: {subscriptionDetails.PublisherId}, SAAS Subscription Status: {subscriptionDetails.SaasSubscriptionStatus}, Azure Subscription: {subscriptionDetails.AdditionalMetadata?.AzureSubscriptionId}");
                 return subscriptionDetails;
             }
+            catch (MarketplaceTerminalException ex)
+            {
+                string errorMessage = $"Terminal exception thrown. Error: {ex.Message}";
+                _logger.Error(ex, errorMessage);
+                op.FailOperation(errorMessage);
+                throw;
+            }
             catch (MarketplaceHttpException ex)
             {
                 string errorMessage = $"Failed to create marketplace SAAS resource while making create request. Error: {ex.Message}";
