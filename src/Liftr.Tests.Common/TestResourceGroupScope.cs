@@ -41,10 +41,14 @@ namespace Microsoft.Liftr
             TimedOperation.SetProperty("TestEnv", "CICD");
         }
 
-        public TestResourceGroupScope(string baseName, ITestOutputHelper output, EnvironmentType? env = null, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "")
+        public TestResourceGroupScope(string baseName, ITestOutputHelper output, EnvironmentType? env = null, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", bool loadCredentials = true)
         {
             GenerateLogger(filePath, memberName, output);
-            AzFactory = new LiftrAzureFactory(Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
+            if (loadCredentials)
+            {
+                AzFactory = new LiftrAzureFactory(Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
+            }
+
             ResourceGroupName = SdkContext.RandomResourceName(baseName, 25);
 
             var operationName = $"{Path.GetFileNameWithoutExtension(filePath)}-{memberName}";
