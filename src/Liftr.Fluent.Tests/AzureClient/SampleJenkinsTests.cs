@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -24,27 +25,35 @@ namespace Microsoft.Liftr.Fluent.Tests
         [JenkinsOnly]
         public async Task CanCreateAndDeleteGroupAsync()
         {
-            using (var scope = new JenkinsTestResourceGroupScope("jenkins-test-rg-", _output))
+            try
             {
-                try
+                using (var scope = new JenkinsTestResourceGroupScope("jenkins-test-rg-", _output))
                 {
-                    var client = scope.Client;
-                    var rg = await client.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
-                    var retrieved = await client.GetResourceGroupAsync(scope.ResourceGroupName);
+                    try
+                    {
+                        var client = scope.Client;
+                        var rg = await client.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
+                        var retrieved = await client.GetResourceGroupAsync(scope.ResourceGroupName);
 
-                    TestCommon.CheckCommonTags(retrieved.Inner.Tags);
+                        TestCommon.CheckCommonTags(retrieved.Inner.Tags);
 
-                    await client.DeleteResourceGroupAsync(scope.ResourceGroupName);
+                        await client.DeleteResourceGroupAsync(scope.ResourceGroupName);
 
-                    // It is deleted.
-                    Assert.Null(await client.GetResourceGroupAsync(scope.ResourceGroupName));
+                        // It is deleted.
+                        Assert.Null(await client.GetResourceGroupAsync(scope.ResourceGroupName));
+                    }
+                    catch (Exception ex)
+                    {
+                        scope.TimedOperation.FailOperation(ex.Message);
+                        scope.Logger.Error(ex, ex.Message);
+                        throw;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    scope.TimedOperation.FailOperation(ex.Message);
-                    scope.Logger.Error(ex, ex.Message);
-                    throw;
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
             }
         }
 

@@ -72,7 +72,7 @@ namespace Microsoft.Liftr
             get
             {
                 Check();
-                return new ClientSecretCredential(TestCredentials.TenantId, TestCredentials.ClientId, TestCredentials.ClientSecret);
+                return new ClientSecretCredential(AuthFileContract.TenantId, AuthFileContract.ClientId, AuthFileContract.ClientSecret);
             }
         }
 
