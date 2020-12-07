@@ -13,5 +13,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource
         public IEnumerable<MarketplaceSaasResourceEntity> Entities { get; set; }
 
         public DateTime? LastTimeStamp { get; set; }
+
+        public int PageSize { get; set; }
     }
 }

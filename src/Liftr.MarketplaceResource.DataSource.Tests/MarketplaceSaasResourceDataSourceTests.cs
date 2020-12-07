@@ -157,6 +157,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
                 DateTime? timeStamp = allResources.LastTimeStamp;
                 var nextResources = await dataSource.GetPaginatedResourcesAsync(2, timeStamp);
                 nextResources.Entities.Should().Contain(resource => resource.ToJson(false).OrdinalEquals(saasResource2.ToJson(false)));
+                nextResources.PageSize.Should().Be(2);
             }
 
             {
@@ -165,6 +166,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
 
                 allResources.Entities.Should().HaveCount(4);
                 allResources.LastTimeStamp.Should().BeNull();
+                allResources.PageSize.Should().Be(10);
             }
         }
     }

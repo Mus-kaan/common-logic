@@ -103,7 +103,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource
 
                 entities = await cursor.SortByDescending(item => item.CreatedUTC).ToListAsync();
                 lastTimeStamp = GetLastTimeStamp(entities, pageSize);
-                return new PaginatedResponse() { Entities = entities, LastTimeStamp = lastTimeStamp };
+                return new PaginatedResponse() { Entities = entities, LastTimeStamp = lastTimeStamp, PageSize = pageSize };
             }
             finally
             {

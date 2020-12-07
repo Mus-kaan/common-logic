@@ -100,7 +100,7 @@ namespace Liftr.Sample.Web.Controllers
             var response = new SaasResourcesListResponse
             {
                 Subscriptions = paginatedResponse.Entities.Select(entity => entity.SubscriptionDetails),
-                NextLink = string.IsNullOrEmpty(continuationToken) ? null : (baseUrl + '?' + "token=" + continuationToken)
+                NextLink = string.IsNullOrEmpty(continuationToken) ? null : (baseUrl + '?' + "token=" + continuationToken +"&page-size=" + paginatedResponse.PageSize)
             };
             return response;
         }
