@@ -15,7 +15,7 @@ IMG_mdsd="genevamdsd:master_337"
 IMG_mdm="genevamdm:master_52"
 IMG_fluentd="genevafluentd_td-agent:master_157"
 IMG_azsecpack="genevasecpackinstall:master_64"
-IMG_prommdm="shared/prom-mdm-converter:2.0.master.20200921.1"
+IMG_prommdm="shared/prom-mdm-converter:2.0.master.20201207.1"
 
 for i in "$@"
 do
