@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.ACIS.Contracts;
 using Microsoft.Liftr.ACIS.Relay;
 using Microsoft.Liftr.DataSource.MonitoringSvc;
 using System;
@@ -34,6 +35,30 @@ namespace Microsoft.Liftr.ACIS.Management
             await operation.SuccessfulFinishAsync(result.ToJson(indented: true));
 
             return result;
+        }
+
+        public async Task UpdateEventhubAsync(IACISOperation operation, UpdateEventhubMessage message)
+        {
+            if (operation == null)
+            {
+                throw new ArgumentNullException(nameof(operation));
+            }
+
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            await operation.LogInfoAsync("Updating event hub meta data from RP DB ...");
+            try
+            {
+                var updated = await _evhDataSource.UpdateAsync(message.EventhubNamespaceName, message.IngestEnabled, message.Active);
+                await operation.SuccessfulFinishAsync(updated.ToJson(indented: true));
+            }
+            catch (Exception ex)
+            {
+                await operation.FailAsync(ex.Message);
+            }
         }
     }
 }

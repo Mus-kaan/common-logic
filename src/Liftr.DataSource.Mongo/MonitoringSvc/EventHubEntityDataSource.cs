@@ -71,6 +71,25 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
             }
         }
 
+        public async Task<IEventHubEntity> UpdateAsync(string eventhubNamespaceName, bool ingestEnabled, bool active)
+        {
+            var filter = Builders<EventHubEntity>.Filter.Eq(i => i.Namespace, eventhubNamespaceName);
+            var update = Builders<EventHubEntity>.Update
+                .Set(e => e.IngestionEnabled, ingestEnabled)
+                .Set(e => e.Active, active);
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var updatedEntity = await _collection.FindOneAndUpdateAsync<EventHubEntity>(filter, update);
+                return updatedEntity;
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
+        }
+
         public async Task<IEnumerable<IEventHubEntity>> ListAsync(MonitoringResourceProvider resourceProvider)
         {
             var filter = Builders<EventHubEntity>.Filter.Eq(i => i.ResourceProvider, resourceProvider);

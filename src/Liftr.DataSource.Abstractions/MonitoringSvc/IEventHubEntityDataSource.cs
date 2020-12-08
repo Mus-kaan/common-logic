@@ -16,6 +16,8 @@ namespace Microsoft.Liftr.DataSource.MonitoringSvc
     {
         Task AddAsync(IEventHubEntity entity);
 
+        Task<IEventHubEntity> UpdateAsync(string eventhubNamespaceName, bool ingestEnabled, bool active);
+
         Task<IEnumerable<IEventHubEntity>> ListAsync();
 
         Task<IEnumerable<IEventHubEntity>> ListAsync(MonitoringResourceProvider resourceProvider);

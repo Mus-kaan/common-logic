@@ -90,6 +90,19 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             list = await s.ListAsync();
             Assert.Equal(6, list.Count());
 
+            // Test update
+            {
+                var evh = list.First(i => i.Namespace.OrdinalEquals("ns6"));
+                Assert.True(evh.Active);
+                Assert.True(evh.IngestionEnabled);
+                await s.UpdateAsync(evh.Namespace, ingestEnabled: false, active: false);
+
+                list = await s.ListAsync();
+                evh = list.First(i => i.Namespace.OrdinalEquals("ns6"));
+                Assert.False(evh.Active);
+                Assert.False(evh.IngestionEnabled);
+            }
+
             list = await s.ListAsync(rp, location1);
             Assert.Equal(3, list.Count());
 

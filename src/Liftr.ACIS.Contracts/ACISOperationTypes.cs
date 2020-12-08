@@ -12,11 +12,7 @@ namespace Microsoft.Liftr.ACIS.Contracts
         public const string AddEventhub = nameof(AddEventhub);
         public const string DeleteEventhub = nameof(DeleteEventhub);
 
-        public const string EventhubDisableIngest = nameof(EventhubDisableIngest);
-        public const string EventhubEnableIngest = nameof(EventhubEnableIngest);
-
-        public const string EventhubDisableConsuming = nameof(EventhubDisableConsuming);
-        public const string EventhubEnableConsuming = nameof(EventhubEnableConsuming);
+        public const string UpdateEventhub = nameof(UpdateEventhub);
         #endregion
 
         #region Datadog

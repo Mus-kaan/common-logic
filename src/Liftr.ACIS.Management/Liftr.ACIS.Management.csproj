@@ -7,6 +7,7 @@
     <RootNamespace>Microsoft.Liftr.ACIS.Management</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Liftr.ACIS.Contracts\Liftr.ACIS.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.ACIS.Relay.Abstractions\Liftr.ACIS.Relay.Abstractions.csproj" />
     <ProjectReference Include="..\Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj" />
   </ItemGroup>

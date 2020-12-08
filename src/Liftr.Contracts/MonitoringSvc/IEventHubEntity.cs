@@ -54,12 +54,12 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
         DateTime CreatedAtUTC { get; set; }
 
         /// <summary>
-        /// If this event hub is ingestionEnabled
+        /// Should this eventhub be used to set in the Diagnostics settings.
         /// </summary>
         bool IngestionEnabled { get; set; }
 
         /// <summary>
-        /// If this event hub is active
+        /// Should LogForwarder listen and read data from this eventhub.
         /// </summary>
         bool Active { get; set; }
     }
