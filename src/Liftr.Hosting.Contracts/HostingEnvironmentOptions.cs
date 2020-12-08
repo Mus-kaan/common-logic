@@ -54,6 +54,8 @@ namespace Microsoft.Liftr.Hosting.Contracts
 
         public bool IsAKS => AKSConfigurations != null;
 
+        public Dictionary<string, string> Properties { get; set; }
+
         public void CheckValid()
         {
             if (string.IsNullOrEmpty(DomainName))
