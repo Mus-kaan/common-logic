@@ -18,6 +18,8 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public HostingOptions HostingOptions { get; set; }
 
+        public HostingEnvironmentOptions EnvironmentOptions { get; set; }
+
         public Serilog.ILogger Logger { get; set; }
     }
 }

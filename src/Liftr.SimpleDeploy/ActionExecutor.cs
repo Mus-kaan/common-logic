@@ -157,6 +157,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     KeyVaultClient = kvClient,
                     RunnerCommandOptions = _commandOptions,
                     HostingOptions = _hostingOptions,
+                    EnvironmentOptions = hostingEnvironmentOptions,
                     Logger = _logger,
                 };
 
