@@ -89,6 +89,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     _logger.Information("Created CosmosDB with Id {ResourceId}", provisionedResources.CosmosDBAccount.Id);
                 }
             }
+            else
+            {
+                _logger.Information("Skip creating cosmos db.");
+            }
 
             if (dataOptions.DataPlaneStorageCountPerSubscription > 0 && dataOptions.DataPlaneSubscriptions != null)
             {
