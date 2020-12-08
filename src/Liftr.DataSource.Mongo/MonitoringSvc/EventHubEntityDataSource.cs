@@ -81,8 +81,9 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
             await _rateLimiter.WaitAsync();
             try
             {
-                var updatedEntity = await _collection.FindOneAndUpdateAsync<EventHubEntity>(filter, update);
-                return updatedEntity;
+                await _collection.FindOneAndUpdateAsync<EventHubEntity>(filter, update);
+                var cursor = await _collection.FindAsync<EventHubEntity>(filter);
+                return await cursor.FirstOrDefaultAsync();
             }
             finally
             {

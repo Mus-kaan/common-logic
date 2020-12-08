@@ -53,7 +53,8 @@ namespace Microsoft.Liftr.ACIS.Management
             try
             {
                 var updated = await _evhDataSource.UpdateAsync(message.EventhubNamespaceName, message.IngestEnabled, message.Active);
-                await operation.SuccessfulFinishAsync(updated.ToJson(indented: true));
+                var result = new EventHubRecord(updated);
+                await operation.SuccessfulFinishAsync(result.ToJson(indented: true));
             }
             catch (Exception ex)
             {
