@@ -88,6 +88,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(provisionedResources.CosmosDBAccount, dataOptions.LogAnalyticsWorkspaceId);
                     _logger.Information("Created CosmosDB with Id {ResourceId}", provisionedResources.CosmosDBAccount.Id);
                 }
+                else
+                {
+                    _logger.Information("Use existing CosmosDB with Id {ResourceId}", provisionedResources.CosmosDBAccount.Id);
+                }
             }
             else
             {
