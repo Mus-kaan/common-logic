@@ -35,5 +35,30 @@ namespace Microsoft.Liftr.DataSource.Mongo
             collection = collection.WithReadPreference(new ReadPreference(ReadPreferenceMode.SecondaryPreferred));
             return collection;
         }
+
+        public IMongoCollection<MarketplaceSaasResourceEntity> GetOrCreateMarketplaceSaasCollection(string collectionName)
+        {
+            IMongoCollection<MarketplaceSaasResourceEntity> collection = null;
+
+            if (!CollectionExists(_db, collectionName))
+            {
+                _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
+                collection = CreateCollection<MarketplaceSaasResourceEntity>(collectionName);
+
+                var marketplaceSubscriptionIdx = new CreateIndexModel<MarketplaceSaasResourceEntity>(Builders<MarketplaceSaasResourceEntity>.IndexKeys.Ascending(item => item.MarketplaceSubscription), new CreateIndexOptions<MarketplaceSaasResourceEntity> { Unique = true });
+                collection.Indexes.CreateOne(marketplaceSubscriptionIdx);
+
+                var createdAtIndex = new CreateIndexModel<MarketplaceSaasResourceEntity>(Builders<MarketplaceSaasResourceEntity>.IndexKeys.Descending(item => item.CreatedUTC), new CreateIndexOptions<MarketplaceSaasResourceEntity> { Unique = false });
+                collection.Indexes.CreateOne(createdAtIndex);
+            }
+            else
+            {
+                collection = GetCollection<MarketplaceSaasResourceEntity>(collectionName);
+            }
+
+            // Add read preference to read from the non-home region. The home region is a remote region.
+            collection = collection.WithReadPreference(new ReadPreference(ReadPreferenceMode.SecondaryPreferred));
+            return collection;
+        }
     }
 }

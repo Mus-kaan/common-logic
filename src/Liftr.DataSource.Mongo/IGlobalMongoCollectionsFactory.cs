@@ -9,5 +9,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
     public interface IGlobalMongoCollectionsFactory : IMongoCollectionsBaseFactory
     {
         IMongoCollection<AgreementResourceEntity> GetOrCreateAgreementEntityCollection(string collectionName);
+
+        IMongoCollection<MarketplaceSaasResourceEntity> GetOrCreateMarketplaceSaasCollection(string collectionName);
     }
 }
