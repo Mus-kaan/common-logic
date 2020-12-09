@@ -186,6 +186,9 @@ namespace Microsoft.Liftr.Contracts.Tests
             Assert.Equal("eebfbfdb-4167-49f6-be43-466a6709609f", rid.SubscriptionId);
             Assert.Equal("images", rid.ChildResourceType);
             Assert.Equal("ComDevSBI", rid.ChildResourceName);
+
+            var rid2 = new ResourceId(rid.SubscriptionId, rid.ResourceGroup, rid.Provider, rid.ResourceType, rid.ResourceName, rid.ChildResourceType, rid.ChildResourceName, rid.GrandChildResourceType, rid.GrandChildResourceName);
+            Assert.Equal(rid.ToString(), rid2.ToString());
         }
 
         [Fact]

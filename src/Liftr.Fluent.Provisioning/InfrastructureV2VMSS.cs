@@ -17,8 +17,11 @@ using Microsoft.Liftr.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using static Microsoft.Azure.Management.ResourceManager.Fluent.Core.AvailabilityZoneId;
+
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Fluent.Tests")]
 
 namespace Microsoft.Liftr.Fluent.Provisioning
 {
@@ -66,11 +69,12 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             ProvisionedVMSSResources provisionedResources = new ProvisionedVMSSResources();
 
+            _logger.Information("Parse image version Id to remove begining zeros.");
+            machineInfo.GalleryImageVersionId = ParseImageVersion(machineInfo.GalleryImageVersionId);
             _logger.Information("InfraV2RegionalComputeOptions: {@InfraV2RegionalComputeOptions}", computeOptions);
             _logger.Information("MachineInfo: {@machineInfo}", machineInfo);
             computeOptions.CheckValues();
             machineInfo.CheckValues();
-            machineInfo.UseParsedImageVersion();
 
             _logger.Information("VMSS machine type: {AKSMachineType}", machineInfo.VMSize);
             _logger.Information("VMSS machine count: {AKSMachineCount}", machineInfo.MachineCount);
@@ -467,6 +471,29 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var ex = new InvalidOperationException("Cannot find the VMSS resources");
             _logger.Error(ex, ex.Message);
             throw ex;
+        }
+
+        internal static string ParseImageVersion(string versionResourceId)
+        {
+            var rid = new ResourceId(versionResourceId);
+            if (Version.TryParse(rid.GrandChildResourceName, out var parsedVersion))
+            {
+                var parsedRid = new ResourceId(
+                    rid.SubscriptionId,
+                    rid.ResourceGroup,
+                    rid.Provider,
+                    rid.ResourceType,
+                    rid.ResourceName,
+                    rid.ChildResourceType,
+                    rid.ChildResourceName,
+                    rid.GrandChildResourceType,
+                    parsedVersion.ToString());
+                return parsedRid.ToString();
+            }
+            else
+            {
+                throw new InvalidHostingOptionException($"The image version value '{versionResourceId}' is invalid. ");
+            }
         }
     }
 }

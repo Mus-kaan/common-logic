@@ -179,7 +179,9 @@ namespace Microsoft.Liftr.Contracts
             string resourceType,
             string resourceName = null,
             string childResourceType = null,
-            string childResourceName = null)
+            string childResourceName = null,
+            string grandChildResourceType = null,
+            string grandChildResourceName = null)
         {
             SubscriptionId = subscriptionId;
             ResourceGroup = resourceGroup;
@@ -200,6 +202,12 @@ namespace Microsoft.Liftr.Contracts
             {
                 names.Add(new ResourceTypeNamePair() { ResourceType = childResourceType, ResourceName = childResourceName });
                 _resourceIdStr = _resourceIdStr + $"/{childResourceType}/{childResourceName}";
+            }
+
+            if (!string.IsNullOrEmpty(grandChildResourceType) && !string.IsNullOrEmpty(grandChildResourceName))
+            {
+                names.Add(new ResourceTypeNamePair() { ResourceType = grandChildResourceType, ResourceName = grandChildResourceName });
+                _resourceIdStr = _resourceIdStr + $"/{grandChildResourceType}/{grandChildResourceName}";
             }
 
             TypedNames = names.ToArray();
