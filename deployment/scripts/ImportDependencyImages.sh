@@ -11,10 +11,10 @@ fi
 # [[[GENEVA_UPDATE_CHANGE_HERE]]]
 # The version are referenced at three places. You need to update all of them. Please search for this sentence.
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/references/linuxcontainers.html"
-IMG_mdsd="genevamdsd:master_337"
-IMG_mdm="genevamdm:master_52"
-IMG_fluentd="genevafluentd_td-agent:master_157"
-IMG_azsecpack="genevasecpackinstall:master_64"
+IMG_mdsd="genevamdsd:master_20201210.1"
+IMG_mdm="genevamdm:master_20201210.1"
+IMG_fluentd="genevafluentd_td-agent:master_20201210.1"
+IMG_azsecpack="genevasecpackinstall:master_20201210.1"
 IMG_prommdm="shared/prom-mdm-converter:2.0.master.20201207.1"
 
 for i in "$@"
