@@ -10,3 +10,8 @@ https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-promet
 
 ## prom2icm
 https://github.com/weng5e/liftr/tree/main/helm/prom2icm
+
+## geneva
+https://genevamondocs.azurewebsites.net/collect/environments/akslinux.html
+
+https://dev.azure.com/msazure/One/_git/Compute-Runtime-Tux-GenevaContainers?path=%2Fdocker_geneva_samples%2FAKSGenevaSample%2FDeployment%2FGeneva%2Fchart%2Ftemplates%2Fgeneva-services.yaml
