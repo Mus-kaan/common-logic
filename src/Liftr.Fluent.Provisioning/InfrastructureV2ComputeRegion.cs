@@ -129,6 +129,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var storageName = computeNamingContext.StorageAccountName(computeOptions.ComputeBaseName);
             provisionedResources.StorageAccount = await liftrAzure.GetOrCreateStorageAccountAsync(computeNamingContext.Location, rgName, storageName, computeNamingContext.Tags, subnet?.Inner?.Id);
             await liftrAzure.GrantQueueContributorAsync(provisionedResources.StorageAccount, provisionedResources.ManagedIdentity);
+            await liftrAzure.GrantBlobContributorAsync(provisionedResources.StorageAccount, provisionedResources.ManagedIdentity);
 
             var globalKeyVault = await liftrAzure.GetKeyVaultByIdAsync(computeOptions.GlobalKeyVaultResourceId);
             if (globalKeyVault == null)

@@ -90,6 +90,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             provisionedResources.StorageAccount = await liftrAzure.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, storageName, namingContext.Tags, subnet?.Inner?.Id);
             await liftrAzure.GrantQueueContributorAsync(provisionedResources.StorageAccount, provisionedResources.ManagedIdentity);
+            await liftrAzure.GrantBlobContributorAsync(provisionedResources.StorageAccount, provisionedResources.ManagedIdentity);
 
             if (dataOptions.DataPlaneSubscriptions != null)
             {

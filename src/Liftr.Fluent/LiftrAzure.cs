@@ -440,15 +440,13 @@ namespace Microsoft.Liftr.Fluent
         {
             try
             {
-                // Storage Blob Data Contributor
-                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe";
                 await Authenticated.RoleAssignments
                               .Define(SdkContext.RandomGuid())
                               .ForObjectId(objectId)
-                              .WithRoleDefinition(roleDefinitionId)
+                              .WithRoleDefinition(GetStorageBlobDataContributorRoleDefinitionId())
                               .WithResourceGroupScope(rg)
                               .CreateAsync();
-                _logger.Information("Granted 'Storage Blob Data Contributor' of Resource Group '{rgId}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}", rg.Id, objectId, roleDefinitionId);
+                _logger.Information("Granted 'Storage Blob Data Contributor' of Resource Group '{rgId}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}", rg.Id, objectId, GetStorageBlobDataContributorRoleDefinitionId());
             }
             catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
@@ -463,20 +461,43 @@ namespace Microsoft.Liftr.Fluent
         public Task GrantBlobContributorAsync(IResourceGroup rg, IIdentity msi)
             => GrantBlobContributorAsync(rg, msi.GetObjectId());
 
+        public async Task GrantBlobContributorAsync(IStorageAccount storageAccount, string objectId)
+        {
+            try
+            {
+                await Authenticated.RoleAssignments
+                              .Define(SdkContext.RandomGuid())
+                              .ForObjectId(objectId)
+                              .WithRoleDefinition(GetStorageBlobDataContributorRoleDefinitionId())
+                              .WithResourceScope(storageAccount)
+                              .CreateAsync();
+                _logger.Information("Granted 'Storage Blob Data Contributor' of Storage account '{storageAccountId}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}", storageAccount.Id, objectId, GetStorageBlobDataContributorRoleDefinitionId());
+            }
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
+            {
+            }
+            catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
+            {
+                _logger.Error("The object Id '{objectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", objectId);
+                throw;
+            }
+        }
+
+        public Task GrantBlobContributorAsync(IStorageAccount storageAccount, IIdentity msi)
+           => GrantBlobContributorAsync(storageAccount, msi.GetObjectId());
+
         public async Task GrantBlobContainerContributorAsync(IStorageAccount storageAccount, string containerName, string objectId)
         {
             try
             {
-                // Storage Blob Data Contributor
-                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe";
                 var containerId = $"{storageAccount.Id}/blobServices/default/containers/{containerName}";
                 await Authenticated.RoleAssignments
                               .Define(SdkContext.RandomGuid())
                               .ForObjectId(objectId)
-                              .WithRoleDefinition(roleDefinitionId)
+                              .WithRoleDefinition(GetStorageBlobDataContributorRoleDefinitionId())
                               .WithScope(containerId)
                               .CreateAsync();
-                _logger.Information("Granted 'Storage Blob Data Contributor' of blob container '{containerName}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}, containerId: {containerId}", containerName, objectId, roleDefinitionId, containerId);
+                _logger.Information("Granted 'Storage Blob Data Contributor' of blob container '{containerName}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}, containerId: {containerId}", containerName, objectId, GetStorageBlobDataContributorRoleDefinitionId(), containerId);
             }
             catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
@@ -495,16 +516,14 @@ namespace Microsoft.Liftr.Fluent
         {
             try
             {
-                // Storage Blob Data Reader
-                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/2a2b9908-6ea1-4ae2-8e65-a410df84e7d1";
                 var containerId = $"{storageAccount.Id}/blobServices/default/containers/{containerName}";
                 await Authenticated.RoleAssignments
                               .Define(SdkContext.RandomGuid())
                               .ForObjectId(objectId)
-                              .WithRoleDefinition(roleDefinitionId)
+                              .WithRoleDefinition(GetStorageBlobDataReaderRoleDefinitionId())
                               .WithScope(containerId)
                               .CreateAsync();
-                _logger.Information("Granted 'Storage Blob Data Reader' of blob container '{containerName}' to SPN with object Id '{objectId}'. roleDefinitionId: {roleDefinitionId}, containerId: {containerId}", containerName, objectId, roleDefinitionId, containerId);
+                _logger.Information("Granted 'Storage Blob Data Reader' of blob container '{containerName}' to SPN with object Id '{objectId}'. roleDefinitionId: {roleDefinitionId}, containerId: {containerId}", containerName, objectId, GetStorageBlobDataReaderRoleDefinitionId(), containerId);
             }
             catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
@@ -523,15 +542,13 @@ namespace Microsoft.Liftr.Fluent
         {
             try
             {
-                // Storage Queue Data Contributor
-                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/974c5e8b-45b9-4653-ba55-5f855dd0fb88";
                 await Authenticated.RoleAssignments
                               .Define(SdkContext.RandomGuid())
                               .ForObjectId(objectId)
-                              .WithRoleDefinition(roleDefinitionId)
+                              .WithRoleDefinition(GetStorageQueueDataContributorRoleDefinitionId())
                               .WithResourceGroupScope(rg)
                               .CreateAsync();
-                _logger.Information("Granted 'Storage Queue Data Contributor' of Resource Group '{rgId}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}", rg.Id, objectId, roleDefinitionId);
+                _logger.Information("Granted 'Storage Queue Data Contributor' of Resource Group '{rgId}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}", rg.Id, objectId, GetStorageQueueDataContributorRoleDefinitionId());
             }
             catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
@@ -553,15 +570,13 @@ namespace Microsoft.Liftr.Fluent
         {
             try
             {
-                // Storage Queue Data Contributor
-                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/974c5e8b-45b9-4653-ba55-5f855dd0fb88";
                 await Authenticated.RoleAssignments
                               .Define(SdkContext.RandomGuid())
                               .ForObjectId(objectId)
-                              .WithRoleDefinition(roleDefinitionId)
+                              .WithRoleDefinition(GetStorageQueueDataContributorRoleDefinitionId())
                               .WithScope(storageAccount.Id)
                               .CreateAsync();
-                _logger.Information("Granted 'Storage Queue Data Contributor' storage account '{resourceId}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}", storageAccount.Id, objectId, roleDefinitionId);
+                _logger.Information("Granted 'Storage Queue Data Contributor' storage account '{resourceId}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}", storageAccount.Id, objectId, GetStorageQueueDataContributorRoleDefinitionId());
             }
             catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
@@ -577,16 +592,14 @@ namespace Microsoft.Liftr.Fluent
         {
             try
             {
-                // Storage Account Key Operator Service Role
-                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/81a9662b-bebf-436f-a333-f67b29880f12";
-                _logger.Information("Assigning 'Storage Account Key Operator Service Role' {roleDefinitionId} to Key Vault's First party App with objectId: {objectId} ...", roleDefinitionId, _options.AzureKeyVaultObjectId);
+                _logger.Information("Assigning 'Storage Account Key Operator Service Role' {roleDefinitionId} to Key Vault's First party App with objectId: {objectId} ...", GetStorageAccountKeyOperatorRoleDefinitionId(), _options.AzureKeyVaultObjectId);
                 await Authenticated.RoleAssignments
                               .Define(SdkContext.RandomGuid())
                               .ForObjectId(_options.AzureKeyVaultObjectId)
-                              .WithRoleDefinition(roleDefinitionId)
+                              .WithRoleDefinition(GetStorageAccountKeyOperatorRoleDefinitionId())
                               .WithScope(storageAccount.Id)
                               .CreateAsync();
-                _logger.Information("Granted 'Storage Account Key Operator Service Role' {roleDefinitionId} to Key Vault's First party App with objectId: {objectId}", roleDefinitionId, _options.AzureKeyVaultObjectId);
+                _logger.Information("Granted 'Storage Account Key Operator Service Role' {roleDefinitionId} to Key Vault's First party App with objectId: {objectId}", GetStorageAccountKeyOperatorRoleDefinitionId(), _options.AzureKeyVaultObjectId);
             }
             catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
@@ -597,16 +610,14 @@ namespace Microsoft.Liftr.Fluent
         {
             try
             {
-                // Storage Account Key Operator Service Role
-                var roleDefinitionId = $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/81a9662b-bebf-436f-a333-f67b29880f12";
-                _logger.Information("Assigning 'Storage Account Key Operator Service Role' {roleDefinitionId} to Key Vault's First party App with objectId: {objectId} on rg: {rgId} ...", roleDefinitionId, _options.AzureKeyVaultObjectId, rg.Id);
+                _logger.Information("Assigning 'Storage Account Key Operator Service Role' {roleDefinitionId} to Key Vault's First party App with objectId: {objectId} on rg: {rgId} ...", GetStorageAccountKeyOperatorRoleDefinitionId(), _options.AzureKeyVaultObjectId, rg.Id);
                 await Authenticated.RoleAssignments
                               .Define(SdkContext.RandomGuid())
                               .ForObjectId(_options.AzureKeyVaultObjectId)
-                              .WithRoleDefinition(roleDefinitionId)
+                              .WithRoleDefinition(GetStorageAccountKeyOperatorRoleDefinitionId())
                               .WithResourceGroupScope(rg)
                               .CreateAsync();
-                _logger.Information("Granted 'Storage Account Key Operator Service Role' {roleDefinitionId} to Key Vault's First party App with objectId: {objectId} on rg: {rgId}", roleDefinitionId, _options.AzureKeyVaultObjectId, rg.Id);
+                _logger.Information("Granted 'Storage Account Key Operator Service Role' {roleDefinitionId} to Key Vault's First party App with objectId: {objectId} on rg: {rgId}", GetStorageAccountKeyOperatorRoleDefinitionId(), _options.AzureKeyVaultObjectId, rg.Id);
             }
             catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
             {
@@ -1593,5 +1604,17 @@ namespace Microsoft.Liftr.Fluent
 
             return retryAfter.Value;
         }
+
+        private string GetStorageBlobDataContributorRoleDefinitionId()
+            => $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe"; // Storage Blob Data Contributor
+
+        private string GetStorageBlobDataReaderRoleDefinitionId()
+            => $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/2a2b9908-6ea1-4ae2-8e65-a410df84e7d1"; // Storage Blob Data Reader
+
+        private string GetStorageQueueDataContributorRoleDefinitionId()
+            => $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/974c5e8b-45b9-4653-ba55-5f855dd0fb88"; // Storage Queue Data Contributor
+
+        private string GetStorageAccountKeyOperatorRoleDefinitionId()
+            => $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/81a9662b-bebf-436f-a333-f67b29880f12"; // Storage Account Key Operator Service Role
     }
 }
