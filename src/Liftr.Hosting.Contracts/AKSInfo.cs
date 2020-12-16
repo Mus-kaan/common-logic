@@ -21,7 +21,7 @@ namespace Microsoft.Liftr.Hosting.Contracts
         /// https://aka.ms/supported-version-list
         /// https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/README.md
         /// </summary>
-        public string KubernetesVersion { get; set; } = "1.19.0";
+        public string KubernetesVersion { get; set; } = "1.19.3";
 
         public void CheckValues()
         {
