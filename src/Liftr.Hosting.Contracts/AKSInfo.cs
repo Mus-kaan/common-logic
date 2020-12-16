@@ -20,8 +20,10 @@ namespace Microsoft.Liftr.Hosting.Contracts
         /// az aks get-versions --location westcentralus --output table
         /// https://aka.ms/supported-version-list
         /// https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/README.md
+        /// Please check the release change to avoid breaking change:
+        /// https://github.com/Azure/AKS/releases
         /// </summary>
-        public string KubernetesVersion { get; set; } = "1.19.3";
+        public string KubernetesVersion { get; set; } = "1.18.10";
 
         public void CheckValues()
         {
