@@ -220,6 +220,22 @@ namespace Microsoft.Liftr.SimpleDeploy
                     targetOptions.EnableVNet,
                     certNameList);
 
+                try
+                {
+                    // ACR Pull
+                    var roleDefinitionId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d";
+                    _logger.Information("Granting ACR pull role to the VMSS over the acr '{acrLogin}' ...", acr.LoginServerUrl);
+                    await liftrAzure.Authenticated.RoleAssignments
+                        .Define(SdkContext.RandomGuid())
+                        .ForObjectId(vmss.ManagedIdentity.GetObjectId())
+                        .WithRoleDefinition(roleDefinitionId)
+                        .WithResourceScope(acr)
+                        .CreateAsync();
+                }
+                catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
+                {
+                }
+
                 if (SimpleDeployExtension.AfterProvisionRegionalVMSSResourcesAsync != null)
                 {
                     using (_logger.StartTimedOperation(nameof(SimpleDeployExtension.AfterProvisionRegionalVMSSResourcesAsync)))
