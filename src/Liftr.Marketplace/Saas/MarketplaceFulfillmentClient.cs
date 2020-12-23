@@ -23,7 +23,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
         private readonly ILogger _logger;
         private readonly MarketplaceRestClient _marketplaceRestClient;
 
-        internal MarketplaceFulfillmentClient(MarketplaceRestClient marketplaceRestClient, ILogger logger)
+        public MarketplaceFulfillmentClient(MarketplaceRestClient marketplaceRestClient, ILogger logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _marketplaceRestClient = marketplaceRestClient ?? throw new ArgumentNullException(nameof(marketplaceRestClient));
