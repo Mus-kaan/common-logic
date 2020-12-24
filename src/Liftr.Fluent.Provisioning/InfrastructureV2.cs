@@ -278,6 +278,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             "SSHPassword",
             "ibizaStorageConnectionString",
             "thanos-api",
+            "GlobalDataEncryptionKey",
         };
     }
 }
