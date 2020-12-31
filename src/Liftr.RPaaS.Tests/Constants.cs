@@ -38,5 +38,16 @@ namespace Microsoft.Liftr.RPaaS.Tests
                 Location = "eastus",
             };
         }
+
+        public static TestResource Resource3()
+        {
+            return new TestResource()
+            {
+                Type = "Microsoft.Nginx/frontends",
+                Id = "/subscriptions/f9aed45d-b9e6-462a-a3f5-6ab34857bc17/resourceGroups/myrg/providers/Microsoft.Nginx/frontends/frontend3",
+                Name = "frontend3",
+                Location = "eastus",
+            };
+        }
     }
 }

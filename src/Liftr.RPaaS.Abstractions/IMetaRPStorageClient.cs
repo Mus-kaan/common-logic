@@ -59,6 +59,18 @@ namespace Microsoft.Liftr.RPaaS
         /// <returns></returns>
         Task<IEnumerable<T>> ListResourcesAsync<T>(string resourcePath, string apiVersion);
 
+        /// <summary>
+        /// Gets a list of resources filtered by condition
+        /// To get top-level resource, resourcePath should be /{userRpSubscriptionId}/providers/{providerNamespace}/{resourceType}.
+        /// To get sub-resources, resourcePath should be /{resourceId}/{subResourcesType}.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="resourcePath"></param>
+        /// <param name="apiVersion"></param>
+        /// <param name="filterCondition"></param>
+        /// <returns></returns>
+        Task<IEnumerable<T>> ListFilteredResourcesAsync<T>(string resourcePath, string apiVersion, string filterCondition);
+
         #endregion
 
         #region Subscription operations

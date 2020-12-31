@@ -191,44 +191,30 @@ namespace Microsoft.Liftr.RPaaS
         /// <inheritdoc/>
         public async Task<IEnumerable<T>> ListResourcesAsync<T>(string resourcePath, string apiVersion)
         {
-            var resources = new List<T>();
             var listResponse = new ListResponse<T>()
             {
                 Value = new List<T>(),
                 NextLink = GetMetaRPResourceUrl(resourcePath, apiVersion) + "&$expand=crossPartitionQuery",
             };
 
-            using (var operation = _logger.StartTimedOperation(nameof(ListResourcesAsync)))
-            {
-                operation.SetContextProperty(nameof(resourcePath), resourcePath);
-                do
-                {
-                    _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(_options.UserRPTenantId);
-                    var response = await _httpClient.GetAsync(listResponse.NextLink);
-
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        var errorMessage = $"Failed at listing resources. StatusCode: '{response.StatusCode}'";
-                        if (response.Content != null)
-                        {
-                            errorMessage = errorMessage + $", Response: '{await response.Content.ReadAsStringAsync()}'";
-                        }
-
-                        _logger.LogError(errorMessage);
-                        operation.FailOperation(response.StatusCode, errorMessage);
-                        throw MetaRPException.Create(response, nameof(ListResourcesAsync));
-                    }
-
-                    var content = await response.Content.ReadAsStringAsync();
-                    listResponse = content.FromJson<ListResponse<T>>();
-                    resources.AddRange(listResponse.Value);
-                }
-                while (listResponse.NextLink != null);
-            }
-
-            return resources;
+            return await ListMetaRPResourcesAsync(resourcePath, listResponse);
         }
 
+        public async Task<IEnumerable<T>> ListFilteredResourcesAsync<T>(string resourcePath, string apiVersion, string filterCondition)
+        {
+            if (string.IsNullOrEmpty(filterCondition))
+            {
+                throw new ArgumentNullException(nameof(filterCondition));
+            }
+
+            var listResponse = new ListResponse<T>()
+            {
+                Value = new List<T>(),
+                NextLink = GetMetaRPResourceUrl(resourcePath, apiVersion) + "&$filter=" + filterCondition + "&$expand=crossPartitionQuery",
+            };
+
+            return await ListMetaRPResourcesAsync(resourcePath, listResponse);
+        }
         #endregion
 
         #region Subscription operations
@@ -381,6 +367,41 @@ namespace Microsoft.Liftr.RPaaS
                         {
                             _logger.Warning("Request: {requestMethod} {requestUrl} failed. Delaying for {delay}ms, then retrying {retry}.", outcome.Result.RequestMessage?.Method, outcome.Result.RequestMessage?.RequestUri, timespan.TotalMilliseconds, retryAttempt);
                         });
+        }
+
+        private async Task<IEnumerable<T>> ListMetaRPResourcesAsync<T>(string resourcePath, ListResponse<T> listResponse)
+        {
+            var resources = new List<T>();
+
+            using (var operation = _logger.StartTimedOperation(nameof(ListMetaRPResourcesAsync)))
+            {
+                operation.SetContextProperty(nameof(resourcePath), resourcePath);
+                do
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(_options.UserRPTenantId);
+                    var response = await _httpClient.GetAsync(listResponse.NextLink);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        var errorMessage = $"Failed at listing resources. StatusCode: '{response.StatusCode}'";
+                        if (response.Content != null)
+                        {
+                            errorMessage = errorMessage + $", Response: '{await response.Content.ReadAsStringAsync()}'";
+                        }
+
+                        _logger.LogError(errorMessage);
+                        operation.FailOperation(response.StatusCode, errorMessage);
+                        throw MetaRPException.Create(response, nameof(ListMetaRPResourcesAsync));
+                    }
+
+                    var content = await response.Content.ReadAsStringAsync();
+                    listResponse = content.FromJson<ListResponse<T>>();
+                    resources.AddRange(listResponse.Value);
+                }
+                while (listResponse.NextLink != null);
+            }
+
+            return resources;
         }
     }
 }

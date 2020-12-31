@@ -70,6 +70,74 @@ namespace Microsoft.Liftr.RPaaS.Tests
         }
 
         [Fact]
+        public async Task Returns_all_filtered_resources_in_provider_namespace_Async()
+        {
+            using var handler = new MetaRPMessageHandler();
+
+            var listResponse3 = new ListResponse<TestResource>()
+            {
+                Value = new List<TestResource>() { Constants.Resource3() },
+                NextLink = null,
+            };
+
+            using var response3 = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(listResponse3.ToJson()),
+            };
+
+            handler.QueueResponse(response3);
+
+            using var httpClient = new HttpClient(handler, false);
+            var metaRpClient = new MetaRPStorageClient(
+                new Uri(Constants.MetaRpEndpoint),
+                httpClient,
+                new MetaRPOptions() { UserRPTenantId = "tenantId" },
+                (_) => Task.FromResult("authToken"),
+                _logger);
+
+            string filterCondition = "Properties.userDetail.emailAddress eq '{resource.Properties.UserDetail.EmailAddress}'";
+            var resources = await metaRpClient.ListFilteredResourcesAsync<TestResource>(Constants.RequestPath, Constants.ApiVersion, filterCondition);
+
+            Assert.Single(resources);
+            Assert.Equal(Constants.Resource3().Id, resources.ElementAt(0).Id);
+        }
+
+        [Fact]
+        public async Task Throws_arg_null_exception_filtered_resources_in_provider_namespace_Async()
+        {
+            using var handler = new MetaRPMessageHandler();
+
+            var listResponse3 = new ListResponse<TestResource>()
+            {
+                Value = new List<TestResource>() { Constants.Resource3() },
+                NextLink = null,
+            };
+
+            using var response3 = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(listResponse3.ToJson()),
+            };
+
+            handler.QueueResponse(response3);
+
+            using var httpClient = new HttpClient(handler, false);
+            var metaRpClient = new MetaRPStorageClient(
+                new Uri(Constants.MetaRpEndpoint),
+                httpClient,
+                new MetaRPOptions() { UserRPTenantId = "tenantId" },
+                (_) => Task.FromResult("authToken"),
+                _logger);
+
+            string filterCondition = string.Empty;
+            await Assert.ThrowsAsync<ArgumentNullException>(() => metaRpClient.ListFilteredResourcesAsync<TestResource>(Constants.RequestPath, Constants.ApiVersion, filterCondition));
+
+            string filterCondition2 = null;
+            await Assert.ThrowsAsync<ArgumentNullException>(() => metaRpClient.ListFilteredResourcesAsync<TestResource>(Constants.RequestPath, Constants.ApiVersion, filterCondition2));
+        }
+
+        [Fact]
         public async Task Retries_on_patch_if_resource_not_found_Async()
         {
             using var handlerMock = new MetaRPMessageHandler();
