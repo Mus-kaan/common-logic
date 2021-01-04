@@ -11,11 +11,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
-    <ProjectReference Include="..\Liftr.DataSource.Abstractions\Liftr.DataSource.Abstractions.csproj" />
     <ProjectReference Include="..\Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj" />
     <ProjectReference Include="..\Liftr.EventHubManager\Liftr.EventHubManager.csproj" />
     <ProjectReference Include="..\Liftr.Fluent.Contracts\Liftr.Fluent.Contracts.csproj" />
-    <ProjectReference Include="..\Liftr.Fluent\Liftr.Fluent.csproj" />
     <ProjectReference Include="..\Liftr.Hosting.Swagger\Liftr.Hosting.Swagger.csproj" />
     <ProjectReference Include="..\Liftr.Monitoring.Common\Liftr.Monitoring.Common.csproj" />
     <ProjectReference Include="..\Liftr.Queue\Liftr.Queue.csproj" />

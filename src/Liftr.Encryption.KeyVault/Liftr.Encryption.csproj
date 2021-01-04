@@ -13,7 +13,6 @@
     <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="$(PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.Encryption.Abstractions\Liftr.Encryption.Abstractions.csproj" />
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
   </ItemGroup>
