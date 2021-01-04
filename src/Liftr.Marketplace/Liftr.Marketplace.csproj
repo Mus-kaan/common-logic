@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>$(LiftrClassLibraryTargetFramework21)</TargetFramework>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
     <AssemblyName>Microsoft.Liftr.Marketplace</AssemblyName>
     <RootNamespace>Microsoft.Liftr.Marketplace</RootNamespace>
     <IsPackable>true</IsPackable>
@@ -16,7 +16,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.DiagnosticSource\Liftr.DiagnosticSource.csproj" />
-    <ProjectReference Include="..\Liftr.Logging.GenericHosting\Liftr.Logging.GenericHosting.csproj" />
     <ProjectReference Include="..\Liftr.TokenManager\Liftr.TokenManager.csproj" />
     <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
   </ItemGroup>
