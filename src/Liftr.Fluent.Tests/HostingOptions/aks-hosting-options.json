@@ -146,7 +146,8 @@
         {
           "Location": "westcentralus",
           "DataBaseName": "data20200602", // DO NOT CHNAGE THIS. This will break all the existing resources. Please check with nireis first.
-          "ComputeBaseName": "com20200727"
+          "ComputeBaseName": "com20200727",
+          "SupportAvailabilityZone": false
         },
         {
           "Location": "westus2",

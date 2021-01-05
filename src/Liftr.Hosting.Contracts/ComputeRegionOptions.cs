@@ -18,6 +18,8 @@ namespace Microsoft.Liftr.Hosting.Contracts
 
         public Dictionary<string, string> Properties { get; set; }
 
+        public bool SupportAvailabilityZone { get; set; } = true;
+
         public void CheckValid()
         {
             if (string.IsNullOrEmpty(ComputeBaseName))

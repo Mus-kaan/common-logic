@@ -37,6 +37,8 @@ namespace Microsoft.Liftr.Hosting.Contracts
 
         public bool IsSeparatedDataAndComputeRegion => string.IsNullOrEmpty(ComputeBaseName);
 
+        public bool SupportAvailabilityZone { get; set; } = true;
+
         public void CheckValid()
         {
             if (string.IsNullOrEmpty(DataBaseName))
@@ -63,6 +65,29 @@ namespace Microsoft.Liftr.Hosting.Contracts
                     throw new InvalidHostingOptionException("Duplicated compute location information.");
                 }
             }
+
+            if (SupportAvailabilityZone)
+            {
+                bool canCreateAks = ValidateLocation(Location);
+
+                if (!canCreateAks)
+                {
+                    throw new InvalidHostingOptionException($"Availability Zone support is not provided for location {Location}. Please verify from this doc: https://docs.microsoft.com/en-us/azure/aks/availability-zones#limitations-and-region-availability ");
+                }
+            }
+        }
+
+        public static bool ValidateLocation(Region location)
+        {
+            // https://docs.microsoft.com/en-us/azure/aks/availability-zones#limitations-and-region-availability  #Add or update locations if doc is updated.
+            Region[] locationsWithAvailabilityZone = { Region.AustraliaEast, Region.USCentral, Region.USEast2, Region.USEast, Region.FranceCentral, Region.JapanEast, Region.EuropeNorth, Region.AsiaSouthEast, Region.UKSouth, Region.EuropeWest, Region.USWest2 };
+
+            if (locationsWithAvailabilityZone.Contains(location))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

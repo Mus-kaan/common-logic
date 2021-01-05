@@ -19,7 +19,13 @@
             "vmSize": "WILL_BE_CHANGED [parameters('agentVMSize')]",
             "count": "WILL_BE_CHANGED [parameters('agentCount')]",
             "mode": "System",
-            "osType": "Linux"
+            "osType": "Linux",
+            "type": "VirtualMachineScaleSets",
+            "availabilityZones": [
+              "WILL_BE_CHANGED [parameters('zone1')]",
+              "WILL_BE_CHANGED [parameters('zone2')]",
+              "WILL_BE_CHANGED [parameters('zone3')]"
+            ]
           }
         ],
         "linuxProfile": {
@@ -33,7 +39,17 @@
           }
         },
         "networkProfile": {
-          "loadBalancerSku": "basic"
+          "outboundType": "loadBalancer",
+          "loadBalancerSku": "standard",
+          "loadBalancerProfile": {
+            "outboundIPs": {
+              "publicIPs": [
+                {
+                  "id": "WILL_BE_CHANGED [parameters('publicIpId')]"
+                }
+              ]
+            }
+          }
         }
       },
       "identity": {

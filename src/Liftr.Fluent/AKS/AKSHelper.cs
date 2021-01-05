@@ -26,6 +26,8 @@ namespace Microsoft.Liftr.Fluent
             int vmCount,
             string agentPoolProfileName,
             IDictionary<string, string> tags,
+            bool supportAvailabilityZone,
+            string pIpId,
             ISubnet subnet = null)
         {
             // https://docs.microsoft.com/en-us/azure/templates/microsoft.containerservice/2020-04-01/managedclusters#ManagedClusterIdentity
@@ -39,7 +41,8 @@ namespace Microsoft.Liftr.Fluent
                 tags = new Dictionary<string, string>();
             }
 
-            var templateContent = EmbeddedContentReader.GetContent(c_aksTemplateFile);
+            string templateContent = EmbeddedContentReader.GetContent(c_aksTemplateFile);
+
             templateContent = templateContent.Replace(c_aksNamePlaceHolder, aksName);
 
             dynamic configObj = JObject.Parse(templateContent);
@@ -55,6 +58,18 @@ namespace Microsoft.Liftr.Fluent
             ap.name = agentPoolProfileName;
             ap.vmSize = vmSizeType;
             ap.count = vmCount;
+
+            if (supportAvailabilityZone)
+            {
+                ap.availabilityZones[0] = "1";
+                ap.availabilityZones[1] = "2";
+                ap.availabilityZones[2] = "3";
+            }
+            else
+            {
+                ap.availabilityZones = null;
+            }
+
             if (subnet != null)
             {
                 ap.vnetSubnetID = subnet.Inner.Id;
@@ -62,6 +77,11 @@ namespace Microsoft.Liftr.Fluent
 
             props.linuxProfile.adminUsername = rootUserName;
             props.linuxProfile.ssh.publicKeys[0].keyData = sshPublicKey;
+
+            if (pIpId != null)
+            {
+                props.networkProfile.loadBalancerProfile.outboundIPs.publicIPs[0].id = pIpId;
+            }
 
             return JsonConvert.SerializeObject(configObj, Formatting.Indented);
         }

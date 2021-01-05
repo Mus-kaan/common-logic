@@ -11,6 +11,7 @@ using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Dns.Fluent;
 using Microsoft.Azure.Management.Eventhub.Fluent;
 using Microsoft.Azure.Management.Fluent;
+using Microsoft.Azure.Management.Graph.RBAC.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Monitor.Fluent;
 using Microsoft.Azure.Management.Monitor.Fluent.Models;
@@ -778,7 +779,7 @@ namespace Microsoft.Liftr.Fluent
                 skuType = PublicIPSkuType.Basic;
             }
 
-            _logger.Information("Start creating Publib IP address with name: {pipName} in RG: {rgName} ...", pipName, rgName);
+            _logger.Information("Start creating Public IP address with SKU: {skuType} with name: {pipName} in RG: {rgName} ...", skuType, pipName, rgName);
 
             var pip = await FluentClient
                 .PublicIPAddresses
@@ -791,7 +792,7 @@ namespace Microsoft.Liftr.Fluent
                 .WithTags(tags)
                 .CreateAsync();
 
-            _logger.Information("Created Publib IP address with resourceId: {resourceId}", pip.Id);
+            _logger.Information("Created Public IP address with resourceId: {resourceId}", pip.Id);
             return pip;
         }
 
@@ -1154,9 +1155,11 @@ namespace Microsoft.Liftr.Fluent
             ContainerServiceVMSizeTypes vmSizeType,
             string k8sVersion,
             int vmCount,
+            string outboundIPId,
             IDictionary<string, string> tags,
             ISubnet subnet = null,
-            string agentPoolProfileName = "ap")
+            string agentPoolProfileName = "ap",
+            bool supportAvailabilityZone = false)
         {
             Regex rx = new Regex(@"^[a-z][a-z0-9]{0,11}$");
             if (!rx.IsMatch(agentPoolProfileName))
@@ -1164,7 +1167,9 @@ namespace Microsoft.Liftr.Fluent
                 throw new ArgumentException("Agent pool profile name does not match pattern '^[a-z][a-z0-9]{0,11}$'");
             }
 
+            _logger.Information($"Availability Zone Support is set {supportAvailabilityZone} for the Kuberenetes Cluster");
             _logger.Information("Creating a Kubernetes cluster of version {kubernetesVersion} with name {aksName} ...", k8sVersion, aksName);
+            _logger.Information($"Outbound IP {outboundIPId} is added to AKS cluster ARM Template...");
 
             var templateContent = AKSHelper.GenerateAKSTemplate(
                 region,
@@ -1176,6 +1181,8 @@ namespace Microsoft.Liftr.Fluent
                 vmCount,
                 agentPoolProfileName,
                 tags,
+                supportAvailabilityZone,
+                outboundIPId,
                 subnet);
 
             await CreateDeploymentAsync(region, rgName, templateContent);

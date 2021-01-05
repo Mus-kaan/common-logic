@@ -28,8 +28,7 @@ namespace Microsoft.Liftr.SimpleDeploy
             if (targetOptions.IPPerRegion > 0)
             {
                 var ipNamePrefix = globalNamingContext.GenerateCommonName(targetOptions.Global.BaseName, noRegion: true);
-                var poolRG = ipNamePrefix + "-ip-pool-rg";
-                ipPool = new IPPoolManager(poolRG, ipNamePrefix, azFactory, _logger);
+                ipPool = new IPPoolManager(ipNamePrefix, azFactory, _logger);
             }
 
             var parsedRegionInfo = GetRegionalOptions(targetOptions);
@@ -47,7 +46,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 throw new InvalidOperationException(errMsg);
             }
 
-            await WriteReservedIPToDiskAsync(azFactory, aksRGName, aksName, parsedRegionInfo.AKSRegion, targetOptions, ipPool);
+            await WriteReservedInboundIPToDiskAsync(azFactory, aksRGName, aksName, parsedRegionInfo.AKSRegion, targetOptions, ipPool);
 
             var regionalSubdomain = $"{regionalNamingContext.Location.ShortName()}.{targetOptions.DomainName}";
             File.WriteAllText("aks-domain.txt", $"{aksName}.{targetOptions.DomainName}");

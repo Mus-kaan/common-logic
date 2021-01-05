@@ -30,21 +30,10 @@ namespace Microsoft.Liftr.SimpleDeploy
             if (targetOptions.IPPerRegion > 0)
             {
                 var ipNamePrefix = globalNamingContext.GenerateCommonName(targetOptions.Global.BaseName, noRegion: true);
-                var poolRG = ipNamePrefix + "-ip-pool-rg";
-                ipPool = new IPPoolManager(poolRG, ipNamePrefix, azFactory, _logger);
 
-                var ipSku = targetOptions.IsAKS ? PublicIPSkuType.Basic : PublicIPSkuType.Standard;
-                IEnumerable<Region> ipRegions = null;
-                if (targetOptions.Regions.First().IsSeparatedDataAndComputeRegion)
-                {
-                    ipRegions = targetOptions.Regions.SelectMany(r => r.ComputeRegions).Select(r => r.Location);
-                }
-                else
-                {
-                    ipRegions = targetOptions.Regions.Select(r => r.Location);
-                }
+                ipPool = new IPPoolManager(ipNamePrefix, azFactory, _logger);
 
-                await ipPool.ProvisionIPPoolAsync(targetOptions.Global.Location, targetOptions.IPPerRegion, ipSku, ipRegions, globalNamingContext.Tags);
+                await ipPool.ProvisionIPPoolAsync(targetOptions.Global.Location, targetOptions.IPPerRegion, globalNamingContext.Tags, targetOptions.IsAKS, targetOptions.Regions);
             }
 
             var globalResources = await infra.CreateOrUpdateGlobalRGAsync(

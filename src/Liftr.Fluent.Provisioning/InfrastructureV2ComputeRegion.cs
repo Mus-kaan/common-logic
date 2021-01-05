@@ -6,6 +6,7 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent.Models;
+using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.Storage.Fluent;
@@ -29,7 +30,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             AKSInfo aksInfo,
             KeyVaultClient _kvClient,
             bool enableVNet,
-            string allowedAcisExtensions = null)
+            IPublicIPAddress outboundIp,
+            string allowedAcisExtensions = null,
+            bool supportAvailabilityZone = false)
         {
             if (computeNamingContext == null)
             {
@@ -49,6 +52,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             if (aksInfo == null)
             {
                 throw new ArgumentNullException(nameof(aksInfo));
+            }
+
+            if (outboundIp == null)
+            {
+                throw new ArgumentNullException(nameof(outboundIp));
             }
 
             ProvisionedComputeResources provisionedResources = new ProvisionedComputeResources();
@@ -178,6 +186,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     agentPoolName = agentPoolName.Substring(0, 11);
                 }
 
+                string outboundIpId = outboundIp.Id;
+
                 _logger.Information("Computed AKS agent pool profile name: {agentPoolName}", agentPoolName);
 
                 _logger.Information("Creating AKS cluster ...");
@@ -190,14 +200,13 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     aksInfo.AKSMachineType,
                     aksInfo.KubernetesVersion,
                     aksInfo.AKSMachineCount,
+                    outboundIpId,
                     computeNamingContext.Tags,
                     subnet,
-                    agentPoolProfileName: agentPoolName);
+                    agentPoolProfileName: agentPoolName,
+                    supportAvailabilityZone);
 
                 _logger.Information("Created AKS cluster with Id {ResourceId}", provisionedResources.AKS.Id);
-
-                // Wait for 10 minutes to make sure the AKS MIs can be listed.
-                await Task.Delay(TimeSpan.FromMinutes(10));
             }
             else
             {
@@ -226,10 +235,23 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 throw ex;
             }
 
-            var mcMIList = await liftrAzure.ListAKSMCMIAsync(rgName, aksName, computeNamingContext.Location);
+            IIdentity kubeletMI = null;
+            var delayCounter = 0;
+            const int AKSMIListingMaxDelayCounter = 20;
 
-            // e.g. sp-test-com20200608-wus2-aks-agentpool
-            var kubeletMI = mcMIList.FirstOrDefault(id => id.Name.OrdinalStartsWith(aksName));
+            while (kubeletMI is null && delayCounter < AKSMIListingMaxDelayCounter)
+            {
+                _logger.Information($"Waiting for 2 minutes before listing kubelet MI for AKS {aksName} and resourcegroup {rgName}");
+
+                // Wait for 2 minutes to ensure the AKS MIs can be listed.
+                await Task.Delay(TimeSpan.FromMinutes(2));
+
+                var mcMIList = await liftrAzure.ListAKSMCMIAsync(rgName, aksName, computeNamingContext.Location);
+
+                // e.g. sp-test-com20200608-wus2-aks-agentpool
+                kubeletMI = mcMIList.FirstOrDefault(id => id.Name.OrdinalStartsWith(aksName));
+            }
+
             if (kubeletMI == null)
             {
                 var errMsg = $"Cannot find the kubelet managed identity. There should be exactly one kubelet MI for aks: '{provisionedResources.AKS.Id}'. If the AKS cluster is just created, please wait for several minutes and retry.";

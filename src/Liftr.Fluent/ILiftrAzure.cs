@@ -211,9 +211,11 @@ namespace Microsoft.Liftr.Fluent
             ContainerServiceVMSizeTypes vmSizeType,
             string k8sVersion,
             int vmCount,
+            string outboundIPId,
             IDictionary<string, string> tags,
             ISubnet subnet = null,
-            string agentPoolProfileName = "ap");
+            string agentPoolProfileName = "ap",
+            bool supportAvailabilityZone = false);
 
         Task<IKubernetesCluster> GetAksClusterAsync(string aksResourceId);
 

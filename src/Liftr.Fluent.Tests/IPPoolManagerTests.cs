@@ -9,9 +9,11 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
+using Microsoft.Liftr.Hosting.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -38,27 +40,50 @@ namespace Microsoft.Liftr.Fluent.Tests
             TestCommon.AddCommonTags(context.Tags);
 
             var baseName = SdkContext.RandomResourceName("v", 3);
-            var rgName = context.ResourceGroupName(baseName);
             var prefix = context.GenerateCommonName(baseName, noRegion: true);
+            var rgName = prefix + "-ip-pool-rg";
 
             using var testScope = new TestResourceGroupScope(rgName);
 
             var regions = new List<Region> { location, Region.USEast2 };
+            IEnumerable<RegionOptions> regionOptions = GetRegionOptions(regions);
 
             try
             {
                 var clientFactory = new LiftrAzureFactory(testScope.Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
                 var client = clientFactory.GenerateLiftrAzure();
 
-                var pool = new IPPoolManager(rgName, prefix, clientFactory, testScope.Logger);
+                var pool = new IPPoolManager(prefix, clientFactory, testScope.Logger);
 
-                await pool.ProvisionIPPoolAsync(location, 5, PublicIPSkuType.Basic, regions, context.Tags);
-
+                await pool.ProvisionIPPoolAsync(location, 5, new Dictionary<string, string>() { { "env", "test" } }, false, regionOptions);
                 var allIPs = await pool.ListAllIPAsync(location);
                 Assert.Equal(5, allIPs.Count());
 
                 var ip1 = await pool.GetAvailableIPAsync(location);
                 Assert.EndsWith("-01", ip1.Name, StringComparison.Ordinal);
+
+                await pool.ProvisionIPPoolAsync(location, 1, new Dictionary<string, string>() { { "env", "test" } }, true, regionOptions);
+                allIPs = await pool.ListAllIPAsync(location, IPCategory.Inbound);
+                Assert.Single(allIPs);
+
+                var ip2 = await pool.GetAvailableIPAsync(location, IPCategory.Inbound);
+                var ip2Name = ip2.Name;
+                Assert.Contains(IPCategory.Inbound.ToString(), ip2Name, StringComparison.Ordinal);
+
+                allIPs = await pool.ListAllIPAsync(location, IPCategory.Outbound);
+                Assert.Single(allIPs);
+
+                var ip3 = await pool.GetAvailableIPAsync(location, IPCategory.Outbound);
+                var ip3Name = ip3.Name;
+                Assert.Contains(IPCategory.Outbound.ToString(), ip3Name, StringComparison.Ordinal);
+
+                // Test for not existing IPs
+                await pool.ProvisionIPPoolAsync(Region.USEast2, 1, new Dictionary<string, string>() { { "env", "test" } }, true, regionOptions);
+                allIPs = await pool.ListAllIPAsync(Region.USEast2, IPCategory.Inbound);
+                Assert.Single(allIPs);
+
+                var ipNotExist = await pool.GetAvailableIPAsync(Region.UKSouth, IPCategory.Inbound);
+                Assert.Null(ipNotExist);
 
                 var vnet = await client.GetOrCreateVNetAsync(location, rgName, "test-vnet", context.Tags);
 
@@ -76,14 +101,32 @@ namespace Microsoft.Liftr.Fluent.Tests
                         .WithTags(context.Tags)
                         .CreateAsync();
 
-                var ip2 = await pool.GetAvailableIPAsync(location);
-                Assert.EndsWith("-02", ip2.Name, StringComparison.Ordinal);
+                var ip4 = await pool.GetAvailableIPAsync(location);
+                Assert.EndsWith("-02", ip4.Name, StringComparison.Ordinal);
             }
             catch (Exception ex)
             {
                 testScope.Logger.Error(ex, ex.Message);
                 throw;
             }
+        }
+
+        private IEnumerable<RegionOptions> GetRegionOptions(IEnumerable<Region> regions)
+        {
+            List<RegionOptions> regionOptions = new List<RegionOptions>();
+
+            foreach (var region in regions)
+            {
+                var regionOption = new RegionOptions
+                {
+                    Location = region,
+                    ComputeBaseName = $"testCompute-{Guid.NewGuid()}",
+                    DataBaseName = $"testDb-{Guid.NewGuid()}",
+                };
+                regionOptions.Add(regionOption);
+            }
+
+            return regionOptions;
         }
     }
 }

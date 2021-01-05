@@ -3,7 +3,9 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.KeyVault;
+using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent;
+using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Fluent;
@@ -33,11 +35,13 @@ namespace Microsoft.Liftr.SimpleDeploy
             File.WriteAllText("global-vault-name.txt", globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
 
             IPPoolManager ipPool = null;
+
+            var aksHelper = new AKSNetworkHelper(_logger);
+
             if (targetOptions.IPPerRegion > 0)
             {
                 var ipNamePrefix = globalNamingContext.GenerateCommonName(targetOptions.Global.BaseName, noRegion: true);
-                var poolRG = ipNamePrefix + "-ip-pool-rg";
-                ipPool = new IPPoolManager(poolRG, ipNamePrefix, azFactory, _logger);
+                ipPool = new IPPoolManager(ipNamePrefix, azFactory, _logger);
             }
 
             var parsedRegionInfo = GetRegionalOptions(targetOptions);
@@ -93,9 +97,33 @@ namespace Microsoft.Liftr.SimpleDeploy
                 throw new InvalidOperationException(errMsg);
             }
 
+            IPublicIPAddress outboundIpAddress = null;
+
             if (targetOptions.AKSConfigurations != null)
             {
                 ProvisionedComputeResources computeResources = null;
+
+                // Find Outbound Public IP for AKS cluster creation
+                if (targetOptions.IPPerRegion >= 3)
+                {
+                    // Check if Outbound Public IP under AKS network already exists
+                    try
+                    {
+                        outboundIpAddress = await aksHelper.GetAKSPublicIPAsync(liftrAzure, aksRGName, aksName, regionOptions.Location, IPCategory.Outbound);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        _logger.Information($"Public IP is not available from AKS Network as AKS Cluster doesn't exist in region {regionOptions.Location}. Reason: {ex.Message}. We can go ahead for Outbound Public IP creation for AKS.");
+                    }
+
+                    if (outboundIpAddress is null)
+                    {
+                        outboundIpAddress = await ipPool.GetAvailableIPAsync(regionOptions.Location, IPCategory.Outbound);
+                    }
+
+                    _logger.Information($"Outbound IP address {outboundIpAddress?.IPAddress} created for the AKS Cluster...");
+                }
+
                 if (parsedRegionInfo.ComputeRegionOptions != null)
                 {
                     computeResources = await infra.CreateOrUpdateComputeRegionAsync(
@@ -105,7 +133,9 @@ namespace Microsoft.Liftr.SimpleDeploy
                         targetOptions.AKSConfigurations,
                         kvClient,
                         targetOptions.EnableVNet,
-                        allowedAcisExtensions);
+                        outboundIpAddress,
+                        allowedAcisExtensions,
+                        regionOptions.SupportAvailabilityZone);
                 }
                 else
                 {
@@ -124,7 +154,9 @@ namespace Microsoft.Liftr.SimpleDeploy
                         regionalComputeOptions,
                         targetOptions.AKSConfigurations,
                         kvClient,
-                        targetOptions.EnableVNet);
+                        targetOptions.EnableVNet,
+                        outboundIpAddress,
+                        regionOptions.SupportAvailabilityZone);
                 }
 
                 if (computeResources.ThanosStorageAccount != null)
@@ -151,29 +183,15 @@ namespace Microsoft.Liftr.SimpleDeploy
                 {
                 }
 
-                var pip = await WriteReservedIPToDiskAsync(azFactory, aksRGName, aksName, parsedRegionInfo.AKSRegion, targetOptions, ipPool);
-                if (pip?.Name?.OrdinalContains(IPPoolManager.c_reservedNamePart) == true)
-                {
-                    try
-                    {
-                        _logger.Information("Granting the Network contrinutor over the public IP '{pipId}' to the AKS SPN with object Id '{AKSobjectId}' ...", pip.Id, computeResources.AKSObjectId);
-                        await liftrAzure.Authenticated.RoleAssignments
-                            .Define(SdkContext.RandomGuid())
-                            .ForObjectId(computeResources.AKSObjectId)
-                            .WithBuiltInRole(BuiltInRole.NetworkContributor)
-                            .WithResourceScope(pip)
-                            .CreateAsync();
-                        _logger.Information("Granted Network contrinutor.");
-                    }
-                    catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
-                    {
-                    }
-                    catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
-                    {
-                        _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", computeResources.AKSObjectId);
-                        throw;
-                    }
-                }
+                IPublicIPAddress inboundIpAddress = null;
+
+                _logger.Information($"Writing Inbound Public IP to disk on file public-ip.txt for deployment of AKS {aksName} under resource group {aksRGName}");
+                inboundIpAddress = await WriteReservedInboundIPToDiskAsync(azFactory, aksRGName, aksName, parsedRegionInfo.AKSRegion, targetOptions, ipPool);
+
+                await GrantNetworkContributorRoleAsync(inboundIpAddress, computeResources, liftrAzure);
+
+                // OutboundIP assigned to AKS is also provided Network Contributor role so that Nginx controller can perform action: Microsoft.Network/publicIPAddresses/join/action on this public IP
+                await GrantNetworkContributorRoleAsync(outboundIpAddress, computeResources, liftrAzure);
 
                 File.WriteAllText("vault-name.txt", computeResources.KeyVault.Name);
                 File.WriteAllText("aks-kv.txt", computeResources.KeyVault.VaultUri);
@@ -258,6 +276,32 @@ namespace Microsoft.Liftr.SimpleDeploy
             _logger.Information("-----------------------------------------------------------------------");
             _logger.Information($"Successfully finished managing regional compute resources.");
             _logger.Information("-----------------------------------------------------------------------");
+        }
+
+        private async Task GrantNetworkContributorRoleAsync(IPublicIPAddress pip, ProvisionedComputeResources computeResources, ILiftrAzure liftrAzure)
+        {
+            if (pip?.Name?.OrdinalContains(IPPoolManager.c_reservedNamePart) == true)
+            {
+                try
+                {
+                    _logger.Information($"Granting the Network contributor over the public IP {pip?.IPAddress} Id: {pip?.Id} to the AKS SPN with object Id {computeResources.AKSObjectId} ...");
+                    await liftrAzure.Authenticated.RoleAssignments
+                        .Define(SdkContext.RandomGuid())
+                        .ForObjectId(computeResources.AKSObjectId)
+                        .WithBuiltInRole(BuiltInRole.NetworkContributor)
+                        .WithResourceScope(pip)
+                        .CreateAsync();
+                    _logger.Information($"Granted Network contributor Role to public IP {pip?.IPAddress} Id: {pip?.Id} to the AKS SPN with object Id {computeResources.AKSObjectId} ...");
+                }
+                catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
+                {
+                }
+                catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
+                {
+                    _logger.Error("The AKS SPN object Id '{AKSobjectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", computeResources.AKSObjectId);
+                    throw;
+                }
+            }
         }
     }
 }

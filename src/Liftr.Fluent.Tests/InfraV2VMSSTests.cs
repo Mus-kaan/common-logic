@@ -7,6 +7,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
+using Microsoft.Liftr.Hosting.Contracts;
 using Microsoft.Liftr.KeyVault;
 using Newtonsoft.Json;
 using System;
@@ -67,14 +68,14 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var client = regionalDataScope.Client;
 
                     var ipNamePrefix = context.GenerateCommonName(globalBaseName, noRegion: true);
-                    var poolRG = ipNamePrefix + "-ip-pool-rg";
-                    var ipPool = new IPPoolManager(poolRG, ipNamePrefix, regionalDataScope.AzFactory, logger);
+                    var ipPool = new IPPoolManager(ipNamePrefix, regionalDataScope.AzFactory, logger);
 
                     var gblResources = await infra.CreateOrUpdateGlobalRGAsync(globalBaseName, context, $"{shortPartnerName}-{globalBaseName}.dummy.com", addGlobalDB: false);
 
                     var regions = new List<Region>() { context.Location };
-                    await ipPool.ProvisionIPPoolAsync(context.Location, 3, PublicIPSkuType.Standard, regions, context.Tags);
+                    IEnumerable<RegionOptions> regionOptions = GetRegionOptions(regions);
 
+                    await ipPool.ProvisionIPPoolAsync(context.Location, 3, new Dictionary<string, string>() { { "env", "test" } }, false, regionOptions);
                     await client.GetOrCreateResourceGroupAsync(context.Location, dataRGName, context.Tags);
                     var laName = context.LogAnalyticsName("gbl001");
                     var logAnalytics = await client.GetOrCreateLogAnalyticsWorkspaceAsync(context.Location, dataRGName, laName, context.Tags);
@@ -134,6 +135,24 @@ namespace Microsoft.Liftr.Fluent.Tests
                     throw;
                 }
             }
+        }
+
+        private IEnumerable<RegionOptions> GetRegionOptions(IEnumerable<Region> regions)
+        {
+            List<RegionOptions> regionOptions = new List<RegionOptions>();
+
+            foreach (var region in regions)
+            {
+                var regionOption = new RegionOptions
+                {
+                    Location = region,
+                    ComputeBaseName = $"testCompute-{Guid.NewGuid()}",
+                    DataBaseName = $"testDb-{Guid.NewGuid()}",
+                };
+                regionOptions.Add(regionOption);
+            }
+
+            return regionOptions;
         }
     }
 }

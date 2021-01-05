@@ -55,8 +55,8 @@ namespace Microsoft.Liftr.SimpleDeploy
                 }
 
                 var aksHelper = new AKSNetworkHelper(_logger);
-                var pip = await aksHelper.GetAKSPublicIPAsync(liftrAzure, aksRGName, aksName, aksRegion);
-                if (pip == null)
+                var inboundIP = await aksHelper.GetAKSPublicIPAsync(liftrAzure, aksRGName, aksName, aksRegion, IPCategory.Inbound);
+                if (inboundIP == null)
                 {
                     var errMsg = $"Cannot find the public Ip address for the AKS cluster. aksRGName:{aksRGName}, aksName:{aksName}, region:{aksRegion}.";
                     _logger.Warning(errMsg);
@@ -68,25 +68,25 @@ namespace Microsoft.Liftr.SimpleDeploy
                 }
                 else
                 {
-                    _logger.Information("Find the IP of the AKS is: {IPAddress}", pip.IPAddress);
+                    _logger.Information("Find the IP of the AKS is: {IPAddress}", inboundIP.IPAddress);
 
-                    if (string.IsNullOrEmpty(pip.IPAddress))
+                    if (string.IsNullOrEmpty(inboundIP.IPAddress))
                     {
-                        _logger.Error("The IP address is null of the created Pulic IP with Id {PipResourceId}", pip.Id);
-                        throw new InvalidOperationException($"The IP address is null of the created Pulic IP with Id {pip.Id}");
+                        _logger.Error("The IP address is null of the created Pulic IP with Id {PipResourceId}", inboundIP.Id);
+                        throw new InvalidOperationException($"The IP address is null of the created Pulic IP with Id {inboundIP.Id}");
                     }
 
-                    await dnsZone.Update().DefineARecordSet(aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
-                    await dnsZone.Update().DefineARecordSet("*." + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
-                    await dnsZone.Update().DefineARecordSet("thanos-0-" + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
-                    await dnsZone.Update().DefineARecordSet("thanos-1-" + aksName).WithIPv4Address(pip.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
-                    _logger.Information("Successfully added DNS A record '{recordName}' to IP '{ipAddress}'.", aksName, pip.IPAddress);
+                    await dnsZone.Update().DefineARecordSet(aksName).WithIPv4Address(inboundIP.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
+                    await dnsZone.Update().DefineARecordSet("*." + aksName).WithIPv4Address(inboundIP.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
+                    await dnsZone.Update().DefineARecordSet("thanos-0-" + aksName).WithIPv4Address(inboundIP.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
+                    await dnsZone.Update().DefineARecordSet("thanos-1-" + aksName).WithIPv4Address(inboundIP.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
+                    _logger.Information("Successfully added DNS A record '{recordName}' to IP '{ipAddress}'.", aksName, inboundIP.IPAddress);
 
                     if (_commandOptions.Action == ActionType.UpdateComputeIPInTrafficManager)
                     {
                         var epName = $"{aksRGName}-{SdkContext.RandomResourceName(string.Empty, 5).Substring(0, 3)}";
                         _logger.Information("New endpoint name: {epName}", epName);
-                        await aksHelper.AddPulicIpToTrafficManagerAsync(az, tmId, epName, pip.IPAddress, enabled: true);
+                        await aksHelper.AddPulicIpToTrafficManagerAsync(az, tmId, epName, inboundIP.IPAddress, enabled: true);
                         _logger.Information("Successfully updated AKS public IP in the traffic manager.");
                     }
                 }

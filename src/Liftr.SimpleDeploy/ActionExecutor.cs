@@ -208,8 +208,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     if (targetOptions.IPPerRegion > 0)
                     {
                         var ipNamePrefix = globalNamingContext.GenerateCommonName(targetOptions.Global.BaseName, noRegion: true);
-                        var poolRG = ipNamePrefix + "-ip-pool-rg";
-                        ipPool = new IPPoolManager(poolRG, ipNamePrefix, azFactory, _logger);
+                        ipPool = new IPPoolManager(ipNamePrefix, azFactory, _logger);
                     }
 
                     if (_commandOptions.Action == ActionType.ExportACRInformation)
@@ -368,7 +367,7 @@ namespace Microsoft.Liftr.SimpleDeploy
             return options;
         }
 
-        private async Task<IPublicIPAddress> WriteReservedIPToDiskAsync(
+        private async Task<IPublicIPAddress> WriteReservedInboundIPToDiskAsync(
             LiftrAzureFactory azFactory,
             string aksRGName,
             string aksName,
@@ -376,16 +375,19 @@ namespace Microsoft.Liftr.SimpleDeploy
             HostingEnvironmentOptions targetOptions,
             IPPoolManager ipPool)
         {
-            if (targetOptions.IPPerRegion == 0)
+            if (targetOptions.IPPerRegion < 3)
             {
                 return null;
             }
 
+            IPublicIPAddress pip = null;
+
             var aksHelper = new AKSNetworkHelper(_logger);
-            var pip = await aksHelper.GetAKSPublicIPAsync(azFactory.GenerateLiftrAzure(), aksRGName, aksName, aksLocation);
+            pip = await aksHelper.GetAKSPublicIPAsync(azFactory.GenerateLiftrAzure(), aksRGName, aksName, aksLocation, IPCategory.Inbound);
+
             if (pip == null)
             {
-                pip = await ipPool.GetAvailableIPAsync(aksLocation);
+                pip = await ipPool.GetAvailableIPAsync(aksLocation, IPCategory.Inbound);
             }
 
             if (pip != null)
