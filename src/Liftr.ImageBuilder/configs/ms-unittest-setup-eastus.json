@@ -1,10 +1,10 @@
 {
-  "SubscriptionId": "60fad35b-3a47-4ca0-b691-4a789f737cea",
+  "SubscriptionId": "f885cf14-b751-43c1-9536-dc5b1be02bc0",
   "Location": "eastus",
   "ResourceGroupName": "LIBUnitTestRG",
   "ImageGalleryName": "LIBUnitTestDIG",
   "PackerVMSize": "Standard_D4s_v3",
-  "ImageVersionRetentionTimeInDays": 300,
+  "ImageVersionRetentionTimeInDays": 3000,
   "RegionalReplicaCount": 1,
   "ImageReplicationRegions": [
     "eastus"
