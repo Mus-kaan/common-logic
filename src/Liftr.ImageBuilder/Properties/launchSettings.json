@@ -26,7 +26,7 @@
     },
     "ms-linux-img-unit-test-setup": {
       "commandName": "Project",
-      "commandLineArgs": "-f configs\\ms-unittest-setup-eastus.json --srcImg U1804LTS -n LiftrUTImg -v 1.0.666 --artifactPath configs\\test-packer.tar --authFile my.azureauth-ms.auth.json"
+      "commandLineArgs": "-f configs\\ms-unittest-setup-eastus.json --srcImg U1804LTS -n LiftrUTImg -v 1.0.666 --artifactPath configs\\packer-files-ub18.zip --authFile my.azureauth-ms.auth.json"
     },
     "ms-windows-img-unit-test-setup": {
       "commandName": "Project",
