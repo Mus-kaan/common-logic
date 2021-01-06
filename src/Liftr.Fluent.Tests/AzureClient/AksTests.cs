@@ -5,7 +5,6 @@
 using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Azure.Management.Network.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Hosting.Contracts;
 using System;
 using System.Collections.Generic;

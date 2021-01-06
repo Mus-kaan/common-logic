@@ -3,16 +3,12 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.KeyVault;
-using Microsoft.Azure.Management.Network.Fluent.Models;
-using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
 using Microsoft.Liftr.Hosting.Contracts;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.SimpleDeploy

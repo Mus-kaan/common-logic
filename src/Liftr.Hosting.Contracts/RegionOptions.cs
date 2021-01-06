@@ -46,7 +46,7 @@ namespace Microsoft.Liftr.Hosting.Contracts
                 throw new InvalidHostingOptionException($"{nameof(DataBaseName)} cannot be null or empty.");
             }
 
-            if (string.IsNullOrEmpty(ComputeBaseName))
+            if (IsSeparatedDataAndComputeRegion)
             {
                 if (ComputeRegions == null || !ComputeRegions.Any())
                 {
@@ -64,30 +64,39 @@ namespace Microsoft.Liftr.Hosting.Contracts
                 {
                     throw new InvalidHostingOptionException("Duplicated compute location information.");
                 }
-            }
 
-            if (SupportAvailabilityZone)
-            {
-                bool canCreateAks = ValidateLocation(Location);
-
-                if (!canCreateAks)
+                if (SupportAvailabilityZone)
                 {
-                    throw new InvalidHostingOptionException($"Availability Zone support is not provided for location {Location}. Please verify from this doc: https://docs.microsoft.com/en-us/azure/aks/availability-zones#limitations-and-region-availability ");
+                    ValidateAKSZoneLocation(Location);
                 }
             }
         }
 
-        public static bool ValidateLocation(Region location)
+        public static void ValidateAKSZoneLocation(Region location)
         {
             // https://docs.microsoft.com/en-us/azure/aks/availability-zones#limitations-and-region-availability  #Add or update locations if doc is updated.
-            Region[] locationsWithAvailabilityZone = { Region.AustraliaEast, Region.USCentral, Region.USEast2, Region.USEast, Region.FranceCentral, Region.JapanEast, Region.EuropeNorth, Region.AsiaSouthEast, Region.UKSouth, Region.EuropeWest, Region.USWest2 };
+            Region[] locationsWithAvailabilityZone =
+                {
+                Region.AustraliaEast,
+                Region.CanadaCentral,
+                Region.USCentral,
+                Region.USEast,
+                Region.USEast2,
+                Region.FranceCentral,
+                Region.JapanEast,
+                Region.EuropeNorth,
+                Region.AsiaSouthEast,
+                Region.UKSouth,
+                Region.EuropeWest,
+                Region.USWest2,
+                };
 
             if (locationsWithAvailabilityZone.Contains(location))
             {
-                return true;
+                return;
             }
 
-            return false;
+            throw new InvalidHostingOptionException($"Availability Zone support is not provided for region '{location}'. Please verify from this doc: https://docs.microsoft.com/en-us/azure/aks/availability-zones#limitations-and-region-availability ");
         }
     }
 }

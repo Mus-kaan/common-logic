@@ -26,6 +26,11 @@ namespace Microsoft.Liftr.Hosting.Contracts
             {
                 throw new InvalidHostingOptionException($"{nameof(ComputeBaseName)} cannot be null or empty.");
             }
+
+            if (SupportAvailabilityZone)
+            {
+                RegionOptions.ValidateAKSZoneLocation(Location);
+            }
         }
     }
 }
