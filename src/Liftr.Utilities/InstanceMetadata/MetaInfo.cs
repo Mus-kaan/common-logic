@@ -16,6 +16,8 @@ namespace Microsoft.Liftr.Utilities
 
         public string Timestamp { get; set; }
 
+        public string OutboundIP { get; set; }
+
         public ComputeTagMetadata GetComputeTagMetadata()
         {
             ComputeTagMetadata result = new ComputeTagMetadata();

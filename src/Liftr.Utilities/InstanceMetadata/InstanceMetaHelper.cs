@@ -43,6 +43,7 @@ namespace Microsoft.Liftr.Utilities
                 }
 
                 s_metaInfo.InstanceMeta = await InstanceMetadata.LoadAsync();
+                s_metaInfo.OutboundIP = await MetadataHelper.GetPublicIPAddressAsync(noThrow: true);
                 s_loadTime = DateTime.UtcNow;
                 return s_metaInfo;
             }
