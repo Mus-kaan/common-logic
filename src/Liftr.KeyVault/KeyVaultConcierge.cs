@@ -66,16 +66,33 @@ namespace Microsoft.Liftr.KeyVault
             }
         }
 
-        public async Task<SecretBundle> GetSecretAsync(string secretName)
+        public async Task<SecretBundle> GetSecretAsync(string secretName, bool noThrowNotFound = false)
         {
             _logger.Information("Start getting secret with name '{secretName}' in vault '{vaultBaseUrl}' ...", secretName, _vaultBaseUrl);
-            var result = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, secretName);
-            _logger.Information("Finished getting secret with name: {secretName}.", secretName);
-            return result;
+            try
+            {
+                var result = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, secretName);
+                _logger.Information("Finished getting secret with name: {secretName}.", secretName);
+                return result;
+            }
+            catch (KeyVaultErrorException ex) when (noThrowNotFound && ex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return null;
+            }
         }
 
-        public async Task<SecretBundle> SetSecretAsync(string secretName, string value, IDictionary<string, string> tags = null)
+        public async Task<SecretBundle> SetSecretAsync(string secretName, string value, IDictionary<string, string> tags = null, bool setOnlyWhenDifferent = true)
         {
+            if (setOnlyWhenDifferent)
+            {
+                var existing = await GetSecretAsync(secretName, noThrowNotFound: true);
+                if (existing != null && existing.Value.StrictEquals(value))
+                {
+                    _logger.Information("Didn't overwrite the current secret version since the new value is the same.");
+                    return existing;
+                }
+            }
+
             _logger.Information("Start setting secret with name '{secretName}' in vault '{vaultBaseUrl}' ...", secretName, _vaultBaseUrl);
             var result = await _keyVaultClient.SetSecretAsync(_vaultBaseUrl, secretName, value, tags);
             _logger.Information("Finished setting secret with name: {secretName}.", secretName);
