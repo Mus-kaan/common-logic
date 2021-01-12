@@ -47,6 +47,11 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 clientRequestId = GetHeaderValue(httpContext, HeaderConstants.ARMClientRequestId);
             }
 
+            if (string.IsNullOrEmpty(clientRequestId))
+            {
+                clientRequestId = GetHeaderValue(httpContext, HeaderConstants.MarketplaceRequestId);
+            }
+
             if (string.IsNullOrEmpty(armRequestTrackingId))
             {
                 armRequestTrackingId = GetHeaderValue(httpContext, HeaderConstants.ARMRequestTrackingId);
@@ -55,6 +60,11 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             if (string.IsNullOrEmpty(correlationtId))
             {
                 correlationtId = GetHeaderValue(httpContext, HeaderConstants.RequestCorrelationId);
+            }
+
+            if (string.IsNullOrEmpty(correlationtId))
+            {
+                correlationtId = GetHeaderValue(httpContext, HeaderConstants.MarketplaceCorrelationId);
             }
 
             if (string.IsNullOrEmpty(correlationtId))

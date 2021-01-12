@@ -32,5 +32,9 @@ namespace Microsoft.Liftr.DiagnosticSource
         public const string LiftrRequestCorrelationId = "X-Liftr-Correlation-Request-Id";
 
         public const string LiftrLogLevelOverwrite = "X-Liftr-Log-Filter-Overwrite";
+
+        public const string MarketplaceRequestId = "x-ms-requestId";
+
+        public const string MarketplaceCorrelationId = "x-ms-correlationid";
     }
 }
