@@ -6,4 +6,7 @@
     <AssemblyName>Microsoft.Liftr.ACIS.Contracts</AssemblyName>
     <RootNamespace>Microsoft.Liftr.ACIS.Contracts</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
+  </ItemGroup>
 </Project>

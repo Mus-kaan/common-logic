@@ -19,7 +19,7 @@ namespace Microsoft.Liftr.Contracts.MonitoringSvc
         public string AccountName { get; }
 
         /// <summary>
-        /// Name of the storage account or the queue.
+        /// Resource Id of the storage account
         /// </summary>
         string ResourceId { get; }
 
