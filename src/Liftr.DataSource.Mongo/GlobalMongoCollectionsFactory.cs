@@ -36,6 +36,30 @@ namespace Microsoft.Liftr.DataSource.Mongo
             return collection;
         }
 
+        public IMongoCollection<MarketplaceRelationshipEntity> GetOrCreateMarketplaceRelationshipEntityCollection(string collectionName)
+        {
+            IMongoCollection<MarketplaceRelationshipEntity> collection = null;
+
+            if (!CollectionExists(_db, collectionName))
+            {
+                _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
+                collection = CreateCollection<MarketplaceRelationshipEntity>(collectionName);
+
+                var recourceIdIx = new CreateIndexModel<MarketplaceRelationshipEntity>(Builders<MarketplaceRelationshipEntity>.IndexKeys.Ascending(item => item.ResourceId), new CreateIndexOptions<MarketplaceRelationshipEntity> { Unique = true });
+                collection.Indexes.CreateOne(recourceIdIx);
+
+                var marketplaceSubscriptionIdx = new CreateIndexModel<MarketplaceRelationshipEntity>(Builders<MarketplaceRelationshipEntity>.IndexKeys.Ascending(item => item.MarketplaceSubscription), new CreateIndexOptions<MarketplaceRelationshipEntity> { Unique = false });
+                collection.Indexes.CreateOne(marketplaceSubscriptionIdx);
+            }
+            else
+            {
+                collection = GetCollection<MarketplaceRelationshipEntity>(collectionName);
+            }
+
+            collection = collection.WithReadPreference(new ReadPreference(ReadPreferenceMode.SecondaryPreferred));
+            return collection;
+        }
+
         public IMongoCollection<MarketplaceSaasResourceEntity> GetOrCreateMarketplaceSaasCollection(string collectionName)
         {
             IMongoCollection<MarketplaceSaasResourceEntity> collection = null;
