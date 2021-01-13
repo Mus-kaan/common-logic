@@ -182,6 +182,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     supportAvailabilityZone);
 
                 _logger.Information("Created AKS cluster with Id {ResourceId}", aks.Id);
+
+                // Wait for 8 minutes for AKS to finish the actual supporting resource creation.
+                await Task.Delay(TimeSpan.FromMinutes(8));
             }
             else
             {

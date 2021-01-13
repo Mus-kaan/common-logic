@@ -6,7 +6,7 @@
     {
       "EnvironmentName": "Dev",
       "DomainName": "sample-global-dev.azliftr-test.io",
-      "AzureSubscription": "f885cf14-b751-43c1-9536-dc5b1be02bc0", // LiftrToolsUnitTestONLY
+      "AzureSubscription": "f885cf14-b751-43c1-9536-dc5b1be02bc0", // 'LiftrToolsUnitTestONLY'
       "EnableVNet": false,
       "OneCertCertificates": { // key is certificate name, value is certificate subject
         "GenevaClientCert": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
@@ -17,20 +17,21 @@
       },
       "Global": {
         "Location": "centralus",
-        "BaseName": "gbl200902"
+        "BaseName": "gbl210101"
       },
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "da200903",
+          "DataBaseName": "da210105",
           "ComputeRegions": [
             {
               "Location": "southcentralus",
-              "ComputeBaseName": "co200907"
+              "ComputeBaseName": "co210111",
+              "SupportAvailabilityZone": false
             },
             {
               "Location": "eastus",
-              "ComputeBaseName": "co200907"
+              "ComputeBaseName": "co210111"
             }
           ]
         }
@@ -39,7 +40,7 @@
     {
       "EnvironmentName": "Test",
       "DomainName": "sample-global-test.azliftr-test.io",
-      "AzureSubscription": "f885cf14-b751-43c1-9536-dc5b1be02bc0", // LiftrToolsUnitTestONLY
+      "AzureSubscription": "f885cf14-b751-43c1-9536-dc5b1be02bc0", // 'LiftrToolsUnitTestONLY'
       "EnableVNet": false,
       "OneCertCertificates": { // key is certificate name, value is certificate subject
         "GenevaClientCert": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
@@ -50,20 +51,21 @@
       },
       "Global": {
         "Location": "centralus",
-        "BaseName": "gbl200902"
+        "BaseName": "gbl210101"
       },
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "da200903",
+          "DataBaseName": "da210105",
           "ComputeRegions": [
             {
               "Location": "southcentralus",
-              "ComputeBaseName": "co200907"
+              "ComputeBaseName": "co210111",
+              "SupportAvailabilityZone": false
             },
             {
               "Location": "eastus",
-              "ComputeBaseName": "co200907"
+              "ComputeBaseName": "co210111"
             }
           ]
         }

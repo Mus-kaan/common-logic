@@ -22,6 +22,8 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public string AKSName { get; set; }
 
-        public Region AKSRegion => ComputeRegionNamingContext == null ? RegionNamingContext.Location : ComputeRegionNamingContext.Location;
+        public Region AKSRegion => RegionOptions.IsSeparatedDataAndComputeRegion ? ComputeRegionNamingContext.Location : RegionNamingContext.Location;
+
+        public bool EnableAvailabilityZone => RegionOptions.IsSeparatedDataAndComputeRegion ? ComputeRegionOptions.SupportAvailabilityZone : RegionOptions.SupportAvailabilityZone;
     }
 }

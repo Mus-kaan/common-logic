@@ -48,6 +48,8 @@ namespace Microsoft.Liftr.SimpleDeploy
             var regionalNamingContext = parsedRegionInfo.RegionNamingContext;
             var aksRGName = parsedRegionInfo.AKSRGName;
             var aksName = parsedRegionInfo.AKSName;
+            var aksRegion = parsedRegionInfo.AKSRegion;
+            var enableAKSAvailabilityZone = parsedRegionInfo.EnableAvailabilityZone;
             regionalNamingContext.Tags["GlobalRG"] = globalRGName;
 
             RegionalComputeOptions regionalComputeOptions = new RegionalComputeOptions()
@@ -108,16 +110,23 @@ namespace Microsoft.Liftr.SimpleDeploy
                     // Check if Outbound Public IP under AKS network already exists
                     try
                     {
-                        outboundIpAddress = await aksHelper.GetAKSPublicIPAsync(liftrAzure, aksRGName, aksName, regionOptions.Location, IPCategory.Outbound);
+                        outboundIpAddress = await aksHelper.GetAKSPublicIPAsync(liftrAzure, aksRGName, aksName, aksRegion, IPCategory.Outbound);
                     }
                     catch (InvalidOperationException ex)
                     {
-                        _logger.Information($"Public IP is not available from AKS Network as AKS Cluster doesn't exist in region {regionOptions.Location}. Reason: {ex.Message}. We can go ahead for Outbound Public IP creation for AKS.");
+                        _logger.Information($"Public IP is not available from AKS Network as AKS Cluster doesn't exist in region {aksRegion}. Reason: {ex.Message}. We can go ahead for Outbound Public IP creation for AKS.");
                     }
 
-                    if (outboundIpAddress is null)
+                    if (outboundIpAddress == null)
                     {
-                        outboundIpAddress = await ipPool.GetAvailableIPAsync(regionOptions.Location, IPCategory.Outbound);
+                        outboundIpAddress = await ipPool.GetAvailableIPAsync(aksRegion, IPCategory.Outbound);
+
+                        if (outboundIpAddress == null)
+                        {
+                            var ex = new InvalidOperationException($"Cannot get available IP address for region {aksRegion}");
+                            _logger.Error(ex, ex.Message);
+                            throw ex;
+                        }
                     }
 
                     _logger.Information($"Outbound IP address {outboundIpAddress?.IPAddress} created for the AKS Cluster...");
@@ -134,7 +143,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                         targetOptions.EnableVNet,
                         outboundIpAddress,
                         allowedAcisExtensions,
-                        regionOptions.SupportAvailabilityZone);
+                        enableAKSAvailabilityZone);
                 }
                 else
                 {
@@ -155,7 +164,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                         kvClient,
                         targetOptions.EnableVNet,
                         outboundIpAddress,
-                        regionOptions.SupportAvailabilityZone);
+                        enableAKSAvailabilityZone);
                 }
 
                 if (computeResources.ThanosStorageAccount != null)
