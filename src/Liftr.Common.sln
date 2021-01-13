@@ -189,7 +189,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Tests.ProvisioningUti
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.MarketplaceRelationship.DataSource.Tests", "Liftr.MarketplaceRelationship.DataSource.Tests\Liftr.MarketplaceRelationship.DataSource.Tests.csproj", "{A2AC2CA0-F4E6-4D33-898A-BFDCA1C8B110}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.MarketplaceRelationship.Datasource", "Liftr.MarketplaceRelationship.Datasource\Liftr.MarketplaceRelationship.Datasource.csproj", "{06169108-0AF2-4B9B-9C44-5A9BF6B2BF23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.MarketplaceRelationship.Datasource", "Liftr.MarketplaceRelationship.Datasource\Liftr.MarketplaceRelationship.Datasource.csproj", "{06169108-0AF2-4B9B-9C44-5A9BF6B2BF23}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Marketplace.WebhookQueue.Contracts", "Liftr.Marketplace.WebhookQueue.Contracts\Liftr.Marketplace.WebhookQueue.Contracts.csproj", "{C7539898-280D-433F-A491-43529D0D0BEA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -545,6 +547,10 @@ Global
 		{06169108-0AF2-4B9B-9C44-5A9BF6B2BF23}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06169108-0AF2-4B9B-9C44-5A9BF6B2BF23}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06169108-0AF2-4B9B-9C44-5A9BF6B2BF23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7539898-280D-433F-A491-43529D0D0BEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7539898-280D-433F-A491-43529D0D0BEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7539898-280D-433F-A491-43529D0D0BEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7539898-280D-433F-A491-43529D0D0BEA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
