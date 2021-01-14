@@ -11,12 +11,38 @@ namespace Microsoft.Liftr.DataSource.Mongo
 {
     public class MarketplaceRelationshipEntity : BaseResourceEntity
     {
-        public MarketplaceRelationshipEntity(MarketplaceSubscription marketplaceSubscription, string resourceId, string region, string tenantId)
+        public MarketplaceRelationshipEntity(
+            string entityId,
+            string resourceId,
+            string region,
+            string tenantId,
+            MarketplaceSubscription marketplaceSubscription)
         {
+            if (string.IsNullOrEmpty(entityId))
+            {
+                throw new ArgumentException($"'{nameof(entityId)}' cannot be null or empty", nameof(entityId));
+            }
+
+            if (string.IsNullOrEmpty(resourceId))
+            {
+                throw new ArgumentException($"'{nameof(resourceId)}' cannot be null or empty", nameof(resourceId));
+            }
+
+            if (string.IsNullOrEmpty(region))
+            {
+                throw new ArgumentException($"'{nameof(region)}' cannot be null or empty", nameof(region));
+            }
+
+            if (string.IsNullOrEmpty(tenantId))
+            {
+                throw new ArgumentException($"'{nameof(tenantId)}' cannot be null or empty", nameof(tenantId));
+            }
+
             MarketplaceSubscription = marketplaceSubscription ?? throw new ArgumentNullException(nameof(marketplaceSubscription));
-            ResourceId = resourceId ?? throw new ArgumentNullException(nameof(resourceId));
-            RPRegion = region ?? throw new ArgumentNullException(nameof(region));
-            TenantId = tenantId ?? throw new ArgumentNullException(nameof(tenantId));
+            ResourceId = resourceId.ToUpperInvariant();
+            Region = region.ToLowerInvariant();
+            TenantId = tenantId;
+            EntityId = entityId;
         }
 
         /// <summary>
@@ -27,9 +53,9 @@ namespace Microsoft.Liftr.DataSource.Mongo
         public MarketplaceSubscription MarketplaceSubscription { get; set; }
 
         /// <summary>
-        /// Region of the Resource Provider that provisions the resource
+        /// Region of the Resource
         /// </summary>
-        [BsonElement("rp_region")]
-        public string RPRegion { get; set; }
+        [BsonElement("region")]
+        public string Region { get; set; }
     }
 }

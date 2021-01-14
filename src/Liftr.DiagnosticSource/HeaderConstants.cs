@@ -33,8 +33,12 @@ namespace Microsoft.Liftr.DiagnosticSource
 
         public const string LiftrLogLevelOverwrite = "X-Liftr-Log-Filter-Overwrite";
 
+        /// <summary>
+        /// Headers from the Marketplace SaaS Fulfillment and Billing apis
+        /// https://docs.microsoft.com/en-us/azure/marketplace/partner-center-portal/marketplace-metering-service-apis
+        /// https://docs.microsoft.com/en-us/azure/marketplace/partner-center-portal/pc-saas-fulfillment-api-v2
+        /// </summary>
         public const string MarketplaceRequestId = "x-ms-requestId";
-
         public const string MarketplaceCorrelationId = "x-ms-correlationid";
     }
 }

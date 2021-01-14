@@ -19,10 +19,15 @@ namespace Microsoft.Liftr.MarketplaceRelationship.DataSource
         {
         }
 
-        public virtual async Task<IEnumerable<TEntity>> ListAsync(MarketplaceSubscription marketplaceSubscription)
+        public virtual async Task<IEnumerable<TEntity>> ListAsync(MarketplaceSubscription marketplaceSubscription, bool showActiveOnly = true)
         {
             var builder = Builders<TEntity>.Filter;
             var filter = builder.Eq(u => u.MarketplaceSubscription, marketplaceSubscription);
+
+            if (showActiveOnly)
+            {
+                filter &= builder.Eq(u => u.Active, true);
+            }
 
             await _rateLimiter.WaitAsync();
             try
