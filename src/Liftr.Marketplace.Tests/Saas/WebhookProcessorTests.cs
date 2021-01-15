@@ -91,7 +91,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             await webhookProcessor.ProcessWebhookAsync(payload);
 
             webhookProcessor.VerifyWebhookHandlerDeleteIsCalled();
-            webhookProcessor.VerifyUpdateOperationsCalled(payload, OperationUpdateStatus.Success);
+            webhookProcessor.VerifyUpdateOperationsNotCalled(payload, OperationUpdateStatus.Success);
         }
 
         [Fact]
@@ -109,7 +109,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             await webhookProcessor.ProcessWebhookAsync(payload);
 
             webhookProcessor.VerifyWebhookHandlerDeleteIsCalled();
-            webhookProcessor.VerifyUpdateOperationsCalled(payload, OperationUpdateStatus.Success);
+            webhookProcessor.VerifyUpdateOperationsNotCalled(payload, OperationUpdateStatus.Success);
         }
 
         [Fact]
@@ -127,7 +127,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             await webhookProcessor.ProcessWebhookAsync(payload);
 
             webhookProcessor.VerifyWebhookHandlerDeleteIsCalled();
-            webhookProcessor.VerifyUpdateOperationsCalled(payload, OperationUpdateStatus.Failure);
+            webhookProcessor.VerifyUpdateOperationsNotCalled(payload, OperationUpdateStatus.Success);
         }
 
         [Fact]
@@ -145,7 +145,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             await webhookProcessor.ProcessWebhookAsync(payload);
 
             webhookProcessor.VerifyWebhookHandlerSuspendIsCalled();
-            webhookProcessor.VerifyUpdateOperationsCalled(payload, OperationUpdateStatus.Success);
+            webhookProcessor.VerifyUpdateOperationsNotCalled(payload, OperationUpdateStatus.Success);
         }
 
         [Fact]
@@ -163,7 +163,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             await webhookProcessor.ProcessWebhookAsync(payload);
 
             webhookProcessor.VerifyWebhookHandlerSuspendIsCalled();
-            webhookProcessor.VerifyUpdateOperationsCalled(payload, OperationUpdateStatus.Failure);
+            webhookProcessor.VerifyUpdateOperationsNotCalled(payload, OperationUpdateStatus.Failure);
         }
 
         [Fact]

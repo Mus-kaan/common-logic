@@ -13,13 +13,21 @@ namespace Microsoft.Liftr.Marketplace.Saas.Interfaces
     public interface IWebhookMarketplaceCaller
     {
         /// <summary>
-        /// Webhook Authorization for Marketplace
+        /// Calling Get Operation API on Operation Id received from Webhook payload for authorization
         /// </summary>
+        /// <param name="marketplaceSubscription">Marketplace Subscription</param>
+        /// <param name="operationId">Operation Id</param>
+        /// <param name="cancellationToken">Cancellation Token</param>
+        /// <returns>SubscriptionOperation</returns>
         Task<SubscriptionOperation> AuthorizeWebhookWithMarketplaceAsync(MarketplaceSubscription marketplaceSubscription, Guid operationId, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Updating Webhook Operation Result on Partner side to Marketplace.
+        /// Updating Webhook Operation Result (Success/Failure) on Partner side to Marketplace.
         /// </summary>
+        /// <param name="marketplaceSubscription">Marketplace Subscription</param>
+        /// <param name="operationId">Operation Id</param>
+        /// <param name="operationUpdate">Operation Id</param>
+        /// <param name="cancellationToken">Cancellation Token</param>
         Task UpdateMarketplaceAsync(MarketplaceSubscription marketplaceSubscription, Guid operationId, OperationUpdate operationUpdate, CancellationToken cancellationToken = default);
     }
 }

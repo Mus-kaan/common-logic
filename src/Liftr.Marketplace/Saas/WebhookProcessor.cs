@@ -81,10 +81,12 @@ namespace Microsoft.Liftr.Marketplace.Saas
             try
             {
                 OperationUpdateStatus operationStatus;
+                bool patchRequired = true;
                 switch (payload.Action)
                 {
                     case WebhookAction.Unsubscribe:
                         operationStatus = await _webhookHandler.ProcessDeleteAsync(payload);
+                        patchRequired = false;
                         break;
                     case WebhookAction.ChangePlan:
                         operationStatus = await _webhookHandler.ProcessChangePlanAsync(payload);
@@ -94,6 +96,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
                         break;
                     case WebhookAction.Suspend:
                         operationStatus = await _webhookHandler.ProcessSuspendAsync(payload);
+                        patchRequired = false;
                         break;
                     case WebhookAction.Reinstate:
                         operationStatus = await _webhookHandler.ProcessReinstateAsync(payload);
@@ -103,11 +106,15 @@ namespace Microsoft.Liftr.Marketplace.Saas
                         throw new MarketplaceException($"Action {payload.Action} is not supported");
                 }
 
-                // After Success/Failure, Patch the operation to Marketplace
-                await _marketplaceCaller.UpdateMarketplaceAsync(
+                // After Success/Failure, Patch the operation to Marketplace. Patch is not required for Delete and Suspend action
+                if (patchRequired)
+                {
+                    await _marketplaceCaller.UpdateMarketplaceAsync(
                     payload.MarketplaceSubscription,
                     payload.OperationId,
-                    new OperationUpdate(payload.PlanId, payload.Quantity, operationStatus));
+                    new OperationUpdate(payload.PlanId, payload.Quantity, operationStatus),
+                    cancellationToken);
+                }
             }
             catch (Exception ex)
             {

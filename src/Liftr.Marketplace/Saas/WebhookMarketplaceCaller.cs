@@ -43,9 +43,9 @@ namespace Microsoft.Liftr.Marketplace.Saas
             try
             {
                 await _fulfillmentClient.UpdateOperationAsync(
-                        marketplaceSubscription,
-                        operationId,
-                        operationUpdate);
+                    marketplaceSubscription,
+                    operationId,
+                    operationUpdate);
             }
             catch (MarketplaceException ex)
             {
