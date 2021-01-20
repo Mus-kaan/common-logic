@@ -161,12 +161,15 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             {
                 if (db != null)
                 {
-                    // The cosmos DB service endpoint PUT is not idempotent. PUT the same subnet Id will generate 400.
-                    var dbVNetRules = db.VirtualNetworkRules;
-                    if (dbVNetRules?.Any((subnetId) => subnetId?.Id?.OrdinalEquals(subnet.Inner.Id) == true) != true)
+                    await db.WithVirtualNetworkRuleAsync(subnet, _logger);
+                }
+
+                if (!string.IsNullOrEmpty(computeOptions.GlobalCosmosDBResourceId))
+                {
+                    var globalDb = await liftrAzure.GetCosmosDBAsync(computeOptions.GlobalCosmosDBResourceId);
+                    if (globalDb != null)
                     {
-                        _logger.Information("Restrict access to cosmos DB with Id '{cosmosDBId}' to subnet '{subnetId}'.", db.Id, subnet.Inner.Id);
-                        await db.Update().WithVirtualNetworkRule(vnet.Id, subnet.Name).ApplyAsync();
+                        await globalDb.WithVirtualNetworkRuleAsync(subnet, _logger);
                     }
                 }
             }

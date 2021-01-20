@@ -45,5 +45,36 @@ namespace Microsoft.Liftr
 
             return $"DefaultEndpointsProtocol=https;AccountName={accountName};AccountKey={key.Value};EndpointSuffix=core.windows.net";
         }
+
+        public static async Task<IStorageAccount> WithAccessFromIpAddressAsync(this IStorageAccount storageAccount, string ip, Serilog.ILogger logger, bool enableVNetFilter = true)
+        {
+            if (storageAccount == null)
+            {
+                throw new ArgumentNullException(nameof(storageAccount));
+            }
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            if (!enableVNetFilter && storageAccount.Inner.NetworkRuleSet.DefaultAction != DefaultAction.Deny)
+            {
+                logger.Information("Skip adding IP rules to storage account with Id '{storageId}' since the Network filter is not enabled.", storageAccount.Id);
+                return storageAccount;
+            }
+
+            if (storageAccount.Inner.NetworkRuleSet.DefaultAction == DefaultAction.Allow)
+            {
+                storageAccount = await storageAccount.Update()
+                    .WithAccessFromSelectedNetworks()
+                    .ApplyAsync();
+            }
+
+            logger.Information("Restrict access to storage account with Id '{storageId}' to IP '{ip}'.", storageAccount.Id, ip);
+            return await storageAccount.Update()
+                .WithAccessFromIpAddress(ip)
+                .ApplyAsync();
+        }
     }
 }

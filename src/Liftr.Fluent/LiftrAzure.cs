@@ -13,6 +13,7 @@ using Microsoft.Azure.Management.Eventhub.Fluent;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
+using Microsoft.Azure.Management.KeyVault.Fluent.Models;
 using Microsoft.Azure.Management.Monitor.Fluent;
 using Microsoft.Azure.Management.Monitor.Fluent.Models;
 using Microsoft.Azure.Management.Msi.Fluent;
@@ -980,8 +981,18 @@ namespace Microsoft.Liftr.Fluent
             return kv;
         }
 
-        public async Task WithKeyVaultAccessFromNetworkAsync(IVault vault, string ipAddress, string subnetId)
+        public async Task WithKeyVaultAccessFromNetworkAsync(IVault vault, string ipAddress, string subnetId, bool enableVNetFilter = true)
         {
+            if (vault == null)
+            {
+                throw new ArgumentNullException(nameof(vault));
+            }
+
+            if (!enableVNetFilter && vault?.Inner?.Properties?.NetworkAcls?.DefaultAction != NetworkRuleAction.Deny)
+            {
+                _logger.Information("Skip adding VNet since Network isolation is not enabled for key vault {kvId}", vault.Id);
+            }
+
             var helper = new KeyVaultHelper(_logger);
             await helper.WithAccessFromNetworkAsync(vault, this, ipAddress, subnetId);
         }

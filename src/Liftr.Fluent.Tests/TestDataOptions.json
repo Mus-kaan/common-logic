@@ -1,6 +1,7 @@
 {
   "ActiveDBKeyName": "Primary MongoDB Connection String",
   "GlobalKeyVaultResourceId": "/subscriptions/f885cf14-b751-43c1-9536-dc5b1be02bc0/resourceGroups/ut-test-gbl200701-cus-rg/providers/Microsoft.KeyVault/vaults/uttestgbl200701cuskv",
+  "GlobalTrafficManagerResourceId": "/subscriptions/f885cf14-b751-43c1-9536-dc5b1be02bc0/resourceGroups/ut-test-gbl200701-cus-rg/providers/Microsoft.Network/trafficManagerProfiles/ut-test-gbl200701-cus-tm",
   "DomainName": "sample-partner-test-ame.azliftr-test.io",
   "DNSZoneId": "/subscriptions/f885cf14-b751-43c1-9536-dc5b1be02bc0/resourceGroups/ut-test-gbl200701-cus-rg/providers/Microsoft.Network/dnszones/sample-partner-test-ame.azliftr-test.io",
   "SecretPrefix": "UnitTestRP",

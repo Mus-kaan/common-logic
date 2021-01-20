@@ -48,6 +48,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 GlobalKeyVaultResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
                 GlobalStorageResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}",
                 GlobalCosmosDBResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.DocumentDB/databaseAccounts/{globalNamingContext.CosmosDBName(targetOptions.Global.BaseName)}",
+                GlobalTrafficManagerResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Network/trafficmanagerprofiles/{globalNamingContext.TrafficManagerName(targetOptions.Global.BaseName)}",
                 LogAnalyticsWorkspaceId = targetOptions.LogAnalyticsWorkspaceId,
                 DomainName = targetOptions.DomainName,
                 DNSZoneId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{globalRGName}/providers/Microsoft.Network/dnszones/{targetOptions.DomainName}",

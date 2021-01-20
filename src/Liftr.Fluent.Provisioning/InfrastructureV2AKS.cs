@@ -4,6 +4,7 @@
 
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.ContainerService.Fluent.Models;
+using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
@@ -117,6 +118,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
 
             var subnet = enableVNet ? await liftrAzure.CreateNewSubnetAsync(vnet, namingContext.SubnetName(computeOptions.ComputeBaseName), nsg?.Id) : null;
+            ICosmosDBAccount globalDB = null;
 
             if (enableVNet)
             {
@@ -135,12 +137,15 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 var db = await liftrAzure.GetCosmosDBAsync(dataRGName, dbName);
                 if (db != null)
                 {
-                    // The cosmos DB service endpoint PUT is not idempotent. PUT the same subnet Id will generate 400.
-                    var dbVNetRules = db.VirtualNetworkRules;
-                    if (dbVNetRules?.Any((subnetId) => subnetId?.Id?.OrdinalEquals(subnet.Inner.Id) == true) != true)
+                    await db.WithVirtualNetworkRuleAsync(subnet, _logger);
+                }
+
+                if (!string.IsNullOrEmpty(computeOptions.GlobalCosmosDBResourceId))
+                {
+                    globalDB = await liftrAzure.GetCosmosDBAsync(computeOptions.GlobalCosmosDBResourceId);
+                    if (globalDB != null)
                     {
-                        _logger.Information("Restrict access to cosmos DB with Id '{cosmosDBId}' to subnet '{subnetId}'.", db.Id, subnet.Inner.Id);
-                        await db.Update().WithVirtualNetworkRule(vnet.Id, subnet.Name).ApplyAsync();
+                        await globalDB.WithVirtualNetworkRuleAsync(subnet, _logger);
                     }
                 }
             }
@@ -217,19 +222,23 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var delayCounter = 0;
             const int AKSMIListingMaxDelayCounter = 20;
 
-            while (kubeletMI is null && delayCounter < AKSMIListingMaxDelayCounter)
+            do
             {
-                _logger.Information($"Waiting for 2 minutes before listing kubelet MI for AKS {aksName} and resourcegroup {rgName}");
-
-                // Wait for 2 minutes to ensure the AKS MIs can be listed.
-                await Task.Delay(TimeSpan.FromMinutes(2));
-
                 var mcMIList = await liftrAzure.ListAKSMCMIAsync(rgName, aksName, namingContext.Location);
 
                 // e.g. sp-test-com20200608-wus2-aks-agentpool
                 kubeletMI = mcMIList.FirstOrDefault(id => id.Name.OrdinalStartsWith(aksName));
-                delayCounter++;
+
+                if (kubeletMI == null)
+                {
+                    _logger.Information("Waiting for 2 minutes before listing kubelet MI for AKS '{aksName}' in resource group '{rgName}'", aksName, rgName);
+
+                    // Wait for 2 minutes to ensure the AKS MIs can be listed.
+                    await Task.Delay(TimeSpan.FromMinutes(2));
+                    delayCounter++;
+                }
             }
+            while (kubeletMI == null && delayCounter < AKSMIListingMaxDelayCounter);
 
             if (kubeletMI == null)
             {
@@ -300,9 +309,12 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 KeyVault = regionalKeyVault,
                 ManagedIdentity = msi,
                 AKS = aks,
+                AKSSubnet = subnet,
                 AKSObjectId = aksMIObjectId,
                 KubeletObjectId = kubeletObjectId,
                 ThanosStorageAccount = thanosStorage,
+                GlobalKeyVault = globalKeyVault,
+                GlobalCosmosDB = globalDB,
             };
 
             return provisionedResources;

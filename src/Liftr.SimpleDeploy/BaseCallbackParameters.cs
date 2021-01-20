@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Fluent.Contracts;
+using Microsoft.Liftr.Fluent.Provisioning;
 
 namespace Microsoft.Liftr.SimpleDeploy
 {
@@ -13,5 +14,7 @@ namespace Microsoft.Liftr.SimpleDeploy
         public string BaseName { get; set; }
 
         public NamingContext NamingContext { get; set; }
+
+        public IPPoolManager IPPoolManager { get; set; }
     }
 }

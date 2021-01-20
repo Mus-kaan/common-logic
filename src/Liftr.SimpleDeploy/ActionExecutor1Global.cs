@@ -49,6 +49,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                         BaseName = targetOptions.Global.BaseName,
                         NamingContext = globalNamingContext,
                         Resources = globalResources,
+                        IPPoolManager = ipPool,
                     };
 
                     await SimpleDeployExtension.AfterProvisionGlobalResourcesAsync.Invoke(parameters);

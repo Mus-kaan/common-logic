@@ -71,6 +71,10 @@ namespace Microsoft.Liftr.Fluent.Tests
                         scope.Logger.Information("The actual log content is uploaded to blob at: {logContentUri}", logUri.ToString());
                         Assert.True(logUri.ToString().OrdinalEndsWith("blob.core.windows.net/log-container/2019-01/20/2019-01-20T08:00:00.0000000Z.txt"));
                     }
+
+                    await st.WithAccessFromIpAddressAsync("52.183.60.248", scope.Logger);
+                    await st.WithAccessFromIpAddressAsync("52.183.60.248", scope.Logger);
+                    await st.WithAccessFromIpAddressAsync("52.183.60.249", scope.Logger);
                 }
                 catch (Exception ex)
                 {

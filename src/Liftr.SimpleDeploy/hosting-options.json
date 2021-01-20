@@ -28,6 +28,7 @@
           "Location": "eastus",
           "DataBaseName": "data191003",
           "ComputeBaseName": "com191005",
+          "SupportAvailabilityZone": true,
           "DataPlaneSubscriptions": [
             "eebfbfdb-4167-49f6-be43-466a6709609f"
           ]
@@ -36,6 +37,7 @@
           "Location": "westcentralus",
           "DataBaseName": "data191003",
           "ComputeBaseName": "com191005",
+          "SupportAvailabilityZone": false,
           "DataPlaneSubscriptions": [
             "eebfbfdb-4167-49f6-be43-466a6709609f"
           ]

@@ -1,0 +1,20 @@
+{
+  "profiles": {
+    "1_global-resource": {
+      "commandName": "Project",
+      "commandLineArgs": "-a CreateOrUpdateGlobal -f hosting-options.json -e Test -r global --authFile my.azureauth-ms.auth.json"
+    },
+    "2_data_westus2": {
+      "commandName": "Project",
+      "commandLineArgs": "-a CreateOrUpdateRegionalData -f hosting-options.json -e Test -r westus2 --authFile my.azureauth-ms.auth.json --activeKey \"Primary MongoDB Connection String\""
+    },
+    "3_compute_westus2": {
+      "commandName": "Project",
+      "commandLineArgs": "-a CreateOrUpdateRegionalCompute -f hosting-options.json -e Test -r westus2 --authFile my.azureauth-ms.auth.json"
+    },
+    "5_TM_westus2": {
+      "commandName": "Project",
+      "commandLineArgs": "-a UpdateComputeIPInTrafficManager -f hosting-options.json -e Test -r westus2 --authFile my.azureauth-ms.auth.json"
+    }
+  }
+}

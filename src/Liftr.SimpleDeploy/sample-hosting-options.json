@@ -4,13 +4,15 @@
   "PartnerName": "SamplePartner",
   "ShortPartnerName": "sp",
   "SecretPrefix": "SamplePartner",
+  "AllowedAcisExtensions": "Liftr",
   "StorageCountPerDataPlaneSubscription": 1,
   "Environments": [
     {
       "EnvironmentName": "Test",
-      "DomainName": "sample-partner-test-ame.azliftr-test.io",
+      "DomainName": "sample-partner-test.azliftr-test.io",
       "AzureSubscription": "d21a525e-7c86-486d-a79e-a4f3622f639a",
       "EnableVNet": true,
+      "IPPerRegion": 3,
       "OneCertCertificates": { // key is certificate name, value is certificate subject
         "GenevaClientCert": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
         "FirstPartyAppCert": "test-first-party-certificate.liftr-dev.net"
@@ -20,21 +22,24 @@
       },
       "Global": {
         "Location": "centralus",
-        "BaseName": "gbl191002"
+        "BaseName": "gbl191002",
+        "AddGlobalDB": false
       },
       "Regions": [
         {
           "Location": "eastus",
-          "DataBaseName": "data191002",
-          "ComputeBaseName": "com191002",
+          "DataBaseName": "data191003",
+          "ComputeBaseName": "com191005",
+          "SupportAvailabilityZone": true,
           "DataPlaneSubscriptions": [
             "eebfbfdb-4167-49f6-be43-466a6709609f"
           ]
         },
         {
           "Location": "westcentralus",
-          "DataBaseName": "data191002",
-          "ComputeBaseName": "com191002",
+          "DataBaseName": "data191003",
+          "ComputeBaseName": "com191005",
+          "SupportAvailabilityZone": false,
           "DataPlaneSubscriptions": [
             "eebfbfdb-4167-49f6-be43-466a6709609f"
           ]

@@ -26,6 +26,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string GlobalCosmosDBResourceId { get; set; }
 
+        public string GlobalTrafficManagerResourceId { get; set; }
+
         public Dictionary<string, string> OneCertCertificates { get; set; } = new Dictionary<string, string>();
 
         public IEnumerable<string> DataPlaneSubscriptions { get; set; }
@@ -56,6 +58,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             if (string.IsNullOrEmpty(SecretPrefix))
             {
                 throw new InvalidHostingOptionException($"{nameof(SecretPrefix)} should not be null.");
+            }
+
+            if (string.IsNullOrEmpty(GlobalTrafficManagerResourceId))
+            {
+                throw new InvalidHostingOptionException($"{nameof(GlobalTrafficManagerResourceId)} should not be null.");
             }
 
             if (string.IsNullOrEmpty(LogAnalyticsWorkspaceId))

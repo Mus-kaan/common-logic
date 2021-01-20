@@ -221,6 +221,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                             ComputeOptions = regionalComputeOptions,
                             RegionOptions = regionOptions,
                             Resources = computeResources,
+                            IPPoolManager = ipPool,
                         };
 
                         await SimpleDeployExtension.AfterProvisionRegionalAKSResourcesAsync.Invoke(parameters);

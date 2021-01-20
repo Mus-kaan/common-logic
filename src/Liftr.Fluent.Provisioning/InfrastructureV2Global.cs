@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Azure.Management.TrafficManager.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.KeyVault;
 using System;
@@ -31,6 +32,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 var rgName = namingContext.ResourceGroupName(baseName);
                 var kvName = namingContext.KeyVaultName(baseName);
                 var acrName = namingContext.ACRName(baseName);
+                var trafficManagerName = namingContext.TrafficManagerName(baseName);
 
                 var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
                 result.ResourceGroup = await liftrAzure.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
@@ -46,6 +48,21 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 {
                     result.DnsZone = await liftrAzure.CreateDNSZoneAsync(rgName, dnsName, namingContext.Tags);
                 }
+
+                result.GlobalTrafficManager = await liftrAzure.GetOrCreateTrafficManagerAsync(rgName, trafficManagerName, namingContext.Tags);
+                await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(result.GlobalTrafficManager, logAnalyticsWorkspaceId);
+
+                if (result.GlobalTrafficManager.TrafficRoutingMethod != TrafficRoutingMethod.Performance)
+                {
+                    result.GlobalTrafficManager = await result.GlobalTrafficManager.Update().WithPerformanceBasedRouting().ApplyAsync();
+                }
+
+                _logger.Information("Set DNS zone '{dnsZone}' CNAME '{cname}' to Traffic Manager '{tmFqdn}'.", result.DnsZone.Id, "www", result.GlobalTrafficManager.Fqdn);
+                await result.DnsZone.Update()
+                    .DefineCNameRecordSet("www")
+                    .WithAlias(result.GlobalTrafficManager.Fqdn).WithTimeToLive(600)
+                    .Attach()
+                    .ApplyAsync();
 
                 result.KeyVault = await liftrAzure.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
 

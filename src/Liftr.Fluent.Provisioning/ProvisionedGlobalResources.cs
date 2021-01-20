@@ -7,6 +7,7 @@ using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Dns.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Management.TrafficManager.Fluent;
 
 namespace Microsoft.Liftr.Fluent.Provisioning
 {
@@ -19,6 +20,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         public IRegistry ContainerRegistry { get; set; }
 
         public IDnsZone DnsZone { get; set; }
+
+        public ITrafficManagerProfile GlobalTrafficManager { get; set; }
 
         public ICosmosDBAccount GlobalCosmosDBAccount { get; set; }
     }

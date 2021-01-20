@@ -26,7 +26,8 @@
       },
       "Global": {
         "Location": "centralus",
-        "BaseName": "gbl20200102"
+        "BaseName": "gbl20200102",
+        "AddGlobalDB": true
       },
       "Regions": [
         {
@@ -60,7 +61,8 @@
       },
       "Global": {
         "Location": "centralus",
-        "BaseName": "gbl20200102"
+        "BaseName": "gbl20200102",
+        "AddGlobalDB": true
       },
       "Regions": [
         {

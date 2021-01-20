@@ -182,7 +182,7 @@ namespace Microsoft.Liftr.Fluent
 
         Task<IEnumerable<IVault>> ListKeyVaultAsync(string rgName, string namePrefix = null);
 
-        Task WithKeyVaultAccessFromNetworkAsync(IVault vault, string ipAddress, string subnetId);
+        Task WithKeyVaultAccessFromNetworkAsync(IVault vault, string ipAddress, string subnetId, bool enableVNetFilter = true);
 
         Task RemoveAccessPolicyAsync(string kvResourceId, string servicePrincipalObjectId);
 
