@@ -39,7 +39,7 @@ namespace Microsoft.Liftr.Hosting.Contracts
 
         public bool SupportAvailabilityZone { get; set; } = true;
 
-        public void CheckValid()
+        public void CheckValid(bool isAKS)
         {
             if (string.IsNullOrEmpty(DataBaseName))
             {
@@ -65,7 +65,7 @@ namespace Microsoft.Liftr.Hosting.Contracts
                     throw new InvalidHostingOptionException("Duplicated compute location information.");
                 }
 
-                if (SupportAvailabilityZone)
+                if (isAKS && SupportAvailabilityZone)
                 {
                     ValidateAKSZoneLocation(Location);
                 }

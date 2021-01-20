@@ -77,7 +77,7 @@ namespace Microsoft.Liftr.Hosting.Contracts
 
             foreach (var region in Regions)
             {
-                region.CheckValid();
+                region.CheckValid(IsAKS);
 
                 if (EnableVNet && region.IsSeparatedDataAndComputeRegion)
                 {
