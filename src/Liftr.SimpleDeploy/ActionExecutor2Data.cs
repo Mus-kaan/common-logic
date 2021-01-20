@@ -19,7 +19,8 @@ namespace Microsoft.Liftr.SimpleDeploy
             HostingEnvironmentOptions targetOptions,
             KeyVaultClient kvClient,
             LiftrAzureFactory azFactory,
-            string allowedAcisExtensions)
+            string allowedAcisExtensions,
+            IPPoolManager ipPool)
         {
             var liftrAzure = azFactory.GenerateLiftrAzure();
             var infra = new InfrastructureV2(azFactory, kvClient, _logger);
@@ -72,6 +73,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                             DataOptions = dataOptions,
                             RegionOptions = regionOptions,
                             Resources = dataResources,
+                            IPPoolManager = ipPool,
                         };
 
                         await SimpleDeployExtension.AfterProvisionDataRegionAsync.Invoke(parameters);
@@ -94,6 +96,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                             DataOptions = dataOptions,
                             RegionOptions = regionOptions,
                             Resources = dataResources,
+                            IPPoolManager = ipPool,
                         };
 
                         await SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync.Invoke(parameters);

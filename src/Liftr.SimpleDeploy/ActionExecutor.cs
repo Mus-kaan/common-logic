@@ -229,7 +229,7 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                         if (_commandOptions.Action == ActionType.CreateOrUpdateRegionalData)
                         {
-                            await ManageDataResourcesAsync(targetOptions, kvClient, azFactory, _hostingOptions.AllowedAcisExtensions);
+                            await ManageDataResourcesAsync(targetOptions, kvClient, azFactory, _hostingOptions.AllowedAcisExtensions, ipPool);
                         }
                         else if (_commandOptions.Action == ActionType.CreateOrUpdateRegionalCompute)
                         {
