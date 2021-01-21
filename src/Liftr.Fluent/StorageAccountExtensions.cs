@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Azure.Management.Storage.Fluent.Models;
 using System;
@@ -44,6 +45,42 @@ namespace Microsoft.Liftr
             }
 
             return $"DefaultEndpointsProtocol=https;AccountName={accountName};AccountKey={key.Value};EndpointSuffix=core.windows.net";
+        }
+
+        public static async Task<IStorageAccount> WithAccessFromVNetAsync(this IStorageAccount storageAccount, ISubnet subnet, Serilog.ILogger logger, bool enableVNetFilter = true)
+        {
+            if (storageAccount == null)
+            {
+                throw new ArgumentNullException(nameof(storageAccount));
+            }
+
+            if (subnet == null)
+            {
+                throw new ArgumentNullException(nameof(subnet));
+            }
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            if (!enableVNetFilter && storageAccount.Inner.NetworkRuleSet.DefaultAction != DefaultAction.Deny)
+            {
+                logger.Information("Skip adding VNet to storage account with Id '{storageId}' since the Network filter is not enabled.", storageAccount.Id);
+                return storageAccount;
+            }
+
+            if (storageAccount.Inner.NetworkRuleSet.DefaultAction == DefaultAction.Allow)
+            {
+                storageAccount = await storageAccount.Update()
+                    .WithAccessFromSelectedNetworks()
+                    .ApplyAsync();
+            }
+
+            logger.Information("Restrict access to storage account with Id '{storageId}' to Subnet '{subnetId}'.", storageAccount.Id, subnet.Inner.Id);
+            return await storageAccount.Update()
+                .WithAccessFromNetworkSubnet(subnet.Inner.Id)
+                .ApplyAsync();
         }
 
         public static async Task<IStorageAccount> WithAccessFromIpAddressAsync(this IStorageAccount storageAccount, string ip, Serilog.ILogger logger, bool enableVNetFilter = true)

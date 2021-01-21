@@ -129,8 +129,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 var stor = await liftrAzure.GetStorageAccountAsync(dataRGName, storName);
                 if (stor != null)
                 {
-                    _logger.Information("Restrict access to storage account with Id '{storId}' to subnet '{subnetId}'.", stor.Id, subnet.Inner.Id);
-                    await stor.Update().WithAccessFromNetworkSubnet(subnet.Inner.Id).ApplyAsync();
+                    await stor.WithAccessFromVNetAsync(subnet, _logger);
                 }
 
                 var dbName = namingContext.CosmosDBName(computeOptions.DataBaseName);
