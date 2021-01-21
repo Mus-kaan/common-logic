@@ -4,6 +4,7 @@
 
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
+using Serilog;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,7 +37,7 @@ namespace Microsoft.Liftr
             return connStr;
         }
 
-        public static async Task<ICosmosDBAccount> WithVirtualNetworkRuleAsync(this ICosmosDBAccount db, ISubnet subnet, Serilog.ILogger logger = null, bool enableVNetFilter = true)
+        public static async Task<ICosmosDBAccount> WithVirtualNetworkRuleAsync(this ICosmosDBAccount db, ISubnet subnet, Serilog.ILogger logger, bool enableVNetFilter = true)
         {
             if (db == null)
             {
@@ -48,13 +49,14 @@ namespace Microsoft.Liftr
                 throw new ArgumentNullException(nameof(subnet));
             }
 
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
             if (!enableVNetFilter && !db.VirtualNetoworkFilterEnabled)
             {
-                if (logger != null)
-                {
-                    logger.Information("Skip adding VNet rules to cosmos DB with Id '{cosmosDBId}' since the VNet filter is not enabled.", db.Id);
-                }
-
+                logger.Information("Skip adding VNet rules to cosmos DB with Id '{cosmosDBId}' since the VNet filter is not enabled.", db.Id);
                 return db;
             }
 
@@ -71,6 +73,51 @@ namespace Microsoft.Liftr
             }
 
             return db;
+        }
+
+        public static async Task<IDisposable> StartOpenNetworkScopeAsync(this ICosmosDBAccount db, Serilog.ILogger logger)
+        {
+            if (db == null)
+            {
+                throw new ArgumentNullException(nameof(db));
+            }
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            if (db.VirtualNetoworkFilterEnabled)
+            {
+                logger.Information("Open the database to all Networks temporarily. This will switched back to restricted Network. db: '{dbId}'", db.Id);
+                db = await db.Update().WithVirtualNetworkFilterEnabled(false).ApplyAsync();
+                return new CosmosDBOpenNetworkScope(db, logger, enableVNet: true);
+            }
+
+            return new CosmosDBOpenNetworkScope(db, logger, enableVNet: false);
+        }
+    }
+
+    internal sealed class CosmosDBOpenNetworkScope : IDisposable
+    {
+        private readonly ICosmosDBAccount _db;
+        private readonly ILogger _logger;
+        private readonly bool _enableVNet;
+
+        public CosmosDBOpenNetworkScope(ICosmosDBAccount db, Serilog.ILogger logger, bool enableVNet)
+        {
+            _db = db;
+            _logger = logger;
+            _enableVNet = enableVNet;
+        }
+
+        public void Dispose()
+        {
+            if (_enableVNet)
+            {
+                _logger.Information("Tuen VNet restrictions back on for db: '{dbId}'", _db.Id);
+                _db.Update().WithVirtualNetworkFilterEnabled(true).Apply();
+            }
         }
     }
 }
