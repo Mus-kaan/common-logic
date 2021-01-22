@@ -4,7 +4,10 @@
 
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.TrafficManager.Fluent;
+using Microsoft.Liftr.Fluent;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr
@@ -73,11 +76,16 @@ namespace Microsoft.Liftr
             await update.Attach().ApplyAsync();
         }
 
-        public static async Task WithTrafficManagerEndpointAsync(this ITrafficManagerProfile tm, ITrafficManagerProfile targetTM, Region region, Serilog.ILogger logger)
+        public static async Task WithTrafficManagerEndpointAsync(this ITrafficManagerProfile tm, ILiftrAzure liftrAzure, ITrafficManagerProfile targetTM, Region region, Serilog.ILogger logger)
         {
             if (tm == null)
             {
                 throw new ArgumentNullException(nameof(tm));
+            }
+
+            if (liftrAzure == null)
+            {
+                throw new ArgumentNullException(nameof(liftrAzure));
             }
 
             if (targetTM == null)
@@ -99,13 +107,36 @@ namespace Microsoft.Liftr
             logger.Information("Targeting TM to add as endpoint: {targetTM}", targetTM.Id);
             var endpointName = targetTM.Name;
 
+            List<string> endpointsToRemove = new List<string>();
+
             foreach (var endpoint in tm.Inner.Endpoints)
             {
-                if (endpoint.TargetResourceId.OrdinalEquals(targetTM.Id))
+                if (endpoint.TargetResourceId?.OrdinalEquals(targetTM.Id) == true)
                 {
                     logger.Information("The same TM endpoint is already added to the Traffic Manger.");
                     return;
                 }
+                else if (endpoint.TargetResourceId?.OrdinalContains("trafficManagerProfiles") == true)
+                {
+                    var epTM = await liftrAzure.GetTrafficManagerAsync(endpoint.TargetResourceId);
+                    if (epTM == null)
+                    {
+                        endpointsToRemove.Add(endpoint.Name);
+                    }
+                }
+            }
+
+            if (endpointsToRemove.Any())
+            {
+                logger.Information("Remove invalid TM enpoints: {@endpointsToRemove}", endpointsToRemove);
+                var update = tm.Update();
+
+                foreach (var ep in endpointsToRemove)
+                {
+                    update = update.WithoutEndpoint(ep);
+                }
+
+                tm = await update.ApplyAsync();
             }
 
             logger.Information("Add the TM as a new endpoint with name {EndpointName}.", endpointName);

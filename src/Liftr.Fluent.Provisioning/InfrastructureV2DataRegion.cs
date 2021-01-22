@@ -70,7 +70,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var globalTMId = new ResourceId(dataOptions.GlobalTrafficManagerResourceId);
             var globalTM = await liftrAzure.GetOrCreateTrafficManagerAsync(globalTMId.ResourceGroup, globalTMId.ResourceName, namingContext.Tags);
 
-            await globalTM.WithTrafficManagerEndpointAsync(provisionedResources.TrafficManager, namingContext.Location, _logger);
+            await globalTM.WithTrafficManagerEndpointAsync(liftrAzure, provisionedResources.TrafficManager, namingContext.Location, _logger);
 
             _logger.Information("Set DNS zone '{dnsZone}' CNAME '{cname}' to Traffic Manager '{tmFqdn}'.", provisionedResources.DnsZone.Id, namingContext.Location.ShortName(), provisionedResources.TrafficManager.Fqdn);
             await provisionedResources.DnsZone.Update()
