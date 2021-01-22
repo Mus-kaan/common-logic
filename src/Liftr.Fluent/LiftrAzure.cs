@@ -38,6 +38,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -135,6 +136,50 @@ namespace Microsoft.Liftr.Fluent
                     _logger.Error(ex.Message);
                     throw ex;
                 }
+            }
+        }
+
+        public async Task PutResourceAsync(string resourceId, string apiVersion, string resourceJsonBody, CancellationToken cancellationToken = default)
+        {
+            using (var handler = new AzureApiAuthHandler(AzureCredentials))
+            using (var httpClient = new HttpClient(handler))
+            {
+                if (string.IsNullOrEmpty(resourceId))
+                {
+                    throw new ArgumentNullException(nameof(resourceId));
+                }
+
+                if (string.IsNullOrEmpty(apiVersion))
+                {
+                    throw new ArgumentNullException(nameof(apiVersion));
+                }
+
+                var uriBuilder = new UriBuilder(AzureCredentials.Environment.ResourceManagerEndpoint);
+                uriBuilder.Path = resourceId;
+                uriBuilder.Query = $"api-version={apiVersion}";
+
+                _logger.Information($"Start putting resource at Uri: {uriBuilder.Uri}");
+                using var httpContent = new StringContent(resourceJsonBody, Encoding.UTF8, "application/json");
+                var runOutputResponse = await _options.HttpPolicy.ExecuteAsync(() => httpClient.PutAsync(uriBuilder.Uri, httpContent));
+
+                if (!runOutputResponse.IsSuccessStatusCode)
+                {
+                    var errMsg = $"Failed at putting resource with Id '{resourceId}'. statusCode: '{runOutputResponse.StatusCode}'";
+                    if (runOutputResponse?.Content != null)
+                    {
+                        errMsg = errMsg + $", response: {await runOutputResponse.Content?.ReadAsStringAsync()}";
+                    }
+
+                    var ex = new InvalidOperationException(errMsg);
+                    _logger.Error(ex.Message);
+                    throw ex;
+                }
+                else if (runOutputResponse.StatusCode == HttpStatusCode.Accepted)
+                {
+                    await WaitAsyncOperationAsync(httpClient, runOutputResponse, cancellationToken);
+                }
+
+                _logger.Information($"Finished putting resource at Uri: {uriBuilder.Uri}");
             }
         }
 
