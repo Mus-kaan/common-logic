@@ -58,6 +58,8 @@ namespace Microsoft.Liftr.Fluent
 
         Task PutResourceAsync(string resourceId, string apiVersion, string resourceBody, CancellationToken cancellationToken = default);
 
+        Task PatchResourceAsync(string resourceId, string apiVersion, string resourceJsonBody, CancellationToken cancellationToken = default);
+
         Task DeleteResourceAsync(string resourceId, string apiVersion, CancellationToken cancellationToken = default);
 
         Task<string> WaitAsyncOperationAsync(HttpClient client, HttpResponseMessage startOperationResponse, CancellationToken cancellationToken, TimeSpan? pollingTime = null);

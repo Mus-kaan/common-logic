@@ -183,6 +183,52 @@ namespace Microsoft.Liftr.Fluent
             }
         }
 
+        public async Task PatchResourceAsync(string resourceId, string apiVersion, string resourceJsonBody, CancellationToken cancellationToken = default)
+        {
+            using var handler = new AzureApiAuthHandler(AzureCredentials);
+            using var httpClient = new HttpClient(handler);
+            if (string.IsNullOrEmpty(resourceId))
+            {
+                throw new ArgumentNullException(nameof(resourceId));
+            }
+
+            if (string.IsNullOrEmpty(apiVersion))
+            {
+                throw new ArgumentNullException(nameof(apiVersion));
+            }
+
+            var uriBuilder = new UriBuilder(AzureCredentials.Environment.ResourceManagerEndpoint);
+            uriBuilder.Path = resourceId;
+            uriBuilder.Query = $"api-version={apiVersion}";
+
+            _logger.Information($"Start PATCH resource at Uri: {uriBuilder.Uri}");
+            using var httpContent = new StringContent(resourceJsonBody, Encoding.UTF8, "application/json");
+            using var request = new HttpRequestMessage(new HttpMethod("PATCH"), uriBuilder.Uri)
+            {
+                Content = httpContent,
+            };
+            var runOutputResponse = await _options.HttpPolicy.ExecuteAsync(() => httpClient.SendAsync(request));
+
+            if (!runOutputResponse.IsSuccessStatusCode)
+            {
+                var errMsg = $"Failed at patching resource with Id '{resourceId}'. statusCode: '{runOutputResponse.StatusCode}'";
+                if (runOutputResponse?.Content != null)
+                {
+                    errMsg = errMsg + $", response: {await runOutputResponse.Content?.ReadAsStringAsync()}";
+                }
+
+                var ex = new InvalidOperationException(errMsg);
+                _logger.Error(ex.Message);
+                throw ex;
+            }
+            else if (runOutputResponse.StatusCode == HttpStatusCode.Accepted)
+            {
+                await WaitAsyncOperationAsync(httpClient, runOutputResponse, cancellationToken);
+            }
+
+            _logger.Information($"Finished PATCH resource at Uri: {uriBuilder.Uri}");
+        }
+
         public async Task DeleteResourceAsync(string resourceId, string apiVersion, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(resourceId))

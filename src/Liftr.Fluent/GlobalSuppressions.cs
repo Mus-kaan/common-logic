@@ -9,3 +9,4 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1201:Elements should appear in the correct order", Justification = "<Pending>", Scope = "member", Target = "~F:Microsoft.Liftr.Fluent.ResourceProviderRegister.s_commonProviderList")]
+[assembly: SuppressMessage("Reliability", "Liftr1005:Avoid calling System.Threading.Tasks.Task.Wait()", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.CosmosDBOpenNetworkScope.Dispose")]
