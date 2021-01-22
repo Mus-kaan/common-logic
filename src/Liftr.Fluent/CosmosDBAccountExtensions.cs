@@ -150,6 +150,8 @@ namespace Microsoft.Liftr
                 logger.Information("Open the database to all Networks temporarily. This will switched back to restricted Network. db: '{dbId}'", db.Id);
                 var vnetRules = db.VirtualNetworkRules.ToList();
                 db = await db.TurnOffVNetAsync(liftrAzure);
+                logger.Information("Wait for 3 minutes to make sure the VNet rules are synced.");
+                await Task.Delay(TimeSpan.FromMinutes(3));
                 return new CosmosDBOpenNetworkScope(db, logger, vnetRules);
             }
 
