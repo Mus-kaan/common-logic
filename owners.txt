@@ -5,6 +5,8 @@
 ; @ indicates "alert only" - this alias is not an owner (approval won't affect OE) but will be added to pull requests in order to be notified​
 
 akagarw
-vekurapa
+hashah
+narai
+kaal
 
 *liftrdev
