@@ -57,6 +57,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 var nsg = await liftrAzure.GetOrCreateDefaultNSGAsync(namingContext.Location, rgName, nsgName, namingContext.Tags);
                 provisionedResources.VNet = await liftrAzure.GetOrCreateVNetAsync(namingContext.Location, rgName, vnetName, namingContext.Tags, nsg.Id);
                 await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(provisionedResources.VNet, dataOptions.LogAnalyticsWorkspaceId);
+
+                provisionedResources.VNet = await provisionedResources.VNet.RemoveEmptySubnetsAsync(_logger);
             }
 
             if (dataOptions.EnableVNet)

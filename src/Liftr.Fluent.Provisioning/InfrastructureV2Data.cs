@@ -92,6 +92,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             await liftrAzure.GrantQueueContributorAsync(provisionedResources.StorageAccount, provisionedResources.ManagedIdentity);
             await liftrAzure.GrantBlobContributorAsync(provisionedResources.StorageAccount, provisionedResources.ManagedIdentity);
 
+            provisionedResources.StorageAccount = await provisionedResources.StorageAccount.RemoveUnusedVNetRulesAsync(_azureClientFactory, _logger);
+
             if (dataOptions.DataPlaneSubscriptions != null)
             {
                 foreach (var subscrptionId in dataOptions.DataPlaneSubscriptions)

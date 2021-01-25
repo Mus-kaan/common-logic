@@ -5,7 +5,9 @@
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Azure.Management.Storage.Fluent.Models;
+using Microsoft.Liftr.Fluent;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -112,6 +114,58 @@ namespace Microsoft.Liftr
             return await storageAccount.Update()
                 .WithAccessFromIpAddress(ip)
                 .ApplyAsync();
+        }
+
+        public static async Task<IStorageAccount> RemoveUnusedVNetRulesAsync(this IStorageAccount storageAccount, ILiftrAzureFactory liftrAzureFactory, Serilog.ILogger logger)
+        {
+            if (storageAccount == null)
+            {
+                throw new ArgumentNullException(nameof(storageAccount));
+            }
+
+            if (liftrAzureFactory == null)
+            {
+                throw new ArgumentNullException(nameof(liftrAzureFactory));
+            }
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            if (storageAccount.Inner.NetworkRuleSet.DefaultAction != DefaultAction.Deny)
+            {
+                logger.Information("Skip removing VNet rules from storage account with Id '{storageId}' since the Network filter is not enabled.", storageAccount.Id);
+                return storageAccount;
+            }
+
+            List<string> subnetsToRemove = new List<string>();
+            foreach (var subnetStr in storageAccount.NetworkSubnetsWithAccess)
+            {
+                var subnetId = new Liftr.Contracts.ResourceId(subnetStr);
+                var az = liftrAzureFactory.GenerateLiftrAzure(subnetId.SubscriptionId);
+                var subnet = await az.GetSubnetAsync(subnetStr);
+                if (subnet == null)
+                {
+                    subnetsToRemove.Add(subnetStr);
+                }
+            }
+
+            if (!subnetsToRemove.Any())
+            {
+                logger.Information("All subnets in the filter are active.");
+                return storageAccount;
+            }
+
+            var update = storageAccount.Update();
+
+            foreach (var subnet in subnetsToRemove)
+            {
+                logger.Information("Removing subnet '{subnetId}' from VNet filter of storage '{storageName}' ...", subnet, storageAccount.Name);
+                update = update.WithoutNetworkSubnetAccess(subnet);
+            }
+
+            return await update.ApplyAsync();
         }
     }
 }

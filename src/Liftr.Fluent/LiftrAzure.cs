@@ -853,6 +853,23 @@ namespace Microsoft.Liftr.Fluent
             return vnet.Subnets[subnetName];
         }
 
+        public async Task<ISubnet> GetSubnetAsync(string subnetId)
+        {
+            var parsedSubnetId = new Liftr.Contracts.ResourceId(subnetId);
+            var vnet = await GetVNetAsync(parsedSubnetId.ResourceGroup, parsedSubnetId.ResourceName);
+            if (vnet == null)
+            {
+                return null;
+            }
+
+            if (vnet.Subnets.ContainsKey(parsedSubnetId.ChildResourceName))
+            {
+                return vnet.Subnets[parsedSubnetId.ChildResourceName];
+            }
+
+            return null;
+        }
+
         public async Task<IPublicIPAddress> GetOrCreatePublicIPAsync(Region location, string rgName, string pipName, IDictionary<string, string> tags, PublicIPSkuType skuType = null)
         {
             var pip = await GetPublicIPAsync(rgName, pipName);

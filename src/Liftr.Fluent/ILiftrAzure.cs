@@ -137,6 +137,8 @@ namespace Microsoft.Liftr.Fluent
 
         Task<ISubnet> CreateNewSubnetAsync(INetwork vnet, string subnetName, string nsgId = null);
 
+        Task<ISubnet> GetSubnetAsync(string subnetId);
+
         Task<IPublicIPAddress> GetOrCreatePublicIPAsync(Region location, string rgName, string pipName, IDictionary<string, string> tags, PublicIPSkuType skuType = null);
 
         Task<IPublicIPAddress> CreatePublicIPAsync(Region location, string rgName, string pipName, IDictionary<string, string> tags, PublicIPSkuType skuType = null);
