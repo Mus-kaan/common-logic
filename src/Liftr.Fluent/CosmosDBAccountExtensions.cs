@@ -105,6 +105,8 @@ namespace Microsoft.Liftr
                 throw new ArgumentNullException(nameof(logger));
             }
 
+            db = await db.WaitForUpdatingAsync();
+
             if (!enableVNetFilter && !db.VirtualNetoworkFilterEnabled)
             {
                 logger.Information("Skip adding VNet rules to cosmos DB with Id '{cosmosDBId}' since the VNet filter is not enabled.", db.Id);
