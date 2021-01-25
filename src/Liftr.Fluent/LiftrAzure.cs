@@ -1042,6 +1042,7 @@ namespace Microsoft.Liftr.Fluent
 
         public Task<ICosmosDBAccount> GetCosmosDBAsync(string dbResourceId)
         {
+            _logger.Information("Getting CosmosDB with id '{dbResourceId}' ...", dbResourceId);
             return FluentClient
                 .CosmosDBAccounts
                 .GetByIdAsync(dbResourceId);
@@ -1049,6 +1050,7 @@ namespace Microsoft.Liftr.Fluent
 
         public Task<ICosmosDBAccount> GetCosmosDBAsync(string rgName, string cosmosDBName)
         {
+            _logger.Information("Getting CosmosDB in rg '{rgName}' with name '{cosmosDBName}' ...", rgName, cosmosDBName);
             return FluentClient
                 .CosmosDBAccounts
                 .GetByResourceGroupAsync(rgName, cosmosDBName);
