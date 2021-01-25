@@ -105,6 +105,7 @@ namespace Microsoft.Liftr
                 throw new ArgumentNullException(nameof(logger));
             }
 
+            logger.Information("Starting restrict access to cosmos DB with Id '{cosmosDBId}' to subnet '{subnetId}' ...", db.Id, subnet.Inner.Id);
             db = await db.WaitForUpdatingAsync();
 
             if (!enableVNetFilter && !db.VirtualNetoworkFilterEnabled)
