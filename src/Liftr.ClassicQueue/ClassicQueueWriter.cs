@@ -52,7 +52,7 @@ namespace Microsoft.Liftr.ClassicQueue
             _messageVisibilityTimeout = messageVisibilityTimeout;
         }
 
-        public async Task AddMessageAsync(string message, CancellationToken cancellationToken = default)
+        public async Task AddMessageAsync(string message, TimeSpan? messageVisibilityTimeout = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(message))
             {
@@ -68,10 +68,11 @@ namespace Microsoft.Liftr.ClassicQueue
                 CreatedAt = _timeSource.UtcNow.ToZuluString(),
             };
 
+            messageVisibilityTimeout = messageVisibilityTimeout ?? _messageVisibilityTimeout;
             CloudQueueMessage qMessage = new CloudQueueMessage(msg.ToJson());
-            await _queue.AddMessageAsync(qMessage, _messageTimeToLive, _messageVisibilityTimeout, new QueueRequestOptions(), new OperationContext(), cancellationToken);
+            await _queue.AddMessageAsync(qMessage, _messageTimeToLive, messageVisibilityTimeout, new QueueRequestOptions(), new OperationContext(), cancellationToken);
 
-            _logger.Information("Added message with Id '{MsgId}' into queue. TTL: {msgTTL}, visibilityTimeout: {visibilityTimeout}", msg.MsgId, _messageTimeToLive, _messageVisibilityTimeout);
+            _logger.Information("Added message with Id '{MsgId}' into queue. TTL: {msgTTL}, visibilityTimeout: {visibilityTimeout}", msg.MsgId, _messageTimeToLive, messageVisibilityTimeout);
         }
     }
 }

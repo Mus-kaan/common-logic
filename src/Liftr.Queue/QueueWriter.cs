@@ -50,7 +50,7 @@ namespace Microsoft.Liftr.Queue
             _messageVisibilityTimeout = messageVisibilityTimeout;
         }
 
-        public async Task AddMessageAsync(string message, CancellationToken cancellationToken = default)
+        public async Task AddMessageAsync(string message, TimeSpan? messageVisibilityTimeout = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(message))
             {
@@ -67,13 +67,14 @@ namespace Microsoft.Liftr.Queue
                 Version = QueueMessageVersion.v2,
             };
 
+            messageVisibilityTimeout = messageVisibilityTimeout ?? _messageVisibilityTimeout;
             await _queue.SendMessageAsync(
                 msg.ToJson(),
-                visibilityTimeout: _messageVisibilityTimeout,
+                visibilityTimeout: messageVisibilityTimeout,
                 timeToLive: _messageTimeToLive,
                 cancellationToken: cancellationToken);
 
-            _logger.Information("Added message with Id '{MsgId}' into queue. TTL: {msgTTL}, visibilityTimeout: {visibilityTimeout}", msg.MsgId, _messageTimeToLive, _messageVisibilityTimeout);
+            _logger.Information("Added message with Id '{MsgId}' into queue. TTL: {msgTTL}, visibilityTimeout: {visibilityTimeout}", msg.MsgId, _messageTimeToLive, messageVisibilityTimeout);
         }
     }
 }
