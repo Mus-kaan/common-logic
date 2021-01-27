@@ -217,6 +217,23 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 throw ex;
             }
 
+            try
+            {
+                // Network contributor over the outbound IP
+                // OutboundIP assigned to AKS is also provided Network Contributor role so that Nginx controller can perform action: Microsoft.Network/publicIPAddresses/join/action on this public IP
+                var ipRg = await liftrAzure.GetResourceGroupAsync(outboundIp.ResourceGroupName);
+                _logger.Information("Granting Network contributor over the outbound IP rg to the AKS MI with object Id '{AKSobjectId}' ...", msi.Id, aksMIObjectId);
+                await liftrAzure.Authenticated.RoleAssignments
+                    .Define(SdkContext.RandomGuid())
+                    .ForObjectId(aksMIObjectId)
+                    .WithBuiltInRole(BuiltInRole.NetworkContributor)
+                    .WithResourceGroupScope(ipRg)
+                    .CreateAsync();
+            }
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
+            {
+            }
+
             IIdentity kubeletMI = null;
             var delayCounter = 0;
             const int AKSMIListingMaxDelayCounter = 20;

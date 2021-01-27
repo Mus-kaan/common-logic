@@ -198,9 +198,6 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                 await GrantNetworkContributorRoleAsync(inboundIpAddress, computeResources, liftrAzure);
 
-                // OutboundIP assigned to AKS is also provided Network Contributor role so that Nginx controller can perform action: Microsoft.Network/publicIPAddresses/join/action on this public IP
-                await GrantNetworkContributorRoleAsync(outboundIpAddress, computeResources, liftrAzure);
-
                 File.WriteAllText("vault-name.txt", computeResources.KeyVault.Name);
                 File.WriteAllText("aks-kv.txt", computeResources.KeyVault.VaultUri);
                 File.WriteAllText("aks-domain.txt", $"{computeResources.AKS.Name}.{targetOptions.DomainName}");
