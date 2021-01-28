@@ -22,7 +22,4 @@
     <ProjectReference Include="..\..\Liftr.TokenManager\Liftr.TokenManager.csproj" />
     <ProjectReference Include="..\..\Liftr.WebHosting\Liftr.WebHosting.csproj" />
   </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="dotnet swagger tofile --serializeasv2 --output bin/swagger.json bin/$(Configuration)/netcoreapp3.1/Liftr.Sample.Web.dll v1" />
-  </Target>
 </Project>
