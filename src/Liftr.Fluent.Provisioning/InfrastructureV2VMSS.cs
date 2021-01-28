@@ -142,18 +142,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var certList = new List<string>();
             if (certificateNameList != null && certificateNameList.Any())
             {
-                using var regionalKVValet = new KeyVaultConcierge(provisionedResources.RegionalKeyVault.VaultUri, _kvClient, _logger);
-
                 foreach (var certName in certificateNameList)
                 {
-                    var bundle = await regionalKVValet.GetCertAsync(certName);
-                    if (bundle == null)
-                    {
-                        var ex = new InvalidOperationException($"Cannot find certificate with name '{certName}' in Key Vault '{provisionedResources.RegionalKeyVault.VaultUri}'.");
-                        _logger.Error(ex, ex.Message);
-                        throw ex;
-                    }
-
                     certList.Add($"{provisionedResources.RegionalKeyVault.VaultUri}secrets/{certName}");
                 }
 
