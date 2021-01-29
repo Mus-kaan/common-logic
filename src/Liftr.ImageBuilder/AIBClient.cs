@@ -224,6 +224,7 @@ namespace Microsoft.Liftr.ImageBuilder
             HttpResponseMessage startOperationResponse,
             CancellationToken cancellationToken)
         {
+            int maxRetry = 5;
             string statusUrl = string.Empty;
 
             if (startOperationResponse.Headers.Contains("Location"))
@@ -234,15 +235,32 @@ namespace Microsoft.Liftr.ImageBuilder
             while (true)
             {
                 var statusResponse = await client.GetAsync(new Uri(statusUrl), cancellationToken);
-                var body = await statusResponse.Content.ReadAsStringAsync();
-                if (body.OrdinalContains("Running") || body.OrdinalContains("InProgress"))
+                if (statusResponse.IsSuccessStatusCode)
                 {
-                    _logger.Debug("Waiting for ARM Async Operation. statusUrl: {statusUrl}", statusUrl);
-                    await Task.Delay(TimeSpan.FromSeconds(60), cancellationToken);
+                    var body = await statusResponse.Content.ReadAsStringAsync();
+                    if (body.OrdinalContains("Running") || body.OrdinalContains("InProgress"))
+                    {
+                        _logger.Debug("Waiting for ARM Async Operation. statusUrl: {statusUrl}", statusUrl);
+                        await Task.Delay(TimeSpan.FromSeconds(60), cancellationToken);
+                    }
+                    else
+                    {
+                        return body;
+                    }
                 }
                 else
                 {
-                    return body;
+                    _logger.Warning("Check async operation failed. statusUrl: {statusUrl}, StatusCode: {StatusCode}", statusUrl, statusResponse.StatusCode);
+                    var body = await statusResponse.Content.ReadAsStringAsync();
+                    _logger.Warning("ErrorBody: {ErrorBody}", body);
+
+                    if (maxRetry <= 0)
+                    {
+                        return body;
+                    }
+
+                    maxRetry--;
+                    await Task.Delay(TimeSpan.FromSeconds(60), cancellationToken);
                 }
             }
         }
