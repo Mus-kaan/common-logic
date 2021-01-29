@@ -11,6 +11,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
     public static class TestDBConnection
     {
         public const string TestDatabaseName = "unit-test";
+        public const string TestCollectionPrefix = "test.collection.";
 
         private const string LIFTR_UNIT_TEST_MONGODB_CONNSTR_BASE64 = nameof(LIFTR_UNIT_TEST_MONGODB_CONNSTR_BASE64);
 
@@ -34,6 +35,6 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
         public static MongoOptions TestMongoOptions => new MongoOptions() { ConnectionString = TestMongodbConStr, DatabaseName = TestDatabaseName };
 
-        public static string RandomCollectionName() => "test.collection." + ObjectId.GenerateNewId().ToString();
+        public static string RandomCollectionName() => $"{TestCollectionPrefix}{DateTime.UtcNow.ToZuluString()}.{ObjectId.GenerateNewId()}";
     }
 }

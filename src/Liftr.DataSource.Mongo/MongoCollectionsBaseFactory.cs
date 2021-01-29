@@ -7,6 +7,7 @@ using MongoDB.Driver;
 using MongoDB.Driver.Core.Events;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Authentication;
@@ -102,6 +103,13 @@ namespace Microsoft.Liftr.DataSource.Mongo
         public async Task DeleteCollectionAsync(string collectionName)
         {
             await _db.DropCollectionAsync(collectionName);
+        }
+
+        public async Task<IEnumerable<string>> ListCollectionsAsync()
+        {
+            var collections = await _db.ListCollectionsAsync();
+            var list = await collections.ToListAsync();
+            return list.Select(item => item["name"].AsString);
         }
 
         public void DeleteCollection(string collectionName)

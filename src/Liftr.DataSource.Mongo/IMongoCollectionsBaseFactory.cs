@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using MongoDB.Driver;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.DataSource.Mongo
@@ -16,5 +17,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
         Task DeleteCollectionAsync(string collectionName);
 
         void DeleteCollection(string collectionName);
+
+        Task<IEnumerable<string>> ListCollectionsAsync();
     }
 }
