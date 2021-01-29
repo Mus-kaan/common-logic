@@ -53,51 +53,6 @@ namespace Microsoft.Liftr.EV2.Tests
         }
 
         [Fact]
-        public void VerifyGenerateSeparateComputeRegionsArtifacts()
-        {
-            var artifact = new EV2ArtifactsGenerator(_logger);
-
-            var ev2Options = JsonConvert.DeserializeObject<EV2HostingOptions>(File.ReadAllText("TestEv2HostingOptions.json"));
-            var hostingOptions = JsonConvert.DeserializeObject<HostingOptions>(File.ReadAllText("TestHostingOptionsSeparateComputeRegion.json"));
-
-            var dir = Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString());
-
-            artifact.GenerateArtifacts(ev2Options, hostingOptions, dir);
-
-            var folders = Directory.GetDirectories(dir);
-
-            Assert.Equal(6, folders.Length);
-            {
-                var filePath = Path.Combine(dir, "1_global", "ServiceModel.DogFood.json");
-                Assert.True(File.Exists(filePath), $"'{filePath}' should exist.");
-            }
-
-            {
-                var filePath = Path.Combine(dir, "1_global", "RolloutSpec.DogFood.global.json");
-                Assert.True(File.Exists(filePath), $"'{filePath}' should exist.");
-            }
-
-            {
-                var filePath = Path.Combine(dir, "1_global", "parameters", "DogFood", "RolloutParameters.DogFood.global.json");
-                Assert.True(File.Exists(filePath), $"'{filePath}' should exist.");
-            }
-
-            {
-                var computeDirPath = Path.Combine(dir, "3_regional_compute");
-                var files = Directory.GetFiles(computeDirPath);
-
-                Assert.Equal(7, files.Length);
-                Assert.Contains(files, f => f.OrdinalContains("RolloutSpec.DogFood.eastus.json"));
-                Assert.Contains(files, f => f.OrdinalContains("RolloutSpec.DogFood.southcentralus.json"));
-                Assert.Contains(files, f => f.OrdinalContains("RolloutSpec.Production.centralus.json"));
-                Assert.Contains(files, f => f.OrdinalContains("RolloutSpec.Production.eastus2.json"));
-                Assert.Contains(files, f => f.OrdinalContains("RolloutSpec.Production.westcentralus.json"));
-                Assert.Contains(files, f => f.OrdinalContains("ServiceModel.DogFood.json"));
-                Assert.Contains(files, f => f.OrdinalContains("ServiceModel.Production.json"));
-            }
-        }
-
-        [Fact]
         public void VerifyGenerateImageBuilderArtifacts()
         {
             var artifact = new EV2ArtifactsGenerator(_logger);

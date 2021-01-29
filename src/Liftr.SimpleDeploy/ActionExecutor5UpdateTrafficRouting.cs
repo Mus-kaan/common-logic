@@ -37,7 +37,7 @@ namespace Microsoft.Liftr.SimpleDeploy
             var aksRGName = parsedRegionInfo.AKSRGName;
             var aksName = parsedRegionInfo.AKSName;
             var aksRegion = parsedRegionInfo.AKSRegion;
-            var computeBaseName = regionOptions.ComputeBaseName ?? parsedRegionInfo.ComputeRegionOptions.ComputeBaseName;
+            var computeBaseName = regionOptions.ComputeBaseName;
 
             if ((_commandOptions.Action == ActionType.UpdateComputeIPInTrafficManager && targetOptions.IsAKS) ||
                 (_commandOptions.Action == ActionType.CreateOrUpdateRegionalCompute && targetOptions.IsAKS) ||

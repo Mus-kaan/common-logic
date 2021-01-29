@@ -18,11 +18,6 @@ namespace Microsoft.Liftr.SimpleDeploy
         /// </summary>
         public static Func<RegionalDataCallbackParameters, Task> AfterProvisionRegionalDataResourcesAsync { get; set; }
 
-        /// <summary>
-        /// Call back after the data region are created. This assume that data and compute are in DIFFERENT regions.
-        /// </summary>
-        public static Func<DataRegionCallbackParameters, Task> AfterProvisionDataRegionAsync { get; set; }
-
         public static Func<AKSCallbackParameters, Task> AfterProvisionRegionalAKSResourcesAsync { get; set; }
 
         public static Func<VMSSCallbackParameters, Task> AfterProvisionRegionalVMSSResourcesAsync { get; set; }

@@ -55,7 +55,7 @@ namespace Microsoft.Liftr.SimpleDeploy
             RegionalComputeOptions regionalComputeOptions = new RegionalComputeOptions()
             {
                 DataBaseName = regionOptions.DataBaseName,
-                ComputeBaseName = regionOptions.ComputeBaseName ?? parsedRegionInfo.ComputeRegionOptions.ComputeBaseName,
+                ComputeBaseName = regionOptions.ComputeBaseName,
                 GlobalKeyVaultResourceId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
                 LogAnalyticsWorkspaceResourceId = targetOptions.LogAnalyticsWorkspaceId,
                 ActiveDBKeyName = _commandOptions.ActiveKeyName,
@@ -132,40 +132,24 @@ namespace Microsoft.Liftr.SimpleDeploy
                     _logger.Information($"Outbound IP address {outboundIpAddress?.IPAddress} created for the AKS Cluster...");
                 }
 
-                if (parsedRegionInfo.ComputeRegionOptions != null)
+                if (!string.IsNullOrEmpty(regionOptions.KubernetesVersion))
                 {
-                    computeResources = await infra.CreateOrUpdateComputeRegionAsync(
-                        parsedRegionInfo.ComputeRegionNamingContext,
-                        regionalNamingContext,
-                        regionalComputeOptions,
-                        targetOptions.AKSConfigurations,
-                        kvClient,
-                        targetOptions.EnableVNet,
-                        outboundIpAddress,
-                        allowedAcisExtensions,
-                        enableAKSAvailabilityZone);
+                    _logger.Information(
+                        "For region {aksRegion}, overwritting the default k8s version {defaultK8sVersion} with regional version {k8sVersion}",
+                        regionalNamingContext.Location.Name,
+                        targetOptions.AKSConfigurations.KubernetesVersion,
+                        regionOptions.KubernetesVersion);
+                    targetOptions.AKSConfigurations.KubernetesVersion = regionOptions.KubernetesVersion;
                 }
-                else
-                {
-                    if (!string.IsNullOrEmpty(regionOptions.KubernetesVersion))
-                    {
-                        _logger.Information(
-                            "For region {aksRegion}, overwritting the default k8s version {defaultK8sVersion} with regional version {k8sVersion}",
-                            regionalNamingContext.Location.Name,
-                            targetOptions.AKSConfigurations.KubernetesVersion,
-                            regionOptions.KubernetesVersion);
-                        targetOptions.AKSConfigurations.KubernetesVersion = regionOptions.KubernetesVersion;
-                    }
 
-                    computeResources = await infra.CreateOrUpdateRegionalAKSRGAsync(
-                        regionalNamingContext,
-                        regionalComputeOptions,
-                        targetOptions.AKSConfigurations,
-                        kvClient,
-                        targetOptions.EnableVNet,
-                        outboundIpAddress,
-                        enableAKSAvailabilityZone);
-                }
+                computeResources = await infra.CreateOrUpdateRegionalAKSRGAsync(
+                    regionalNamingContext,
+                    regionalComputeOptions,
+                    targetOptions.AKSConfigurations,
+                    kvClient,
+                    targetOptions.EnableVNet,
+                    outboundIpAddress,
+                    enableAKSAvailabilityZone);
 
                 if (computeResources.ThanosStorageAccount != null)
                 {

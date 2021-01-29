@@ -56,51 +56,24 @@ namespace Microsoft.Liftr.SimpleDeploy
             };
 
             bool createVNet = targetOptions.IsAKS ? targetOptions.EnableVNet : true;
+            var dataResources = await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions, createVNet, allowedAcisExtensions);
 
-            if (regionOptions.IsSeparatedDataAndComputeRegion)
+            if (SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync != null)
             {
-                var dataResources = await infra.CreateOrUpdateDataRegionAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions, createVNet);
-
-                if (SimpleDeployExtension.AfterProvisionDataRegionAsync != null)
+                using (_logger.StartTimedOperation(nameof(SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync)))
                 {
-                    using (_logger.StartTimedOperation(nameof(SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync)))
+                    var parameters = new RegionalDataCallbackParameters()
                     {
-                        var parameters = new DataRegionCallbackParameters()
-                        {
-                            CallbackConfigurations = _callBackConfigs,
-                            BaseName = regionOptions.DataBaseName,
-                            NamingContext = regionalNamingContext,
-                            DataOptions = dataOptions,
-                            RegionOptions = regionOptions,
-                            Resources = dataResources,
-                            IPPoolManager = ipPool,
-                        };
+                        CallbackConfigurations = _callBackConfigs,
+                        BaseName = regionOptions.DataBaseName,
+                        NamingContext = regionalNamingContext,
+                        DataOptions = dataOptions,
+                        RegionOptions = regionOptions,
+                        Resources = dataResources,
+                        IPPoolManager = ipPool,
+                    };
 
-                        await SimpleDeployExtension.AfterProvisionDataRegionAsync.Invoke(parameters);
-                    }
-                }
-            }
-            else
-            {
-                var dataResources = await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions, createVNet, allowedAcisExtensions);
-
-                if (SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync != null)
-                {
-                    using (_logger.StartTimedOperation(nameof(SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync)))
-                    {
-                        var parameters = new RegionalDataCallbackParameters()
-                        {
-                            CallbackConfigurations = _callBackConfigs,
-                            BaseName = regionOptions.DataBaseName,
-                            NamingContext = regionalNamingContext,
-                            DataOptions = dataOptions,
-                            RegionOptions = regionOptions,
-                            Resources = dataResources,
-                            IPPoolManager = ipPool,
-                        };
-
-                        await SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync.Invoke(parameters);
-                    }
+                    await SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync.Invoke(parameters);
                 }
             }
 

@@ -300,16 +300,8 @@ namespace Microsoft.Liftr.SimpleDeploy
             var options = GetRegionalOptions(targetOptions);
             string rgName, kvName = null;
 
-            if (options.ComputeRegionOptions == null)
-            {
-                rgName = options.RegionNamingContext.ResourceGroupName(options.RegionOptions.DataBaseName);
-                kvName = options.RegionNamingContext.KeyVaultName(options.RegionOptions.DataBaseName);
-            }
-            else
-            {
-                rgName = options.ComputeRegionNamingContext.ResourceGroupName(options.ComputeRegionOptions.ComputeBaseName);
-                kvName = options.ComputeRegionNamingContext.KeyVaultName(options.ComputeRegionOptions.ComputeBaseName);
-            }
+            rgName = options.RegionNamingContext.ResourceGroupName(options.RegionOptions.DataBaseName);
+            kvName = options.RegionNamingContext.KeyVaultName(options.RegionOptions.DataBaseName);
 
             var liftrAzure = azFactory.GenerateLiftrAzure();
             var targetResourceId = $"subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.KeyVault/vaults/{kvName}";
@@ -330,19 +322,7 @@ namespace Microsoft.Liftr.SimpleDeploy
             var options = new ActionExcutorRegionOptions();
             var location = Region.Create(_commandOptions.Region);
 
-            if (targetOptions.Regions.First().IsSeparatedDataAndComputeRegion &&
-                (_commandOptions.Action == ActionType.CreateOrUpdateRegionalCompute ||
-                _commandOptions.Action == ActionType.PrepareK8SAppDeployment ||
-                _commandOptions.Action == ActionType.UpdateComputeIPInTrafficManager))
-            {
-                options.RegionOptions = targetOptions.Regions.FirstOrDefault(r => r.ComputeRegions.Any(computeRegion => computeRegion.Location.Name.OrdinalEquals(location.Name)));
-                options.ComputeRegionOptions = targetOptions.Regions.SelectMany(r => r.ComputeRegions).FirstOrDefault(r => r.Location.Name.OrdinalEquals(location.Name));
-                options.ComputeRegionNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, options.ComputeRegionOptions.Location);
-            }
-            else
-            {
-                options.RegionOptions = targetOptions.Regions.FirstOrDefault(r => r.Location.Name.OrdinalEquals(location.Name));
-            }
+            options.RegionOptions = targetOptions.Regions.FirstOrDefault(r => r.Location.Name.OrdinalEquals(location.Name));
 
             if (options.RegionOptions == null)
             {
@@ -352,17 +332,8 @@ namespace Microsoft.Liftr.SimpleDeploy
             }
 
             options.RegionNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, options.RegionOptions.Location);
-
-            if (options.ComputeRegionNamingContext == null)
-            {
-                options.AKSRGName = options.RegionNamingContext.ResourceGroupName(options.RegionOptions.ComputeBaseName);
-                options.AKSName = options.RegionNamingContext.AKSName(options.RegionOptions.ComputeBaseName);
-            }
-            else
-            {
-                options.AKSRGName = options.ComputeRegionNamingContext.ResourceGroupName(options.ComputeRegionOptions.ComputeBaseName);
-                options.AKSName = options.ComputeRegionNamingContext.AKSName(options.ComputeRegionOptions.ComputeBaseName);
-            }
+            options.AKSRGName = options.RegionNamingContext.ResourceGroupName(options.RegionOptions.ComputeBaseName);
+            options.AKSName = options.RegionNamingContext.AKSName(options.RegionOptions.ComputeBaseName);
 
             return options;
         }

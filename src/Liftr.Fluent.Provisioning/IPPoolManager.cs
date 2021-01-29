@@ -62,50 +62,36 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             try
             {
-                bool isSeparatedDataAndComputeRegion = regionOptions.First().IsSeparatedDataAndComputeRegion;
                 var az = _azureClientFactory.GenerateLiftrAzure();
-                var rg = await az.GetOrCreateResourceGroupAsync(poolLocation, _ipPoolRG, tags);
-                var inboundRG = await az.GetOrCreateResourceGroupAsync(poolLocation, _inboundPoolRG, tags);
-                var outboundRG = await az.GetOrCreateResourceGroupAsync(poolLocation, _outboundPoolRG, tags);
+                IResourceGroup rg = null, inboundRG = null, outboundRG = null;
+
+                if (isAKS)
+                {
+                    inboundRG = await az.GetOrCreateResourceGroupAsync(poolLocation, _inboundPoolRG, tags);
+                    outboundRG = await az.GetOrCreateResourceGroupAsync(poolLocation, _outboundPoolRG, tags);
+                }
+                else
+                {
+                    rg = await az.GetOrCreateResourceGroupAsync(poolLocation, _ipPoolRG, tags);
+                }
+
                 bool availabilityZoneSupport = false;
 
                 foreach (var regionOption in regionOptions)
                 {
-                    if (isSeparatedDataAndComputeRegion)
-                    {
-                        var computeRegionOptions = regionOption.ComputeRegions;
-                        foreach (var computeRegionOption in computeRegionOptions)
-                        {
-                            var computeRegion = computeRegionOption.Location;
-                            _logger.Information($"For Compute Region {computeRegion}, IP SKU Type is {PublicIPSkuType.Standard} and AKS hosting is set {isAKS}");
+                    var region = regionOption.Location;
+                    availabilityZoneSupport = regionOption.SupportAvailabilityZone;
+                    _logger.Information($"For Region {region}, Availability Zone Support is {availabilityZoneSupport} and IP SKU Type is {PublicIPSkuType.Standard} and AKS hosting is set {isAKS}");
 
-                            if (isAKS)
-                            {
-                                await ProvisionIPPoolAsync(computeRegion, ipPerRegion, tags, inboundRG, PublicIPSkuType.Standard, az, IPCategory.Inbound);
-                                await ProvisionIPPoolAsync(computeRegion, ipPerRegion, tags, outboundRG, PublicIPSkuType.Standard, az, IPCategory.Outbound);
-                            }
-                            else
-                            {
-                                await ProvisionIPPoolAsync(computeRegion, ipPerRegion, tags, rg, PublicIPSkuType.Standard, az);
-                            }
-                        }
+                    if (isAKS)
+                    {
+                        // Creating 1 inbound IP and 1 Outbound IP for AKS
+                        await ProvisionIPPoolAsync(region, ipPerRegion, tags, inboundRG, PublicIPSkuType.Standard, az, IPCategory.Inbound);
+                        await ProvisionIPPoolAsync(region, ipPerRegion, tags, outboundRG, PublicIPSkuType.Standard, az, IPCategory.Outbound);
                     }
                     else
                     {
-                        var region = regionOption.Location;
-                        availabilityZoneSupport = regionOption.SupportAvailabilityZone;
-                        _logger.Information($"For Region {region}, Availability Zone Support is {availabilityZoneSupport} and IP SKU Type is {PublicIPSkuType.Standard} and AKS hosting is set {isAKS}");
-
-                        if (isAKS)
-                        {
-                            // Creating 1 inbound IP and 1 Outbound IP for AKS
-                            await ProvisionIPPoolAsync(region, ipPerRegion, tags, inboundRG, PublicIPSkuType.Standard, az, IPCategory.Inbound);
-                            await ProvisionIPPoolAsync(region, ipPerRegion, tags, outboundRG, PublicIPSkuType.Standard, az, IPCategory.Outbound);
-                        }
-                        else
-                        {
-                            await ProvisionIPPoolAsync(region, ipPerRegion, tags, rg, PublicIPSkuType.Standard, az);
-                        }
+                        await ProvisionIPPoolAsync(region, ipPerRegion, tags, rg, PublicIPSkuType.Standard, az);
                     }
                 }
             }

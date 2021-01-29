@@ -24,18 +24,11 @@ namespace Microsoft.Liftr.Hosting.Contracts
         /// </summary>
         public string KubernetesVersion { get; set; }
 
-        /// <summary>
-        /// A list of compute regions.
-        /// </summary>
-        public IEnumerable<ComputeRegionOptions> ComputeRegions { get; set; }
-
         public bool ZoneRedundant { get; set; }
 
         public IEnumerable<string> DataPlaneSubscriptions { get; set; }
 
         public Dictionary<string, string> Properties { get; set; }
-
-        public bool IsSeparatedDataAndComputeRegion => string.IsNullOrEmpty(ComputeBaseName);
 
         public bool SupportAvailabilityZone { get; set; } = true;
 
@@ -46,29 +39,14 @@ namespace Microsoft.Liftr.Hosting.Contracts
                 throw new InvalidHostingOptionException($"{nameof(DataBaseName)} cannot be null or empty.");
             }
 
-            if (IsSeparatedDataAndComputeRegion)
+            if (string.IsNullOrEmpty(ComputeBaseName))
             {
-                if (ComputeRegions == null || !ComputeRegions.Any())
-                {
-                    throw new InvalidHostingOptionException("Cannot find information about the compute location.");
-                }
-
-                foreach (var computeRegion in ComputeRegions)
-                {
-                    computeRegion.CheckValid();
-                }
+                throw new InvalidHostingOptionException($"{nameof(ComputeBaseName)} cannot be null or empty.");
             }
-            else
-            {
-                if (ComputeRegions?.Any() == true)
-                {
-                    throw new InvalidHostingOptionException("Duplicated compute location information.");
-                }
 
-                if (isAKS && SupportAvailabilityZone)
-                {
-                    ValidateAKSZoneLocation(Location);
-                }
+            if (isAKS && SupportAvailabilityZone)
+            {
+                ValidateAKSZoneLocation(Location);
             }
         }
 

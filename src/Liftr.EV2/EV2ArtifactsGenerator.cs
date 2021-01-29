@@ -244,7 +244,7 @@ namespace Microsoft.Liftr.EV2
 
             foreach (var targetEnvironment in ev2Options.TargetEnvironments)
             {
-                var regions = ParseRegions(targetEnvironment, hostingOptions, checkComputeRegion: false);
+                var regions = ParseRegions(targetEnvironment, hostingOptions);
 
                 GenerateEnvironmentArtifacts(
                     ev2Options,
@@ -265,7 +265,7 @@ namespace Microsoft.Liftr.EV2
 
             foreach (var targetEnvironment in ev2Options.TargetEnvironments)
             {
-                var regions = ParseRegions(targetEnvironment, hostingOptions, checkComputeRegion: true);
+                var regions = ParseRegions(targetEnvironment, hostingOptions);
 
                 GenerateEnvironmentArtifacts(
                     ev2Options,
@@ -286,7 +286,7 @@ namespace Microsoft.Liftr.EV2
 
             foreach (var targetEnvironment in ev2Options.TargetEnvironments)
             {
-                var regions = ParseRegions(targetEnvironment, hostingOptions, checkComputeRegion: true);
+                var regions = ParseRegions(targetEnvironment, hostingOptions);
 
                 GenerateEnvironmentArtifacts(
                     ev2Options,
@@ -307,7 +307,7 @@ namespace Microsoft.Liftr.EV2
 
             foreach (var targetEnvironment in ev2Options.TargetEnvironments)
             {
-                var regions = ParseRegions(targetEnvironment, hostingOptions, checkComputeRegion: true);
+                var regions = ParseRegions(targetEnvironment, hostingOptions);
 
                 GenerateEnvironmentArtifacts(
                     ev2Options,
@@ -319,7 +319,7 @@ namespace Microsoft.Liftr.EV2
             }
         }
 
-        private static IEnumerable<string> ParseRegions(TargetEnvironment targetEnvironment, HostingOptions hostingOptions, bool checkComputeRegion)
+        private static IEnumerable<string> ParseRegions(TargetEnvironment targetEnvironment, HostingOptions hostingOptions)
         {
             var hostEnv = hostingOptions.Environments.FirstOrDefault(e => e.EnvironmentName == targetEnvironment.EnvironmentName);
             if (hostEnv == null)
@@ -328,11 +328,6 @@ namespace Microsoft.Liftr.EV2
             }
 
             var regions = hostEnv.Regions.Select(r => r.Location.Name);
-
-            if (checkComputeRegion && hostEnv.Regions.First().IsSeparatedDataAndComputeRegion)
-            {
-                regions = hostEnv.Regions.SelectMany(r => r.ComputeRegions).Select(r => r.Location.Name);
-            }
 
             return regions;
         }

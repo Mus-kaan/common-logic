@@ -14,16 +14,12 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public NamingContext RegionNamingContext { get; set; }
 
-        public ComputeRegionOptions ComputeRegionOptions { get; set; }
-
-        public NamingContext ComputeRegionNamingContext { get; set; }
-
         public string AKSRGName { get; set; }
 
         public string AKSName { get; set; }
 
-        public Region AKSRegion => RegionOptions.IsSeparatedDataAndComputeRegion ? ComputeRegionNamingContext.Location : RegionNamingContext.Location;
+        public Region AKSRegion => RegionNamingContext.Location;
 
-        public bool EnableAvailabilityZone => RegionOptions.IsSeparatedDataAndComputeRegion ? ComputeRegionOptions.SupportAvailabilityZone : RegionOptions.SupportAvailabilityZone;
+        public bool EnableAvailabilityZone => RegionOptions.SupportAvailabilityZone;
     }
 }

@@ -78,11 +78,6 @@ namespace Microsoft.Liftr.Hosting.Contracts
             foreach (var region in Regions)
             {
                 region.CheckValid(IsAKS);
-
-                if (EnableVNet && region.IsSeparatedDataAndComputeRegion)
-                {
-                    throw new InvalidHostingOptionException($"Separated data and compute regions does not support VNet.");
-                }
             }
 
             if (AKSConfigurations == null && VMSSConfigurations == null)
