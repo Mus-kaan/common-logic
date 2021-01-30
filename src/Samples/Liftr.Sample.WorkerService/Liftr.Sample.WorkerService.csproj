@@ -5,6 +5,7 @@
     <UserSecretsId>a230081a-dccc-49c9-ba47-651d22e0bd9a</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.ApplicationInsights.Profiler.AspNetCore" Version="$(PackageVersion_Microsoft_ApplicationInsights_Profiler_AspNetCore)" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(PackageVersion_Microsoft_Extensions_Hosting)" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="$(PackageVersion_Microsoft_Extensions_Configuration_UserSecrets)" />
   </ItemGroup>

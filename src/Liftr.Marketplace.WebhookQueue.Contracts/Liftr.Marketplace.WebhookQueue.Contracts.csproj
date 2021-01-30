@@ -1,14 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
     <IsPackable>true</IsPackable>
     <AssemblyName>Microsoft.Liftr.Marketplace.WebhookQueue.Contracts</AssemblyName>
     <RootNamespace>Microsoft.Liftr.Marketplace.WebhookQueue.Contracts</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Marketplace\Liftr.Marketplace.csproj" />
   </ItemGroup>
-
 </Project>

@@ -1,26 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
-		<IsPackable>false</IsPackable>
-		<AssemblyName>Microsoft.Liftr.DataSource.Mongo.Tests</AssemblyName>
-		<RootNamespace>Microsoft.Liftr.DataSource.Mongo.Tests</RootNamespace>
-	</PropertyGroup>
-	<ItemGroup>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(PackageVersion_Microsoft_NET_Test_Sdk)" />
-		<PackageReference Include="xunit" Version="$(PackageVersion_xunit)" />
-		<PackageReference Include="xunit.runner.visualstudio" Version="$(PackageVersion_xunit_runner_visualstudio)" />
-		<PackageReference Include="coverlet.collector" Version="$(PackageVersion_coverlet_collector)" />
-		<PackageReference Include="coverlet.msbuild" Version="$(PackageVersion_coverlet_msbuild)">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="FluentAssertions" Version="$(PackageVersion_FluentAssertions)" />
-	</ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>Microsoft.Liftr.DataSource.Mongo.Tests</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.DataSource.Mongo.Tests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(PackageVersion_Microsoft_NET_Test_Sdk)" />
+    <PackageReference Include="xunit" Version="$(PackageVersion_xunit)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(PackageVersion_xunit_runner_visualstudio)" />
+    <PackageReference Include="coverlet.collector" Version="$(PackageVersion_coverlet_collector)" />
+    <PackageReference Include="coverlet.msbuild" Version="$(PackageVersion_coverlet_msbuild)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions" Version="$(PackageVersion_FluentAssertions)" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.DataSource.Mongo.Tests.Common\Liftr.DataSource.Mongo.Tests.Common.csproj" />
     <ProjectReference Include="..\Liftr.MarketplaceRelationship.Datasource\Liftr.MarketplaceRelationship.Datasource.csproj" />
     <ProjectReference Include="..\Liftr.Tests.Common\Liftr.Tests.Common.csproj" />
   </ItemGroup>
-
 </Project>

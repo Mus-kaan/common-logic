@@ -14,6 +14,7 @@
     <PackageVersion_Microsoft_ApplicationInsights>2.12.0</PackageVersion_Microsoft_ApplicationInsights>
     <PackageVersion_Microsoft_ApplicationInsights_AspNetCore>2.12.0</PackageVersion_Microsoft_ApplicationInsights_AspNetCore>
     <PackageVersion_Microsoft_ApplicationInsights_DependencyCollector>2.12.0</PackageVersion_Microsoft_ApplicationInsights_DependencyCollector>
+    <PackageVersion_Microsoft_ApplicationInsights_Profiler_AspNetCore>2.2.0-beta6</PackageVersion_Microsoft_ApplicationInsights_Profiler_AspNetCore>
     <PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>2.2.0</PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>
     <PackageVersion_Microsoft_Azure_Cosmos_Table>1.0.8</PackageVersion_Microsoft_Azure_Cosmos_Table>
     <PackageVersion_Microsoft_Azure_KeyVault>3.0.5</PackageVersion_Microsoft_Azure_KeyVault>

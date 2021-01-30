@@ -1,14 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
-		<AssemblyName>Microsoft.Liftr.MarketplaceRelationship.DataSource</AssemblyName>
-		<RootNamespace>Microsoft.Liftr.MarketplaceRelationship.DataSource</RootNamespace>
-		<IsPackable>true</IsPackable>
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <AssemblyName>Microsoft.Liftr.MarketplaceRelationship.DataSource</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.MarketplaceRelationship.DataSource</RootNamespace>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj" />
   </ItemGroup>
-
 </Project>

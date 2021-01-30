@@ -172,6 +172,8 @@ namespace Microsoft.Liftr.Sample.Web
 
             services.AddControllers();
             services.AddRazorPages();
+
+            services.AddServiceProfiler();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
