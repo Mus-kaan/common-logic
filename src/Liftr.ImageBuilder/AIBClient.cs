@@ -71,7 +71,16 @@ namespace Microsoft.Liftr.ImageBuilder
                 uriBuilder.Path =
                     $"/subscriptions/{_liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{templateName}/run";
                 uriBuilder.Query = $"api-version={c_AIBAPIVersion}";
-                var startRunResponse = await httpClient.PostAsync(uriBuilder.Uri, null);
+                HttpResponseMessage startRunResponse = null;
+                int retry = 3;
+
+                do
+                {
+                    startRunResponse = await httpClient.PostAsync(uriBuilder.Uri, null);
+                    retry--;
+                    await Task.Delay(TimeSpan.FromMinutes(2));
+                }
+                while (retry > 0 && !startRunResponse.IsSuccessStatusCode);
 
                 if (startRunResponse.StatusCode == HttpStatusCode.Accepted)
                 {
