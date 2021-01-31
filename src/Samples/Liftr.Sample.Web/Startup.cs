@@ -18,6 +18,7 @@ using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.Hosting.Swagger;
 using Microsoft.Liftr.IFxAuditLinux;
 using Microsoft.Liftr.MarketplaceResource.DataSource;
+using Microsoft.Liftr.Profiler.AspNetCore;
 using Microsoft.Liftr.Queue;
 using Microsoft.Liftr.TokenManager;
 using Microsoft.Liftr.TokenManager.Options;
@@ -173,7 +174,7 @@ namespace Microsoft.Liftr.Sample.Web
             services.AddControllers();
             services.AddRazorPages();
 
-            services.AddServiceProfiler();
+            services.AddAppInsightsProfiler(_configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.Profiler.AspNetCore</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Profiler.AspNetCore</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ApplicationInsights.Profiler.AspNetCore" Version="$(PackageVersion_Microsoft_ApplicationInsights_Profiler_AspNetCore)" />
+  </ItemGroup>
+</Project>

@@ -8,7 +8,6 @@
     <DisableLiftrCodeAnalysis>true</DisableLiftrCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.ApplicationInsights.Profiler.AspNetCore" Version="$(PackageVersion_Microsoft_ApplicationInsights_Profiler_AspNetCore)" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="$(PackageVersion_prometheus-net_AspNetCore)" />
   </ItemGroup>
   <ItemGroup>
@@ -18,6 +17,7 @@
     <ProjectReference Include="..\..\Liftr.IFxAuditLinux\Liftr.IFxAuditLinux.csproj" />
     <ProjectReference Include="..\..\Liftr.MarketplaceResource.DataSource\Liftr.MarketplaceResource.DataSource.csproj" />
     <ProjectReference Include="..\..\Liftr.Logging.AspNetCore\Liftr.Logging.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\Liftr.Profiler.AspNetCore\Liftr.Profiler.AspNetCore.csproj" />
     <ProjectReference Include="..\..\Liftr.Queue\Liftr.Queue.csproj" />
     <ProjectReference Include="..\..\Liftr.TokenManager.Abstractions\Liftr.TokenManager.Abstractions.csproj" />
     <ProjectReference Include="..\..\Liftr.TokenManager\Liftr.TokenManager.csproj" />
