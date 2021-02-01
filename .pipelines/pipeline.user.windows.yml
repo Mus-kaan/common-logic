@@ -68,14 +68,14 @@ test:
           include:
             - "**/*.trx"
             - "**/*.coverage"
-      codecoverage:
-        - summary_file: "TestOutput/CodeCoverage/coverage.cobertura.xml"
-          report_directory: "TestOutput/CoverageReport"
-          coverage_tool: "Cobertura"
-          from: "TestOutput"
-          include:
-            - "**/*.xml"
-            - "*.html"
+      # codecoverage:
+      #   - summary_file: "TestOutput/CodeCoverage/coverage.cobertura.xml"
+      #     report_directory: "TestOutput/CoverageReport"
+      #     coverage_tool: "Cobertura"
+      #     from: "TestOutput"
+      #     include:
+      #       - "**/*.xml"
+      #       - "*.html"
 
 package:
   commands:

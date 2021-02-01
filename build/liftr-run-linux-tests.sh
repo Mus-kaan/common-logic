@@ -16,7 +16,7 @@ do
   echo "Start dotnet test $solution"
   echo
 
-  dotnet test $solution --logger:trx --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat="json%2cCobertura" /p:CoverletOutput="$SrcRoot/TestOutput/CodeCoverage/" /p:MergeWith="$SrcRoot/TestOutput/CodeCoverage/coverage.json" --results-directory="$SrcRoot/TestOutput/CoverageResult/"
+  dotnet test $solution --logger:trx
     exit_code=$?
     if [ $exit_code -ne 0 ]; then
         echo "Failed to test"
@@ -25,17 +25,6 @@ do
   echo "Finished dotnet test $solution"
   echo "==========[Liftr]==========[https://aka.ms/liftr]==========[Liftr]==========[https://aka.ms/liftr]=========="
 done
-
-echo "-------- Generating Code Coverage report ------------------------"
-$SrcRoot/buildtools/reportgenerator "-reports:$SrcRoot/TestOutput/CodeCoverage/coverage.cobertura.xml" "-targetdir:$SrcRoot/TestOutput/CoverageReport" -reporttypes:HtmlInline_AzurePipelines                 # Generates report
-EX=$?
-
-if [ "$EX" -ne 0 ]; then
-    echo -e "${RED}Error while generating code coverage report ${NC}"
-    exit $EX
-fi
-
-echo "===============Code coverage Report Generated=============="
 
 echo "Successfully finished testing!"
 echo "**********[Liftr]**********[https://aka.ms/liftr]**********[Liftr]**********[https://aka.ms/liftr]**********"
