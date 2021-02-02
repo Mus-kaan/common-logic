@@ -13,6 +13,9 @@ namespace Microsoft.Liftr.ACIS.Contracts
         public const string DeleteEventhub = nameof(DeleteEventhub);
 
         public const string UpdateEventhub = nameof(UpdateEventhub);
+
+        public const string AddMonitoringRelationship = nameof(AddMonitoringRelationship);
+        public const string RemoveMonitoringRelationship = nameof(RemoveMonitoringRelationship);
         #endregion
 
         #region Datadog
