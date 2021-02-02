@@ -14,6 +14,7 @@ namespace Microsoft.Liftr.ACIS.Contracts
 
         public const string UpdateEventhub = nameof(UpdateEventhub);
 
+        public const string ListMonitoringRelationship = nameof(ListMonitoringRelationship);
         public const string AddMonitoringRelationship = nameof(AddMonitoringRelationship);
         public const string RemoveMonitoringRelationship = nameof(RemoveMonitoringRelationship);
         #endregion
