@@ -105,6 +105,19 @@ namespace Liftr.MarketplaceRelationship.DataSource.Test
                 var actualStr = retrieved.ToJson();
                 Assert.Equal(exceptedStr, actualStr);
             }
+
+            {
+                var retrieved = await dataSource.ListAsync();
+
+                Assert.Equal(expected.Count(), retrieved.Count());
+                Assert.Equal(resourceId1.ToUpperInvariant(), retrieved.First().ResourceId);
+                Assert.Equal(region1, retrieved.First().Region);
+                Assert.Equal(tenantId1, retrieved.First().TenantId);
+
+                var exceptedStr = expected.ToJson();
+                var actualStr = retrieved.ToJson();
+                Assert.Equal(exceptedStr, actualStr);
+            }
         }
     }
 }
