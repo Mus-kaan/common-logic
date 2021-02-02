@@ -42,5 +42,29 @@ namespace Microsoft.Liftr.MarketplaceRelationship.DataSource
                 _rateLimiter.Release();
             }
         }
+
+        public virtual async Task<IEnumerable<TEntity>> ListAsync(bool showActiveOnly = true)
+        {
+            var builder = Builders<TEntity>.Filter;
+            var filter = builder.Empty;
+
+            if (showActiveOnly)
+            {
+                filter &= builder.Eq(u => u.Active, true);
+            }
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var cursor = _collection.Find(filter);
+                var entities = await cursor.ToListAsync();
+
+                return entities;
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
+        }
     }
 }
