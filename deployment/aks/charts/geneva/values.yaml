@@ -23,7 +23,7 @@ promMdmConverter:
   name: prom-mdm-converter
   replicas: 1
   promConverterImagePullPolicy: Always
-  dockerTag: 2.0.master.20210115.1
+  dockerTag: 2.0.master.20210128.1
 
   metrics: # Metrics below with a suffix "_named" or "_rate" are likely defined in the Prometheus configuration
     kube_pod_status_phase:
