@@ -13,10 +13,11 @@ region="westus"
 
 # [[[GENEVA_UPDATE_CHANGE_HERE]]]
 # The version are referenced at three places. You need to update all of them. Please search for this sentence.
+# latest prom mdm image version: https://msazure.visualstudio.com/Liftr/_build?definitionId=113171&_a=summary&view=runs
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/references/linuxcontainers.html"
 IMG_mdsd="genevamdsd:master_20210201.2"
 IMG_mdm="genevamdm:master_20210201.2"
-IMG_fluentd="genevafluentd_td-agent:master_20210201.2"
+IMG_fluentd="genevafluentd_td-agent:master_20210203.1"
 IMG_azsecpack="genevasecpackinstall:master_20210201.2"
 IMG_kubegen="kube-gen:master_20210201.2"
 IMG_kubectl="kubectl:master_20210201.2"

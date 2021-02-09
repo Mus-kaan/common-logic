@@ -8,13 +8,14 @@ linuxgenevaACR:
 # [[[GENEVA_UPDATE_CHANGE_HERE]]]
 # The version are referenced at three places. You need to update all of them. Please search for this sentence.
 # Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/references/linuxcontainers.html
+# latest prom mdm image version: https://msazure.visualstudio.com/Liftr/_build?definitionId=113171&_a=summary&view=runs
 mdsd:
   dockerTag: master_20210201.2
 mdm:
   dockerTag: master_20210201.2
 
 fluentd:
-  dockerTag: master_20210201.2
+  dockerTag: master_20210203.1
 
 secpack:
   dockerTag: master_20210201.2
@@ -23,7 +24,7 @@ promMdmConverter:
   name: prom-mdm-converter
   replicas: 1
   promConverterImagePullPolicy: Always
-  dockerTag: 2.0.master.20210128.1
+  dockerTag: 2.0.master.20210204.1
 
   metrics: # Metrics below with a suffix "_named" or "_rate" are likely defined in the Prometheus configuration
     kube_pod_status_phase:
