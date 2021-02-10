@@ -21,6 +21,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_build", "_build", "{298928
 		Directory.Build.targets = Directory.Build.targets
 		NuGet.config = NuGet.config
 		PackageVersions.props = PackageVersions.props
+		..\.pipelines\pipeline.user.linux.buddy.yml = ..\.pipelines\pipeline.user.linux.buddy.yml
+		..\.pipelines\pipeline.user.linux.yml = ..\.pipelines\pipeline.user.linux.yml
+		..\.pipelines\pipeline.user.windows.buddy.yml = ..\.pipelines\pipeline.user.windows.buddy.yml
+		..\.pipelines\pipeline.user.windows.yml = ..\.pipelines\pipeline.user.windows.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DataSource.Mongo.Tests.Common", "Liftr.DataSource.Mongo.Tests.Common\Liftr.DataSource.Mongo.Tests.Common.csproj", "{50927DA1-CA1A-415D-B367-64884D31F75E}"
@@ -189,7 +193,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.MarketplaceRelationsh
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Marketplace.WebhookQueue.Contracts", "Liftr.Marketplace.WebhookQueue.Contracts\Liftr.Marketplace.WebhookQueue.Contracts.csproj", "{C7539898-280D-433F-A491-43529D0D0BEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Profiler.AspNetCore", "Liftr.Profiler.AspNetCore\Liftr.Profiler.AspNetCore.csproj", "{13565FA9-39DC-4B88-B716-CF3A317BFBA2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Profiler.AspNetCore", "Liftr.Profiler.AspNetCore\Liftr.Profiler.AspNetCore.csproj", "{13565FA9-39DC-4B88-B716-CF3A317BFBA2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

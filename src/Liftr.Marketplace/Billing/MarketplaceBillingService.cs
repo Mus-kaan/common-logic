@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Marketplace.Billing.Contracts;
 using Microsoft.Liftr.Marketplace.Billing.Models;
 using Serilog;
@@ -20,6 +21,11 @@ namespace Microsoft.Liftr.Marketplace.Billing
         {
             _marketplaceBillingClient = marketplaceBillingClient ?? throw new ArgumentNullException(nameof(marketplaceBillingClient));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        public MarketplaceBillingService(IMarketplaceBillingClient marketplaceBillingClient)
+            : this(marketplaceBillingClient, LoggerFactory.ConsoleLogger)
+        {
         }
 
         /// <summary>

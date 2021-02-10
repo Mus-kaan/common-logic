@@ -8,8 +8,6 @@ using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.Marketplace.Exceptions;
 using Microsoft.Liftr.Marketplace.Saas.Contracts;
 using Microsoft.Liftr.Marketplace.Saas.Models;
-using Moq;
-using Serilog;
 using System;
 using System.Net.Http;
 using System.Threading;
@@ -31,11 +29,10 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
 
         public FulfillmentClient_WithMarketplaceMockAPIs_Tests()
         {
-            var logger = new Mock<ILogger>().Object;
             var serviceProvider = new ServiceCollection().AddHttpClient().BuildServiceProvider();
             var httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();
 #pragma warning disable CA2000 // Dispose objects before losing scope
-            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(_marketplaceSaasUri, marketplaceSaasApiVersion, logger, httpClientFactory, () => Task.FromResult("mockToken")), logger);
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(_marketplaceSaasUri, marketplaceSaasApiVersion, httpClientFactory, () => Task.FromResult("mockToken")));
 #pragma warning restore CA2000 // Dispose objects before losing scope
         }
 

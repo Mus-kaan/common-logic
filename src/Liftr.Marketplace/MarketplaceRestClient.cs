@@ -4,6 +4,7 @@
 
 using Flurl;
 using Microsoft.Liftr.DiagnosticSource;
+using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Marketplace.Contracts;
 using Microsoft.Liftr.Marketplace.Exceptions;
 using Newtonsoft.Json;
@@ -55,6 +56,15 @@ namespace Microsoft.Liftr.Marketplace
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
             _authenticationTokenCallback = authenticationTokenCallback ?? throw new ArgumentNullException(nameof(authenticationTokenCallback));
+        }
+
+        public MarketplaceRestClient(
+            Uri endpoint,
+            string apiVersion,
+            IHttpClientFactory httpClientFactory,
+            AuthenticationTokenCallback authenticationTokenCallback)
+            : this(endpoint, apiVersion, LoggerFactory.ConsoleLogger, httpClientFactory, authenticationTokenCallback)
+        {
         }
 
         public delegate Task<string> AuthenticationTokenCallback();

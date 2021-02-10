@@ -9,7 +9,6 @@ using Microsoft.Liftr.Marketplace.Billing.Models;
 using Microsoft.Liftr.Marketplace.Options;
 using Moq;
 using Newtonsoft.Json;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -23,16 +22,12 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
 {
     public class MarketplaceBillingClientTests
     {
-        private readonly Mock<ILogger> _mockLogger;
         private readonly Mock<IHttpClientFactory> _httpClientFactory;
         private MarketplaceAPIOptions _marketplaceOptions;
 
         public MarketplaceBillingClientTests()
         {
-            _mockLogger = new Mock<ILogger>();
             _httpClientFactory = new Mock<IHttpClientFactory>();
-
-            SetupLogger();
             SetupMarketplaceSaasOptions();
         }
 
@@ -57,7 +52,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
             _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, _httpClientFactory.Object);
+            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _httpClientFactory.Object);
             var response = await billingClient.SendUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
             response.Should().BeEquivalentTo(expectedResponse);
@@ -83,7 +78,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
             _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, _httpClientFactory.Object);
+            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _httpClientFactory.Object);
             var response = await billingClient.SendUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
             response.Should().BeEquivalentTo(expectedResponse);
@@ -110,7 +105,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
             _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, _httpClientFactory.Object);
+            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _httpClientFactory.Object);
             var response = await billingClient.SendUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
             response.RawResponse.Should().BeEquivalentTo(expectedResponse.RawResponse);
@@ -138,7 +133,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
             _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, _httpClientFactory.Object);
+            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _httpClientFactory.Object);
             var response = await billingClient.SendUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
             response.Should().BeEquivalentTo(expectedResponse);
@@ -171,7 +166,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
             _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, _httpClientFactory.Object);
+            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _httpClientFactory.Object);
             var response = await billingClient.SendBatchUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
             response.Should().BeEquivalentTo(expectedResponse);
@@ -203,7 +198,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
             _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, _httpClientFactory.Object);
+            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _httpClientFactory.Object);
             var response = await billingClient.SendBatchUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
             response.Should().BeEquivalentTo(expectedResponse);
@@ -236,7 +231,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
             _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, _httpClientFactory.Object);
+            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _httpClientFactory.Object);
             var response = await billingClient.SendBatchUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
             response.RawResponse.Should().BeEquivalentTo(expectedResponse.RawResponse);
@@ -270,7 +265,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
             _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, _httpClientFactory.Object);
+            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _httpClientFactory.Object);
             var response = await billingClient.SendBatchUsageEventAsync(request, cancellationToken: CancellationToken.None);
 
             response.Should().BeEquivalentTo(expectedResponse);
@@ -279,10 +274,10 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
         [Fact]
         public void BillingClient_Constructor_ThrowNullArgument_Exception()
         {
-            var marketplaceOptionException = Assert.Throws<ArgumentNullException>(() => new MarketplaceBillingClient(null, () => Task.FromResult("mockToken"), _mockLogger.Object, null));
-            var tokenCallBackException = Assert.Throws<ArgumentNullException>(() => new MarketplaceBillingClient(_marketplaceOptions, null, _mockLogger.Object, null));
+            var marketplaceOptionException = Assert.Throws<ArgumentNullException>(() => new MarketplaceBillingClient(null, () => Task.FromResult("mockToken"), null));
+            var tokenCallBackException = Assert.Throws<ArgumentNullException>(() => new MarketplaceBillingClient(_marketplaceOptions, null, null));
             var loggerException = Assert.Throws<ArgumentNullException>(() => new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), null, null));
-            var httpClientException = Assert.Throws<ArgumentNullException>(() => new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, null));
+            var httpClientException = Assert.Throws<ArgumentNullException>(() => new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), null));
 
             Assert.Equal("Value cannot be null. (Parameter 'marketplaceOptions')", marketplaceOptionException.Message);
             Assert.Equal("Value cannot be null. (Parameter 'authenticationTokenCallback')", tokenCallBackException.Message);
@@ -311,7 +306,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
             _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, _httpClientFactory.Object);
+            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _httpClientFactory.Object);
             await Assert.ThrowsAsync<MarketplaceBillingException>(async () => await billingClient.SendUsageEventAsync(request, cancellationToken: CancellationToken.None));
         }
 
@@ -342,13 +337,8 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             using var httpClient = new HttpClient(handler, false);
             _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _mockLogger.Object, _httpClientFactory.Object);
+            var billingClient = new MarketplaceBillingClient(_marketplaceOptions, () => Task.FromResult("mockToken"), _httpClientFactory.Object);
             await Assert.ThrowsAsync<MarketplaceBillingException>(async () => await billingClient.SendBatchUsageEventAsync(request, cancellationToken: CancellationToken.None));
-        }
-
-        private void SetupLogger()
-        {
-            _mockLogger.Setup(log => log.Information(It.IsAny<string>(), It.IsAny<string>()));
         }
 
         private void SetupMarketplaceSaasOptions()

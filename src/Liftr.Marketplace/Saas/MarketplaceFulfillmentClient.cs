@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts.Marketplace;
+using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Marketplace.Exceptions;
 using Microsoft.Liftr.Marketplace.Saas.Contracts;
 using Microsoft.Liftr.Marketplace.Saas.Interfaces;
@@ -27,6 +28,11 @@ namespace Microsoft.Liftr.Marketplace.Saas
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _marketplaceRestClient = marketplaceRestClient ?? throw new ArgumentNullException(nameof(marketplaceRestClient));
+        }
+
+        public MarketplaceFulfillmentClient(MarketplaceRestClient marketplaceRestClient)
+            : this(marketplaceRestClient, LoggerFactory.ConsoleLogger)
+        {
         }
 
         public async Task<ResolvedMarketplaceSubscription> ResolveSaaSSubscriptionAsync(

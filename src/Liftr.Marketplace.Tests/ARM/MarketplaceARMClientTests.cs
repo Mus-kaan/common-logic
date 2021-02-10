@@ -8,7 +8,6 @@ using Microsoft.Liftr.Marketplace.ARM.Models;
 using Microsoft.Liftr.Marketplace.Contracts;
 using Microsoft.Liftr.Marketplace.Tests;
 using Moq;
-using Serilog;
 using System;
 using System.Net.Http;
 using System.Threading;
@@ -21,7 +20,6 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
     {
         private readonly Uri _marketplaceEndpoint = new Uri("https://marketplaceapi.microsoft.com");
         private readonly string _version = "2018-08-31";
-        private readonly ILogger _logger;
         private readonly MarketplaceARMClient _armClient;
         private readonly Mock<IHttpClientFactory> _httpClientFactory;
 
@@ -38,25 +36,23 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
 
         public MarketplaceARMClientTests()
         {
-            var mockLogger = new Mock<ILogger>();
             using var httpclient = new HttpClient();
             _httpClientFactory = new Mock<IHttpClientFactory>();
-            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, mockLogger.Object, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
-            _logger = mockLogger.Object;
-            _armClient = new MarketplaceARMClient(_logger, _marketplaceRestClient);
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
+            _armClient = new MarketplaceARMClient(_marketplaceRestClient);
         }
 
         [Fact]
         public void ARMClient_InvalidParameters_ThrowsException()
         {
-            Assert.Throws<ArgumentNullException>(() => new MarketplaceARMClient(_logger, null));
+            Assert.Throws<ArgumentNullException>(() => new MarketplaceARMClient(null));
             Assert.Throws<ArgumentNullException>(() => new MarketplaceARMClient(null, _marketplaceRestClient));
         }
 
         [Fact]
         public async Task CreateResourceAsync_Invalid_Parameters_Throws_Async()
         {
-            var armClient = new MarketplaceARMClient(_logger, _marketplaceRestClient);
+            var armClient = new MarketplaceARMClient(_marketplaceRestClient);
 
             await Assert.ThrowsAsync<ArgumentNullException>(async () => await _armClient.CreateSaaSResourceAsync(new MarketplaceSaasResourceProperties(), _marketplaceRequestMetadata));
             await Assert.ThrowsAsync<ArgumentNullException>(async () => await _armClient.CreateSaaSResourceAsync(CreateSaasResourceProperties("test"), new MarketplaceRequestMetadata()));
@@ -81,8 +77,8 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
             using var httpClient = new HttpClient(handler, false);
             _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
-            var armClient = new MarketplaceARMClient(_logger, _marketplaceRestClient);
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
+            var armClient = new MarketplaceARMClient(_marketplaceRestClient);
 
             var createdResource = await armClient.CreateSaaSResourceAsync(marketplaceOfferDetail, _marketplaceRequestMetadata);
 
@@ -111,8 +107,8 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
             using var httpClient = new HttpClient(handler, false);
             _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
-            var armClient = new MarketplaceARMClient(_logger, _marketplaceRestClient);
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
+            var armClient = new MarketplaceARMClient(_marketplaceRestClient);
 
             var createdResource = await armClient.CreateSaaSResourceAsync(marketplaceOfferDetail, _marketplaceRequestMetadata);
 

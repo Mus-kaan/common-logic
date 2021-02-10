@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Marketplace.Exceptions;
 using Microsoft.Liftr.Marketplace.Saas.Contracts;
 using Microsoft.Liftr.Marketplace.Saas.Interfaces;
@@ -30,6 +31,11 @@ namespace Microsoft.Liftr.Marketplace.Saas
             _marketplaceCaller = marketplaceCaller ?? throw new ArgumentNullException(nameof(marketplaceCaller));
             _webhookHandler = webhookHandler ?? throw new ArgumentNullException(nameof(webhookHandler));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        public WebhookProcessor(IWebhookMarketplaceCaller marketplaceCaller, IWebhookHandler webhookHandler)
+            : this(marketplaceCaller, webhookHandler, LoggerFactory.ConsoleLogger)
+        {
         }
 
         /// <summary>

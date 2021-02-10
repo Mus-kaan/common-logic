@@ -4,6 +4,7 @@
 
 using Flurl;
 using Microsoft.Liftr.DiagnosticSource;
+using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Marketplace.Billing.Contracts;
 using Microsoft.Liftr.Marketplace.Billing.Models;
 using Microsoft.Liftr.Marketplace.Billing.Utils;
@@ -38,6 +39,11 @@ namespace Microsoft.Liftr.Marketplace.Billing
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _billingBaseUrl = marketplaceOptions.Endpoint.ToString();
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+        }
+
+        public MarketplaceBillingClient(MarketplaceAPIOptions marketplaceOptions, AuthenticationTokenCallback authenticationTokenCallback, IHttpClientFactory httpClientFactory)
+           : this(marketplaceOptions, authenticationTokenCallback, LoggerFactory.ConsoleLogger, httpClientFactory)
+        {
         }
 
         public delegate Task<string> AuthenticationTokenCallback();

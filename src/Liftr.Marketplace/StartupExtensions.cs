@@ -16,7 +16,6 @@ using Microsoft.Liftr.Marketplace.Saas.Interfaces;
 using Microsoft.Liftr.Marketplace.Saas.Options;
 using Microsoft.Liftr.TokenManager;
 using Microsoft.Liftr.TokenManager.Options;
-using Serilog;
 using System;
 using System.Net.Http;
 
@@ -32,7 +31,8 @@ namespace Microsoft.Liftr.Marketplace.Saas
         /// </remarks>
         /// <param name="services"></param>
         /// <param name="configuration"></param>
-        public static void AddMarketplaceFulfillmentClient(this IServiceCollection services, IConfiguration configuration)
+        /// <param name="consoleLog">Generate a console logger without retrieving the logger from DI container.</param>
+        public static void AddMarketplaceFulfillmentClient(this IServiceCollection services, IConfiguration configuration, bool consoleLog = false)
         {
             if (configuration == null)
             {
@@ -47,7 +47,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
 
             services.AddSingleton<IMarketplaceFulfillmentClient, MarketplaceFulfillmentClient>(sp =>
             {
-                var logger = sp.GetService<ILogger>();
+                var logger = consoleLog ? Liftr.Logging.LoggerFactory.ConsoleLogger : sp.GetService<Serilog.ILogger>();
                 var marketplaceOptions = sp.GetService<IOptions<MarketplaceSaasOptions>>().Value;
 
                 if (marketplaceOptions == null)
@@ -92,7 +92,8 @@ namespace Microsoft.Liftr.Marketplace.Saas
         /// </summary>
         /// <param name="services"></param>
         /// <param name="configuration"></param>
-        public static void AddMarketplaceARMClient(this IServiceCollection services, IConfiguration configuration)
+        /// <param name="consoleLog">Generate a console logger without retrieving the logger from DI container.</param>
+        public static void AddMarketplaceARMClient(this IServiceCollection services, IConfiguration configuration, bool consoleLog = false)
         {
             if (configuration == null)
             {
@@ -108,7 +109,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
             services.AddSingleton<IMarketplaceARMClient, MarketplaceARMClient>(sp =>
             {
                 var options = sp.GetService<IOptions<MarketplaceARMClientOptions>>().Value;
-                var logger = sp.GetService<ILogger>();
+                var logger = consoleLog ? Liftr.Logging.LoggerFactory.ConsoleLogger : sp.GetService<Serilog.ILogger>();
 
                 var fpaOptions = options.MarketplaceFPAOptions;
                 if (!Validate(fpaOptions))
@@ -150,7 +151,8 @@ namespace Microsoft.Liftr.Marketplace.Saas
         /// </remarks>
         /// <param name="services"></param>
         /// <param name="configuration"></param>
-        public static void AddMarketplaceBillingClient(this IServiceCollection services, IConfiguration configuration)
+        /// <param name="consoleLog">Generate a console logger without retrieving the logger from DI container.</param>
+        public static void AddMarketplaceBillingClient(this IServiceCollection services, IConfiguration configuration, bool consoleLog = false)
         {
             if (configuration == null)
             {
@@ -165,7 +167,7 @@ namespace Microsoft.Liftr.Marketplace.Saas
 
             services.AddSingleton<IMarketplaceBillingClient, MarketplaceBillingClient>(sp =>
             {
-                var logger = sp.GetService<ILogger>();
+                var logger = consoleLog ? Liftr.Logging.LoggerFactory.ConsoleLogger : sp.GetService<Serilog.ILogger>();
                 var marketplaceOptions = sp.GetService<IOptions<MarketplaceSaasOptions>>().Value;
 
                 if (marketplaceOptions == null)

@@ -4,6 +4,7 @@
 
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DiagnosticSource;
+using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Marketplace.ARM.Contracts;
 using Microsoft.Liftr.Marketplace.ARM.Interfaces;
 using Microsoft.Liftr.Marketplace.ARM.Models;
@@ -31,6 +32,11 @@ namespace Microsoft.Liftr.Marketplace.ARM
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _marketplaceRestClient = marketplaceRestClient ?? throw new ArgumentNullException(nameof(marketplaceRestClient));
+        }
+
+        public MarketplaceARMClient(MarketplaceRestClient marketplaceRestClient)
+            : this(LoggerFactory.ConsoleLogger, marketplaceRestClient)
+        {
         }
 
         public async Task<MarketplaceSubscriptionDetails> CreateSaaSResourceAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata)
