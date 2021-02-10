@@ -1001,7 +1001,7 @@ namespace Microsoft.Liftr.Fluent
                 .WithTags(tags)
                 .CreateAsync();
 
-            _logger.Information("Created DNS zone with id '{resourceId}'.", dns);
+            _logger.Information("Created DNS zone with id '{resourceId}'.", dns.Id);
             return dns;
         }
 
