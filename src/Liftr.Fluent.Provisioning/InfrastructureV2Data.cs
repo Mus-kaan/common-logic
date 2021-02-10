@@ -104,7 +104,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                         await liftrAzure.Authenticated.RoleAssignments
                             .Define(SdkContext.RandomGuid())
                             .ForObjectId(provisionedResources.ManagedIdentity.GetObjectId())
-                            .WithBuiltInRole(BuiltInRole.Contributor)
+                            .WithBuiltInRole(BuiltInRole.Owner)
                             .WithSubscriptionScope(subscrptionId)
                             .CreateAsync();
                     }
