@@ -116,6 +116,11 @@ echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/environments/linuxcontainers.html"
 echo "import geneva images"
 
+az acr import --name "$ACRName" --source linuxgeneva-microsoft.azurecr.io/$IMG_mdsd --force
+az acr import --name "$ACRName" --source linuxgeneva-microsoft.azurecr.io/$IMG_mdm --force
+az acr import --name "$ACRName" --source linuxgeneva-microsoft.azurecr.io/$IMG_fluentd --force
+az acr import --name "$ACRName" --source linuxgeneva-microsoft.azurecr.io/$IMG_azsecpack --force
+
 if [ "$TenantId" == "72f988bf-86f1-41af-91ab-2d7cd011db47" ]; then
     echo "Using Liftr Microsoft Tenant ACR. Please make sure the EV2 MI has 'Reader' role over the ms tenant ACR 'liftrmsacr'."
     LiftrACRResourceId="/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-acr-rg/providers/Microsoft.ContainerRegistry/registries/liftrmsacr"
@@ -124,10 +129,6 @@ else
     LiftrACRResourceId="/subscriptions/d8f298fb-60f5-4676-a7d3-25442ec5ce1e/resourceGroups/liftr-acr-rg/providers/Microsoft.ContainerRegistry/registries/LiftrAMEACR"
 fi
 
-az acr import --name "$ACRName" --source $IMG_mdsd --registry $LiftrACRResourceId --force
-az acr import --name "$ACRName" --source $IMG_mdm --registry $LiftrACRResourceId --force
-az acr import --name "$ACRName" --source $IMG_fluentd --registry $LiftrACRResourceId --force
-az acr import --name "$ACRName" --source $IMG_azsecpack --registry $LiftrACRResourceId --force
 az acr import --name "$ACRName" --source $IMG_prommdm --registry $LiftrACRResourceId --force
 
 set +x
