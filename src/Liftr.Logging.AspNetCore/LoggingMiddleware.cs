@@ -35,8 +35,38 @@ namespace Microsoft.Liftr.Logging.AspNetCore
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Middleware should fail silently.")]
         public async Task InvokeAsync(HttpContext httpContext)
         {
-            LogEventLevel? overrideLevel = null;
+            if (httpContext.Request?.Path.Value?.OrdinalStartsWith("/api/liveness-probe") == true ||
+                httpContext.Request?.Path.Value?.OrdinalStartsWith("/metrics") == true)
+            {
+                try
+                {
+                    // This is to remove AppInsights logging when it is enabled. If not, this will do nothing.
+                    httpContext?.Features?.Set<RequestTelemetry>(null);
+                }
+                catch
+                {
+                }
+            }
 
+            if (httpContext.Request?.Path.Value?.OrdinalStartsWith("/api/liveness-probe") == true)
+            {
+                var meta = await InstanceMetaHelper.GetMetaInfoAsync();
+                httpContext.Response.StatusCode = (int)HttpStatusCode.OK;
+                if (meta != null)
+                {
+                    await httpContext.Response.WriteAsync(meta.ToJson(indented: true));
+                }
+
+                return;
+            }
+
+            if (httpContext.Request?.Path.Value?.OrdinalStartsWith("/metrics") == true)
+            {
+                await _next(httpContext);
+                return;
+            }
+
+            LogEventLevel? overrideLevel = null;
             string levelOverwrite = GetHeaderValue(httpContext, HeaderConstants.LiftrLogLevelOverwrite);
             string clientRequestId = GetHeaderValue(httpContext, HeaderConstants.LiftrClientRequestId);
             string armRequestTrackingId = GetHeaderValue(httpContext, HeaderConstants.LiftrARMRequestTrackingId);
@@ -114,31 +144,6 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             if (!string.IsNullOrEmpty(correlationtId))
             {
                 CallContextHolder.CorrelationId.Value = correlationtId;
-            }
-
-            if (httpContext.Request?.Path.Value?.OrdinalStartsWith("/api/liveness-probe") == true ||
-                httpContext.Request?.Path.Value?.OrdinalStartsWith("/metrics") == true)
-            {
-                try
-                {
-                    // This is to remove AppInsights logging when it is enabled. If not, this will do nothing.
-                    httpContext?.Features?.Set<RequestTelemetry>(null);
-                }
-                catch
-                {
-                }
-            }
-
-            if (httpContext.Request?.Path.Value?.OrdinalStartsWith("/api/liveness-probe") == true)
-            {
-                var meta = await InstanceMetaHelper.GetMetaInfoAsync();
-                httpContext.Response.StatusCode = (int)HttpStatusCode.OK;
-                if (meta != null)
-                {
-                    await httpContext.Response.WriteAsync(meta.ToJson(indented: true));
-                }
-
-                return;
             }
 
             using (var logFilterOverrideScope = new LogFilterOverrideScope(overrideLevel))
