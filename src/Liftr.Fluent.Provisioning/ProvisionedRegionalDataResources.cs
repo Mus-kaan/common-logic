@@ -18,5 +18,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         public IStorageAccount StorageAccount { get; set; }
 
         public RPAssetOptions RPAssetOptions { get; set; }
+
+        public DataAssetOptions DataAssetOptions { get; set; }
     }
 }

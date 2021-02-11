@@ -92,7 +92,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
         }
 
-        private async Task<RPAssetOptions> AddKeyVaultSecretsAsync(
+        private async Task<(RPAssetOptions, DataAssetOptions)> AddKeyVaultSecretsAsync(
             NamingContext namingContext,
             IVault keyVault,
             string secretPrefix,
@@ -113,11 +113,19 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 {
                     StorageAccountName = regionalStorageAccount.Name,
                 };
+                var dataAssets = new DataAssetOptions()
+                {
+                    StorageAccountName = regionalStorageAccount.Name,
+                };
 
                 if (acisStorageAccount != null)
                 {
                     rpAssets.ACISStorageAccountName = acisStorageAccount.Name;
                     rpAssets.ACISStorageConnectionString = await acisStorageAccount.GetPrimaryConnectionStringAsync();
+
+                    // TODO: add rotation
+                    dataAssets.ACISStorageAccountName = acisStorageAccount.Name;
+                    dataAssets.ACISStorageConnectionString = rpAssets.ACISStorageConnectionString;
                 }
 
                 if (cosmosDB != null)
@@ -133,6 +141,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                             ConnectionString = c.ConnectionString,
                             Description = c.Description,
                         });
+
+                        // TODO: add rotation
+                        dataAssets.RegionalDBConnectionString = await cosmosDB.GetPrimaryConnectionStringAsync();
+                        dataAssets.RegionalDBReadonlyConnectionString = await cosmosDB.GetPrimaryReadOnlyConnectionStringAsync();
                     }
                     catch (Exception dbEx)
                     {
@@ -162,6 +174,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                             ConnectionString = c.ConnectionString,
                             Description = c.Description,
                         });
+
+                        // TODO: add rotation
+                        dataAssets.GlobalDBConnectionString = await globalCosmosDB.GetPrimaryConnectionStringAsync();
+                        dataAssets.GlobalDBReadonlyConnectionString = await globalCosmosDB.GetPrimaryReadOnlyConnectionStringAsync();
                     }
                     catch (Exception dbEx)
                     {
@@ -182,10 +198,14 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     }
 
                     rpAssets.GlobalStorageAccountName = gblStor.Name;
+                    dataAssets.GlobalStorageAccountName = gblStor.Name;
                 }
 
                 _logger.Information("Puting the RPAssetOptions in the key vault ...");
                 await regionalKVValet.SetSecretAsync($"{secretPrefix}-{nameof(RPAssetOptions)}", rpAssets.ToJson(), namingContext.Tags);
+
+                _logger.Information("Puting the DataAssetOptions in the key vault ...");
+                await regionalKVValet.SetSecretAsync($"{secretPrefix}-{nameof(DataAssetOptions)}", dataAssets.ToJson(), namingContext.Tags);
 
                 _logger.Information($"Puting the key vault Uri '{keyVault.VaultUri}' in the key vault secret ...");
                 await regionalKVValet.SetSecretAsync("vaultUri", keyVault.VaultUri, namingContext.Tags);
@@ -228,7 +248,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     _logger.Information("Copied {copiedSecretCount} secrets from central key vault to local key vault.", cnt);
                 }
 
-                return rpAssets;
+                return (rpAssets, dataAssets);
             }
         }
 

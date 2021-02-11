@@ -134,7 +134,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 await liftrAzure.GrantQueueContributorAsync(asicStorage, provisionedResources.ManagedIdentity);
             }
 
-            provisionedResources.RPAssetOptions = await AddKeyVaultSecretsAsync(
+            (provisionedResources.RPAssetOptions, provisionedResources.DataAssetOptions) = await AddKeyVaultSecretsAsync(
                 namingContext,
                 provisionedResources.KeyVault,
                 dataOptions.SecretPrefix,
