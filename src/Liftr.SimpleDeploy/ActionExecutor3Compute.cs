@@ -261,10 +261,16 @@ namespace Microsoft.Liftr.SimpleDeploy
                         await SimpleDeployExtension.AfterProvisionRegionalVMSSResourcesAsync.Invoke(parameters);
                     }
 
-                    var vm = await vmss.VMSS.RefreshAsync();
-                    _ = vm.RestartAsync();
-                    await Task.Delay(5000);
-                    _logger.Information("Restarting VMSS to pick up potential VNet change. vmId: {vmId}", vm.Id);
+                    if (targetOptions.EnableVNet)
+                    {
+                        _logger.Information("Wait 5 minutes and restart VMSS to pick up potential VNet change.");
+                        await Task.Delay(TimeSpan.FromMinutes(5));
+                        var vm = await vmss.VMSS.RefreshAsync();
+
+                        // fire and forget
+                        _ = vm.RestartAsync();
+                        await Task.Delay(5000);
+                    }
                 }
             }
 
