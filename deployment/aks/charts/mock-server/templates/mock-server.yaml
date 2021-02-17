@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-mock-server
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}-mock-server
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-mock-server
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-mock-server
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: mock-server-container
+        image: {{ required "The imageRegistry parameter must be provided." .Values.imageRegistry }}/{{ required "The mockServer.imageName parameter must be provided." .Values.mockServer.imageName }}
