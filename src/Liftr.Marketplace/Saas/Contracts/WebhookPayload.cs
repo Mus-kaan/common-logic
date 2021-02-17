@@ -27,6 +27,12 @@ namespace Microsoft.Liftr.Marketplace.Saas.Contracts
 
         // When resource has been reinstated after suspension
         Reinstate,
+
+        // Received at the end of the users term for renewal
+        Renew,
+
+        // Received when the Marketplace resource has been successfully created
+        Subscribe,
     }
 
     /// <summary>

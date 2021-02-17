@@ -18,5 +18,9 @@ namespace Microsoft.Liftr.Marketplace.Saas.Interfaces
         Task<OperationUpdateStatus> ProcessSuspendAsync(WebhookPayload payload);
 
         Task<OperationUpdateStatus> ProcessReinstateAsync(WebhookPayload payload);
+
+        Task<OperationUpdateStatus> ProcessRenewAsync(WebhookPayload payload);
+
+        Task<OperationUpdateStatus> ProcessSubscribeAsync(WebhookPayload payload);
     }
 }

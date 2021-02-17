@@ -41,7 +41,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
         {
             var webhookProcessor = new TestWebhookProcessor();
             WebhookPayload payload = CreateWebhook(WebhookAction.Unsubscribe);
-            payload.Action = (WebhookAction)6;
+            payload.Action = (WebhookAction)9;
 
             await Assert.ThrowsAsync<InvalidOperationException>(async () => await webhookProcessor.ProcessWebhookAsync(payload));
         }

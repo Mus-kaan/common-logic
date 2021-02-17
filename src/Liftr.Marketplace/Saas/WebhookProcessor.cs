@@ -107,6 +107,12 @@ namespace Microsoft.Liftr.Marketplace.Saas
                     case WebhookAction.Reinstate:
                         operationStatus = await _webhookHandler.ProcessReinstateAsync(payload);
                         break;
+                    case WebhookAction.Renew:
+                        operationStatus = await _webhookHandler.ProcessRenewAsync(payload);
+                        break;
+                    case WebhookAction.Subscribe:
+                        operationStatus = await _webhookHandler.ProcessSubscribeAsync(payload);
+                        break;
                     default:
                         _logger.Error("Action {action} is not supported", payload.Action, payload.MarketplaceSubscription);
                         throw new MarketplaceException($"Action {payload.Action} is not supported");
