@@ -15,3 +15,7 @@ https://github.com/weng5e/liftr/tree/main/helm/prom2icm
 https://genevamondocs.azurewebsites.net/collect/environments/akslinux.html
 
 https://dev.azure.com/msazure/One/_git/Compute-Runtime-Tux-GenevaContainers?path=%2Fdocker_geneva_samples%2FAKSGenevaSample%2FDeployment%2FGeneva%2Fchart%2Ftemplates%2Fgeneva-services.yaml
+
+# key vault CSI
+https://github.com/Azure/secrets-store-csi-driver-provider-azure
+https://github.com/kubernetes-sigs/secrets-store-csi-driver.git

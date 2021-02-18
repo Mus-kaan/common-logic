@@ -10,3 +10,4 @@ controller:
   "path": "$uri", "request_query": "$args", "request_length": $request_length, "duration_seconds": $request_time,"method": "$request_method", "http_referrer": "$http_referer",
   "http_user_agent": "$http_user_agent" }'
     ssl-ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256: ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-ECDSA-AES256-SHA384: ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384"
+    error-log-level: "info"

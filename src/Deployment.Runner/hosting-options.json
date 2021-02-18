@@ -8,11 +8,9 @@
     {
       "EnvironmentName": "Dev",
       "DomainName": "sp-dev.azliftr-test.io",
-      "AzureSubscription": "eebfbfdb-4167-49f6-be43-466a6709609f", // 'Liftr - TEST'
+      "AzureSubscription": "af20b225-d632-4791-97a0-2b33fa486420", // 'Liftr - Platform'
       "EnableVNet": false,
       "IPPerRegion": 5,
-      "LogAnalyticsWorkspaceId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.OperationalInsights/workspaces/sample-partner-log",
-      "DiagnosticsStorageId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.Storage/storageAccounts/liftrdiagonstics",
       "OneCertCertificates": { // key is certificate name, value is certificate subject
         "GenevaClientCert": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net",
         "FirstPartyAppCert": "liftr-monitoring.first-party.liftr-dev.net",
@@ -26,19 +24,19 @@
       },
       "Global": {
         "Location": "centralus",
-        "BaseName": "gbl20200102",
+        "BaseName": "gbl210115",
         "AddGlobalDB": true
       },
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "data20200506",
-          "ComputeBaseName": "com20210129"
+          "DataBaseName": "da210201",
+          "ComputeBaseName": "co210210"
         },
         {
           "Location": "eastus",
-          "DataBaseName": "data20200506",
-          "ComputeBaseName": "com20210129"
+          "DataBaseName": "da210201",
+          "ComputeBaseName": "co210210"
         }
       ]
     },
@@ -68,12 +66,12 @@
         {
           "Location": "westus2",
           "DataBaseName": "data20200506",
-          "ComputeBaseName": "com20210129"
+          "ComputeBaseName": "com20210212"
         },
         {
           "Location": "eastus",
           "DataBaseName": "data20200506",
-          "ComputeBaseName": "com20210129"
+          "ComputeBaseName": "com20210212"
         }
       ]
     }

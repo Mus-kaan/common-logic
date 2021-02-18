@@ -1,0 +1,75 @@
+{{- if .Values.windows.enabled}}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ template "sscdpa.fullname" . }}-windows
+  namespace: {{ .Release.Namespace }}
+{{ include "sscdpa.labels" . | indent 2 }}
+spec:
+  updateStrategy:
+{{ toYaml .Values.windows.updateStrategy | indent 4 }}
+  selector:
+    matchLabels:
+      app: {{ template "sscdpa.name" . }}
+  template:
+    metadata:
+{{ include "sscdpa.labels" . | indent 6 }}
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
+      {{- end }}
+      serviceAccountName: csi-secrets-store-provider-azure
+      containers:
+        - name: provider-azure-installer
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --endpoint=unix://C:\\provider\\azure.sock
+            {{- if .Values.logFormatJSON }}
+            - --log-format-json={{ .Values.logFormatJSON }}
+            {{- end }}
+            {{- if .Values.logVerbosity }}
+            - -v={{ .Values.logVerbosity }}
+            {{- end }}
+            {{- if .Values.constructPEMChain }}
+            - --construct-pem-chain={{ .Values.constructPEMChain }}
+            {{- end }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  [
+                      "cmd",
+                      "/c",
+                      "del /f C:\\provider\\azure.sock",
+                  ]
+          resources:
+{{ toYaml .Values.windows.resources | indent 12 }}
+          volumeMounts:
+            - name: provider-vol
+              mountPath: "C:\\provider"
+            - name: mountpoint-dir
+              mountPath: "C:\\var\\lib\\kubelet\\pods"
+              mountPropagation: HostToContainer
+      {{- if .Values.windows.priorityClassName }}
+      priorityClassName: {{ .Values.windows.priorityClassName | quote }}
+      {{- end }}
+      volumes:
+        - name: provider-vol
+          hostPath:
+            path: C:\k\secrets-store-csi-providers
+            type: DirectoryOrCreate
+        - name: mountpoint-dir
+          hostPath:
+            path: C:\var\lib\kubelet\pods\
+      nodeSelector:
+        kubernetes.io/os: windows
+{{- if .Values.windows.nodeSelector }}
+{{- toYaml .Values.windows.nodeSelector | nindent 8 }}
+{{- end }}
+{{- with .Values.windows.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+{{- end }}
+{{- end -}}

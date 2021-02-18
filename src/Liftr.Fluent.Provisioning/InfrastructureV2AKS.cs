@@ -197,15 +197,18 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             if (!string.IsNullOrEmpty(computeOptions.LogAnalyticsWorkspaceResourceId))
             {
-                var aksAddOns = new Dictionary<string, ManagedClusterAddonProfile>()
+                if (aks.AddonProfiles?.ContainsKey("omsagent") != true)
                 {
-                    ["omsagent"] = new ManagedClusterAddonProfile(true, new Dictionary<string, string>()
+                    var aksAddOns = new Dictionary<string, ManagedClusterAddonProfile>()
                     {
-                        ["logAnalyticsWorkspaceResourceID"] = computeOptions.LogAnalyticsWorkspaceResourceId,
-                    }),
-                };
-                _logger.Information("Enable AKS Azure Monitor and send the diagnostics data to Log Analytics with Id '{logAnalyticsWorkspaceResourceId}'", computeOptions.LogAnalyticsWorkspaceResourceId);
-                await aks.Update().WithAddOnProfiles(aksAddOns).ApplyAsync();
+                        ["omsagent"] = new ManagedClusterAddonProfile(true, new Dictionary<string, string>()
+                        {
+                            ["logAnalyticsWorkspaceResourceID"] = computeOptions.LogAnalyticsWorkspaceResourceId,
+                        }),
+                    };
+                    _logger.Information("Enable AKS Azure Monitor and send the diagnostics data to Log Analytics with Id '{logAnalyticsWorkspaceResourceId}'", computeOptions.LogAnalyticsWorkspaceResourceId);
+                    await aks.Update().WithAddOnProfiles(aksAddOns).ApplyAsync();
+                }
             }
 
             var aksMIObjectId = await liftrAzure.GetAKSMIAsync(rgName, aksName);

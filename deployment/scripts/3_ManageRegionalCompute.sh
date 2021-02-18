@@ -46,6 +46,8 @@ fi
 --compactRegion="$REGION" \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId"
 
+./DeployKeyVaultCSI.sh
+
 ./DeployNginx.sh
 
 ./DeployProm2IcM.sh

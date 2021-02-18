@@ -1,0 +1,148 @@
+linux:
+  enabled: true
+  image:
+    repository: k8s.gcr.io/csi-secrets-store/driver
+    tag: v0.0.19
+    pullPolicy: Always
+
+  driver:
+    resources:
+      limits:
+        cpu: 200m
+        memory: 200Mi
+      requests:
+        cpu: 50m
+        memory: 100Mi
+
+  registrarImage:
+    repository: k8s.gcr.io/sig-storage/csi-node-driver-registrar
+    tag: v2.1.0
+    pullPolicy: Always
+
+  registrar:
+    resources:
+      limits:
+        cpu: 100m
+        memory: 100Mi
+      requests:
+        cpu: 10m
+        memory: 20Mi
+
+  livenessProbeImage:
+    repository: k8s.gcr.io/sig-storage/livenessprobe
+    tag: v2.2.0
+    pullPolicy: Always
+
+  livenessProbe:
+    resources:
+      limits:
+        cpu: 100m
+        memory: 100Mi
+      requests:
+        cpu: 10m
+        memory: 20Mi
+
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+
+  kubeletRootDir: /var/lib/kubelet
+  providersDir: /etc/kubernetes/secrets-store-csi-providers
+  nodeSelector: {}
+  tolerations: []
+  metricsAddr: ":8095"
+  env: []
+  priorityClassName: ""
+  annotations: {}
+
+windows:
+  enabled: false
+  image:
+    repository: k8s.gcr.io/csi-secrets-store/driver
+    tag: v0.0.19
+    pullPolicy: IfNotPresent
+
+  driver:
+    resources:
+      limits:
+        cpu: 400m
+        memory: 400Mi
+      requests:
+        cpu: 50m
+        memory: 100Mi
+
+  registrarImage:
+    repository: k8s.gcr.io/sig-storage/csi-node-driver-registrar
+    tag: v2.1.0
+    pullPolicy: IfNotPresent
+
+  registrar:
+    resources:
+      limits:
+        cpu: 200m
+        memory: 200Mi
+      requests:
+        cpu: 10m
+        memory: 20Mi
+
+  livenessProbeImage:
+    repository: k8s.gcr.io/sig-storage/livenessprobe
+    tag: v2.2.0
+    pullPolicy: IfNotPresent
+
+  livenessProbe:
+    resources:
+      limits:
+        cpu: 200m
+        memory: 200Mi
+      requests:
+        cpu: 10m
+        memory: 20Mi
+
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+
+  kubeletRootDir: C:\var\lib\kubelet
+  providersDir: C:\k\secrets-store-csi-providers
+  nodeSelector: {}
+  tolerations: []
+  metricsAddr: ":8095"
+  env: []
+  priorityClassName: ""
+  annotations: {}
+
+# log level. Uses V logs (klog)
+logVerbosity: 0
+
+# logging format JSON
+logFormatJSON: false
+
+livenessProbe:
+  port: 9808
+  logLevel: 2
+
+## Install Default RBAC roles and bindings
+rbac:
+  install: true
+
+## Install RBAC roles and bindings required for K8S Secrets syncing. Change this
+## to false after v0.0.14
+syncSecret:
+  enabled: true
+
+## Minimum Provider Versions (optional)
+## A comma delimited list of key-value pairs of minimum provider versions
+## e.g. provider1=0.0.2,provider2=0.0.3
+minimumProviderVersions:
+
+## ; delimited list of providers that support grpc for driver-provider [alpha]
+grpcSupportedProviders: gcp;azure;
+
+## Enable secret rotation feature [alpha]
+enableSecretRotation: false
+
+## Secret rotation poll interval duration
+rotationPollInterval:

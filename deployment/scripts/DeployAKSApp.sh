@@ -79,6 +79,16 @@ KeyVaultEndpoint=$(<bin/aks-kv.txt)
 fi
 echo "KeyVaultEndpoint: $KeyVaultEndpoint"
 
+if [ "$TenantId" = "" ]; then
+echo "Read TenantId from file 'bin/tenant-id.txt'."
+TenantId=$(<bin/tenant-id.txt)
+    if [ "$TenantId" = "" ]; then
+        echo "Please set the tenant Id using variable 'TenantId' ..."
+        exit 1 # terminate and indicate error
+    fi
+fi
+echo "TenantId: $TenantId"
+
 if [ "$AppVersion" = "" ]; then
 echo "Read AppVersion from file 'bin/version.txt'."
 AppVersion=$(<bin/version.txt)
@@ -144,17 +154,6 @@ VaultName=$(<bin/vault-name.txt)
 fi
 echo "VaultName: $VaultName"
 
-./CreateCertificateSecret.sh \
---DeploymentSubscriptionId=$DeploymentSubscriptionId \
---VaultName=$VaultName \
---KeyVaultSecretName="ssl-cert" \
---tlsSecretName="aks-app-tls-secret" \
---caSecretName="aks-app-tls-ca-secret" \
---Namespace=$namespace
-
-sslCertB64Content=$(cat ssl-cert.cer | base64 -w 0)
-sslKeyB64Content=$(cat ssl-cert.key | base64 -w 0)
-
 # Deploy the helm chart.
 echo "-----------------------------------------------------------------"
 echo "Start deploy '$HelmReleaseName' helm chart."
@@ -175,13 +174,13 @@ fi
 $Helm upgrade $HelmReleaseName --install --wait $DeploymentFlag\
 --set appVersion="$AppVersion" \
 --set vaultEndpoint="$KeyVaultEndpoint" \
+--set keyvault="$VaultName" \
+--set tenantId="$TenantId" \
 --set hostname="$AppReleaseDomainName" \
 --set aksdomain="$ClusterHostname" \
 --set domainName="$DomainName" \
 --set regionalDomainName="$RegionalDomainName" \
 --set appReleaseDomainName="$AppReleaseDomainName" \
---set sslcertb64="$sslCertB64Content" \
---set sslkeyb64="$sslKeyB64Content" \
 --set controller.service.omitClusterIP=true \
 --set defaultBackend.service.omitClusterIP=true \
 --set compactRegion="$compactRegion" \
