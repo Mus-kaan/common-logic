@@ -21,12 +21,27 @@ namespace Microsoft.Liftr.Marketplace.ARM.Interfaces
         Task<MarketplaceSubscriptionDetails> CreateSaaSResourceAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata);
 
         /// <summary>
+        /// Creates a Marketplace SaaS resource at Subscription Level
+        /// </summary>
+        /// <returns>Created SaaS resource</returns>
+        Task<MarketplaceSubscriptionDetails> CreateSaaSResourceAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata, string resourceGroup);
+
+        /// <summary>
         /// Deletes a Marketplace Saas resource
         /// </summary>
         /// <remarks>
         /// https://marketplaceapi.spza-internal.net/swagger/ui/index#!/SubscriptionResourceV2/SubscriptionResourceV2_Delete
         /// </remarks>
         Task DeleteSaaSResourceAsync(MarketplaceSubscription marketplaceSubscription, MarketplaceRequestMetadata requestMetadata);
+
+        /// <summary>
+        /// Deletes a Marketplace Saas resource at subscription level
+        /// </summary>
+        /// <param name="subscriptionId"></param>
+        /// <param name="resourceName"></param>
+        /// <param name="resourceGroup"></param>
+        /// <param name="requestMetadata"></param>
+        Task DeleteSaaSResourceAsync(string subscriptionId, string resourceName, string resourceGroup, MarketplaceRequestMetadata requestMetadata);
 
         /// <summary>
         /// Fetch access token for the given market place resource id.

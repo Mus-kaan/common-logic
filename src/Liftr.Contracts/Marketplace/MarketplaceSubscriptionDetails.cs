@@ -108,5 +108,9 @@ namespace Microsoft.Liftr.Contracts.Marketplace
     public class SaasAdditionalMetadata
     {
         public string AzureSubscriptionId { get; set; }
+
+        public string ResourceUri { get; set; }
+
+        public string IsSubscriptionLevel { get; set; }
     }
 }

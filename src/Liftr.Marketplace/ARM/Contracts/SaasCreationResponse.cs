@@ -16,7 +16,7 @@ namespace Microsoft.Liftr.Marketplace.ARM.Contracts
         [JsonProperty("subscription")]
         public MarketplaceSubscriptionDetails SubscriptionDetails { get; set; }
 
-        #region sampleresponse
+        #region Tenant Level sampleresponse
         /* Sample response
 {
     "status": "Succeeded",
@@ -69,6 +69,76 @@ namespace Microsoft.Liftr.Marketplace.ARM.Contracts
         "fulfillmentId": "0b857450-f9a6-41fd-b517-bb21f2c82c56",
         "storeFront": "StoreForLiftr",
         "sandboxType": "None",
+        "sessionMode": "None"
+    }
+}
+         */
+        #endregion
+        #region Subscription Level sampleresponse
+        /* Sample response
+{
+    "status": "Succeeded",
+    "resourceLocation": "https://main.df.marketplaceapi.azure.net/api/saasresources/subscriptions/638ee90e-61bf-f594-e2ee-254ad8ba50dd?api-version=2018-08-31",
+    "id": "638ee90e-61bf-f594-e2ee-254ad8ba50dd",
+    "subscription": {
+        "doctype": "Subscription",
+        "partitionKey": "638ee90e-61bf-f594-e2ee-254ad8ba50dd",
+        "isDeleted": false,
+        "additionalMetadata": {
+            "AzureSubscriptionId": "d3c0b378-d50b-4ac7-ac42-b9aacc66f6c5",
+            "ResourceId": "5074566a-2c1d-4b40-b559-5374ad99797c",
+            "ResourceUri": "/subscriptions/d3c0b378-d50b-4ac7-ac42-b9aacc66f6c5/resourceGroups/rohit-test/providers/Microsoft.SaaS/resources/RawResponse-Log",
+            "IsSubscriptionLevel": "True"
+        },
+        "isMigration": false,
+        "skuId": "0002",
+        "isHidden": true,
+        "commerceReconciliation": {
+            "lastRun": "2021-02-17T22:00:10.4701498Z",
+            "status": "Ok",
+            "internalStatus": "Ok",
+            "message": "AssetState: 'Active', TransactionType: 'Fulfill', TransactionState: 'Pending', SubscriptionStatus: 'PendingFulfillmentStart'",
+            "isNewSubscription": true
+        },
+        "id": "638ee90e-61bf-f594-e2ee-254ad8ba50dd",
+        "publisherId": "isvtestuklegacy",
+        "offerId": "liftr_cf_dev",
+        "name": "RawResponse-Log",
+        "saasSubscriptionStatus": "PendingFulfillmentStart",
+        "beneficiary": {
+            "emailId": "rohanand@microsoft.com",
+            "objectId": "58d2e826-8d41-4f73-93aa-6744e882139a",
+            "tenantId": "6457aa98-4dba-4966-a260-6fc215e8616a",
+            "puid": "1003DFFD0027E540",
+            "iss": "https://sts.windows-ppe.net/6457aa98-4dba-4966-a260-6fc215e8616a/",
+            "clienT-IP": "147.243.154.42:12131"
+        },
+        "purchaser": {
+            "emailId": "rohanand@microsoft.com",
+            "objectId": "58d2e826-8d41-4f73-93aa-6744e882139a",
+            "tenantId": "6457aa98-4dba-4966-a260-6fc215e8616a",
+            "puid": "1003DFFD0027E540",
+            "iss": "https://sts.windows-ppe.net/6457aa98-4dba-4966-a260-6fc215e8616a/",
+            "clienT-IP": "147.243.154.42:12131"
+        },
+        "planId": "payg",
+        "term": {
+            "termUnit": "P1M"
+        },
+        "autoRenew": true,
+        "isTest": true,
+        "isFreeTrial": false,
+        "allowedCustomerOperations": [
+            "Delete",
+            "Update",
+            "Read"
+        ],
+        "sessionId": "5074566a-2c1d-4b40-b559-5374ad99797c",
+        "fulfillmentId": "a37995dd-0b91-44e4-a909-036b6e69b0f6",
+        "storeFront": "StoreForLiftr",
+        "sandboxType": "None",
+        "created": "2021-02-17T22:00:07.5757017Z",
+        "lastModified": "2021-02-17T22:00:07.5757017Z",
         "sessionMode": "None"
     }
 }

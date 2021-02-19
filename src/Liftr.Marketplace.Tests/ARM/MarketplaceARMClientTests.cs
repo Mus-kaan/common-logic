@@ -2,10 +2,12 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using FluentAssertions;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.Marketplace.ARM.Contracts;
 using Microsoft.Liftr.Marketplace.ARM.Models;
 using Microsoft.Liftr.Marketplace.Contracts;
+using Microsoft.Liftr.Marketplace.Saas.Contracts;
 using Microsoft.Liftr.Marketplace.Tests;
 using Moq;
 using System;
@@ -115,6 +117,146 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
             Assert.Equal(createdResource.Id, saasResource.SubscriptionDetails.Id);
         }
 
+        [Fact]
+        public async Task CreateResourceAsync_Creates_resource_at_subscriptionLevel_with_polling_Async()
+        {
+            var resourceName = $"test-{Guid.NewGuid()}";
+            var resourceGroup = "saas-test";
+            var saasResource = new SaasCreationResponse()
+            {
+                SubscriptionDetails = new MarketplaceSubscriptionDetails()
+                {
+                    Name = resourceName,
+                    Id = Guid.NewGuid().ToString(),
+                },
+            };
+            var marketplaceOfferDetail = CreateSaasResourceProperties(resourceName);
+            var operationLocation = "https://mockoperationlocation.com";
+
+            using var handler = new MockHttpMessageHandler(saasResource, operationLocation);
+            using var httpClient = new HttpClient(handler, false);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
+            var armClient = new MarketplaceARMClient(_marketplaceRestClient);
+
+            var createdResource = await armClient.CreateSaaSResourceAsync(marketplaceOfferDetail, _marketplaceRequestMetadata, resourceGroup);
+
+            Assert.Equal(createdResource.Id, saasResource.SubscriptionDetails.Id);
+        }
+
+        [Fact(Skip = "Regex Validation not implemented by Marketplace yet")]
+        public async Task CreateResourceAsync_Creates_resource_at_subscriptionLevel_with_polling_Throws_Invalid_Regex_Exception_Async()
+        {
+            var resourceName = $"test-{Guid.NewGuid()}";
+            var resourceGroup = "saas-test";
+            var saasResource = new SaasCreationResponse()
+            {
+                SubscriptionDetails = new MarketplaceSubscriptionDetails()
+                {
+                    Name = resourceName,
+                    Id = Guid.NewGuid().ToString(),
+                },
+            };
+            var marketplaceOfferDetail = CreateSaasResourceProperties(resourceName);
+            marketplaceOfferDetail.Name = "abcdAZH90~Org^._";
+            var operationLocation = "https://mockoperationlocation.com";
+
+            using var handler = new MockHttpMessageHandler(saasResource, operationLocation);
+            using var httpClient = new HttpClient(handler, false);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
+            var armClient = new MarketplaceARMClient(_marketplaceRestClient);
+
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await armClient.CreateSaaSResourceAsync(marketplaceOfferDetail, _marketplaceRequestMetadata, resourceGroup));
+        }
+
+        [Fact]
+        public async Task CreateResourceAsync_Creates_resource_at_subscriptionLevel_when_operation_returns_InProgress_Async()
+        {
+            var resourceName = $"test-{Guid.NewGuid()}";
+            var resourceGroup = "saas-test";
+            var marketplaceOfferDetail = CreateSaasResourceProperties(resourceName);
+
+            var saasResource = new SaasCreationResponse()
+            {
+                SubscriptionDetails = new MarketplaceSubscriptionDetails()
+                {
+                    Name = resourceName,
+                    Id = Guid.NewGuid().ToString(),
+                },
+                Status = OperationStatus.Succeeded,
+            };
+
+            var operationLocation = "https://mockoperationlocation.com";
+
+            using var handler = new MockHttpMessageHandler(saasResource, operationLocation, true);
+            using var httpClient = new HttpClient(handler, false);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
+            var armClient = new MarketplaceARMClient(_marketplaceRestClient);
+
+            var createdResource = await armClient.CreateSaaSResourceAsync(marketplaceOfferDetail, _marketplaceRequestMetadata, resourceGroup);
+
+            Assert.Equal(createdResource.Id, saasResource.SubscriptionDetails.Id);
+        }
+
+        [Fact]
+        public async Task DeleteSaaSResourceAsync_Deletes_resource_at_subscriptionLevel_with_polling_Async()
+        {
+            var resourceName = $"test-{Guid.NewGuid()}";
+            var resourceGroup = "saas-test";
+            var subscription = "subscription";
+            var operationLocation = "https://deleteoperationlocation.com";
+
+            var subsOperation = new SubscriptionOperation()
+            {
+                Action = "Unsubscribe",
+                MarketplaceSubscription = new MarketplaceSubscription(Guid.NewGuid()),
+                PlanId = "PAYG",
+                Status = OperationStatus.Succeeded,
+            };
+
+            using var handler = new MockHttpMessageHandler(null, operationLocation, subOperation: subsOperation);
+            using var httpClient = new HttpClient(handler, false);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
+            var armClient = new MarketplaceARMClient(_marketplaceRestClient);
+
+            Func<Task> act = async () => await armClient.DeleteSaaSResourceAsync(subscription, resourceName, resourceGroup, _marketplaceRequestMetadata);
+            await act.Should().NotThrowAsync();
+        }
+
+        [Fact]
+        public async Task DeleteSaaSResourceAsync_Deletes_resource_at_subscriptionLevel_when_operation_returns_InProgress_Async()
+        {
+            var resourceName = $"test-{Guid.NewGuid()}";
+            var resourceGroup = "saas-test";
+            var subscription = "subscription";
+            var operationLocation = "https://deleteoperationlocation.com";
+
+            var subsOperation = new SubscriptionOperation()
+            {
+                Action = "Unsubscribe",
+                MarketplaceSubscription = new MarketplaceSubscription(Guid.NewGuid()),
+                PlanId = "PAYG",
+                Status = OperationStatus.Succeeded,
+            };
+
+            using var handler = new MockHttpMessageHandler(null, operationLocation, subOperation: subsOperation);
+            using var httpClient = new HttpClient(handler, false);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
+            var armClient = new MarketplaceARMClient(_marketplaceRestClient);
+
+            Func<Task> act = async () => await armClient.DeleteSaaSResourceAsync(subscription, resourceName, resourceGroup, _marketplaceRequestMetadata);
+            await act.Should().NotThrowAsync();
+        }
+
         /* [Fact(Skip = "Not implemented")]
         public async Task InitiateDeleteResource_throws_exception_if_resource_deletion_fails_Async()
         {
@@ -158,13 +300,15 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
         {
             private readonly SaasCreationResponse _creationResponse;
             private readonly string _operationLocation;
+            private readonly SubscriptionOperation _subOperation;
             private bool _progress;
 
-            public MockHttpMessageHandler(SaasCreationResponse creationResponse, string operationLocation, bool progress = false)
+            public MockHttpMessageHandler(SaasCreationResponse creationResponse, string operationLocation, bool progress = false, SubscriptionOperation subOperation = null)
             {
                 _creationResponse = creationResponse;
                 _operationLocation = operationLocation;
                 _progress = progress;
+                _subOperation = subOperation;
             }
 
             protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -176,9 +320,21 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
                 {
                     response = MockAsyncOperationHelper.AcceptedResponseWithOperationLocation(_operationLocation);
                 }
+                else if (request.RequestUri.ToString().OrdinalContains("resources") && request.Method == HttpMethod.Put)
+                {
+                    response = MockAsyncOperationHelper.AcceptedResponseWithOperationLocation(_operationLocation);
+                }
+                else if (request.RequestUri.ToString().OrdinalContains("resources") && request.Method == HttpMethod.Delete)
+                {
+                    response = MockAsyncOperationHelper.AcceptedResponseWithOperationLocation(_operationLocation);
+                }
                 else if (request.RequestUri.ToString().OrdinalContains("mockoperationlocation") && request.Method == HttpMethod.Get && !_progress)
                 {
                     response = MockAsyncOperationHelper.SuccessResponseWithSucceededStatus(_creationResponse);
+                }
+                else if (request.RequestUri.ToString().OrdinalContains("deleteoperationlocation") && request.Method == HttpMethod.Get && !_progress)
+                {
+                    response = MockAsyncOperationHelper.SuccessResponseWithSucceededStatus(_subOperation);
                 }
                 else if (request.RequestUri.ToString().OrdinalContains("mockoperationlocation") && request.Method == HttpMethod.Get && _progress)
                 {

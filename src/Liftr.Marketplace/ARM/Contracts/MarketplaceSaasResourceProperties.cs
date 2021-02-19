@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.Liftr.Marketplace.ARM.Contracts
 {
@@ -25,6 +26,7 @@ namespace Microsoft.Liftr.Marketplace.ARM.Contracts
 
         public PaymentChannelMetadata PaymentChannelMetadata { get; set; }
 
+        // [TO DO: Add Regex Validation Check for SaaS resource name when implemented by MP team]
         public bool IsValid()
         {
             return
