@@ -175,6 +175,20 @@ namespace Microsoft.Liftr.Contracts.Tests
         }
 
         [Fact]
+        public void CanParseSubscriptionLogResourceId()
+        {
+            string resourceIdString = "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourcegroups/testing/providers/microsoft.disks/type576_type576_1_osdisk_1_e6ca31687024444bb940722df0f9109d";
+            var rid = new ResourceId(resourceIdString);
+
+            Assert.Equal(RootScopeLevel.ResourceGroup, rid.RootScopeLevel);
+            Assert.True(rid.HasRoutingScope);
+            Assert.Equal(resourceIdString, rid.ToString());
+            Assert.Equal("xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", rid.SubscriptionId);
+            Assert.Equal("testing", rid.ResourceGroup);
+            Assert.Equal("microsoft.disks", rid.Provider);
+        }
+
+        [Fact]
         public void CanParse3PartResourceId()
         {
             string resourceIdString = "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/LiftrComDevImgRG/providers/Microsoft.Compute/galleries/LiftrComDevSIG/images/ComDevSBI/versions/0.6.13241130";
@@ -268,13 +282,10 @@ namespace Microsoft.Liftr.Contracts.Tests
         }
 
         [Theory]
-        [InlineData("/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/providers/Microsoft.Compute/")]
         [InlineData("asdasasfdsf")]
         [InlineData("/subscriptionss/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/providers/Microsoft.Compute/availabilitySets/AvSet")]
         [InlineData("/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/AresourceGroups/private-link-service/providers/Microsoft.Compute/availabilitySets/AvSet")]
         [InlineData("/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/Aproviders/Microsoft.Compute/availabilitySets/AvSet")]
-        [InlineData("/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/providers/Microsoft.Compute/availabilitySets/AvSet/")]
-        [InlineData("/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/providers/Microsoft.Compute/availabilitySets/AvSet/sdf")]
         [InlineData("subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/private-link-service/providers/Microsoft.Compute/availabilitySets/AvSet")]
         public void ParseInvalidFormatThrow(string resourceIdString)
         {

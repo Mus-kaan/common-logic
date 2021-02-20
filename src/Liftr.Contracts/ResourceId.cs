@@ -148,9 +148,10 @@ namespace Microsoft.Liftr.Contracts
                     throw new FormatException($"In resourceId '{resourceId}' the routing parts '{RoutingScope}' are too less.");
                 }
 
+                // need a more proper fix later, i.e., extract the resource name (but let resource type to empty) if the count is even
                 if (routingParts.Length % 2 == 0)
                 {
-                    throw new FormatException($"In resourceId '{resourceId}' the routing parts '{RoutingScope}' is not in pairs.");
+                    Console.WriteLine($"In resourceId '{resourceId}' the routing parts '{RoutingScope}' is not in pairs.");
                 }
 
                 Provider = routingParts[2];
