@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Microsoft.Liftr.Contracts;
 using System;
 
 namespace Microsoft.Liftr.Fluent.Contracts
@@ -205,6 +206,26 @@ namespace Microsoft.Liftr.Fluent.Contracts
             }
 
             throw new ArgumentOutOfRangeException($"Azure region {region} does not have predefined short name.");
+        }
+
+        public static AzureRegion ToLiftrRegion(this Region region)
+        {
+            if (region == null)
+            {
+                throw new ArgumentNullException(nameof(region));
+            }
+
+            return new AzureRegion(region.Name);
+        }
+
+        public static Region ToFluentRegion(this AzureRegion region)
+        {
+            if (region == null)
+            {
+                throw new ArgumentNullException(nameof(region));
+            }
+
+            return region.ShortName.ParseShortAzureRegion();
         }
 
         public static Region ParseShortAzureRegion(this string location)

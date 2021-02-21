@@ -101,6 +101,33 @@ namespace Microsoft.Liftr.Contracts.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => { AzureRegion.FromShortName("asfa"); });
         }
 
+        [Theory]
+        [InlineData("eastasia", "East Asia", "hk")]
+        [InlineData("southindia", "South India", "sin")]
+        public void CheckNameMapping(string name, string displayName, string shortName)
+        {
+            {
+                var parsedName = new AzureRegion(name);
+                Assert.Equal(name, parsedName.Name);
+                Assert.Equal(displayName, parsedName.DisplayName);
+                Assert.Equal(shortName, parsedName.ShortName);
+            }
+
+            {
+                var parsedName = new AzureRegion(displayName);
+                Assert.Equal(name, parsedName.Name);
+                Assert.Equal(displayName, parsedName.DisplayName);
+                Assert.Equal(shortName, parsedName.ShortName);
+            }
+
+            {
+                var parsedName = AzureRegion.FromShortName(shortName);
+                Assert.Equal(name, parsedName.Name);
+                Assert.Equal(displayName, parsedName.DisplayName);
+                Assert.Equal(shortName, parsedName.ShortName);
+            }
+        }
+
         private static void VerifyRegionToTextAndBack(AzureRegion location)
         {
             Assert.Equal(location, AzureRegion.FromShortName(location.ShortName));
