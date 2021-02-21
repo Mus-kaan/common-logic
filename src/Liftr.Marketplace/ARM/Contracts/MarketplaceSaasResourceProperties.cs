@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Newtonsoft.Json;
-using System.Text.RegularExpressions;
 
 namespace Microsoft.Liftr.Marketplace.ARM.Contracts
 {

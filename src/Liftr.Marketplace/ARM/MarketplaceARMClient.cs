@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts.Marketplace;
-using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Marketplace.ARM.Contracts;
 using Microsoft.Liftr.Marketplace.ARM.Interfaces;
