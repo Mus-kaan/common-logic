@@ -154,6 +154,19 @@ VaultName=$(<bin/vault-name.txt)
 fi
 echo "VaultName: $VaultName"
 
+CurrentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo "CurrentDir: $CurrentDir"
+beforeDeployAKSAppScript="$CurrentDir/before_DeployAKSAPP.sh"
+
+if [ -f "$beforeDeployAKSAppScript" ]; then
+    echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
+    echo "source extension script '$beforeDeployAKSAppScript' before installing AKS app:"
+    source $beforeDeployAKSAppScript
+    echo "Finished sourcing extension script '$beforeDeployAKSAppScript'."
+    echo "After sourcing extension script APP_ASPNETCORE_ENVIRONMENT: $APP_ASPNETCORE_ENVIRONMENT"
+    echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
+fi
+
 # Deploy the helm chart.
 echo "-----------------------------------------------------------------"
 echo "Start deploy '$HelmReleaseName' helm chart."
