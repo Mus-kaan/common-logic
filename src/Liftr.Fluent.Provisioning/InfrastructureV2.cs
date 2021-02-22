@@ -103,7 +103,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             string globalKeyVaultResourceId,
             IIdentity msi,
             IStorageAccount acisStorageAccount,
-            string globalCosmosDBResourceId)
+            string globalCosmosDBResourceId,
+            IEnumerable<string> dataPlaneSubscriptions)
         {
             var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
 
@@ -199,6 +200,12 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
                     rpAssets.GlobalStorageAccountName = gblStor.Name;
                     dataAssets.GlobalStorageAccountName = gblStor.Name;
+                }
+
+                if (dataPlaneSubscriptions != null)
+                {
+                    rpAssets.DataPlaneSubscriptions = dataPlaneSubscriptions.Select(sub => new DataPlaneSubscriptionInfo() { SubscriptionId = sub });
+                    dataAssets.DataPlaneSubscriptions = dataPlaneSubscriptions.Select(sub => new DataPlaneSubscriptionInfo() { SubscriptionId = sub });
                 }
 
                 _logger.Information("Puting the RPAssetOptions in the key vault ...");
