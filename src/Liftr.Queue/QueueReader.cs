@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Logging;
@@ -63,8 +64,7 @@ namespace Microsoft.Liftr.Queue
                     TimeSpan waitTime = _waitTime;
                     try
                     {
-                        var messages = (await _queue.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: _visibilityTime, cancellationToken: cancellationToken)).Value;
-                        var queueMessage = messages?.FirstOrDefault();
+                        var queueMessage = await GetQueueMessageAsync(cancellationToken);
 
                         if (queueMessage != null)
                         {
@@ -238,6 +238,14 @@ namespace Microsoft.Liftr.Queue
             }
 
             return _waitTime;
+        }
+
+        private async Task<QueueMessage> GetQueueMessageAsync(CancellationToken cancellationToken)
+        {
+            using var noAppInsightsTelemetryScope = new NoAppInsightsScope();
+            var messages = (await _queue.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: _visibilityTime, cancellationToken: cancellationToken)).Value;
+            var queueMessage = messages?.FirstOrDefault();
+            return queueMessage;
         }
     }
 }
