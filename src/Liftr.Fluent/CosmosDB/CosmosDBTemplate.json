@@ -1,0 +1,26 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "resources": [
+    {
+      "name": "WILL_BE_CHANGED [parameters('keyVaultName')]",
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "apiVersion": "2020-09-01",
+      "location": "WILL_BE_CHANGED [parameters('location')]",
+      "tags": {
+        "WILL_BE_CHANGED_displayName": "Key Vault with logging"
+      },
+      "kind": "MongoDB",
+      "properties": {
+        "consistencyPolicy": {
+          "defaultConsistencyLevel": "Strong"
+        },
+        "databaseAccountOfferType": "Standard",
+        "enableFreeTier": false,
+        "apiProperties": {
+          "serverVersion": "3.2"
+        }
+      }
+    }
+  ]
+}

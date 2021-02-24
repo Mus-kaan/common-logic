@@ -1015,23 +1015,19 @@ namespace Microsoft.Liftr.Fluent
             IDictionary<string, string> tags,
             ISubnet subnet = null)
         {
-            _logger.Information($"Creating a CosmosDB with name {cosmosDBName} ...");
-            var creatable = FluentClient
-               .CosmosDBAccounts
-               .Define(cosmosDBName)
-               .WithRegion(location)
-               .WithExistingResourceGroup(rgName)
-               .WithDataModelMongoDB()
-               .WithStrongConsistency()
-               .WithTags(tags);
-
-            if (subnet != null)
+            var helper = new CosmosDBHelper(_logger);
+            var cosmosDBAccount = await GetCosmosDBAsync(rgName, cosmosDBName);
+            if (cosmosDBAccount == null)
             {
-                creatable = creatable.WithVirtualNetworkRule(subnet.Parent.Id, subnet.Name);
-            }
+                cosmosDBAccount = await helper.CreateCosmosDBAsync(this, location, rgName, cosmosDBName, tags);
 
-            ICosmosDBAccount cosmosDBAccount = await creatable.CreateAsync();
-            _logger.Information($"Created CosmosDB with name {cosmosDBName}");
+                if (subnet != null)
+                {
+                    cosmosDBAccount = await cosmosDBAccount.Update().WithVirtualNetworkRule(subnet.Parent.Id, subnet.Name).ApplyAsync();
+                }
+
+                _logger.Information($"Created CosmosDB with name {cosmosDBName}");
+            }
 
             _logger.Information("Get the MongoDB connection string");
             var databaseAccountListConnectionStringsResult = await cosmosDBAccount.ListConnectionStringsAsync();
