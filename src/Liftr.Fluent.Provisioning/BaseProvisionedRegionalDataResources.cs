@@ -14,6 +14,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
     {
         public IResourceGroup ResourceGroup { get; set; }
 
+        public IResourceGroup GlobalResourceGroup { get; set; }
+
         public INetwork VNet { get; set; }
 
         public IDnsZone DnsZone { get; set; }

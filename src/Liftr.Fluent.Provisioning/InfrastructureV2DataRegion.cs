@@ -40,6 +40,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var cosmosName = namingContext.CosmosDBName(baseName);
 
             var dnsZoneId = new ResourceId(dataOptions.DNSZoneId);
+            provisionedResources.GlobalResourceGroup = await liftrAzure.GetResourceGroupAsync(dnsZoneId.ResourceGroup);
+
             provisionedResources.DnsZone = await liftrAzure.GetDNSZoneAsync(dnsZoneId.ResourceGroup, dnsZoneId.ResourceName);
             if (provisionedResources.DnsZone == null)
             {

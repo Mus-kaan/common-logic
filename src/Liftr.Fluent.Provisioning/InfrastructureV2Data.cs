@@ -42,6 +42,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             ProvisionedRegionalDataResources provisionedResources = new ProvisionedRegionalDataResources()
             {
                 ResourceGroup = dataRegionResources.ResourceGroup,
+                GlobalResourceGroup = dataRegionResources.GlobalResourceGroup,
                 VNet = dataRegionResources.VNet,
                 DnsZone = dataRegionResources.DnsZone,
                 TrafficManager = dataRegionResources.TrafficManager,
