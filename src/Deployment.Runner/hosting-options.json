@@ -16,7 +16,8 @@
         "FirstPartyAppCert": "liftr-monitoring.first-party.liftr-dev.net",
         "SampleFirstPartyAppCert": "sample-rp.first-party.liftr-dev.net",
         "SampleMPCert": "market-place.sample.liftr-dev.net",
-        "icm-cert": "prom2icm-sample.icm.liftr-dev.net"
+        "icm-cert": "prom2icm-sample.icm.liftr-dev.net",
+        "DatadogMPCert": "market-place.datadog.liftr-dev.net"
       },
       "AKSConfigurations": {
         "AKSMachineCount": 3,
@@ -51,7 +52,8 @@
         "GenevaClientCert": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net",
         "FirstPartyAppCert": "liftr-monitoring.first-party.liftr-dev.net",
         "SampleFirstPartyAppCert": "sample-rp.first-party.liftr-dev.net",
-        "SampleMPCert": "market-place.sample.liftr-dev.net"
+        "SampleMPCert": "market-place.sample.liftr-dev.net",
+        "DatadogMPCert": "market-place.datadog.liftr-dev.net"
       },
       "AKSConfigurations": {
         "AKSMachineCount": 3,
