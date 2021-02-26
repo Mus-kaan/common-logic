@@ -100,6 +100,11 @@ namespace Microsoft.Liftr.DataSource.Mongo
             throw new CollectionNotExistException($"Collection with name {collectionName} does not exist.");
         }
 
+        public bool CollectionExists(string collectionName)
+        {
+            return CollectionExists(_db, collectionName);
+        }
+
         public async Task DeleteCollectionAsync(string collectionName)
         {
             await _db.DropCollectionAsync(collectionName);
