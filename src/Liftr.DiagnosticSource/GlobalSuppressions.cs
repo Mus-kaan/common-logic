@@ -14,6 +14,7 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.AspNetCore.Tests")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Logging.GenericHosting")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Queue")]
+[assembly: InternalsVisibleTo("Microsoft.Liftr.Metrics.DiagnosticSource")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Tests.Common")]
 [assembly: InternalsVisibleTo("Microsoft.Liftr.Tests.Utilities")]
 

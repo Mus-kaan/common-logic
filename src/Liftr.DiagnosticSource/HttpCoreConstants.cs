@@ -8,5 +8,6 @@ namespace Microsoft.Liftr.DiagnosticSource
     {
         public const string HttpHandlerDiagnosticListener = nameof(HttpHandlerDiagnosticListener);
         public const string HttpOutStartEventName = "System.Net.Http.HttpRequestOut.Start";
+        public const string HttpOutStopEventName = "System.Net.Http.HttpRequestOut.Stop";
     }
 }

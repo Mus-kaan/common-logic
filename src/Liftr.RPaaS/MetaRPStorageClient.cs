@@ -21,6 +21,9 @@ namespace Microsoft.Liftr.RPaaS
 {
     public class MetaRPStorageClient : IMetaRPStorageClient
     {
+        private const string MetricTypeHeaderKey = "x-ms-metrictype";
+        private const string MetricTypeHeaderValue = "metarp";
+
         private readonly HttpClient _httpClient;
         private readonly MetaRPOptions _options;
         private readonly AuthenticationTokenCallback _tokenCallback;
@@ -78,6 +81,8 @@ namespace Microsoft.Liftr.RPaaS
                 operation.SetContextProperty(nameof(tenantId), tenantId);
                 var url = GetMetaRPResourceUrl(resourceId, apiVersion);
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
+                _httpClient.DefaultRequestHeaders.Add(MetricTypeHeaderKey, MetricTypeHeaderValue);
+
                 var response = await _httpClient.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
@@ -118,6 +123,8 @@ namespace Microsoft.Liftr.RPaaS
                 operation.SetContextProperty(nameof(tenantId), tenantId);
                 var url = GetMetaRPResourceUrl(resourceId, apiVersion);
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
+                _httpClient.DefaultRequestHeaders.Add(MetricTypeHeaderKey, MetricTypeHeaderValue);
+
                 var response = await _httpClient.PutAsync(url, content);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -156,6 +163,7 @@ namespace Microsoft.Liftr.RPaaS
                 operation.SetContextProperty(nameof(tenantId), tenantId);
                 var url = GetMetaRPResourceUrl(resourceId, apiVersion);
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
+                _httpClient.DefaultRequestHeaders.Add(MetricTypeHeaderKey, MetricTypeHeaderValue);
 
                 var method = new HttpMethod("PATCH");
 
@@ -266,6 +274,8 @@ namespace Microsoft.Liftr.RPaaS
             ops.SetContextProperty("AsyncOperationId", operation.Id);
             var url = GetMetaRPResourceUrl(operation.Id, apiVersion);
             _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
+            _httpClient.DefaultRequestHeaders.Add(MetricTypeHeaderKey, MetricTypeHeaderValue);
+
             var method = new HttpMethod("PATCH");
             using (var request = new HttpRequestMessage(method, url)
             {
@@ -379,6 +389,8 @@ namespace Microsoft.Liftr.RPaaS
                 do
                 {
                     _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(_options.UserRPTenantId);
+                    _httpClient.DefaultRequestHeaders.Add(MetricTypeHeaderKey, MetricTypeHeaderValue);
+
                     var response = await _httpClient.GetAsync(listResponse.NextLink);
 
                     if (!response.IsSuccessStatusCode)

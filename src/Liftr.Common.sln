@@ -195,6 +195,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Marketplace.WebhookQu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Profiler.AspNetCore", "Liftr.Profiler.AspNetCore\Liftr.Profiler.AspNetCore.csproj", "{13565FA9-39DC-4B88-B716-CF3A317BFBA2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{80BACA9B-B8B0-41A6-A928-C6E2B5B408CC}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Metrics.AspNetCore", "Liftr.Metrics.AspNetCore\Liftr.Metrics.AspNetCore.csproj", "{848BD647-3282-4B4C-88D2-9B6E7C39190D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Metrics.DiagnosticSource", "Liftr.Metrics.DiagnosticSource\Liftr.Metrics.DiagnosticSource.csproj", "{7B9A247F-E3BA-49F8-BF40-071EB3487BD1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -549,6 +558,14 @@ Global
 		{13565FA9-39DC-4B88-B716-CF3A317BFBA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13565FA9-39DC-4B88-B716-CF3A317BFBA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13565FA9-39DC-4B88-B716-CF3A317BFBA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{848BD647-3282-4B4C-88D2-9B6E7C39190D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{848BD647-3282-4B4C-88D2-9B6E7C39190D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{848BD647-3282-4B4C-88D2-9B6E7C39190D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{848BD647-3282-4B4C-88D2-9B6E7C39190D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B9A247F-E3BA-49F8-BF40-071EB3487BD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B9A247F-E3BA-49F8-BF40-071EB3487BD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B9A247F-E3BA-49F8-BF40-071EB3487BD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B9A247F-E3BA-49F8-BF40-071EB3487BD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

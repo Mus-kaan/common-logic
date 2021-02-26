@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
-    <IsPackable>true</IsPackable>
-    <AssemblyName>Microsoft.Liftr.Logging.Metrics</AssemblyName>
-    <RootNamespace>Microsoft.Liftr.Logging.Metrics</RootNamespace>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="JustEat.StatsD" Version="$(PackageVersion_JustEat_StatsD)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(PackageVersion_Newtonsoft_Json)" />
-    <PackageReference Include="Serilog" Version="$(PackageVersion_Serilog)" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+		<IsPackable>true</IsPackable>
+		<AssemblyName>Microsoft.Liftr.Logging.Metrics</AssemblyName>
+		<RootNamespace>Microsoft.Liftr.Logging.Metrics</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="JustEat.StatsD" Version="$(PackageVersion_JustEat_StatsD)" />
+		<PackageReference Include="Newtonsoft.Json" Version="$(PackageVersion_Newtonsoft_Json)" />
+		<PackageReference Include="Serilog" Version="$(PackageVersion_Serilog)" />
+	</ItemGroup>
 </Project>

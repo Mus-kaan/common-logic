@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.Metrics.AspNetCore</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Metrics.AspNetCore</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="$(PackageVersion_Microsoft_AspNetCore_Http_Extensions)" />
+	<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions)" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Logging.Metrics\Liftr.Logging.Metrics.csproj" />
+    <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
+  </ItemGroup>
+
+</Project>
