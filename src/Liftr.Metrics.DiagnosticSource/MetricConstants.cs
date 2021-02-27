@@ -2,8 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using System.Net;
-
 namespace Microsoft.Liftr.Metrics.DiagnosticSource
 {
     public static class MetricConstants

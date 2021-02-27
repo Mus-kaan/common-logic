@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Liftr.Metrics.AspNetCore;
 
 namespace Microsoft.Liftr.Metrics.AspNetCore.Extensions
 {

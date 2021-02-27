@@ -16,8 +16,8 @@
     <PackageVersion_Microsoft_ApplicationInsights_DependencyCollector>2.12.0</PackageVersion_Microsoft_ApplicationInsights_DependencyCollector>
     <PackageVersion_Microsoft_ApplicationInsights_Profiler_AspNetCore>2.2.0-beta6</PackageVersion_Microsoft_ApplicationInsights_Profiler_AspNetCore>
     <PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>2.2.0</PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>
-	<PackageVersion_Microsoft_AspNetCore_Http_Extensions>2.2.0</PackageVersion_Microsoft_AspNetCore_Http_Extensions>
-	<PackageVersion_Microsoft_Azure_Cosmos_Table>1.0.8</PackageVersion_Microsoft_Azure_Cosmos_Table>
+    <PackageVersion_Microsoft_AspNetCore_Http_Extensions>2.2.0</PackageVersion_Microsoft_AspNetCore_Http_Extensions>
+    <PackageVersion_Microsoft_Azure_Cosmos_Table>1.0.8</PackageVersion_Microsoft_Azure_Cosmos_Table>
     <PackageVersion_Microsoft_Azure_KeyVault>3.0.5</PackageVersion_Microsoft_Azure_KeyVault>
     <PackageVersion_Microsoft_Azure_KeyVault_Extensions>3.0.5</PackageVersion_Microsoft_Azure_KeyVault_Extensions>
     <PackageVersion_Microsoft_Azure_Management_Fluent>1.34.0</PackageVersion_Microsoft_Azure_Management_Fluent>
@@ -25,7 +25,7 @@
     <PackageVersion_Microsoft_Azure_Services_AppAuthentication>1.5.0</PackageVersion_Microsoft_Azure_Services_AppAuthentication>
     <PackageVersion_Microsoft_Azure_Storage_Blob>11.1.5</PackageVersion_Microsoft_Azure_Storage_Blob>
     <PackageVersion_Microsoft_Azure_Storage_Queue>11.2.2</PackageVersion_Microsoft_Azure_Storage_Queue>
-	<PackageVersion_Microsoft_CSharp>4.5.0</PackageVersion_Microsoft_CSharp>
+    <PackageVersion_Microsoft_CSharp>4.5.0</PackageVersion_Microsoft_CSharp>
     <PackageVersion_Microsoft_Extensions_Configuration_AzureKeyVault>3.1.4</PackageVersion_Microsoft_Extensions_Configuration_AzureKeyVault>
     <PackageVersion_Microsoft_Extensions_Configuration_EnvironmentVariables>3.1.4</PackageVersion_Microsoft_Extensions_Configuration_EnvironmentVariables>
     <PackageVersion_Microsoft_Extensions_Configuration_Json>3.1.4</PackageVersion_Microsoft_Extensions_Configuration_Json>
