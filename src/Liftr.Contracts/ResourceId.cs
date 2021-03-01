@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Liftr.Contracts
 {
@@ -238,6 +239,20 @@ namespace Microsoft.Liftr.Contracts
         public string ResourceType { get; }
 
         public string ResourceName { get; }
+
+        public string TargetResourceType
+        {
+            get
+            {
+                if (TypedNames == null || !TypedNames.Any())
+                {
+                    return null;
+                }
+
+                var type = string.Join("/", TypedNames.Select(name => name.ResourceType));
+                return type.ToUpperInvariant();
+            }
+        }
 
         public string ChildResourceType
         {

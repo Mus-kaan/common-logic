@@ -42,5 +42,7 @@ namespace Microsoft.Liftr.DiagnosticSource
         /// must log this so that end-to-end requests can be correlated across Azure.
         /// </summary>
         public static readonly AsyncLocal<string> CorrelationId = new AsyncLocal<string>(); // https://docs.microsoft.com/en-us/rest/api/datafactory/v1/data-factory-gateway
+
+        public static readonly AsyncLocal<string> ARMOperationName = new AsyncLocal<string>();
     }
 }

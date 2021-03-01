@@ -25,6 +25,8 @@ namespace Microsoft.Liftr.Contracts
         /// </summary>
         public string GenericPath { get; private set; }
 
+        public string TargetResourceType { get; private set; }
+
         public static bool TryParse(string path, out ResourceIdPath resourceIdPath)
         {
             if (string.IsNullOrEmpty(path))
@@ -74,6 +76,7 @@ namespace Microsoft.Liftr.Contracts
                     childResourceName);
 
                 parsed.GenericPath = string.IsNullOrEmpty(actionPart) ? genericResourceId.ToString() : $"{genericResourceId}/{actionPart}";
+                parsed.TargetResourceType = string.IsNullOrEmpty(actionPart) ? rid.TargetResourceType : $"{rid.TargetResourceType}/{actionPart}".ToUpperInvariant();
 
                 resourceIdPath = parsed;
                 return true;

@@ -119,6 +119,7 @@ namespace Microsoft.Liftr.Queue
                                 CallContextHolder.ClientRequestId.Value = message.MsgTelemetryContext.ClientRequestId;
                                 CallContextHolder.ARMRequestTrackingId.Value = message.MsgTelemetryContext.ARMRequestTrackingId;
                                 CallContextHolder.CorrelationId.Value = message.MsgTelemetryContext.CorrelationId;
+                                CallContextHolder.ARMOperationName.Value = message.MsgTelemetryContext.ARMOperationName;
                                 correlationId = message.MsgTelemetryContext.CorrelationId;
 
                                 if (Enum.TryParse<LogEventLevel>(message.MsgTelemetryContext.LogFilterOverwrite, true, out var level))
@@ -137,6 +138,7 @@ namespace Microsoft.Liftr.Queue
                                 using (new LogContextPropertyScope("LiftrClientReqId", message.MsgTelemetryContext?.ClientRequestId))
                                 using (new LogContextPropertyScope("LiftrTrackingId", message.MsgTelemetryContext?.ARMRequestTrackingId))
                                 using (new LogContextPropertyScope("LiftrCorrelationId", message.MsgTelemetryContext?.CorrelationId))
+                                using (new LogContextPropertyScope("ARMOperationName", message.MsgTelemetryContext?.ARMOperationName))
                                 using (var operation = _logger.StartTimedOperation("ProcessQueueMessage", correlationId))
                                 {
                                     operation.SetProperty(nameof(srpMsgId), srpMsgId);

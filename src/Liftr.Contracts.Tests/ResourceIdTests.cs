@@ -164,6 +164,7 @@ namespace Microsoft.Liftr.Contracts.Tests
             Assert.Equal("Microsoft.Compute", rid.Provider);
             Assert.Equal("availabilitySets", rid.ResourceType);
             Assert.Equal("AvSet", rid.ResourceName);
+            Assert.Equal("AVAILABILITYSETS", rid.TargetResourceType);
 
             Assert.Single(rid.TypedNames);
             Assert.Equal("availabilitySets", rid.TypedNames[0].ResourceType);
@@ -200,6 +201,7 @@ namespace Microsoft.Liftr.Contracts.Tests
             Assert.Equal("eebfbfdb-4167-49f6-be43-466a6709609f", rid.SubscriptionId);
             Assert.Equal("images", rid.ChildResourceType);
             Assert.Equal("ComDevSBI", rid.ChildResourceName);
+            Assert.Equal("GALLERIES/IMAGES/VERSIONS", rid.TargetResourceType);
 
             var rid2 = new ResourceId(rid.SubscriptionId, rid.ResourceGroup, rid.Provider, rid.ResourceType, rid.ResourceName, rid.ChildResourceType, rid.ChildResourceName, rid.GrandChildResourceType, rid.GrandChildResourceName);
             Assert.Equal(rid.ToString(), rid2.ToString());

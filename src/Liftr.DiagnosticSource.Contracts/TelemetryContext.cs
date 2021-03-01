@@ -33,6 +33,8 @@ namespace Microsoft.Liftr.DiagnosticSource
         /// </summary>
         public string CorrelationId { get; set; }
 
+        public string ARMOperationName { get; set; }
+
         public bool IsEmpty() =>
             string.IsNullOrEmpty(LogFilterOverwrite)
             && string.IsNullOrEmpty(ClientRequestId)
@@ -61,6 +63,11 @@ namespace Microsoft.Liftr.DiagnosticSource
             if (!string.IsNullOrEmpty(CallContextHolder.CorrelationId.Value))
             {
                 context.CorrelationId = CallContextHolder.CorrelationId.Value;
+            }
+
+            if (!string.IsNullOrEmpty(CallContextHolder.ARMOperationName.Value))
+            {
+                context.ARMOperationName = CallContextHolder.ARMOperationName.Value;
             }
 
             return context.IsEmpty() ? null : context;

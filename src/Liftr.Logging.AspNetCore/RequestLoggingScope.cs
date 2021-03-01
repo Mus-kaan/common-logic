@@ -4,6 +4,7 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.DiagnosticSource;
 using System;
 
 namespace Microsoft.Liftr.Logging.AspNetCore
@@ -42,9 +43,17 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 // 'PUT /subscriptions/<subscriptionId>/resourceGroups/<resourceGroup>/providers/Microsoft.Datadog/monitors/<name>'
                 _requestIdPath = requestIdPath;
                 var operationName = $"{httpMethod} {requestIdPath.GenericPath}";
+
                 _operation = logger.StartTimedOperation(operationName, correlationtId);
                 _operation.SetContextProperty("subId", requestIdPath.ResourceId.SubscriptionId);
                 _operation.SetContextProperty("rg", requestIdPath.ResourceId.ResourceGroup);
+
+                if (!string.IsNullOrEmpty(requestIdPath.TargetResourceType))
+                {
+                    var armOperationName = $"{httpMethod} {requestIdPath.TargetResourceType}".ToUpperInvariant();
+                    CallContextHolder.ARMOperationName.Value = armOperationName;
+                    _operation.SetContextProperty(nameof(CallContextHolder.ARMOperationName), armOperationName);
+                }
 
                 if (!string.IsNullOrEmpty(requestIdPath.ResourceId.ResourceName))
                 {

@@ -18,6 +18,7 @@ namespace Microsoft.Liftr.Contracts.Tests
 
             Assert.Equal(rid, parsed.ResourceId.ToString());
             Assert.Equal(path, parsed.Path);
+            Assert.Equal("MONITORS/RESOURCECREATIONVALIDATE", parsed.TargetResourceType);
             Assert.Equal("/subscriptions/<subscriptionId>/resourceGroups/<resourceGroup>/providers/Microsoft.Datadog/monitors/<name>/ResourceCreationValidate", parsed.GenericPath);
         }
 
@@ -30,6 +31,7 @@ namespace Microsoft.Liftr.Contracts.Tests
 
             Assert.Equal(rid, parsed.ResourceId.ToString());
             Assert.Equal(rid, parsed.Path);
+            Assert.Equal("MONITORS", parsed.TargetResourceType);
             Assert.Equal("/subscriptions/<subscriptionId>/resourceGroups/<resourceGroup>/providers/Microsoft.Datadog/monitors/<name>", parsed.GenericPath);
         }
 
@@ -43,6 +45,7 @@ namespace Microsoft.Liftr.Contracts.Tests
 
             Assert.Equal(rid, parsed.ResourceId.ToString());
             Assert.Equal(path, parsed.Path);
+            Assert.Equal("MONITORS/CHILDTYPE/RESOURCECREATIONVALIDATE", parsed.TargetResourceType);
             Assert.Equal("/subscriptions/<subscriptionId>/resourceGroups/<resourceGroup>/providers/Microsoft.Datadog/monitors/<name>/childType/<childName>/ResourceCreationValidate", parsed.GenericPath);
         }
 
@@ -55,6 +58,7 @@ namespace Microsoft.Liftr.Contracts.Tests
 
             Assert.Equal(rid, parsed.ResourceId.ToString());
             Assert.Equal(rid, parsed.Path);
+            Assert.Equal("MONITORS/CHILDTYPE", parsed.TargetResourceType);
             Assert.Equal("/subscriptions/<subscriptionId>/resourceGroups/<resourceGroup>/providers/Microsoft.Datadog/monitors/<name>/childType/<childName>", parsed.GenericPath);
         }
 
