@@ -119,7 +119,6 @@ namespace Microsoft.Liftr.Queue
                                 CallContextHolder.ClientRequestId.Value = message.MsgTelemetryContext.ClientRequestId;
                                 CallContextHolder.ARMRequestTrackingId.Value = message.MsgTelemetryContext.ARMRequestTrackingId;
                                 CallContextHolder.CorrelationId.Value = message.MsgTelemetryContext.CorrelationId;
-                                CallContextHolder.ARMOperationName.Value = message.MsgTelemetryContext.ARMOperationName;
                                 correlationId = message.MsgTelemetryContext.CorrelationId;
 
                                 if (Enum.TryParse<LogEventLevel>(message.MsgTelemetryContext.LogFilterOverwrite, true, out var level))
