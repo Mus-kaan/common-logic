@@ -18,6 +18,7 @@ using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.Hosting.Swagger;
 using Microsoft.Liftr.IFxAuditLinux;
 using Microsoft.Liftr.MarketplaceResource.DataSource;
+using Microsoft.Liftr.Marketplace.Saas;
 using Microsoft.Liftr.Profiler.AspNetCore;
 using Microsoft.Liftr.Queue;
 using Microsoft.Liftr.TokenManager;
@@ -170,6 +171,7 @@ namespace Microsoft.Liftr.Sample.Web
             });
 
             services.AddSingleton<IIfxAuditLogger, IfxAuditLogger>();
+            services.AddMarketplaceARMClient(_configuration);
 
             services.AddControllers();
             services.AddRazorPages();

@@ -32,8 +32,7 @@ namespace Microsoft.Liftr.Marketplace.ARM.Models
             // 'MSClientPrincipalId'and 'MSClientPrincipalName' are empty for serivce principal.
             return
                 !string.IsNullOrEmpty(MSClientObjectId) &&
-                !string.IsNullOrEmpty(MSClientTenantId) &&
-                !string.IsNullOrEmpty(MSClientIssuer);
+                !string.IsNullOrEmpty(MSClientTenantId);
         }
     }
 }

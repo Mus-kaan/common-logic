@@ -3,6 +3,9 @@ using Microsoft.IFxAudit;
 using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.IFxAuditLinux;
+using Microsoft.Liftr.Marketplace.ARM.Contracts;
+using Microsoft.Liftr.Marketplace.ARM.Interfaces;
+using Microsoft.Liftr.Marketplace.ARM.Models;
 using Microsoft.Liftr.MarketplaceResource.DataSource;
 using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
@@ -19,15 +22,18 @@ namespace Liftr.Sample.Web.Controllers
     {
         private readonly IMarketplaceSaasResourceDataSource _dataSource;
         private readonly ILogger _logger;
+        private readonly IMarketplaceARMClient _marketplaceARMClient;
         private readonly IIfxAuditLogger _ifxAuditLogger;
 
         public MarketplaceResourceController(
             IMarketplaceSaasResourceDataSource resourceMetadataEntityDataSource,
             ILogger logger,
+            IMarketplaceARMClient marketplaceARMClient,
             IIfxAuditLogger ifxAuditLogger)
         {
             _dataSource = resourceMetadataEntityDataSource;
             _logger = logger;
+            _marketplaceARMClient = marketplaceARMClient;
             _ifxAuditLogger = ifxAuditLogger;
         }
 
@@ -94,15 +100,108 @@ namespace Liftr.Sample.Web.Controllers
 
             if (paginatedResponse.LastTimeStamp != null)
             {
-               continuationToken = paginatedResponse.LastTimeStamp.Value.Ticks.ToString(CultureInfo.InvariantCulture);
+                continuationToken = paginatedResponse.LastTimeStamp.Value.Ticks.ToString(CultureInfo.InvariantCulture);
             }
 
             var response = new SaasResourcesListResponse
             {
                 Subscriptions = paginatedResponse.Entities.Select(entity => entity.SubscriptionDetails),
-                NextLink = string.IsNullOrEmpty(continuationToken) ? null : (baseUrl + '?' + "token=" + continuationToken +"&page-size=" + paginatedResponse.PageSize)
+                NextLink = string.IsNullOrEmpty(continuationToken) ? null : (baseUrl + '?' + "token=" + continuationToken + "&page-size=" + paginatedResponse.PageSize)
             };
             return response;
+        }
+
+        [HttpPut("subscriptionlevel/{resourceGroup}/{resourceName}")]
+        public async Task<MarketplaceSubscriptionDetails> CreateSubLevelSaas(string resourceGroup, string resourceName)
+        {
+            // var subscriptionId = "52d42ba4-3473-4064-9f95-e780df01f6de";
+            var subId = "d3c0b378-d50b-4ac7-ac42-b9aacc66f6c5";
+            var saasResourceProperties = new MarketplaceSaasResourceProperties()
+            {
+                Name = resourceName,
+                PaymentChannelMetadata = new PaymentChannelMetadata()
+                {
+                    AzureSubscriptionId = subId,
+                },
+                PlanId = "payg",
+                PublisherId = "datadog1591740804488",
+                PaymentChannelType = "SubscriptionDelegated",
+                OfferId = "dd_liftr_v2",
+                TermId = "hjdtn7tfnxcy"
+            };
+
+            var requestMetadata = new MarketplaceRequestMetadata()
+            {
+                MSClientTenantId = "6457aa98-4dba-4966-a260-6fc215e8616a",
+                MSClientObjectId = "25f0ce98-7b18-4510-9966-6f97f27667cf",
+                // MSClientPrincipalId = "10030000A5D03A4B",
+                // MSClientIssuer = "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
+                MSClientPrincipalName = "runnerDF@billtest434458live.ccsctp.net",
+            };
+
+            var response = await _marketplaceARMClient.CreateSaaSResourceAsync(saasResourceProperties, requestMetadata, resourceGroup);
+            return response;
+        }
+
+        [HttpDelete("subscriptionlevel/{resourceGroup}/{resourceName}")]
+        public async Task DeleteSubLevelSaas(string resourceGroup, string resourceName)
+        {
+            var requestMetadata = new MarketplaceRequestMetadata()
+            {
+                MSClientTenantId = "6457aa98-4dba-4966-a260-6fc215e8616a",
+                MSClientObjectId = "25f0ce98-7b18-4510-9966-6f97f27667cf",
+                // MSClientPrincipalId = "10030000A5D03A4B",
+                // MSClientIssuer = "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
+                MSClientPrincipalName = "akagarw@microsoft.com",
+            };
+
+            await _marketplaceARMClient.DeleteSaaSResourceAsync("d3c0b378-d50b-4ac7-ac42-b9aacc66f6c5", resourceName, resourceGroup, requestMetadata);
+        }
+
+        [HttpPut("tenantlevel/{resourceName}")]
+        public async Task<MarketplaceSubscriptionDetails> CreateTenantLevelSaas(string resourceName)
+        {
+            var subId = "d3c0b378-d50b-4ac7-ac42-b9aacc66f6c5";
+            var saasResourceProperties = new MarketplaceSaasResourceProperties()
+            {
+                Name = resourceName,
+                PaymentChannelMetadata = new PaymentChannelMetadata()
+                {
+                    AzureSubscriptionId = subId,
+                },
+                PlanId = "payg",
+                PublisherId = "datadog1591740804488",
+                PaymentChannelType = "SubscriptionDelegated",
+                OfferId = "dd_liftr_v2",
+                TermId = "hjdtn7tfnxcy"
+            };
+
+            var requestMetadata = new MarketplaceRequestMetadata()
+            {
+                MSClientTenantId = "6457aa98-4dba-4966-a260-6fc215e8616a",
+                MSClientObjectId = "25f0ce98-7b18-4510-9966-6f97f27667cf",
+                // MSClientPrincipalId = "10030000A5D03A4B",
+                // MSClientIssuer = "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
+                MSClientPrincipalName = "runnerDF@billtest434458live.ccsctp.net",
+            };
+
+            var response = await _marketplaceARMClient.CreateSaaSResourceAsync(saasResourceProperties, requestMetadata);
+            return response;
+        }
+
+        [HttpDelete("tenantlevel/{marketplaceSubscription}")]
+        public async Task DeleteTenantLevelSaas(string marketplaceSubscription)
+        {
+            var requestMetadata = new MarketplaceRequestMetadata()
+            {
+                MSClientTenantId = "6457aa98-4dba-4966-a260-6fc215e8616a",
+                MSClientObjectId = "25f0ce98-7b18-4510-9966-6f97f27667cf",
+                // MSClientPrincipalId = "10030000A5D03A4B",
+                // MSClientIssuer = "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
+                MSClientPrincipalName = "runnerDF@billtest434458live.ccsctp.net",
+            };
+
+            await _marketplaceARMClient.DeleteSaaSResourceAsync(MarketplaceSubscription.From(marketplaceSubscription), requestMetadata);
         }
     }
 }

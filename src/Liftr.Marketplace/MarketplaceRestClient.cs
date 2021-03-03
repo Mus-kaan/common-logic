@@ -142,7 +142,7 @@ namespace Microsoft.Liftr.Marketplace
             string requestPath,
             Dictionary<string, string>? additionalHeaders = null,
             object? content = null,
-            CancellationToken cancellationToken = default) where T : MarketplaceAsyncOperationResponse
+            CancellationToken cancellationToken = default) where T : BaseOperationResponse
         {
             using var httpClient = _httpClientFactory.CreateClient();
             var requestId = Guid.NewGuid(); // Every request should have a different requestId
@@ -252,7 +252,11 @@ namespace Microsoft.Liftr.Marketplace
             return retryAfter.Value;
         }
 
-        private async Task<T> PollOperationAsync<T>(HttpRequestMessage originalRequest, HttpResponseMessage response, HttpClient httpClient, int retryCounter) where T : class
+        /// <summary>
+        /// Marketplace API for Polling Operation Status
+        /// This polling calls the GetOperation API on <see href="https://msazure.visualstudio.com/One/_git/AAPT-SPZA?path=%2Fsrc%2Fsource%2FMicrosoft.MarketPlace.StoreApi%2FControllers%2FSaasV2%2FSubscriptionResourceV2Controller.cs">Marketplace side</see>
+        /// </summary>
+        private async Task<T> PollOperationAsync<T>(HttpRequestMessage originalRequest, HttpResponseMessage response, HttpClient httpClient, int retryCounter) where T : BaseOperationResponse
         {
             // Read all the relevant headers from the original 202 response
             var retryAfter = GetRetryAfterValue(response);
@@ -280,7 +284,7 @@ namespace Microsoft.Liftr.Marketplace
             // you will have to check here the response and if that says complete then you can proceed or "status": "InProgress" then do it again.
             if (asyncOperationResponse.StatusCode == HttpStatusCode.OK)
             {
-                var asyncResponseObj = (await asyncOperationResponse.Content.ReadAsStringAsync()).FromJson<MarketplaceAsyncOperationResponse>();
+                var asyncResponseObj = (await asyncOperationResponse.Content.ReadAsStringAsync()).FromJson<BaseOperationResponse>();
 
                 switch (asyncResponseObj.Status)
                 {
@@ -290,7 +294,8 @@ namespace Microsoft.Liftr.Marketplace
                         return await PollOperationAsync<T>(originalRequest, response, httpClient, --retryCounter);
 
                     case OperationStatus.Failed:
-                        string errorMessage = $"Async polling operation failed while polling the operation. Operation Id : {resultLocation} for SAAS resource for original HTTP request {originalRequest.Method}";
+                        // to do: Add the error message from the asyncresponse into the exception
+                        string errorMessage = $"Async polling operation failed while polling the operation. Operation Id : {resultLocation} for SAAS resource for original HTTP request {originalRequest.Method}.";
                         var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(asyncOperationResponse, errorMessage);
                         _logger.Error(marketplaceException, errorMessage);
                         throw marketplaceException;
@@ -330,7 +335,12 @@ namespace Microsoft.Liftr.Marketplace
 
         private async Task<MarketplaceHttpException> GetRequestFailedExceptionAsync(HttpResponseMessage httpResponse)
         {
-            var responseContent = httpResponse.Content?.ReadAsStringAsync();
+            string responseContent = string.Empty;
+            if (httpResponse.Content != null)
+            {
+                responseContent = await httpResponse.Content.ReadAsStringAsync();
+            }
+
             var errorMessage = $"SAAS Fulfillment or Create Request Failed with status code: {httpResponse.StatusCode} and content: {responseContent}";
             var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(httpResponse, errorMessage);
             _logger.Error(marketplaceException, errorMessage);

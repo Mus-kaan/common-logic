@@ -118,7 +118,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             await Assert.ThrowsAsync<MarketplaceHttpException>(async () => await _marketplaceRestClient.SendRequestWithPollingAsync<TestResource>(HttpMethod.Put, "/retry/test", content: "somecontent"));
         }
 
-        internal class TestResource : MarketplaceAsyncOperationResponse
+        internal class TestResource : BaseOperationResponse
         {
         }
 

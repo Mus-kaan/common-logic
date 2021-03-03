@@ -3,16 +3,44 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Contracts.Marketplace;
-using Microsoft.Liftr.Marketplace.Contracts;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using System;
+using System.Net;
 
-namespace Microsoft.Liftr.Marketplace.ARM.Contracts
+namespace Microsoft.Liftr.Marketplace.Contracts
 {
-#nullable disable
-
-    // https://msazure.visualstudio.com/One/_git/AAPT-SPZA?path=%2Fsrc%2Fsource%2FMicrosoft.MarketPlace.Common.Models%2FSaasV2%2FSubscriptionV2.cs&_a=contents&version=GBmaster
-    public class SaasCreationResponse : MarketplaceAsyncOperationResponse
+    // Base class for all Marketplace Operation Responses
+    // https://msazure.visualstudio.com/One/_git/AAPT-SPZA?path=%2Fsrc%2Fsource%2FMicrosoft.MarketPlace.Common.Models%2FSaasV2%2FBaseOperationResponse.cs&_a=contents&version=GBmaster
+    public class BaseOperationResponse
     {
+        public OperationStatus Status { get; set; }
+
+        /// <summary>
+        /// Gets or sets the resource location
+        /// </summary>
+        [JsonProperty("resourceLocation")]
+        public Uri ResourceLocation { get; set; }
+
+        /// <summary>
+        /// Gets or sets the id
+        /// </summary>
+        [JsonProperty("id")]
+        public Guid Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the error status code
+        /// </summary>
+        [JsonProperty("errorStatusCode")]
+        [JsonConverter(typeof(StringEnumConverter))]
+        public HttpStatusCode? ErrorStatusCode { get; set; }
+
+        /// <summary>
+        /// Gets or sets the error message
+        /// </summary>
+        [JsonProperty("errorMessage")]
+        public string ErrorMessage { get; set; }
+
         [JsonProperty("subscription")]
         public MarketplaceSubscriptionDetails SubscriptionDetails { get; set; }
 

@@ -18,16 +18,8 @@ namespace Microsoft.Liftr.Marketplace.Exceptions
         {
         }
 
-        public MarketplaceException(string message, MarketplaceHttpException marketplaceHttpException)
-            : base(message)
-        {
-            MarketplaceHttpException = marketplaceHttpException;
-        }
-
         public MarketplaceException()
         {
         }
-
-        public MarketplaceHttpException MarketplaceHttpException { get; }
     }
 }

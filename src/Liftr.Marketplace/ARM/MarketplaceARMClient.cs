@@ -7,6 +7,7 @@ using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Marketplace.ARM.Contracts;
 using Microsoft.Liftr.Marketplace.ARM.Interfaces;
 using Microsoft.Liftr.Marketplace.ARM.Models;
+using Microsoft.Liftr.Marketplace.Contracts;
 using Microsoft.Liftr.Marketplace.Exceptions;
 using Microsoft.Liftr.Marketplace.Saas.Contracts;
 using Serilog;
@@ -57,7 +58,7 @@ namespace Microsoft.Liftr.Marketplace.ARM
             {
                 var additionalHeaders = GetAdditionalMarketplaceHeaders(requestMetadata);
                 var json = saasResourceProperties.ToJObject();
-                var createdResource = await _marketplaceRestClient.SendRequestWithPollingAsync<SaasCreationResponse>(HttpMethod.Put, ResourceTypePath, additionalHeaders, json);
+                var createdResource = await _marketplaceRestClient.SendRequestWithPollingAsync<BaseOperationResponse>(HttpMethod.Put, ResourceTypePath, additionalHeaders, json);
                 var subscriptionDetails = createdResource.SubscriptionDetails;
                 _logger.Information($"Marketplace SAAS resource has been successfully created. \n SAAS ResourceId: {subscriptionDetails.Id}, Name: {subscriptionDetails.Name}, Plan: {subscriptionDetails.PlanId}, Offer: {subscriptionDetails.OfferId}, Publisher: {subscriptionDetails.PublisherId}, SAAS Subscription Status: {subscriptionDetails.SaasSubscriptionStatus}, Azure Subscription: {subscriptionDetails.AdditionalMetadata?.AzureSubscriptionId}");
                 return subscriptionDetails;
@@ -101,7 +102,7 @@ namespace Microsoft.Liftr.Marketplace.ARM
                 _logger.Information($"Request Path at Subscription Level: {resourceTypePath}");
                 var additionalHeaders = GetAdditionalMarketplaceHeaders(requestMetadata);
                 var json = saasResourceProperties.ToJObject();
-                var createdResource = await _marketplaceRestClient.SendRequestWithPollingAsync<SaasCreationResponse>(HttpMethod.Put, resourceTypePath, additionalHeaders, json);
+                var createdResource = await _marketplaceRestClient.SendRequestWithPollingAsync<BaseOperationResponse>(HttpMethod.Put, resourceTypePath, additionalHeaders, json);
                 var subscriptionDetails = createdResource.SubscriptionDetails;
                 _logger.Information($"Marketplace Subscription level SAAS resource has been successfully created. \n SAAS ResourceId: {subscriptionDetails.Id}, Name: {subscriptionDetails.Name}, Plan: {subscriptionDetails.PlanId}, Offer: {subscriptionDetails.OfferId}, Publisher: {subscriptionDetails.PublisherId}, SAAS Subscription Status: {subscriptionDetails.SaasSubscriptionStatus}, Azure Subscription: {subscriptionDetails.AdditionalMetadata?.AzureSubscriptionId}");
                 return subscriptionDetails;
@@ -202,7 +203,7 @@ namespace Microsoft.Liftr.Marketplace.ARM
 
             try
             {
-                var response = await _marketplaceRestClient.SendRequestWithPollingAsync<SubscriptionOperation>(HttpMethod.Delete, resourceTypePath, additionalHeaders);
+                var response = await _marketplaceRestClient.SendRequestWithPollingAsync<BaseOperationResponse>(HttpMethod.Delete, resourceTypePath, additionalHeaders);
                 op.SetResultDescription($"Successfully deleted Marketplace subscription level resource {resourceTypePath}");
             }
             catch (MarketplaceTerminalException ex)

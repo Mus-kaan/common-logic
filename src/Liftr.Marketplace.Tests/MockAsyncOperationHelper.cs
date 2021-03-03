@@ -50,14 +50,14 @@ namespace Microsoft.Liftr.Marketplace.Tests
             var response = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(new MarketplaceAsyncOperationResponse() { Status = OperationStatus.InProgress }.ToJson()),
+                Content = new StringContent(new BaseOperationResponse() { Status = OperationStatus.InProgress }.ToJson()),
             };
             response.Headers.RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(new TimeSpan(0, 0, 1));
 
             return response;
         }
 
-        public static HttpResponseMessage SuccessResponseWithSucceededStatus<T>(T body) where T : MarketplaceAsyncOperationResponse
+        public static HttpResponseMessage SuccessResponseWithSucceededStatus<T>(T body) where T : BaseOperationResponse
         {
             body.Status = OperationStatus.Succeeded;
 

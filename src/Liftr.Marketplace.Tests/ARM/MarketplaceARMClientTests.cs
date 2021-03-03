@@ -64,7 +64,7 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
         public async Task CreateResourceAsync_Creates_resource_with_polling_Async()
         {
             var resourceName = $"test-{Guid.NewGuid()}";
-            var saasResource = new SaasCreationResponse()
+            var saasResource = new BaseOperationResponse()
             {
                 SubscriptionDetails = new MarketplaceSubscriptionDetails()
                 {
@@ -93,7 +93,7 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
             var resourceName = $"test-{Guid.NewGuid()}";
             var marketplaceOfferDetail = CreateSaasResourceProperties(resourceName);
 
-            var saasResource = new SaasCreationResponse()
+            var saasResource = new BaseOperationResponse()
             {
                 SubscriptionDetails = new MarketplaceSubscriptionDetails()
                 {
@@ -122,7 +122,7 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
         {
             var resourceName = $"test-{Guid.NewGuid()}";
             var resourceGroup = "saas-test";
-            var saasResource = new SaasCreationResponse()
+            var saasResource = new BaseOperationResponse()
             {
                 SubscriptionDetails = new MarketplaceSubscriptionDetails()
                 {
@@ -150,7 +150,7 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
         {
             var resourceName = $"test-{Guid.NewGuid()}";
             var resourceGroup = "saas-test";
-            var saasResource = new SaasCreationResponse()
+            var saasResource = new BaseOperationResponse()
             {
                 SubscriptionDetails = new MarketplaceSubscriptionDetails()
                 {
@@ -179,7 +179,7 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
             var resourceGroup = "saas-test";
             var marketplaceOfferDetail = CreateSaasResourceProperties(resourceName);
 
-            var saasResource = new SaasCreationResponse()
+            var saasResource = new BaseOperationResponse()
             {
                 SubscriptionDetails = new MarketplaceSubscriptionDetails()
                 {
@@ -298,12 +298,12 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
 
         internal class MockHttpMessageHandler : HttpMessageHandler
         {
-            private readonly SaasCreationResponse _creationResponse;
+            private readonly BaseOperationResponse _creationResponse;
             private readonly string _operationLocation;
             private readonly SubscriptionOperation _subOperation;
             private bool _progress;
 
-            public MockHttpMessageHandler(SaasCreationResponse creationResponse, string operationLocation, bool progress = false, SubscriptionOperation subOperation = null)
+            public MockHttpMessageHandler(BaseOperationResponse creationResponse, string operationLocation, bool progress = false, SubscriptionOperation subOperation = null)
             {
                 _creationResponse = creationResponse;
                 _operationLocation = operationLocation;
