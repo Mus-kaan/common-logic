@@ -4,6 +4,7 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System;
 
 namespace Microsoft.Liftr.Contracts.Marketplace
 {
@@ -111,6 +112,32 @@ namespace Microsoft.Liftr.Contracts.Marketplace
 
         public string ResourceUri { get; set; }
 
-        public string IsSubscriptionLevel { get; set; }
+        [JsonConverter(typeof(BooleanJsonConverter))]
+        public bool IsSubscriptionLevel { get; set; }
+    }
+
+    /// <summary>
+    /// Handles converting JSON string values into a C# boolean data type.
+    /// </summary>
+    public class BooleanJsonConverter : JsonConverter
+    {
+        public override bool CanWrite
+        {
+            get { return false; }
+        }
+
+        public override bool CanConvert(Type objectType)
+        {
+            return objectType == typeof(bool);
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            return reader != null && (reader.Value.ToString().ToLowerInvariant().Trim() == "true");
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+        }
     }
 }

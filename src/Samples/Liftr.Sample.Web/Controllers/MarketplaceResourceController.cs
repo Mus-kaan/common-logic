@@ -114,14 +114,13 @@ namespace Liftr.Sample.Web.Controllers
         [HttpPut("subscriptionlevel/{resourceGroup}/{resourceName}")]
         public async Task<MarketplaceSubscriptionDetails> CreateSubLevelSaas(string resourceGroup, string resourceName)
         {
-            // var subscriptionId = "52d42ba4-3473-4064-9f95-e780df01f6de";
-            var subId = "d3c0b378-d50b-4ac7-ac42-b9aacc66f6c5";
+            var subscriptionId = "52d42ba4-3473-4064-9f95-e780df01f6de";
             var saasResourceProperties = new MarketplaceSaasResourceProperties()
             {
                 Name = resourceName,
                 PaymentChannelMetadata = new PaymentChannelMetadata()
                 {
-                    AzureSubscriptionId = subId,
+                    AzureSubscriptionId = subscriptionId,
                 },
                 PlanId = "payg",
                 PublisherId = "datadog1591740804488",
@@ -132,11 +131,11 @@ namespace Liftr.Sample.Web.Controllers
 
             var requestMetadata = new MarketplaceRequestMetadata()
             {
-                MSClientTenantId = "6457aa98-4dba-4966-a260-6fc215e8616a",
-                MSClientObjectId = "25f0ce98-7b18-4510-9966-6f97f27667cf",
+                MSClientTenantId = "b3e78b16-9d91-4ae8-adb5-f32951c2be79",
+                MSClientObjectId = "6c76483f-16ed-4fc2-b4d7-94e2d5c629cd",
                 // MSClientPrincipalId = "10030000A5D03A4B",
                 // MSClientIssuer = "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
-                MSClientPrincipalName = "runnerDF@billtest434458live.ccsctp.net",
+                MSClientPrincipalName = "billtest350046@hotmail.com",
             };
 
             var response = await _marketplaceARMClient.CreateSaaSResourceAsync(saasResourceProperties, requestMetadata, resourceGroup);
@@ -146,28 +145,29 @@ namespace Liftr.Sample.Web.Controllers
         [HttpDelete("subscriptionlevel/{resourceGroup}/{resourceName}")]
         public async Task DeleteSubLevelSaas(string resourceGroup, string resourceName)
         {
+            var subscriptionId = "52d42ba4-3473-4064-9f95-e780df01f6de";
             var requestMetadata = new MarketplaceRequestMetadata()
             {
-                MSClientTenantId = "6457aa98-4dba-4966-a260-6fc215e8616a",
-                MSClientObjectId = "25f0ce98-7b18-4510-9966-6f97f27667cf",
+                MSClientTenantId = "b3e78b16-9d91-4ae8-adb5-f32951c2be79",
+                MSClientObjectId = "6c76483f-16ed-4fc2-b4d7-94e2d5c629cd",
                 // MSClientPrincipalId = "10030000A5D03A4B",
                 // MSClientIssuer = "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
-                MSClientPrincipalName = "akagarw@microsoft.com",
+                MSClientPrincipalName = "billtest350046@hotmail.com",
             };
 
-            await _marketplaceARMClient.DeleteSaaSResourceAsync("d3c0b378-d50b-4ac7-ac42-b9aacc66f6c5", resourceName, resourceGroup, requestMetadata);
+            await _marketplaceARMClient.DeleteSaaSResourceAsync(subscriptionId, resourceName, resourceGroup, requestMetadata);
         }
 
         [HttpPut("tenantlevel/{resourceName}")]
         public async Task<MarketplaceSubscriptionDetails> CreateTenantLevelSaas(string resourceName)
         {
-            var subId = "d3c0b378-d50b-4ac7-ac42-b9aacc66f6c5";
+            var subscriptionId = "52d42ba4-3473-4064-9f95-e780df01f6de";
             var saasResourceProperties = new MarketplaceSaasResourceProperties()
             {
                 Name = resourceName,
                 PaymentChannelMetadata = new PaymentChannelMetadata()
                 {
-                    AzureSubscriptionId = subId,
+                    AzureSubscriptionId = subscriptionId,
                 },
                 PlanId = "payg",
                 PublisherId = "datadog1591740804488",
@@ -178,11 +178,11 @@ namespace Liftr.Sample.Web.Controllers
 
             var requestMetadata = new MarketplaceRequestMetadata()
             {
-                MSClientTenantId = "6457aa98-4dba-4966-a260-6fc215e8616a",
-                MSClientObjectId = "25f0ce98-7b18-4510-9966-6f97f27667cf",
+                MSClientTenantId = "b3e78b16-9d91-4ae8-adb5-f32951c2be79",
+                MSClientObjectId = "6c76483f-16ed-4fc2-b4d7-94e2d5c629cd",
                 // MSClientPrincipalId = "10030000A5D03A4B",
                 // MSClientIssuer = "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
-                MSClientPrincipalName = "runnerDF@billtest434458live.ccsctp.net",
+                MSClientPrincipalName = "billtest350046@hotmail.com",
             };
 
             var response = await _marketplaceARMClient.CreateSaaSResourceAsync(saasResourceProperties, requestMetadata);
@@ -194,11 +194,11 @@ namespace Liftr.Sample.Web.Controllers
         {
             var requestMetadata = new MarketplaceRequestMetadata()
             {
-                MSClientTenantId = "6457aa98-4dba-4966-a260-6fc215e8616a",
-                MSClientObjectId = "25f0ce98-7b18-4510-9966-6f97f27667cf",
+                MSClientTenantId = "b3e78b16-9d91-4ae8-adb5-f32951c2be79",
+                MSClientObjectId = "6c76483f-16ed-4fc2-b4d7-94e2d5c629cd",
                 // MSClientPrincipalId = "10030000A5D03A4B",
                 // MSClientIssuer = "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
-                MSClientPrincipalName = "runnerDF@billtest434458live.ccsctp.net",
+                MSClientPrincipalName = "billtest350046@hotmail.com",
             };
 
             await _marketplaceARMClient.DeleteSaaSResourceAsync(MarketplaceSubscription.From(marketplaceSubscription), requestMetadata);
