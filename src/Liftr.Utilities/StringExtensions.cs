@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -90,6 +91,26 @@ namespace Microsoft.Liftr
             return new string(input.ToCharArray()
                 .Where(c => !char.IsWhiteSpace(c))
                 .ToArray());
+        }
+
+        /// <summary>
+        /// Get string in hexadecimal format from bytes array
+        /// </summary>
+        /// <param name="input">Byte array</param>
+        /// <returns>Hexadecimal string representation</returns>
+        public static string GetStringFromBytes(byte[] input)
+        {
+            Ensure.ArgumentNotNull(input, nameof(input));
+
+            // Merge all bytes into a string of bytes
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < input.Length; i++)
+            {
+                builder.Append(input[i].ToString("X", CultureInfo.InvariantCulture));
+            }
+
+            var output = builder.ToString();
+            return output;
         }
 
         public static int OrdinalSubstringCount(this string text, string pattern)

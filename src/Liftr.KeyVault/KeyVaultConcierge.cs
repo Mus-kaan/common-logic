@@ -6,6 +6,9 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.KeyVault.Models;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.KeyVault
@@ -215,6 +218,7 @@ namespace Microsoft.Liftr.KeyVault
                         throw new KeyVaultErrorException("Failed to create certificate. " + certOperation?.Error?.Message);
                     }
 
+                    await GetCertificateDetailsAsync(certName);
                     return certOperation;
                 }
                 catch (Exception ex)
@@ -236,12 +240,35 @@ namespace Microsoft.Liftr.KeyVault
             {
                 _logger.Information("Start getting certificate with name {certificateName} in vault '{vaultBaseUrl}' ...", certName, _vaultBaseUrl);
                 SecretBundle secret = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, certName);
-                _logger.Information("Finished getting certificate with name {certificateName} .", certName);
+                await GetCertificateDetailsAsync(certName);
                 return secret;
             }
             catch (KeyVaultErrorException ex) when (ex.Response?.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// Get details of the certificate.
+        /// </summary>
+        /// <param name="certName">Name of the cert.</param>
+        /// <returns>CertificateBundle object</returns>
+        public async Task<CertificateBundle> GetCertificateDetailsAsync(string certName)
+        {
+            try
+            {
+                _logger.Information("Fetching certificate details with name {certificateName} in vault '{vaultBaseUrl}' ...", certName, _vaultBaseUrl);
+                CertificateBundle certDetails = await _keyVaultClient.GetCertificateAsync(_vaultBaseUrl, certName);
+                var thumbprint = StringExtensions.GetStringFromBytes(certDetails.X509Thumbprint);
+
+                _logger.Information("Finished getting certificate details with name {certificateName}, Thumbprint: {thumbprint} and Id: {certId}...", certName, thumbprint, certDetails.Id);
+                return certDetails;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message);
+                throw;
             }
         }
 
