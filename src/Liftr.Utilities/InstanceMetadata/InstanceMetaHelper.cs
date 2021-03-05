@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -52,6 +53,19 @@ namespace Microsoft.Liftr.Utilities
                 Console.WriteLine($"{nameof(GetMetaInfoAsync)} failed. Exception: {ex}");
                 return null;
             }
+        }
+
+        public static async Task<Dictionary<string, string>> GetTagsWithoutCacheAsync()
+        {
+            var meta = await InstanceMetadata.LoadAsync();
+            var tagsString = meta?.Compute?.Tags;
+
+            if (TagStringParser.TryParse(tagsString, out var parsedTags))
+            {
+                return parsedTags;
+            }
+
+            return null;
         }
     }
 }
