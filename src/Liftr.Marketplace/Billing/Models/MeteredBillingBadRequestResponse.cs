@@ -2,8 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace Microsoft.Liftr.Marketplace.Billing.Models
 {
@@ -16,19 +16,19 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
         /// <summary>
         /// Message for error
         /// </summary>
-        [JsonPropertyName("message")]
+        [JsonProperty("message")]
         public string Message { get; set; }
 
         /// <summary>
         /// Name of the target
         /// </summary>
-        [JsonPropertyName("target")]
+        [JsonProperty("target")]
         public string Target { get; set; }
 
         /// <summary>
         /// Detail of error
         /// </summary>
-        [JsonPropertyName("details")]
+        [JsonProperty("details")]
         public IEnumerable<ErrorDetail> Details { get; set; }
     }
 
@@ -37,19 +37,19 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
         /// <summary>
         /// Message for error
         /// </summary>
-        [JsonPropertyName("message")]
+        [JsonProperty("message")]
         public string Message { get; set; }
 
         /// <summary>
         /// Name of the target
         /// </summary>
-        [JsonPropertyName("target")]
+        [JsonProperty("target")]
         public string Target { get; set; }
 
         /// <summary>
         /// code in readable format
         /// </summary>
-        [JsonPropertyName("code")]
+        [JsonProperty("code")]
         public string Code { get; set; }
     }
 }

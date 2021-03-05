@@ -2,8 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace Microsoft.Liftr.Marketplace.Billing.Models
 {
@@ -13,16 +13,16 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
     /// </summary>
     public class MeteredBillingBatchUsageSuccessResponse : MeteredBillingRequestResponse
     {
-        [JsonPropertyName("count")]
+        [JsonProperty("count")]
         public int Count { get; set; }
 
-        [JsonPropertyName("result")]
+        [JsonProperty("result")]
         public IEnumerable<BatchAdditionInfoModel> Result { get; set; }
     }
 
     public class BatchAdditionInfoModel : AcceptedMessage
     {
-        [JsonPropertyName("error")]
+        [JsonProperty("error")]
         public object Error { get; set; } = null;
     }
 }

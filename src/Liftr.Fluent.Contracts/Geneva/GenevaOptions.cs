@@ -28,7 +28,9 @@ namespace Microsoft.Liftr.Fluent.Contracts.Geneva
             bool isValidEnv = typeof(MonitoringGcsEnvironments).GetConstantsValues<string>().Any(e => e.StrictEquals(MonitoringGCSEnvironment));
             if (!isValidEnv)
             {
+#pragma warning disable CA2208 // Instantiate argument exceptions correctly
                 throw new ArgumentOutOfRangeException($"{nameof(MonitoringGCSEnvironment)} is not a valid value.");
+#pragma warning restore CA2208 // Instantiate argument exceptions correctly
             }
         }
     }

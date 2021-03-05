@@ -2,8 +2,9 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Contracts.Marketplace;
+using Newtonsoft.Json;
 using System;
-using System.Text.Json.Serialization;
 
 namespace Microsoft.Liftr.Marketplace.Billing.Models
 {
@@ -16,13 +17,13 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
         /// <summary>
         /// Message for conflict error
         /// </summary>
-        [JsonPropertyName("message")]
+        [JsonProperty("message")]
         public string Message { get; set; }
 
         /// <summary>
         /// Addition information for conflict error
         /// </summary>
-        [JsonPropertyName("additionalInfo")]
+        [JsonProperty("additionalInfo")]
         public AdditionalInfo AdditionalInfo { get; set; }
     }
 
@@ -31,7 +32,7 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
         /// <summary>
         /// Unique identifier associated with the usage event
         /// </summary>
-        [JsonPropertyName("acceptedMessage")]
+        [JsonProperty("acceptedMessage")]
         public AcceptedMessage AcceptedMessage { get; set; }
     }
 
@@ -40,49 +41,49 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
         /// <summary>
         /// Unique identifier associated with the usage event
         /// </summary>
-        [JsonPropertyName("usageEventId")]
+        [JsonProperty("usageEventId")]
         public Guid UsageEventId { get; set; }
 
         /// <summary>
         /// Request status i.e. Accepted|NotProcessed|Expired
         /// </summary>
-        [JsonPropertyName("status")]
+        [JsonProperty("status")]
         public string Status { get; set; }
 
         /// <summary>
         /// Time this message was created in UTC
         /// </summary>
-        [JsonPropertyName("messageTime")]
+        [JsonProperty("messageTime")]
         public DateTime MessageTime { get; set; }
 
         /// <summary>
         /// Identifier of the resource against which usage is emitted
         /// </summary>
-        [JsonPropertyName("resourceId")]
-        public string ResourceId { get; set; }
+        [JsonProperty("resourceId")]
+        public Guid ResourceId { get; set; }
 
         /// <summary>
         /// Quantity used
         /// </summary>
-        [JsonPropertyName("quantity")]
+        [JsonProperty("quantity")]
         public double Quantity { get; set; }
 
         /// <summary>
         /// Dimension identifier
         /// </summary>
-        [JsonPropertyName("dimension")]
+        [JsonProperty("dimension")]
         public string Dimension { get; set; }
 
         /// <summary>
         /// Time in UTC when the usage event occurred
         /// </summary>
-        [JsonPropertyName("effectiveStartTime")]
+        [JsonProperty("effectiveStartTime")]
         public DateTime EffectiveStartTime { get; set; }
 
         /// <summary>
         /// Plan associated with the purchased offer
         /// </summary>
-        [JsonPropertyName("planId")]
+        [JsonProperty("planId")]
         public string PlanId { get; set; }
     }
 }

@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using FluentAssertions;
+using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.Marketplace.Billing;
 using Microsoft.Liftr.Marketplace.Billing.Exceptions;
 using Microsoft.Liftr.Marketplace.Billing.Models;
@@ -35,7 +36,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
         public async Task BillingClient_Send_Usage_Event_To_Marketplace_Success_Response_Async()
         {
             var correlationId = Guid.NewGuid().ToString();
-            var resourceId = Guid.NewGuid().ToString();
+            var resourceId = Guid.NewGuid();
 
             var request = new UsageEventRequest
             {
@@ -65,7 +66,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
 
             var request = new UsageEventRequest
             {
-                ResourceId = string.Empty,
+                ResourceId = Guid.Empty,
                 Quantity = 4,
                 Dimension = "Meter1",
                 EffectiveStartTime = DateTime.Now.AddHours(-1),
@@ -88,7 +89,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
         public async Task BillingClient_Send_Usage_Event_To_Marketplace_Forbidden_Response_Async()
         {
             var correlationId = Guid.NewGuid().ToString();
-            var resourceId = Guid.NewGuid().ToString();
+            var resourceId = Guid.NewGuid();
 
             var request = new UsageEventRequest
             {
@@ -116,7 +117,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
         public async Task BillingClient_Send_Usage_Event_To_Marketplace_Conflict_Response_Async()
         {
             var correlationId = Guid.NewGuid().ToString();
-            var resourceId = Guid.NewGuid().ToString();
+            var resourceId = Guid.NewGuid();
 
             var request = new UsageEventRequest
             {
@@ -143,7 +144,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
         public async Task BillingClient_Send_Batch_Usage_Event_To_Marketplace_Success_Response_Async()
         {
             var correlationId = Guid.NewGuid().ToString();
-            var resourceId = Guid.NewGuid().ToString();
+            var resourceId = Guid.NewGuid();
 
             var request = new BatchUsageEventRequest
             {
@@ -183,7 +184,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
                 {
                     new UsageEventRequest
                     {
-                        ResourceId = string.Empty,
+                        ResourceId = Guid.Empty,
                         Quantity = 4,
                         Dimension = "Meter1",
                         EffectiveStartTime = DateTime.Now.AddHours(-1),
@@ -208,7 +209,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
         public async Task BillingClient_Send_Batch_Usage_Event_To_Marketplace_Forbidden_Response_Async()
         {
             var correlationId = Guid.NewGuid().ToString();
-            var resourceId = Guid.NewGuid().ToString();
+            var resourceId = Guid.NewGuid();
 
             var request = new BatchUsageEventRequest
             {
@@ -242,7 +243,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
         public async Task BillingClient_Send_Batch_Usage_Event_To_Marketplace_Conflict_Response_Async()
         {
             var correlationId = Guid.NewGuid().ToString();
-            var resourceId = Guid.NewGuid().ToString();
+            var resourceId = Guid.NewGuid();
 
             var request = new BatchUsageEventRequest
             {
@@ -289,7 +290,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
         public async Task BillingClient_Send_Usage_Event_MarketplaceBillingException_Exception_Async()
         {
             var correlationId = Guid.NewGuid().ToString();
-            var resourceId = Guid.NewGuid().ToString();
+            var resourceId = Guid.NewGuid();
 
             var request = new UsageEventRequest
             {
@@ -314,7 +315,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
         public async Task BillingClient_Send_Batch_Usage_Event_MarketplaceBillingException_Exception_Async()
         {
             var correlationId = Guid.NewGuid().ToString();
-            var resourceId = Guid.NewGuid().ToString();
+            var resourceId = Guid.NewGuid();
 
             var request = new BatchUsageEventRequest
             {
@@ -350,7 +351,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             };
         }
 
-        private MeteredBillingSuccessResponse MockMeteredBillingSuccessResponse(string resourceId)
+        private MeteredBillingSuccessResponse MockMeteredBillingSuccessResponse(Guid resourceId)
         {
             var response = new MeteredBillingSuccessResponse
             {
@@ -409,7 +410,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             return response;
         }
 
-        private MeteredBillingConflictResponse MockMeteredBillingConflictResponse(string resourceId)
+        private MeteredBillingConflictResponse MockMeteredBillingConflictResponse(Guid resourceId)
         {
             var response = new MeteredBillingConflictResponse
             {
@@ -437,7 +438,7 @@ namespace Microsoft.Liftr.Marketplace.Tests.Billing
             return response;
         }
 
-        private MeteredBillingBatchUsageSuccessResponse MockMeteredBillingBatchSuccessResponse(string resourceId)
+        private MeteredBillingBatchUsageSuccessResponse MockMeteredBillingBatchSuccessResponse(Guid resourceId)
         {
             var response = new MeteredBillingBatchUsageSuccessResponse
             {

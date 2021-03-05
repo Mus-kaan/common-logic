@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace Microsoft.Liftr.Marketplace.Billing.Models
 {
@@ -16,7 +16,7 @@ namespace Microsoft.Liftr.Marketplace.Billing.Models
         /// <summary>
         /// Request status code in readable format
         /// </summary>
-        [JsonPropertyName("code")]
+        [JsonProperty("code")]
         public string Code { get; set; }
     }
 }
