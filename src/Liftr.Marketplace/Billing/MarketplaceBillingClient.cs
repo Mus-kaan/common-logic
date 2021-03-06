@@ -10,6 +10,7 @@ using Microsoft.Liftr.Marketplace.Billing.Models;
 using Microsoft.Liftr.Marketplace.Billing.Utils;
 using Microsoft.Liftr.Marketplace.Options;
 using Microsoft.Liftr.Marketplace.Saas;
+using Microsoft.Liftr.Marketplace.Utils;
 using Newtonsoft.Json;
 using Serilog;
 using System;
@@ -25,7 +26,6 @@ namespace Microsoft.Liftr.Marketplace.Billing
 {
     public class MarketplaceBillingClient : IMarketplaceBillingClient
     {
-        private const string DefaultApiVersionParameterName = "api-version";
         private readonly string _billingBaseUrl;
         private readonly MarketplaceAPIOptions _marketplaceOptions;
         private readonly AuthenticationTokenCallback _authenticationTokenCallback;
@@ -150,7 +150,7 @@ namespace Microsoft.Liftr.Marketplace.Billing
         {
             var endpoint = _billingBaseUrl
                 .AppendPathSegment(requestPath)
-                .SetQueryParam(DefaultApiVersionParameterName, _marketplaceOptions.ApiVersion);
+                .SetQueryParam(MarketplaceConstants.DefaultApiVersionParameterName, _marketplaceOptions.ApiVersion);
 
             var request = new HttpRequestMessage(method, endpoint);
 

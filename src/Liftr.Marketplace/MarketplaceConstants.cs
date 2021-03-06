@@ -24,5 +24,7 @@ namespace Microsoft.Liftr.Marketplace
         public const string BillingLogTag = "Billing";
         public const string SAASLogTag = "SAAS";
         public const string WebhookLogTag = "Webhook";
+        internal const string AsyncOperationLocation = "Operation-Location";
+        internal const string DefaultApiVersionParameterName = "api-version";
     }
 }

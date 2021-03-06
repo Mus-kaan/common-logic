@@ -5,7 +5,7 @@
 using Microsoft.Liftr.Contracts.Marketplace;
 using System;
 
-namespace Microsoft.Liftr.Marketplace.Saas
+namespace Microsoft.Liftr.Marketplace.Utils
 {
     internal class MarketplaceUrlHelper
     {

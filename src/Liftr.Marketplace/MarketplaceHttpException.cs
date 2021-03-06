@@ -48,5 +48,18 @@ namespace Microsoft.Liftr.Marketplace.Exceptions
 
             return marketplaceException;
         }
+
+        internal static async Task<MarketplaceHttpException> CreateRequestFailedExceptionAsync(HttpResponseMessage httpResponse)
+        {
+            string responseContent = string.Empty;
+            if (httpResponse.Content != null)
+            {
+                responseContent = await httpResponse.Content.ReadAsStringAsync();
+            }
+
+            var errorMessage = $"SAAS Fulfillment or Create Request Failed with status code: {httpResponse.StatusCode} and content: {responseContent}";
+            var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(httpResponse, errorMessage);
+            return marketplaceException;
+        }
     }
 }

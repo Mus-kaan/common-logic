@@ -8,6 +8,7 @@ using Microsoft.Liftr.Marketplace.Exceptions;
 using Microsoft.Liftr.Marketplace.Saas.Contracts;
 using Microsoft.Liftr.Marketplace.Saas.Interfaces;
 using Microsoft.Liftr.Marketplace.Saas.Models;
+using Microsoft.Liftr.Marketplace.Utils;
 using Serilog;
 using System;
 using System.Collections.Generic;
