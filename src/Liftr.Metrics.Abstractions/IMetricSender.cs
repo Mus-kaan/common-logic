@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Liftr.Logging.Metrics
+namespace Microsoft.Liftr.Metrics
 {
     public interface IMetricSender
     {

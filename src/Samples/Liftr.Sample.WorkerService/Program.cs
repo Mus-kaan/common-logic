@@ -4,6 +4,8 @@
 
 using Azure.Core;
 using Azure.Storage.Queues;
+using Liftr.Metrics.AOP;
+using Liftr.Sample.WorkerService;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -12,8 +14,11 @@ using Microsoft.Liftr.DataSource;
 using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.GenericHosting;
 using Microsoft.Liftr.Logging.GenericHosting;
+using Microsoft.Liftr.Logging.Metrics;
+using Microsoft.Liftr.Metrics;
 using Microsoft.Liftr.Queue;
 using MongoDB.Driver;
+using Serilog;
 using System;
 using System.Linq;
 
@@ -88,6 +93,16 @@ namespace Microsoft.Liftr.Sample.WorkerService
                     return new QueueReader(queue, qOptions, sp.GetService<ITimeSource>(), logger);
                 });
 
+                services.AddSingleton<IMetricSender>((sp) =>
+                {
+                    return new MetricSender("localhost", "SampleAppMetrics", Log.Logger, null);
+                });
+                services.AddSingletonWithProxy<ITestClass, TestClass>();
+                var serviceProvider = services.BuildServiceProvider();
+                var testProxy = serviceProvider.GetService<ITestClass>();
+                testProxy.TestMethod();
+                testProxy.TestMethodAsync();
+                testProxy.TestMethodWithExceptionAsync();
                 services.AddHostedService<Worker>();
             });
     }

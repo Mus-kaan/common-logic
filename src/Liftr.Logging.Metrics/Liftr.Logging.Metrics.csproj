@@ -11,4 +11,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="$(PackageVersion_Newtonsoft_Json)" />
     <PackageReference Include="Serilog" Version="$(PackageVersion_Serilog)" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Metrics.Abstractions\Liftr.Metrics.Abstractions.csproj" />
+  </ItemGroup>
 </Project>

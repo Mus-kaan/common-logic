@@ -7,10 +7,11 @@
     <RootNamespace>Microsoft.Liftr.Metrics.DiagnosticSource</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="$(PackageVersion_System_Diagnostics_DiagnosticSource)" />
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(PackageVersion_Microsoft_Extensions_DependencyInjection_Abstractions)" />
+	  <PackageReference Include="Serilog" Version="$(PackageVersion_Serilog)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.DiagnosticSource\Liftr.DiagnosticSource.csproj" />
-    <ProjectReference Include="..\Liftr.Logging.Metrics\Liftr.Logging.Metrics.csproj" />
+    <ProjectReference Include="..\Liftr.Metrics.Abstractions\Liftr.Metrics.Abstractions.csproj" />
   </ItemGroup>
 </Project>

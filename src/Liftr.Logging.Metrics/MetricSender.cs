@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using JustEat.StatsD;
+using Microsoft.Liftr.Metrics;
 using Serilog;
 using System;
 using System.Collections.Generic;

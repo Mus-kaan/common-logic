@@ -4,6 +4,7 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.Liftr.Logging.Metrics;
+using Microsoft.Liftr.Metrics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

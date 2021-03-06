@@ -3,7 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.DiagnosticSource;
-using Microsoft.Liftr.Logging.Metrics;
+using Microsoft.Liftr.Metrics;
 using Serilog;
 using System;
 using System.Collections.Generic;

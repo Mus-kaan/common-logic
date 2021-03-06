@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+		<IsPackable>true</IsPackable>
+		<AssemblyName>Microsoft.Liftr.Metrics</AssemblyName>
+		<RootNamespace>Microsoft.Liftr.Metrics</RootNamespace>
+	</PropertyGroup>
+
+</Project>

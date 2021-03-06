@@ -14,6 +14,8 @@
     <ProjectReference Include="..\..\Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj" />
     <ProjectReference Include="..\..\Liftr.GenericHosting\Liftr.GenericHosting.csproj" />
     <ProjectReference Include="..\..\Liftr.Logging.GenericHosting\Liftr.Logging.GenericHosting.csproj" />
+    <ProjectReference Include="..\..\Liftr.Metrics.AOP\Liftr.Metrics.AOP.csproj" />
+    <ProjectReference Include="..\..\Liftr.Metrics.AspNetCore\Liftr.Metrics.AspNetCore.csproj" />
     <ProjectReference Include="..\..\Liftr.Queue\Liftr.Queue.csproj" />
   </ItemGroup>
 </Project>

@@ -5,6 +5,7 @@
     <PackageVersion_Azure_Storage_Blobs>12.4.4</PackageVersion_Azure_Storage_Blobs>
     <PackageVersion_Azure_Storage_Queues>12.3.2</PackageVersion_Azure_Storage_Queues>
     <PackageVersion_BouncyCastle_NetCore>1.8.6</PackageVersion_BouncyCastle_NetCore>
+	<PackageVersion_CastleCore>4.4.0</PackageVersion_CastleCore>
     <PackageVersion_CommandLineParser>2.8.0</PackageVersion_CommandLineParser>
     <PackageVersion_coverlet_collector>1.2.0</PackageVersion_coverlet_collector>
     <PackageVersion_coverlet_msbuild>2.9.0</PackageVersion_coverlet_msbuild>

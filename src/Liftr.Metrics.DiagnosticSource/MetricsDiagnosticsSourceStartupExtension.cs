@@ -3,7 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Liftr.Logging.Metrics;
+using Microsoft.Liftr.Metrics;
 using Serilog;
 using System;
 
