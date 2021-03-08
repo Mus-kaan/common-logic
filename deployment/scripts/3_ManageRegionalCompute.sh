@@ -41,6 +41,11 @@ fi
 
 ./ConnectAKS.sh
 
+./DeployPrometheusStack.sh \
+--environmentName="$APP_ASPNETCORE_ENVIRONMENT" \
+--compactRegion="$REGION" \
+--DeploymentSubscriptionId="$DeploymentSubscriptionId"
+
 ./DeployPodIdentity.sh \
 --environmentName="$APP_ASPNETCORE_ENVIRONMENT" \
 --compactRegion="$REGION" \
@@ -51,11 +56,6 @@ fi
 ./DeployNginx.sh
 
 ./DeployProm2IcM.sh
-
-./DeployPrometheusStack.sh \
---environmentName="$APP_ASPNETCORE_ENVIRONMENT" \
---compactRegion="$REGION" \
---DeploymentSubscriptionId="$DeploymentSubscriptionId"
 
 ./DeployGenevaMonitoring.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId" \
