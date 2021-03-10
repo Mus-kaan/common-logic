@@ -109,9 +109,11 @@ namespace Microsoft.Liftr.Marketplace.Saas
                         break;
                     case WebhookAction.Renew:
                         operationStatus = await _webhookHandler.ProcessRenewAsync(payload);
+                        patchRequired = false;
                         break;
                     case WebhookAction.Subscribe:
                         operationStatus = await _webhookHandler.ProcessSubscribeAsync(payload);
+                        patchRequired = false;
                         break;
                     default:
                         _logger.Error("Action {action} is not supported", payload.Action, payload.MarketplaceSubscription);
