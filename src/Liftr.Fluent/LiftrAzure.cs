@@ -43,6 +43,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using static Microsoft.Azure.Management.Fluent.Azure;
+using TimeSpan = System.TimeSpan;
 
 namespace Microsoft.Liftr.Fluent
 {
