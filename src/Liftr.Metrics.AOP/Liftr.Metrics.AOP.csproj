@@ -1,18 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
-		<IsPackable>true</IsPackable>
-		<AssemblyName>Microsoft.Liftr.Metrics.AOP</AssemblyName>
-		<RootNamespace>Microsoft.Liftr.Metrics.AOP</RootNamespace>
-	</PropertyGroup>
-	<ItemGroup>
-		<PackageReference Include="Castle.Core" Version="$(PackageVersion_CastleCore)" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(PackageVersion_Microsoft_Extensions_DependencyInjection_Abstractions)" />
-		<PackageReference Include="Microsoft.CSharp" Version="$(PackageVersion_Microsoft_CSharp)" />	
-		<PackageReference Include="Serilog" Version="$(PackageVersion_Serilog)" />
-	</ItemGroup>
-	<ItemGroup>
-	  <ProjectReference Include="..\Liftr.Metrics.Abstractions\Liftr.Metrics.Abstractions.csproj" />
-	</ItemGroup>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.Metrics.AOP</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Metrics.AOP</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Castle.Core" Version="$(PackageVersion_Castle_Core)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(PackageVersion_Microsoft_Extensions_DependencyInjection_Abstractions)" />
+    <PackageReference Include="Microsoft.CSharp" Version="$(PackageVersion_Microsoft_CSharp)" />
+    <PackageReference Include="Serilog" Version="$(PackageVersion_Serilog)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Metrics.Abstractions\Liftr.Metrics.Abstractions.csproj" />
+  </ItemGroup>
 </Project>
