@@ -5,8 +5,6 @@
 using Microsoft.Liftr.Metrics;
 using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Liftr.Sample.WorkerService

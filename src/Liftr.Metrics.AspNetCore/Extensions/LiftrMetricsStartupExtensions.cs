@@ -5,7 +5,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Liftr.Logging.Metrics;
-using Microsoft.Liftr.Metrics;
 using Microsoft.Liftr.Utilities;
 using System;
 using System.Collections.Generic;

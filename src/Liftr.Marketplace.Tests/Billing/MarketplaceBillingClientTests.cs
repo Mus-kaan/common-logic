@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using FluentAssertions;
-using Microsoft.Liftr.Contracts.Marketplace;
 using Microsoft.Liftr.Marketplace.Billing;
 using Microsoft.Liftr.Marketplace.Billing.Exceptions;
 using Microsoft.Liftr.Marketplace.Billing.Models;

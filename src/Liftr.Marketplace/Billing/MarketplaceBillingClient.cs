@@ -9,7 +9,6 @@ using Microsoft.Liftr.Marketplace.Billing.Contracts;
 using Microsoft.Liftr.Marketplace.Billing.Models;
 using Microsoft.Liftr.Marketplace.Billing.Utils;
 using Microsoft.Liftr.Marketplace.Options;
-using Microsoft.Liftr.Marketplace.Saas;
 using Microsoft.Liftr.Marketplace.Utils;
 using Newtonsoft.Json;
 using Serilog;

@@ -9,7 +9,6 @@ using Microsoft.Liftr.Marketplace.ARM.Interfaces;
 using Microsoft.Liftr.Marketplace.ARM.Models;
 using Microsoft.Liftr.Marketplace.Contracts;
 using Microsoft.Liftr.Marketplace.Exceptions;
-using Microsoft.Liftr.Marketplace.Saas.Contracts;
 using Serilog;
 using System;
 using System.Collections.Generic;
