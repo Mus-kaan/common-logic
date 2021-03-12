@@ -8,6 +8,8 @@ namespace Microsoft.Liftr.Utilities
 {
     public class ComputeTagMetadata
     {
+        public string BlobEndpoint { get; set; }
+
         public string VaultEndpoint { get; set; }
 
         public string ASPNETCORE_ENVIRONMENT { get; set; }

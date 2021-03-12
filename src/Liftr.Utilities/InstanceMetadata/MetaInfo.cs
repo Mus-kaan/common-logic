@@ -40,9 +40,14 @@ namespace Microsoft.Liftr.Utilities
                     result.VaultEndpoint = parsedTags["ENV_" + nameof(result.VaultEndpoint)];
                 }
 
+                if (parsedTags.ContainsKey("ENV_" + nameof(result.BlobEndpoint)))
+                {
+                    result.BlobEndpoint = parsedTags["ENV_" + nameof(result.BlobEndpoint)];
+                }
+
                 if (parsedTags.ContainsKey("ENV_" + nameof(result.GCS_REGION)))
                 {
-                    result.VaultEndpoint = parsedTags["ENV_" + nameof(result.GCS_REGION)];
+                    result.GCS_REGION = parsedTags["ENV_" + nameof(result.GCS_REGION)];
                 }
 
                 return result;
