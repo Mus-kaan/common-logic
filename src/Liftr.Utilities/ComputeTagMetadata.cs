@@ -18,6 +18,8 @@ namespace Microsoft.Liftr.Utilities
 
         public string GCS_REGION { get; set; }
 
+        public string LiftrObjectId { get; set; }
+
         public IDictionary<string, string> Tags { get; set; }
     }
 }

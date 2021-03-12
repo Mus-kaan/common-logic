@@ -50,6 +50,11 @@ namespace Microsoft.Liftr.Utilities
                     result.GCS_REGION = parsedTags["ENV_" + nameof(result.GCS_REGION)];
                 }
 
+                if (parsedTags.ContainsKey(nameof(result.LiftrObjectId)))
+                {
+                    result.LiftrObjectId = parsedTags[nameof(result.LiftrObjectId)];
+                }
+
                 return result;
             }
 
