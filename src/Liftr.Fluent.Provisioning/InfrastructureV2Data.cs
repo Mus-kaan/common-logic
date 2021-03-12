@@ -101,7 +101,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 {
                     try
                     {
-                        _logger.Information("Granting the MSI {MSIReourceId} contributor role to the subscription with {subscrptionId} ...", provisionedResources.ManagedIdentity.Id, subscrptionId);
+                        _logger.Information("Granting the MSI {MSIReourceId} Owner role to the subscription with {subscrptionId} ...", provisionedResources.ManagedIdentity.Id, subscrptionId);
                         await liftrAzure.Authenticated.RoleAssignments
                             .Define(SdkContext.RandomGuid())
                             .ForObjectId(provisionedResources.ManagedIdentity.GetObjectId())
@@ -112,6 +112,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
                     {
                     }
+
+                    await liftrAzure.GrantBlobContributorAsync(subscrptionId, provisionedResources.ManagedIdentity);
                 }
             }
 

@@ -96,6 +96,10 @@ namespace Microsoft.Liftr.Fluent
 
         Task<IEnumerable<IStorageAccount>> ListStorageAccountAsync(string rgName, string namePrefix = null);
 
+        Task GrantBlobContributorAsync(string subscriptionId, string objectId);
+
+        Task GrantBlobContributorAsync(string subscriptionId, IIdentity msi);
+
         Task GrantBlobContributorAsync(IResourceGroup rg, string objectId);
 
         Task GrantBlobContributorAsync(IResourceGroup rg, IIdentity msi);

@@ -577,6 +577,31 @@ namespace Microsoft.Liftr.Fluent
             }
         }
 
+        public Task GrantBlobContributorAsync(string subscriptionId, IIdentity msi)
+            => GrantBlobContributorAsync(subscriptionId, msi.GetObjectId());
+
+        public async Task GrantBlobContributorAsync(string subscriptionId, string objectId)
+        {
+            try
+            {
+                await Authenticated.RoleAssignments
+                              .Define(SdkContext.RandomGuid())
+                              .ForObjectId(objectId)
+                              .WithRoleDefinition(GetStorageBlobDataContributorRoleDefinitionId())
+                              .WithSubscriptionScope(subscriptionId)
+                              .CreateAsync();
+                _logger.Information("Granted 'Storage Blob Data Contributor' of subscription '{subscriptionId}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}", subscriptionId, objectId, GetStorageBlobDataContributorRoleDefinitionId());
+            }
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
+            {
+            }
+            catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
+            {
+                _logger.Error("The object Id '{objectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", objectId);
+                throw;
+            }
+        }
+
         public Task GrantBlobContributorAsync(IStorageAccount storageAccount, IIdentity msi)
            => GrantBlobContributorAsync(storageAccount, msi.GetObjectId());
 
