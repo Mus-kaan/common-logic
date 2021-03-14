@@ -11,6 +11,7 @@ using Polly.Contrib.WaitAndRetry;
 using Polly.Retry;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -23,6 +24,8 @@ namespace Microsoft.Liftr.RPaaS
     {
         private const string MetricTypeHeaderKey = "x-ms-metrictype";
         private const string MetricTypeHeaderValue = "metarp";
+        private const double FirstRetryDelay = 3;
+        private const int RetryCount = 5;
 
         private readonly HttpClient _httpClient;
         private readonly MetaRPOptions _options;
@@ -83,7 +86,8 @@ namespace Microsoft.Liftr.RPaaS
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
                 _httpClient.DefaultRequestHeaders.Add(MetricTypeHeaderKey, MetricTypeHeaderValue);
 
-                var response = await _httpClient.GetAsync(url);
+                var retryPolicy = GetRetryPolicyForAuthFailuresandNotFound();
+                var response = await retryPolicy.ExecuteAsync(async () => await _httpClient.GetAsync(url));
                 if (response.IsSuccessStatusCode)
                 {
                     return JsonConvert.DeserializeObject<T>(
@@ -125,7 +129,8 @@ namespace Microsoft.Liftr.RPaaS
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
                 _httpClient.DefaultRequestHeaders.Add(MetricTypeHeaderKey, MetricTypeHeaderValue);
 
-                var response = await _httpClient.PutAsync(url, content);
+                var retryPolicy = GetRetryPolicyForAuthFailuresandNotFound();
+                var response = await retryPolicy.ExecuteAsync(async () => await _httpClient.PutAsync(url, content));
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorMessage = $"Failed at updating resource from RPaaS. StatusCode: '{response.StatusCode}'";
@@ -168,7 +173,7 @@ namespace Microsoft.Liftr.RPaaS
                 var method = new HttpMethod("PATCH");
 
                 // For patch operation we need to retry on 404 as sometimes due to ARM cache replication issue, we get 404 on first attempt
-                var retryPolicy = GetRetryPolicyFor404();
+                var retryPolicy = GetRetryPolicyForAuthFailuresandNotFound();
                 var response = await retryPolicy.ExecuteAsync(() =>
                 {
                     var request = new HttpRequestMessage(method, url)
@@ -364,19 +369,39 @@ namespace Microsoft.Liftr.RPaaS
             return authenticationHeader;
         }
 
-        private AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicyFor404()
+        /// <summary>
+        /// This retry policy is used for overcoming the AuthorizationFailed error which occurs due to delay in read/write role assignment on resource.
+        /// Also, for patch operation we need to retry on 404 as sometimes due to ARM cache replication issue, we get 404 on first attempt
+        /// </summary>
+        private AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicyForAuthFailuresandNotFound()
         {
-            // https://github.com/Polly-Contrib/Polly.Contrib.WaitAndRetry#new-jitter-recommendation
-            var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(3), retryCount: 5);
+            var delay = GetJitteredBackoffDelay();
+
+            HttpStatusCode[] httpStatusCodesWorthRetrying =
+           {
+                   HttpStatusCode.Forbidden, // 403
+                   HttpStatusCode.Unauthorized, // 401
+                   HttpStatusCode.NotFound, // 404
+           };
 
             return Policy
-                    .HandleResult<HttpResponseMessage>(r => r.StatusCode == HttpStatusCode.NotFound)
+                    .HandleResult<HttpResponseMessage>(r => httpStatusCodesWorthRetrying.Contains(r.StatusCode))
                     .WaitAndRetryAsync(
                         delay,
                         onRetry: (outcome, timespan, retryAttempt, context) =>
                         {
-                            _logger.Warning("Request: {requestMethod} {requestUrl} failed. Delaying for {delay}ms, then retrying {retry}.", outcome.Result.RequestMessage?.Method, outcome.Result.RequestMessage?.RequestUri, timespan.TotalMilliseconds, retryAttempt);
+                            LogRetryInfo(outcome, timespan, retryAttempt);
                         });
+        }
+
+        /// <summary>
+        /// Reference: https://github.com/Polly-Contrib/Polly.Contrib.WaitAndRetry#new-jitter-recommendation
+        /// </summary>
+        private static IEnumerable<TimeSpan> GetJitteredBackoffDelay() => Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromSeconds(FirstRetryDelay), retryCount: RetryCount);
+
+        private void LogRetryInfo(DelegateResult<HttpResponseMessage> outcome, TimeSpan timespan, int retryAttempt)
+        {
+            _logger.Information("Request: {requestMethod} {requestUrl} failed. Delaying for {delay}ms, then retrying attempt is: {retry} / {totalCount}.", outcome.Result.RequestMessage?.Method, outcome.Result.RequestMessage?.RequestUri, timespan.TotalMilliseconds, retryAttempt, RetryCount);
         }
 
         private async Task<IEnumerable<T>> ListMetaRPResourcesAsync<T>(string resourcePath, ListResponse<T> listResponse)
