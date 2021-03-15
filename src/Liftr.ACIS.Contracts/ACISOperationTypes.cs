@@ -22,6 +22,10 @@ namespace Microsoft.Liftr.ACIS.Contracts
         #region Datadog
         public const string GetDatadogMonitor = nameof(GetDatadogMonitor);
         public const string ListDatadogMonitor = nameof(ListDatadogMonitor);
+        public const string GetMonitorsBySubscription = nameof(GetMonitorsBySubscription);
+        public const string GetRelationshipsByMonitor = nameof(GetRelationshipsByMonitor);
+        public const string GetRelationshipsByResource = nameof(GetRelationshipsByResource);
+        public const string RemoveRelationshipByResource = nameof(RemoveRelationshipByResource);
         #endregion
     }
 }
