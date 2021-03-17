@@ -75,7 +75,7 @@ namespace Microsoft.Liftr.Fluent.Tests
         [CheckInValidation(skipLinux: true)]
         public async Task CanCreateKeyVaultInVNetAsync()
         {
-            using (var scope = new TestResourceGroupScope("unittest-kv-", _output))
+            using (var scope = new TestResourceGroupScope("ut-kv-vnet-", _output))
             {
                 try
                 {

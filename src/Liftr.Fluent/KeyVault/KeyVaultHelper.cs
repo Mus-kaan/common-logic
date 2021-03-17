@@ -145,6 +145,8 @@ namespace Microsoft.Liftr.Fluent
                 accessPolicies.Add(policy.Inner);
             }
 
+            var softDeleteTime = await GetSoftDeleteTimeAsync(vault, liftrAzure);
+
             var templateContent = GenerateKeyVaultTemplate(
                 vault.Region,
                 vault.Name,
@@ -158,6 +160,13 @@ namespace Microsoft.Liftr.Fluent
             _logger.Information("Key Vault '{kvId}' is accessible from IPs : '{@allowedIPs}', and subnets: '{@allowedSubnets}'.", vault.Id, ips, subnets);
         }
 
+        private static async Task<int> GetSoftDeleteTimeAsync(IVault vault, ILiftrAzure liftrAzure)
+        {
+            var currentTemplate = await liftrAzure.GetResourceAsync(vault.Id, "2019-09-01");
+            dynamic currentObject = JObject.Parse(currentTemplate);
+            return (int)currentObject.properties.softDeleteRetentionInDays;
+        }
+
         private static string GenerateKeyVaultTemplate(
             Region location,
             string vaultName,
@@ -165,7 +174,8 @@ namespace Microsoft.Liftr.Fluent
             IEnumerable<AccessPolicyEntry> accessPolicies,
             IEnumerable<IPRule> ips,
             IEnumerable<VirtualNetworkRule> subnets,
-            IDictionary<string, string> tags)
+            IDictionary<string, string> tags,
+            int softDeleteRetentionInDays = 15)
         {
             // https://docs.microsoft.com/en-us/rest/api/keyvault/vaults/createorupdate#create-or-update-a-vault-with-network-acls
             if (location == null)
@@ -200,6 +210,7 @@ namespace Microsoft.Liftr.Fluent
 
             var props = r.properties;
             props.tenantId = tenantId;
+            props.softDeleteRetentionInDays = softDeleteRetentionInDays;
 
             if (ips == null && subnets == null)
             {
