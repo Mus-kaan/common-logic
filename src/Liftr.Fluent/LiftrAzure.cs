@@ -1123,6 +1123,7 @@ namespace Microsoft.Liftr.Fluent
             if (!enableVNetFilter && vault?.Inner?.Properties?.NetworkAcls?.DefaultAction != NetworkRuleAction.Deny)
             {
                 _logger.Information("Skip adding VNet since Network isolation is not enabled for key vault {kvId}", vault.Id);
+                return;
             }
 
             var helper = new KeyVaultHelper(_logger);
