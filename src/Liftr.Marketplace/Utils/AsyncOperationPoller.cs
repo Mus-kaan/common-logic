@@ -30,9 +30,19 @@ namespace Microsoft.Liftr.Marketplace.Utils
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            // Read all the relevant headers from the original 202 response
-            _retryAfter = originalResponse.GetRetryAfterValue(logger);
-            _operationLocation = originalResponse.GetOperationLocationFromHeader(logger);
+            try
+            {
+                // Read all the relevant headers from the original 202 response
+                _retryAfter = originalResponse.GetRetryAfterValue(logger);
+                _operationLocation = originalResponse.GetOperationLocationFromHeader(logger);
+            }
+            catch (InvalidOperationException ex)
+            {
+                var errorMessage = $"Cannot start PollingOperation due to insufficient headers. Error: {ex.Message}";
+                var pollingException = PollingExceptionHelper.CreatePollingException(_originalRequest, _operationLocation, errorMessage);
+                _logger.Error(pollingException.Message);
+                throw pollingException;
+            }
         }
 
         /// <summary>
@@ -46,20 +56,23 @@ namespace Microsoft.Liftr.Marketplace.Utils
             {
                 await Task.Delay(_retryAfter);
 
-                using var request = GetSubrequestMessage();
+                using var request = CreatePollingRequest();
                 var response = await _httpClient.SendAsync(request);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw await MarketplaceHttpException.CreateRequestFailedExceptionAsync(response);
+                    errorMessage = $"Async Polling failed with StatusCode: {response.StatusCode}.";
+                    var ex = await PollingExceptionHelper.CreatePollingExceptionForFailResponseAsync(_originalRequest, _operationLocation, errorMessage, response);
+                    _logger.Error(ex.Message);
+                    throw ex;
                 }
 
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
-                    errorMessage = $"Cannot get the status of polling operation for SAAS resource operation. Operation Id : {_operationLocation} Status Code: {response.StatusCode}";
-                    var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(response, errorMessage);
-                    _logger.Error(marketplaceException, errorMessage);
-                    throw marketplaceException;
+                    errorMessage = $"Async Polling received Response with StatusCode: {response.StatusCode}. This is unexpected and cannot be handled.";
+                    var ex = await PollingExceptionHelper.CreatePollingExceptionForFailResponseAsync(_originalRequest, _operationLocation, errorMessage, response);
+                    _logger.Error(ex.Message);
+                    throw ex;
                 }
 
                 var asyncResponseObj = (await response.Content.ReadAsStringAsync()).FromJson<BaseOperationResponse>();
@@ -69,43 +82,50 @@ namespace Microsoft.Liftr.Marketplace.Utils
                     case OperationStatus.InProgress:
                     case OperationStatus.NotStarted:
                         {
-                            _logger.Information($"Trying to check the status of operation again. {_operationLocation}.Operation status for SAAS resource for Original HTTP request {_originalRequest.Method} is {asyncResponseObj.Status}");
+                            _logger.Information($"Trying to check the status of operation again. {_operationLocation}. Operation status for SAAS resource for Original HTTP request {_originalRequest.Method} is {asyncResponseObj.Status}");
                             continue;
                         }
 
                     case OperationStatus.Failed:
                         {
-                            // to do: Add the error message from the asyncresponse into the exception
-                            errorMessage = $"Async polling operation failed while polling the operation. Operation Id : {_operationLocation} for SAAS resource for original HTTP request {_originalRequest.Method}.";
-                            var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(response, errorMessage);
-                            _logger.Error(marketplaceException, errorMessage);
-                            throw marketplaceException;
+                            if (PurchaseExceptionHelper.TryGetPurchaseFailure(asyncResponseObj.ErrorMessage, _operationLocation, _originalRequest, response, out var purchaseException))
+                            {
+                                throw purchaseException;
+                            }
+                            else
+                            {
+                                var ex = await PollingExceptionHelper.CreatePollingExceptionForFailResponseAsync(_originalRequest, _operationLocation, asyncResponseObj.ErrorMessage, response);
+                                _logger.Error(ex.Message);
+                                throw ex;
+                            }
                         }
 
                     case OperationStatus.Succeeded:
                         {
-                            var message = $"Async polling operation has been successful for SAAS resource for original HTTP request {_originalRequest.Method}. Operation Id : {_operationLocation}";
+                            var message = $"SAAS Async Polling operation has been successful for SAAS resource for original HTTP request {_originalRequest.Method}. Operation Id : {_operationLocation}";
                             _logger.Information(message);
                             return (await response.Content.ReadAsStringAsync()).FromJson<T>();
                         }
 
                     default:
                         {
-                            errorMessage = $"Unknown operation is detected for async polling of marketplace API for SAAS resource for original HTTP request {_originalRequest.Method}. Operation Id : {_operationLocation} and status : {asyncResponseObj.Status}";
-                            var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(response, errorMessage);
-                            _logger.Error(marketplaceException, errorMessage);
-                            throw marketplaceException;
+                            errorMessage = $"SAAS Async Polling received response OperationStatus:{asyncResponseObj.Status}. This is unexpected and cannot be handled.";
+                            var ex = await PollingExceptionHelper.CreatePollingExceptionForFailResponseAsync(_originalRequest, _operationLocation, errorMessage, response);
+                            _logger.Error(ex.Message);
+                            throw ex;
                         }
                 }
             }
 
-            errorMessage = $"Maximum retries of async polling for SAAS operation has been reached. So terminating the polling requests. Operation Id : {_operationLocation}";
-            var terminalException = new MarketplaceTerminalException(errorMessage);
-            _logger.Error(terminalException, errorMessage);
-            throw terminalException;
+            {
+                errorMessage = $"Maximum retries of async polling reached for SAAS resource";
+                var ex = PollingExceptionHelper.CreatePollingException(_originalRequest, _operationLocation, errorMessage);
+                _logger.Error(ex.Message);
+                throw ex;
+            }
         }
 
-        private HttpRequestMessage GetSubrequestMessage()
+        private HttpRequestMessage CreatePollingRequest()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, _operationLocation);
 

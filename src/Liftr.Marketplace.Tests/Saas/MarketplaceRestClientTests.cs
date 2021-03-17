@@ -6,6 +6,7 @@ using FluentAssertions;
 using Microsoft.Liftr.Marketplace.Contracts;
 using Microsoft.Liftr.Marketplace.Exceptions;
 using Microsoft.Liftr.Marketplace.Tests;
+using Microsoft.Liftr.Marketplace.Utils;
 using Moq;
 using Newtonsoft.Json;
 using Serilog;
@@ -20,7 +21,7 @@ using Xunit;
 
 namespace Microsoft.Liftr.Marketplace.Saas.Tests
 {
-    public class MarketplaceRestClientTests
+    public partial class MarketplaceRestClientTests
     {
         private const string ApiVersion = "test-version";
         private readonly Uri _endpoint = new Uri("https://testmock.com/api");
@@ -103,7 +104,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
 
             _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
 
-            await Assert.ThrowsAsync<MarketplaceHttpException>(async () => await _marketplaceRestClient.SendRequestWithPollingAsync<TestResource>(HttpMethod.Put, "/operation/test", content: "somecontent"));
+            await Assert.ThrowsAsync<PollingException>(async () => await _marketplaceRestClient.SendRequestWithPollingAsync<TestResource>(HttpMethod.Put, "/operation/test", content: "somecontent"));
         }
 
         [Fact]
@@ -115,7 +116,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
 
             _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
 
-            await Assert.ThrowsAsync<MarketplaceHttpException>(async () => await _marketplaceRestClient.SendRequestWithPollingAsync<TestResource>(HttpMethod.Put, "/retry/test", content: "somecontent"));
+            await Assert.ThrowsAsync<PollingException>(async () => await _marketplaceRestClient.SendRequestWithPollingAsync<TestResource>(HttpMethod.Put, "/retry/test", content: "somecontent"));
         }
 
         internal class TestResource : BaseOperationResponse

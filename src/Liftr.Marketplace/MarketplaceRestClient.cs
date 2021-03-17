@@ -88,7 +88,7 @@ namespace Microsoft.Liftr.Marketplace
 
             using var request = HttpRequestHelper.CreateRequest(_endpoint, _apiVersion, method, requestPath, requestId, correlationId, additionalHeaders, accessToken);
             _logger.Information($"Sending request method: {method}, requestUri: {request.RequestUri}, requestId: {requestId}, correlationId: {correlationId} for SAAS fulfillment or create");
-            HttpResponseMessage? httpResponse = null;
+            HttpResponseMessage? response = null;
 
             try
             {
@@ -96,40 +96,33 @@ namespace Microsoft.Liftr.Marketplace
                 {
                     var requestBody = JsonConvert.SerializeObject(content);
                     request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
-                    httpResponse = await httpClient.SendAsync(request, cancellationToken);
+                    response = await httpClient.SendAsync(request, cancellationToken);
                 }
                 else
                 {
-                    httpResponse = await httpClient.SendAsync(request, cancellationToken);
+                    response = await httpClient.SendAsync(request, cancellationToken);
                 }
 
-                if (!httpResponse.IsSuccessStatusCode)
+                if (!response.IsSuccessStatusCode)
                 {
-                    throw await MarketplaceHttpException.CreateRequestFailedExceptionAsync(httpResponse);
+                    throw await RequestFailedException.CreateAsync(request, response);
                 }
 
-                var response = (await httpResponse.Content.ReadAsStringAsync()).FromJson<T>();
-                if (method == HttpMethod.Get)
-                {
-                    // Temporarily printing the response content to debug an issue with Saas GET request
-                    _logger.Information($"Request Content for GET request: {await httpResponse.Content.ReadAsStringAsync()}");
-                }
+                var result = (await response.Content.ReadAsStringAsync()).FromJson<T>();
+                _logger.Information($"Request: {request.RequestUri} succeeded for SAAS operation");
 
-                _logger.Information($"Request: {request.RequestUri} succeded for SAAS fulfillment or create");
-
-                return response;
+                return result;
             }
             catch (HttpRequestException ex)
             {
-                var errorMessage = $"The request: {method}:{request.RequestUri} failed for SAAS fulfillment or create";
+                var errorMessage = $"The request: {method}:{request.RequestUri} failed for SAAS operation";
                 if (ex.Message != null)
                 {
-                    errorMessage += $"Reason: {ex?.Message}";
+                    errorMessage += $"Reason: {ex.Message}";
                 }
 
-                var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(httpResponse, errorMessage);
-                _logger.Error(marketplaceException, errorMessage);
-                throw marketplaceException;
+                _logger.Error(errorMessage);
+                throw;
             }
         }
 
@@ -148,7 +141,7 @@ namespace Microsoft.Liftr.Marketplace
 
             using var request = HttpRequestHelper.CreateRequest(_endpoint, _apiVersion, method, requestPath, requestId, correlationId, additionalHeaders, accessToken);
             _logger.Information($"Sending request method: {method}, requestUri: {request.RequestUri}, requestId: {requestId}, correlationId: {correlationId} for SAAS fulfillment or create");
-            HttpResponseMessage? httpResponse = null;
+            HttpResponseMessage? response = null;
 
             try
             {
@@ -156,40 +149,38 @@ namespace Microsoft.Liftr.Marketplace
                 {
                     var requestBody = JsonConvert.SerializeObject(content);
                     request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
-                    httpResponse = await httpClient.SendAsync(request, cancellationToken);
+                    response = await httpClient.SendAsync(request, cancellationToken);
                 }
                 else
                 {
-                    httpResponse = await httpClient.SendAsync(request, cancellationToken);
+                    response = await httpClient.SendAsync(request, cancellationToken);
                 }
 
-                if (!httpResponse.IsSuccessStatusCode)
+                if (!response.IsSuccessStatusCode)
                 {
-                    throw await MarketplaceHttpException.CreateRequestFailedExceptionAsync(httpResponse);
+                    throw await RequestFailedException.CreateAsync(request, response);
                 }
 
-                if (httpResponse.StatusCode == HttpStatusCode.Accepted)
+                if (response.StatusCode == HttpStatusCode.Accepted)
                 {
                     // If the status code is 202 means it is an async operation
-                    var poller = new AsyncOperationPoller(request, httpResponse, httpClient, _logger);
+                    var poller = new AsyncOperationPoller(request, response, httpClient, _logger);
                     return await poller.PollOperationAsync<T>(MarketplaceConstants.PollingCount);
                 }
 
-                var response = (await httpResponse.Content.ReadAsStringAsync()).FromJson<T>();
-                _logger.Information($"Request: {request.RequestUri} succeded for SAAS fulfillment or create.");
-                return response;
+                var result = (await response.Content.ReadAsStringAsync()).FromJson<T>();
+                _logger.Information($"Request: {request.RequestUri} succeeded for SAAS operation.");
+                return result;
             }
             catch (HttpRequestException ex)
             {
-                var errorMessage = $"The request: {method}:{request.RequestUri} failed for SAAS fulfillment or create.";
+                var errorMessage = $"The request: {method}:{request.RequestUri} failed for SAAS operation.";
                 if (ex.Message != null)
                 {
-                    errorMessage += $"Reason: {ex?.Message}";
+                    errorMessage += $"Reason: {ex.Message}";
                 }
 
-                var marketplaceException = await MarketplaceHttpException.CreateMarketplaceHttpExceptionAsync(httpResponse, errorMessage);
-                _logger.Error(marketplaceException, errorMessage);
-                throw marketplaceException;
+                throw;
             }
         }
 #nullable disable

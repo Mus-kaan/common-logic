@@ -65,7 +65,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
         {
             var marketplaceSubscription = new MarketplaceSubscription(Guid.NewGuid());
 
-            await Assert.ThrowsAsync<MarketplaceException>(async () => await _fulfillmentClient.ActivateSaaSSubscriptionAsync(
+            await Assert.ThrowsAsync<RequestFailedException>(async () => await _fulfillmentClient.ActivateSaaSSubscriptionAsync(
                 new ActivateSubscriptionRequest(marketplaceSubscription, "NOT_EXISTING_PLAN", 100), CancellationToken.None));
         }
 

@@ -65,7 +65,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             var resolveToken = "testResolveToken";
             _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _httpClientFactory.Object, () => Task.FromResult("mockToken")));
 
-            await Assert.ThrowsAsync<MarketplaceException>(async () => await _fulfillmentClient.ResolveSaaSSubscriptionAsync(resolveToken, cancellationToken));
+            await Assert.ThrowsAsync<RequestFailedException>(async () => await _fulfillmentClient.ResolveSaaSSubscriptionAsync(resolveToken, cancellationToken));
         }
 
         [Fact]
@@ -91,7 +91,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
             _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _httpClientFactory.Object, () => Task.FromResult("mockToken")));
 
-            await Assert.ThrowsAsync<MarketplaceException>(async () => await _fulfillmentClient.ActivateSaaSSubscriptionAsync(new ActivateSubscriptionRequest(s_marketplaceSubscription, "Gold", 100), cancellationToken));
+            await Assert.ThrowsAsync<RequestFailedException>(async () => await _fulfillmentClient.ActivateSaaSSubscriptionAsync(new ActivateSubscriptionRequest(s_marketplaceSubscription, "Gold", 100), cancellationToken));
         }
 
         [Fact]
@@ -151,7 +151,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
 
             var operationUpdate = new OperationUpdate("BAD_PLAN", 0, OperationUpdateStatus.Success);
 
-            await Assert.ThrowsAsync<MarketplaceException>(async () => await _fulfillmentClient.UpdateOperationAsync(s_marketplaceSubscription, s_operationId, operationUpdate));
+            await Assert.ThrowsAsync<RequestFailedException>(async () => await _fulfillmentClient.UpdateOperationAsync(s_marketplaceSubscription, s_operationId, operationUpdate));
         }
 
         [Fact]

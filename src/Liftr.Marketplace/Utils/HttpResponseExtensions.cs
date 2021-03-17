@@ -21,8 +21,7 @@ namespace Microsoft.Liftr.Marketplace.Utils
             }
             else
             {
-                string errorMessage = $"Could not get Operation-Location header from response of async polling for SAAS resource creation. Request Uri : {response?.RequestMessage?.RequestUri}";
-                throw new MarketplaceHttpException(errorMessage);
+                throw new InvalidOperationException("Missing Operation-Location value from response header");
             }
         }
 
@@ -31,10 +30,7 @@ namespace Microsoft.Liftr.Marketplace.Utils
             var retryAfter = response.Headers.RetryAfter?.Delta;
             if (retryAfter == null)
             {
-                var errorMessage = $"Could not parse correct headers from operation response of async polling for SAAS resource creation. Request Uri : {response?.RequestMessage?.RequestUri}";
-                var marketplaceException = new MarketplaceHttpException(errorMessage);
-                logger.Error(marketplaceException, errorMessage);
-                throw marketplaceException;
+                throw new InvalidOperationException("Missing RetryAfter value from response header");
             }
 
             return retryAfter.Value;

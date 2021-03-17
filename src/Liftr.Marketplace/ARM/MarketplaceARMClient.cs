@@ -62,19 +62,12 @@ namespace Microsoft.Liftr.Marketplace.ARM
                 _logger.Information($"Marketplace SAAS resource has been successfully created. \n SAAS ResourceId: {subscriptionDetails.Id}, Name: {subscriptionDetails.Name}, Plan: {subscriptionDetails.PlanId}, Offer: {subscriptionDetails.OfferId}, Publisher: {subscriptionDetails.PublisherId}, SAAS Subscription Status: {subscriptionDetails.SaasSubscriptionStatus}, Azure Subscription: {subscriptionDetails.AdditionalMetadata?.AzureSubscriptionId}");
                 return subscriptionDetails;
             }
-            catch (MarketplaceTerminalException ex)
-            {
-                string errorMessage = $"Terminal exception thrown. Error: {ex.Message}";
-                _logger.Error(ex, errorMessage);
-                op.FailOperation(errorMessage);
-                throw;
-            }
-            catch (MarketplaceHttpException ex)
+            catch (MarketplaceException ex)
             {
                 string errorMessage = $"Failed to create marketplace SAAS resource while making create request. Error: {ex.Message}";
                 _logger.Error(ex, errorMessage);
                 op.FailOperation(errorMessage);
-                throw new MarketplaceException(errorMessage, ex);
+                throw;
             }
         }
 
@@ -106,19 +99,12 @@ namespace Microsoft.Liftr.Marketplace.ARM
                 _logger.Information($"Marketplace Subscription level SAAS resource has been successfully created. \n SAAS ResourceId: {subscriptionDetails.Id}, Name: {subscriptionDetails.Name}, Plan: {subscriptionDetails.PlanId}, Offer: {subscriptionDetails.OfferId}, Publisher: {subscriptionDetails.PublisherId}, SAAS Subscription Status: {subscriptionDetails.SaasSubscriptionStatus}, Azure Subscription: {subscriptionDetails.AdditionalMetadata?.AzureSubscriptionId}");
                 return subscriptionDetails;
             }
-            catch (MarketplaceTerminalException ex)
-            {
-                string errorMessage = $"Terminal exception thrown while creating SAAS resource. Error: {ex.Message}";
-                _logger.Error(ex, errorMessage);
-                op.FailOperation(errorMessage);
-                throw;
-            }
-            catch (MarketplaceHttpException ex)
+            catch (MarketplaceException ex)
             {
                 string errorMessage = $"Failed to create subscription level marketplace SAAS resource while making create request. Error: {ex.Message}";
                 _logger.Error(ex, errorMessage);
                 op.FailOperation(errorMessage);
-                throw new MarketplaceException(errorMessage, ex);
+                throw;
             }
         }
 
@@ -131,7 +117,7 @@ namespace Microsoft.Liftr.Marketplace.ARM
                 var response = await _marketplaceRestClient.SendRequestAsync<MarketplaceSaasTokenResponse>(HttpMethod.Post, resourcePath);
                 return response;
             }
-            catch (MarketplaceHttpException ex)
+            catch (RequestFailedException ex)
             {
                 var errorMessage = $"Failed to get access token for saas resource {resourceId}. Error: {ex.Message}";
                 _logger.Error(ex, errorMessage);
@@ -161,12 +147,12 @@ namespace Microsoft.Liftr.Marketplace.ARM
                 var response = await _marketplaceRestClient.SendRequestAsync<string>(HttpMethod.Delete, resourcePath, GetAdditionalMarketplaceHeaders(requestMetadata));
                 op.SetResultDescription($"Successfully deleted Marketplace subscription {marketplaceSubscription.ToString()}");
             }
-            catch (MarketplaceHttpException ex)
+            catch (MarketplaceException ex)
             {
                 string errorMessage = $"Failed to delete marketplace saas resource. Error: {ex.Message}";
                 _logger.Error(ex, errorMessage);
                 op.FailOperation(errorMessage);
-                throw new MarketplaceException(errorMessage, ex);
+                throw;
             }
         }
 
@@ -205,19 +191,12 @@ namespace Microsoft.Liftr.Marketplace.ARM
                 var response = await _marketplaceRestClient.SendRequestWithPollingAsync<BaseOperationResponse>(HttpMethod.Delete, resourceTypePath, additionalHeaders);
                 op.SetResultDescription($"Successfully deleted Marketplace subscription level resource {resourceTypePath}");
             }
-            catch (MarketplaceTerminalException ex)
-            {
-                string errorMessage = $"Terminal exception thrown while deleting SAAS resource. Error: {ex.Message}";
-                _logger.Error(ex, errorMessage);
-                op.FailOperation(errorMessage);
-                throw;
-            }
-            catch (MarketplaceHttpException ex)
+            catch (MarketplaceException ex)
             {
                 string errorMessage = $"Failed to delete marketplace susbcription level SAAS resource. Error: {ex.Message}";
                 _logger.Error(ex, errorMessage);
                 op.FailOperation(errorMessage);
-                throw new MarketplaceException(errorMessage, ex);
+                throw;
             }
         }
 
