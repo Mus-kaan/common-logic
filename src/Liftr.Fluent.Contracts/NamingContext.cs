@@ -118,6 +118,9 @@ namespace Microsoft.Liftr.Fluent.Contracts
         public string CosmosDBName(string baseName)
             => GenerateCommonName(baseName, "db");
 
+        public string PostgreSQLName(string baseName)
+            => GenerateCommonName(baseName, "pgsql");
+
         public string LogAnalyticsName(string baseName)
             => GenerateCommonName(baseName, "log");
 
