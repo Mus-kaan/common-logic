@@ -48,7 +48,8 @@ namespace Microsoft.Liftr.Fluent
                 null,
                 null,
                 null,
-                tags);
+                tags,
+                softDeleteRetentionInDays: 15);
 
             await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true);
 
@@ -90,7 +91,8 @@ namespace Microsoft.Liftr.Fluent
                 null,
                 ips,
                 subnets,
-                tags);
+                tags,
+                softDeleteRetentionInDays: 15);
 
             await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true);
 
@@ -154,7 +156,8 @@ namespace Microsoft.Liftr.Fluent
                 accessPolicies,
                 ips,
                 subnets,
-                tags);
+                tags,
+                softDeleteTime);
 
             await liftrAzure.CreateDeploymentAsync(vault.Region, vault.ResourceGroupName, templateContent, noLogging: true);
             _logger.Information("Key Vault '{kvId}' is accessible from IPs : '{@allowedIPs}', and subnets: '{@allowedSubnets}'.", vault.Id, ips, subnets);
@@ -175,7 +178,7 @@ namespace Microsoft.Liftr.Fluent
             IEnumerable<IPRule> ips,
             IEnumerable<VirtualNetworkRule> subnets,
             IDictionary<string, string> tags,
-            int softDeleteRetentionInDays = 15)
+            int softDeleteRetentionInDays)
         {
             // https://docs.microsoft.com/en-us/rest/api/keyvault/vaults/createorupdate#create-or-update-a-vault-with-network-acls
             if (location == null)
