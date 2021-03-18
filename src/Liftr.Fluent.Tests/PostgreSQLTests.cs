@@ -2,12 +2,12 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Management.PostgreSQL;
 using Microsoft.Azure.Management.PostgreSQL.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Liftr.Management.PostgreSQL;
 using System;
 using System.Threading.Tasks;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Fluent.Tests
@@ -32,8 +32,6 @@ namespace Microsoft.Liftr.Fluent.Tests
 
                 var rg = await azure.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
                 var name = SdkContext.RandomResourceName("tt-pgsql-", 15);
-                using var client = new PostgreSQLManagementClient(azure.AzureCredentials);
-                client.SubscriptionId = azure.DefaultSubscriptionId;
 
                 var createParameters = new ServerForCreate(
                     properties: new ServerPropertiesForDefaultCreate(
@@ -42,7 +40,13 @@ namespace Microsoft.Liftr.Fluent.Tests
                     location: TestCommon.Location.Name,
                     sku: new Microsoft.Azure.Management.PostgreSQL.Models.Sku(name: "B_Gen5_1"));
 
-                var server = await client.Servers.CreateAsync(rg.Name, name, createParameters);
+                var server = await azure.CreatePostgreSQLServerAsync(rg.Name, name, createParameters);
+
+                var listResult = await azure.ListPostgreSQLServersAsync(rg.Name);
+                Assert.Single(listResult);
+
+                var getResult = await azure.GetPostgreSQLServerAsync(rg.Name, name);
+                Assert.Equal(name, getResult.Name);
             }
             catch (Exception ex)
             {
