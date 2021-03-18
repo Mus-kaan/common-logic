@@ -6,7 +6,6 @@ using Microsoft.Liftr.Marketplace.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.Liftr.Marketplace.Utils

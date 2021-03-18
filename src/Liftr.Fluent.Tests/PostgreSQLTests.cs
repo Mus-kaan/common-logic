@@ -7,8 +7,6 @@ using Microsoft.Azure.Management.PostgreSQL.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Liftr.Management.PostgreSQL;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 

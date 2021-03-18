@@ -4,8 +4,6 @@
 
 using Microsoft.Liftr.Fluent;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Management.PostgreSQL

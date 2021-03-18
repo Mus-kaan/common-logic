@@ -6,7 +6,6 @@ using FluentAssertions;
 using Microsoft.Liftr.Marketplace.Contracts;
 using Microsoft.Liftr.Marketplace.Exceptions;
 using Microsoft.Liftr.Marketplace.Tests;
-using Microsoft.Liftr.Marketplace.Utils;
 using Moq;
 using Newtonsoft.Json;
 using Serilog;

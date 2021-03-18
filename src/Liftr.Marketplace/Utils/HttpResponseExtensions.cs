@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Liftr.Marketplace.Exceptions;
 using Serilog;
 using System;
 using System.Collections.Generic;

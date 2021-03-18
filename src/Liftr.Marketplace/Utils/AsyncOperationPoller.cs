@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Marketplace.Contracts;
-using Microsoft.Liftr.Marketplace.Exceptions;
 using Serilog;
 using System;
 using System.Net;
