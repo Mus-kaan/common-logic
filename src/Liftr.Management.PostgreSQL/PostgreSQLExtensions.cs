@@ -72,7 +72,7 @@ namespace Microsoft.Liftr.Management.PostgreSQL
             using var client = new PostgreSQLManagementClient(liftrAzure.AzureCredentials);
             client.SubscriptionId = liftrAzure.DefaultSubscriptionId;
 
-            return await client .Servers.UpdateAsync(rgName, serverName, updateParameters);
+            return await client.Servers.UpdateAsync(rgName, serverName, updateParameters);
         }
     }
 }
