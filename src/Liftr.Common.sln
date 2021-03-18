@@ -206,7 +206,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Metrics.DiagnosticSou
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Metrics.AOP", "Liftr.Metrics.AOP\Liftr.Metrics.AOP.csproj", "{8FDB233D-7F9A-49BF-910B-C03DB6FE9A5F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Metrics.Abstractions", "Liftr.Metrics.Abstractions\Liftr.Metrics.Abstractions.csproj", "{0A0732F0-54E5-4012-9F67-DC1867EA42B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Metrics.Abstractions", "Liftr.Metrics.Abstractions\Liftr.Metrics.Abstractions.csproj", "{0A0732F0-54E5-4012-9F67-DC1867EA42B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Management.PostgreSQL", "Liftr.Management.PostgreSQL\Liftr.Management.PostgreSQL.csproj", "{3C9D3CC8-09A4-43D3-9796-E2358687EC5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -578,6 +580,10 @@ Global
 		{0A0732F0-54E5-4012-9F67-DC1867EA42B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A0732F0-54E5-4012-9F67-DC1867EA42B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A0732F0-54E5-4012-9F67-DC1867EA42B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C9D3CC8-09A4-43D3-9796-E2358687EC5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C9D3CC8-09A4-43D3-9796-E2358687EC5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C9D3CC8-09A4-43D3-9796-E2358687EC5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C9D3CC8-09A4-43D3-9796-E2358687EC5B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -609,6 +615,7 @@ Global
 		{ACD46FEB-FCC1-437E-8C8C-E29AB3AC2855} = {97E4360B-DEBA-4B82-900B-05EBB56BE840}
 		{19FF20CB-50A9-493C-9AB9-A16471900FBF} = {97E4360B-DEBA-4B82-900B-05EBB56BE840}
 		{1722EFB7-C7E8-4194-A649-8C445110E4AC} = {97E4360B-DEBA-4B82-900B-05EBB56BE840}
+		{3C9D3CC8-09A4-43D3-9796-E2358687EC5B} = {E4958D13-B767-451D-8C50-629C1805BD9A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CF8F327F-EB87-482C-861B-2D635AB4E992}

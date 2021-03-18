@@ -47,6 +47,8 @@ namespace Microsoft.Liftr.Fluent
 
         string TenantId { get; }
 
+        string DefaultSubscriptionId { get; }
+
         string SPNObjectId { get; }
 
         string DefaultSubnetName { get; }

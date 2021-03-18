@@ -62,6 +62,7 @@ namespace Microsoft.Liftr.Fluent
 
         public LiftrAzure(
             string tenantId,
+            string defaultSubscriptionId,
             string spnObjectId,
             TokenCredential tokenCredential,
             AzureCredentials credentials,
@@ -71,6 +72,7 @@ namespace Microsoft.Liftr.Fluent
             ILogger logger)
         {
             TenantId = tenantId;
+            DefaultSubscriptionId = defaultSubscriptionId;
             SPNObjectId = spnObjectId;
             TokenCredential = tokenCredential ?? throw new ArgumentNullException(nameof(tokenCredential));
             AzureCredentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
@@ -81,6 +83,8 @@ namespace Microsoft.Liftr.Fluent
         }
 
         public string TenantId { get; }
+
+        public string DefaultSubscriptionId { get; }
 
         public string SPNObjectId { get; }
 

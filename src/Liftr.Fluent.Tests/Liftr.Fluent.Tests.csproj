@@ -22,6 +22,7 @@
     <ProjectReference Include="..\Liftr.Fluent.Provisioning\Liftr.Fluent.Provisioning.csproj" />
     <ProjectReference Include="..\Liftr.Logging.Blob\Liftr.Logging.Blob.csproj" />
     <ProjectReference Include="..\Liftr.Logging.StaticLogger\Liftr.Logging.StaticLogger.csproj" />
+    <ProjectReference Include="..\Liftr.Management.PostgreSQL\Liftr.Management.PostgreSQL.csproj" />
     <ProjectReference Include="..\Liftr.Tests.Common\Liftr.Tests.Common.csproj" />
   </ItemGroup>
   <ItemGroup>

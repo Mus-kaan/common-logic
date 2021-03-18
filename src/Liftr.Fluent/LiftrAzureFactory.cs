@@ -82,7 +82,7 @@ namespace Microsoft.Liftr.Fluent
 
             var azure = authenticated.WithSubscription(subscriptionId);
 
-            var client = new LiftrAzure(_tenantId, _spnObjectId, TokenCredential, _credentialsProvider.Invoke(), azure, authenticated, _options, _logger);
+            var client = new LiftrAzure(_tenantId, subscriptionId, _spnObjectId, TokenCredential, _credentialsProvider.Invoke(), azure, authenticated, _options, _logger);
 
             return client;
         }
