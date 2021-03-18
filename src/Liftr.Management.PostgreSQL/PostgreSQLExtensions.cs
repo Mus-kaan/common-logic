@@ -23,6 +23,19 @@ namespace Microsoft.Liftr.Management.PostgreSQL
             return liftrAzure.RegisterResourceProviderAsync("Microsoft.DBforPostgreSQL");
         }
 
+        public static PostgreSQLManagementClient GetPostgreSQLServerClient(this ILiftrAzure liftrAzure)
+        {
+            if (liftrAzure == null)
+            {
+                throw new ArgumentNullException(nameof(liftrAzure));
+            }
+
+            var client = new PostgreSQLManagementClient(liftrAzure.AzureCredentials);
+            client.SubscriptionId = liftrAzure.DefaultSubscriptionId;
+
+            return client;
+        }
+
         public static async Task<Server> GetPostgreSQLServerAsync(this ILiftrAzure liftrAzure, string rgName, string serverName)
         {
             if (liftrAzure == null)
@@ -30,9 +43,7 @@ namespace Microsoft.Liftr.Management.PostgreSQL
                 throw new ArgumentNullException(nameof(liftrAzure));
             }
 
-            using var client = new PostgreSQLManagementClient(liftrAzure.AzureCredentials);
-            client.SubscriptionId = liftrAzure.DefaultSubscriptionId;
-
+            using var client = liftrAzure.GetPostgreSQLServerClient();
             return await client.Servers.GetAsync(rgName, serverName);
         }
 
@@ -43,9 +54,7 @@ namespace Microsoft.Liftr.Management.PostgreSQL
                 throw new ArgumentNullException(nameof(liftrAzure));
             }
 
-            using var client = new PostgreSQLManagementClient(liftrAzure.AzureCredentials);
-            client.SubscriptionId = liftrAzure.DefaultSubscriptionId;
-
+            using var client = liftrAzure.GetPostgreSQLServerClient();
             return await client.Servers.ListByResourceGroupAsync(rgName);
         }
 
@@ -56,9 +65,7 @@ namespace Microsoft.Liftr.Management.PostgreSQL
                 throw new ArgumentNullException(nameof(liftrAzure));
             }
 
-            using var client = new PostgreSQLManagementClient(liftrAzure.AzureCredentials);
-            client.SubscriptionId = liftrAzure.DefaultSubscriptionId;
-
+            using var client = liftrAzure.GetPostgreSQLServerClient();
             return await client.Servers.CreateAsync(rgName, serverName, createParameters);
         }
 
@@ -69,9 +76,7 @@ namespace Microsoft.Liftr.Management.PostgreSQL
                 throw new ArgumentNullException(nameof(liftrAzure));
             }
 
-            using var client = new PostgreSQLManagementClient(liftrAzure.AzureCredentials);
-            client.SubscriptionId = liftrAzure.DefaultSubscriptionId;
-
+            using var client = liftrAzure.GetPostgreSQLServerClient();
             return await client.Servers.UpdateAsync(rgName, serverName, updateParameters);
         }
     }
