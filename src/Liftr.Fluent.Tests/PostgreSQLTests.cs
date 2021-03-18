@@ -33,12 +33,13 @@ namespace Microsoft.Liftr.Fluent.Tests
                 var rg = await azure.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
                 var name = SdkContext.RandomResourceName("tt-pgsql-", 15);
 
+                var pswd = SdkContext.RandomResourceName("pswd", 15);
                 var createParameters = new ServerForCreate(
                     properties: new ServerPropertiesForDefaultCreate(
                         administratorLogin: "testUser",
-                        administratorLoginPassword: "testPassword1!"),
+                        administratorLoginPassword: pswd),
                     location: TestCommon.Location.Name,
-                    sku: new Microsoft.Azure.Management.PostgreSQL.Models.Sku(name: "B_Gen5_1"));
+                    sku: new Sku(name: "B_Gen5_1"));
 
                 var server = await azure.CreatePostgreSQLServerAsync(rg.Name, name, createParameters);
 
