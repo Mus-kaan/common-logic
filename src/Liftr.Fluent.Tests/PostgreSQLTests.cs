@@ -33,7 +33,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                 var rg = await azure.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
                 var name = SdkContext.RandomResourceName("tt-pgsql-", 15);
 
-                var pswd = SdkContext.RandomResourceName("pswd", 15);
+                var pswd = Guid.NewGuid().ToString();
                 var createParameters = new ServerForCreate(
                     properties: new ServerPropertiesForDefaultCreate(
                         administratorLogin: "testUser",
@@ -42,6 +42,12 @@ namespace Microsoft.Liftr.Fluent.Tests
                     sku: new Sku(name: "B_Gen5_1"));
 
                 var server = await azure.CreatePostgreSQLServerAsync(rg.Name, name, createParameters);
+
+                var ip = "131.107.159.44";
+                await azure.PostgreSQLAddIPAsync(rg.Name, name, ip);
+                await azure.PostgreSQLAddIPAsync(rg.Name, name, ip);
+                await azure.PostgreSQLRemoveIPAsync(rg.Name, name, ip);
+                await azure.PostgreSQLRemoveIPAsync(rg.Name, name, ip);
 
                 var listResult = await azure.ListPostgreSQLServersAsync(rg.Name);
                 Assert.Single(listResult);

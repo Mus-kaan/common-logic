@@ -79,5 +79,46 @@ namespace Microsoft.Liftr.Management.PostgreSQL
             using var client = liftrAzure.GetPostgreSQLServerClient();
             return await client.Servers.UpdateAsync(rgName, serverName, updateParameters);
         }
+
+        public static async Task<FirewallRule> PostgreSQLAddIPAsync(this ILiftrAzure liftrAzure, string rgName, string serverName, string ipAddress)
+        {
+            if (liftrAzure == null)
+            {
+                throw new ArgumentNullException(nameof(liftrAzure));
+            }
+
+            if (ipAddress == null)
+            {
+                throw new ArgumentNullException(nameof(ipAddress));
+            }
+
+            using var client = liftrAzure.GetPostgreSQLServerClient();
+            var ruleName = ipAddress.Replace(".", "_");
+            var newRule = new FirewallRule(ipAddress, ipAddress);
+            return await client.FirewallRules.CreateOrUpdateAsync(rgName, serverName, ruleName, newRule);
+        }
+
+        public static async Task PostgreSQLRemoveIPAsync(this ILiftrAzure liftrAzure, string rgName, string serverName, string ipAddress)
+        {
+            if (liftrAzure == null)
+            {
+                throw new ArgumentNullException(nameof(liftrAzure));
+            }
+
+            if (ipAddress == null)
+            {
+                throw new ArgumentNullException(nameof(ipAddress));
+            }
+
+            using var client = liftrAzure.GetPostgreSQLServerClient();
+            var ruleName = ipAddress.Replace(".", "_");
+            try
+            {
+                await client.FirewallRules.DeleteAsync(rgName, serverName, ruleName);
+            }
+            catch (Rest.Azure.CloudException ex) when (ex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+            }
+        }
     }
 }
