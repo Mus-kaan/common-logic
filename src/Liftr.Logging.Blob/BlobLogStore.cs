@@ -63,7 +63,8 @@ namespace Microsoft.Liftr.Logging.Blob
         private string GetBlobName()
         {
             var timeStamp = _timeSource.UtcNow;
-            return $"{timeStamp.ToString("yyyy-MM", CultureInfo.InvariantCulture)}/{timeStamp.ToString("dd", CultureInfo.InvariantCulture)}/{timeStamp.ToZuluString()}.txt";
+            var blobName = $"{timeStamp.ToString("yyyy-MM", CultureInfo.InvariantCulture)}/{timeStamp.ToString("dd", CultureInfo.InvariantCulture)}/{timeStamp.ToZuluString()}.txt";
+            return blobName.Replace(":", "_"); // avoid ":" being refused by Windows file name restriction
         }
     }
 }
