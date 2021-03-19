@@ -86,8 +86,7 @@ namespace Microsoft.Liftr.RPaaS
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
                 _httpClient.DefaultRequestHeaders.Add(MetricTypeHeaderKey, MetricTypeHeaderValue);
 
-                var retryPolicy = GetRetryPolicyForAuthFailuresandNotFound();
-                var response = await retryPolicy.ExecuteAsync(async () => await _httpClient.GetAsync(url));
+                var response = await _httpClient.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
                     return JsonConvert.DeserializeObject<T>(
@@ -129,8 +128,7 @@ namespace Microsoft.Liftr.RPaaS
                 _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
                 _httpClient.DefaultRequestHeaders.Add(MetricTypeHeaderKey, MetricTypeHeaderValue);
 
-                var retryPolicy = GetRetryPolicyForAuthFailuresandNotFound();
-                var response = await retryPolicy.ExecuteAsync(async () => await _httpClient.PutAsync(url, content));
+                var response = await _httpClient.PutAsync(url, content);
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorMessage = $"Failed at updating resource from RPaaS. StatusCode: '{response.StatusCode}'";
@@ -173,7 +171,7 @@ namespace Microsoft.Liftr.RPaaS
                 var method = new HttpMethod("PATCH");
 
                 // For patch operation we need to retry on 404 as sometimes due to ARM cache replication issue, we get 404 on first attempt
-                var retryPolicy = GetRetryPolicyForAuthFailuresandNotFound();
+                var retryPolicy = GetRetryPolicyForNotFound();
                 var response = await retryPolicy.ExecuteAsync(() =>
                 {
                     var request = new HttpRequestMessage(method, url)
@@ -370,28 +368,30 @@ namespace Microsoft.Liftr.RPaaS
         }
 
         /// <summary>
-        /// This retry policy is used for overcoming the AuthorizationFailed error which occurs due to delay in read/write role assignment on resource.
-        /// Also, for patch operation we need to retry on 404 as sometimes due to ARM cache replication issue, we get 404 on first attempt
+        /// For patch operation we need to retry on 404 as sometimes due to ARM cache replication issue, we get 404 on first attempt
         /// </summary>
-        private AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicyForAuthFailuresandNotFound()
+        private AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicyForNotFound()
         {
             var delay = GetJitteredBackoffDelay();
 
             HttpStatusCode[] httpStatusCodesWorthRetrying =
            {
-                   HttpStatusCode.Forbidden, // 403
-                   HttpStatusCode.Unauthorized, // 401
                    HttpStatusCode.NotFound, // 404
            };
 
+            return GetPolicy(httpStatusCodesWorthRetrying, delay);
+        }
+
+        private AsyncRetryPolicy<HttpResponseMessage> GetPolicy(HttpStatusCode[] httpStatusCodesWorthRetrying, IEnumerable<TimeSpan> delay)
+        {
             return Policy
-                    .HandleResult<HttpResponseMessage>(r => httpStatusCodesWorthRetrying.Contains(r.StatusCode))
-                    .WaitAndRetryAsync(
-                        delay,
-                        onRetry: (outcome, timespan, retryAttempt, context) =>
-                        {
-                            LogRetryInfo(outcome, timespan, retryAttempt);
-                        });
+                  .HandleResult<HttpResponseMessage>(r => httpStatusCodesWorthRetrying.Contains(r.StatusCode))
+                  .WaitAndRetryAsync(
+                      delay,
+                      onRetry: (outcome, timespan, retryAttempt, context) =>
+                      {
+                          LogRetryInfo(outcome, timespan, retryAttempt);
+                      });
         }
 
         /// <summary>
