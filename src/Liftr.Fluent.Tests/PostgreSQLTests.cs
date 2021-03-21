@@ -69,7 +69,10 @@ namespace Microsoft.Liftr.Fluent.Tests
         [Fact(Skip = "Only local debug for now")]
         public async Task VerifyDatabaseCreationAsync()
         {
-            var dbName = "grafana_db_" + ObjectId.GenerateNewId().ToString();
+            var objectId = ObjectId.GenerateNewId().ToString();
+            var dbName = "db_grafana_" + objectId;
+            var dbUser = "user_grafana_" + objectId;
+            var userPassword = Guid.NewGuid().ToString();
             using var scope = new TestResourceGroupScope("ut-pgsql-", _output);
             try
             {
@@ -84,11 +87,21 @@ namespace Microsoft.Liftr.Fluent.Tests
                 };
 
                 var serverClient = new PostgreSQLServerManagement(sqlOptions, scope.Logger);
+
+                await serverClient.CreateUserInNotExistAsync(dbUser, userPassword);
+                await serverClient.CreateUserInNotExistAsync(dbUser, userPassword);
+
                 await serverClient.CreateDatabaseIfNotExistAsync(dbName);
                 await serverClient.CreateDatabaseIfNotExistAsync(dbName);
 
-                await serverClient.DropDatabaseIfNotExistAsync(dbName);
-                await serverClient.DropDatabaseIfNotExistAsync(dbName);
+                await serverClient.GrantDatabaseAccessAsync(dbName, dbUser);
+                await serverClient.GrantDatabaseAccessAsync(dbName, dbUser);
+
+                await serverClient.DropDatabaseAsync(dbName);
+                await serverClient.DropDatabaseAsync(dbName);
+
+                await serverClient.DropUserAsync(dbUser);
+                await serverClient.DropUserAsync(dbUser);
             }
             catch (Exception ex)
             {
