@@ -9,3 +9,5 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Design", "CA1065:Do not raise exceptions in unexpected locations", Justification = "<Pending>", Scope = "member", Target = "~P:Microsoft.Liftr.DataSource.Mongo.TestDBConnection.TestMongodbConStr")]
+[assembly: SuppressMessage("Design", "CA1065:Do not raise exceptions in unexpected locations", Justification = "<Pending>", Scope = "member", Target = "~P:Microsoft.Liftr.DataSource.Mongo.TestPostgreCredentials.AdminUsername")]
+[assembly: SuppressMessage("Design", "CA1065:Do not raise exceptions in unexpected locations", Justification = "<Pending>", Scope = "member", Target = "~P:Microsoft.Liftr.DataSource.Mongo.TestPostgreCredentials.AdminPassword")]

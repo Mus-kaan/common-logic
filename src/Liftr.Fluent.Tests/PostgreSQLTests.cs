@@ -4,7 +4,9 @@
 
 using Microsoft.Azure.Management.PostgreSQL.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.Management.PostgreSQL;
+using MongoDB.Bson;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -22,7 +24,7 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [CheckInValidation(skipLinux: true)]
-        public async Task VerifyPosegreSQLCreationAsync()
+        public async Task VerifyPosegreSQLServerCreationAsync()
         {
             using var scope = new TestResourceGroupScope("ut-pgsql-", _output);
             try
@@ -54,6 +56,39 @@ namespace Microsoft.Liftr.Fluent.Tests
 
                 var getResult = await azure.GetPostgreSQLServerAsync(rg.Name, name);
                 Assert.Equal(name, getResult.Name);
+            }
+            catch (Exception ex)
+            {
+                scope.Logger.Error(ex, "PostgreSQL test failed");
+                scope.TimedOperation.FailOperation(ex.Message);
+                throw;
+            }
+        }
+
+        // [CheckInValidation(skipLinux: true)]
+        [Fact(Skip = "Only local debug for now")]
+        public async Task VerifyDatabaseCreationAsync()
+        {
+            var dbName = "grafana_db_" + ObjectId.GenerateNewId().ToString();
+            using var scope = new TestResourceGroupScope("ut-pgsql-", _output);
+            try
+            {
+                var azure = scope.Client;
+                await azure.RegisterPostgreSQLRPAsync();
+
+                var sqlOptions = new PostgreSQLOptions()
+                {
+                    Server = "wuwengpostgreserver1.postgres.database.azure.com",
+                    ServerResourceName = "wuwengpostgreserver1",
+                    Password = TestPostgreCredentials.AdminPassword,
+                };
+
+                var serverClient = new PostgreSQLServerManagement(sqlOptions, scope.Logger);
+                await serverClient.CreateDatabaseIfNotExistAsync(dbName);
+                await serverClient.CreateDatabaseIfNotExistAsync(dbName);
+
+                await serverClient.DropDatabaseIfNotExistAsync(dbName);
+                await serverClient.DropDatabaseIfNotExistAsync(dbName);
             }
             catch (Exception ex)
             {
