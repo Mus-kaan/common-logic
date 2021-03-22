@@ -107,6 +107,44 @@ namespace Microsoft.Liftr.RPaaS
             }
         }
 
+        public async Task<HttpResponseMessage> DeleteResourceAsync<T>(string resourceId, string tenantId, string apiVersion)
+        {
+            if (string.IsNullOrEmpty(resourceId))
+            {
+                throw new ArgumentNullException(nameof(resourceId));
+            }
+
+            if (string.IsNullOrEmpty(tenantId))
+            {
+                throw new ArgumentException("Please provide the User's tenant id", nameof(tenantId));
+            }
+
+            using (var operation = _logger.StartTimedOperation(nameof(DeleteResourceAsync)))
+            {
+                operation.SetContextProperty(nameof(resourceId), resourceId);
+                operation.SetContextProperty(nameof(tenantId), tenantId);
+                var url = GetMetaRPResourceUrl(resourceId, apiVersion);
+                _httpClient.DefaultRequestHeaders.Authorization = await GetAuthHeaderAsync(tenantId);
+                _httpClient.DefaultRequestHeaders.Add(MetricTypeHeaderKey, MetricTypeHeaderValue);
+
+                var response = await _httpClient.DeleteAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorMessage = $"Failed at deleting resource from RPaaS. StatusCode: '{response.StatusCode}'";
+                    if (response.Content != null)
+                    {
+                        errorMessage = errorMessage + $", Response: '{await response.Content.ReadAsStringAsync()}'";
+                    }
+
+                    _logger.LogError(errorMessage);
+                    operation.FailOperation(response.StatusCode, errorMessage);
+                    throw MetaRPException.Create(response, nameof(DeleteResourceAsync));
+                }
+
+                return response;
+            }
+        }
+
         public async Task<HttpResponseMessage> PutResourceAsync<T>(T resource, string resourceId, string tenantId, string apiVersion)
         {
             if (resource == null)

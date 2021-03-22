@@ -27,6 +27,16 @@ namespace Microsoft.Liftr.RPaaS
         Task<T> GetResourceAsync<T>(string resourceId, string tenantId, string apiVersion);
 
         /// <summary>
+        /// Deletes ARM resource for given resource id and api version from MetaRP
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="resourceId"></param>
+        /// <param name="tenantId"></param>
+        /// <param name="apiVersion"></param>
+        /// <returns></returns>
+        Task<HttpResponseMessage> DeleteResourceAsync<T>(string resourceId, string tenantId, string apiVersion);
+
+        /// <summary>
         /// Updates ARM resource for given api version
         /// </summary>
         /// <typeparam name="T"></typeparam>
