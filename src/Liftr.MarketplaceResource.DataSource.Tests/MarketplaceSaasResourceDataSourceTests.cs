@@ -52,6 +52,10 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
                 Beneficiary = new SaasBeneficiary() { TenantId = "tenantId" },
                 Id = marketplaceSubscription1.ToString(),
                 SaasSubscriptionStatus = SaasSubscriptionStatus.Subscribed,
+                AdditionalMetadata = new SaasAdditionalMetadata()
+                {
+                    AzureSubscriptionId = Guid.NewGuid().ToString(),
+                },
             };
 
             var saasResource1 = new MarketplaceSaasResourceEntity(
@@ -94,6 +98,10 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource.Tests
                 Beneficiary = new SaasBeneficiary() { TenantId = "tenantId" },
                 Id = marketplaceSubscription2.ToString(),
                 SaasSubscriptionStatus = SaasSubscriptionStatus.Subscribed,
+                AdditionalMetadata = new SaasAdditionalMetadata()
+                {
+                    AzureSubscriptionId = Guid.NewGuid().ToString(),
+                },
             };
 
             var saasResource2 = new MarketplaceSaasResourceEntity(

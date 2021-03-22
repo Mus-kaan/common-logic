@@ -92,6 +92,19 @@ namespace Microsoft.Liftr.DataSource.Mongo
         }
     }
 
+    public class SaasAdditionalMetadataEntity
+    {
+        public string AzureSubscriptionId { get; set; }
+
+        [BsonIgnoreIfNull]
+#pragma warning disable CA1056 // Uri properties should not be strings
+        public string ResourceUri { get; set; }
+#pragma warning restore CA1056 // Uri properties should not be strings
+
+        [BsonIgnoreIfNull]
+        public bool IsSubscriptionLevel { get; set; }
+    }
+
     /// <summary>
     /// This class is used to add the BsonSerialization properties to the MarketplaceSubscriptionDetails
     /// </summary>
@@ -135,7 +148,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
         [JsonProperty("additionalMetadata")]
         [BsonElement("add_metadata")]
-        public SaasAdditionalMetadata AdditionalMetadata { get; set; }
+        public SaasAdditionalMetadataEntity AdditionalMetadata { get; set; }
 
         public static MarketplaceSubscriptionDetailsEntity From(MarketplaceSubscriptionDetails marketplaceSubscriptionDetails)
         {
@@ -150,12 +163,17 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 OfferId = marketplaceSubscriptionDetails.OfferId,
                 PublisherId = marketplaceSubscriptionDetails.PublisherId,
                 SaasSubscriptionStatus = marketplaceSubscriptionDetails.SaasSubscriptionStatus,
-                AdditionalMetadata = marketplaceSubscriptionDetails.AdditionalMetadata,
                 Term = marketplaceSubscriptionDetails.Term,
                 Id = marketplaceSubscriptionDetails.Id,
                 PlanId = marketplaceSubscriptionDetails.PlanId,
                 Beneficiary = marketplaceSubscriptionDetails.Beneficiary,
                 Quantity = marketplaceSubscriptionDetails.Quantity,
+                AdditionalMetadata = new SaasAdditionalMetadataEntity()
+                {
+                    AzureSubscriptionId = marketplaceSubscriptionDetails.AdditionalMetadata.AzureSubscriptionId,
+                    ResourceUri = marketplaceSubscriptionDetails.AdditionalMetadata.ResourceUri,
+                    IsSubscriptionLevel = marketplaceSubscriptionDetails.AdditionalMetadata.IsSubscriptionLevel,
+                },
             };
         }
     }
