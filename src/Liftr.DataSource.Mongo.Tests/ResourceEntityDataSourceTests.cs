@@ -102,6 +102,18 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
                 Assert.Equal(3, allEntities.Count());
             }
 
+            // can retrieve all available active entities
+            {
+                var allAvailableActive = await s.ListAsync();
+                Assert.Equal(2, allAvailableActive.Count());
+            }
+
+            // can retrieve all available entities
+            {
+                var allAvailable = await s.ListAsync(showActiveOnly: false);
+                Assert.Equal(3, allAvailable.Count());
+            }
+
             // can update entity
             {
                 var newVnet = "newVnet";

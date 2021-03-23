@@ -23,6 +23,11 @@ namespace Microsoft.Liftr.DataSource
         Task<IEnumerable<TResource>> ListAsync(string resourceId, bool showActiveOnly = true);
 
         /// <summary>
+        /// List all available entities.
+        /// </summary>
+        Task<IEnumerable<TResource>> ListAsync(bool showActiveOnly = true);
+
+        /// <summary>
         /// Find an entity by the entity Id (Mongo DB Object Id) and then mark it as inactive and change the provisioning state.
         /// </summary>
         Task<bool> SoftDeleteAsync(string entityId);

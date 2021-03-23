@@ -16,7 +16,5 @@ namespace Liftr.MarketplaceRelationship.DataSource
         /// List all the relationship entities for the marketplace subscription.
         /// </summary>
         Task<IEnumerable<TEntity>> ListAsync(MarketplaceSubscription marketplaceSubscription, bool showActiveOnly = true);
-
-        Task<IEnumerable<TEntity>> ListAsync(bool showActiveOnly = true);
     }
 }

@@ -99,6 +99,28 @@ namespace Microsoft.Liftr.DataSource.Mongo
             }
         }
 
+        public virtual async Task<IEnumerable<TResource>> ListAsync(bool showActiveOnly = true)
+        {
+            var builder = Builders<TResource>.Filter;
+            var filter = builder.Empty;
+
+            if (showActiveOnly)
+            {
+                filter &= builder.Eq(u => u.Active, true);
+            }
+
+            await _rateLimiter.WaitAsync();
+            try
+            {
+                var cursor = _collection.Find(filter);
+                return await cursor.ToListAsync();
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
+        }
+
         public virtual async Task<bool> SoftDeleteAsync(string entityId)
         {
             var builder = Builders<TResource>.Filter;
