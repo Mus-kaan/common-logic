@@ -3,9 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.Fluent.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Liftr.Hosting.Contracts
 {

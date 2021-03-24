@@ -5,7 +5,6 @@
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Hosting.Contracts;
 using Newtonsoft.Json;
-using System;
 using System.IO;
 using System.Linq;
 using Xunit;

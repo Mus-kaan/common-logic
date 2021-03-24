@@ -7,7 +7,6 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.Management.PostgreSQL;
 using MongoDB.Bson;
-using Npgsql;
 using System;
 using System.Threading.Tasks;
 using Xunit;
