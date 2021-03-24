@@ -39,7 +39,13 @@
           "DataBaseName": "data20200502", // DO NOT CHNAGE THIS. This will break all the existing resources. Please check with nireis first.
           "ComputeBaseName": "com20200727"
         }
-      ]
+      ],
+      "PartnerCredentialUpdateConfig": {
+        "PartnerTenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", // Partner Tenant Id
+        "MultiTenantAppId": "a3b7c1aa-e4d7-40c0-a480-187679dec0b2", // Mutl-Tenant Application Id
+        "PartnerKeyvaultEndpoint": "https://confluent-liftr-kv.vault.azure.net", // Partner Keyvault Name
+        "CertificateSubjectName": "partner-cred-secure-sharing.token-svc.liftr-dev.net"
+      }
     },
     {
       "EnvironmentName": "DogFood",

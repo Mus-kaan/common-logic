@@ -208,7 +208,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Metrics.AOP", "Liftr.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Metrics.Abstractions", "Liftr.Metrics.Abstractions\Liftr.Metrics.Abstractions.csproj", "{0A0732F0-54E5-4012-9F67-DC1867EA42B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Management.PostgreSQL", "Liftr.Management.PostgreSQL\Liftr.Management.PostgreSQL.csproj", "{3C9D3CC8-09A4-43D3-9796-E2358687EC5B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Management.PostgreSQL", "Liftr.Management.PostgreSQL\Liftr.Management.PostgreSQL.csproj", "{3C9D3CC8-09A4-43D3-9796-E2358687EC5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

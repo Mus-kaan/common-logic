@@ -37,6 +37,8 @@ namespace Microsoft.Liftr.Hosting.Contracts
 
         public VMSSMachineInfo VMSSConfigurations { get; set; }
 
+        public PartnerCredentialUpdateOptions PartnerCredentialUpdateConfig { get; set; }
+
         public GenevaOptions Geneva { get; set; }
 
         public int IPPerRegion { get; set; } = 3;
@@ -93,6 +95,11 @@ namespace Microsoft.Liftr.Hosting.Contracts
             if (VMSSConfigurations != null)
             {
                 VMSSConfigurations.CheckValues();
+            }
+
+            if (PartnerCredentialUpdateConfig != null)
+            {
+                PartnerCredentialUpdateConfig.CheckValid();
             }
 
             if (OneCertCertificates == null ||

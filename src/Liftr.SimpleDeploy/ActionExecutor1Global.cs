@@ -37,6 +37,8 @@ namespace Microsoft.Liftr.SimpleDeploy
                 globalNamingContext,
                 targetOptions.DomainName,
                 targetOptions.Global.AddGlobalDB,
+                _hostingOptions.SecretPrefix,
+                targetOptions.PartnerCredentialUpdateConfig,
                 targetOptions.LogAnalyticsWorkspaceId);
 
             if (SimpleDeployExtension.AfterProvisionGlobalResourcesAsync != null)

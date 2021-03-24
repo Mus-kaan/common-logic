@@ -11,5 +11,7 @@ namespace Microsoft.Liftr.Hosting.Contracts
         public const string GenevaClientCert = nameof(GenevaClientCert);
 
         public const string FirstPartyAppCert = nameof(FirstPartyAppCert);
+
+        public const string PartnerCredSharingAppCert = "PartnerCredSharingAppCert";
     }
 }

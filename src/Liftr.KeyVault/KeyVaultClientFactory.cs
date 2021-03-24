@@ -6,6 +6,7 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Liftr.KeyVault
 {
@@ -22,6 +23,17 @@ namespace Microsoft.Liftr.KeyVault
 #pragma warning disable CA2000 // Dispose objects before losing scope
                 }), new HttpClient());
 #pragma warning restore CA2000 // Dispose objects before losing scope
+        }
+
+        public static KeyVaultClient FromClientIdAndCertificate(string clientId, X509Certificate2 certificate, string aadEndPoint, string tenantId)
+        {
+            return new KeyVaultClient(async (authority, resource, scope) =>
+            {
+                var authenticationContext = new AuthenticationContext(authority: $"{aadEndPoint}/{tenantId}", validateAuthority: true);
+                var clientAssertionCertificate = new ClientAssertionCertificate(clientId, certificate);
+                var result = await authenticationContext.AcquireTokenAsync(resource, clientAssertionCertificate, sendX5c: true);
+                return result.AccessToken;
+            });
         }
 
         public static KeyVaultClient FromMSI()

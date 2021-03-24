@@ -296,6 +296,24 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
         }
 
+        private async Task CreateKeyVaultCertificateAsync(
+           KeyVaultConcierge kvValet,
+           string certName,
+           string certSubject,
+           IDictionary<string, string> certificateTags = null)
+        {
+            _logger.Information("Checking OneCert certificate in Key Vault with name '{certName}' and subject '{certSubject}'...", certName, certSubject);
+            var certOptions = new CertificateOptions()
+            {
+                CertificateName = certName,
+                SubjectName = certSubject,
+                SubjectAlternativeNames = new List<string>() { certSubject },
+            };
+
+            await kvValet.SetCertificateIssuerAsync(OneCertPrivateIssuer, OneCertPrivateProvider);
+            await kvValet.CreateCertificateIfNotExistAsync(certOptions.CertificateName, OneCertPrivateIssuer, certOptions.SubjectName, certOptions.SubjectAlternativeNames, certificateTags);
+        }
+
         private static readonly HashSet<string> s_secretsAvoidCopy = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "AKSSPClientSecret",
@@ -306,6 +324,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             "ibizaStorageConnectionString",
             "thanos-api",
             "GlobalDataEncryptionKey",
+            "PartnerCredSharingAppCert",
         };
     }
 }
