@@ -10,6 +10,7 @@ using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Logging.Blob;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -23,6 +24,37 @@ namespace Microsoft.Liftr.Fluent.Tests
         public StorageAccountTests(ITestOutputHelper output)
         {
             _output = output;
+        }
+
+        [CheckInValidation(skipLinux: true)]
+        public async Task CreateAndUpdateStorageAccountAsync()
+        {
+            using (var scope = new TestResourceGroupScope("ut-st-", _output))
+            {
+                try
+                {
+                    var logger = scope.Logger;
+                    var azFactory = scope.AzFactory;
+                    var az = scope.Client;
+                    var rg = await az.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
+                    var name = SdkContext.RandomResourceName("st", 15);
+
+                    var vnet = await az.GetOrCreateVNetAsync(TestCommon.Location, scope.ResourceGroupName, SdkContext.RandomResourceName("vnet", 9), TestCommon.Tags);
+                    var subnet = vnet.Subnets.FirstOrDefault().Value;
+
+                    var st = await az.GetOrCreateStorageAccountAsync(TestCommon.Location, scope.ResourceGroupName, name, TestCommon.Tags, subnet?.Inner?.Id);
+                    st = await st.RemoveUnusedVNetRulesAsync(azFactory, logger);
+
+                    var currentPublicIP = await MetadataHelper.GetPublicIPAddressAsync();
+                    await st.WithAccessFromIpAddressAsync(currentPublicIP, logger);
+                }
+                catch (Exception ex)
+                {
+                    scope.Logger.Error(ex, "Failed.");
+                    scope.TimedOperation.FailOperation(ex.Message);
+                    throw;
+                }
+            }
         }
 
         [CheckInValidation(skipLinux: true)]

@@ -94,6 +94,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             await liftrAzure.GrantBlobContributorAsync(provisionedResources.StorageAccount, provisionedResources.ManagedIdentity);
 
             provisionedResources.StorageAccount = await provisionedResources.StorageAccount.RemoveUnusedVNetRulesAsync(_azureClientFactory, _logger);
+            if (dataOptions.EnableVNet)
+            {
+                _logger.Information("Make sure the Storage Account '{saId}' can be accessed from current IP '{currentPublicIP}'.", provisionedResources.StorageAccount.Id, currentPublicIP);
+                await provisionedResources.StorageAccount.WithAccessFromIpAddressAsync(currentPublicIP, _logger);
+            }
 
             if (dataOptions.DataPlaneSubscriptions != null)
             {
