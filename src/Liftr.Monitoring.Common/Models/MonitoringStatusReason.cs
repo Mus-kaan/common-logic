@@ -49,6 +49,11 @@ namespace Microsoft.Liftr.Monitoring.Common.Models
         ConflictStatus,
 
         /// <summary>
+        /// Resource is monitored by a Diagnostic Settings created by the user.
+        /// </summary>
+        CreatedByUser,
+
+        /// <summary>
         /// Other errors happened when trying to create the diagnostic setting. Requires support.
         /// </summary>
         Other,
