@@ -12,6 +12,7 @@
     <PackageReference Include="Serilog.AspNetCore" Version="$(PackageVersion_Serilog_AspNetCore)" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="$(PackageVersion_Serilog_Settings_Configuration)" />
     <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="$(PackageVersion_Serilog_Sinks_ApplicationInsights)" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="$(PackageVersion_System_Text_Encodings_Web)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.DiagnosticSource\Liftr.DiagnosticSource.csproj" />
