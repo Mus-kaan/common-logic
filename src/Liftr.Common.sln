@@ -210,6 +210,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Metrics.Abstractions"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Management.PostgreSQL", "Liftr.Management.PostgreSQL\Liftr.Management.PostgreSQL.csproj", "{3C9D3CC8-09A4-43D3-9796-E2358687EC5B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Monitoring.VNext.Common", "Liftr.Monitoring.VNext.Common\Liftr.Monitoring.VNext.Common.csproj", "{F1050A55-FF22-4C72-9268-68988506A3E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -584,6 +586,10 @@ Global
 		{3C9D3CC8-09A4-43D3-9796-E2358687EC5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C9D3CC8-09A4-43D3-9796-E2358687EC5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C9D3CC8-09A4-43D3-9796-E2358687EC5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1050A55-FF22-4C72-9268-68988506A3E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1050A55-FF22-4C72-9268-68988506A3E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1050A55-FF22-4C72-9268-68988506A3E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1050A55-FF22-4C72-9268-68988506A3E6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

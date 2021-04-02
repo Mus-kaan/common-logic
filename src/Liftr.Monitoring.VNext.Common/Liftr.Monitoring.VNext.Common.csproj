@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.Monitoring.VNext.Common</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Monitoring.VNext.Common</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Queue\Liftr.Queue.csproj" />
+  </ItemGroup>
+</Project>
