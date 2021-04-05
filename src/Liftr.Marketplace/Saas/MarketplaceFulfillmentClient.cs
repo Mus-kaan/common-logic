@@ -248,5 +248,46 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 throw;
             }
         }
+
+        public async Task<SubscriptionOperation> UpdatePlanAsync(
+            MarketplaceSubscription marketplaceSubscription,
+            ChangePlanRequest changePlanRequest,
+            CancellationToken cancellationToken = default)
+        {
+            if (marketplaceSubscription is null)
+            {
+                throw new ArgumentNullException(nameof(marketplaceSubscription));
+            }
+
+            if (changePlanRequest is null)
+            {
+                throw new ArgumentNullException(nameof(changePlanRequest));
+            }
+
+            using var op = _logger.StartTimedOperation(nameof(UpdatePlanAsync));
+            op.SetContextProperty(nameof(MarketplaceSubscription), marketplaceSubscription.ToString());
+            var requestPath = MarketplaceUrlHelper.GetRequestPath(MarketplaceEnum.ChangePlan, marketplaceSubscription);
+
+            try
+            {
+                var response = await _marketplaceRestClient.SendRequestWithPollingAsync<SubscriptionOperation>(
+                    new HttpMethod("PATCH"),
+                    requestPath,
+                    content: changePlanRequest.ToJObject(),
+                    cancellationToken: cancellationToken);
+
+                var message = $"Successfully updated subscription {marketplaceSubscription} to plan: {changePlanRequest.PlanId}. Received operation repsonse: {response.ToJson()}";
+                _logger.Information(message);
+                op.SetResultDescription(message);
+                return response;
+            }
+            catch (MarketplaceException ex)
+            {
+                var errorMessage = $"Failed to Change plan for subscription";
+                _logger.Error(ex.Message, errorMessage);
+                op.FailOperation(errorMessage);
+                throw;
+            }
+        }
     }
 }

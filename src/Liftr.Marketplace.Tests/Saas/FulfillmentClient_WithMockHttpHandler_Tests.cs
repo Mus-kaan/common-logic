@@ -4,11 +4,13 @@
 
 using FluentAssertions;
 using Microsoft.Liftr.Contracts.Marketplace;
+using Microsoft.Liftr.Marketplace.Contracts;
 using Microsoft.Liftr.Marketplace.Exceptions;
 using Microsoft.Liftr.Marketplace.Saas.Contracts;
 using Microsoft.Liftr.Marketplace.Saas.Models;
 using Microsoft.Liftr.Marketplace.Tests;
 using Moq;
+using Moq.Protected;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -166,6 +168,59 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
 
             Func<Task> act = async () => { await _fulfillmentClient.DeleteSubscriptionAsync(subscription); };
             await act.Should().NotThrowAsync();
+        }
+
+        [Fact]
+        public async Task Can_update_plan_Async()
+        {
+            using var acceptedResponse = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.Accepted,
+            };
+
+            var inProgressOperation = new BaseOperationResponse()
+            {
+                Status = OperationStatus.InProgress,
+            };
+
+            var successOperation = new BaseOperationResponse()
+            {
+                Status = OperationStatus.Succeeded,
+                SubscriptionDetails = new MarketplaceSubscriptionDetails()
+                {
+                    PlanId = "Gold",
+                },
+            };
+
+            acceptedResponse.Headers.Add(MarketplaceConstants.AsyncOperationLocation, "https://mockmarketplacelocation.com");
+            acceptedResponse.Headers.RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(TimeSpan.FromSeconds(0.5));
+
+            using var inProgressResponse = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(inProgressOperation.ToJson(), Encoding.UTF8, "application/json"),
+            };
+
+            using var successResponse = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(successOperation.ToJson(), Encoding.UTF8, "application/json"),
+            };
+
+            var mockMessageHandler = new Mock<HttpMessageHandler>();
+            mockMessageHandler.Protected()
+                .SetupSequence<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(acceptedResponse)
+                .ReturnsAsync(inProgressResponse)
+                .ReturnsAsync(successResponse);
+
+            using var httpClient = new HttpClient(mockMessageHandler.Object, false);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+            _fulfillmentClient = new MarketplaceFulfillmentClient(new MarketplaceRestClient(new Uri(marketplaceEndpoint), marketplaceSaasApiVersion, _httpClientFactory.Object, () => Task.FromResult("mockToken")));
+            var changePlanRequest = new ChangePlanRequest("Gold");
+
+            var operationResponse = await _fulfillmentClient.UpdatePlanAsync(s_marketplaceSubscription, changePlanRequest);
+            operationResponse.SubscriptionDetails.PlanId.Should().Be("Gold");
         }
 
         internal static ResolvedMarketplaceSubscription GetResolvedSubscription()

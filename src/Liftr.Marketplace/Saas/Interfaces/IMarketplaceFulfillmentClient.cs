@@ -85,5 +85,13 @@ namespace Microsoft.Liftr.Marketplace.Saas.Interfaces
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<MarketplaceSubscriptionDetails> GetSubscriptionAsync(MarketplaceSubscription marketplaceSubscription, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Update the plan for an existing Saas resource.
+        /// </summary>
+        /// <remarks>
+        /// https://docs.microsoft.com/en-us/azure/marketplace/partner-center-portal/pc-saas-fulfillment-api-v2#change-the-plan-on-the-subscription
+        /// </remarks>
+        Task<SubscriptionOperation> UpdatePlanAsync(MarketplaceSubscription marketplaceSubscription, ChangePlanRequest changePlanRequest, CancellationToken cancellationToken = default);
     }
 }
