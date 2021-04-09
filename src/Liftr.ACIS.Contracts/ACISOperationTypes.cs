@@ -23,6 +23,7 @@ namespace Microsoft.Liftr.ACIS.Contracts
         public const string GetDatadogMonitor = nameof(GetDatadogMonitor);
         public const string ListDatadogMonitor = nameof(ListDatadogMonitor);
         public const string GetMonitorsBySubscription = nameof(GetMonitorsBySubscription);
+        public const string ListAllMonitors = nameof(ListAllMonitors);
         public const string GetRelationshipsByMonitor = nameof(GetRelationshipsByMonitor);
         public const string GetRelationshipsByResource = nameof(GetRelationshipsByResource);
         public const string RemoveRelationshipByResource = nameof(RemoveRelationshipByResource);
