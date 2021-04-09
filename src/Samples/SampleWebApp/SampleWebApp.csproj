@@ -6,6 +6,9 @@
     <UserSecretsId>a230081a-dccc-49c9-ba47-651d22e0bd9a</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="System.Text.Encodings.Web" Version="$(PackageVersion_System_Text_Encodings_Web)" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\Liftr.Hosting.Swagger\Liftr.Hosting.Swagger.csproj" />
     <ProjectReference Include="..\..\Liftr.Logging.AspNetCore\Liftr.Logging.AspNetCore.csproj" />
     <ProjectReference Include="..\..\Liftr.RPaaS.Hosting\Liftr.RPaaS.Hosting.csproj" />

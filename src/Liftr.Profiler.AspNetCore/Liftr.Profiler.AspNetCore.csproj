@@ -8,5 +8,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights.Profiler.AspNetCore" Version="$(PackageVersion_Microsoft_ApplicationInsights_Profiler_AspNetCore)" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="$(PackageVersion_System_Text_Encodings_Web)" />
   </ItemGroup>
 </Project>

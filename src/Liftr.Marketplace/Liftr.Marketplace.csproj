@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="$(PackageVersion_Microsoft_Extensions_Http)" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions)" />
     <PackageReference Include="System.Text.Json" Version="$(PackageVersion_System_Text_Json)" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="$(PackageVersion_System_Text_Encodings_Web)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />

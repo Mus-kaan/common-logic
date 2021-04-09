@@ -11,6 +11,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(PackageVersion_Microsoft_Extensions_Configuration_EnvironmentVariables)" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(PackageVersion_Microsoft_Extensions_Configuration_Json)" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(PackageVersion_Microsoft_Extensions_Hosting)" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="$(PackageVersion_System_Text_Encodings_Web)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Configuration\Liftr.Configuration.csproj" />

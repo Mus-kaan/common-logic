@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Management.PostgreSQL" Version="$(PackageVersion_Microsoft_Azure_Management_PostgreSQL)" />
     <PackageReference Include="Npgsql" Version="$(PackageVersion_Npgsql)" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="$(PackageVersion_System_Text_Encodings_Web)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Fluent\Liftr.Fluent.csproj" />
