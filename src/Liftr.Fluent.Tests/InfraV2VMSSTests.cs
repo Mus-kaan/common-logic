@@ -74,7 +74,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var regions = new List<Region>() { context.Location };
                     IEnumerable<RegionOptions> regionOptions = GetRegionOptions(regions);
 
-                    await ipPool.ProvisionIPPoolAsync(context.Location, 3, new Dictionary<string, string>() { { "env", "test" } }, false, regionOptions);
+                    await ipPool.ProvisionIPPoolAsync(context.Location, 3, context.Tags, false, regionOptions);
                     await client.GetOrCreateResourceGroupAsync(context.Location, dataRGName, context.Tags);
                     var laName = context.LogAnalyticsName("gbl001");
                     var logAnalytics = await client.GetOrCreateLogAnalyticsWorkspaceAsync(context.Location, dataRGName, laName, context.Tags);

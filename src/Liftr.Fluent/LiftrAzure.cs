@@ -461,6 +461,46 @@ namespace Microsoft.Liftr.Fluent
 
             await Task.WhenAll(tasks);
         }
+
+        public async Task DeleteResourceGroupWithPrefixAsync(string rgNamePrefix)
+        {
+            _logger.Information($"Listing resource groups in subscription: {FluentClient.SubscriptionId}");
+            var rgs = await FluentClient
+                .ResourceGroups
+                .ListAsync();
+
+            var toDelete = rgs.Where(rg => rg.Name.OrdinalStartsWith(rgNamePrefix));
+
+            _logger.Information("There are {toDeletCount} resource groups with prefix {rgPrefix} in total {rgCount}.", toDelete.Count(), rgNamePrefix, rgs.Count());
+
+            List<Task> tasks = new List<Task>();
+            foreach (var rg in toDelete)
+            {
+                tasks.Add(DeleteResourceGroupAsync(rg.Name, noThrow: true));
+            }
+
+            await Task.WhenAll(tasks);
+        }
+
+        public async Task DeleteResourceGroupWithNamePartAsync(string rgNamePart)
+        {
+            _logger.Information($"Listing resource groups in subscription: {FluentClient.SubscriptionId}");
+            var rgs = await FluentClient
+                .ResourceGroups
+                .ListAsync();
+
+            var toDelete = rgs.Where(rg => rg.Name.OrdinalContains(rgNamePart));
+
+            _logger.Information("There are {toDeletCount} resource groups with name part {rgPrefix} in total {rgCount}.", toDelete.Count(), rgNamePart, rgs.Count());
+
+            List<Task> tasks = new List<Task>();
+            foreach (var rg in toDelete)
+            {
+                tasks.Add(DeleteResourceGroupAsync(rg.Name, noThrow: true));
+            }
+
+            await Task.WhenAll(tasks);
+        }
         #endregion Resource Group
 
         #region Storage Account

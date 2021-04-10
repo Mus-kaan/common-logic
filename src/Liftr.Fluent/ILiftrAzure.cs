@@ -87,6 +87,10 @@ namespace Microsoft.Liftr.Fluent
         Task DeleteResourceGroupAsync(string rgName, bool noThrow = false);
 
         Task DeleteResourceGroupWithTagAsync(string tagName, string tagValue, Func<IReadOnlyDictionary<string, string>, bool> tagsFilter = null);
+
+        Task DeleteResourceGroupWithPrefixAsync(string rgNamePrefix);
+
+        Task DeleteResourceGroupWithNamePartAsync(string rgNamePart);
         #endregion Resource Group
 
         #region Storage Account
