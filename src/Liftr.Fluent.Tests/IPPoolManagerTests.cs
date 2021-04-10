@@ -53,14 +53,14 @@ namespace Microsoft.Liftr.Fluent.Tests
 
                 var pool = new IPPoolManager(prefix, clientFactory, testScope.Logger);
 
-                await pool.ProvisionIPPoolAsync(location, 5, new Dictionary<string, string>() { { "env", "test" } }, false, regionOptions);
+                await pool.ProvisionIPPoolAsync(location, 5, context.Tags, false, regionOptions);
                 var allIPs = await pool.ListAllIPAsync(location);
                 Assert.Equal(5, allIPs.Count());
 
                 var ip1 = await pool.GetAvailableIPAsync(location);
                 Assert.EndsWith("-01", ip1.Name, StringComparison.Ordinal);
 
-                await pool.ProvisionIPPoolAsync(location, 1, new Dictionary<string, string>() { { "env", "test" } }, true, regionOptions);
+                await pool.ProvisionIPPoolAsync(location, 1, context.Tags, true, regionOptions);
                 allIPs = await pool.ListAllIPAsync(location, IPCategory.Inbound);
                 Assert.Single(allIPs);
 
@@ -76,7 +76,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                 Assert.Contains(IPCategory.Outbound.ToString(), ip3Name, StringComparison.Ordinal);
 
                 // Test for not existing IPs
-                await pool.ProvisionIPPoolAsync(Region.USEast2, 1, new Dictionary<string, string>() { { "env", "test" } }, true, regionOptions);
+                await pool.ProvisionIPPoolAsync(Region.USEast2, 1, context.Tags, true, regionOptions);
                 allIPs = await pool.ListAllIPAsync(Region.USEast2, IPCategory.Inbound);
                 Assert.Single(allIPs);
 
