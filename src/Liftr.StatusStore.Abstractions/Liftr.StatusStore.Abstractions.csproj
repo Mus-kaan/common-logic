@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.StatusStore.Abstractions</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.StatusStore</RootNamespace>
+  </PropertyGroup>
+</Project>
