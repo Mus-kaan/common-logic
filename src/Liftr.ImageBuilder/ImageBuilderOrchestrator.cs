@@ -200,13 +200,6 @@ namespace Microsoft.Liftr.ImageBuilder
                 rootOperation.SetProperty(nameof(_options.SubscriptionId), _options.SubscriptionId.ToString());
                 rootOperation.SetProperty(nameof(_options.ImageReplicationRegions), string.Join(", ", _options.ImageReplicationRegions.Select(r => r.Name)));
 
-                var artifactUrlWithSAS = await _artifactStore.UploadBuildArtifactsToSupportingStorageAsync(artifactPath);
-                _logger.Information("uploaded the file '{filePath}' and generated the url with the SAS token.", artifactPath);
-                if (isZip)
-                {
-                    File.Delete(artifactPath);
-                }
-
                 bool isLinux = true;
                 string generatedTemplate;
                 var templateName = $"{imageName}-{imageVersion}";
@@ -222,6 +215,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 Dictionary<string, string> imgVersionTags = new Dictionary<string, string>(tags);
                 imgVersionTags[ImageGalleryClient.c_deleteAfterTagName] = deleteAfterStr;
 
+                IGalleryImageVersion baseSBIVersion = null;
                 if (!sourceImageType.IsPlatformImage())
                 {
                     string sbiSASToken = null;
@@ -240,7 +234,18 @@ namespace Microsoft.Liftr.ImageBuilder
                         }
                     }
 
-                    var linuxSourceImage = await CheckLatestSourceSBIAndCacheLocallyAsync(sbiSASToken, sourceImageType, galleryClient);
+                    baseSBIVersion = await CheckLatestSourceSBIAndCacheLocallyAsync(sbiSASToken, sourceImageType, galleryClient);
+                }
+
+                var artifactUrlWithSAS = await _artifactStore.UploadBuildArtifactsToSupportingStorageAsync(artifactPath);
+                _logger.Information("uploaded the file '{filePath}' and generated the url with the SAS token.", artifactPath);
+                if (isZip)
+                {
+                    File.Delete(artifactPath);
+                }
+
+                if (!sourceImageType.IsPlatformImage())
+                {
                     generatedTemplate = templateHelper.GenerateLinuxSBITemplate(
                         _options.Location,
                         templateName,
@@ -248,7 +253,7 @@ namespace Microsoft.Liftr.ImageBuilder
                         imageVersion,
                         artifactUrlWithSAS.ToString(),
                         _msi.Id,
-                        linuxSourceImage.Id,
+                        baseSBIVersion.Id,
                         imgVersionTags,
                         isZip);
                 }
