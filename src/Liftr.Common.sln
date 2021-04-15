@@ -195,11 +195,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Marketplace.WebhookQu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Profiler.AspNetCore", "Liftr.Profiler.AspNetCore\Liftr.Profiler.AspNetCore.csproj", "{13565FA9-39DC-4B88-B716-CF3A317BFBA2}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{80BACA9B-B8B0-41A6-A928-C6E2B5B408CC}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Metrics.AspNetCore", "Liftr.Metrics.AspNetCore\Liftr.Metrics.AspNetCore.csproj", "{848BD647-3282-4B4C-88D2-9B6E7C39190D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Metrics.DiagnosticSource", "Liftr.Metrics.DiagnosticSource\Liftr.Metrics.DiagnosticSource.csproj", "{7B9A247F-E3BA-49F8-BF40-071EB3487BD1}"
