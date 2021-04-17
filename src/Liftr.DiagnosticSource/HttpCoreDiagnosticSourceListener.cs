@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -60,30 +61,29 @@ namespace Microsoft.Liftr.DiagnosticSource
                 // Inject the headers to all out-going http requests.
                 if (!string.IsNullOrEmpty(CallContextHolder.LogFilterOverwrite.Value))
                 {
-                    request.Headers.Add(HeaderConstants.LiftrLogLevelOverwrite, CallContextHolder.LogFilterOverwrite.Value);
+                    request.Headers.AddIfNotExists(HeaderConstants.LiftrLogLevelOverwrite, CallContextHolder.LogFilterOverwrite.Value);
                 }
 
                 if (!string.IsNullOrEmpty(CallContextHolder.ClientRequestId.Value))
                 {
-                    request.Headers.Add(HeaderConstants.LiftrClientRequestId, CallContextHolder.ClientRequestId.Value);
+                    request.Headers.AddIfNotExists(HeaderConstants.LiftrClientRequestId, CallContextHolder.ClientRequestId.Value);
                 }
 
                 if (!string.IsNullOrEmpty(CallContextHolder.ARMRequestTrackingId.Value))
                 {
-                    request.Headers.Add(HeaderConstants.LiftrARMRequestTrackingId, CallContextHolder.ARMRequestTrackingId.Value);
+                    request.Headers.AddIfNotExists(HeaderConstants.LiftrARMRequestTrackingId, CallContextHolder.ARMRequestTrackingId.Value);
                 }
 
                 if (!string.IsNullOrEmpty(CallContextHolder.CorrelationId.Value))
                 {
-                    request.Headers.Add(HeaderConstants.LiftrRequestCorrelationId, CallContextHolder.CorrelationId.Value);
+                    request.Headers.AddIfNotExists(HeaderConstants.LiftrRequestCorrelationId, CallContextHolder.CorrelationId.Value);
 
-                    if (!request.Headers.Contains(HeaderConstants.RequestCorrelationId) &&
-                        s_domainsToAddCorrelationHeader.Contains(request.RequestUri.Host))
+                    if (s_domainsToAddCorrelationHeader.Contains(request.RequestUri.Host))
                     {
                         // We cannot add the 'X-MS-Correlation-Request-Id' to all the outbound requests.
                         // e.g. storage requests is also using this header, and it will sign the request content (include this header)
                         // and store a signature in the request to avoid tampering. If we add this header again, the signature will not match.
-                        request.Headers.Add(HeaderConstants.RequestCorrelationId, CallContextHolder.CorrelationId.Value);
+                        request.Headers.AddIfNotExists(HeaderConstants.RequestCorrelationId, CallContextHolder.CorrelationId.Value);
                     }
                 }
             }
