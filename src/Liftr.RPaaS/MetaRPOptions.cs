@@ -3,12 +3,13 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Liftr.TokenManager.Options;
+using System;
 
 namespace Microsoft.Liftr.RPaaS
 {
     public class MetaRPOptions
     {
-        public string MetaRPEndpoint { get; set; }
+        public Uri MetaRPEndpoint { get; set; }
 
         public string UserRPTenantId { get; set; }
 

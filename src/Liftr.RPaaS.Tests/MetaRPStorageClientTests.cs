@@ -56,9 +56,12 @@ namespace Microsoft.Liftr.RPaaS.Tests
 
             using var httpClient = new HttpClient(handler, false);
             var metaRpClient = new MetaRPStorageClient(
-                new Uri(Constants.MetaRpEndpoint),
                 httpClient,
-                new MetaRPOptions() { UserRPTenantId = "tenantId" },
+                new MetaRPOptions()
+                {
+                    MetaRPEndpoint = new Uri(Constants.MetaRpEndpoint),
+                    UserRPTenantId = "tenantId",
+                },
                 (_) => Task.FromResult("authToken"),
                 _logger);
 
@@ -90,9 +93,12 @@ namespace Microsoft.Liftr.RPaaS.Tests
 
             using var httpClient = new HttpClient(handler, false);
             var metaRpClient = new MetaRPStorageClient(
-                new Uri(Constants.MetaRpEndpoint),
                 httpClient,
-                new MetaRPOptions() { UserRPTenantId = "tenantId" },
+                new MetaRPOptions()
+                {
+                    MetaRPEndpoint = new Uri(Constants.MetaRpEndpoint),
+                    UserRPTenantId = "tenantId",
+                },
                 (_) => Task.FromResult("authToken"),
                 _logger);
 
@@ -124,9 +130,12 @@ namespace Microsoft.Liftr.RPaaS.Tests
 
             using var httpClient = new HttpClient(handler, false);
             var metaRpClient = new MetaRPStorageClient(
-                new Uri(Constants.MetaRpEndpoint),
                 httpClient,
-                new MetaRPOptions() { UserRPTenantId = "tenantId" },
+                new MetaRPOptions()
+                {
+                    MetaRPEndpoint = new Uri(Constants.MetaRpEndpoint),
+                    UserRPTenantId = "tenantId",
+                },
                 (_) => Task.FromResult("authToken"),
                 _logger);
 
@@ -150,9 +159,12 @@ namespace Microsoft.Liftr.RPaaS.Tests
 
             using var httpClient = new HttpClient(handlerMock, false);
             var metaRpClient = new MetaRPStorageClient(
-                new Uri(Constants.MetaRpEndpoint),
                 httpClient,
-                new MetaRPOptions() { UserRPTenantId = "tenantId" },
+                new MetaRPOptions()
+                {
+                    MetaRPEndpoint = new Uri(Constants.MetaRpEndpoint),
+                    UserRPTenantId = "tenantId",
+                },
                 (_) => Task.FromResult("authToken"),
                 _logger);
 

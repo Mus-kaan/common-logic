@@ -27,9 +27,7 @@ namespace Microsoft.Liftr.RPaaS.Hosting
 
                 var metaRPOptions = sp.GetService<IOptions<MetaRPOptions>>().Value;
 
-                if (metaRPOptions == null
-                || string.IsNullOrEmpty(metaRPOptions.MetaRPEndpoint)
-                || metaRPOptions == null)
+                if (metaRPOptions == null)
                 {
                     var ex = new InvalidOperationException($"Please make sure '{nameof(MetaRPOptions)}' section is set in the appsettings.");
                     logger.LogError(ex.Message);
@@ -75,7 +73,6 @@ namespace Microsoft.Liftr.RPaaS.Hosting
                 }
 
                 var metaRPClient = new MetaRPStorageClient(
-                    new Uri(metaRPOptions.MetaRPEndpoint),
                     httpClientFactory.CreateClient(),
                     metaRPOptions,
                     (tenantId) =>
