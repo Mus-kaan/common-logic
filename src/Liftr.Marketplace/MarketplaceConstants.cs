@@ -16,10 +16,6 @@ namespace Microsoft.Liftr.Marketplace
         public const string MarketplaceRequestIdHeaderKey = "x-ms-requestid";
         public const string MarketplaceCorrelationIdHeaderKey = "x-ms-correlationid";
 
-        // Instrumentation Header and value
-        public const string MetricTypeHeaderKey = "x-ms-metrictype";
-        public const string MetricTypeHeaderValue = "marketplace";
-
         // Logging Tags Used
         public const string BillingLogTag = "Billing";
         public const string SAASLogTag = "SAAS";

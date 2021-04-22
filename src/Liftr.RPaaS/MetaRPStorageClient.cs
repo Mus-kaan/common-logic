@@ -19,8 +19,6 @@ namespace Microsoft.Liftr.RPaaS
 #nullable enable
     public class MetaRPStorageClient : IMetaRPStorageClient
     {
-        private const string MetricTypeHeaderKey = "x-ms-metrictype";
-        private const string MetricTypeHeaderValue = "metarp";
         private readonly HttpClient _httpClient;
         private readonly MetaRPOptions _options;
         private readonly AuthenticationTokenCallback _tokenCallback;
@@ -392,7 +390,6 @@ namespace Microsoft.Liftr.RPaaS
             var accessToken = await _tokenCallback(tenantId);
             var request = new HttpRequestMessage(httpMethod, url);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            request.Headers.Add(MetricTypeHeaderKey, MetricTypeHeaderValue);
 
             if (content != null)
             {

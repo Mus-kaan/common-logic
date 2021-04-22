@@ -31,7 +31,6 @@ namespace Microsoft.Liftr.Marketplace.Utils
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             request.Headers.Add(MarketplaceConstants.MarketplaceRequestIdHeaderKey, requestId.ToString());
             request.Headers.Add(MarketplaceConstants.MarketplaceCorrelationIdHeaderKey, correlationId);
-            request.Headers.Add(MarketplaceConstants.MetricTypeHeaderKey, MarketplaceConstants.MetricTypeHeaderValue);
 
             if (additionalHeaders != null)
             {

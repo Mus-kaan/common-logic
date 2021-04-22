@@ -7,7 +7,6 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
 
 namespace Microsoft.Liftr.Metrics.DiagnosticSource
@@ -62,42 +61,43 @@ namespace Microsoft.Liftr.Metrics.DiagnosticSource
                 var duration = activity.Duration.TotalMilliseconds;
                 string httpVerb = response.RequestMessage.Method.ToString();
                 string statusCode = response.StatusCode.ToString();
-                IDictionary<string, string> dimensions = new Dictionary<string, string>
+                var dimensions = new Dictionary<string, string>
                 {
                     ["HTTPVerb"] = httpVerb,
                     ["StatusCode"] = statusCode,
                 };
 
-                var metricType = response.RequestMessage.Headers.TryGetValues(MetricConstants.LiftrMetricTypeHeaderKey, out var values) ? values.FirstOrDefault() : string.Empty;
-
                 // Send Marketplace Metrics. TODO - Marketplace saas status fail/success
-                if (metricType.Equals(MetricConstants.MarketplaceMetricType, System.StringComparison.Ordinal))
+                if (!string.IsNullOrEmpty(MetricContextHolder.MarketplaceMetricContext.Value))
                 {
-                    _metricSender.Gauge(MetricConstants.HTTPVerb_Marketplace_Duration, (int)duration, (Dictionary<string, string>)dimensions);
-                    _metricSender.Gauge(MetricConstants.HTTPVerb_Marketplace_Result, 1, (Dictionary<string, string>)dimensions);
+                    _metricSender.Gauge(MetricConstants.HTTPVerb_Marketplace_Duration, (int)duration, dimensions);
+                    _metricSender.Gauge(MetricConstants.HTTPVerb_Marketplace_Result, 1, dimensions);
+                    _logger.Debug("Sent marketplace metrics with dimensions {dimensions} ", dimensions.Values);
                     return;
                 }
 
                 // Send MetaRP Metrics
-                if (metricType.Equals(MetricConstants.MetaRPMetricType, System.StringComparison.Ordinal))
+                if (!string.IsNullOrEmpty(MetricContextHolder.MetaRPMetricContext.Value))
                 {
-                    _metricSender.Gauge(MetricConstants.HTTPVerb_MetaRP_Duration, (int)duration, (Dictionary<string, string>)dimensions);
-                    _metricSender.Gauge(MetricConstants.HTTPVerb_MetaRP_Result, 1, (Dictionary<string, string>)dimensions);
+                    _metricSender.Gauge(MetricConstants.HTTPVerb_MetaRP_Duration, (int)duration, dimensions);
+                    _metricSender.Gauge(MetricConstants.HTTPVerb_MetaRP_Result, 1, dimensions);
+                    _logger.Debug("Sent metarp metrics with dimensions {dimensions} ", dimensions.Values);
                     return;
                 }
 
                 // Send Partner Metrics
-                if (metricType.Equals(MetricConstants.PartnerMetricType, System.StringComparison.Ordinal))
+                if (!string.IsNullOrEmpty(MetricContextHolder.PartnerMetricContext.Value))
                 {
-                    _metricSender.Gauge(MetricConstants.HTTPVerb_PartnerAPI_Duration, (int)duration, (Dictionary<string, string>)dimensions);
-                    _metricSender.Gauge(MetricConstants.HTTPVerb_PartnerAPI_Result, 1, (Dictionary<string, string>)dimensions);
+                    _metricSender.Gauge(MetricConstants.HTTPVerb_PartnerAPI_Duration, (int)duration, dimensions);
+                    _metricSender.Gauge(MetricConstants.HTTPVerb_PartnerAPI_Result, 1, dimensions);
+                    _logger.Debug("Sent partner metrics with dimensions {dimensions} ", dimensions.Values);
                     return;
                 }
 
                 // Send All Other Outgoing Call Metrics
-                _metricSender.Gauge(MetricConstants.HTTPVerb_DefaultCalls_Duration, (int)duration, (Dictionary<string, string>)dimensions);
-                _metricSender.Gauge(MetricConstants.HTTPVerb_DefaultCalls_Result, 1, (Dictionary<string, string>)dimensions);
-                _logger.Debug("Sent metris with dimension {dimension} ", dimensions.Values);
+                _metricSender.Gauge(MetricConstants.HTTPVerb_DefaultCalls_Duration, (int)duration, dimensions);
+                _metricSender.Gauge(MetricConstants.HTTPVerb_DefaultCalls_Result, 1, dimensions);
+                _logger.Debug("Sent metrics with dimension {dimensions} ", dimensions.Values);
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch
