@@ -42,7 +42,7 @@ namespace Microsoft.Liftr.Hosting.Swagger
                 operation.Extensions.Add("x-ms-long-running-operation", new OpenApiBoolean(true));
             }
 
-            var methodsWithExamples = new List<string>() { "PUT", "GET", "POST", "PATCH" };
+            var methodsWithExamples = new List<string>() { "PUT", "GET", "POST", "PATCH", "DELETE" };
 
             if (methodsWithExamples.Contains(context.ApiDescription.HttpMethod.ToUpperInvariant()))
             {
