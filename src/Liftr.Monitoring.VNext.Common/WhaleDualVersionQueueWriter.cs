@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Liftr.Monitoring.VNext.Common.Interfaces;
 using Microsoft.Liftr.Monitoring.VNext.Common.Interfaces;
 using Microsoft.Liftr.Queue;
 using Serilog;
@@ -16,23 +17,23 @@ namespace Microsoft.Liftr.Monitoring.VNext.Common
         private readonly ILogger _logger;
         private IQueueWriter _whaleQueueWriter;
         private IQueueWriter _whaleV2QueueWriter;
-        private WhaleSubscriptionOptions _whaleSubscriptionOptions;
+        private ISubscriptionVersionSelector _subscriptionVersionSelector;
 
         public WhaleDualVersionQueueWriter(
             IQueueWriter whaleQueueWriter,
             IQueueWriter whaleV2QueueWriter,
-            WhaleSubscriptionOptions whaleSubscriptionOptions,
+            ISubscriptionVersionSelector subscriptionVersionSelector,
             ILogger logger)
         {
             _whaleQueueWriter = whaleQueueWriter ?? throw new ArgumentNullException(nameof(whaleQueueWriter));
             _whaleV2QueueWriter = whaleV2QueueWriter ?? throw new ArgumentNullException(nameof(whaleV2QueueWriter));
-            _whaleSubscriptionOptions = whaleSubscriptionOptions ?? throw new ArgumentNullException(nameof(whaleSubscriptionOptions));
+            _subscriptionVersionSelector = subscriptionVersionSelector ?? throw new ArgumentNullException(nameof(subscriptionVersionSelector));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task AddMessageAsync(string subscriptionId, string message, CancellationToken cancellationToken = default)
         {
-            if (_whaleSubscriptionOptions.IsV2Subscription(subscriptionId))
+            if (_subscriptionVersionSelector.IsV2Subscription(subscriptionId))
             {
                 Log.Verbose("Writing to Whale V2 Queue");
                 await _whaleV2QueueWriter.AddMessageAsync(message, cancellationToken: cancellationToken);
