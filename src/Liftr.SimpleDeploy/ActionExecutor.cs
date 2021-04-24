@@ -166,6 +166,7 @@ namespace Microsoft.Liftr.SimpleDeploy
             catch (Exception ex)
             {
                 _logger.Fatal(ex, "Failed at running the deployment runner. Touble-shooting guide: https://aka.ms/liftr/ev2-failure");
+                await Task.Delay(3000);
                 throw;
             }
         }

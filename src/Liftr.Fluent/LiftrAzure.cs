@@ -353,7 +353,7 @@ namespace Microsoft.Liftr.Fluent
                 uriBuilder.Path = $"/subscriptions/{subscriptionId}/providers/{resourceProviderName}/register";
                 uriBuilder.Query = $"api-version=2014-04-01-preview";
 
-                _logger.Debug($"Start registering resource provider '{resourceProviderName}' in subscription '{subscriptionId}'");
+                _logger.Information($"Start registering resource provider '{resourceProviderName}' in subscription '{subscriptionId}'");
                 var response = await _options.HttpPolicy.ExecuteAsync(() => httpClient.PostAsync(uriBuilder.Uri, null));
 
                 if (!response.IsSuccessStatusCode)

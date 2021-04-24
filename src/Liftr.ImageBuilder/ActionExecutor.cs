@@ -151,7 +151,8 @@ namespace Microsoft.Liftr.ImageBuilder
             }
             catch (Exception ex)
             {
-                _logger.Fatal(ex, "ActionExecutor StartAsync Failed.");
+                _logger.Fatal(ex, "Failed at running Liftr VM image builder Failed.");
+                await Task.Delay(3000);
                 throw;
             }
         }
