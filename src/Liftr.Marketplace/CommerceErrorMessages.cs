@@ -53,8 +53,23 @@ namespace Microsoft.Liftr.Marketplace
         public static readonly string OperationErrorPurchaseAgreementSigning = "Purchase has failed because we couldn't verify your signing on legal agreement. Please retry. If error persists, try to make the purchase using different Azure subscription or contact support.";
 
         /// <summary>
-        /// Error message for when a subscription is not eligible to purchase a sku in the private store context
+        /// Error message when a subscription is not eligible to purchase a sku in the private store context
         /// </summary>
         public static readonly string OperationErrorNotEligibleSkuForPrivateStore = @"Plan "".+"" of offer "".+"" by publisher "".+"" is not available to you for purchase per the rules set by your IT Admin";
+
+        /// <summary>
+        /// Error message when a subscription is not eligible to purchase because of test header expiration
+        /// </summary>
+        public static readonly string TestHeaderRetentionExpired = @"Invalid Subscription id \S+, Test header retention date cannot be in the past";
+
+        /// <summary>
+        /// Error message when a plan is not eligible for purchasing
+        /// </summary>
+        public static readonly string PlanNotAvailableForPurchasing = @"Purchase of plan "".+"" of offer "".+"" by publisher "".+"" has failed. This plan is currently not available for purchasing.";
+
+        /// <summary>
+        /// Error message when an unknown payment validation issue occurred
+        /// </summary>
+        public static readonly string UnknownPaymentValidationIssue = @"Some payment validation issue happened for the subscription id \S+, Please retry. If error persists, try to make the purchase using different Azure subscription or contact support.";
     }
 }

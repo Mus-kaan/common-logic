@@ -257,6 +257,33 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
             await act.Should().NotThrowAsync();
         }
 
+        [Fact]
+        public async Task ValidatesSaaSPurchasePaymentAsync_Validates_SaaS_Purchase_Payment_Async()
+        {
+            var paymentValidationRequest = new PaymentValidationRequest()
+            {
+                TenantId = "tenantId",
+                AzureSubscriptionId = "subscription1",
+                PlanId = "PAYG",
+                OfferId = "offer",
+                TermId = "hdcbvgdjk",
+                PublisherId = "confluent",
+                Email = "rohanand@microsoft.com",
+            };
+
+            var path = "paymentValidation";
+
+            using var handler = new MockHttpMessageHandler(null, path);
+            using var httpClient = new HttpClient(handler, false);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
+            var armClient = new MarketplaceARMClient(_marketplaceRestClient);
+
+            var validationResponse = await armClient.ValidatesSaaSPurchasePaymentAsync(paymentValidationRequest, _marketplaceRequestMetadata);
+            Assert.True(validationResponse.IsSuccess);
+        }
+
         /* [Fact(Skip = "Not implemented")]
         public async Task InitiateDeleteResource_throws_exception_if_resource_deletion_fails_Async()
         {
@@ -340,6 +367,13 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
                 {
                     _progress = false;
                     response = MockAsyncOperationHelper.SuccessResponseWithInProgressStatus();
+                }
+                else if (request.RequestUri.ToString().OrdinalContains("paymentValidation") && request.Method == HttpMethod.Post)
+                {
+                    response.StatusCode = System.Net.HttpStatusCode.OK;
+                    var content = "Payment Validated!";
+                    var responseContent = content.ToJson();
+                    response.Content = new StringContent(responseContent);
                 }
 
                 return response;

@@ -16,5 +16,8 @@ namespace Microsoft.Liftr.Marketplace.Exceptions
         SubscriptionNotFoundForBilling,
         FreeSubscriptionNotAllowed,
         CSPTenantNotAllowedForPurchase,
+        TestHeaderExpired,
+        PlanNotAvailableForPurchase,
+        PaymentValidationFailedWithUnknownIssue,
     }
 }

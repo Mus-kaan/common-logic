@@ -20,6 +20,9 @@ namespace Microsoft.Liftr.Marketplace.Utils
             { CommerceErrorMessages.OperationErrorAzureSubscriptionMissingForPurchase, PurchaseErrorType.SubscriptionNotFoundForBilling },
             { CommerceErrorMessages.OperationErrorPaidPurchaseWithFreeTrial, PurchaseErrorType.FreeSubscriptionNotAllowed },
             { CommerceErrorMessages.OperationErrorProductNotForCspByCsp, PurchaseErrorType.CSPTenantNotAllowedForPurchase },
+            { CommerceErrorMessages.TestHeaderRetentionExpired, PurchaseErrorType.TestHeaderExpired },
+            { CommerceErrorMessages.PlanNotAvailableForPurchasing, PurchaseErrorType.PlanNotAvailableForPurchase },
+            { CommerceErrorMessages.UnknownPaymentValidationIssue, PurchaseErrorType.PaymentValidationFailedWithUnknownIssue },
         };
 
         internal static bool TryGetPurchaseFailure(
@@ -41,6 +44,22 @@ namespace Microsoft.Liftr.Marketplace.Utils
             }
 
             exception = null;
+            return false;
+        }
+
+        internal static bool TryGetPurchaseErrorType(
+           string errorMessage, out PurchaseErrorType? errorType)
+        {
+            foreach (KeyValuePair<string, PurchaseErrorType> entry in CommerceErrorMapping)
+            {
+                if (Regex.IsMatch(errorMessage, entry.Key))
+                {
+                    errorType = entry.Value;
+                    return true;
+                }
+            }
+
+            errorType = null;
             return false;
         }
     }

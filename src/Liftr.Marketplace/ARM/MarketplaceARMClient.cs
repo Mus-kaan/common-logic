@@ -12,6 +12,7 @@ using Microsoft.Liftr.Marketplace.Exceptions;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -23,6 +24,7 @@ namespace Microsoft.Liftr.Marketplace.ARM
     {
         private const string ResourceTypePath = "api/saasresources/subscriptions";
         private const string SubscriptionResourceTypePath = "api/resources/subscriptions/";
+        private const string PaymentValidationPath = "api/paymentValidation";
         private const string MarketplaceLiftrStoreFront = "StoreForLiftr";
         private readonly ILogger _logger;
         private readonly MarketplaceRestClient _marketplaceRestClient;
@@ -200,13 +202,55 @@ namespace Microsoft.Liftr.Marketplace.ARM
             }
         }
 
+        public async Task<PaymentValidationResponse> ValidatesSaaSPurchasePaymentAsync(PaymentValidationRequest paymentValidationRequest, MarketplaceRequestMetadata requestMetadata)
+        {
+            if (paymentValidationRequest is null || !paymentValidationRequest.IsValid())
+            {
+                throw new ArgumentNullException(nameof(paymentValidationRequest), $"Please provide valid {nameof(PaymentValidationRequest)}");
+            }
+
+            if (requestMetadata is null || !requestMetadata.IsValid())
+            {
+                throw new ArgumentNullException(nameof(requestMetadata), $"Please provide valid {nameof(MarketplaceRequestMetadata)}");
+            }
+
+            using var op = _logger.StartTimedOperation(nameof(ValidatesSaaSPurchasePaymentAsync));
+            try
+            {
+                _logger.Information($"Starting SaaS Purchase Payment Validation for Azure Subscription: {paymentValidationRequest.AzureSubscriptionId}, plan: {paymentValidationRequest.PlanId}, offer: {paymentValidationRequest.OfferId}, publisher: {paymentValidationRequest.PublisherId}");
+                var additionalHeaders = GetAdditionalMarketplaceHeaders(requestMetadata);
+                var json = paymentValidationRequest.ToJObject();
+                var validationResponse = await _marketplaceRestClient.SendRequestAsync<string>(HttpMethod.Post, PaymentValidationPath, additionalHeaders, json);
+                _logger.Information($"SaaS Purchase Payment is succesfully validated with response {validationResponse} for Azure Subscription: {paymentValidationRequest.AzureSubscriptionId}, plan: {paymentValidationRequest.PlanId}, offer: {paymentValidationRequest.OfferId}, publisher: {paymentValidationRequest.PublisherId}");
+                return PaymentValidationResponse.BuildValidationResponseSuccessful();
+            }
+            catch (MarketplaceException ex)
+            {
+                string errorMessage = $"Failed to validate SaaS purchase payment for the Azure subscription: {paymentValidationRequest.AzureSubscriptionId}. Error: {ex.Message}";
+                _logger.Error(ex, errorMessage);
+                op.FailOperation(errorMessage);
+
+                var requestFailedException = ex as RequestFailedException;
+
+                if (requestFailedException != null)
+                {
+                    var exceptionMessage = await requestFailedException.Response.Content.ReadAsStringAsync();
+                    var statusCode = requestFailedException.Response.StatusCode;
+                    _logger.Error(requestFailedException, exceptionMessage);
+                    return PaymentValidationResponse.BuildValidationResponseFailed(statusCode, exceptionMessage);
+                }
+
+                return PaymentValidationResponse.BuildValidationResponseFailed(HttpStatusCode.BadRequest, ex.Message);
+            }
+        }
+
         private static string GetCompleteRequestPath(string subscriptionId, string resourceGroup, string resourceName)
         {
             var requestPath = SubscriptionResourceTypePath + subscriptionId + "/resourceGroups/" + resourceGroup + "/" + resourceName;
             return requestPath;
         }
 
-        private Dictionary<string, string> GetAdditionalMarketplaceHeaders(MarketplaceRequestMetadata requestHeaders)
+        private static Dictionary<string, string> GetAdditionalMarketplaceHeaders(MarketplaceRequestMetadata requestHeaders)
         {
             var additionalHeaders = new Dictionary<string, string>();
             additionalHeaders.Add("x-ms-client-object-id", requestHeaders.MSClientObjectId);

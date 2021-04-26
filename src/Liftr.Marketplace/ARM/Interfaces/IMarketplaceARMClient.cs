@@ -52,5 +52,13 @@ namespace Microsoft.Liftr.Marketplace.ARM.Interfaces
         /// https://marketplaceapi.spza-internal.net/swagger/ui/index#!/SubscriptionResourceV2/SubscriptionResourceV2_Post_0
         /// </remarks>
         Task<MarketplaceSaasTokenResponse> GetAccessTokenAsync(string resourceId);
+
+        /// <summary>
+        /// Validates the SaaS Purchase Payment
+        /// </summary>
+        /// <param name="paymentValidationRequest"></param>
+        /// <param name="requestMetadata"></param>
+        /// <returns>Payment validation status</returns>
+        Task<PaymentValidationResponse> ValidatesSaaSPurchasePaymentAsync(PaymentValidationRequest paymentValidationRequest, MarketplaceRequestMetadata requestMetadata);
     }
 }
