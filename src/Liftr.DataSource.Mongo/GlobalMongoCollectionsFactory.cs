@@ -45,7 +45,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
                 collection = CreateCollection<MarketplaceRelationshipEntity>(collectionName);
 
-                var recourceIdIx = new CreateIndexModel<MarketplaceRelationshipEntity>(Builders<MarketplaceRelationshipEntity>.IndexKeys.Ascending(item => item.ResourceId), new CreateIndexOptions<MarketplaceRelationshipEntity> { Unique = true });
+                var recourceIdIx = new CreateIndexModel<MarketplaceRelationshipEntity>(Builders<MarketplaceRelationshipEntity>.IndexKeys.Ascending(item => item.ResourceId), new CreateIndexOptions<MarketplaceRelationshipEntity> { Unique = false });
                 collection.Indexes.CreateOne(recourceIdIx);
 
                 var marketplaceSubscriptionIdx = new CreateIndexModel<MarketplaceRelationshipEntity>(Builders<MarketplaceRelationshipEntity>.IndexKeys.Ascending(item => item.MarketplaceSubscription), new CreateIndexOptions<MarketplaceRelationshipEntity> { Unique = false });
