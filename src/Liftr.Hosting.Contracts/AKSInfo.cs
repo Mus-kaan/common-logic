@@ -23,7 +23,7 @@ namespace Microsoft.Liftr.Hosting.Contracts
         /// Please check the release change to avoid breaking change:
         /// https://github.com/Azure/AKS/releases
         /// </summary>
-        public string KubernetesVersion { get; set; } = "1.18.10";
+        public string KubernetesVersion { get; set; } = "1.18.17";
 
         public void CheckValues()
         {
