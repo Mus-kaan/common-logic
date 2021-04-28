@@ -8,6 +8,10 @@ https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx
 ## kube-prometheus-stack
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
 
+https://github.com/grafana/helm-charts/tree/main/charts/grafana
+https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-state-metrics
+https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-node-exporter
+
 ## prom2icm
 https://github.com/weng5e/liftr/tree/main/helm/prom2icm
 

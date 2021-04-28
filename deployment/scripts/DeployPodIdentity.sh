@@ -62,10 +62,12 @@ set -x
 sed -i "s|MSI_RESOURCE_ID_PLACEHOLDER|$MSIResourceId|g" pod-id-values.yaml
 sed -i "s|MSI_CLIENT_ID_PLACEHOLDER|$MSIClientId|g" pod-id-values.yaml
 
+# TODO: Add OPA. details: https://azure.github.io/aad-pod-identity/docs/configure/aad_pod_identity_on_kubenet/
 $Helm upgrade aad-pod-id-rel aad-pod-identity-*.tgz --install --create-namespace \
 --wait --force \
 --namespace $namespace \
--f pod-id-values.yaml
+-f pod-id-values.yaml \
+--set nmi.allowNetworkPluginKubenet=true
 
 set +x
 echo "-------------------------------------"

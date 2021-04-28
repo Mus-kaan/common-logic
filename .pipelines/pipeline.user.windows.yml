@@ -17,7 +17,7 @@ signing_options:
 version:
   name: "Liftr.Common"
   major: 3 # The major version number.
-  minor: 11 # The minor version number
+  minor: 12 # The minor version number
   system: "buildrevision"
 
 versioning:

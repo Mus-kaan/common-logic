@@ -29,7 +29,7 @@ alertmanager:
           - url: "http://icm-rel-prom2icm.prometheus.svc.cluster.local/alerts"
 
 grafana:
-  enabled: false
+  enabled: true
 
 kubeEtcd:
   enabled: false

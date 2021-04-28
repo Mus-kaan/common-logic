@@ -194,9 +194,11 @@ $Helm upgrade $helmReleaseName kube-prometheus-stack-*.tgz --install --wait \
 --set prometheusOperator.configmapReloadImage.repository="$liftrACRURI/jimmidyson/configmap-reload" \
 --set prometheusOperator.prometheusConfigReloaderImage.repository="$liftrACRURI/prometheus-operator/prometheus-config-reloader" \
 --set prometheus.prometheusSpec.image.repository="$liftrACRURI/prometheus/prometheus" \
---set kube-state-metrics.image.repository="$liftrACRURI/coreos/kube-state-metrics" \
+--set kube-state-metrics.image.repository="$liftrACRURI/kube-state-metrics/kube-state-metrics" \
 --set prometheus-node-exporter.image.repository="$liftrACRURI/prometheus/node-exporter" \
 --set prometheus.prometheusSpec.thanos.image="$liftrACRURI/thanos/thanos:v0.15.0" \
+--set grafana.image.repository="$liftrACRURI/grafana/grafana" \
+--set grafana.sidecar.image.repository="$liftrACRURI/kiwigrid/k8s-sidecar" \
 $ThanosFlag
 
 if [ ! -f thanos-api.cer ]; then

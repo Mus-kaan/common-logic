@@ -25,12 +25,12 @@ def change_style(style, representer):
 # Source files list
 charts = [
     {
-        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/prometheus-rules.yaml',
+        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/kubernetes-prometheusRule.yaml',
         'destination': '../templates/prometheus/rules-1.14',
         'min_kubernetes': '1.14.0-0'
     },
     {
-        'source': 'https://raw.githubusercontent.com/etcd-io/etcd/master/Documentation/op-guide/etcd3_alert.rules.yml',
+        'source': 'https://raw.githubusercontent.com/etcd-io/website/master/content/docs/v3.4.0/op-guide/etcd3_alert.rules.yml',
         'destination': '../templates/prometheus/rules-1.14',
         'min_kubernetes': '1.14.0-0'
     },
@@ -41,7 +41,7 @@ charts = [
         'max_kubernetes': '1.14.0-0'
     },
     {
-        'source': 'https://raw.githubusercontent.com/etcd-io/etcd/master/Documentation/op-guide/etcd3_alert.rules.yml',
+        'source': 'https://raw.githubusercontent.com/etcd-io/website/master/content/docs/v3.4.0/op-guide/etcd3_alert.rules.yml',
         'destination': '../templates/prometheus/rules',
         'min_kubernetes': '1.10.0-0',
         'max_kubernetes': '1.14.0-0'
@@ -61,7 +61,7 @@ condition_map = {
     'kube-prometheus-node-alerting.rules': ' .Values.defaultRules.rules.kubePrometheusNodeAlerting',
     'kube-prometheus-node-recording.rules': ' .Values.defaultRules.rules.kubePrometheusNodeRecording',
     'kube-scheduler.rules': ' .Values.kubeScheduler.enabled .Values.defaultRules.rules.kubeScheduler',
-    'kube-state-metrics': ' .Values.kubeStateMetrics.enabled .Values.defaultRules.rules.kubeStateMetrics',
+    'kube-state-metrics': ' .Values.defaultRules.rules.kubeStateMetrics',
     'kubelet.rules': ' .Values.kubelet.enabled .Values.defaultRules.rules.kubelet',
     'kubernetes-absent': ' .Values.defaultRules.rules.kubernetesAbsent',
     'kubernetes-resources': ' .Values.defaultRules.rules.kubernetesResources',
@@ -71,15 +71,15 @@ condition_map = {
     'kubernetes-system-kubelet': ' .Values.defaultRules.rules.kubernetesSystem', # kubernetes-system was split into more groups in 1.14, one of them is kubernetes-system-kubelet
     'kubernetes-system-controller-manager': ' .Values.kubeControllerManager.enabled',
     'kubernetes-system-scheduler': ' .Values.kubeScheduler.enabled .Values.defaultRules.rules.kubeScheduler',
-    'node-exporter.rules': ' .Values.nodeExporter.enabled .Values.defaultRules.rules.node',
-    'node-exporter': ' .Values.nodeExporter.enabled .Values.defaultRules.rules.node',
-    'node.rules': ' .Values.nodeExporter.enabled .Values.defaultRules.rules.node',
+    'node-exporter.rules': ' .Values.defaultRules.rules.node',
+    'node-exporter': ' .Values.defaultRules.rules.node',
+    'node.rules': ' .Values.defaultRules.rules.node',
     'node-network': ' .Values.defaultRules.rules.network',
     'node-time': ' .Values.defaultRules.rules.time',
     'prometheus-operator': ' .Values.defaultRules.rules.prometheusOperator',
     'prometheus.rules': ' .Values.defaultRules.rules.prometheus',
     'prometheus': ' .Values.defaultRules.rules.prometheus', # kube-prometheus >= 1.14 uses prometheus as group instead of prometheus.rules
-    'kubernetes-apps': ' .Values.kubeStateMetrics.enabled .Values.defaultRules.rules.kubernetesApps',
+    'kubernetes-apps': ' .Values.defaultRules.rules.kubernetesApps',
     'etcd': ' .Values.kubeEtcd.enabled .Values.defaultRules.rules.etcd',
 }
 
@@ -113,6 +113,9 @@ replacement_map = {
         'init': ''},
     'https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#': {
         'replacement': '{{ .Values.defaultRules.runbookUrl }}',
+        'init': ''},
+    'https://github.com/prometheus-operator/kube-prometheus/wiki/': {
+        'replacement': '{{ .Values.defaultRules.runbookUrl }}alert-name-',
         'init': ''},
     'job="kube-state-metrics"': {
         'replacement': 'job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"',
@@ -282,6 +285,17 @@ def write_group_to_file(group, url, destination, min_kubernetes, max_kubernetes)
 
     print("Generated %s" % new_filename)
 
+def write_rules_names_template():
+    with open('../templates/prometheus/_rules.tpl', 'w') as f:
+        f.write('''{{- /*
+Generated file. Do not change in-place! In order to change this file first read following link:
+https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
+*/ -}}\n''')
+        f.write('{{- define "rules.names" }}\n')
+        f.write('rules:\n')
+        for rule in condition_map:
+            f.write('  - "%s"\n' % rule)
+        f.write('{{- end }}')
 
 def main():
     init_yaml_styles()
@@ -302,6 +316,10 @@ def main():
         groups = yaml_text['spec']['groups'] if yaml_text.get('spec') else yaml_text['groups']
         for group in groups:
             write_group_to_file(group, chart['source'], chart['destination'], chart['min_kubernetes'], chart['max_kubernetes'])
+
+    # write rules.names named template
+    write_rules_names_template()
+
     print("Finished")
 
 

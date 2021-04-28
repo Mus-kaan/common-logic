@@ -72,32 +72,41 @@ set -x
 if [ "$ComputeType" = "aks" ]; then
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "import 'ingress-nginx' chart images"
-echo "import k8s.gcr.io/ingress-nginx/controller:v0.41.0"
-az acr import --name "$ACRName" --source k8s.gcr.io/ingress-nginx/controller:v0.41.0 --force
+echo "import k8s.gcr.io/ingress-nginx/controller:v0.45.0"
+az acr import --name "$ACRName" --source k8s.gcr.io/ingress-nginx/controller:v0.45.0 --force
 
 echo "import k8s.gcr.io/defaultbackend-amd64:1.5"
 az acr import --name "$ACRName" --source k8s.gcr.io/defaultbackend-amd64:1.5 --force
 
-echo "import docker.io/jettech/kube-webhook-certgen:v1.5.0"
-az acr import --name "$ACRName" --source docker.io/jettech/kube-webhook-certgen:v1.5.0 --force
+echo "import docker.io/jettech/kube-webhook-certgen:v1.5.1"
+az acr import --name "$ACRName" --source docker.io/jettech/kube-webhook-certgen:v1.5.1 --force
 
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "import 'kube-state-metrics' chart images"
-echo "import quay.io/coreos/kube-state-metrics:v1.9.7"
-az acr import --name "$ACRName" --source quay.io/coreos/kube-state-metrics:v1.9.7 --force
+echo "import k8s.gcr.io/kube-state-metrics/kube-state-metrics:v2.0.0"
+az acr import --name "$ACRName" --source k8s.gcr.io/kube-state-metrics/kube-state-metrics:v2.0.0 --force
 
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "import 'prometheus-node-exporter' chart images"
-echo "import quay.io/prometheus/node-exporter:v1.0.1"
-az acr import --name "$ACRName" --source quay.io/prometheus/node-exporter:v1.0.1 --force
+echo "import quay.io/prometheus/node-exporter:v1.1.2"
+az acr import --name "$ACRName" --source quay.io/prometheus/node-exporter:v1.1.2 --force
+
+echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
+echo "import 'grafana' chart images"
+
+echo "import docker.io/grafana/grafana:7.5.3"
+az acr import --name "$ACRName" --source docker.io/grafana/grafana:7.5.3 --force
+
+echo "import quay.io/kiwigrid/k8s-sidecar:1.10.7"
+az acr import --name "$ACRName" --source quay.io/kiwigrid/k8s-sidecar:1.10.7 --force
 
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "import 'kube-prometheus-stack' chart images"
 echo "import quay.io/prometheus/alertmanager:v0.21.0"
 az acr import --name "$ACRName" --source quay.io/prometheus/alertmanager:v0.21.0 --force
 
-echo "import quay.io/prometheus-operator/prometheus-operator:v0.43.1"
-az acr import --name "$ACRName" --source quay.io/prometheus-operator/prometheus-operator:v0.43.1 --force
+echo "import quay.io/prometheus-operator/prometheus-operator:v0.47.0"
+az acr import --name "$ACRName" --source quay.io/prometheus-operator/prometheus-operator:v0.47.0 --force
 
 echo "import quay.io/thanos/thanos:v0.15.0"
 az acr import --name "$ACRName" --source quay.io/thanos/thanos:v0.15.0 --force
@@ -105,11 +114,11 @@ az acr import --name "$ACRName" --source quay.io/thanos/thanos:v0.15.0 --force
 echo "import docker.io/jimmidyson/configmap-reload:v0.4.0"
 az acr import --name "$ACRName" --source docker.io/jimmidyson/configmap-reload:v0.4.0 --force
 
-echo "import quay.io/prometheus-operator/prometheus-config-reloader:v0.43.1"
-az acr import --name "$ACRName" --source quay.io/prometheus-operator/prometheus-config-reloader:v0.43.1 --force
+echo "import quay.io/prometheus-operator/prometheus-config-reloader:v0.47.0"
+az acr import --name "$ACRName" --source quay.io/prometheus-operator/prometheus-config-reloader:v0.47.0 --force
 
-echo "import quay.io/prometheus/prometheus:v2.22.1"
-az acr import --name "$ACRName" --source quay.io/prometheus/prometheus:v2.22.1 --force
+echo "import quay.io/prometheus/prometheus:v2.26.0"
+az acr import --name "$ACRName" --source quay.io/prometheus/prometheus:v2.26.0 --force
 fi
 
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"

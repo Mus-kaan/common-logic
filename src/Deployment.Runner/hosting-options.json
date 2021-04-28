@@ -33,12 +33,12 @@
         {
           "Location": "westus2",
           "DataBaseName": "da210201",
-          "ComputeBaseName": "co210210"
+          "ComputeBaseName": "co210426"
         },
         {
           "Location": "eastus",
           "DataBaseName": "da210201",
-          "ComputeBaseName": "co210210"
+          "ComputeBaseName": "co210426"
         }
       ]
     },
@@ -70,12 +70,12 @@
         {
           "Location": "westus2",
           "DataBaseName": "data20200506",
-          "ComputeBaseName": "com20210212"
+          "ComputeBaseName": "co210426"
         },
         {
           "Location": "eastus",
           "DataBaseName": "data20200506",
-          "ComputeBaseName": "com20210212"
+          "ComputeBaseName": "co210426"
         }
       ]
     }
