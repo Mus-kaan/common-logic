@@ -16,6 +16,8 @@ echo "************************************************************"
 $Helm upgrade $helmReleaseName --install --wait --timeout 10m \
 --create-namespace \
 --set constructPEMChain=true \
+--set secrets-store-csi-driver.enableSecretRotation=true \
+--set secrets-store-csi-driver.rotationPollInterval=30m \
 --namespace "$namespace" csi-secrets-store-provider-azure-*.tgz
 
 echo "------------------------------------------------------------"
