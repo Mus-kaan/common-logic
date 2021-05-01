@@ -6,7 +6,6 @@ using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.ARM;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Polly;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;

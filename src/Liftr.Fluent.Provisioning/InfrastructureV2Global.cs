@@ -150,9 +150,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             if (certBundle != null)
             {
                 var privateKeyBytes = Convert.FromBase64String(certBundle.Value);
-#pragma warning disable CA2000 // Dispose objects before losing scope
-                var certificate = new X509Certificate2(privateKeyBytes);
-#pragma warning restore CA2000 // Dispose objects before losing scope
+                using var certificate = new X509Certificate2(privateKeyBytes);
                 var partnerKVClient = KeyVaultClientFactory.FromClientIdAndCertificate(partnerCredentialUpdateConfig.MultiTenantAppId, certificate, partnerCredentialUpdateConfig.AadEndpoint, partnerCredentialUpdateConfig.PartnerTenantId);
                 var secrets = await partnerKVClient.GetSecretsAsync(partnerCredentialUpdateConfig.PartnerKeyvaultEndpoint);
                 _logger.Information("List all secrets from partner keyvault.");

@@ -6,6 +6,7 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.KeyVault.Models;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.KeyVault
@@ -137,13 +138,16 @@ namespace Microsoft.Liftr.KeyVault
             var existingCert = await GetCertAsync(certName);
             if (existingCert != null)
             {
-                _logger.Information("There already exist a certificate with name {certificateName} in vault '{vaultBaseUrl}'. Skip creating a new one.", certName, _vaultBaseUrl);
-                return null;
+                var privateKeyBytes = Convert.FromBase64String(existingCert.Value);
+                using var certificate = new X509Certificate2(privateKeyBytes);
+                if (certificate.Subject.OrdinalStartsWith($"CN={certificateSubject}"))
+                {
+                    _logger.Information("There already exist a certificate with name {certificateName} in vault '{vaultBaseUrl}' with the same subject {subjectName}. Skip creating a new one.", certName, _vaultBaseUrl, certificateSubject);
+                    return null;
+                }
             }
-            else
-            {
-                return await CreateCertificateAsync(certName, issuerName, certificateSubject, subjectAlternativeNames, tags);
-            }
+
+            return await CreateCertificateAsync(certName, issuerName, certificateSubject, subjectAlternativeNames, tags);
         }
 
         public async Task<CertificateOperation> CreateCertificateAsync(string certName, string issuerName, string certificateSubject, IList<string> subjectAlternativeNames, IDictionary<string, string> tags = null)
