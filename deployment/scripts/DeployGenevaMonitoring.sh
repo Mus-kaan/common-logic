@@ -122,29 +122,15 @@ VaultName=$(<bin/vault-name.txt)
 fi
 echo "VaultName: $VaultName"
 
-echo "az keyvault secret download --subscription "$DeploymentSubscriptionId" --vault-name "$VaultName" --name GenevaClientCert --file encodedGenevaPfx"
-az keyvault secret download --subscription "$DeploymentSubscriptionId" --vault-name "$VaultName" --name GenevaClientCert --file encodedGenevaPfx
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-    echo "az keyvault secret download failed."
-    exit $exit_code
+if [ "$TenantId" = "" ]; then
+echo "Read TenantId from file 'bin/tenant-id.txt'."
+TenantId=$(<bin/tenant-id.txt)
+    if [ "$TenantId" = "" ]; then
+        echo "Please set the tenant Id using variable 'TenantId' ..."
+        exit 1 # terminate and indicate error
+    fi
 fi
-
-echo "(cat encodedGenevaPfx | base64 --decode) > geneva.pfx"
-(cat encodedGenevaPfx | base64 --decode) > geneva.pfx
-
-# Note: Since use CA issued certificate, need to exclude CA. As https://nam06.safelinks.protection.outlook.com/?url=https%3A%2F%2Fmsazure.visualstudio.com%2FOne%2F_git%2FCompute-Runtime-Tux-GenevaContainers%3Fpath%3D%252Fdocker_geneva_mdsd_finalize%252Fstart_mdsd.sh%26version%3DGBmaster%26line%3D25%26lineStyle%3Dplain%26lineEnd%3D36%26lineStartColumn%3D1%26lineEndColumn%3D2&data=02%7C01%7CYiming.Jia%40microsoft.com%7C89c14642297342476e9e08d6b752b83e%7C72f988bf86f141af91ab2d7cd011db47%7C1%7C0%7C636897963293490981&sdata=lVisF0aQqR6NTczakYL0Uze0VWklIj9fKsGS%2FjgZicU%3D&reserved=0
-# It checks mds of private key and certificate.
-openssl pkcs12 -in geneva.pfx -out geneva_cert.pem -nodes -clcerts -nokeys -password pass:
-openssl pkcs12 -in geneva.pfx -out geneva_key.pem -nodes -nocerts -password pass:
-
-genevaServiceCert=$(cat geneva_cert.pem | base64 -w 0)
-genevaServiceKey=$(cat geneva_key.pem | base64 -w 0)
-
-rm -f encodedGenevaPfx
-rm -f geneva.pfx
-rm -f geneva_cert.pem
-rm -f geneva_key.pem
+echo "TenantId: $TenantId"
 
 ./CleanUpFirstFailedHelmRelease.sh \
 --HelmReleaseName="aks-geneva" \
@@ -155,16 +141,15 @@ echo "start deploy geneva helm chart."
 $Helm upgrade aks-geneva --install --wait --force \
 --create-namespace \
 --values "$GenevaParametersFile" \
+--set keyvault="$VaultName" \
+--set tenantId="$TenantId" \
 --set genevaTenant="$PartnerName" \
 --set genevaRole="$AKSName" \
 --set hostResourceGroup="$AKSRGName" \
 --set hostRegion="$Region" \
 --set compactRegion="$compactRegion" \
 --set environmentName="$environmentName" \
---set gcskeyb64="$genevaServiceKey" \
 --set gcs_region="$gcs_region" \
---set gcscertb64="$genevaServiceCert" \
---set gcskeyb64="$genevaServiceKey" \
 --set linuxgenevaACR.endpoint="$liftrACRURI" \
 --namespace "$namespace" geneva-*.tgz
 

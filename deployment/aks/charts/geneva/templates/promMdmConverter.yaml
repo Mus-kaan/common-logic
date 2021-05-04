@@ -9,15 +9,6 @@
 # The prom-mdm-converter relies on Prometheus' remote_write module, which can be used to pipe ALL metrics Prometheus receives to an HTTP endpoint.
 # The prom-mdm-converter then uses the rules its been given to decide whether to fire these metrics to MDM.
 #
-apiVersion: v1
-kind: Secret
-metadata:
-  name: prom-converter-mdm-cert
-type: Opaque
-data:
-  cert.pem: {{ .Values.gcscertb64 }}
-  key.pem: {{ .Values.gcskeyb64 }}
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -34,6 +25,7 @@ spec:
     metadata:
       labels:
         component: {{ .Chart.Name }}-prommdmconv
+        aadpodidbinding: liftr-aad-pod-identity
     spec:
       containers:
         - name: prom-mdm-converter
@@ -73,8 +65,11 @@ spec:
               readOnly: true
       volumes:
         - name: mdm-cert-vol
-          secret:
-            secretName: prom-converter-mdm-cert
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: mdm-secret-provider
         - name: config
           configMap:
             name: "prom-mdm-converter-conf"
