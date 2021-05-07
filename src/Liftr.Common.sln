@@ -213,6 +213,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.StatusStore.Blob", "L
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.StatusStore.Blob.Tests", "Liftr.StatusStore.Blob.Tests\Liftr.StatusStore.Blob.Tests.csproj", "{02D0605F-341C-403E-AA04-5178FCC5CD38}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Identity", "Liftr.Identity\Liftr.Identity.csproj", "{40545B3F-D032-4AAB-84BB-955ABC8BFBB5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -603,6 +605,10 @@ Global
 		{02D0605F-341C-403E-AA04-5178FCC5CD38}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02D0605F-341C-403E-AA04-5178FCC5CD38}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02D0605F-341C-403E-AA04-5178FCC5CD38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40545B3F-D032-4AAB-84BB-955ABC8BFBB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40545B3F-D032-4AAB-84BB-955ABC8BFBB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40545B3F-D032-4AAB-84BB-955ABC8BFBB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40545B3F-D032-4AAB-84BB-955ABC8BFBB5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

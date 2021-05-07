@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <PackageVersion_Azure_Core>1.6.0</PackageVersion_Azure_Core>
     <PackageVersion_Azure_Identity>1.3.0</PackageVersion_Azure_Identity>
     <PackageVersion_Azure_Storage_Blobs>12.4.4</PackageVersion_Azure_Storage_Blobs>
     <PackageVersion_Azure_Storage_Queues>12.3.2</PackageVersion_Azure_Storage_Queues>

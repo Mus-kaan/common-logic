@@ -19,6 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.ClassicQueue\Liftr.ClassicQueue.csproj" />
+    <ProjectReference Include="..\Liftr.Identity\Liftr.Identity.csproj" />
     <ProjectReference Include="..\Liftr.Queue\Liftr.Queue.csproj" />
     <ProjectReference Include="..\Liftr.Tests.Common\Liftr.Tests.Common.csproj" />
   </ItemGroup>

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.Identity</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.Identity</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Azure.Core" Version="$(PackageVersion_Azure_Core)" />
+  </ItemGroup>
+</Project>
