@@ -27,6 +27,7 @@ namespace Microsoft.Liftr.ACIS.Contracts
         public const string GetRelationshipsByMonitor = nameof(GetRelationshipsByMonitor);
         public const string GetRelationshipsByResource = nameof(GetRelationshipsByResource);
         public const string RemoveRelationshipByResource = nameof(RemoveRelationshipByResource);
+        public const string GetMonitorTagRules = nameof(GetMonitorTagRules);
 
         public const string GetMarketplaceResourceByMonitor = nameof(GetMarketplaceResourceByMonitor);
         #endregion
