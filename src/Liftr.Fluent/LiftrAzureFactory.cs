@@ -5,6 +5,7 @@
 using Azure.Core;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Microsoft.Liftr.Contracts;
 using Serilog;
 using System;
 using System.Threading.Tasks;
@@ -101,7 +102,8 @@ namespace Microsoft.Liftr.Fluent
                 throw new InvalidOperationException($"Cannot find the storage account with Id '{resourceId}'");
             }
 
-            return await stor.GetPrimaryConnectionStringAsync();
+            var storageCredentailManager = new StorageAccountCredentialLifeCycleManager(stor, new SystemTimeSource(), _logger);
+            return await storageCredentailManager.GetActiveConnectionStringAsync();
         }
     }
 }

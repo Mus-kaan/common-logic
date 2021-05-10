@@ -14,7 +14,6 @@
     <ProjectReference Include="..\..\Liftr.Hosting.Swagger\Liftr.Hosting.Swagger.csproj" />
     <ProjectReference Include="..\..\Liftr.Contracts\Liftr.Contracts.csproj" />
     <ProjectReference Include="..\..\Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj" />
-    <ProjectReference Include="..\..\Liftr.IFxAuditLinux\Liftr.IFxAuditLinux.csproj" />
     <ProjectReference Include="..\..\Liftr.MarketplaceResource.DataSource\Liftr.MarketplaceResource.DataSource.csproj" />
     <ProjectReference Include="..\..\Liftr.Logging.AspNetCore\Liftr.Logging.AspNetCore.csproj" />
     <ProjectReference Include="..\..\Liftr.Marketplace\Liftr.Marketplace.csproj" />

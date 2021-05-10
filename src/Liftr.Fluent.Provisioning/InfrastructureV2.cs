@@ -121,10 +121,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
                 if (acisStorageAccount != null)
                 {
-                    rpAssets.ACISStorageAccountName = acisStorageAccount.Name;
-                    rpAssets.ACISStorageConnectionString = await acisStorageAccount.GetPrimaryConnectionStringAsync();
+                    var storageAccountCredentialManager = new StorageAccountCredentialLifeCycleManager(acisStorageAccount, new SystemTimeSource(), _logger);
 
-                    // TODO: add rotation
+                    rpAssets.ACISStorageAccountName = acisStorageAccount.Name;
+                    rpAssets.ACISStorageConnectionString = await storageAccountCredentialManager.GetActiveConnectionStringAsync();
+
                     dataAssets.ACISStorageAccountName = acisStorageAccount.Name;
                     dataAssets.ACISStorageConnectionString = rpAssets.ACISStorageConnectionString;
                 }
@@ -143,9 +144,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                             Description = c.Description,
                         });
 
-                        // TODO: add rotation
-                        dataAssets.RegionalDBConnectionString = await cosmosDB.GetPrimaryConnectionStringAsync();
-                        dataAssets.RegionalDBReadonlyConnectionString = await cosmosDB.GetPrimaryReadOnlyConnectionStringAsync();
+                        var regionalCosmosDBCredentialManager = new CosmosDBCredentialLifeCycleManager(cosmosDB, new SystemTimeSource(), _logger);
+                        dataAssets.RegionalDBConnectionString = await regionalCosmosDBCredentialManager.GetActiveConnectionStringAsync();
+                        dataAssets.RegionalDBReadonlyConnectionString = await regionalCosmosDBCredentialManager.GetActiveConnectionStringAsync(readOnly: true);
                     }
                     catch (Exception dbEx)
                     {
@@ -176,9 +177,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                             Description = c.Description,
                         });
 
-                        // TODO: add rotation
-                        dataAssets.GlobalDBConnectionString = await globalCosmosDB.GetPrimaryConnectionStringAsync();
-                        dataAssets.GlobalDBReadonlyConnectionString = await globalCosmosDB.GetPrimaryReadOnlyConnectionStringAsync();
+                        var globalCosmosDBCredentialManager = new CosmosDBCredentialLifeCycleManager(globalCosmosDB, new SystemTimeSource(), _logger);
+                        dataAssets.GlobalDBConnectionString = await globalCosmosDBCredentialManager.GetActiveConnectionStringAsync();
+                        dataAssets.GlobalDBReadonlyConnectionString = await globalCosmosDBCredentialManager.GetActiveConnectionStringAsync(readOnly: true);
                     }
                     catch (Exception dbEx)
                     {

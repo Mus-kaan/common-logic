@@ -35,7 +35,9 @@ namespace Microsoft.Liftr.ACIS.Relay.Tests
                 var stor = await scope.GetTestStorageAccountAsync();
                 ACISOperationStorageOptions options = new ACISOperationStorageOptions()
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     StorageAccountConnectionString = await stor.GetPrimaryConnectionStringAsync(),
+#pragma warning restore CS0618 // Type or member is obsolete
                 };
 
                 CloudStorageAccount storageAccount = CloudStorageAccount.Parse(options.StorageAccountConnectionString);
@@ -104,7 +106,9 @@ namespace Microsoft.Liftr.ACIS.Relay.Tests
                 var stor = await scope.GetTestStorageAccountAsync();
                 ACISOperationStorageOptions options = new ACISOperationStorageOptions()
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     StorageAccountConnectionString = await stor.GetPrimaryConnectionStringAsync(),
+#pragma warning restore CS0618 // Type or member is obsolete
                 };
 
                 CloudStorageAccount storageAccount = CloudStorageAccount.Parse(options.StorageAccountConnectionString);

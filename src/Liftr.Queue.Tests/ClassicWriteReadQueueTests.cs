@@ -46,7 +46,9 @@ namespace Microsoft.Liftr.Queue.Tests
 
                     IQueueWriter writer = null;
                     {
+#pragma warning disable CS0618 // Type or member is obsolete
                         var connectionString = await storageAccount.GetPrimaryConnectionStringAsync();
+#pragma warning restore CS0618 // Type or member is obsolete
                         Azure.Storage.CloudStorageAccount classicStorageAccount = Azure.Storage.CloudStorageAccount.Parse(connectionString);
                         CloudQueueClient queueClient = classicStorageAccount.CreateCloudQueueClient();
                         var classicQueue = queueClient.GetQueueReference(queueName);

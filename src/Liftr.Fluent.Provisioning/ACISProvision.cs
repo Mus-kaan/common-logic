@@ -5,6 +5,7 @@
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.KeyVault.Fluent.Models;
 using Microsoft.Azure.Management.Storage.Fluent;
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.KeyVault;
 using System;
@@ -53,7 +54,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 var rg = await az.GetOrCreateResourceGroupAsync(namingContext.Location, rgName, namingContext.Tags);
 
                 var stor = await az.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, storName, namingContext.Tags);
-                var conn = await stor.GetPrimaryConnectionStringAsync();
+                var storageCredentailManager = new StorageAccountCredentialLifeCycleManager(stor, new SystemTimeSource(), _logger);
+                var conn = await storageCredentailManager.GetActiveConnectionStringAsync();
 
                 var kv = await az.GetOrCreateKeyVaultAsync(namingContext.Location, rgName, kvName, namingContext.Tags);
                 await az.GrantSelfKeyVaultAdminAccessAsync(kv);

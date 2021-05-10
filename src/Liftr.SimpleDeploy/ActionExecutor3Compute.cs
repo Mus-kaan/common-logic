@@ -7,6 +7,7 @@ using Microsoft.Azure.Management.Graph.RBAC.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
@@ -154,7 +155,8 @@ namespace Microsoft.Liftr.SimpleDeploy
                 if (computeResources.ThanosStorageAccount != null)
                 {
                     // write the Thanos storage credential to disk so the helm deployment can utilize it.
-                    var storKey = await computeResources.ThanosStorageAccount.GetPrimaryStorageKeyAsync();
+                    var storageCredentailManager = new StorageAccountCredentialLifeCycleManager(computeResources.ThanosStorageAccount, new SystemTimeSource(), _logger);
+                    var storKey = await storageCredentailManager.GetActiveKeyAsync();
                     File.WriteAllText("diag-stor-name.txt", computeResources.ThanosStorageAccount.Name);
                     File.WriteAllText("diag-stor-key.txt", storKey.Value);
                 }

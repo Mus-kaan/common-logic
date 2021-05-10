@@ -15,6 +15,7 @@ namespace Microsoft.Liftr
 {
     public static class StorageAccountExtensions
     {
+        [Obsolete("We need to handle secret rotation. Please use StorageAccountCredentialLifeCycleManager instead.")]
         public static async Task<string> GetPrimaryConnectionStringAsync(this IStorageAccount storageAccount)
         {
             if (storageAccount == null)
@@ -27,6 +28,7 @@ namespace Microsoft.Liftr
             return key.ToConnectionString(storageAccount.Name);
         }
 
+        [Obsolete("We need to handle secret rotation. Please use StorageAccountCredentialLifeCycleManager instead.")]
         public static async Task<StorageAccountKey> GetPrimaryStorageKeyAsync(this IStorageAccount storageAccount)
         {
             if (storageAccount == null)

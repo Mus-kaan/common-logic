@@ -14,22 +14,45 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr
 {
+    public class CosmosDBConnectionStrings
+    {
+        public string PrimaryMongoDBConnectionString { get; set; }
+
+        public string SecondaryMongoDBConnectionString { get; set; }
+
+        public string PrimaryReadOnlyMongoDBConnectionString { get; set; }
+
+        public string SecondaryReadOnlyMongoDBConnectionString { get; set; }
+    }
+
+    public static class CosmosDBKeyType
+    {
+        public const string PrimaryConn = "Primary MongoDB Connection String";
+        public const string SecondaryConn = "Secondary MongoDB Connection String";
+        public const string PrimaryReadConn = "Primary Read-Only MongoDB Connection String";
+        public const string SecondaryReadConn = "Secondary Read-Only MongoDB Connection String";
+    }
+
     public static class CosmosDBAccountExtensions
     {
         private const string c_apiVersion = "2020-04-01";
         private const string c_turnOffVNetPATCHBody = "{\"properties\":{\"ipRules\":[],\"isVirtualNetworkFilterEnabled\":false,\"virtualNetworkRules\":[]}}";
 
+        [Obsolete("We need to handle secret rotation. Please use CosmosDBCredentialLifeCycleManager instead.")]
         public static Task<string> GetPrimaryConnectionStringAsync(this ICosmosDBAccount db)
-            => GetConnectionStringAsync(db, "Primary MongoDB Connection String");
+            => GetConnectionStringAsync(db, CosmosDBKeyType.PrimaryConn);
 
+        [Obsolete("We need to handle secret rotation. Please use CosmosDBCredentialLifeCycleManager instead.")]
         public static Task<string> GetSecondaryConnectionStringAsync(this ICosmosDBAccount db)
-            => GetConnectionStringAsync(db, "Secondary MongoDB Connection String");
+            => GetConnectionStringAsync(db, CosmosDBKeyType.SecondaryConn);
 
+        [Obsolete("We need to handle secret rotation. Please use CosmosDBCredentialLifeCycleManager instead.")]
         public static Task<string> GetPrimaryReadOnlyConnectionStringAsync(this ICosmosDBAccount db)
-            => GetConnectionStringAsync(db, "Primary Read-Only MongoDB Connection String");
+            => GetConnectionStringAsync(db, CosmosDBKeyType.PrimaryReadConn);
 
+        [Obsolete("We need to handle secret rotation. Please use CosmosDBCredentialLifeCycleManager instead.")]
         public static Task<string> GetSecondaryReadOnlyConnectionStringAsync(this ICosmosDBAccount db)
-            => GetConnectionStringAsync(db, "Secondary Read-Only MongoDB Connection String");
+            => GetConnectionStringAsync(db, CosmosDBKeyType.SecondaryReadConn);
 
         public static async Task<string> GetConnectionStringAsync(this ICosmosDBAccount db, string description)
         {
@@ -41,6 +64,25 @@ namespace Microsoft.Liftr
             var dbConnectionStrings = await db.ListConnectionStringsAsync();
             var connStr = dbConnectionStrings.ConnectionStrings.FirstOrDefault(c => c.Description.OrdinalEquals(description)).ConnectionString;
             return connStr;
+        }
+
+        public static async Task<CosmosDBConnectionStrings> GetConnectionStringsAsync(this ICosmosDBAccount db)
+        {
+            if (db == null)
+            {
+                throw new ArgumentNullException(nameof(db));
+            }
+
+            var dbConnectionStrings = await db.ListConnectionStringsAsync();
+            var conns = new CosmosDBConnectionStrings()
+            {
+                PrimaryMongoDBConnectionString = dbConnectionStrings.ConnectionStrings.FirstOrDefault(c => c.Description.OrdinalEquals(CosmosDBKeyType.PrimaryConn)).ConnectionString,
+                SecondaryMongoDBConnectionString = dbConnectionStrings.ConnectionStrings.FirstOrDefault(c => c.Description.OrdinalEquals(CosmosDBKeyType.SecondaryConn)).ConnectionString,
+                PrimaryReadOnlyMongoDBConnectionString = dbConnectionStrings.ConnectionStrings.FirstOrDefault(c => c.Description.OrdinalEquals(CosmosDBKeyType.PrimaryReadConn)).ConnectionString,
+                SecondaryReadOnlyMongoDBConnectionString = dbConnectionStrings.ConnectionStrings.FirstOrDefault(c => c.Description.OrdinalEquals(CosmosDBKeyType.SecondaryReadConn)).ConnectionString,
+            };
+
+            return conns;
         }
 
         public static async Task<ICosmosDBAccount> TurnOffVNetAsync(this ICosmosDBAccount db, ILiftrAzure liftrAzure)

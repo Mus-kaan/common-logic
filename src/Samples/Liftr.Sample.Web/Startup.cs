@@ -16,7 +16,6 @@ using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DataSource;
 using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.Hosting.Swagger;
-using Microsoft.Liftr.IFxAuditLinux;
 using Microsoft.Liftr.Marketplace.Saas;
 using Microsoft.Liftr.MarketplaceResource.DataSource;
 using Microsoft.Liftr.Profiler.AspNetCore;
@@ -170,7 +169,6 @@ namespace Microsoft.Liftr.Sample.Web
                 return new SingleTenantAppTokenProvider(options, kvClient, logger);
             });
 
-            services.AddSingleton<IIfxAuditLogger, IfxAuditLogger>();
             services.AddMarketplaceARMClient(_configuration);
 
             services.AddControllers();
@@ -230,7 +228,6 @@ namespace Microsoft.Liftr.Sample.Web
             app.ApplicationServices.GetService<IQueueWriter>();
             app.ApplicationServices.GetService<IMultiTenantAppTokenProvider>();
             app.ApplicationServices.GetService<ISingleTenantAppTokenProvider>();
-            app.ApplicationServices.GetService<IIfxAuditLogger>();
         }
     }
 }

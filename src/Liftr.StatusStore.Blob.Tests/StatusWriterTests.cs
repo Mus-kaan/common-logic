@@ -34,7 +34,9 @@ namespace Microsoft.Liftr.StatusStore.Blob.Tests
                     var name = SdkContext.RandomResourceName("st", 15);
                     var st = await az.GetOrCreateStorageAccountAsync(TestCommon.Location, scope.ResourceGroupName, name, TestCommon.Tags);
 
+#pragma warning disable CS0618 // Type or member is obsolete
                     var connectionStr = await st.GetPrimaryConnectionStringAsync();
+#pragma warning restore CS0618 // Type or member is obsolete
 
                     BlobServiceClient blobServiceClient = new BlobServiceClient(connectionStr);
                     var container = blobServiceClient.GetBlobContainerClient("rw-container");
