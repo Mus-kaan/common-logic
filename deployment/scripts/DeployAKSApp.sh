@@ -184,7 +184,7 @@ if [ "$APP_ASPNETCORE_ENVIRONMENT" = "DogFood" ] || [ "$APP_ASPNETCORE_ENVIRONME
     echo "Remove '--atomic' auto roll back for non-production environment. And use '--force' to delete and replace failed releases."
 fi
 
-$Helm upgrade $HelmReleaseName --install --wait --timeout 25m $DeploymentFlag\
+$Helm upgrade $HelmReleaseName --install --debug --wait --timeout 25m $DeploymentFlag\
 --set appVersion="$AppVersion" \
 --set vaultEndpoint="$KeyVaultEndpoint" \
 --set keyvault="$VaultName" \
