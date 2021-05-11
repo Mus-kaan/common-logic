@@ -53,16 +53,6 @@ ACRName=$(<bin/acr-name.txt)
     fi
 fi
 
-if [ "$TenantId" = "" ]; then
-echo "Read TenantId from file 'bin/tenant-id.txt'."
-TenantId=$(<bin/tenant-id.txt)
-    if [ "$TenantId" = "" ]; then
-        echo "Please set 'TenantId' ..."
-        exit 1 # terminate and indicate error
-    fi
-fi
-echo "TenantId: $TenantId"
-
 if [ "$ComputeType" = "" ]; then
 ComputeType=$(<bin/compute-type.txt)
 fi
@@ -130,15 +120,7 @@ az acr import --name "$ACRName" --source linuxgeneva-microsoft.azurecr.io/$IMG_m
 az acr import --name "$ACRName" --source linuxgeneva-microsoft.azurecr.io/$IMG_fluentd --force
 az acr import --name "$ACRName" --source linuxgeneva-microsoft.azurecr.io/$IMG_azsecpack --force
 
-if [ "$TenantId" == "72f988bf-86f1-41af-91ab-2d7cd011db47" ]; then
-    echo "Using Liftr Microsoft Tenant ACR. Please make sure the EV2 MI has 'Reader' role over the ms tenant ACR 'liftrmsacr'."
-    LiftrACRResourceId="/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-acr-rg/providers/Microsoft.ContainerRegistry/registries/liftrmsacr"
-else
-    echo "Using Liftr AME Tenant ACR. Please make sure the EV2 MI has 'Reader' role over the ame tenant ACR 'liftrameacr'."
-    LiftrACRResourceId="/subscriptions/d8f298fb-60f5-4676-a7d3-25442ec5ce1e/resourceGroups/liftr-acr-rg/providers/Microsoft.ContainerRegistry/registries/LiftrAMEACR"
-fi
-
-az acr import --name "$ACRName" --source $IMG_prommdm --registry $LiftrACRResourceId --force
+az acr import --name "$ACRName" --source liftrmsacr.azurecr.io/$IMG_prommdm --force
 
 set +x
 echo "Imported all the dependency images"
