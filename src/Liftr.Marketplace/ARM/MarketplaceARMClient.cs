@@ -146,7 +146,7 @@ namespace Microsoft.Liftr.Marketplace.ARM
 
             try
             {
-                var response = await _marketplaceRestClient.SendRequestAsync<string>(HttpMethod.Delete, resourcePath, GetAdditionalMarketplaceHeaders(requestMetadata));
+                var response = await _marketplaceRestClient.SendRequestWithPollingAsync<BaseOperationResponse>(HttpMethod.Delete, resourcePath, GetAdditionalMarketplaceHeaders(requestMetadata));
                 op.SetResultDescription($"Successfully deleted Marketplace subscription {marketplaceSubscription.ToString()}");
             }
             catch (MarketplaceException ex)
