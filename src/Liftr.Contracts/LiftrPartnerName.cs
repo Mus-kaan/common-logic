@@ -11,5 +11,6 @@ namespace Microsoft.Liftr.Contracts
         Elastic,
         Logz,
         Nginx,
+        Dynatrace,
     }
 }
