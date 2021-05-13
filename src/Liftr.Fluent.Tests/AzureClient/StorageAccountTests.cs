@@ -47,6 +47,15 @@ namespace Microsoft.Liftr.Fluent.Tests
 
                     var currentPublicIP = await MetadataHelper.GetPublicIPAddressAsync();
                     await st.WithAccessFromIpAddressAsync(currentPublicIP, logger);
+
+                    var find = await az.FindStorageAccountAsync(name);
+                    Assert.Equal(st.Id, find.Id);
+
+                    find = await az.FindStorageAccountAsync(name, scope.ResourceGroupName);
+                    Assert.Equal(st.Id, find.Id);
+
+                    find = await az.FindStorageAccountAsync(name, scope.ResourceGroupName.Substring(0, 5));
+                    Assert.Equal(st.Id, find.Id);
                 }
                 catch (Exception ex)
                 {

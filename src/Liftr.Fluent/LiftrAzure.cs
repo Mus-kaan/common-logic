@@ -556,6 +556,40 @@ namespace Microsoft.Liftr.Fluent
             return stor;
         }
 
+        public async Task<IStorageAccount> FindStorageAccountAsync(string storageAccountName, string resourceGroupNamePrefix = null)
+        {
+            IEnumerable<IResourceGroup> resourceGroups = await FluentClient
+                .ResourceGroups
+                .ListAsync();
+
+            if (!string.IsNullOrEmpty(resourceGroupNamePrefix))
+            {
+                resourceGroups = resourceGroups.Where(rg => rg.Name.OrdinalStartsWith(resourceGroupNamePrefix));
+            }
+
+            if (resourceGroups?.Any() != true)
+            {
+                return null;
+            }
+
+            _logger.Information("Finding storage account with name '{storageAccountName}' in total {rgCount} resource groups", storageAccountName, resourceGroups.Count());
+
+            foreach (var rg in resourceGroups)
+            {
+                var account = await FluentClient
+                    .StorageAccounts
+                    .GetByResourceGroupAsync(rg.Name, storageAccountName);
+
+                if (account != null)
+                {
+                    _logger.Information("Found storage account with Id {storageAccountId}", account.Id);
+                    return account;
+                }
+            }
+
+            return null;
+        }
+
         public async Task<IEnumerable<IStorageAccount>> ListStorageAccountAsync(string rgName, string namePrefix = null)
         {
             _logger.Information("Listing storage accounts in rgName '{rgName}' with prefix '{namePrefix}' ...", rgName, namePrefix);

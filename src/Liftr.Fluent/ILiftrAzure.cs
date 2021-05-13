@@ -100,6 +100,8 @@ namespace Microsoft.Liftr.Fluent
 
         Task<IStorageAccount> GetStorageAccountAsync(string rgName, string storageAccountName);
 
+        Task<IStorageAccount> FindStorageAccountAsync(string storageAccountName, string resourceGroupNamePrefix = null);
+
         Task<IEnumerable<IStorageAccount>> ListStorageAccountAsync(string rgName, string namePrefix = null);
 
         Task GrantBlobContributorAsync(string subscriptionId, string objectId);

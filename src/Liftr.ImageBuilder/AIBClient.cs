@@ -2,7 +2,11 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Azure.Storage;
+using Azure.Storage.Blobs;
+using Azure.Storage.Sas;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent;
 using Newtonsoft.Json.Linq;
 using System;
@@ -115,14 +119,60 @@ namespace Microsoft.Liftr.ImageBuilder
             CancellationToken cancellationToken = default)
         {
             var runOutput = await GetAIBRunOutputAsync(rgName, templateName, c_aibVHDRunOutputName, cancellationToken);
-            if (TryExtractVHDSASFromRunOutput(runOutput, out var sas))
-            {
-                return sas;
-            }
-            else
+
+            string vhdUriStr = null;
+            if (!TryExtractVHDUriFromRunOutput(runOutput, out vhdUriStr))
             {
                 throw new InvalidOperationException("Cannot parse the AIB run output: " + runOutput);
             }
+
+            var vhdUri = new Uri(vhdUriStr);
+            var storageAccountName = vhdUri.Host.Split('.').First();
+            var pathParts = vhdUri.AbsolutePath.Split('/');
+
+            var containerName = pathParts[1];
+            var blobName = pathParts[2];
+
+            var stor = await _liftrAzure.FindStorageAccountAsync(storageAccountName, resourceGroupNamePrefix: "IT_");
+            if (stor == null)
+            {
+                throw new InvalidOperationException($"Cannot find the storage account with name {storageAccountName}");
+            }
+
+#pragma warning disable CS0618 // Type or member is obsolete
+            var conn = await stor.GetPrimaryConnectionStringAsync();
+#pragma warning restore CS0618 // Type or member is obsolete
+
+            var blob = new BlobClient(conn, containerName, blobName);
+
+            // Create a SAS token that's valid a short interval.
+            BlobSasBuilder sasBuilder = new BlobSasBuilder()
+            {
+                Protocol = SasProtocol.Https,
+                Resource = "b", // b is for blobs
+                BlobContainerName = blob.BlobContainerName,
+                BlobName = blob.Name,
+                StartsOn = DateTimeOffset.UtcNow.AddMinutes(-10),
+                ExpiresOn = DateTimeOffset.UtcNow.AddHours(2),
+            };
+            sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+            AzureStorageConnectionString azStr = null;
+            if (!AzureStorageConnectionString.TryParseConnectionString(conn, out azStr))
+            {
+                var ex = new InvalidOperationException("The storage connection string is in invalid format.");
+                _logger.Fatal(ex.Message);
+                throw ex;
+            }
+
+            StorageSharedKeyCredential cred = new StorageSharedKeyCredential(azStr.AccountName, azStr.AccountKey);
+            string sasToken = sasBuilder.ToSasQueryParameters(cred).ToString();
+
+            // Construct the full URI, including the SAS token.
+            UriBuilder fullUri = new UriBuilder(blob.Uri);
+            fullUri.Query = sasToken;
+
+            return fullUri.Uri.ToString();
         }
 
         public async Task<string> GetAIBTemplateAsync(
@@ -211,14 +261,18 @@ namespace Microsoft.Liftr.ImageBuilder
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
-        internal static bool TryExtractVHDSASFromRunOutput(string runOutput, out string vhdSAS)
+        internal static bool TryExtractVHDUriFromRunOutput(string runOutput, out string vhdUri)
         {
-            vhdSAS = null;
+            vhdUri = null;
             try
             {
                 dynamic obj = JObject.Parse(runOutput);
-                vhdSAS = obj.properties.artifactUri;
+                string artifactUriStr = obj.properties.artifactUri;
 
+                // artifactUriStr is currently a SAS Uri. It will be changed to pure Uri without the SAS token.
+                // This is making sure it is a pure Uri without SAS.
+                Uri artifactUri = new Uri(artifactUriStr);
+                vhdUri = $"{artifactUri.Scheme}://{artifactUri.Host}{artifactUri.AbsolutePath}";
                 return true;
             }
             catch
