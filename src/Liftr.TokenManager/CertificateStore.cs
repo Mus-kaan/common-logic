@@ -19,13 +19,15 @@ namespace Microsoft.Liftr.TokenManager
     {
         private readonly IKeyVaultClient _kvClient;
         private readonly ILogger _logger;
+        private readonly TimeSpan _certificateCacheTTL;
         private readonly SemaphoreSlim _mu = new SemaphoreSlim(1, 1);
-        private readonly Dictionary<string, X509Certificate2> _certificates = new Dictionary<string, X509Certificate2>();
+        private readonly Dictionary<string, CertificateCacheItem> _cachedCertificates = new Dictionary<string, CertificateCacheItem>();
 
-        public CertificateStore(IKeyVaultClient kvClient, ILogger logger)
+        public CertificateStore(IKeyVaultClient kvClient, ILogger logger, TimeSpan? certificateCacheTTL = null)
         {
             _kvClient = kvClient ?? throw new ArgumentNullException(nameof(kvClient));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _certificateCacheTTL = certificateCacheTTL ?? TimeSpan.FromMinutes(30);
         }
 
         public void Dispose()
@@ -45,12 +47,20 @@ namespace Microsoft.Liftr.TokenManager
             await _mu.WaitAsync();
             try
             {
-                if (!_certificates.ContainsKey(certPath))
+                if (_cachedCertificates.ContainsKey(certPath)
+                    && DateTimeOffset.UtcNow < _cachedCertificates[certPath].ValidTill)
                 {
-                    _certificates[certPath] = await LoadCertificateFromKeyVaultAsync(keyVaultEndpoint, certificateName);
+                    return _cachedCertificates[certPath].Certificate;
                 }
 
-                return _certificates[certPath];
+                var cert = await LoadCertificateFromKeyVaultAsync(keyVaultEndpoint, certificateName);
+                _cachedCertificates[certPath] = new CertificateCacheItem()
+                {
+                    Certificate = cert,
+                    ValidTill = DateTimeOffset.UtcNow + _certificateCacheTTL,
+                };
+
+                return cert;
             }
             finally
             {
@@ -67,7 +77,13 @@ namespace Microsoft.Liftr.TokenManager
                 {
                     _logger.Information("Start loading certificate with name {CertificateName} from key vault with endpoint {KeyVaultEndpoint} ...", certificateName, keyVaultEndpoint.AbsoluteUri);
                     var secretBundle = await _kvClient.GetSecretAsync(keyVaultEndpoint.AbsoluteUri, certificateName);
-                    _logger.Information("Loaded the certificate with name {CertificateName} from key vault with endpoint {KeyVaultEndpoint}", certificateName, keyVaultEndpoint.AbsoluteUri);
+
+                    _logger.Information(
+                        "Loaded the certificate with secretIdentifier: {secretIdentifier}. certificateCreationTime: {certCreated} certificateExpireTime: {certExpire}",
+                        secretBundle.SecretIdentifier.Identifier,
+                        secretBundle.Attributes.Created.Value.ToZuluString(),
+                        secretBundle.Attributes.Expires.Value.ToZuluString());
+
                     var privateKeyBytes = Convert.FromBase64String(secretBundle.Value);
                     return new X509Certificate2(privateKeyBytes);
                 }
@@ -79,5 +95,12 @@ namespace Microsoft.Liftr.TokenManager
                 }
             }
         }
+    }
+
+    internal class CertificateCacheItem
+    {
+        public X509Certificate2 Certificate { get; set; }
+
+        public DateTimeOffset ValidTill { get; set; }
     }
 }
