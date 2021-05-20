@@ -52,12 +52,21 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 {
                     clusterConfigurator.Subscribe<CommandSucceededEvent>(eventData =>
                     {
-                        _logger.Debug("[ Mongo | CommandSucceeded ] StartTime: {StartTime}, Event:{@CommandSucceededEvent}.", DateTime.Now.Subtract(eventData.Duration).ToZuluString(), eventData);
+                        _logger.Debug(
+                            "[ Mongo | CommandSucceeded ] StartTime: {StartTime}, DurationMS: {durationMS}, CommandName: {CommandName}.",
+                            DateTime.Now.Subtract(eventData.Duration).ToZuluString(),
+                            eventData.Duration.TotalMilliseconds,
+                            eventData.CommandName);
                     });
 
                     clusterConfigurator.Subscribe<CommandFailedEvent>(eventData =>
                     {
-                        _logger.Information("[ Mongo | CommandFailed ] StartTime: {StartTime}, Event:{@CommandFailedEvent}.", DateTime.Now.Subtract(eventData.Duration).ToZuluString(), eventData);
+                        _logger.Warning(
+                            eventData.Failure,
+                            "[ Mongo | CommandFailed ] StartTime: {StartTime}, DurationMS: {durationMS}, CommandName: {CommandName}.",
+                            DateTime.Now.Subtract(eventData.Duration).ToZuluString(),
+                            eventData.Duration.TotalMilliseconds,
+                            eventData.CommandName);
                     });
                 };
             }
