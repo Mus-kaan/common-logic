@@ -27,7 +27,6 @@ using MongoDB.Driver;
 using Prometheus;
 using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 namespace Microsoft.Liftr.Sample.Web
@@ -62,8 +61,8 @@ namespace Microsoft.Liftr.Sample.Web
 
             services.AddSingleton<ITimeSource, SystemTimeSource>();
 
-            // 'RPAssetOptions' is loaded from Key Vault by default. This is set at provisioning time.
-            var optionsValue = _configuration.GetSection(nameof(RPAssetOptions)).Value.FromJson<RPAssetOptions>();
+            // 'DataAssetOptions' is loaded from Key Vault by default. This is set at provisioning time.
+            var optionsValue = _configuration.GetSection(nameof(DataAssetOptions)).Value.FromJson<DataAssetOptions>();
             if (optionsValue != null)
             {
                 services.AddSingleton(optionsValue);
@@ -83,7 +82,7 @@ namespace Microsoft.Liftr.Sample.Web
             services.AddSingleton<MongoCollectionsFactory, MongoCollectionsFactory>((sp) =>
             {
                 var logger = sp.GetService<Serilog.ILogger>();
-                var assetOptions = sp.GetService<RPAssetOptions>();
+                var assetOptions = sp.GetService<DataAssetOptions>();
                 var mongoOptions = sp.GetService<IOptions<MongoOptions>>().Value;
 
                 if (mongoOptions == null)
@@ -91,7 +90,7 @@ namespace Microsoft.Liftr.Sample.Web
                     throw new InvalidOperationException($"Could not find {nameof(MongoOptions)} in configuration");
                 }
 
-                mongoOptions.ConnectionString = assetOptions.CosmosDBConnectionStrings.Where(i => i.Description.OrdinalEquals(assetOptions.ActiveKeyName)).FirstOrDefault().ConnectionString;
+                mongoOptions.ConnectionString = assetOptions.RegionalDBConnectionString;
                 return new MongoCollectionsFactory(mongoOptions, logger);
             });
 
@@ -134,7 +133,7 @@ namespace Microsoft.Liftr.Sample.Web
             services.AddSingleton<IQueueWriter, QueueWriter>((sp) =>
             {
                 var logger = sp.GetService<Serilog.ILogger>();
-                var assetOptions = sp.GetService<RPAssetOptions>();
+                var assetOptions = sp.GetService<DataAssetOptions>();
                 var tokenCredentials = sp.GetService<TokenCredential>();
 
                 var queueUri = new Uri($"https://{assetOptions.StorageAccountName}.queue.core.windows.net/sample-queue");

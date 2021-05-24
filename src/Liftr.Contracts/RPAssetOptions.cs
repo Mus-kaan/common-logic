@@ -3,11 +3,13 @@
 //-----------------------------------------------------------------------------
 
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Microsoft.Liftr.Contracts
 {
+    [Obsolete("Please use DataAssetOptions instead. SDL requires secrets rotation which is provided by DataAssetOptions. This one does not provide rotation.")]
     public class RPAssetOptions
     {
         [JsonProperty("dbConns")]

@@ -6,6 +6,7 @@ using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Liftr.Contracts;
+using System;
 
 namespace Microsoft.Liftr.Fluent.Provisioning
 {
@@ -17,6 +18,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public IStorageAccount StorageAccount { get; set; }
 
+        [Obsolete("Please use DataAssetOptions instead")]
         public RPAssetOptions RPAssetOptions { get; set; }
 
         public DataAssetOptions DataAssetOptions { get; set; }

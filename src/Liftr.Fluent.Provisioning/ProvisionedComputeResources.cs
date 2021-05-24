@@ -8,7 +8,6 @@ using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Storage.Fluent;
-using Microsoft.Liftr.Contracts;
 
 namespace Microsoft.Liftr.Fluent.Provisioning
 {
@@ -33,7 +32,5 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         public string AKSObjectId { get; set; }
 
         public string KubeletObjectId { get; set; }
-
-        public RPAssetOptions RPAssetOptions { get; set; }
     }
 }

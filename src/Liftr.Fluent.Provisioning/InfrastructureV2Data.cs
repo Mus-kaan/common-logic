@@ -142,7 +142,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 await liftrAzure.GrantQueueContributorAsync(asicStorage, provisionedResources.ManagedIdentity);
             }
 
+#pragma warning disable CS0618 // Type or member is obsolete
             (provisionedResources.RPAssetOptions, provisionedResources.DataAssetOptions) = await AddKeyVaultSecretsAsync(
+#pragma warning restore CS0618 // Type or member is obsolete
                 namingContext,
                 provisionedResources.KeyVault,
                 dataOptions.SecretPrefix,

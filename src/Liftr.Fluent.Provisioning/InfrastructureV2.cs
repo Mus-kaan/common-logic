@@ -92,6 +92,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
         }
 
+#pragma warning disable CS0618 // Type or member is obsolete
         private async Task<(RPAssetOptions, DataAssetOptions)> AddKeyVaultSecretsAsync(
             NamingContext namingContext,
             IVault keyVault,
@@ -114,6 +115,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 {
                     StorageAccountName = regionalStorageAccount.Name,
                 };
+#pragma warning restore CS0618 // Type or member is obsolete
                 var dataAssets = new DataAssetOptions()
                 {
                     StorageAccountName = regionalStorageAccount.Name,
@@ -210,7 +212,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 }
 
                 _logger.Information("Puting the RPAssetOptions in the key vault ...");
+#pragma warning disable CS0618 // Type or member is obsolete
                 await regionalKVValet.SetSecretAsync($"{secretPrefix}-{nameof(RPAssetOptions)}", rpAssets.ToJson(), namingContext.Tags);
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 _logger.Information("Puting the DataAssetOptions in the key vault ...");
                 await regionalKVValet.SetSecretAsync($"{secretPrefix}-{nameof(DataAssetOptions)}", dataAssets.ToJson(), namingContext.Tags);

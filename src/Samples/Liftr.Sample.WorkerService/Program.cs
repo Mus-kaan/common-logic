@@ -20,7 +20,6 @@ using Microsoft.Liftr.Queue;
 using MongoDB.Driver;
 using Serilog;
 using System;
-using System.Linq;
 
 namespace Microsoft.Liftr.Sample.WorkerService
 {
@@ -40,8 +39,8 @@ namespace Microsoft.Liftr.Sample.WorkerService
                 var configuration = hostContext.Configuration;
                 services.AddSingleton<ITimeSource, SystemTimeSource>();
 
-                // 'RPAssetOptions' is loaded from Key Vault by default. This is set at provisioning time.
-                var optionsValue = configuration.GetSection(nameof(RPAssetOptions)).Value.FromJson<RPAssetOptions>();
+                // 'DataAssetOptions' is loaded from Key Vault by default. This is set at provisioning time.
+                var optionsValue = configuration.GetSection(nameof(DataAssetOptions)).Value.FromJson<DataAssetOptions>();
                 services.AddSingleton(optionsValue);
 
                 services.Configure<MongoOptions>(configuration.GetSection(nameof(MongoOptions)));
@@ -49,7 +48,7 @@ namespace Microsoft.Liftr.Sample.WorkerService
 
                 services.AddSingleton<MongoCollectionsFactory, MongoCollectionsFactory>((sp) =>
                 {
-                    var assetOptions = sp.GetService<RPAssetOptions>();
+                    var assetOptions = sp.GetService<DataAssetOptions>();
                     var logger = sp.GetService<Serilog.ILogger>();
                     var mongoOptions = sp.GetService<IOptions<MongoOptions>>().Value;
 
@@ -58,7 +57,7 @@ namespace Microsoft.Liftr.Sample.WorkerService
                         throw new InvalidOperationException($"Could not find {nameof(MongoOptions)} in configuration");
                     }
 
-                    mongoOptions.ConnectionString = assetOptions.CosmosDBConnectionStrings.Where(i => i.Description.OrdinalEquals(assetOptions.ActiveKeyName)).FirstOrDefault().ConnectionString;
+                    mongoOptions.ConnectionString = assetOptions.RegionalDBConnectionString;
                     return new MongoCollectionsFactory(mongoOptions, logger);
                 });
 
@@ -82,7 +81,7 @@ namespace Microsoft.Liftr.Sample.WorkerService
                 services.AddSingleton<IQueueReader, QueueReader>((sp) =>
                 {
                     var logger = sp.GetService<Serilog.ILogger>();
-                    var assetOptions = sp.GetService<RPAssetOptions>();
+                    var assetOptions = sp.GetService<DataAssetOptions>();
                     var tokenCredentials = sp.GetService<TokenCredential>();
                     var qOptions = sp.GetService<IOptions<QueueReaderOptions>>().Value;
 
