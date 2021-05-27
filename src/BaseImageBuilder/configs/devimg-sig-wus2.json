@@ -1,0 +1,14 @@
+{
+  // See details about the image builder options at: https://aka.ms/liftr/img-builder-options
+  "SubscriptionId": "af20b225-d632-4791-97a0-2b33fa486420", // 'Liftr - Platform'
+  "Location": "westus2",
+  "ResourceGroupName": "DevBoxImgRG", // Please make sure the service principal or managed identity used to run the image builder has at least contributor role on this resource group.
+  "ImageGalleryName": "DevVMSIG",
+  "PackerVMSize": "Standard_B2s",
+  "ImageVersionRetentionTimeInDays": 60, // The generated Shared Image Gallery will be deleted after this time. 0 means do not clean up. You can also keep the clean up and lock a specific image version.
+  "RegionalReplicaCount": 1, // https://docs.microsoft.com/en-us/azure/virtual-machines/windows/shared-image-galleries#scaling
+  "ImageReplicationRegions": [
+    "westus2"
+  ],
+  "ExportVHDToStorage": false // This is required to be used in the distribution step.
+}
