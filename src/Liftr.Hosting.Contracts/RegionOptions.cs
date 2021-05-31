@@ -67,6 +67,7 @@ namespace Microsoft.Liftr.Hosting.Contracts
                 Region.UKSouth,
                 Region.EuropeWest,
                 Region.USWest2,
+                Region.USSouthCentral,
                 };
 
             if (locationsWithAvailabilityZone.Contains(location))
