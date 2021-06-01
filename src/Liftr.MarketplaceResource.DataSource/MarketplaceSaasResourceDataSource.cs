@@ -88,7 +88,7 @@ namespace Microsoft.Liftr.MarketplaceResource.DataSource
             {
                 if (timeStamp == null)
                 {
-                   cursor = _collection.Find(filter).Limit(pageSize);
+                    cursor = _collection.Find(filter).Limit(pageSize);
                 }
                 else
                 {

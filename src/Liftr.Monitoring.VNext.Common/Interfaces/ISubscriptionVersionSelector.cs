@@ -6,6 +6,6 @@ namespace Liftr.Monitoring.VNext.Common.Interfaces
 {
     public interface ISubscriptionVersionSelector
     {
-         bool IsV2Subscription(string subscriptionId);
+        bool IsV2Subscription(string subscriptionId);
     }
 }

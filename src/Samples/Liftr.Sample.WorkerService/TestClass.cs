@@ -15,7 +15,7 @@ namespace Liftr.Sample.WorkerService
 
         public TestClass(ILogger logger)
         {
-           _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [LiftrMetrics("Test_Metric")]

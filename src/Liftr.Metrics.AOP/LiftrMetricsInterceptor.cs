@@ -120,9 +120,9 @@ namespace Microsoft.Liftr.Metrics.AOP
                 var metricName = GetMetricName(invocation, Constants.DefaultMetricName);
                 var dimensions = new Dictionary<string, string>
                 {
-                   [Constants.Dimension_ClassName] = className,
-                   [Constants.Dimension_MethodName] = methodName,
-                   [Constants.Dimension_Status] = status,
+                    [Constants.Dimension_ClassName] = className,
+                    [Constants.Dimension_MethodName] = methodName,
+                    [Constants.Dimension_Status] = status,
                 };
                 _metricSender.Gauge(metricName, (int)stopwatch.ElapsedMilliseconds, dimensions);
                 _logger.Debug("Sent Metrics with MetricName: {metricName}, Duration: {duration}, Dimensions: {dimesions}", metricName, stopwatch.ElapsedMilliseconds, dimensions.Values);
