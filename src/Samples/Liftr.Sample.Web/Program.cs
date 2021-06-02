@@ -5,6 +5,7 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Liftr.Logging.AspNetCore;
+using Microsoft.Liftr.Metrics.Prom;
 using Microsoft.Liftr.WebHosting;
 
 namespace Microsoft.Liftr.Sample.Web
@@ -16,6 +17,7 @@ namespace Microsoft.Liftr.Sample.Web
             WebHost
                 .CreateDefaultBuilder(args)
                 .UseLiftrLogger()
+                .UsePrometheusMetrics()
                 .UseKeyVaultProvider("SampleRP")
                 .UseStartup<Startup>()
                 .Build()

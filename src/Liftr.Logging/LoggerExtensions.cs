@@ -34,14 +34,28 @@ namespace Microsoft.Liftr
             string operationId = null,
             bool generateMetrics = false,
             bool newCorrelationId = false,
-            bool skipAppInsights = false)
+            bool skipAppInsights = false,
+            bool generatePrometheus = true,
+            [CallerFilePath] string filePath = "",
+            [CallerMemberName] string memberName = "",
+            [CallerLineNumber] int lineNumber = 0)
         {
             if (logger == null)
             {
                 throw new ArgumentNullException(nameof(logger));
             }
 
-            return new TimedOperation(logger, operationName, operationId, generateMetrics, newCorrelationId, skipAppInsights);
+            return new TimedOperation(
+                logger,
+                operationName,
+                operationId,
+                generateMetrics,
+                newCorrelationId,
+                skipAppInsights,
+                generatePrometheus,
+                filePath,
+                memberName,
+                lineNumber);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "Liftr1004:Avoid calling System.Threading.Tasks.Task<TResult>.Result", Justification = "<Pending>")]

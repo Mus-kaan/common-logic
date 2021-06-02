@@ -11,6 +11,19 @@ namespace Microsoft.Liftr.Logging
     {
         string Name { get; }
 
+        /// <summary>
+        /// Gets the total elapsed time measured by the current instance, in milliseconds.
+        /// </summary>
+        long ElapsedMilliseconds { get; }
+
+        bool IsSuccessful { get; }
+
+        string CallerFilePath { get; }
+
+        string CallerMemberName { get; }
+
+        int CallerLineNumber { get; }
+
         void SetEnvironmentType(string environmentType);
 
         /// <summary>

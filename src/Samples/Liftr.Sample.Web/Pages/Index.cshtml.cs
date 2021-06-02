@@ -20,6 +20,7 @@ namespace Liftr.Sample.Web.Pages
         private readonly IMultiTenantAppTokenProvider _mpApp;
         private readonly ISingleTenantAppTokenProvider _sinApp;
         private readonly Serilog.ILogger _logger;
+        private readonly Random _rand = new Random();
 
         public int CurrentCounter { get; set; }
 
@@ -41,7 +42,12 @@ namespace Liftr.Sample.Web.Pages
         {
             using (var ops = _logger.StartTimedOperation("TestSkipOperation", skipAppInsights: true))
             {
-                await Task.Delay(30);
+                var roll = _rand.Next(0, 100);
+                if (roll > 70)
+                {
+                    ops.FailOperation();
+                }
+                await Task.Delay(roll/4);
             }
 
             IndexPVCounter.Inc();

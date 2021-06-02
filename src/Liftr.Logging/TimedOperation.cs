@@ -6,6 +6,7 @@ using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Liftr.DiagnosticSource;
+using Microsoft.Liftr.Logging.Contracts;
 using Serilog.Context;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,8 @@ namespace Microsoft.Liftr.Logging
         private const string StatusCode = nameof(StatusCode);
         private readonly Serilog.ILogger _logger;
         private readonly bool _skipAppInsights;
+        private readonly bool _generatePrometheus;
+
         private readonly Dictionary<string, object> _properties = new Dictionary<string, object>();
         private readonly IOperationHolder<RequestTelemetry> _appInsightsOperation;
         private readonly string _operationId;
@@ -42,7 +45,11 @@ namespace Microsoft.Liftr.Logging
             string operationId,
             bool generateMetrics,
             bool newCorrelationId,
-            bool skipAppInsights)
+            bool skipAppInsights,
+            bool generatePrometheus,
+            string callerFilePath,
+            string callerMemberName,
+            int callerLineNumber)
         {
             if (string.IsNullOrEmpty(operationId))
             {
@@ -65,6 +72,11 @@ namespace Microsoft.Liftr.Logging
             _logger = logger;
             Name = operationName;
             _skipAppInsights = skipAppInsights;
+            _generatePrometheus = generatePrometheus;
+
+            CallerFilePath = callerFilePath;
+            CallerMemberName = callerMemberName;
+            CallerLineNumber = callerLineNumber;
 
             if (!skipAppInsights)
             {
@@ -84,6 +96,16 @@ namespace Microsoft.Liftr.Logging
 
         public string Name { get; }
 
+        public long ElapsedMilliseconds { get; set; }
+
+        public bool IsSuccessful => _isSuccessful;
+
+        public string CallerFilePath { get; }
+
+        public string CallerMemberName { get; }
+
+        public int CallerLineNumber { get; }
+
         public void Dispose()
         {
             if (_correlationIdScope != null)
@@ -93,6 +115,8 @@ namespace Microsoft.Liftr.Logging
             }
 
             _sw.Stop();
+            ElapsedMilliseconds = _sw.ElapsedMilliseconds;
+
             if (LoggerExtensions.Options.LogTimedOperation)
             {
                 using var scope = new NoAppInsightsScope(_skipAppInsights);
@@ -138,6 +162,11 @@ namespace Microsoft.Liftr.Logging
                         _appInsightsOperation.Telemetry.Metrics[_environmentType + Name + FailedOperationCount] = 1;
                     }
                 }
+            }
+
+            if (_generatePrometheus && PrometheusMetricsProcessor.Enabled)
+            {
+                PrometheusMetricsProcessor.TimedOperationMetricsProcessor.Process(this);
             }
 
             _appInsightsOperation?.Dispose();

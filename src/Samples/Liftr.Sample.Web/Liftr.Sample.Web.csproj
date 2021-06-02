@@ -8,15 +8,13 @@
     <DisableLiftrCodeAnalysis>true</DisableLiftrCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="prometheus-net.AspNetCore" Version="$(PackageVersion_prometheus-net_AspNetCore)" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\Liftr.Hosting.Swagger\Liftr.Hosting.Swagger.csproj" />
     <ProjectReference Include="..\..\Liftr.Contracts\Liftr.Contracts.csproj" />
     <ProjectReference Include="..\..\Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj" />
     <ProjectReference Include="..\..\Liftr.MarketplaceResource.DataSource\Liftr.MarketplaceResource.DataSource.csproj" />
     <ProjectReference Include="..\..\Liftr.Logging.AspNetCore\Liftr.Logging.AspNetCore.csproj" />
     <ProjectReference Include="..\..\Liftr.Marketplace\Liftr.Marketplace.csproj" />
+    <ProjectReference Include="..\..\Liftr.Metrics.Prometheus\Liftr.Metrics.Prometheus.csproj" />
     <ProjectReference Include="..\..\Liftr.Profiler.AspNetCore\Liftr.Profiler.AspNetCore.csproj" />
     <ProjectReference Include="..\..\Liftr.Queue\Liftr.Queue.csproj" />
     <ProjectReference Include="..\..\Liftr.TokenManager.Abstractions\Liftr.TokenManager.Abstractions.csproj" />

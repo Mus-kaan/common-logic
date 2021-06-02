@@ -44,7 +44,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 _requestIdPath = requestIdPath;
                 var operationName = $"{httpMethod} {requestIdPath.GenericPath}";
 
-                _operation = logger.StartTimedOperation(operationName, correlationtId);
+                _operation = logger.StartTimedOperation(operationName, correlationtId, generatePrometheus: false);
                 _operation.SetContextProperty("subId", requestIdPath.ResourceId.SubscriptionId);
                 _operation.SetContextProperty("rg", requestIdPath.ResourceId.ResourceGroup);
 
@@ -68,7 +68,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             else
             {
                 var operationName = $"{httpMethod} {requestPath}";
-                _operation = logger.StartTimedOperation(operationName, correlationtId);
+                _operation = logger.StartTimedOperation(operationName, correlationtId, generatePrometheus: false);
             }
         }
 

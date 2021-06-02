@@ -48,7 +48,7 @@
     <PackageVersion_Npgsql>5.0.3</PackageVersion_Npgsql>
     <PackageVersion_Polly_Contrib_WaitAndRetry>1.1.1</PackageVersion_Polly_Contrib_WaitAndRetry>
     <PackageVersion_Polly_Extensions_Http>3.0.0</PackageVersion_Polly_Extensions_Http>
-    <PackageVersion_prometheus-net_AspNetCore>4.0.0</PackageVersion_prometheus-net_AspNetCore>
+    <PackageVersion_prometheus-net_AspNetCore>4.1.1</PackageVersion_prometheus-net_AspNetCore>
     <PackageVersion_Serilog>2.9.0</PackageVersion_Serilog>
     <PackageVersion_Serilog_AspNetCore>3.2.0</PackageVersion_Serilog_AspNetCore>
     <PackageVersion_Serilog_Extensions_Hosting>3.1.0</PackageVersion_Serilog_Extensions_Hosting>
