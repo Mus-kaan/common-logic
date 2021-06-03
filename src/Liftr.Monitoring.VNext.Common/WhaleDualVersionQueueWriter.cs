@@ -31,17 +31,17 @@ namespace Microsoft.Liftr.Monitoring.VNext.Common
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task AddMessageAsync(string subscriptionId, string message, CancellationToken cancellationToken = default)
+        public async Task AddMessageAsync(string subscriptionId, string message, TimeSpan? messageVisibilityTimeout = null, CancellationToken cancellationToken = default)
         {
             if (_subscriptionVersionSelector.IsV2Subscription(subscriptionId))
             {
                 Log.Verbose("Writing to Whale V2 Queue");
-                await _whaleV2QueueWriter.AddMessageAsync(message, cancellationToken: cancellationToken);
+                await _whaleV2QueueWriter.AddMessageAsync(message, messageVisibilityTimeout, cancellationToken);
             }
             else
             {
                 Log.Verbose("Writing to Whale V1 Queue");
-                await _whaleQueueWriter.AddMessageAsync(message, cancellationToken: cancellationToken);
+                await _whaleQueueWriter.AddMessageAsync(message, messageVisibilityTimeout, cancellationToken);
             }
         }
     }
