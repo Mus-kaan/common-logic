@@ -28,7 +28,14 @@ namespace Microsoft.Liftr.Metrics.Prom
             var cacheKey = timedOperation.CallerFilePath + timedOperation.Name;
             var summary = _summaries.GetOrAdd(cacheKey, (_) =>
             {
-                var summaryName = ConvertToPrometheusMetricsName("app_" + timedOperation.Name + "DurationMilliseconds");
+                var name = timedOperation.Name;
+
+                if (name.OrdinalEndsWith(c_asyncSuffic))
+                {
+                    name = name.Substring(0, name.Length - c_asyncSuffic.Length);
+                }
+
+                var summaryName = ConvertToPrometheusMetricsName("app_" + name + "DurationMilliseconds");
                 var summaryConfig = new SummaryConfiguration
                 {
                     Objectives = new[]
@@ -57,11 +64,6 @@ namespace Microsoft.Liftr.Metrics.Prom
             if (string.IsNullOrEmpty(name))
             {
                 return name;
-            }
-
-            if (name.OrdinalEndsWith(c_asyncSuffic))
-            {
-                name = name.Substring(0, name.Length - c_asyncSuffic.Length);
             }
 
             var builder = new StringBuilder(name.Length + Math.Min(2, name.Length / 5));

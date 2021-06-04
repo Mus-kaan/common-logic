@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="prometheus-net.AspNetCore" Version="$(PackageVersion_prometheus-net_AspNetCore)" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="$(PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions)" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="$(PackageVersion_System_Text_Encodings_Web)" />
   </ItemGroup>
 
   <ItemGroup>

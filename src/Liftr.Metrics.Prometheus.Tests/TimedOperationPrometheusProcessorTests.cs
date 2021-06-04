@@ -10,7 +10,7 @@ namespace Microsoft.Liftr.Metrics.Prometheus.Tests
     public class TimedOperationPrometheusProcessorTests
     {
         [Theory]
-        [InlineData("load_certificate_from_key_vault", "LoadCertificateFromKeyVaultAsync")]
+        [InlineData("load_certificate_from_key_vault", "LoadCertificateFromKeyVault")]
         [InlineData("test_sc", "TestSC")]
         [InlineData("test_sc", "testSC")]
         [InlineData("test_snake_case", "TestSnakeCase")]
