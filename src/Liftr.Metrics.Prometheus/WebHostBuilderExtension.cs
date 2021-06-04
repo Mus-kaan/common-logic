@@ -12,6 +12,9 @@ namespace Microsoft.Liftr.Metrics.Prom
 {
     public static class WebHostBuilderExtension
     {
+        /// <summary>
+        /// Expose the duration metrics of <see cref="LoggerExtensions.StartTimedOperation" /> to Prometheus
+        /// </summary>
         public static IWebHostBuilder UsePrometheusMetrics(this IWebHostBuilder builder)
         {
             if (builder == null)
