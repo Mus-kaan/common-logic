@@ -246,7 +246,7 @@ namespace Microsoft.Liftr.Fluent
                 throw new ArgumentNullException(nameof(apiVersion));
             }
 
-            // https://github.com/Azure/azure-rest-api-specs-pr/blob/87dbc20106afce8c615113d654c14359a3356486/specification/imagebuilder/resource-manager/Microsoft.VirtualMachineImages/preview/2019-05-01-preview/imagebuilder.json#L280
+            // https://github.com/Azure/azure-rest-api-specs/blob/master/specification/imagebuilder/resource-manager/Microsoft.VirtualMachineImages/stable/2020-02-14/imagebuilder.json#L280
             using (var handler = new AzureApiAuthHandler(AzureCredentials))
             using (var httpClient = new HttpClient(handler))
             {
