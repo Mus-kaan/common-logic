@@ -36,8 +36,5 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         [Option("authFile", Required = false, HelpText = "Use auth file to login instead of managed identity.")]
         public string AuthFile { get; set; }
-
-        [Option("activeKey", Required = false, HelpText = "Name of the active cosmos DB connection String.")]
-        public string ActiveKeyName { get; set; }
     }
 }

@@ -39,12 +39,12 @@ namespace Microsoft.Liftr.SimpleDeploy
 
             var dataOptions = new RegionalDataOptions()
             {
-                ActiveDBKeyName = _commandOptions.ActiveKeyName,
                 SecretPrefix = _hostingOptions.SecretPrefix,
                 OneCertCertificates = targetOptions.OneCertCertificates,
                 DataPlaneSubscriptions = regionOptions.DataPlaneSubscriptions,
                 DataPlaneStorageCountPerSubscription = _hostingOptions.StorageCountPerDataPlaneSubscription,
                 EnableVNet = targetOptions.EnableVNet,
+                EnableThanos = _hostingOptions.EnableThanos,
                 DBSupport = _hostingOptions.DBSupport,
                 GlobalKeyVaultResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
                 GlobalStorageResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}",

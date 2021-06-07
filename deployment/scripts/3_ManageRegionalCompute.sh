@@ -57,6 +57,11 @@ fi
 
 ./DeployProm2IcM.sh
 
+./DeployThanosIngress.sh \
+--environmentName="$APP_ASPNETCORE_ENVIRONMENT" \
+--compactRegion="$REGION" \
+--DeploymentSubscriptionId="$DeploymentSubscriptionId"
+
 ./DeployGenevaMonitoring.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId" \
 --GenevaParametersFile="$GenevaParametersFile" \

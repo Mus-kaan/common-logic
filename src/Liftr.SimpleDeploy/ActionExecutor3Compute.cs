@@ -59,7 +59,6 @@ namespace Microsoft.Liftr.SimpleDeploy
                 ComputeBaseName = regionOptions.ComputeBaseName,
                 GlobalKeyVaultResourceId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
                 LogAnalyticsWorkspaceResourceId = targetOptions.LogAnalyticsWorkspaceId,
-                ActiveDBKeyName = _commandOptions.ActiveKeyName,
                 SecretPrefix = _hostingOptions.SecretPrefix,
                 GlobalStorageResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}",
                 GlobalCosmosDBResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.DocumentDB/databaseAccounts/{globalNamingContext.CosmosDBName(targetOptions.Global.BaseName)}",
@@ -73,7 +72,6 @@ namespace Microsoft.Liftr.SimpleDeploy
 
             var dataOptions = new RegionalDataOptions()
             {
-                ActiveDBKeyName = _commandOptions.ActiveKeyName,
                 SecretPrefix = _hostingOptions.SecretPrefix,
                 OneCertCertificates = targetOptions.OneCertCertificates,
                 DataPlaneSubscriptions = regionOptions.DataPlaneSubscriptions,

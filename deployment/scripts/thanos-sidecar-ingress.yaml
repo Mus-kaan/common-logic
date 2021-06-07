@@ -37,8 +37,7 @@ metadata:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
-    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
-    nginx.ingress.kubernetes.io/auth-tls-secret: "prometheus/thanos-ca-secret"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "PLACE_HOLDER_THANOS_CLIENT_IP_RANGE"
   labels:
     app: prometheus
   name: thanos-sidecar-0
@@ -62,8 +61,7 @@ metadata:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
-    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
-    nginx.ingress.kubernetes.io/auth-tls-secret: "prometheus/thanos-ca-secret"
+    nginx.ingress.kubernetes.io/whitelist-source-range: "PLACE_HOLDER_THANOS_CLIENT_IP_RANGE"
   labels:
     app: prometheus
   name: thanos-sidecar-1

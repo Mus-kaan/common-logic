@@ -6,7 +6,7 @@
     },
     "2_data_westus2": {
       "commandName": "Project",
-      "commandLineArgs": "-a CreateOrUpdateRegionalData -f hosting-options.json -e Test -r westus2 --authFile my.azureauth-ms.auth.json --activeKey \"Primary MongoDB Connection String\""
+      "commandLineArgs": "-a CreateOrUpdateRegionalData -f hosting-options.json -e Test -r westus2 --authFile my.azureauth-ms.auth.json"
     },
     "3_compute_westus2": {
       "commandName": "Project",

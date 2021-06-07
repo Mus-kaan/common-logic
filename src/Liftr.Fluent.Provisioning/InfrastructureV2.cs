@@ -92,13 +92,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
         }
 
-#pragma warning disable CS0618 // Type or member is obsolete
-        private async Task<(RPAssetOptions, DataAssetOptions)> AddKeyVaultSecretsAsync(
+        private async Task<DataAssetOptions> AddKeyVaultSecretsAsync(
             NamingContext namingContext,
             IVault keyVault,
             string secretPrefix,
             IStorageAccount regionalStorageAccount,
-            string cosmosDBActiveKeyName,
             ICosmosDBAccount cosmosDB,
             string globalStorageResourceId,
             string globalKeyVaultResourceId,
@@ -111,11 +109,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             using (var regionalKVValet = new KeyVaultConcierge(keyVault.VaultUri, _kvClient, _logger))
             {
-                var rpAssets = new RPAssetOptions()
-                {
-                    StorageAccountName = regionalStorageAccount.Name,
-                };
-#pragma warning restore CS0618 // Type or member is obsolete
                 var dataAssets = new DataAssetOptions()
                 {
                     StorageAccountName = regionalStorageAccount.Name,
@@ -124,28 +117,16 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 if (acisStorageAccount != null)
                 {
                     var storageAccountCredentialManager = new StorageAccountCredentialLifeCycleManager(acisStorageAccount, new SystemTimeSource(), _logger);
-
-                    rpAssets.ACISStorageAccountName = acisStorageAccount.Name;
-                    rpAssets.ACISStorageConnectionString = await storageAccountCredentialManager.GetActiveConnectionStringAsync();
-
                     dataAssets.ACISStorageAccountName = acisStorageAccount.Name;
-                    dataAssets.ACISStorageConnectionString = rpAssets.ACISStorageConnectionString;
+                    dataAssets.ACISStorageConnectionString = await storageAccountCredentialManager.GetActiveConnectionStringAsync();
                 }
 
                 if (cosmosDB != null)
                 {
                     _logger.Information($"Cosmos DB '{cosmosDB.Id}' provisioning state: {cosmosDB.Inner.ProvisioningState}");
-                    rpAssets.ActiveKeyName = cosmosDBActiveKeyName;
 
                     try
                     {
-                        var dbConnectionStrings = await cosmosDB.ListConnectionStringsAsync();
-                        rpAssets.CosmosDBConnectionStrings = dbConnectionStrings.ConnectionStrings.Select(c => new CosmosDBConnectionString()
-                        {
-                            ConnectionString = c.ConnectionString,
-                            Description = c.Description,
-                        });
-
                         var regionalCosmosDBCredentialManager = new CosmosDBCredentialLifeCycleManager(cosmosDB, new SystemTimeSource(), _logger);
                         dataAssets.RegionalDBConnectionString = await regionalCosmosDBCredentialManager.GetActiveConnectionStringAsync();
                         dataAssets.RegionalDBReadonlyConnectionString = await regionalCosmosDBCredentialManager.GetActiveConnectionStringAsync(readOnly: true);
@@ -167,18 +148,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
                 if (globalCosmosDB != null)
                 {
-                    _logger.Information($"Cosmos DB '{globalCosmosDB.Id}' provisioning state: {globalCosmosDB.Inner.ProvisioningState}");
-                    rpAssets.ActiveKeyName = cosmosDBActiveKeyName;
+                    _logger.Information($"Global Cosmos DB '{globalCosmosDB.Id}' provisioning state: {globalCosmosDB.Inner.ProvisioningState}");
 
                     try
                     {
-                        var dbConnectionStrings = await globalCosmosDB.ListConnectionStringsAsync();
-                        rpAssets.GlobalCosmosDBConnectionStrings = dbConnectionStrings.ConnectionStrings.Select(c => new CosmosDBConnectionString()
-                        {
-                            ConnectionString = c.ConnectionString,
-                            Description = c.Description,
-                        });
-
                         var globalCosmosDBCredentialManager = new CosmosDBCredentialLifeCycleManager(globalCosmosDB, new SystemTimeSource(), _logger);
                         dataAssets.GlobalDBConnectionString = await globalCosmosDBCredentialManager.GetActiveConnectionStringAsync();
                         dataAssets.GlobalDBReadonlyConnectionString = await globalCosmosDBCredentialManager.GetActiveConnectionStringAsync(readOnly: true);
@@ -201,20 +174,13 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                         throw new InvalidOperationException("Cannot find the global storage account with Id: " + globalStorageResourceId);
                     }
 
-                    rpAssets.GlobalStorageAccountName = gblStor.Name;
                     dataAssets.GlobalStorageAccountName = gblStor.Name;
                 }
 
                 if (dataPlaneSubscriptions != null)
                 {
-                    rpAssets.DataPlaneSubscriptions = dataPlaneSubscriptions.Select(sub => new DataPlaneSubscriptionInfo() { SubscriptionId = sub });
                     dataAssets.DataPlaneSubscriptions = dataPlaneSubscriptions.Select(sub => new DataPlaneSubscriptionInfo() { SubscriptionId = sub });
                 }
-
-                _logger.Information("Puting the RPAssetOptions in the key vault ...");
-#pragma warning disable CS0618 // Type or member is obsolete
-                await regionalKVValet.SetSecretAsync($"{secretPrefix}-{nameof(RPAssetOptions)}", rpAssets.ToJson(), namingContext.Tags);
-#pragma warning restore CS0618 // Type or member is obsolete
 
                 _logger.Information("Puting the DataAssetOptions in the key vault ...");
                 await regionalKVValet.SetSecretAsync($"{secretPrefix}-{nameof(DataAssetOptions)}", dataAssets.ToJson(), namingContext.Tags);
@@ -260,7 +226,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     _logger.Information("Copied {copiedSecretCount} secrets from central key vault to local key vault.", cnt);
                 }
 
-                return (rpAssets, dataAssets);
+                return dataAssets;
             }
         }
 

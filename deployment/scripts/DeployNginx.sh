@@ -37,6 +37,7 @@ $Helm upgrade $helmReleaseName --install --wait --timeout 25m \
 --set controller.image.repository="$liftrACRURI/ingress-nginx/controller" \
 --set controller.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
 --set controller.service.enableHttp=false \
+--set controller.service.externalTrafficPolicy=Local \
 --set controller.addHeaders.X-Content-Type-Options="nosniff" \
 --set defaultBackend.image.repository="$liftrACRURI/defaultbackend-amd64" \
 --namespace "$namespace" ingress-nginx-*.tgz
@@ -47,6 +48,7 @@ $Helm upgrade $helmReleaseName --install --wait --timeout 25m \
 --set controller.image.repository="$liftrACRURI/ingress-nginx/controller" \
 --set controller.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
 --set controller.service.enableHttp=false \
+--set controller.service.externalTrafficPolicy=Local \
 --set controller.addHeaders.X-Content-Type-Options="nosniff" \
 --set defaultBackend.image.repository="$liftrACRURI/defaultbackend-amd64" \
 --set controller.service.loadBalancerIP=$PublicIP \

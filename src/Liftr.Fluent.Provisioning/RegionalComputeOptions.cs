@@ -17,8 +17,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public string ComputeBaseName { get; set; }
 
-        public string ActiveDBKeyName { get; set; }
-
         public string SecretPrefix { get; set; }
 
         public string GlobalStorageResourceId { get; set; }

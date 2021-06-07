@@ -67,24 +67,6 @@ liftrACRURI=$(<bin/acr-endpoint.txt)
 fi
 echo "liftrACRURI: $liftrACRURI"
 
-if [ "$VaultName" = "" ]; then
-echo "Read VaultName from file 'bin/vault-name.txt'."
-VaultName=$(<bin/vault-name.txt)
-    if [ "$VaultName" = "" ]; then
-        echo "Please set the name of the Key Vault with certificates using variable 'VaultName' ..."
-        exit 1 # terminate and indicate error
-    fi
-fi
-
-if [ "$GlobalVaultName" = "" ]; then
-echo "Read GlobalVaultName from file 'bin/vault-name.txt'."
-GlobalVaultName=$(<bin/global-vault-name.txt)
-    if [ "$GlobalVaultName" = "" ]; then
-        echo "Please set the name of the Key Vault with certificates using variable 'GlobalVaultName' ..."
-        exit 1 # terminate and indicate error
-    fi
-fi
-
 if [ "$AKSDomain" = "" ]; then
 echo "Read AKSDomain from file 'bin/aks-domain.txt'."
 AKSDomain=$(<bin/aks-domain.txt)
@@ -104,7 +86,7 @@ set -e
 
 ThanosFlag="--set prometheus.prometheusSpec.replicas=1 "
 
-if [ -f bin/enable-thanos.txt ]; then
+if [ -f bin/thanos-client-ip.txt ]; then
 echo "Thanos is enabled."
 
 if [ "$DiagStorName" = "" ]; then
@@ -126,25 +108,9 @@ DiagStorKey=$(<bin/diag-stor-key.txt)
     fi
 fi
 
-./CreateCertificateSecret.sh \
---DeploymentSubscriptionId=$DeploymentSubscriptionId \
---VaultName=$GlobalVaultName \
---KeyVaultSecretName="thanos-api" \
---tlsSecretName="dummy-tls-secret" \
---caSecretName="thanos-ca-secret" \
---Namespace=$namespace
-
-./CreateCertificateSecret.sh \
---DeploymentSubscriptionId=$DeploymentSubscriptionId \
---VaultName=$VaultName \
---KeyVaultSecretName="ssl-cert" \
---tlsSecretName="thanos-ingress-secret" \
---caSecretName="dummy-ca-secret" \
---Namespace=$namespace
-
 set +e
 kubectl -n $namespace delete secret thanos-objstore-config
-$Helm uninstall $helmReleaseName -n $namespace
+# $Helm uninstall $helmReleaseName -n $namespace
 set -e
 
 sed -i "s|STOR_NAME_PLACEHOLDER|$DiagStorName|g" thanos-storage-config.yaml
@@ -200,13 +166,6 @@ $Helm upgrade $helmReleaseName kube-prometheus-stack-*.tgz --install --wait \
 --set grafana.image.repository="$liftrACRURI/grafana/grafana" \
 --set grafana.sidecar.image.repository="$liftrACRURI/kiwigrid/k8s-sidecar" \
 $ThanosFlag
-
-if [ ! -f thanos-api.cer ]; then
-    echo "Cannot find the api secret for Thanos. Skip deploying Thanos ingress"
-else
-    echo "Configuring Thanos ingress"
-    kubectl apply -n "$namespace" -f thanos-sidecar-ingress.yaml
-fi
 
 echo "------------------------------------------------------------"
 echo "Finished helm upgrade Prometheus chart"

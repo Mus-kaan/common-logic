@@ -7,10 +7,6 @@ currentScriptName=`basename "$0"`
 echo "CurrentDir: $CurrentDir"
 echo "currentScriptName: $currentScriptName"
 
-if [ "$ActiveKey" = "" ]; then
-    ActiveKey="Primary MongoDB Connection String"
-fi
-
 ./ExecuteDeploymentRunner.sh \
 --ProvisionAction="CreateOrUpdateRegionalData" \
 --EnvName="$APP_ASPNETCORE_ENVIRONMENT" \

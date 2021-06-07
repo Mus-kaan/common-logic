@@ -78,7 +78,7 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                 if (_hostingOptions.EnableThanos)
                 {
-                    File.WriteAllText("enable-thanos.txt", "true");
+                    File.WriteAllText("thanos-client-ip.txt", hostingEnvironmentOptions.ThanosClientIPRange);
                 }
 
                 _logger.Information("ActionExecutor Action:{ExeAction}", _commandOptions.Action);

@@ -9,14 +9,14 @@
     },
     "2_wcus-data": {
       "commandName": "Project",
-      "commandLineArgs": "-a CreateOrUpdateRegionalData -e Test -r westcentralus --authFile my.azureauth-ms.auth.json --activeKey \"Primary MongoDB Connection String\"",
+      "commandLineArgs": "-a CreateOrUpdateRegionalData -e Test -r westcentralus --authFile my.azureauth-ms.auth.json",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "2_eastus-data": {
       "commandName": "Project",
-      "commandLineArgs": "-a CreateOrUpdateRegionalData -e Test -r eastus --authFile my.azureauth-ms.auth.json --activeKey \"Primary MongoDB Connection String\"",
+      "commandLineArgs": "-a CreateOrUpdateRegionalData -e Test -r eastus --authFile my.azureauth-ms.auth.json",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -72,7 +72,7 @@
     },
     "ut_2_eastus-data": {
       "commandName": "Project",
-      "commandLineArgs": "-a CreateOrUpdateRegionalData -f unit-test-hosting-options.json -e Test -r eastus --authFile liftr-ms-unit-test-only.auth.json --activeKey \"Primary MongoDB Connection String\"",
+      "commandLineArgs": "-a CreateOrUpdateRegionalData -f unit-test-hosting-options.json -e Test -r eastus --authFile liftr-ms-unit-test-only.auth.json",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "AMEDev"
       }

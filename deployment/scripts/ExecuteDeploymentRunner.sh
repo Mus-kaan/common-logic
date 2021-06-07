@@ -52,10 +52,6 @@ if [ -z ${Region+x} ]; then
     exit 1
 fi
 
-if [ -z ${ActiveKey+x} ]; then
-    ActiveKey="Primary MongoDB Connection String"
-fi
-
 if [ "$RunnerSPNObjectId" = "" ]; then
     echo "Please set the object Id of the executing service principal using variable 'RunnerSPNObjectId' ..."
     exit 1 # terminate and indicate error
@@ -68,8 +64,7 @@ dotnet Deployment.Runner.dll \
 -f "$ConfigFilePath" \
 -e "$EnvName" \
 -r "$Region" \
---spnObjectId "$RunnerSPNObjectId" \
---activeKey "$ActiveKey"
+--spnObjectId "$RunnerSPNObjectId"
 
 exit_code=$?
 if [ $exit_code -ne 0 ]; then

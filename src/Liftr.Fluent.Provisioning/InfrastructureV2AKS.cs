@@ -153,8 +153,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             IStorageAccount thanosStorage = null;
             if (computeOptions.EnableThanos)
             {
-                var thanosStorageName = namingContext.GenerateCommonName(computeOptions.ComputeBaseName, suffix: "tha", delimiter: string.Empty);
-                thanosStorage = await liftrAzure.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, thanosStorageName, namingContext.Tags);
+                thanosStorage = await liftrAzure.GetStorageAccountAsync(dataRGName, namingContext.ThanosStorageAccountName(computeOptions.DataBaseName));
             }
 
             var aks = await liftrAzure.GetAksClusterAsync(rgName, aksName);

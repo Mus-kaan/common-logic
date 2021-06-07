@@ -82,6 +82,11 @@ namespace Microsoft.Liftr.Hosting.Contracts
             foreach (var env in Environments)
             {
                 env.CheckValid();
+
+                if (EnableThanos && string.IsNullOrEmpty(env.ThanosClientIPRange))
+                {
+                    throw new InvalidHostingOptionException($"Since Thanos is enabled, please provide '{nameof(env.ThanosClientIPRange)}'.");
+                }
             }
         }
     }

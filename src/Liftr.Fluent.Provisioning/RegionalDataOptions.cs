@@ -10,8 +10,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 {
     public class RegionalDataOptions
     {
-        public string ActiveDBKeyName { get; set; }
-
         public string SecretPrefix { get; set; }
 
         public string DomainName { get; set; }
@@ -36,15 +34,12 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public bool EnableVNet { get; set; }
 
+        public bool EnableThanos { get; set; }
+
         public bool DBSupport { get; set; } = true;
 
         public void CheckValid()
         {
-            if (DBSupport && string.IsNullOrEmpty(ActiveDBKeyName))
-            {
-                throw new InvalidHostingOptionException($"{nameof(ActiveDBKeyName)} should not be null.");
-            }
-
             if (string.IsNullOrEmpty(DomainName))
             {
                 throw new InvalidHostingOptionException($"{nameof(DomainName)} should not be null.");
@@ -81,18 +76,6 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 {
                     throw new InvalidHostingOptionException("data plane Subscriptions cannot be empty.");
                 }
-            }
-
-            if (!DBSupport || ActiveDBKeyName.OrdinalEquals("Primary MongoDB Connection String")
-            || ActiveDBKeyName.OrdinalEquals("Secondary MongoDB Connection String")
-            || ActiveDBKeyName.OrdinalEquals("Primary Read-Only MongoDB Connection String")
-            || ActiveDBKeyName.OrdinalEquals("Secondary Read-Only MongoDB Connection String"))
-            {
-                return;
-            }
-            else
-            {
-                throw new InvalidHostingOptionException($"{nameof(ActiveDBKeyName)} must be one of the following: 'Primary MongoDB Connection String', 'Secondary MongoDB Connection String', 'Primary Read-Only MongoDB Connection String', 'Secondary Read-Only MongoDB Connection String'.");
             }
         }
     }

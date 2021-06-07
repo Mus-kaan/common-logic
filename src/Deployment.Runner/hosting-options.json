@@ -4,12 +4,14 @@
   "SecretPrefix": "SampleRP",
   //"IcMConnectorId": "2bb00c56-1a2d-477b-9b02-05562eb1f8b2",
   //"IcMNotificationEmail": "your_email@microsoft.com",
+  "EnableThanos": true,
   "Environments": [
     {
       "EnvironmentName": "Dev",
       "DomainName": "sp-dev.azliftr-test.io",
       "AzureSubscription": "af20b225-d632-4791-97a0-2b33fa486420", // 'Liftr - Platform'
       "EnableVNet": false,
+      "ThanosClientIPRange": "20.69.173.84, 20.69.173.113, 20.69.173.209",
       "IPPerRegion": 5,
       "OneCertCertificates": { // key is certificate name, value is certificate subject
         "GenevaClientCert": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net",
@@ -26,19 +28,19 @@
       },
       "Global": {
         "Location": "centralus",
-        "BaseName": "gbl210115",
+        "BaseName": "gbl210501",
         "AddGlobalDB": true
       },
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "da210201",
-          "ComputeBaseName": "co210601"
+          "DataBaseName": "da210601",
+          "ComputeBaseName": "co210607"
         },
         {
           "Location": "eastus",
-          "DataBaseName": "da210201",
-          "ComputeBaseName": "co210601"
+          "DataBaseName": "da210601",
+          "ComputeBaseName": "co210607"
         }
       ]
     },
@@ -47,6 +49,7 @@
       "DomainName": "sp-test.azliftr-test.io",
       "AzureSubscription": "eebfbfdb-4167-49f6-be43-466a6709609f", // 'Liftr - TEST'
       "EnableVNet": true,
+      "ThanosClientIPRange": "20.69.173.84, 20.69.173.113, 20.69.173.209",
       "LogAnalyticsWorkspaceId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.OperationalInsights/workspaces/sample-partner-log",
       "DiagnosticsStorageId": "/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourceGroups/liftr-dev-wus-rg/providers/Microsoft.Storage/storageAccounts/liftrdiagonstics",
       "OneCertCertificates": { // key is certificate name, value is certificate subject
@@ -63,19 +66,19 @@
       },
       "Global": {
         "Location": "centralus",
-        "BaseName": "gbl20200102",
+        "BaseName": "gbl210501",
         "AddGlobalDB": true
       },
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "data20200506",
-          "ComputeBaseName": "co210601"
+          "DataBaseName": "da210601",
+          "ComputeBaseName": "co210607"
         },
         {
           "Location": "eastus",
-          "DataBaseName": "data20200506",
-          "ComputeBaseName": "co210601"
+          "DataBaseName": "da210601",
+          "ComputeBaseName": "co210607"
         }
       ]
     }

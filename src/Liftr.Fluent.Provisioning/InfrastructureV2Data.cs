@@ -100,6 +100,12 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 await provisionedResources.StorageAccount.WithAccessFromIpAddressAsync(currentPublicIP, _logger);
             }
 
+            if (dataOptions.EnableThanos)
+            {
+                var thanosStorageName = namingContext.ThanosStorageAccountName(baseName);
+                provisionedResources.ThanosStorageAccount = await liftrAzure.GetOrCreateStorageAccountAsync(namingContext.Location, rgName, thanosStorageName, namingContext.Tags);
+            }
+
             if (dataOptions.DataPlaneSubscriptions != null)
             {
                 foreach (var subscrptionId in dataOptions.DataPlaneSubscriptions)
@@ -142,14 +148,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 await liftrAzure.GrantQueueContributorAsync(asicStorage, provisionedResources.ManagedIdentity);
             }
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            (provisionedResources.RPAssetOptions, provisionedResources.DataAssetOptions) = await AddKeyVaultSecretsAsync(
-#pragma warning restore CS0618 // Type or member is obsolete
+            provisionedResources.DataAssetOptions = await AddKeyVaultSecretsAsync(
                 namingContext,
                 provisionedResources.KeyVault,
                 dataOptions.SecretPrefix,
                 provisionedResources.StorageAccount,
-                dataOptions.ActiveDBKeyName,
                 provisionedResources.CosmosDBAccount,
                 dataOptions.GlobalStorageResourceId,
                 dataOptions.GlobalKeyVaultResourceId,

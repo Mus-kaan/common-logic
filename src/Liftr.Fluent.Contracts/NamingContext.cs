@@ -82,6 +82,18 @@ namespace Microsoft.Liftr.Fluent.Contracts
             return name;
         }
 
+        public string ThanosStorageAccountName(string baseName)
+        {
+            var name = "tha" + GenerateCommonName(baseName, suffix: null, noRegion: false, delimiter: string.Empty);
+            name = name.ToLowerInvariant();
+            if (name.Length > 24)
+            {
+                throw new InvalidOperationException($"{nameof(StorageAccountName)} cannot be longer than 24 characters. name: " + name);
+            }
+
+            return name;
+        }
+
         public string NetworkName(string baseName)
             => GenerateCommonName(baseName, "vnet");
 
