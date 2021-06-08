@@ -6,7 +6,6 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Microsoft.Liftr.Hosting.Contracts
 {
@@ -46,36 +45,8 @@ namespace Microsoft.Liftr.Hosting.Contracts
 
             if (isAKS && SupportAvailabilityZone)
             {
-                ValidateAKSZoneLocation(Location);
+                AvailabilityZoneRegionLookup.HasSupportAKS(Location);
             }
-        }
-
-        public static void ValidateAKSZoneLocation(Region location)
-        {
-            // https://docs.microsoft.com/en-us/azure/aks/availability-zones#limitations-and-region-availability  #Add or update locations if doc is updated.
-            Region[] locationsWithAvailabilityZone =
-                {
-                Region.AustraliaEast,
-                Region.CanadaCentral,
-                Region.USCentral,
-                Region.USEast,
-                Region.USEast2,
-                Region.FranceCentral,
-                Region.JapanEast,
-                Region.EuropeNorth,
-                Region.AsiaSouthEast,
-                Region.UKSouth,
-                Region.EuropeWest,
-                Region.USWest2,
-                Region.USSouthCentral,
-                };
-
-            if (locationsWithAvailabilityZone.Contains(location))
-            {
-                return;
-            }
-
-            throw new InvalidHostingOptionException($"Availability Zone support is not provided for region '{location}'. Please verify from this doc: https://docs.microsoft.com/en-us/azure/aks/availability-zones#limitations-and-region-availability ");
         }
     }
 }
