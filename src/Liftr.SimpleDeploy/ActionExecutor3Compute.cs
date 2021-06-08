@@ -153,6 +153,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 if (computeResources.ThanosStorageAccount != null)
                 {
                     // write the Thanos storage credential to disk so the helm deployment can utilize it.
+                    _logger.Information("Writing Thanos storage metadata to disk of storage account '{thanosStorageId}'.", computeResources.ThanosStorageAccount.Id);
                     var storageCredentailManager = new StorageAccountCredentialLifeCycleManager(computeResources.ThanosStorageAccount, new SystemTimeSource(), _logger);
                     var storKey = await storageCredentailManager.GetActiveKeyAsync();
                     File.WriteAllText("diag-stor-name.txt", computeResources.ThanosStorageAccount.Name);
