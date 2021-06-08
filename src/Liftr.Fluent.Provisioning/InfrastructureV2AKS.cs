@@ -154,6 +154,10 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             if (computeOptions.EnableThanos)
             {
                 thanosStorage = await liftrAzure.GetStorageAccountAsync(dataRGName, namingContext.ThanosStorageAccountName(computeOptions.DataBaseName));
+                if (thanosStorage == null)
+                {
+                    throw new InvalidOperationException("Cannot find the Thanos storage account.");
+                }
             }
 
             var aks = await liftrAzure.GetAksClusterAsync(rgName, aksName);
