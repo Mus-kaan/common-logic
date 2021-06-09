@@ -837,8 +837,8 @@ namespace Microsoft.Liftr.Fluent
                 .Define(nsgName)
                 .WithRegion(location)
                 .WithExistingResourceGroup(rgName)
-                .AllowAny80InBound()
-                .AllowAny443InBound()
+                .AllowAny80TCPInBound()
+                .AllowAny443TCPInBound()
                 .WithTags(tags)
                 .CreateAsync();
 
