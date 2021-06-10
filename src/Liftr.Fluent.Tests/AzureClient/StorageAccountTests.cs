@@ -4,9 +4,11 @@
 
 using Azure.Storage.Blobs;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Logging.Blob;
 using System;
@@ -44,6 +46,15 @@ namespace Microsoft.Liftr.Fluent.Tests
 
                     var st = await az.GetOrCreateStorageAccountAsync(TestCommon.Location, scope.ResourceGroupName, name, TestCommon.Tags, subnet?.Inner?.Id);
                     st = await st.RemoveUnusedVNetRulesAsync(azFactory, logger);
+
+                    if (AvailabilityZoneRegionLookup.HasSupportStorage(TestCommon.Location))
+                    {
+                        Assert.Equal(st.SkuType.Name.Value, StorageAccountSkuType.Standard_ZRS.Name.Value);
+                    }
+                    else
+                    {
+                        Assert.Equal(st.SkuType.Name.Value, StorageAccountSkuType.Standard_GRS.Name.Value);
+                    }
 
                     var currentPublicIP = await MetadataHelper.GetPublicIPAddressAsync();
                     await st.WithAccessFromIpAddressAsync(currentPublicIP, logger);

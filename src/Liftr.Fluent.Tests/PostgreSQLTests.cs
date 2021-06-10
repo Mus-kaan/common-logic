@@ -4,6 +4,7 @@
 
 using Microsoft.Azure.Management.PostgreSQL.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.Management.PostgreSQL;
@@ -61,6 +62,60 @@ namespace Microsoft.Liftr.Fluent.Tests
             catch (Exception ex)
             {
                 scope.Logger.Error(ex, "PostgreSQL test failed");
+                scope.TimedOperation.FailOperation(ex.Message);
+                throw;
+            }
+        }
+
+        [CheckInValidation(skipLinux: true)]
+        public async Task VerifyPostgreSQLFlexibleServerCreationAsync()
+        {
+            using var scope = new TestResourceGroupScope("ut-pgsql-", _output);
+            try
+            {
+                var azure = scope.Client;
+                await azure.RegisterPostgreSQLRPAsync();
+
+                var rg = await azure.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
+                var name = SdkContext.RandomResourceName("tt-pgsql-flexible-", 15);
+
+                var pswd = Guid.NewGuid().ToString();
+                var createParameters = new Microsoft.Azure.Management.PostgreSQL.FlexibleServers.Models.Server()
+                {
+                    AdministratorLogin = "testUser",
+                    AdministratorLoginPassword = pswd,
+                    HaEnabled = Azure.Management.PostgreSQL.FlexibleServers.Models.HAEnabledEnum.Enabled,
+                    Location = TestCommon.Location.Name,
+                    StorageProfile = new Azure.Management.PostgreSQL.FlexibleServers.Models.StorageProfile()
+                    {
+                        BackupRetentionDays = 7,
+                        StorageMB = 32768,
+                    },
+                    Version = "11",
+                    Sku = new Azure.Management.PostgreSQL.FlexibleServers.Models.Sku()
+                    {
+                        Name = "Standard_E2s_v3",
+                        Tier = "MemoryOptimized",
+                    },
+                };
+
+                var server = await azure.CreatePostgreSQLFlexibleServerAsync(rg.Name, name, createParameters);
+
+                var ip = "131.107.159.44";
+                await azure.PostgreSQLFlexibleServerAddIPAsync(rg.Name, name, ip);
+                await azure.PostgreSQLFlexibleServerAddIPAsync(rg.Name, name, ip);
+                await azure.PostgreSQLFlexibleServerRemoveIPAsync(rg.Name, name, ip);
+                await azure.PostgreSQLFlexibleServerRemoveIPAsync(rg.Name, name, ip);
+
+                var listResult = await azure.ListPostgreSQLFlexibleServersAsync(rg.Name);
+                Assert.Single(listResult);
+
+                var getResult = await azure.GetPostgreSQLFlexibleServerAsync(rg.Name, name);
+                Assert.Equal(name, getResult.Name);
+            }
+            catch (Exception ex)
+            {
+                scope.Logger.Error(ex, "PostgreSQL flexible server test failed");
                 scope.TimedOperation.FailOperation(ex.Message);
                 throw;
             }

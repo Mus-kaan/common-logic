@@ -8,6 +8,7 @@ using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.DataSource.Mongo.MonitoringSvc;
 using Microsoft.Liftr.DataSource.Mongo.Tests.Common;
 using Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc;
+using Microsoft.Liftr.Fluent.Contracts;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,7 +38,8 @@ namespace Microsoft.Liftr.Fluent.Tests
                 (var dbAccount, var conn) = await client.CreateCosmosDBAsync(TestCommon.Location, scope.ResourceGroupName, dbName, TestCommon.Tags);
 
                 // Second deployment will not fail.
-                await client.CreateCosmosDBAsync(TestCommon.Location, scope.ResourceGroupName, dbName, TestCommon.Tags);
+                var location = TestCommon.Location;
+                await client.CreateCosmosDBAsync(location, scope.ResourceGroupName, dbName, TestCommon.Tags);
 
                 var dbs = await client.ListCosmosDBAsync(scope.ResourceGroupName);
                 Assert.Single(dbs);
@@ -45,6 +47,8 @@ namespace Microsoft.Liftr.Fluent.Tests
                 var db = dbs.First();
                 Assert.Equal(dbName, db.Name);
                 TestCommon.CheckCommonTags(db.Inner.Tags);
+                Assert.Single(db.Inner.Locations);
+                Assert.Equal(AvailabilityZoneRegionLookup.HasSupportCosmosDB(location), db.Inner.Locations[0].IsZoneRedundant);
 
                 var option = new MockMongoOptions() { ConnectionString = conn, DatabaseName = "unit-test" };
                 var collectionFactory = new MongoCollectionsFactory(option, scope.Logger);

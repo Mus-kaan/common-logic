@@ -22,5 +22,37 @@ namespace Microsoft.Liftr.Fluent.Tests
                 AvailabilityZoneRegionLookup.HasSupportAKS(Region.AsiaEast);
             });
         }
+
+        [Fact]
+        public void CheckCosmosDBZoneSupport()
+        {
+            Assert.True(AvailabilityZoneRegionLookup.HasSupportCosmosDB(Region.CanadaCentral));
+
+            Assert.False(AvailabilityZoneRegionLookup.HasSupportCosmosDB(Region.UAENorth));
+        }
+
+        [Fact]
+        public void CheckACRZoneSupport()
+        {
+            Assert.True(AvailabilityZoneRegionLookup.HasSupportACR(Region.EuropeNorth));
+
+            Assert.False(AvailabilityZoneRegionLookup.HasSupportACR(Region.USWest));
+        }
+
+        [Fact]
+        public void CheckStorgeZoneSupport()
+        {
+            Assert.True(AvailabilityZoneRegionLookup.HasSupportStorage(Region.BrazilSouth));
+
+            Assert.False(AvailabilityZoneRegionLookup.HasSupportStorage(Region.IndiaWest));
+        }
+
+        [Fact]
+        public void CheckPostgresZoneSupport()
+        {
+            Assert.True(AvailabilityZoneRegionLookup.HasSupportPostgresSQL(Region.EuropeWest));
+
+            Assert.False(AvailabilityZoneRegionLookup.HasSupportPostgresSQL(Region.FranceSouth));
+        }
     }
 }

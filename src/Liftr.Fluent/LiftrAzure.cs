@@ -535,6 +535,13 @@ namespace Microsoft.Liftr.Fluent
                     .WithAccessFromNetworkSubnet(accessFromSubnetId);
             }
 
+            if (AvailabilityZoneRegionLookup.HasSupportStorage(location))
+            {
+                // GZRS & RAGZRS also have zone redundant but might violate "data resident" as the paired region might be out of GEO
+                storageAccountCreatable = storageAccountCreatable
+                    .WithSku(StorageAccountSkuType.Standard_ZRS);
+            }
+
             var storageAccount = await storageAccountCreatable.CreateAsync();
 
             _logger.Information("Created storage account with {resourceId}", storageAccount.Id);
@@ -1119,10 +1126,10 @@ namespace Microsoft.Liftr.Fluent
             IDictionary<string, string> tags,
             ISubnet subnet = null)
         {
-            var helper = new CosmosDBHelper(_logger);
             var cosmosDBAccount = await GetCosmosDBAsync(rgName, cosmosDBName);
             if (cosmosDBAccount == null)
             {
+                var helper = new CosmosDBHelper(_logger);
                 cosmosDBAccount = await helper.CreateCosmosDBAsync(this, location, rgName, cosmosDBName, tags);
 
                 if (subnet != null)
@@ -1508,14 +1515,8 @@ namespace Microsoft.Liftr.Fluent
 
             if (acr == null)
             {
-                _logger.Information("Creating ACR with name {acrName} in RG {rgName} ...", acrName, rgName);
-                acr = await FluentClient.ContainerRegistries
-                    .Define(acrName)
-                    .WithRegion(location)
-                    .WithExistingResourceGroup(rgName)
-                    .WithPremiumSku()
-                    .WithTags(tags)
-                    .CreateAsync();
+                var helper = new ACRHelper(_logger);
+                acr = await helper.CreateACRAsync(this, location, rgName, acrName, tags);
                 _logger.Information("Created ACR with Id {resourceId}.", acr.Id);
             }
 

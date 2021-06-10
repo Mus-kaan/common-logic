@@ -3,18 +3,25 @@
   "contentVersion": "1.0.0.0",
   "resources": [
     {
-      "name": "WILL_BE_CHANGED [parameters('keyVaultName')]",
+      "name": "WILL_BE_CHANGED [parameters('cosmosDBName')]",
       "type": "Microsoft.DocumentDB/databaseAccounts",
       "apiVersion": "2020-09-01",
       "location": "WILL_BE_CHANGED [parameters('location')]",
       "tags": {
-        "WILL_BE_CHANGED_displayName": "Key Vault with logging"
+        "WILL_BE_CHANGED_displayName": "CosmosDB with MongoDB interface"
       },
       "kind": "MongoDB",
       "properties": {
         "consistencyPolicy": {
           "defaultConsistencyLevel": "Strong"
         },
+        "locations": [
+          {
+            "failoverPriority": 0,
+            "isZoneRedundant": "WILL_BE_CHANGED [parameters('az')]",
+            "locationName": "WILL_BE_CHANGED [parameters('location')]"
+          }
+        ],
         "databaseAccountOfferType": "Standard",
         "enableFreeTier": false,
         "apiProperties": {
