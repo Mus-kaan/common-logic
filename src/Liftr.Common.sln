@@ -217,7 +217,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Identity", "Liftr.Ide
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Metrics.Prometheus", "Liftr.Metrics.Prometheus\Liftr.Metrics.Prometheus.csproj", "{DFD19170-BEB6-4296-AA65-CA59AFB66BA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Metrics.Prometheus.Tests", "Liftr.Metrics.Prometheus.Tests\Liftr.Metrics.Prometheus.Tests.csproj", "{7C83C103-86B6-459D-8DC4-97603A7E8D66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Metrics.Prometheus.Tests", "Liftr.Metrics.Prometheus.Tests\Liftr.Metrics.Prometheus.Tests.csproj", "{7C83C103-86B6-459D-8DC4-97603A7E8D66}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.ManagedIdentity", "Liftr.ManagedIdentity\Liftr.ManagedIdentity.csproj", "{615BABCE-B184-4320-BFF0-15A87BDB4130}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -621,6 +623,10 @@ Global
 		{7C83C103-86B6-459D-8DC4-97603A7E8D66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C83C103-86B6-459D-8DC4-97603A7E8D66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C83C103-86B6-459D-8DC4-97603A7E8D66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{615BABCE-B184-4320-BFF0-15A87BDB4130}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{615BABCE-B184-4320-BFF0-15A87BDB4130}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{615BABCE-B184-4320-BFF0-15A87BDB4130}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{615BABCE-B184-4320-BFF0-15A87BDB4130}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

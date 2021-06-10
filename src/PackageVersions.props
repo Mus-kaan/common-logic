@@ -39,6 +39,7 @@
     <PackageVersion_Microsoft_Extensions_Http_Polly>3.1.13</PackageVersion_Microsoft_Extensions_Http_Polly>
     <PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions>3.1.13</PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions>
     <PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>5.2.7</PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>
+    <PackageVersion_Microsoft_Identity_Client>4.22.0</PackageVersion_Microsoft_Identity_Client>
     <PackageVersion_Microsoft_IFxAudit>1.0.1200</PackageVersion_Microsoft_IFxAudit>
     <PackageVersion_Microsoft_Liftr_EV2>[5.5.1606-build1117]</PackageVersion_Microsoft_Liftr_EV2>
     <PackageVersion_Microsoft_NET_Test_Sdk>16.0.1</PackageVersion_Microsoft_NET_Test_Sdk>
