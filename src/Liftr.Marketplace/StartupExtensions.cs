@@ -7,6 +7,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Liftr.Contracts;
+using Microsoft.Liftr.Marketplace.Agreement.Interfaces;
+using Microsoft.Liftr.Marketplace.Agreement.Options;
+using Microsoft.Liftr.Marketplace.Agreement.Service;
 using Microsoft.Liftr.Marketplace.ARM;
 using Microsoft.Liftr.Marketplace.ARM.Interfaces;
 using Microsoft.Liftr.Marketplace.ARM.Options;
@@ -206,6 +209,68 @@ namespace Microsoft.Liftr.Marketplace.Saas
             });
         }
 
+        /// <summary>
+        /// This method adds the Marketplace Agreement Client for signing the agreement before SaaS resource creation
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="configuration"></param>
+        /// <param name="consoleLog">Generate a console logger without retrieving the logger from DI container.</param>
+        public static void AddMarketplaceAgreementClient(this IServiceCollection services, IConfiguration configuration, bool consoleLog = false)
+        {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException(nameof(configuration));
+            }
+
+            services.Configure<MarketplaceAgreementOptions>(configuration.GetSection(nameof(MarketplaceAgreementOptions)));
+            services.Configure<MarketplaceAgreementOptions>((mpARMOptions) =>
+            {
+                mpARMOptions.AuthOptions.KeyVaultEndpoint = new Uri(configuration[GlobalSettingConstants.VaultEndpoint]);
+            });
+
+            services.AddSingleton<ISignAgreementRestClient, SignAgreementRestClient>(sp =>
+            {
+                var agreementOptions = sp.GetService<IOptions<MarketplaceAgreementOptions>>().Value;
+                var logger = consoleLog ? Liftr.Logging.LoggerFactory.ConsoleLogger : sp.GetService<Serilog.ILogger>();
+
+                if (!Validate(agreementOptions))
+                {
+                    var ex = new InvalidOperationException($"Please make sure '{nameof(MarketplaceAgreementOptions)}' is set properly.");
+                    logger.LogError(ex.Message);
+                    throw ex;
+                }
+
+                var kvClient = sp.GetService<IKeyVaultClient>();
+                if (kvClient == null)
+                {
+                    var ex = new InvalidOperationException("Marketplace Agreement Init] Cannot find a key vault client in the dependency injection container");
+                    logger.LogError(ex.Message);
+                    throw ex;
+                }
+
+                var certStore = new CertificateStore(kvClient, logger);
+
+                return new SignAgreementRestClient(agreementOptions, logger, certStore);
+            });
+
+            services.AddSingleton<ISignAgreementService, SignAgreementService>(sp =>
+            {
+                var logger = consoleLog ? Liftr.Logging.LoggerFactory.ConsoleLogger : sp.GetService<Serilog.ILogger>();
+
+                var signAgreementRestClient = sp.GetService<ISignAgreementRestClient>();
+                if (signAgreementRestClient == null)
+                {
+                    var ex = new InvalidOperationException("Marketplace Agreement Init] Cannot find a signAgreementRestClient in the dependency injection container");
+                    logger.LogError(ex.Message);
+                    throw ex;
+                }
+
+                return new SignAgreementService(
+                    signAgreementRestClient,
+                    logger);
+            });
+        }
+
         private static bool Validate(SingleTenantAADAppTokenProviderOptions options)
         {
             if (options == null
@@ -215,6 +280,21 @@ namespace Microsoft.Liftr.Marketplace.Saas
                 || string.IsNullOrWhiteSpace(options.ApplicationId)
                 || string.IsNullOrWhiteSpace(options.CertificateName)
                 || string.IsNullOrWhiteSpace(options.TenantId))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool Validate(MarketplaceAgreementOptions options)
+        {
+            if (options == null
+                || options.API.Endpoint == null
+                || string.IsNullOrWhiteSpace(options.API.ApiVersion)
+                || options.AuthOptions == null
+                || options.AuthOptions.KeyVaultEndpoint == null
+                || string.IsNullOrWhiteSpace(options.AuthOptions.CertificateName))
             {
                 return false;
             }

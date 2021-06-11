@@ -26,6 +26,9 @@ namespace Microsoft.Liftr.Marketplace.ARM.Models
         [JsonProperty(PropertyName = "x-ms-client-app-id")]
         public string MSClientAppId { get; set; }
 
+        [JsonProperty(PropertyName = "x-ms-client-subscription-id")]
+        public string MSClientSubscriptionId { get; set; }
+
         public bool IsValid()
         {
             // TODO: figure out which ones are the really used ones.

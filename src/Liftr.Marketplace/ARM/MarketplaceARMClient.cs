@@ -9,6 +9,7 @@ using Microsoft.Liftr.Marketplace.ARM.Interfaces;
 using Microsoft.Liftr.Marketplace.ARM.Models;
 using Microsoft.Liftr.Marketplace.Contracts;
 using Microsoft.Liftr.Marketplace.Exceptions;
+using Microsoft.Liftr.Marketplace.Utils;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -23,9 +24,7 @@ namespace Microsoft.Liftr.Marketplace.ARM
     public sealed class MarketplaceARMClient : IMarketplaceARMClient
     {
         private const string ResourceTypePath = "api/saasresources/subscriptions";
-        private const string SubscriptionResourceTypePath = "api/resources/subscriptions/";
         private const string PaymentValidationPath = "api/paymentValidation";
-        private const string MarketplaceLiftrStoreFront = "StoreForLiftr";
         private readonly ILogger _logger;
         private readonly MarketplaceRestClient _marketplaceRestClient;
 
@@ -57,7 +56,7 @@ namespace Microsoft.Liftr.Marketplace.ARM
             using var op = _logger.StartTimedOperation(nameof(CreateSaaSResourceAsync));
             try
             {
-                var additionalHeaders = GetAdditionalMarketplaceHeaders(requestMetadata);
+                var additionalHeaders = HttpRequestHelper.GetAdditionalMarketplaceHeaders(requestMetadata);
                 var json = saasResourceProperties.ToJObject();
                 var createdResource = await _marketplaceRestClient.SendRequestWithPollingAsync<BaseOperationResponse>(HttpMethod.Put, ResourceTypePath, additionalHeaders, json);
                 var subscriptionDetails = createdResource.SubscriptionDetails;
@@ -92,9 +91,9 @@ namespace Microsoft.Liftr.Marketplace.ARM
                 var resourceName = saasResourceProperties.Name;
                 _logger.Information($"Subscription Level SAAS resource creation parameters: SubscriptionId: {subscriptionId}, ResourceGroup: {resourceGroup}, ResourceName: {resourceName}");
 
-                var resourceTypePath = GetCompleteRequestPath(subscriptionId, resourceGroup, resourceName);
+                var resourceTypePath = HttpRequestHelper.GetCompleteRequestPathForSubscriptionLevel(subscriptionId, resourceGroup, resourceName);
                 _logger.Information($"Request Path at Subscription Level: {resourceTypePath}");
-                var additionalHeaders = GetAdditionalMarketplaceHeaders(requestMetadata);
+                var additionalHeaders = HttpRequestHelper.GetAdditionalMarketplaceHeaders(requestMetadata);
                 var json = saasResourceProperties.ToJObject();
                 var createdResource = await _marketplaceRestClient.SendRequestWithPollingAsync<BaseOperationResponse>(HttpMethod.Put, resourceTypePath, additionalHeaders, json);
                 var subscriptionDetails = createdResource.SubscriptionDetails;
@@ -146,7 +145,7 @@ namespace Microsoft.Liftr.Marketplace.ARM
 
             try
             {
-                var response = await _marketplaceRestClient.SendRequestAsync<string>(HttpMethod.Delete, resourcePath, GetAdditionalMarketplaceHeaders(requestMetadata));
+                var response = await _marketplaceRestClient.SendRequestAsync<string>(HttpMethod.Delete, resourcePath, HttpRequestHelper.GetAdditionalMarketplaceHeaders(requestMetadata));
                 op.SetResultDescription($"Successfully deleted Marketplace subscription {marketplaceSubscription.ToString()}");
             }
             catch (MarketplaceException ex)
@@ -181,9 +180,9 @@ namespace Microsoft.Liftr.Marketplace.ARM
             }
 
             _logger.Information($"Subscription level SAAS resource deletion parameters: SubscriptionId: {subscriptionId}, ResourceGroup: {resourceGroup}, ResourceName: {resourceName}");
-            var resourceTypePath = GetCompleteRequestPath(subscriptionId, resourceGroup, resourceName);
+            var resourceTypePath = HttpRequestHelper.GetCompleteRequestPathForSubscriptionLevel(subscriptionId, resourceGroup, resourceName);
             _logger.Information($"Path: {resourceTypePath}");
-            var additionalHeaders = GetAdditionalMarketplaceHeaders(requestMetadata);
+            var additionalHeaders = HttpRequestHelper.GetAdditionalMarketplaceHeaders(requestMetadata);
 
             using var op = _logger.StartTimedOperation(nameof(DeleteSaaSResourceAsync));
             op.SetContextProperty(nameof(MarketplaceSubscription), resourceTypePath);
@@ -218,7 +217,7 @@ namespace Microsoft.Liftr.Marketplace.ARM
             try
             {
                 _logger.Information($"Starting SaaS Purchase Payment Validation for Azure Subscription: {paymentValidationRequest.AzureSubscriptionId}, plan: {paymentValidationRequest.PlanId}, offer: {paymentValidationRequest.OfferId}, publisher: {paymentValidationRequest.PublisherId}");
-                var additionalHeaders = GetAdditionalMarketplaceHeaders(requestMetadata);
+                var additionalHeaders = HttpRequestHelper.GetAdditionalMarketplaceHeaders(requestMetadata);
                 var json = paymentValidationRequest.ToJObject();
                 var validationResponse = await _marketplaceRestClient.SendRequestAsync<string>(HttpMethod.Post, PaymentValidationPath, additionalHeaders, json);
                 _logger.Information($"SaaS Purchase Payment is succesfully validated with response {validationResponse} for Azure Subscription: {paymentValidationRequest.AzureSubscriptionId}, plan: {paymentValidationRequest.PlanId}, offer: {paymentValidationRequest.OfferId}, publisher: {paymentValidationRequest.PublisherId}");
@@ -242,39 +241,6 @@ namespace Microsoft.Liftr.Marketplace.ARM
 
                 return PaymentValidationResponse.BuildValidationResponseFailed(HttpStatusCode.BadRequest, ex.Message);
             }
-        }
-
-        private static string GetCompleteRequestPath(string subscriptionId, string resourceGroup, string resourceName)
-        {
-            var requestPath = SubscriptionResourceTypePath + subscriptionId + "/resourceGroups/" + resourceGroup + "/" + resourceName;
-            return requestPath;
-        }
-
-        private static Dictionary<string, string> GetAdditionalMarketplaceHeaders(MarketplaceRequestMetadata requestHeaders)
-        {
-            var additionalHeaders = new Dictionary<string, string>();
-            additionalHeaders.Add("x-ms-client-object-id", requestHeaders.MSClientObjectId);
-            additionalHeaders.Add("x-ms-client-tenant-id", requestHeaders.MSClientTenantId);
-
-            additionalHeaders.Add("x-ms-client-issuer", requestHeaders.MSClientIssuer);
-            additionalHeaders.Add("x-ms-client-name", MarketplaceLiftrStoreFront);
-
-            if (!string.IsNullOrEmpty(requestHeaders.MSClientPrincipalName))
-            {
-                additionalHeaders.Add("x-ms-client-principal-name", requestHeaders.MSClientPrincipalName);
-            }
-
-            if (!string.IsNullOrEmpty(requestHeaders.MSClientPrincipalId))
-            {
-                additionalHeaders.Add("x-ms-client-principal-id", requestHeaders.MSClientPrincipalId);
-            }
-
-            if (!string.IsNullOrEmpty(requestHeaders.MSClientAppId))
-            {
-                additionalHeaders.Add("x-ms-client-app-id", requestHeaders.MSClientAppId);
-            }
-
-            return additionalHeaders;
         }
     }
 }
