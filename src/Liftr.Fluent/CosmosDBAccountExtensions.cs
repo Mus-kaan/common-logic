@@ -161,7 +161,7 @@ namespace Microsoft.Liftr
                 var subnet = await az.GetSubnetAsync(vnetRule.Id);
                 if (subnet == null)
                 {
-                    logger.Information("Subnet '{subnetId}' is already deleted. Removing it from cosmos DB VNet rules.", vnetRule.Id);
+                    logger.Information("Subnet {subnetId} is already deleted. Removing it from cosmos DB VNet rules.", vnetRule.Id);
                     cleanUpDeleted = true;
                     var vnetId = $"/subscriptions/{subnetId.SubscriptionId}/resourceGroups/{subnetId.ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{subnetId.ResourceName}";
                     dbUpdate = dbUpdate.WithoutVirtualNetworkRule(vnetId, subnetId.ChildResourceName);
