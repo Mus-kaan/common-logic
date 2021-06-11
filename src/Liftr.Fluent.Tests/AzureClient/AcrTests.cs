@@ -3,10 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.Liftr.Fluent.Contracts;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;

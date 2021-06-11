@@ -4,7 +4,6 @@
 
 using Microsoft.Azure.Management.PostgreSQL.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.Management.PostgreSQL;

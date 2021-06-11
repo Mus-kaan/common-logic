@@ -168,7 +168,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 var db = await liftrAzure.GetCosmosDBAsync(dataRGName, dbName);
                 if (db != null)
                 {
-                    await db.WithVirtualNetworkRuleAsync(provisionedResources.Subnet, _logger);
+                    db = await db.CleanUpDeletedVNetsAsync(_azureClientFactory, _logger);
+                    db = await db.WithVirtualNetworkRuleAsync(provisionedResources.Subnet, _logger);
                 }
 
                 if (!string.IsNullOrEmpty(computeOptions.GlobalCosmosDBResourceId))
@@ -176,7 +177,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     var globalDb = await liftrAzure.GetCosmosDBAsync(computeOptions.GlobalCosmosDBResourceId);
                     if (globalDb != null)
                     {
-                        await globalDb.WithVirtualNetworkRuleAsync(provisionedResources.Subnet, _logger);
+                        globalDb = await globalDb.CleanUpDeletedVNetsAsync(_azureClientFactory, _logger);
+                        globalDb = await globalDb.WithVirtualNetworkRuleAsync(provisionedResources.Subnet, _logger);
                     }
                 }
             }

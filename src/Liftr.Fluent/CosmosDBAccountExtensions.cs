@@ -3,8 +3,10 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.CosmosDB.Fluent;
+using Microsoft.Azure.Management.CosmosDB.Fluent.CosmosDBAccount.Update;
 using Microsoft.Azure.Management.CosmosDB.Fluent.Models;
 using Microsoft.Azure.Management.Network.Fluent;
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent;
 using Serilog;
 using System;
@@ -128,6 +130,51 @@ namespace Microsoft.Liftr
 
             db = await updatable.ApplyAsync();
             return await db.WaitForUpdatingAsync();
+        }
+
+        public static async Task<ICosmosDBAccount> CleanUpDeletedVNetsAsync(this ICosmosDBAccount db, ILiftrAzureFactory azFactory, Serilog.ILogger logger)
+        {
+            if (db == null)
+            {
+                throw new ArgumentNullException(nameof(db));
+            }
+
+            if (azFactory == null)
+            {
+                throw new ArgumentNullException(nameof(azFactory));
+            }
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            db = await db.WaitForUpdatingAsync();
+
+            IWithOptionals dbUpdate = db.Update();
+            bool cleanUpDeleted = false;
+            var dbVNetRules = db.VirtualNetworkRules;
+            foreach (var vnetRule in dbVNetRules)
+            {
+                var subnetId = new ResourceId(vnetRule.Id);
+                var az = azFactory.GenerateLiftrAzure(subnetId.SubscriptionId);
+                var subnet = await az.GetSubnetAsync(vnetRule.Id);
+                if (subnet == null)
+                {
+                    logger.Information("Subnet '{subnetId}' is already deleted. Removing it from cosmos DB VNet rules.", vnetRule.Id);
+                    cleanUpDeleted = true;
+                    var vnetId = $"/subscriptions/{subnetId.SubscriptionId}/resourceGroups/{subnetId.ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{subnetId.ResourceName}";
+                    dbUpdate = dbUpdate.WithoutVirtualNetworkRule(vnetId, subnetId.ChildResourceName);
+                }
+            }
+
+            if (cleanUpDeleted)
+            {
+                db = await dbUpdate.ApplyAsync();
+                db = await db.WaitForUpdatingAsync();
+            }
+
+            return db;
         }
 
         public static async Task<ICosmosDBAccount> WithVirtualNetworkRuleAsync(this ICosmosDBAccount db, ISubnet subnet, Serilog.ILogger logger, bool enableVNetFilter = true)

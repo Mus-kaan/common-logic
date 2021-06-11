@@ -3,14 +3,12 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ContainerRegistry.Fluent;
-using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent
