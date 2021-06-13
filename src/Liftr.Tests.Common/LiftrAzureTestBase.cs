@@ -29,14 +29,18 @@ namespace Microsoft.Liftr.Tests
                 throw new InvalidOperationException("Cannot find azure region, please make sure the test method is marked by the cloud region test trait. e.g. 'PublicWestUS2'");
             }
 
-            AzFactory = new LiftrAzureFactory(Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
+            TestCredentails = TestCredentailsLoader.LoadTestCredentails(TestCloudType.Value, Logger);
+
+            AzFactory = TestCredentails.AzFactory;
 
             ResourceGroupName = $"{TestClassName}-{DateTimeStr}-{s_rand.Next(0, 999)}{TestAzureRegion.ShortName}";
 
             TestResourceGroup = Client.CreateResourceGroupAsync(TestAzureRegion.ToFluentRegion(), ResourceGroupName, TestCommon.Tags).Result;
         }
 
-        public LiftrAzureFactory AzFactory { get; protected set; }
+        public TestCredentails TestCredentails { get; }
+
+        public LiftrAzureFactory AzFactory { get; }
 
         public ILiftrAzure Client
         {
