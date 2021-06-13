@@ -65,6 +65,19 @@ namespace Microsoft.Liftr.Tests
                 {
                     azEnv = AzureEnvironment.AzureGlobalCloud;
                 }
+                else if (cloud == CloudType.DogFood)
+                {
+                    azEnv = new AzureEnvironment()
+                    {
+                        Name = "AzureDogFood",
+                        AuthenticationEndpoint = "https://login.windows-ppe.net/",
+                        ResourceManagerEndpoint = "https://api-dogfood.resources.windows-int.net/",
+                        ManagementEndpoint = "https://management.core.windows.net/", // TODO: figure this out
+                        GraphEndpoint = "https://graph.ppe.windows.net/",
+                        StorageEndpointSuffix = "core.windows.net", // TODO: figure this out
+                        KeyVaultSuffix = "vault-int.azure-int.net",
+                    };
+                }
                 else
                 {
                     throw new InvalidOperationException($"Do not know the Azure endpoint for cloud {cloud}");
