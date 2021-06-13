@@ -33,13 +33,14 @@ namespace Microsoft.Liftr.Tests
         private TelemetryConfiguration _appInsightsConfig;
         private DependencyTrackingTelemetryModule _depModule;
         private TelemetryClient _appInsightsClient;
+        private bool _disposed = false;
 
         static LiftrTestBase()
         {
             TestExceptionHelper.EnableExceptionCapture();
         }
 
-        public LiftrTestBase(ITestOutputHelper output, [CallerFilePath] string sourceFile = "")
+        public LiftrTestBase(ITestOutputHelper output, bool useMethodName = true, [CallerFilePath] string sourceFile = "")
         {
             if (output == null)
             {
@@ -87,13 +88,11 @@ namespace Microsoft.Liftr.Tests
                     TestClassName = parts[parts.Length - 2];
                     TestMethodName = parts[parts.Length - 1];
 
+                    operationName = useMethodName ? $"{TestClassName}-{TestMethodName}" : TestClassName;
+
                     if (TestCloudType != null && TestAzureRegion != null)
                     {
-                        operationName = $"{TestClassName}-{TestCloudType}-{TestAzureRegion.Name}";
-                    }
-                    else
-                    {
-                        operationName = $"{TestClassName}-{TestMethodName}";
+                        operationName = $"{operationName}-{TestCloudType}-{TestAzureRegion.Name}";
                     }
                 }
             }
@@ -140,15 +139,25 @@ namespace Microsoft.Liftr.Tests
 
         public ITimedOperation TimedOperation { get; private set; }
 
+        public bool? IsFailure { get; private set; }
+
         protected Action OnTestFailure { get; set; }
 
         public virtual void Dispose()
         {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _disposed = true;
+
             try
             {
                 var theExceptionThrownByTest = TestExceptionHelper.TestException;
                 if (theExceptionThrownByTest != null)
                 {
+                    IsFailure = true;
                     if (TimedOperation != null)
                     {
                         Logger.Error(theExceptionThrownByTest, $"test_failure. {TimedOperation.Name}");
@@ -165,6 +174,10 @@ namespace Microsoft.Liftr.Tests
                         {
                         }
                     }
+                }
+                else
+                {
+                    IsFailure = false;
                 }
 
                 TimedOperation?.Dispose();

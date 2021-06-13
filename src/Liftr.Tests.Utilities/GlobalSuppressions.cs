@@ -11,4 +11,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1063:Implement IDisposable Correctly", Justification = "<Pending>", Scope = "type", Target = "~T:Microsoft.Liftr.Tests.LiftrTestBase")]
 [assembly: SuppressMessage("Usage", "CA1816:Dispose methods should call SuppressFinalize", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.Tests.LiftrTestBase.Dispose")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.Tests.LiftrTestBase.Dispose")]
-[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.Tests.LiftrTestBase.#ctor(Xunit.Abstractions.ITestOutputHelper,System.String)")]
+[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.Tests.LiftrTestBase.#ctor(Xunit.Abstractions.ITestOutputHelper,System.Boolean,System.String)")]
