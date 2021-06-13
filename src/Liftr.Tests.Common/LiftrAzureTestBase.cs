@@ -3,9 +3,11 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
@@ -35,7 +37,9 @@ namespace Microsoft.Liftr.Tests
 
             ResourceGroupName = $"{TestClassName}-{DateTimeStr}-{s_rand.Next(0, 999)}{TestAzureRegion.ShortName}";
 
-            TestResourceGroup = Client.CreateResourceGroupAsync(TestAzureRegion.ToFluentRegion(), ResourceGroupName, TestCommon.Tags).Result;
+            TestLocation = TestAzureRegion.ToFluentRegion();
+
+            TestResourceGroup = Client.CreateResourceGroupAsync(TestLocation, ResourceGroupName, Tags).Result;
         }
 
         public TestCredentails TestCredentails { get; }
@@ -53,6 +57,10 @@ namespace Microsoft.Liftr.Tests
         public string ResourceGroupName { get; }
 
         public IResourceGroup TestResourceGroup { get; }
+
+        public Region TestLocation { get; }
+
+        public Dictionary<string, string> Tags { get; } = new Dictionary<string, string>(TestCommon.Tags);
 
         public override void Dispose()
         {

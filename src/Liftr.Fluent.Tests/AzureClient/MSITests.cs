@@ -3,36 +3,33 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using Microsoft.Liftr.Tests;
+using Microsoft.Liftr.Tests.Utilities.Trait;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Fluent.Tests
 {
-    public sealed class MSITests
+    public sealed class MSITests : LiftrAzureTestBase
     {
-        private readonly ITestOutputHelper _output;
-
         public MSITests(ITestOutputHelper output)
+            : base(output)
         {
-            _output = output;
         }
 
         [CheckInValidation(skipLinux: true)]
+        [PublicWestUS2]
         public async Task CanCreateAsync()
         {
-            using (var scope = new TestResourceGroupScope("unittest-msi-", _output))
-            {
-                var client = scope.Client;
-                var rg = await client.CreateResourceGroupAsync(TestCommon.Location, scope.ResourceGroupName, TestCommon.Tags);
-                var name = SdkContext.RandomResourceName("test-msi-", 15);
+            var client = Client;
+            var name = SdkContext.RandomResourceName("test-msi-", 15);
 
-                var created = await client.CreateMSIAsync(TestCommon.Location, scope.ResourceGroupName, name, TestCommon.Tags);
-                var retrieved = await client.GetMSIAsync(scope.ResourceGroupName, name);
+            var created = await client.CreateMSIAsync(TestLocation, ResourceGroupName, name, Tags);
+            var retrieved = await client.GetMSIAsync(ResourceGroupName, name);
 
-                Assert.Equal(name, retrieved.Name);
-                TestCommon.CheckCommonTags(retrieved.Inner.Tags);
-            }
+            Assert.Equal(name, retrieved.Name);
+            TestCommon.CheckCommonTags(retrieved.Inner.Tags);
         }
     }
 }
