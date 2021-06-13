@@ -9,7 +9,7 @@ using Microsoft.Liftr.Fluent.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
+using System.Threading;
 using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Tests
@@ -39,7 +39,7 @@ namespace Microsoft.Liftr.Tests
 
             TestLocation = TestAzureRegion.ToFluentRegion();
 
-            TestResourceGroup = Client.CreateResourceGroupAsync(TestLocation, ResourceGroupName, Tags).Result;
+            TestResourceGroup = Client.CreateResourceGroup(TestLocation, ResourceGroupName, Tags);
         }
 
         public TestCredentails TestCredentails { get; }
@@ -69,7 +69,7 @@ namespace Microsoft.Liftr.Tests
             {
                 // Delete the rg when the test succeeded.
                 _ = Client.DeleteResourceGroupAsync(ResourceGroupName);
-                Task.Delay(3000).Wait();
+                Thread.Sleep(3000);
             }
 
             GC.SuppressFinalize(this);

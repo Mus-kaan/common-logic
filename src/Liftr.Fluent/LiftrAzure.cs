@@ -401,6 +401,19 @@ namespace Microsoft.Liftr.Fluent
             return rg;
         }
 
+        public IResourceGroup CreateResourceGroup(Region location, string rgName, IDictionary<string, string> tags)
+        {
+            _logger.Information("Creating a resource group with name: {rgName}", rgName);
+            var rg = FluentClient
+                .ResourceGroups
+                .Define(rgName)
+                .WithRegion(location)
+                .WithTags(tags)
+                .Create();
+            _logger.Information("Created a resource group with Id:{resourceId}", rg.Id);
+            return rg;
+        }
+
         public async Task<IResourceGroup> GetResourceGroupAsync(string rgName)
         {
             try
@@ -430,6 +443,26 @@ namespace Microsoft.Liftr.Fluent
                 await FluentClient
                 .ResourceGroups
                 .DeleteByNameAsync(rgName);
+                _logger.Information("Finished delete resource group with name: " + rgName);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Cannot delete resource group with name {rgName}", rgName);
+                if (!noThrow)
+                {
+                    throw;
+                }
+            }
+        }
+
+        public void DeleteResourceGroup(string rgName, bool noThrow = false)
+        {
+            _logger.Information("Deleteing resource group with name: " + rgName);
+            try
+            {
+                FluentClient
+                .ResourceGroups
+                .DeleteByName(rgName);
                 _logger.Information("Finished delete resource group with name: " + rgName);
             }
             catch (Exception ex)

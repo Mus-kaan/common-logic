@@ -9,5 +9,3 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Design", "CA1065:Do not raise exceptions in unexpected locations", Justification = "<Pending>", Scope = "member", Target = "~P:Microsoft.Liftr.TestCredentials.AuthFileContract")]
-[assembly: SuppressMessage("Reliability", "Liftr1004:Avoid calling System.Threading.Tasks.Task<TResult>.Result", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.Tests.LiftrAzureTestBase.#ctor(Xunit.Abstractions.ITestOutputHelper,System.Boolean,System.String)")]
-[assembly: SuppressMessage("Reliability", "Liftr1005:Avoid calling System.Threading.Tasks.Task.Wait()", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.Tests.LiftrAzureTestBase.Dispose")]

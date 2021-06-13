@@ -82,9 +82,13 @@ namespace Microsoft.Liftr.Fluent
 
         Task<IResourceGroup> CreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags);
 
+        IResourceGroup CreateResourceGroup(Region location, string rgName, IDictionary<string, string> tags);
+
         Task<IResourceGroup> GetResourceGroupAsync(string rgName);
 
         Task DeleteResourceGroupAsync(string rgName, bool noThrow = false);
+
+        void DeleteResourceGroup(string rgName, bool noThrow = false);
 
         Task DeleteResourceGroupWithTagAsync(string tagName, string tagValue, Func<IReadOnlyDictionary<string, string>, bool> tagsFilter = null);
 
