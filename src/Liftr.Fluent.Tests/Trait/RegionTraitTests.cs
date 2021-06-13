@@ -18,11 +18,39 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [Fact]
-        [PublicWestUS2]
-        public void PublicWestUS2Test()
+        [DogfoodEastUS]
+        public void DogfoodEastUSTest()
+        {
+            Assert.Equal(CloudType.DogFood, TestCloudType);
+            Assert.Equal(AzureRegion.USEast.Name, TestAzureRegion.Name);
+            Assert.Equal("DogfoodEastUS", TestRegionCategory);
+        }
+
+        [Fact]
+        [DogfoodWestUS2]
+        public void DogfoodWestUS2Test()
+        {
+            Assert.Equal(CloudType.DogFood, TestCloudType);
+            Assert.Equal(AzureRegion.USWest2.Name, TestAzureRegion.Name);
+            Assert.Equal("DogfoodWestUS2", TestRegionCategory);
+        }
+
+        [Fact]
+        [PublicCentralUS]
+        public void PublicCentralUSTest()
         {
             Assert.Equal(CloudType.Public, TestCloudType);
-            Assert.Equal(AzureRegion.USWest2.Name, TestAzureRegion.Name);
+            Assert.Equal(AzureRegion.USCentral.Name, TestAzureRegion.Name);
+            Assert.Equal("PublicCentralUS", TestRegionCategory);
+        }
+
+        [Fact]
+        [PublicEastUS2]
+        public void PublicEastUS2Test()
+        {
+            Assert.Equal(CloudType.Public, TestCloudType);
+            Assert.Equal(AzureRegion.USEast2.Name, TestAzureRegion.Name);
+            Assert.Equal("PublicEastUS2", TestRegionCategory);
         }
 
         [Fact]
@@ -31,6 +59,34 @@ namespace Microsoft.Liftr.Fluent.Tests
         {
             Assert.Equal(CloudType.Public, TestCloudType);
             Assert.Equal(AzureRegion.USEast.Name, TestAzureRegion.Name);
+            Assert.Equal("PublicEastUS", TestRegionCategory);
+        }
+
+        [Fact]
+        [PublicWestCentralUS]
+        public void PublicWestCentralUSTest()
+        {
+            Assert.Equal(CloudType.Public, TestCloudType);
+            Assert.Equal(AzureRegion.USWestCentral.Name, TestAzureRegion.Name);
+            Assert.Equal("PublicWestCentralUS", TestRegionCategory);
+        }
+
+        [Fact]
+        [PublicWestUS2]
+        public void PublicWestUS2Test()
+        {
+            Assert.Equal(CloudType.Public, TestCloudType);
+            Assert.Equal(AzureRegion.USWest2.Name, TestAzureRegion.Name);
+            Assert.Equal("PublicWestUS2", TestRegionCategory);
+        }
+
+        [Fact]
+        [PublicWestUS]
+        public void PublicWestUSTest()
+        {
+            Assert.Equal(CloudType.Public, TestCloudType);
+            Assert.Equal(AzureRegion.USWest.Name, TestAzureRegion.Name);
+            Assert.Equal("PublicWestUS", TestRegionCategory);
         }
     }
 }

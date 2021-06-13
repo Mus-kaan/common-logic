@@ -9,6 +9,7 @@ using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Tests.Utilities;
+using Microsoft.Liftr.Tests.Utilities.Trait;
 using Serilog;
 using System;
 using System.Globalization;
@@ -65,7 +66,7 @@ namespace Microsoft.Liftr.Tests
                     {
                         if (traits.ContainsKey(nameof(CloudType)))
                         {
-                            if (Enum.TryParse<CloudType>(traits[nameof(CloudType)].First(), out var cloudType))
+                            if (Enum.TryParse<CloudType>(traits[nameof(CloudType)].Last(), out var cloudType))
                             {
                                 TestCloudType = cloudType;
                             }
@@ -73,18 +74,26 @@ namespace Microsoft.Liftr.Tests
 
                         if (traits.ContainsKey(nameof(AzureRegion)))
                         {
-                            TestAzureRegion = new AzureRegion(traits[nameof(AzureRegion)].First());
+                            TestAzureRegion = new AzureRegion(traits[nameof(AzureRegion)].Last());
+                        }
+
+                        if (traits.ContainsKey(TraitConstants.RegionCategory))
+                        {
+                            TestRegionCategory = traits[TraitConstants.RegionCategory].Last();
                         }
                     }
 
                     var parts = Test.DisplayName.Split('.');
                     TestClassName = parts[parts.Length - 2];
                     TestMethodName = parts[parts.Length - 1];
-                    operationName = $"{TestClassName}-{TestMethodName}";
 
                     if (TestCloudType != null && TestAzureRegion != null)
                     {
-                        operationName = $"{operationName}-{TestCloudType}-{TestAzureRegion.Name}";
+                        operationName = $"{TestClassName}-{TestCloudType}-{TestAzureRegion.Name}";
+                    }
+                    else
+                    {
+                        operationName = $"{TestClassName}-{TestMethodName}";
                     }
                 }
             }
@@ -122,6 +131,8 @@ namespace Microsoft.Liftr.Tests
         public CloudType? TestCloudType { get; }
 
         public AzureRegion TestAzureRegion { get; }
+
+        public string TestRegionCategory { get; }
 
         public ITest Test { get; }
 
