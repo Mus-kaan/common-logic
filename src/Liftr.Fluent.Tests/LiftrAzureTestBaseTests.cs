@@ -17,7 +17,7 @@ namespace Microsoft.Liftr.Fluent.Tests
         {
         }
 
-        [Fact]
+        [JenkinsOnly]
         [PublicWestUS2]
         public void PublicWestUS2Test()
         {
