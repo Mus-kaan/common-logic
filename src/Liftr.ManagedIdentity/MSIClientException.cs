@@ -46,7 +46,7 @@ namespace Microsoft.Liftr.ManagedIdentity
         public static MSIClientException IdentityClientException(
             string message,
             Exception innerException = null,
-            [CallerMemberName]string operationName = "")
+            [CallerMemberName] string operationName = "")
         {
             return new MSIClientException(
                 message: message,
@@ -58,7 +58,7 @@ namespace Microsoft.Liftr.ManagedIdentity
         public static MSIClientException IdentityServiceException(
             string message,
             Exception innerException = null,
-            [CallerMemberName]string operationName = "")
+            [CallerMemberName] string operationName = "")
         {
             return new MSIClientException(
                 message: message,

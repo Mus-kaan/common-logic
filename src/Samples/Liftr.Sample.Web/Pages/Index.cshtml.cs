@@ -47,7 +47,7 @@ namespace Liftr.Sample.Web.Pages
                 {
                     ops.FailOperation();
                 }
-                await Task.Delay(roll/4);
+                await Task.Delay(roll / 4);
             }
 
             IndexPVCounter.Inc();

@@ -5,12 +5,14 @@
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DependencyCollector;
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Tests.Utilities;
 using Serilog;
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
@@ -56,10 +58,34 @@ namespace Microsoft.Liftr.Tests
                 if (cachedTestMember != null)
                 {
                     Test = (ITest)cachedTestMember.GetValue(output);
+
+                    var traits = Test?.TestCase?.Traits;
+
+                    if (traits != null)
+                    {
+                        if (traits.ContainsKey(nameof(CloudType)))
+                        {
+                            if (Enum.TryParse<CloudType>(traits[nameof(CloudType)].First(), out var cloudType))
+                            {
+                                TestCloudType = cloudType;
+                            }
+                        }
+
+                        if (traits.ContainsKey(nameof(AzureRegion)))
+                        {
+                            TestAzureRegion = new AzureRegion(traits[nameof(AzureRegion)].First());
+                        }
+                    }
+
                     var parts = Test.DisplayName.Split('.');
                     TestClassName = parts[parts.Length - 2];
                     TestMethodName = parts[parts.Length - 1];
                     operationName = $"{TestClassName}-{TestMethodName}";
+
+                    if (TestCloudType != null && TestAzureRegion != null)
+                    {
+                        operationName = $"{operationName}-{TestCloudType}-{TestAzureRegion.Name}";
+                    }
                 }
             }
             catch
@@ -79,6 +105,12 @@ namespace Microsoft.Liftr.Tests
             {
                 TimedOperation.SetProperty(nameof(TestMethodName), TestMethodName);
             }
+
+            if (TestCloudType != null && TestAzureRegion != null)
+            {
+                TimedOperation.SetContextProperty(nameof(TestCloudType), TestCloudType.ToString());
+                TimedOperation.SetContextProperty(nameof(TestAzureRegion), TestAzureRegion.Name);
+            }
         }
 
         public string TestClassName { get; }
@@ -86,6 +118,10 @@ namespace Microsoft.Liftr.Tests
         public string TestMethodName { get; }
 
         public string DateTimeStr { get; }
+
+        public CloudType? TestCloudType { get; }
+
+        public AzureRegion TestAzureRegion { get; }
 
         public ITest Test { get; }
 

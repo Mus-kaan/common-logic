@@ -10,9 +10,7 @@ using Microsoft.Liftr.Marketplace.Exceptions;
 using Microsoft.Liftr.Marketplace.Utils;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Marketplace.Agreement.Service
