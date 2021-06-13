@@ -31,7 +31,7 @@ namespace Microsoft.Liftr.Tests
 
             AzFactory = new LiftrAzureFactory(Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
 
-            ResourceGroupName = $"{TestClassName}-{DateTimeStr}-{s_rand.Next(0, 999)}{TestAzureRegion.ShortName}rg";
+            ResourceGroupName = $"{TestClassName}-{DateTimeStr}-{s_rand.Next(0, 999)}{TestAzureRegion.ShortName}";
 
             TestResourceGroup = Client.CreateResourceGroupAsync(TestAzureRegion.ToFluentRegion(), ResourceGroupName, TestCommon.Tags).Result;
         }
