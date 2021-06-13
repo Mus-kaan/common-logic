@@ -52,37 +52,37 @@ namespace Microsoft.Liftr.Tests
         {
             var authFile = LoadAuthFileContract(cloud);
 
+            AzureEnvironment azEnv = null;
+            if (cloud == CloudType.Public)
+            {
+                azEnv = AzureEnvironment.AzureGlobalCloud;
+            }
+            else if (cloud == CloudType.DogFood)
+            {
+                azEnv = new AzureEnvironment()
+                {
+                    Name = "AzureDogFood",
+                    AuthenticationEndpoint = "https://login.windows-ppe.net/",
+                    ResourceManagerEndpoint = "https://api-dogfood.resources.windows-int.net/",
+                    ManagementEndpoint = "https://management.core.windows.net/", // TODO: figure this out
+                    GraphEndpoint = "https://graph.ppe.windows.net/",
+                    StorageEndpointSuffix = "core.windows.net", // TODO: figure this out
+                    KeyVaultSuffix = "vault-int.azure-int.net",
+                };
+            }
+            else
+            {
+                throw new InvalidOperationException($"Do not know the Azure endpoint for cloud {cloud}");
+            }
+
             var options = new TokenCredentialOptions()
             {
-                AuthorityHost = new Uri(authFile.ActiveDirectoryEndpointUrl),
+                AuthorityHost = new Uri(azEnv.AuthenticationEndpoint),
             };
             var clientSecretCredential = new ClientSecretCredential(authFile.TenantId, authFile.ClientId, authFile.ClientSecret, options);
 
             Func<AzureCredentials> getAzureCredentials = () =>
             {
-                AzureEnvironment azEnv = null;
-                if (cloud == CloudType.Public)
-                {
-                    azEnv = AzureEnvironment.AzureGlobalCloud;
-                }
-                else if (cloud == CloudType.DogFood)
-                {
-                    azEnv = new AzureEnvironment()
-                    {
-                        Name = "AzureDogFood",
-                        AuthenticationEndpoint = "https://login.windows-ppe.net/",
-                        ResourceManagerEndpoint = "https://api-dogfood.resources.windows-int.net/",
-                        ManagementEndpoint = "https://management.core.windows.net/", // TODO: figure this out
-                        GraphEndpoint = "https://graph.ppe.windows.net/",
-                        StorageEndpointSuffix = "core.windows.net", // TODO: figure this out
-                        KeyVaultSuffix = "vault-int.azure-int.net",
-                    };
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Do not know the Azure endpoint for cloud {cloud}");
-                }
-
                 return SdkContext.AzureCredentialsFactory
                         .FromServicePrincipal(authFile.ClientId, authFile.ClientSecret, authFile.TenantId, azEnv);
             };
