@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>Microsoft.Liftr.TestResultAggregator</RootNamespace>
+    <AssemblyName>Microsoft.Liftr.TestResultAggregator</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Logging.AspNetCore\Liftr.Logging.AspNetCore.csproj" />
+    <ProjectReference Include="..\Liftr.Metrics.Prometheus\Liftr.Metrics.Prometheus.csproj" />
+  </ItemGroup>
+
+
+</Project>
