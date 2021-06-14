@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+  name: test-result-aggregator-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-result-aggregator-web
+  template:
+    metadata:
+      name: test-result-aggregator-web
+      labels:
+        app: test-result-aggregator-web
+        visualize: "true"
+        run: test-result-aggregator-web
+    spec:
+      containers:
+        - name: test-result-aggregator-web
+          image: spdevgbl210501cusacr.azurecr.io/artifact/c6ca85d0-80f3-49b5-b6c0-da1de7dbfc6f/buddy/test-result-aggregator:0.6.01626.2170-269bca58
+          ports:
+            - name: web
+              containerPort: 5000
+          livenessProbe:
+            httpGet:
+              path: /api/liveness-probe
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: test-result-aggregator-web
+    visualize: "true"
+    app: test-result-aggregator-web
+  name: test-result-aggregator-web
+spec:
+  selector:
+    app: test-result-aggregator-web
+  type: ClusterIP
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 5000
