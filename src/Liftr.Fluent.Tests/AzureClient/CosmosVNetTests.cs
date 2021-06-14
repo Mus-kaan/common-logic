@@ -47,4 +47,3 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
     }
 }
-}
