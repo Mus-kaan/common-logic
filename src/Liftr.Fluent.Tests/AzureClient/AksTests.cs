@@ -31,7 +31,6 @@ namespace Microsoft.Liftr.Fluent.Tests
             try
             {
                 var client = Client;
-                var rg = await client.CreateResourceGroupAsync(TestCommon.Location, ResourceGroupName, TestCommon.Tags);
                 var name = SdkContext.RandomResourceName("test-aks-", 15);
                 var rootUserName = "aksuser";
                 var sshPublicKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIoUCnmwyMDFAf0Ia/OnCTR3g9uxp6uxU/"
@@ -97,7 +96,6 @@ namespace Microsoft.Liftr.Fluent.Tests
             try
             {
                 var client = Client;
-                var rg = await client.CreateResourceGroupAsync(TestCommon.Location, ResourceGroupName, TestCommon.Tags);
                 var name = SdkContext.RandomResourceName("test-aks-", 15);
                 var vnetName = SdkContext.RandomResourceName("vnet", 9);
                 var rootUserName = "aksuser";
@@ -153,7 +151,6 @@ namespace Microsoft.Liftr.Fluent.Tests
             try
             {
                 var client = Client;
-                var rg = await client.CreateResourceGroupAsync(TestCommon.Location, ResourceGroupName, TestCommon.Tags);
                 var name = SdkContext.RandomResourceName("test-aks-", 15);
                 var rootUserName = "aksuser";
                 var sshPublicKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIoUCnmwyMDFAf0Ia/OnCTR3g9uxp6uxU/"
