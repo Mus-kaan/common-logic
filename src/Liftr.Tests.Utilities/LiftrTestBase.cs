@@ -16,6 +16,7 @@ using Microsoft.Liftr.Utilities;
 using Prometheus;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -32,6 +33,7 @@ namespace Microsoft.Liftr.Tests
     public class LiftrTestBase : IDisposable
     {
         private const string LIFTR_UNIT_TEST_PUSH_GATEWAY = nameof(LIFTR_UNIT_TEST_PUSH_GATEWAY);
+        private const string LIFTR_UNIT_TEST_COMPONENT_TAG = nameof(LIFTR_UNIT_TEST_COMPONENT_TAG);
         private static readonly IDisposable s_httpClientSubscriber = GetHttpCoreDiagnosticSourceSubscriber();
         private static readonly string s_appInsightsIntrumentationKey = GetInstrumentationKey();
 
@@ -61,6 +63,17 @@ namespace Microsoft.Liftr.Tests
             var pushGateway = Environment.GetEnvironmentVariable(LIFTR_UNIT_TEST_PUSH_GATEWAY);
             if (!string.IsNullOrEmpty(pushGateway) && !PrometheusMetricsProcessor.Enabled)
             {
+                var testComponent = Environment.GetEnvironmentVariable(LIFTR_UNIT_TEST_COMPONENT_TAG);
+                if (!string.IsNullOrEmpty(testComponent))
+                {
+                    var staticLabels = new Dictionary<string, string>()
+                    {
+                        ["Component"] = testComponent,
+                    };
+
+                    Prometheus.Metrics.DefaultRegistry.SetStaticLabels(staticLabels);
+                }
+
                 PrometheusMetricsProcessor.TimedOperationMetricsProcessor = new TimedOperationPrometheusProcessor();
                 PrometheusMetricsProcessor.Enabled = true;
             }

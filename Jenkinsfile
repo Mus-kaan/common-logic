@@ -12,6 +12,7 @@ pipeline {
 		CDP_BUILD_TYPE = 'Official'
 		LIFTR_ENV = 'JENKINS'
 		LIFTR_APPINSIGHTS_IKEY = 'f3f08c6d-bfdf-49df-86be-d5444dbf3627' // https://portal.azure.com/?feature.customportal=false#@microsoft.onmicrosoft.com/resource/subscriptions/eebfbfdb-4167-49f6-be43-466a6709609f/resourcegroups/liftr-dev-wus-rg/providers/microsoft.insights/components/common-cicd-logs-wus2/overview
+		LIFTR_UNIT_TEST_COMPONENT_TAG = 'Liftr.Common'
 		LIFTR_UNIT_TEST_PUSH_GATEWAY = 'http://pushgateway.default.svc.cluster.local:9091/metrics'
 	}
 
