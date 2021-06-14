@@ -1433,26 +1433,36 @@ namespace Microsoft.Liftr.Fluent
             _logger.Information("Creating a Kubernetes cluster of version {kubernetesVersion} with name {aksName} ...", k8sVersion, aksName);
             _logger.Information($"Outbound IP {outboundIPId} is added to AKS cluster ARM Template...");
 
-            var templateContent = AKSHelper.GenerateAKSTemplate(
-                region,
-                aksName,
-                k8sVersion,
-                rootUserName,
-                sshPublicKey,
-                vmSizeType.Value,
-                vmCount,
-                agentPoolProfileName,
-                tags,
-                supportAvailabilityZone,
-                outboundIPId,
-                subnet);
+            using var ops = _logger.StartTimedOperation(nameof(CreateAksClusterAsync));
+            try
+            {
+                var templateContent = AKSHelper.GenerateAKSTemplate(
+                    region,
+                    aksName,
+                    k8sVersion,
+                    rootUserName,
+                    sshPublicKey,
+                    vmSizeType.Value,
+                    vmCount,
+                    agentPoolProfileName,
+                    tags,
+                    supportAvailabilityZone,
+                    outboundIPId,
+                    subnet);
 
-            await CreateDeploymentAsync(region, rgName, templateContent);
+                await CreateDeploymentAsync(region, rgName, templateContent);
 
-            var k8s = await GetAksClusterAsync(rgName, aksName);
+                var k8s = await GetAksClusterAsync(rgName, aksName);
 
-            _logger.Information("Created Kubernetes cluster with resource Id {resourceId}", k8s.Id);
-            return k8s;
+                _logger.Information("Created Kubernetes cluster with resource Id {resourceId}", k8s.Id);
+                return k8s;
+            }
+            catch (Exception ex)
+            {
+                ops.FailOperation(ex.Message);
+                _logger.Error(ex, "AKS created failed.");
+                throw;
+            }
         }
 
         public async Task<IKubernetesCluster> GetAksClusterAsync(string aksResourceId)
