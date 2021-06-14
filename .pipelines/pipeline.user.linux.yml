@@ -91,6 +91,16 @@ package:
         local_path: ".docker-images/sampleConsole.json" # folder name '.docker-images' cannot be changed
         # 'sampleConsole' match the chart parameter name
         artifact_path: "docker-images/sampleConsole.json"
+    - !!dockerbuildcommand
+      name: "Build test result aggregator docker image"
+      context_folder: "src/Liftr.TestResultAggregator"
+      repository_name: "test-result-aggregator"
+      latest: false # Don't push the :latest tag since every deployment should refer to a build number.
+      publish_build_tag: true
+      metadata_file:
+        local_path: ".docker-images/testAggregator.json" # folder name '.docker-images' cannot be changed
+        # 'sampleConsole' match the chart parameter name
+        artifact_path: "docker-images/testAggregator.json"
     - !!buildcommand
       name: "Pack EV2 shell extension"
       command: "build/liftr-run-linux-pack-ev2-ext.sh"
