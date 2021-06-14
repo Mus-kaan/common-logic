@@ -8,17 +8,15 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Logging;
-using Microsoft.Liftr.Logging.Contracts;
-using Microsoft.Liftr.Metrics.Prom;
 using Microsoft.Liftr.Tests.Utilities;
 using Microsoft.Liftr.Tests.Utilities.Trait;
-using Microsoft.Liftr.Utilities;
-using Prometheus;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
@@ -32,7 +30,7 @@ namespace Microsoft.Liftr.Tests
     /// </summary>
     public class LiftrTestBase : IDisposable
     {
-        private const string LIFTR_UNIT_TEST_PUSH_GATEWAY = nameof(LIFTR_UNIT_TEST_PUSH_GATEWAY);
+        private const string LIFTR_UNIT_TEST_AGGREGATOR = nameof(LIFTR_UNIT_TEST_AGGREGATOR);
         private const string LIFTR_UNIT_TEST_COMPONENT_TAG = nameof(LIFTR_UNIT_TEST_COMPONENT_TAG);
         private static readonly IDisposable s_httpClientSubscriber = GetHttpCoreDiagnosticSourceSubscriber();
         private static readonly string s_appInsightsIntrumentationKey = GetInstrumentationKey();
@@ -59,24 +57,6 @@ namespace Microsoft.Liftr.Tests
             GenerateLogger(testClass, output);
             string operationName = null;
             DateTimeStr = DateTime.UtcNow.ToString("MMddHmmss", CultureInfo.InvariantCulture);
-
-            var pushGateway = Environment.GetEnvironmentVariable(LIFTR_UNIT_TEST_PUSH_GATEWAY);
-            if (!string.IsNullOrEmpty(pushGateway) && !PrometheusMetricsProcessor.Enabled)
-            {
-                var testComponent = Environment.GetEnvironmentVariable(LIFTR_UNIT_TEST_COMPONENT_TAG);
-                if (!string.IsNullOrEmpty(testComponent))
-                {
-                    var staticLabels = new Dictionary<string, string>()
-                    {
-                        ["Component"] = testComponent,
-                    };
-
-                    Prometheus.Metrics.DefaultRegistry.SetStaticLabels(staticLabels);
-                }
-
-                PrometheusMetricsProcessor.TimedOperationMetricsProcessor = new TimedOperationPrometheusProcessor();
-                PrometheusMetricsProcessor.Enabled = true;
-            }
 
             try
             {
@@ -209,45 +189,53 @@ namespace Microsoft.Liftr.Tests
 
                 try
                 {
-                    var pushGateway = Environment.GetEnvironmentVariable(LIFTR_UNIT_TEST_PUSH_GATEWAY);
-                    if (!string.IsNullOrEmpty(pushGateway))
+                    var aggregatorEndpoint = Environment.GetEnvironmentVariable(LIFTR_UNIT_TEST_AGGREGATOR);
+                    if (!string.IsNullOrEmpty(aggregatorEndpoint))
                     {
-                        var options = new MetricPusherOptions
+                        var testComponent = Environment.GetEnvironmentVariable(LIFTR_UNIT_TEST_COMPONENT_TAG);
+                        var testResultMetirc = new TestResult()
                         {
-                            Endpoint = pushGateway,
-                            Job = "jenkins_test",
+                            OperationName = TimedOperation.Name,
+                            HelpText = $"Test run metric for {TestClassName}.{TestMethodName}",
+                            TestClass = TestClassName,
+                            TestMethod = TestMethodName,
+                            IsFailure = !TimedOperation.IsSuccessful,
+                            DurationMilliseconds = TimedOperation.ElapsedMilliseconds,
                         };
 
-                        using var pusher = new MetricPusher(options);
-                        pusher.Start();
-
-                        if (TimedOperation != null)
+                        if (!string.IsNullOrEmpty(testComponent))
                         {
-                            var metricName = PrometheusHelper.ConvertToPrometheusMetricsName($"test_{TimedOperation.Name}DurationMilliseconds");
-                            bool addCloud = TestCloudType != null;
-                            var summaryConfig = new SummaryConfiguration
-                            {
-                                LabelNames = addCloud ? new[] { "result", nameof(TestCloudType), nameof(TestAzureRegion) } : new[] { "result" },
-                            };
-
-                            var summary = Prometheus.Metrics
-                                .CreateSummary(metricName, $"Test run duration for {TestClassName}.{TestMethodName}", summaryConfig);
-
-                            if (addCloud)
-                            {
-                                summary
-                                    .WithLabels(TimedOperation.IsSuccessful ? "success" : "failure", TestCloudType.ToString(), TestAzureRegion.Name)
-                                    .Observe(TimedOperation.ElapsedMilliseconds);
-                            }
-                            else
-                            {
-                                summary
-                                    .WithLabels(TimedOperation.IsSuccessful ? "success" : "failure")
-                                    .Observe(TimedOperation.ElapsedMilliseconds);
-                            }
+                            testResultMetirc.Component = testComponent;
                         }
 
-                        pusher.Stop();
+                        if (TestCloudType != null)
+                        {
+                            testResultMetirc.TestCloudType = TestCloudType.ToString();
+                            testResultMetirc.TestAzureRegion = TestAzureRegion.Name;
+                            testResultMetirc.TestRegionCategory = TestRegionCategory;
+                        }
+
+                        if (!string.IsNullOrEmpty(testComponent))
+                        {
+                            var staticLabels = new Dictionary<string, string>()
+                            {
+                                ["Component"] = testComponent,
+                            };
+
+                            Prometheus.Metrics.DefaultRegistry.SetStaticLabels(staticLabels);
+                        }
+
+                        var httpWebRequest = WebRequest.CreateHttp(aggregatorEndpoint);
+                        httpWebRequest.ContentType = "application/json; charset=utf-8";
+                        httpWebRequest.Method = "POST";
+
+                        using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+                        {
+                            streamWriter.Write(testResultMetirc.ToJson());
+                            streamWriter.Flush();
+                        }
+
+                        httpWebRequest.GetResponse();
                     }
                 }
                 catch (Exception ex)
