@@ -9,6 +9,6 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Design", "CA1052:Static holder types should be Static or NotInheritable", Justification = "<Pending>", Scope = "type", Target = "~T:Microsoft.Liftr.TestResultAggregator.Program")]
-[assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.TestResultAggregator.Controllers.WeatherForecastController.Get~System.Collections.Generic.IEnumerable{Microsoft.Liftr.TestResultAggregator.WeatherForecast}")]
 [assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.TestResultAggregator.Startup.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)")]
 [assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.TestResultAggregator.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)")]
+[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.TestResultAggregator.Controllers.TestResultController.Post(Microsoft.Liftr.Contracts.TestResult)")]
