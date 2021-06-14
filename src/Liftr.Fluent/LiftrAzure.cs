@@ -1524,14 +1524,24 @@ namespace Microsoft.Liftr.Fluent
         public async Task<IIdentity> CreateMSIAsync(Region location, string rgName, string msiName, IDictionary<string, string> tags)
         {
             _logger.Information("Creating a Managed Identity with name {msiName} ...", msiName);
-            var msi = await FluentClient.Identities
-                .Define(msiName)
-                .WithRegion(location)
-                .WithExistingResourceGroup(rgName)
-                .WithTags(tags)
-                .CreateAsync();
-            _logger.Information("Created Managed Identity with Id {ResourceId} ...", msi.Id);
-            return msi;
+            using var ops = _logger.StartTimedOperation(nameof(CreateMSIAsync));
+            try
+            {
+                var msi = await FluentClient.Identities
+                    .Define(msiName)
+                    .WithRegion(location)
+                    .WithExistingResourceGroup(rgName)
+                    .WithTags(tags)
+                    .CreateAsync();
+
+                _logger.Information("Created Managed Identity with Id {ResourceId} ...", msi.Id);
+                return msi;
+            }
+            catch (Exception ex)
+            {
+                ops.FailOperation(ex.Message);
+                throw;
+            }
         }
 
         public Task<IIdentity> GetMSIAsync(string rgName, string msiName)

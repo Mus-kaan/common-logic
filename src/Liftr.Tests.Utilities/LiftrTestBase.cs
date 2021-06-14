@@ -8,6 +8,8 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Logging;
+using Microsoft.Liftr.Logging.Contracts;
+using Microsoft.Liftr.Metrics.Prom;
 using Microsoft.Liftr.Tests.Utilities;
 using Microsoft.Liftr.Tests.Utilities.Trait;
 using Microsoft.Liftr.Utilities;
@@ -55,6 +57,13 @@ namespace Microsoft.Liftr.Tests
             GenerateLogger(testClass, output);
             string operationName = null;
             DateTimeStr = DateTime.UtcNow.ToString("MMddHmmss", CultureInfo.InvariantCulture);
+
+            var pushGateway = Environment.GetEnvironmentVariable(LIFTR_UNIT_TEST_PUSH_GATEWAY);
+            if (!string.IsNullOrEmpty(pushGateway) && !PrometheusMetricsProcessor.Enabled)
+            {
+                PrometheusMetricsProcessor.TimedOperationMetricsProcessor = new TimedOperationPrometheusProcessor();
+                PrometheusMetricsProcessor.Enabled = true;
+            }
 
             try
             {
@@ -104,7 +113,7 @@ namespace Microsoft.Liftr.Tests
                 operationName = testClass;
             }
 
-            TimedOperation = Logger.StartTimedOperation(operationName, generateMetrics: true);
+            TimedOperation = Logger.StartTimedOperation(operationName, generateMetrics: true, generatePrometheus: false);
             TimedOperation.SetProperty("TestEnv", "CICD");
 
             if (!string.IsNullOrEmpty(TestClassName))
