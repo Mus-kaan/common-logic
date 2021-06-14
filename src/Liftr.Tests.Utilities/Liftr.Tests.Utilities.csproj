@@ -7,7 +7,7 @@
     <RootNamespace>Microsoft.Liftr.Tests.Utilities</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="prometheus-net" Version="4.1.1" />
+    <PackageReference Include="prometheus-net" Version="$(PackageVersion_prometheus-net)" />
     <PackageReference Include="Serilog.Sinks.Xunit2" Version="$(PackageVersion_Serilog_Sinks_Xunit2)" />
     <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="$(PackageVersion_Serilog_Sinks_ApplicationInsights)" />
     <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="$(PackageVersion_Microsoft_ApplicationInsights_DependencyCollector)" />

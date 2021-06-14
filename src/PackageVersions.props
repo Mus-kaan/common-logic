@@ -38,8 +38,8 @@
     <PackageVersion_Microsoft_Extensions_Http>3.1.13</PackageVersion_Microsoft_Extensions_Http>
     <PackageVersion_Microsoft_Extensions_Http_Polly>3.1.13</PackageVersion_Microsoft_Extensions_Http_Polly>
     <PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions>3.1.13</PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions>
-    <PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>5.2.7</PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>
     <PackageVersion_Microsoft_Identity_Client>4.22.0</PackageVersion_Microsoft_Identity_Client>
+    <PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>5.2.7</PackageVersion_Microsoft_IdentityModel_Clients_ActiveDirectory>
     <PackageVersion_Microsoft_IFxAudit>1.0.1200</PackageVersion_Microsoft_IFxAudit>
     <PackageVersion_Microsoft_Liftr_EV2>[5.5.1606-build1117]</PackageVersion_Microsoft_Liftr_EV2>
     <PackageVersion_Microsoft_NET_Test_Sdk>16.0.1</PackageVersion_Microsoft_NET_Test_Sdk>
@@ -49,6 +49,7 @@
     <PackageVersion_Npgsql>5.0.3</PackageVersion_Npgsql>
     <PackageVersion_Polly_Contrib_WaitAndRetry>1.1.1</PackageVersion_Polly_Contrib_WaitAndRetry>
     <PackageVersion_Polly_Extensions_Http>3.0.0</PackageVersion_Polly_Extensions_Http>
+    <PackageVersion_prometheus-net>4.1.1</PackageVersion_prometheus-net>
     <PackageVersion_prometheus-net_AspNetCore>4.1.1</PackageVersion_prometheus-net_AspNetCore>
     <PackageVersion_Serilog>2.9.0</PackageVersion_Serilog>
     <PackageVersion_Serilog_AspNetCore>3.2.0</PackageVersion_Serilog_AspNetCore>

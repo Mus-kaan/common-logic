@@ -1,21 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
     <IsPackable>true</IsPackable>
     <RootNamespace>Microsoft.Liftr.ManagedIdentity</RootNamespace>
     <AssemblyName>Microsoft.Liftr.ManagedIdentity</AssemblyName>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Http" Version="$(PackageVersion_Microsoft_Extensions_Http)" />
     <PackageReference Include="Microsoft.Identity.Client" Version="$(PackageVersion_Microsoft_Identity_Client)" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />
     <ProjectReference Include="..\Liftr.TokenManager\Liftr.TokenManager.csproj" />
     <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
   </ItemGroup>
-
 </Project>
