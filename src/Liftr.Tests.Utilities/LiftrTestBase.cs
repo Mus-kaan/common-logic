@@ -10,6 +10,8 @@ using Microsoft.Liftr.DiagnosticSource;
 using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Tests.Utilities;
 using Microsoft.Liftr.Tests.Utilities.Trait;
+using Microsoft.Liftr.Utilities;
+using Prometheus;
 using Serilog;
 using System;
 using System.Globalization;
@@ -27,6 +29,7 @@ namespace Microsoft.Liftr.Tests
     /// </summary>
     public class LiftrTestBase : IDisposable
     {
+        private const string LIFTR_UNIT_TEST_PUSH_GATEWAY = nameof(LIFTR_UNIT_TEST_PUSH_GATEWAY);
         private static readonly IDisposable s_httpClientSubscriber = GetHttpCoreDiagnosticSourceSubscriber();
         private static readonly string s_appInsightsIntrumentationKey = GetInstrumentationKey();
 
@@ -181,6 +184,55 @@ namespace Microsoft.Liftr.Tests
                 }
 
                 TimedOperation?.Dispose();
+
+                try
+                {
+                    var pushGateway = Environment.GetEnvironmentVariable(LIFTR_UNIT_TEST_PUSH_GATEWAY);
+                    if (!string.IsNullOrEmpty(pushGateway))
+                    {
+                        var options = new MetricPusherOptions
+                        {
+                            Endpoint = pushGateway,
+                            Job = "jenkins_test",
+                        };
+
+                        using var pusher = new MetricPusher(options);
+                        pusher.Start();
+
+                        if (TimedOperation != null)
+                        {
+                            var metricName = PrometheusHelper.ConvertToPrometheusMetricsName($"test_{TimedOperation.Name}DurationMilliseconds");
+                            bool addCloud = TestCloudType != null;
+                            var summaryConfig = new SummaryConfiguration
+                            {
+                                LabelNames = addCloud ? new[] { "result", nameof(TestCloudType), nameof(TestAzureRegion) } : new[] { "result" },
+                            };
+
+                            var summary = Prometheus.Metrics
+                                .CreateSummary(metricName, $"Test run duration for {TestClassName}.{TestMethodName}", summaryConfig);
+
+                            if (addCloud)
+                            {
+                                summary
+                                    .WithLabels(TimedOperation.IsSuccessful ? "success" : "failure", TestCloudType.ToString(), TestAzureRegion.Name)
+                                    .Observe(TimedOperation.ElapsedMilliseconds);
+                            }
+                            else
+                            {
+                                summary
+                                    .WithLabels(TimedOperation.IsSuccessful ? "success" : "failure")
+                                    .Observe(TimedOperation.ElapsedMilliseconds);
+                            }
+                        }
+
+                        pusher.Stop();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "Failed at pusing metrics");
+                }
+
                 _appInsightsClient?.Flush();
                 _appInsightsConfig?.Dispose();
                 _depModule?.Dispose();

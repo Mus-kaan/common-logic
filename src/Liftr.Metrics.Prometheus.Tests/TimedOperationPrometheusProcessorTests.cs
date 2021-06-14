@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Liftr.Metrics.Prom;
+using Microsoft.Liftr.Utilities;
 using Xunit;
 
 namespace Microsoft.Liftr.Metrics.Prometheus.Tests
@@ -20,7 +20,7 @@ namespace Microsoft.Liftr.Metrics.Prometheus.Tests
         [InlineData("test_sc", "test_SC")]
         public void OrdinalEqual(string expected, string input)
         {
-            var metricsName = TimedOperationPrometheusProcessor.ConvertToPrometheusMetricsName(input);
+            var metricsName = PrometheusHelper.ConvertToPrometheusMetricsName(input);
             Assert.Equal(expected, metricsName);
         }
     }
