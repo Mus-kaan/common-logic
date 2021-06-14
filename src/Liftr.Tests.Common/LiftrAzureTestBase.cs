@@ -37,9 +37,9 @@ namespace Microsoft.Liftr.Tests
 
             ResourceGroupName = $"{TestClassName}-{DateTimeStr}-{s_rand.Next(0, 999)}{TestAzureRegion.ShortName}";
 
-            TestLocation = TestAzureRegion.ToFluentRegion();
+            Location = TestAzureRegion.ToFluentRegion();
 
-            TestResourceGroup = Client.CreateResourceGroup(TestLocation, ResourceGroupName, Tags);
+            TestResourceGroup = Client.CreateResourceGroup(Location, ResourceGroupName, Tags);
         }
 
         public TestCredentails TestCredentails { get; }
@@ -58,7 +58,7 @@ namespace Microsoft.Liftr.Tests
 
         public IResourceGroup TestResourceGroup { get; }
 
-        public Region TestLocation { get; }
+        public Region Location { get; }
 
         public Dictionary<string, string> Tags { get; } = new Dictionary<string, string>(TestCommon.Tags);
 

@@ -25,7 +25,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             var client = Client;
             var name = SdkContext.RandomResourceName("test-msi-", 15);
 
-            var created = await client.CreateMSIAsync(TestLocation, ResourceGroupName, name, Tags);
+            var created = await client.CreateMSIAsync(Location, ResourceGroupName, name, Tags);
             var retrieved = await client.GetMSIAsync(ResourceGroupName, name);
 
             Assert.Equal(name, retrieved.Name);
