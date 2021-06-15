@@ -4,6 +4,10 @@
         {
             "file": "\\deployment\\scripts\\DeployGenevaMonitoring.sh",
             "_justification": "The Geneva pfx cert password is empty. The 'pass:' is just a placeholder for empty password."
+        },
+        {
+            "file": "\\src\\Liftr.Fluent.Tests\\PostgreSQLFlexibleServerTests.cs",
+            "_justification": "The password is dynamiclly generated and the sql server will be deleted after test"
         }
     ]
 }

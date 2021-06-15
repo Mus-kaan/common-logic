@@ -16,6 +16,8 @@ namespace Microsoft.Liftr.Contracts
 
         public string Password { get; set; }
 
-        public string ConnectionString => $"Server={Server};Username={Username}@{ServerResourceName};Database={Database};Port=5432;Password={Password};SSLMode=Require";
+        public string SingleServerConnectionString => $"Server={Server};Username={Username}@{ServerResourceName};Database={Database};Port=5432;Password={Password};SSLMode=Require";
+
+        public string FlexibleServerConnectionString => $"Server={Server};Username={Username};Database={Database};Port=5432;Password={Password};SSLMode=Require";
     }
 }
