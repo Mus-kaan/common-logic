@@ -215,16 +215,6 @@ namespace Microsoft.Liftr.Tests
                             testResultMetirc.TestRegionCategory = TestRegionCategory;
                         }
 
-                        if (!string.IsNullOrEmpty(testComponent))
-                        {
-                            var staticLabels = new Dictionary<string, string>()
-                            {
-                                ["Component"] = testComponent,
-                            };
-
-                            Prometheus.Metrics.DefaultRegistry.SetStaticLabels(staticLabels);
-                        }
-
                         var httpWebRequest = WebRequest.CreateHttp(aggregatorEndpoint);
                         httpWebRequest.ContentType = "application/json; charset=utf-8";
                         httpWebRequest.Method = "POST";
