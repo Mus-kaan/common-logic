@@ -94,6 +94,7 @@ namespace Microsoft.Liftr.Tests
                 AzFactory = azFactory,
                 TokenCrendetial = clientSecretCredential,
                 AzureCredentialsProvider = getAzureCredentials,
+                SubscriptionId = authFile.SubscriptionId,
             };
 
             return credentails;
@@ -107,5 +108,7 @@ namespace Microsoft.Liftr.Tests
         public ClientSecretCredential TokenCrendetial { get; set; }
 
         public Func<AzureCredentials> AzureCredentialsProvider { get; set; }
+
+        public string SubscriptionId { get; set; }
     }
 }

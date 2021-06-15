@@ -35,6 +35,8 @@ namespace Microsoft.Liftr.Tests
 
             AzFactory = TestCredentails.AzFactory;
 
+            SubscriptionId = TestCredentails.SubscriptionId;
+
             ResourceGroupName = $"{TestClassName}-{DateTimeStr}-{s_rand.Next(0, 999)}{TestAzureRegion.ShortName}";
 
             Location = TestAzureRegion.ToFluentRegion();
@@ -53,6 +55,8 @@ namespace Microsoft.Liftr.Tests
                 return AzFactory.GenerateLiftrAzure();
             }
         }
+
+        public string SubscriptionId { get; }
 
         public string ResourceGroupName { get; }
 
