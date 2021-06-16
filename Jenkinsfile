@@ -35,7 +35,7 @@ pipeline {
 
 		stage('test') {
 			options {
-				azureKeyVault([[envVariable: 'LIFTR_CICD_AUTH_FILE_BASE64', name: 'datadog-cicd-spn-ms-auth-base64', secretType: 'Secret']])
+				azureKeyVault([[envVariable: 'LIFTR_CICD_AUTH_FILE_BASE64', name: 'LIFTR-UNIT-TEST-AUTH-FILE-BASE64', secretType: 'Secret']])
 			}
 
 			steps {
