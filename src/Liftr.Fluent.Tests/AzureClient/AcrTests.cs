@@ -5,7 +5,6 @@
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Liftr.Tests;
 using Microsoft.Liftr.Tests.Utilities.Trait;
-using System;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;

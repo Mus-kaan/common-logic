@@ -12,7 +12,6 @@ using Microsoft.Liftr.Tests.Utilities;
 using Microsoft.Liftr.Tests.Utilities.Trait;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
