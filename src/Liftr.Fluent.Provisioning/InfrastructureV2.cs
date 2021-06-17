@@ -22,14 +22,14 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 {
     public partial class InfrastructureV2
     {
-        private const string SSHUserNameSecretName = "SSHUserName";
-        private const string SSHPasswordSecretName = "SSHPassword";
-        private const string SSHPublicKeySecretName = "SSHPublicKey";
-        private const string SSHPrivateKeySecretName = "SSHPrivateKey";
-        private const string OneCertPublicIssuer = "one-cert-public-issuer";
-        private const string OneCertPrivateIssuer = "one-cert-private-issuer";
-        private const string OneCertPublicProvider = "OneCertV2-PublicCA";
-        private const string OneCertPrivateProvider = "OneCertV2-PrivateCA";
+        public const string SSHUserNameSecretName = "SSHUserName";
+        public const string SSHPasswordSecretName = "SSHPassword";
+        public const string SSHPublicKeySecretName = "SSHPublicKey";
+        public const string SSHPrivateKeySecretName = "SSHPrivateKey";
+        public const string OneCertPublicIssuer = "one-cert-public-issuer";
+        public const string OneCertPrivateIssuer = "one-cert-private-issuer";
+        public const string OneCertPublicProvider = "OneCertV2-PublicCA";
+        public const string OneCertPrivateProvider = "OneCertV2-PrivateCA";
 
         private readonly ILiftrAzureFactory _azureClientFactory;
         private readonly KeyVaultClient _kvClient;
