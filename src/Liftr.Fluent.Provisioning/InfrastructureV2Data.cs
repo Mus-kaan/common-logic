@@ -133,7 +133,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             await provisionedResources.KeyVault.Update()
                 .DefineAccessPolicy()
                 .ForObjectId(provisionedResources.ManagedIdentity.GetObjectId())
-                .AllowKeyPermissions(KeyPermissions.Get, KeyPermissions.List)
+                .AllowKeyPermissions(KeyPermissions.WrapKey, KeyPermissions.UnwrapKey, KeyPermissions.Get, KeyPermissions.List)
                 .AllowSecretPermissions(SecretPermissions.List, SecretPermissions.Get)
                 .AllowCertificatePermissions(CertificatePermissions.Get, CertificatePermissions.Getissuers, CertificatePermissions.List)
                 .Attach()
