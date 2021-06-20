@@ -82,6 +82,16 @@ package:
         # 'gatewayWeb' match the chart parameter name
         artifact_path: "docker-images/gatewayWeb.json"
     - !!dockerbuildcommand
+      name: "Build sample worker docker image"
+      context_folder: "src/Samples/Liftr.Sample.Worker"
+      repository_name: "sample-worker-common-repo"
+      latest: false # Don't push the :latest tag since every deployment should refer to a build number.
+      publish_build_tag: true
+      metadata_file:
+        local_path: ".docker-images/sampleWorker.json" # folder name '.docker-images' cannot be changed
+        # 'gatewayWeb' match the chart parameter name
+        artifact_path: "docker-images/sampleWorker.json"
+    - !!dockerbuildcommand
       name: "Build sample console docker image"
       context_folder: "src/Samples/Liftr.Sample.WorkerService"
       repository_name: "sample-console-common-repo"

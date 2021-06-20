@@ -227,6 +227,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.TestResultAggregator"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Observability", "Observability", "{68E3352C-81F5-40A6-8236-4CB91035212C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Sample.Worker", "Samples\Liftr.Sample.Worker\Liftr.Sample.Worker.csproj", "{761F6735-C315-4B28-B03A-B506ED532053}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -641,6 +643,10 @@ Global
 		{31E4CACD-F2E2-4AED-A3DD-BF1F68A7D07F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31E4CACD-F2E2-4AED-A3DD-BF1F68A7D07F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31E4CACD-F2E2-4AED-A3DD-BF1F68A7D07F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{761F6735-C315-4B28-B03A-B506ED532053}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{761F6735-C315-4B28-B03A-B506ED532053}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{761F6735-C315-4B28-B03A-B506ED532053}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{761F6735-C315-4B28-B03A-B506ED532053}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -690,6 +696,7 @@ Global
 		{3C9D3CC8-09A4-43D3-9796-E2358687EC5B} = {E4958D13-B767-451D-8C50-629C1805BD9A}
 		{4924D9FD-CD45-4DBB-AB4B-580818B15969} = {68E3352C-81F5-40A6-8236-4CB91035212C}
 		{0CD8F97A-C460-4BF7-A13D-20270921391B} = {68E3352C-81F5-40A6-8236-4CB91035212C}
+		{761F6735-C315-4B28-B03A-B506ED532053} = {E6C8A847-172D-4E1A-ADFB-AC96B7C1314F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CF8F327F-EB87-482C-861B-2D635AB4E992}
