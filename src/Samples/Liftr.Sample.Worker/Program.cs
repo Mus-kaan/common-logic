@@ -8,7 +8,7 @@ using Microsoft.Liftr.Logging.AspNetCore;
 using Microsoft.Liftr.Metrics.Prom;
 using Microsoft.Liftr.WebHosting;
 
-namespace Liftr.Sample.Worker
+namespace Microsoft.Liftr.Sample.Worker
 {
     public class Program
     {
