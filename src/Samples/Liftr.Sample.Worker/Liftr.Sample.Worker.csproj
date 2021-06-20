@@ -1,5 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
     <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
     <UserSecretsId>a230081a-dccc-49c9-ba47-651d22e0bd9a</UserSecretsId>
@@ -7,7 +7,6 @@
   <PropertyGroup>
     <DisableLiftrCodeAnalysis>true</DisableLiftrCodeAnalysis>
   </PropertyGroup>
-  
   <ItemGroup>
     <ProjectReference Include="..\..\Liftr.Contracts\Liftr.Contracts.csproj" />
     <ProjectReference Include="..\..\Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj" />
@@ -17,6 +16,4 @@
     <ProjectReference Include="..\..\Liftr.Queue\Liftr.Queue.csproj" />
     <ProjectReference Include="..\..\Liftr.WebHosting\Liftr.WebHosting.csproj" />
   </ItemGroup>
-
-
 </Project>
