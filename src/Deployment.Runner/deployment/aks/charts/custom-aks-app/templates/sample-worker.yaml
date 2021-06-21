@@ -26,6 +26,8 @@ spec:
       containers:
       - name: liftr-sample-worker-container
         image: {{ required "The imageRegistry parameter must be provided." .Values.imageRegistry }}/{{ required "The sampleWorker.imageName parameter must be provided." .Values.sampleWorker.imageName }}
+        ports:
+          - containerPort: 5000
         env:
           - name: VaultEndpoint
             value: {{ required "The Key Vault endpoint for the app to load secrets must be provided." .Values.vaultEndpoint }}
