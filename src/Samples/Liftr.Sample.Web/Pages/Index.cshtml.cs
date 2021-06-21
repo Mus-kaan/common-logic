@@ -42,6 +42,9 @@ namespace Liftr.Sample.Web.Pages
         {
             using (var ops = _logger.StartTimedOperation("TestSkipOperation", skipAppInsights: true))
             {
+                ops.WithLabel("label1", "value1");
+                ops.WithLabel("label2", "value2");
+
                 var roll = _rand.Next(0, 100);
                 if (roll > 70)
                 {

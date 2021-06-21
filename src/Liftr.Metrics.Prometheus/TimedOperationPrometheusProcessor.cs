@@ -8,7 +8,9 @@ using Microsoft.Liftr.Utilities;
 using Prometheus;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Microsoft.Liftr.Metrics.Prom
 {
@@ -24,36 +26,56 @@ namespace Microsoft.Liftr.Metrics.Prom
                 throw new ArgumentNullException(nameof(timedOperation));
             }
 
-            var cacheKey = timedOperation.CallerFilePath + timedOperation.Name;
-            var summary = _summaries.GetOrAdd(cacheKey, (_) =>
+            try
             {
-                var name = timedOperation.Name;
-
-                if (name.OrdinalEndsWith(c_asyncSuffic))
+                var cacheKey = timedOperation.CallerFilePath + timedOperation.Name;
+                var summary = _summaries.GetOrAdd(cacheKey, (_) =>
                 {
-                    name = name.Substring(0, name.Length - c_asyncSuffic.Length);
-                }
+                    var name = timedOperation.Name;
 
-                var summaryName = PrometheusHelper.ConvertToPrometheusMetricsName("app_" + name + "DurationMilliseconds");
-                var summaryConfig = new SummaryConfiguration
-                {
-                    Objectives = new[]
+                    if (name.OrdinalEndsWith(c_asyncSuffic))
                     {
+                        name = name.Substring(0, name.Length - c_asyncSuffic.Length);
+                    }
+
+                    var summaryName = PrometheusHelper.ConvertToPrometheusMetricsName("app_" + name + "DurationMilliseconds");
+
+                    var labelNames = new List<string> { "result" };
+                    if (timedOperation.MetricLabels?.Any() == true)
+                    {
+                        labelNames.AddRange(timedOperation.MetricLabels.Select(kvp => kvp.Key));
+                    }
+
+                    var summaryConfig = new SummaryConfiguration
+                    {
+                        Objectives = new[]
+                        {
                         new QuantileEpsilonPair(0.5, 0.05),
                         new QuantileEpsilonPair(0.75, 0.05),
                         new QuantileEpsilonPair(0.95, 0.01),
                         new QuantileEpsilonPair(0.99, 0.005),
-                    },
-                    LabelNames = new[] { "result" },
-                };
-                var newSummary = Prometheus.Metrics
-                    .CreateSummary(summaryName, $"A summary of duration of the operation '{timedOperation.Name}' at [{Path.GetFileName(timedOperation.CallerFilePath)}:{timedOperation.CallerMemberName}:{timedOperation.CallerLineNumber}]", summaryConfig);
-                return newSummary;
-            });
+                        },
+                        LabelNames = labelNames.ToArray(),
+                    };
+                    var newSummary = Prometheus.Metrics
+                        .CreateSummary(summaryName, $"A summary of duration of the operation '{timedOperation.Name}' at [{Path.GetFileName(timedOperation.CallerFilePath)}:{timedOperation.CallerMemberName}:{timedOperation.CallerLineNumber}]", summaryConfig);
+                    return newSummary;
+                });
 
-            summary
-                .WithLabels(timedOperation.IsSuccessful ? "success" : "failure")
-                .Observe(timedOperation.ElapsedMilliseconds);
+                var labelValues = new List<string> { timedOperation.IsSuccessful ? "success" : "failure" };
+                if (timedOperation.MetricLabels?.Any() == true)
+                {
+                    labelValues.AddRange(timedOperation.MetricLabels.Select(kvp => kvp.Value));
+                }
+
+                summary
+                    .WithLabels(labelValues.ToArray())
+                    .Observe(timedOperation.ElapsedMilliseconds);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Warning(ex, "Failed at generating Prometheus metrics");
+            }
         }
     }
 }

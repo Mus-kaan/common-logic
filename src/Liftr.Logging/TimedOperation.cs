@@ -106,6 +106,8 @@ namespace Microsoft.Liftr.Logging
 
         public int CallerLineNumber { get; }
 
+        public Dictionary<string, string> MetricLabels { get; set; } = new Dictionary<string, string>();
+
         public void Dispose()
         {
             if (_correlationIdScope != null)
@@ -222,6 +224,15 @@ namespace Microsoft.Liftr.Logging
         {
             LogContext.PushProperty(name, value);
             SetProperty(name, value);
+        }
+
+        /// <summary>
+        /// Same as 'SetContextProperty' with extra metrics label
+        /// </summary>
+        public void WithLabel(string name, string value)
+        {
+            MetricLabels[name] = value;
+            SetContextProperty(name, value);
         }
 
         public void SetResultDescription(string resultDescription)

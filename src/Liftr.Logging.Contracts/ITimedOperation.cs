@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 
 namespace Microsoft.Liftr.Logging
@@ -23,6 +24,8 @@ namespace Microsoft.Liftr.Logging
         string CallerMemberName { get; }
 
         int CallerLineNumber { get; }
+
+        Dictionary<string, string> MetricLabels { get; }
 
         void SetEnvironmentType(string environmentType);
 
@@ -67,6 +70,13 @@ namespace Microsoft.Liftr.Logging
         /// This property will be logged in the 'operation finish' event and all the log events in scope.
         /// </summary>
         void SetContextProperty(string name, double value);
+
+        /// <summary>
+        /// Please DO NOT use this for high cardinality values.
+        /// Add a property and a metric label to the <see cref="ITimedOperation"/> and all the log events under its scope.
+        /// This property will be logged in the 'operation finish' event and all the log events in scope.
+        /// </summary>
+        void WithLabel(string name, string value);
 
         /// <summary>
         /// Set the 'ResultDescription' property of the <see cref="ITimedOperation"/>.
