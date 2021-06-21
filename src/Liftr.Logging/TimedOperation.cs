@@ -229,10 +229,13 @@ namespace Microsoft.Liftr.Logging
         /// <summary>
         /// Same as 'SetContextProperty' with extra metrics label
         /// </summary>
-        public void WithLabel(string name, string value)
+        public void WithLabel(string name, string value, bool setContextProperty = true)
         {
             MetricLabels[name] = value;
-            SetContextProperty(name, value);
+            if (setContextProperty)
+            {
+                SetContextProperty(name, value);
+            }
         }
 
         public void SetResultDescription(string resultDescription)

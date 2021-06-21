@@ -65,7 +65,7 @@ namespace Microsoft.Liftr.ACIS.Worker
                 var acisOperationName = workerMessage.Operation;
                 var acisOperationId = workerMessage.OperationId;
 
-                operation.SetContextProperty(nameof(acisOperationName), acisOperationName);
+                operation.WithLabel(nameof(acisOperationName), acisOperationName);
                 operation.SetContextProperty(nameof(acisOperationId), acisOperationId);
                 operation.SetContextProperty(nameof(dequeueCount), dequeueCount);
 

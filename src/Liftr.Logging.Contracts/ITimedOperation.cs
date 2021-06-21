@@ -76,7 +76,7 @@ namespace Microsoft.Liftr.Logging
         /// Add a property and a metric label to the <see cref="ITimedOperation"/> and all the log events under its scope.
         /// This property will be logged in the 'operation finish' event and all the log events in scope.
         /// </summary>
-        void WithLabel(string name, string value);
+        void WithLabel(string name, string value, bool setContextProperty = true);
 
         /// <summary>
         /// Set the 'ResultDescription' property of the <see cref="ITimedOperation"/>.

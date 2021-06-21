@@ -140,6 +140,11 @@ namespace Microsoft.Liftr.Queue
                                 using (new LogContextPropertyScope("ARMOperationName", message.MsgTelemetryContext?.ARMOperationName))
                                 using (var operation = _logger.StartTimedOperation("ProcessQueueMessage", correlationId))
                                 {
+                                    if (!string.IsNullOrEmpty(message.MsgTelemetryContext?.ARMOperationName))
+                                    {
+                                        operation.WithLabel("ARMOperationName", message.MsgTelemetryContext?.ARMOperationName, setContextProperty: false);
+                                    }
+
                                     operation.SetProperty(nameof(srpMsgId), srpMsgId);
                                     operation.SetProperty(nameof(message.MsgId), message.MsgId);
                                     _logger.Information(

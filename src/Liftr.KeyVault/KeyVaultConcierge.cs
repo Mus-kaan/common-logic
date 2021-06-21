@@ -159,8 +159,8 @@ namespace Microsoft.Liftr.KeyVault
 
             using (var ops = _logger.StartTimedOperation(nameof(CreateCertificateAsync)))
             {
-                ops.SetContextProperty("CertificateName", certName);
-                ops.SetContextProperty(nameof(issuerName), issuerName);
+                ops.WithLabel("CertificateName", certName);
+                ops.WithLabel(nameof(issuerName), issuerName);
                 ops.SetContextProperty(nameof(certificateSubject), certificateSubject);
 
                 try
