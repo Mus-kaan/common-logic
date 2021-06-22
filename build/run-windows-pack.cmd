@@ -4,16 +4,16 @@ echo "Packing Windows nugets..."
 echo "Current path:"
 cd
 
-echo Major version number: %CDP_MAJOR_NUMBER_ONLY%
-echo Minor version number: %CDP_MINOR_NUMBER_ONLY%
-echo Build number: %CDP_BUILD_NUMBER%
+echo CDP_MAJOR_NUMBER_ONLY: %CDP_MAJOR_NUMBER_ONLY%
+echo CDP_MINOR_NUMBER_ONLY: %CDP_MINOR_NUMBER_ONLY%
 echo CDP_DEFINITION_BUILD_COUNT: %CDP_DEFINITION_BUILD_COUNT%
+echo CDP_BUILD_NUMBER: %CDP_BUILD_NUMBER%
 
-dotnet pack %~dp0..\src\Liftr.Common.sln -c Release --include-source --include-symbols --no-build --no-restore -o %~dp0..\nupkgs /p:MajorVersion=%CDP_MAJOR_NUMBER_ONLY% /p:MinorVersion=%CDP_MINOR_NUMBER_ONLY% /p:PatchVersion=%CDP_BUILD_NUMBER% /p:BuildMetadata=%CDP_DEFINITION_BUILD_COUNT% || goto :error
-echo "Finished packing C# nugets successfully"
-
-set NUGET_VERSION=%CDP_MAJOR_NUMBER_ONLY%.%CDP_MINOR_NUMBER_ONLY%.%CDP_BUILD_NUMBER%-build%CDP_DEFINITION_BUILD_COUNT%
+set NUGET_VERSION=%CDP_MAJOR_NUMBER_ONLY%.%CDP_MINOR_NUMBER_ONLY%.%CDP_DEFINITION_BUILD_COUNT%-x
 echo Nuget version: %NUGET_VERSION%
+
+dotnet pack %~dp0..\src\Liftr.Common.sln -c Release --include-source --include-symbols --no-build --no-restore -o %~dp0..\nupkgs /p:MajorVersion=%CDP_MAJOR_NUMBER_ONLY% /p:MinorVersion=%CDP_MINOR_NUMBER_ONLY% /p:PatchVersion=%CDP_DEFINITION_BUILD_COUNT% /p:BuildMetadata=%CDP_BUILD_NUMBER% -p:PackageVersion=%NUGET_VERSION% || goto :error
+echo "Finished packing C# nugets successfully"
 
 echo "Remove old contentFiles"
 rmdir /s /q %~dp0..\tools\pack-deployment\contentFiles
