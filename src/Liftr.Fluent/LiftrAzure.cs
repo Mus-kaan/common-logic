@@ -437,13 +437,13 @@ namespace Microsoft.Liftr.Fluent
 
         public async Task DeleteResourceGroupAsync(string rgName, bool noThrow = false)
         {
-            _logger.Information("Deleteing resource group with name: " + rgName);
+            _logger.Information("Deleting resource group with name: " + rgName);
             try
             {
                 await FluentClient
                 .ResourceGroups
                 .DeleteByNameAsync(rgName);
-                _logger.Information("Finished delete resource group with name: " + rgName);
+                _logger.Information("Finished deleting resource group with name: " + rgName);
             }
             catch (Exception ex)
             {
@@ -457,13 +457,13 @@ namespace Microsoft.Liftr.Fluent
 
         public void DeleteResourceGroup(string rgName, bool noThrow = false)
         {
-            _logger.Information("Deleteing resource group with name: " + rgName);
+            _logger.Information("Deleting resource group with name: " + rgName);
             try
             {
                 FluentClient
                 .ResourceGroups
                 .DeleteByName(rgName);
-                _logger.Information("Finished delete resource group with name: " + rgName);
+                _logger.Information("Finished deleting resource group with name: " + rgName);
             }
             catch (Exception ex)
             {
