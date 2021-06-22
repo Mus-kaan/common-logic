@@ -27,6 +27,24 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [Fact]
+        [DogfoodEastUS2]
+        public void DogfoodEastUS2Test()
+        {
+            Assert.Equal(CloudType.DogFood, TestCloudType);
+            Assert.Equal(AzureRegion.USEast2.Name, TestAzureRegion.Name);
+            Assert.Equal("DogfoodEastUS2", TestRegionCategory);
+        }
+
+        [Fact]
+        [DogfoodWestUS]
+        public void DogfoodWestUSTest()
+        {
+            Assert.Equal(CloudType.DogFood, TestCloudType);
+            Assert.Equal(AzureRegion.USWest.Name, TestAzureRegion.Name);
+            Assert.Equal("DogfoodWestUS", TestRegionCategory);
+        }
+
+        [Fact]
         [DogfoodWestUS2]
         public void DogfoodWestUS2Test()
         {
