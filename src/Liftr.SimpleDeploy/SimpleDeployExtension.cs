@@ -20,6 +20,8 @@ namespace Microsoft.Liftr.SimpleDeploy
 
         public static Func<AKSCallbackParameters, Task> AfterProvisionRegionalAKSResourcesAsync { get; set; }
 
+        public static Func<PrepareAKSCallbackParameters, Task> AfterPrepareK8SDeploymentAsync { get; set; }
+
         public static Func<VMSSCallbackParameters, Task> AfterProvisionRegionalVMSSResourcesAsync { get; set; }
     }
 }

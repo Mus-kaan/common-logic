@@ -57,6 +57,23 @@ namespace Microsoft.Liftr.SimpleDeploy
             File.WriteAllText("aks-kv.txt", kv.VaultUri);
             File.WriteAllText("vault-name.txt", kv.Name);
 
+            if (SimpleDeployExtension.AfterPrepareK8SDeploymentAsync != null)
+            {
+                using (_logger.StartTimedOperation(nameof(SimpleDeployExtension.AfterPrepareK8SDeploymentAsync)))
+                {
+                    var parameters = new PrepareAKSCallbackParameters()
+                    {
+                        RegionOptions = parsedRegionInfo,
+                        CallbackConfigurations = _callBackConfigs,
+                        BaseName = parsedRegionInfo.RegionOptions.ComputeBaseName,
+                        NamingContext = regionalNamingContext,
+                        IPPoolManager = ipPool,
+                    };
+
+                    await SimpleDeployExtension.AfterPrepareK8SDeploymentAsync.Invoke(parameters);
+                }
+            }
+
             _logger.Information("Successfully finished k8s deployment preparation work.");
         }
     }
