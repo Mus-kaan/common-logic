@@ -185,6 +185,7 @@ if [ "$APP_ASPNETCORE_ENVIRONMENT" = "DogFood" ] || [ "$APP_ASPNETCORE_ENVIRONME
 fi
 
 $Helm upgrade $HelmReleaseName --install --debug --wait --timeout 25m $DeploymentFlag\
+-f app-values.yaml \
 --set appVersion="$AppVersion" \
 --set vaultEndpoint="$KeyVaultEndpoint" \
 --set keyvault="$VaultName" \
