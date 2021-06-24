@@ -40,6 +40,6 @@ namespace Microsoft.Liftr.DataSource
         /// <summary>
         /// Update a resource entity
         /// </summary>
-        Task<TResource> UpdateAsync(TResource entity);
+        Task UpdateAsync(TResource entity);
     }
 }

@@ -15,12 +15,18 @@ namespace Microsoft.Liftr.DataSource.Mongo
         protected readonly IMongoCollection<TResource> _collection;
         protected readonly MongoWaitQueueRateLimiter _rateLimiter;
         protected readonly ITimeSource _timeSource;
+        protected readonly bool _enableOptimisticConcurrencyControl;
 
-        public ResourceEntityDataSource(IMongoCollection<TResource> collection, MongoWaitQueueRateLimiter rateLimiter, ITimeSource timeSource)
+        public ResourceEntityDataSource(
+            IMongoCollection<TResource> collection,
+            MongoWaitQueueRateLimiter rateLimiter,
+            ITimeSource timeSource,
+            bool enableOptimisticConcurrencyControl = false)
         {
             _collection = collection ?? throw new ArgumentNullException(nameof(collection));
             _rateLimiter = rateLimiter ?? throw new ArgumentNullException(nameof(rateLimiter));
             _timeSource = timeSource ?? throw new ArgumentNullException(nameof(timeSource));
+            _enableOptimisticConcurrencyControl = enableOptimisticConcurrencyControl;
         }
 
         public virtual async Task<TResource> AddAsync(TResource entity)
@@ -125,7 +131,10 @@ namespace Microsoft.Liftr.DataSource.Mongo
         {
             var builder = Builders<TResource>.Filter;
             var filter = builder.Eq(u => u.EntityId, entityId);
-            var update = Builders<TResource>.Update.Set(u => u.Active, false).Set(u => u.ProvisioningState, ProvisioningState.Deleting);
+            var update = Builders<TResource>.Update
+                .Set(u => u.Active, false)
+                .Set(u => u.ProvisioningState, ProvisioningState.Deleting)
+                .Set(u => u.LastModifiedUTC, _timeSource.UtcNow);
 
             await _rateLimiter.WaitAsync();
             try
@@ -156,18 +165,30 @@ namespace Microsoft.Liftr.DataSource.Mongo
             }
         }
 
-        public async Task<TResource> UpdateAsync(TResource entity)
+        public async Task UpdateAsync(TResource entity)
         {
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
             }
 
+            var builder = Builders<TResource>.Filter;
+            var filter = builder.Eq(u => u.EntityId, entity.EntityId);
+
+            if (_enableOptimisticConcurrencyControl)
+            {
+                filter &= builder.Eq(u => u.LastModifiedUTC, entity.LastModifiedUTC);
+            }
+
             await _rateLimiter.WaitAsync();
             try
             {
-                await _collection.ReplaceOneAsync(e => e.EntityId == entity.EntityId, entity);
-                return entity;
+                entity.LastModifiedUTC = _timeSource.UtcNow;
+                var replaceResult = await _collection.ReplaceOneAsync(filter, entity);
+                if (replaceResult.ModifiedCount != 1)
+                {
+                    throw new UpdateConflictException($"The update failed due to conflict. The entity with object Id '{entity.EntityId}' might be deleted. Or the {nameof(entity.LastModifiedUTC)} does not match with '{entity.LastModifiedUTC.ToZuluString()}'.");
+                }
             }
             finally
             {

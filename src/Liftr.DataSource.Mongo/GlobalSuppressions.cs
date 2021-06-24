@@ -16,3 +16,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "<Pending>", Scope = "member", Target = "~F:Microsoft.Liftr.DataSource.Mongo.MongoCollectionsBaseFactory._logger")]
 [assembly: SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "<Pending>", Scope = "member", Target = "~F:Microsoft.Liftr.DataSource.Mongo.MongoCollectionsBaseFactory._db")]
 [assembly: SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "<Pending>", Scope = "member", Target = "~F:Microsoft.Liftr.DataSource.Mongo.MongoCollectionsBaseFactory._dbName")]
+[assembly: SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "<Pending>", Scope = "member", Target = "~F:Microsoft.Liftr.DataSource.Mongo.ResourceEntityDataSource`1._enableOptimisticConcurrencyControl")]

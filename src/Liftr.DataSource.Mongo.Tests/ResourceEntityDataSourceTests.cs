@@ -116,12 +116,36 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
 
             // can update entity
             {
-                var newVnet = "newVnet";
-                mockEntity.VNet = newVnet;
-                await s.UpdateAsync(mockEntity);
+                ts.Add(TimeSpan.FromSeconds(1.53));
+                var e1 = await s.GetAsync(mockEntity.EntityId);
+                var e2 = await s.GetAsync(mockEntity.EntityId);
 
-                var retrieved = await s.ListAsync(entity1.ResourceId);
-                Assert.Equal(retrieved.First().VNet, newVnet);
+                e1.VNet = "newVnet11111";
+                ts.Add(TimeSpan.FromSeconds(1.53));
+                await s.UpdateAsync(e1);
+
+                ts.Add(TimeSpan.FromSeconds(1.53));
+                var retrieved = await s.GetAsync(mockEntity.EntityId);
+                Assert.Equal("newVnet11111", retrieved.VNet);
+
+                // ETag is different
+                e2.VNet = "newVnet2222";
+                ts.Add(TimeSpan.FromSeconds(1.53));
+                await Assert.ThrowsAsync<UpdateConflictException>(async () =>
+                {
+                    await s.UpdateAsync(e2);
+                });
+
+                ts.Add(TimeSpan.FromSeconds(1.53));
+                e1 = await s.GetAsync(mockEntity.EntityId);
+                e1.VNet = "newVnet3333";
+
+                ts.Add(TimeSpan.FromSeconds(1.53));
+                await s.UpdateAsync(e1);
+
+                ts.Add(TimeSpan.FromSeconds(1.53));
+                retrieved = await s.GetAsync(mockEntity.EntityId);
+                Assert.Equal("newVnet3333", retrieved.VNet);
             }
         }
     }
