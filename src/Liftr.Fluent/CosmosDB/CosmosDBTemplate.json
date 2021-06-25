@@ -5,7 +5,7 @@
     {
       "name": "WILL_BE_CHANGED [parameters('cosmosDBName')]",
       "type": "Microsoft.DocumentDB/databaseAccounts",
-      "apiVersion": "2020-09-01",
+      "apiVersion": "2021-04-15",
       "location": "WILL_BE_CHANGED [parameters('location')]",
       "tags": {
         "WILL_BE_CHANGED_displayName": "CosmosDB with MongoDB interface"
@@ -25,7 +25,7 @@
         "databaseAccountOfferType": "Standard",
         "enableFreeTier": false,
         "apiProperties": {
-          "serverVersion": "3.2"
+          "serverVersion": "4.0"
         }
       }
     }

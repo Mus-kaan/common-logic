@@ -37,7 +37,7 @@ namespace Microsoft.Liftr.Fluent
 
             _logger.Information($"Creating a CosmosDB with name {cosmosDBName} ...");
 
-            // https://docs.microsoft.com/en-us/azure/templates/microsoft.documentdb/2020-09-01/databaseaccounts
+            // https://docs.microsoft.com/en-us/azure/templates/microsoft.documentdb/2021-04-15/databaseaccounts
             var templateContent = EmbeddedContentReader.GetContent(c_cosmosDBTemplateFile);
 
             dynamic configObj = JObject.Parse(templateContent);

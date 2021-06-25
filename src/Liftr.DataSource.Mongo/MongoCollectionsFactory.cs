@@ -128,17 +128,18 @@ namespace Microsoft.Liftr.DataSource.Mongo
             if (!CollectionExists(_db, collectionName))
             {
                 _logger.Warning("Creating collection with name {collectionName} ...", collectionName);
-                var bson = new BsonDocument
-                {
-                    { "shardCollection", _dbName + "." + collectionName },
-                    { "key", new BsonDocument(shardingKeyName, "hashed") },
-                };
 
-                var shellCommand = new BsonDocumentCommand<BsonDocument>(bson);
+                // https://docs.microsoft.com/en-us/azure/cosmos-db/mongodb-custom-commands#create-collection
+                var createShardedCollection = new BsonDocument
+                {
+                    { "customAction", "CreateCollection" },
+                    { "collection", collectionName },
+                    { "shardKey", shardingKeyName },
+                };
 
                 try
                 {
-                    var commandResult = _db.RunCommand(shellCommand);
+                    var commandResult = _db.RunCommand<BsonDocument>(createShardedCollection);
                 }
                 catch (MongoCommandException ex)
                 {
