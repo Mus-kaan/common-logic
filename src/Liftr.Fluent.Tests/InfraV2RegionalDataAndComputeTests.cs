@@ -77,7 +77,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                         TestCommon.CheckCommonTags(retrievedTM.Inner.Tags);
                     }
 
-                    var pIp = await client.CreatePublicIPAsync(TestCommon.Location, dataRGName, $"test-ip-{Guid.NewGuid()}", new Dictionary<string, string> { { "environment", "test" } }, PublicIPSkuType.Standard);
+                    var pIp = await client.CreatePublicIPAsync(Location, dataRGName, $"test-ip-{Guid.NewGuid()}", new Dictionary<string, string> { { "environment", "test" } }, PublicIPSkuType.Standard);
 
                     // This will take a long time. Be patient.
                     await infra.CreateOrUpdateRegionalAKSRGAsync(
@@ -174,7 +174,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                         TestCommon.CheckCommonTags(retrievedTM.Inner.Tags);
                     }
 
-                    var pIp = await client.CreatePublicIPAsync(TestCommon.Location, dataRGName, $"test-ip-{Guid.NewGuid()}", new Dictionary<string, string> { { "environment", "test" } }, PublicIPSkuType.Standard);
+                    var pIp = await client.CreatePublicIPAsync(Location, dataRGName, $"test-ip-{Guid.NewGuid()}", new Dictionary<string, string> { { "environment", "test" } }, PublicIPSkuType.Standard);
 
                     // This will take a long time. Be patient.
                     await infra.CreateOrUpdateRegionalAKSRGAsync(
