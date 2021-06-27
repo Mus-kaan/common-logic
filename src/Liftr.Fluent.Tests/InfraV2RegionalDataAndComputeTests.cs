@@ -115,6 +115,9 @@ namespace Microsoft.Liftr.Fluent.Tests
                         return;
                     }
 
+                    regionalDataScope.SkipDeleteResourceGroup = true;
+                    regionalComputeScope.SkipDeleteResourceGroup = true;
+
                     throw;
                 }
             }
@@ -202,6 +205,10 @@ namespace Microsoft.Liftr.Fluent.Tests
                 catch (Exception ex)
                 {
                     logger.Error(ex, $"{nameof(VerifyRegionalDataAndComputeCreationWithAKSAvailabilityZoneSupportAsync)} failed.");
+
+                    regionalDataScope.SkipDeleteResourceGroup = true;
+                    regionalComputeScope.SkipDeleteResourceGroup = true;
+
                     throw;
                 }
             }
