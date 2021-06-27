@@ -4,9 +4,10 @@
 
 using Microsoft.Azure.Management.Network.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
-using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
+using Microsoft.Liftr.Tests;
+using Microsoft.Liftr.Tests.Utilities.Trait;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -18,20 +19,19 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Fluent.Tests
 {
-    public sealed class InfraV2RegionalDataAndComputeTests
+    public sealed class InfraV2RegionalDataAndComputeTests : LiftrAzureTestBase
     {
-        private readonly ITestOutputHelper _output;
-
         public InfraV2RegionalDataAndComputeTests(ITestOutputHelper output)
+            : base(output, useMethodName: true)
         {
-            _output = output;
         }
 
         [CheckInValidation(skipLinux: true)]
+        [PublicWestCentralUS]
         public async Task VerifyRegionalDataAndComputeCreationAsync()
         {
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);
-            var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USEast);
+            var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Location);
             TestCommon.AddCommonTags(context.Tags);
 
             var dataBaseName = "data";
@@ -121,10 +121,11 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [CheckInValidation(skipLinux: true)]
+        [PublicWestCentralUS]
         public async Task VerifyRegionalDataAndComputeCreationWithAKSAvailabilityZoneSupportAsync()
         {
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);
-            var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USEast);
+            var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Location);
             TestCommon.AddCommonTags(context.Tags);
 
             var dataBaseName = "data";
