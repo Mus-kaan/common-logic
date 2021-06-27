@@ -116,6 +116,7 @@ namespace Microsoft.Liftr.Contracts
         #region Americas
         public static readonly AzureRegion USWest = new AzureRegion("westus", "West US", "wus");
         public static readonly AzureRegion USWest2 = new AzureRegion("westus2", "West US 2", "wus2");
+        public static readonly AzureRegion USWest3 = new AzureRegion("westus3", "West US 3", "wus3");
         public static readonly AzureRegion USCentral = new AzureRegion("centralus", "Central US", "cus");
         public static readonly AzureRegion USEast = new AzureRegion("eastus", "East US", "eus");
         public static readonly AzureRegion USEast2 = new AzureRegion("eastus2", "East US 2", "eus2");
@@ -186,6 +187,7 @@ namespace Microsoft.Liftr.Contracts
         {
             AzureRegion.USWest,
             AzureRegion.USWest2,
+            AzureRegion.USWest3,
             AzureRegion.USCentral,
             AzureRegion.USEast,
             AzureRegion.USEast2,

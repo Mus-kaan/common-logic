@@ -19,6 +19,8 @@ namespace Microsoft.Liftr.Fluent.Contracts.Tests
 
             Assert.Equal("wus2", Region.USWest2.ShortName());
 
+            Assert.Equal("wus3", Region.Create("westus3").ShortName());
+
             Assert.Equal("cus", Region.USCentral.ShortName());
 
             Assert.Equal("eus", Region.USEast.ShortName());

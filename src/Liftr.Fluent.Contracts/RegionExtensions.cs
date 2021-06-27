@@ -10,10 +10,12 @@ namespace Microsoft.Liftr.Fluent.Contracts
 {
     public static class RegionExtensions
     {
-        private const string _ShortEASTUS2EUAP = "eus2e";
-        private const string _ShortCENTRALUSEUAP = "cuse";
-        private static readonly Region s_EASTUS2EUAP = Region.Create("eastus2euap");
-        private static readonly Region s_CENTRALUSEUAP = Region.Create("centraluseuap");
+        private const string c_EastUS2EuapShortName = "eus2e";
+        private const string c_CentralUSEuapShortName = "cuse";
+        private const string c_WestUS3ShortName = "wus3";
+        private static readonly Region s_EastUS2Euap = Region.Create("eastus2euap");
+        private static readonly Region s_CentralUSEuap = Region.Create("centraluseuap");
+        private static readonly Region s_WestUS3 = Region.Create("westus3");
 
         public static string ShortName(this Region region)
         {
@@ -25,6 +27,10 @@ namespace Microsoft.Liftr.Fluent.Contracts
             else if (region == Region.USWest2)
             {
                 return "wus2";
+            }
+            else if (region == s_WestUS3)
+            {
+                return "wus3";
             }
             else if (region == Region.USCentral)
             {
@@ -202,13 +208,13 @@ namespace Microsoft.Liftr.Fluent.Contracts
             {
                 return "nede";
             }
-            else if (region == s_EASTUS2EUAP)
+            else if (region == s_EastUS2Euap)
             {
-                return _ShortEASTUS2EUAP;
+                return c_EastUS2EuapShortName;
             }
-            else if (region == s_CENTRALUSEUAP)
+            else if (region == s_CentralUSEuap)
             {
-                return _ShortCENTRALUSEUAP;
+                return c_CentralUSEuapShortName;
             }
 
             throw new ArgumentOutOfRangeException($"Azure region {region} does not have predefined short name.");
@@ -420,13 +426,17 @@ namespace Microsoft.Liftr.Fluent.Contracts
             {
                 return Region.GermanyNorthEast;
             }
-            else if (location.OrdinalEquals(_ShortEASTUS2EUAP))
+            else if (location.OrdinalEquals(c_EastUS2EuapShortName))
             {
-                return s_EASTUS2EUAP;
+                return s_EastUS2Euap;
             }
-            else if (location.OrdinalEquals(_ShortCENTRALUSEUAP))
+            else if (location.OrdinalEquals(c_CentralUSEuapShortName))
             {
-                return s_CENTRALUSEUAP;
+                return s_CentralUSEuap;
+            }
+            else if (location.OrdinalEquals(c_WestUS3ShortName))
+            {
+                return s_WestUS3;
             }
 
             throw new ArgumentOutOfRangeException($"Short Azure region {location} is invalid.");

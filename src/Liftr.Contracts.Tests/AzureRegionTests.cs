@@ -18,6 +18,8 @@ namespace Microsoft.Liftr.Contracts.Tests
 
             Assert.Equal("wus2", AzureRegion.USWest2.ShortName);
 
+            Assert.Equal("wus3", AzureRegion.USWest3.ShortName);
+
             Assert.Equal("cus", AzureRegion.USCentral.ShortName);
 
             Assert.Equal("eus", AzureRegion.USEast.ShortName);
@@ -90,7 +92,7 @@ namespace Microsoft.Liftr.Contracts.Tests
                 i++;
             }
 
-            Assert.Equal(48, i);
+            Assert.Equal(49, i);
         }
 
         [Fact]

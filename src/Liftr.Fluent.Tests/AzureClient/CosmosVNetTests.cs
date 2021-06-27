@@ -22,7 +22,7 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [CheckInValidation(skipLinux: true)]
-        [PublicEastUS]
+        [PublicWestUS3]
         public async Task CanCreateCosmosDBAsync()
         {
             var client = Client;
