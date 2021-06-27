@@ -1460,7 +1460,7 @@ namespace Microsoft.Liftr.Fluent
             catch (Exception ex)
             {
                 ops.FailOperation(ex.Message);
-                _logger.Error(ex, "AKS created failed.");
+                _logger.Error(ex, "AKS creation failed.");
                 throw;
             }
         }

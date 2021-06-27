@@ -27,7 +27,7 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [CheckInValidation(skipLinux: true)]
-        [PublicWestCentralUS]
+        [PublicEastUS2]
         public async Task VerifyRegionalDataAndComputeCreationAsync()
         {
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);
@@ -124,7 +124,7 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [CheckInValidation(skipLinux: true)]
-        [PublicWestCentralUS]
+        [PublicEastUS2]
         public async Task VerifyRegionalDataAndComputeCreationWithAKSAvailabilityZoneSupportAsync()
         {
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);
