@@ -11,6 +11,7 @@ using Microsoft.Liftr.Logging;
 using Microsoft.Liftr.Tests.Utilities;
 using Microsoft.Liftr.Tests.Utilities.Trait;
 using Serilog;
+using Serilog.Sinks.TestCorrelator;
 using System;
 using System.Globalization;
 using System.IO;
@@ -33,7 +34,7 @@ namespace Microsoft.Liftr.Tests
         private const string LIFTR_UNIT_TEST_COMPONENT_TAG = nameof(LIFTR_UNIT_TEST_COMPONENT_TAG);
         private static readonly IDisposable s_httpClientSubscriber = GetHttpCoreDiagnosticSourceSubscriber();
         private static readonly string s_appInsightsIntrumentationKey = GetInstrumentationKey();
-
+        private readonly ITestCorrelatorContext _testCorrelatorContext;
         private TelemetryConfiguration _appInsightsConfig;
         private DependencyTrackingTelemetryModule _depModule;
         private TelemetryClient _appInsightsClient;
@@ -54,6 +55,7 @@ namespace Microsoft.Liftr.Tests
             TestExceptionHelper.Register(sourceFile);
             var testClass = GetType().Name;
             GenerateLogger(testClass, output);
+            _testCorrelatorContext = TestCorrelator.CreateContext();
             string operationName = null;
             DateTimeStr = DateTime.UtcNow.ToString("MMddHmmss", CultureInfo.InvariantCulture);
 
@@ -147,6 +149,8 @@ namespace Microsoft.Liftr.Tests
 
         protected Action OnTestFailure { get; set; }
 
+        public Serilog.Events.LogEvent[] GetLogEvents() => TestCorrelator.GetLogEventsFromContextGuid(_testCorrelatorContext.Guid).ToArray();
+
         public virtual void Dispose()
         {
             if (_disposed)
@@ -235,6 +239,7 @@ namespace Microsoft.Liftr.Tests
                 _appInsightsClient?.Flush();
                 _appInsightsConfig?.Dispose();
                 _depModule?.Dispose();
+                _testCorrelatorContext.Dispose();
                 TimedOperation = null;
                 _appInsightsClient = null;
                 _appInsightsConfig = null;
@@ -261,6 +266,7 @@ namespace Microsoft.Liftr.Tests
                 .Enrich.WithProperty("TestClassName", testClass)
                 .Enrich.WithProperty("UnitTestessionId", Guid.NewGuid().ToString())
                 .Enrich.WithProperty("UnitTestStartTime", DateTime.UtcNow.ToZuluString())
+                .WriteTo.TestCorrelator()
                 .WriteTo.ApplicationInsights(_appInsightsClient, TelemetryConverter.Events);
 
             if (output != null)
@@ -275,6 +281,7 @@ namespace Microsoft.Liftr.Tests
             }
 
             Logger = loggerConfig.Enrich.FromLogContext().CreateLogger();
+            Log.Logger = Logger;
         }
 
         private static string GetInstrumentationKey()

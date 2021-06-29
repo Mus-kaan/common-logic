@@ -35,7 +35,7 @@ namespace Microsoft.Liftr.Fluent
                 throw new ArgumentNullException(nameof(liftrAzure));
             }
 
-            _logger.Information($"Creating an ACR with name {acrName} ...");
+            _logger.Information("Creating an ACR with name {acrName} ...", acrName);
             var templateContent = EmbeddedContentReader.GetContent(c_acrTemplateFile);
             dynamic configObj = JObject.Parse(templateContent);
             var r = configObj.resources[0];
