@@ -2,12 +2,17 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.AzureAD.UI;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Liftr.TokenManager;
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 
 namespace Microsoft.Liftr.RPaaS.Hosting
@@ -83,6 +88,63 @@ namespace Microsoft.Liftr.RPaaS.Hosting
 
                 return metaRPClient;
             });
+        }
+
+        public static void AddRPaaSAuthentication(this IServiceCollection services, RPaaSAuthOptions authOptions)
+        {
+            if (authOptions == null)
+            {
+                throw new ArgumentNullException(nameof(authOptions));
+            }
+
+            services.AddAuthentication(options => options.DefaultScheme = AzureADDefaults.JwtBearerAuthenticationScheme)
+                .AddAzureADBearer(options =>
+                {
+                    options.Instance = authOptions.Instance.OriginalString;
+                    options.TenantId = authOptions.TenantId;
+                    options.ClientId = authOptions.ClientId;
+                });
+
+            services.Configure<JwtBearerOptions>(AzureADDefaults.JwtBearerAuthenticationScheme, options =>
+            {
+                options.TokenValidationParameters.ValidAudience = authOptions.Audience;
+                options.TokenValidationParameters.IssuerValidator = ValidateAadIssuer;
+                options.TokenValidationParameters.RequireSignedTokens = true;
+                options.TokenValidationParameters.RequireExpirationTime = true;
+                options.TokenValidationParameters.ValidateLifetime = true;
+                options.TokenValidationParameters.ValidateTokenReplay = true;
+                options.TokenValidationParameters.ValidateIssuerSigningKey = true;
+            });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(RPaaSAuthConstants.RPaaSAuthorizationRule, policy => policy.RequireClaim("appid", new[] { authOptions.RPaaSAppId }));
+            });
+        }
+
+        private static string ValidateAadIssuer(string issuer, SecurityToken token, TokenValidationParameters options)
+        {
+            var jwtToken = token as JwtSecurityToken;
+            if (jwtToken == null)
+            {
+                throw new SecurityTokenInvalidIssuerException("Issuer validation failed. Expected a JWT Token from Azure Active Directory.");
+            }
+
+            // When AzureAdOptions.TenantId is set to "common", the valid issuers are templated with {tenantid},
+            // e.g. "https://sts.windows-ppe.net/{tenantid}/". We need to replace the "{tenantid}" substring with
+            // the actual value.
+            var tenantId = jwtToken.Payload["tid"].ToString();
+            foreach (var iss in options.ValidIssuers)
+            {
+                var candidateIssuer = iss.Replace("{tenantid}", tenantId, StringComparison.OrdinalIgnoreCase);
+                if (candidateIssuer.OrdinalEquals(issuer))
+                {
+                    // Valid issuer
+                    return candidateIssuer;
+                }
+            }
+
+            throw new SecurityTokenInvalidIssuerException($"Issuer validation failed. Issuer {issuer} is not a valid issuer.");
         }
     }
 }

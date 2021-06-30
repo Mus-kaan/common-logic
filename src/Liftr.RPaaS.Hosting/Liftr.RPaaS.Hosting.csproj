@@ -1,12 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
     <IsPackable>true</IsPackable>
     <AssemblyName>Microsoft.Liftr.RPaaS.Hosting</AssemblyName>
     <RootNamespace>Microsoft.Liftr.RPaaS.Hosting</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(PackageVersion_Microsoft_AspNetCore_Authentication_JwtBearer)" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.AzureAD.UI" Version="$(PackageVersion_Microsoft_AspNetCore_Authentication_AzureAD_UI)" />
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="$(PackageVersion_Microsoft_Azure_KeyVault)" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="$(PackageVersion_Microsoft_Extensions_Http)" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="$(PackageVersion_Microsoft_Extensions_Http_Polly)" />
