@@ -35,5 +35,10 @@ namespace Microsoft.Liftr.RPaaS
         /// Our app id.
         /// </summary>
         public string ClientId { get; set; }
+
+        /// <summary>
+        /// Whether RPaaS Auth process should be skipped (e.g. in dev environment)
+        /// </summary>
+        public bool ShouldSkip { get; set; } = false;
     }
 }

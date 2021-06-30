@@ -5,6 +5,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -95,6 +96,21 @@ namespace Microsoft.Liftr.RPaaS.Hosting
             if (authOptions == null)
             {
                 throw new ArgumentNullException(nameof(authOptions));
+            }
+
+            if (authOptions.ShouldSkip)
+            {
+                // always pass authentication by adding an "always success" scheme
+                services.AddAuthentication(options => options.DefaultAuthenticateScheme = "AlwaysSuccess")
+                    .AddScheme<AuthenticationSchemeOptions, AlwaysSuccessAuthenticationHandler>("AlwaysSuccess", null);
+
+                // always pass authorization by adding an "always success" policy as "RPaaS"
+                services.AddSingleton<IAuthorizationHandler, AlwaysSuccessAuthorizationHandler>();
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(RPaaSAuthConstants.RPaaSAuthorizationRule, policy => policy.Requirements.Add(new AlwaysSuccessRequirement()));
+                });
+                return;
             }
 
             services.AddAuthentication(options => options.DefaultScheme = AzureADDefaults.JwtBearerAuthenticationScheme)
