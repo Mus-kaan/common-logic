@@ -37,15 +37,6 @@ namespace Microsoft.Liftr.Fluent
             }
 
             await RegisterProvidersAsync(liftrAzure, s_commonProviderList);
-
-            bool registered1 = await RegisterFeatureAsync(liftrAzure, "Microsoft.Compute", "GalleryPreview");
-            bool registered2 = await RegisterFeatureAsync(liftrAzure, "Microsoft.VirtualMachineImages", "VirtualMachineTemplatePreview");
-
-            if (!registered1 || !registered2)
-            {
-                _logger.Information("Wait for 5 minutes to make sure the feature is registered.");
-                await Task.Delay(TimeSpan.FromMinutes(5));
-            }
         }
 
         public async Task RegisterImportImageProvidersAndFeaturesAsync(ILiftrAzure liftrAzure)
@@ -84,13 +75,14 @@ namespace Microsoft.Liftr.Fluent
             {
                 foreach (var provider in providerList)
                 {
-                    var registration = await liftrAzure.RegisterResourceProviderAsync(provider);
-                    if (registration.Contains(c_providerRegisteredMarker))
+                    var getRPResponse = await liftrAzure.GetResourceProviderAsync(provider);
+                    if (getRPResponse.Contains(c_providerRegisteredMarker))
                     {
                         _logger.Debug($"'{provider}' is already registered.");
                     }
                     else
                     {
+                        var registration = await liftrAzure.RegisterResourceProviderAsync(provider);
                         registering = true;
                         _logger.Information($"'{provider}' has not been registered. Wait for the registration to finish.");
                     }

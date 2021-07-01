@@ -44,6 +44,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             using (var scope = new TestResourceGroupScope("unittest-rg-", _output))
             {
                 var client = scope.Client;
+                var response1 = await client.GetResourceProviderAsync("f885cf14-b751-43c1-9536-dc5b1be02bc0", "Microsoft.ConfidentialLedger");
                 var response = await client.RegisterResourceProviderAsync("microsoft.attestation");
                 var featureResponse = await client.RegisterFeatureAsync("Microsoft.VirtualMachineImages", "VirtualMachineTemplatePreview");
             }

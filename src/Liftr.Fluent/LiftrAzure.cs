@@ -373,6 +373,51 @@ namespace Microsoft.Liftr.Fluent
                 return await response.Content.ReadAsStringAsync();
             }
         }
+
+        public Task<string> GetResourceProviderAsync(string resourceProviderName)
+        {
+            return GetResourceProviderAsync(FluentClient.SubscriptionId, resourceProviderName);
+        }
+
+        public async Task<string> GetResourceProviderAsync(string subscriptionId, string resourceProviderName)
+        {
+            if (string.IsNullOrEmpty(subscriptionId))
+            {
+                throw new ArgumentNullException(nameof(subscriptionId));
+            }
+
+            if (string.IsNullOrEmpty(resourceProviderName))
+            {
+                throw new ArgumentNullException(nameof(resourceProviderName));
+            }
+
+            using (var handler = new AzureApiAuthHandler(AzureCredentials))
+            using (var httpClient = new HttpClient(handler))
+            {
+                var uriBuilder = new UriBuilder(AzureCredentials.Environment.ResourceManagerEndpoint);
+                uriBuilder.Path = $"/subscriptions/{subscriptionId}/providers/{resourceProviderName}";
+                uriBuilder.Query = $"api-version=2014-04-01-preview";
+
+                _logger.Information($"Start getting resource provider '{resourceProviderName}' in subscription '{subscriptionId}'");
+                var response = await _options.HttpPolicy.ExecuteAsync(() => httpClient.GetAsync(uriBuilder.Uri));
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errMsg = $"Failed at getting resource provider. Status code: {response.Content}";
+
+                    if (response.Content != null)
+                    {
+                        errMsg += $"Error content: {await response.Content.ReadAsStringAsync()}";
+                    }
+
+                    var ex = new InvalidOperationException(errMsg);
+                    _logger.Error(ex, errMsg);
+                    throw ex;
+                }
+
+                return await response.Content.ReadAsStringAsync();
+            }
+        }
         #endregion
 
         #region Resource Group
