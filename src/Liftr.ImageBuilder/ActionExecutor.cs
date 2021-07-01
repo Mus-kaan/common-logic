@@ -238,7 +238,7 @@ namespace Microsoft.Liftr.ImageBuilder
                     }
                     else
                     {
-                        await register.RegisterBakeImageProvidersAndFeaturesAsync(azFactory.GenerateLiftrAzure(), withACR: _options.Action == ActionType.OutputACRInformation);
+                        await register.RegisterBakeImageProvidersAndFeaturesAsync(azFactory.GenerateLiftrAzure(), withACR: config.UseACR);
                     }
 
                     var resources = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(infraOptions, tags);
