@@ -18,6 +18,7 @@ namespace Microsoft.Liftr.Metrics.Prometheus.Tests
         [InlineData("test_snake_case123", "TestSnakeCase123")]
         [InlineData("_test_snake_case123", "_testSnakeCase123")]
         [InlineData("test_sc", "test_SC")]
+        [InlineData("certificate_resource_manager_get_or_create_impl_async_geneva_cert", "CertificateResourceManager.GetOrCreateImplAsync:GenevaCert")]
         public void OrdinalEqual(string expected, string input)
         {
             var metricsName = PrometheusHelper.ConvertToPrometheusMetricsName(input);
