@@ -6,6 +6,7 @@ using Azure.Storage.Blobs;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Management.Compute.Fluent;
 using Microsoft.Azure.Management.Compute.Fluent.Models;
+using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.Graph.RBAC.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
@@ -36,13 +37,6 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.ImageBuilder
 {
-    public enum InfrastructureType
-    {
-        BakeNewImage,
-        BakeNewImageAndExport,
-        ImportImage,
-    }
-
     public class ImageBuilderOrchestrator
     {
         internal const string c_SBISASSecretName = "SBISASToken";
@@ -52,6 +46,7 @@ namespace Microsoft.Liftr.ImageBuilder
         private const string c_exportingStorageNamePrefix = "export";
 
         private const string c_keyVaultNamePrefix = "liftr-img-";
+        private const string c_acrNamePrefix = "imgacr";
 
         private const string c_packerFilesFolderName = "packer-files";
         private const string c_entryScriptLinux = "bake-image.sh";
@@ -80,8 +75,15 @@ namespace Microsoft.Liftr.ImageBuilder
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<(IVault, IGallery, IContentStore, IStorageAccount)> CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType infraType, SourceImageType? sourceImageType, IDictionary<string, string> tags)
+        public async Task<ImageBuilderInfraResources> CreateOrUpdateLiftrImageBuilderInfrastructureAsync(
+            InfraOptions infraOptions,
+            IDictionary<string, string> tags)
         {
+            if (infraOptions == null)
+            {
+                throw new ArgumentNullException(nameof(infraOptions));
+            }
+
             using var ops = _logger.StartTimedOperation(nameof(CreateOrUpdateLiftrImageBuilderInfrastructureAsync));
             IStorageAccount exportStorageAccount = null;
             try
@@ -91,23 +93,62 @@ namespace Microsoft.Liftr.ImageBuilder
                 var rg = await liftrAzure.GetOrCreateResourceGroupAsync(_options.Location, _options.ResourceGroupName, tags);
                 await liftrAzure.GrantBlobContributorAsync(rg, liftrAzure.SPNObjectId);
 
+                IRegistry acr = null;
+                if (infraOptions.UseACR)
+                {
+                    var acrList = await liftrAzure.ListACRAsync(_options.ResourceGroupName);
+                    if (acrList == null || !acrList.Any())
+                    {
+                        var acrName = SdkContext.RandomResourceName(c_acrNamePrefix, 29);
+                        acr = await liftrAzure.GetOrCreateACRAsync(_options.Location, _options.ResourceGroupName, acrName, tags);
+                    }
+                    else
+                    {
+                        acr = acrList.First();
+                    }
+                }
+
                 ImageGalleryClient galleryClient = new ImageGalleryClient(_timeSource, _logger);
                 var gallery = await galleryClient.CreateGalleryAsync(liftrAzure.FluentClient, _options.Location, _options.ResourceGroupName, _options.ImageGalleryName, tags);
 
                 _keyVault = await GetOrCreateKeyVaultAsync(c_keyVaultNamePrefix);
 
+                if (acr != null)
+                {
+                    // TODO: use token instead of admin user to restrict to read only access.
+                    if (!acr.AdminUserEnabled)
+                    {
+                        _logger.Information("Enable acr admin user in {acrName}", acr.Name);
+                        acr = await acr.Update().WithRegistryNameAsAdminUser().ApplyAsync();
+                    }
+
+                    var acrCredentials = await acr.GetCredentialsAsync();
+
+                    using var kvValet = new KeyVaultConcierge(_keyVault.VaultUri, _kvClient, _logger);
+                    await kvValet.SetSecretAsync("acr-login-server", acr.LoginServerUrl, tags);
+                    await kvValet.SetSecretAsync("acr-username", acrCredentials.Username, tags);
+                    await kvValet.SetSecretAsync("acr-password", acrCredentials.AccessKeys[AccessKeyType.Primary], tags);
+                }
+
                 (var storageAcct, var contentStore) = await GetOrCreateContentStoreAsync(c_artifactStorageNamePrefix);
                 _artifactStore = contentStore;
-                if (infraType == InfrastructureType.BakeNewImageAndExport)
+
+                if (infraOptions.Type == InfraType.BakeImage && infraOptions.CreateExportStorage == true)
                 {
                     (var stor, var exportContentStore) = await GetOrCreateContentStoreAsync(c_exportingStorageNamePrefix);
                     _exportStore = exportContentStore;
                     exportStorageAccount = stor;
                 }
 
-                if (infraType == InfrastructureType.ImportImage)
+                if (infraOptions.Type == InfraType.ImportImage)
                 {
-                    return (_keyVault, gallery, _artifactStore, exportStorageAccount);
+                    return new ImageBuilderInfraResources()
+                    {
+                        KeyVault = _keyVault,
+                        ImageGallery = gallery,
+                        ArtifactStore = _artifactStore,
+                        ExportStorageAccount = exportStorageAccount,
+                    };
                 }
 
                 _msi = await GetOrCreateMSIAsync();
@@ -131,7 +172,14 @@ namespace Microsoft.Liftr.ImageBuilder
                     throw;
                 }
 
-                return (_keyVault, gallery, _artifactStore, exportStorageAccount);
+                return new ImageBuilderInfraResources()
+                {
+                    KeyVault = _keyVault,
+                    ImageGallery = gallery,
+                    ArtifactStore = _artifactStore,
+                    ExportStorageAccount = exportStorageAccount,
+                    ACR = acr,
+                };
             }
             catch (Exception ex)
             {

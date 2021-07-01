@@ -10,5 +10,6 @@
   "ImageReplicationRegions": [
     "westus2"
   ],
+  "UseACR": true,
   "ExportVHDToStorage": false // This is required to be used in the distribution step.
 }

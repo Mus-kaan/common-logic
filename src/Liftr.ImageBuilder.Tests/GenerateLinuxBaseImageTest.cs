@@ -51,10 +51,16 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
 
                     var orchestrator = new ImageBuilderOrchestrator(options, scope.AzFactory, TestCredentials.KeyVaultClient, timeSource, scope.Logger);
 
-                    (var kv, var gallery, var artifactStore, var stor) = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.BakeNewImageAndExport, SourceImageType.U1804LTS, tags: tags);
+                    InfraOptions infraOptions = new InfraOptions()
+                    {
+                        Type = InfraType.BakeImage,
+                        CreateExportStorage = true,
+                    };
+
+                    var resources = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(infraOptions, tags);
 
                     using (var testKvValet = new KeyVaultConcierge(TestCredentials.SharedKeyVaultUri, TestCredentials.KeyVaultClient, scope.Logger))
-                    using (var kvValet = new KeyVaultConcierge(kv.VaultUri, TestCredentials.KeyVaultClient, scope.Logger))
+                    using (var kvValet = new KeyVaultConcierge(resources.KeyVault.VaultUri, TestCredentials.KeyVaultClient, scope.Logger))
                     {
                         var sbiSASToken = (await testKvValet.GetSecretAsync(ImageBuilderOrchestrator.c_SBISASSecretName)).Value;
                         await kvValet.SetSecretAsync(ImageBuilderOrchestrator.c_SBISASSecretName, sbiSASToken);

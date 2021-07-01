@@ -9,5 +9,6 @@
     "westus"
   ],
   "KeepAzureVMImageBuilderLogs": false,
-  "ExportVHDToStorage": true
+  "ExportVHDToStorage": true,
+  "UseACR": true
 }

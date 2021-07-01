@@ -5,6 +5,7 @@
 using Azure.Core;
 using Azure.Identity;
 using Microsoft.Azure.KeyVault;
+using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Extensions.Hosting;
@@ -137,6 +138,7 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
 
                 LogContext.PushProperty(nameof(tenantId), tenantId);
+                File.WriteAllText("tenant-id.txt", tenantId);
 
                 LiftrAzureFactory azFactory = new LiftrAzureFactory(
                     _logger,
@@ -223,18 +225,43 @@ namespace Microsoft.Liftr.ImageBuilder
                         _logger);
 
                     ResourceProviderRegister register = new ResourceProviderRegister(_logger);
-                    InfrastructureType infraType = InfrastructureType.ImportImage;
-                    if (_options.Action == ActionType.BakeNewVersion)
+                    var infraOptions = new InfraOptions()
                     {
-                        await register.RegisterBakeImageProvidersAndFeaturesAsync(azFactory.GenerateLiftrAzure());
-                        infraType = config.ExportVHDToStorage ? InfrastructureType.BakeNewImageAndExport : InfrastructureType.BakeNewImage;
-                    }
-                    else
+                        Type = _options.Action == ActionType.ImportOneVersion ? InfraType.ImportImage : InfraType.BakeImage,
+                        CreateExportStorage = config.ExportVHDToStorage,
+                        UseACR = config.UseACR,
+                    };
+
+                    if (_options.Action == ActionType.ImportOneVersion)
                     {
                         await register.RegisterImportImageProvidersAndFeaturesAsync(azFactory.GenerateLiftrAzure());
                     }
+                    else
+                    {
+                        await register.RegisterBakeImageProvidersAndFeaturesAsync(azFactory.GenerateLiftrAzure(), withACR: _options.Action == ActionType.OutputACRInformation);
+                    }
 
-                    (var kv, var gallery, var artifactStore, var exportStorageAccount) = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(infraType, _options.SourceImage, tags);
+                    var resources = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(infraOptions, tags);
+
+                    if (_options.Action == ActionType.OutputACRInformation)
+                    {
+                        var acr = resources.ACR;
+
+                        if (acr == null)
+                        {
+                            var errMsg = "Cannot find the ACR.";
+                            _logger.Fatal(errMsg);
+                            throw new InvalidOperationException(errMsg);
+                        }
+
+                        _logger.Information($"Write ACR '{acr.Name}' information to disk.");
+                        File.WriteAllText("acr-name.txt", acr.Name);
+                        File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
+                        File.WriteAllText("acr-subscription-id.txt", config.SubscriptionId.ToString());
+
+                        return;
+                    }
+
                     var extensionParameters = new CallbackParameters()
                     {
                         LiftrAzureFactory = azFactory,
@@ -242,9 +269,9 @@ namespace Microsoft.Liftr.ImageBuilder
                         Logger = _logger,
                         BuilderOptions = config,
                         BuilderCommandOptions = _options,
-                        KeyVault = kv,
-                        VHDStorageAccount = exportStorageAccount,
-                        Gallery = gallery,
+                        KeyVault = resources.KeyVault,
+                        VHDStorageAccount = resources.ExportStorageAccount,
+                        Gallery = resources.ImageGallery,
                     };
 
                     if (_options.Action == ActionType.BakeNewVersion)
@@ -267,13 +294,20 @@ namespace Microsoft.Liftr.ImageBuilder
                                 await ImageBuilderExtension.AfterBakeImageAsync.Invoke(extensionParameters);
                             }
                         }
+
+                        if (resources.ACR != null)
+                        {
+                            _logger.Information("Rotating admin password each time after use of {acrId}.", resources.ACR.Id);
+                            await resources.ACR.RegenerateCredentialAsync(AccessKeyType.Primary);
+                            await resources.ACR.RegenerateCredentialAsync(AccessKeyType.Secondary);
+                        }
                     }
                     else if (_options.Action == ActionType.ImportOneVersion)
                     {
-                        using var kvValet = new KeyVaultConcierge(kv.VaultUri, kvClient, _logger);
+                        using var kvValet = new KeyVaultConcierge(resources.KeyVault.VaultUri, kvClient, _logger);
                         var imgImporter = new ImageImporter(
                             config,
-                            artifactStore,
+                            resources.ArtifactStore,
                             azFactory,
                             kvValet,
                             _timeSource,

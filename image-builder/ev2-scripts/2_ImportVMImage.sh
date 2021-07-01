@@ -38,7 +38,7 @@ ImageVersion=$(<numeric.packageversion.info)
 --ImageVersion="$ImageVersion" \
 --SourceImage="$SourceImage" \
 --RunnerSPNObjectId="$RunnerSPNObjectId" \
---OnlyOutputSubscriptionId="false" \
+--OnlyOutputACR="false" \
 --ImportImage="true" \
 --Cloud="$Cloud"
 

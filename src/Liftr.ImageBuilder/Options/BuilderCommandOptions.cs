@@ -11,11 +11,12 @@ namespace Microsoft.Liftr.ImageBuilder
     {
         BakeNewVersion,
         ImportOneVersion,
+        OutputACRInformation,
     }
 
     public class BuilderCommandOptions
     {
-        [Option('a', "action", Required = false, HelpText = "Action type, e.g. BakeNewVersion, ImportOneVersion.")]
+        [Option('a', "action", Required = false, HelpText = "Action type, e.g. BakeNewVersion, ImportOneVersion, OutputACRInformation.")]
         public ActionType Action { get; set; } = ActionType.BakeNewVersion;
 
         [Option('f', "file", Required = true, HelpText = "Path to the configuration file.")]

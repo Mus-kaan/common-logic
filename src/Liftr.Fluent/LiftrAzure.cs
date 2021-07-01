@@ -1581,6 +1581,13 @@ namespace Microsoft.Liftr.Fluent
             _logger.Information("Getting the ACR {acrName} in RG {rgName} ...", acrName, rgName);
             return FluentClient.ContainerRegistries.GetByResourceGroupAsync(rgName, acrName);
         }
+
+        public async Task<IEnumerable<IRegistry>> ListACRAsync(string rgName)
+        {
+            _logger.Information("Listing all ACR in RG {rgName} ...", rgName);
+            var list = await FluentClient.ContainerRegistries.ListByResourceGroupAsync(rgName);
+            return list?.ToList();
+        }
         #endregion
 
         #region Deployments

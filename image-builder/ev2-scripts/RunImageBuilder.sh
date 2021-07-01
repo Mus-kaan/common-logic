@@ -26,8 +26,8 @@ case $i in
     RunnerSPNObjectId="${i#*=}"
     shift # past argument=value
     ;;
-    --OnlyOutputSubscriptionId=*)
-    OnlyOutputSubscriptionId="${i#*=}"
+    --OnlyOutputACR=*)
+    OnlyOutputACR="${i#*=}"
     shift # past argument=value
     ;;
     --ImportImage=*)
@@ -70,8 +70,8 @@ if [ -z ${RunnerSPNObjectId+x} ]; then
     exit 1
 fi
 
-if [ -z ${OnlyOutputSubscriptionId+x} ]; then
-    echo "OnlyOutputSubscriptionId is blank."
+if [ -z ${OnlyOutputACR+x} ]; then
+    echo "OnlyOutputACR is blank."
     exit 1
 fi
 
@@ -83,8 +83,15 @@ fi
 echo "Using Configuration file: $ConfigurationPath"
 
 cd bin
-
-if [ "$ImportImage" = "true" ]; then
+if [ "$OnlyOutputACR" = "true" ]; then
+    dotnet BaseImageBuilder.dll \
+    -a OutputACRInformation \
+    -f "$ConfigurationPath" \
+    -n "$ImageName" \
+    -v "$ImageVersion" \
+    --spnObjectId "$RunnerSPNObjectId" \
+    --cloud "$Cloud"
+elif [ "$ImportImage" = "true" ]; then
     dotnet BaseImageBuilder.dll \
     -a ImportOneVersion \
     -f "$ConfigurationPath" \

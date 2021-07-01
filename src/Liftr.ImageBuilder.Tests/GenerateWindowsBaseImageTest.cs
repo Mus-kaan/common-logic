@@ -48,7 +48,13 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
 
                     var orchestrator = new ImageBuilderOrchestrator(options, scope.AzFactory, TestCredentials.KeyVaultClient, timeSource, scope.Logger);
 
-                    await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.BakeNewImageAndExport, SourceImageType.WindowsServer2019DatacenterCore, tags: tags);
+                    InfraOptions infraOptions = new InfraOptions()
+                    {
+                        Type = InfraType.BakeImage,
+                        CreateExportStorage = true,
+                    };
+
+                    await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(infraOptions, tags: tags);
 
                     await orchestrator.BuildCustomizedSBIAsync(
                                     "img" + baseName,

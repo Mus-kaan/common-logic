@@ -52,10 +52,6 @@ echo "Prepare packer files ..."
 cp -a "$SupportingFilesDir/packer-files/." "$PackerFilesDir"
 chmod +x $PackerFilesDir/*.sh
 
-if [ -d "$GenerateDockerImageMetadataDir" ]; then
-  cp -a $GenerateDockerImageMetadataDir/. "$PackerFilesDir/cdpx-images"
-fi
-
 cd "$OutDir"
 zip -r $PackerZipFileName $PackerFilesDirName
 echo "Zipped packer files into $PackerZipFile."
@@ -77,6 +73,11 @@ do
   dos2unix $script
   chmod +x $script
 done
+
+if [ -d "$GenerateDockerImageMetadataDir" ]; then
+  rm -rf "$EV2ExtensionFilesDir/cdpx-images"
+  cp -a $GenerateDockerImageMetadataDir/. "$EV2ExtensionFilesDir/cdpx-images"
+fi
 
 cd "$EV2ExtensionFilesDir" && tar -cf $EV2ExtensionTarFile *
 

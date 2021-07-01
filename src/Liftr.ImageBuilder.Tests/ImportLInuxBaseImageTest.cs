@@ -48,15 +48,20 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
 
                 try
                 {
-                    (var kv, var gallery, var artifactStore, var stor) = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.ImportImage, sourceImageType: null, tags: tags);
+                    InfraOptions infraOptions = new InfraOptions()
+                    {
+                        Type = InfraType.ImportImage,
+                    };
+
+                    var resources = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(infraOptions, tags: tags);
 
                     using (var sharedTestKvValet = new KeyVaultConcierge(TestCredentials.SharedKeyVaultUri, TestCredentials.KeyVaultClient, scope.Logger))
-                    using (var kvValet = new KeyVaultConcierge(kv.VaultUri, TestCredentials.KeyVaultClient, scope.Logger))
+                    using (var kvValet = new KeyVaultConcierge(resources.KeyVault.VaultUri, TestCredentials.KeyVaultClient, scope.Logger))
                     {
                         var connStr = (await sharedTestKvValet.GetSecretAsync(ImageImporter.c_exportingStorageAccountConnectionStringSecretName)).Value;
                         await kvValet.SetSecretAsync(ImageImporter.c_exportingStorageAccountConnectionStringSecretName, connStr);
 
-                        var importer = new ImageImporter(options, artifactStore, scope.AzFactory, kvValet, timeSource, scope.Logger);
+                        var importer = new ImageImporter(options, resources.ArtifactStore, scope.AzFactory, kvValet, timeSource, scope.Logger);
                         await importer.ImportImageVHDAsync("LiftrUTImg", "1.0.666");
 
                         // Import again will not fail.

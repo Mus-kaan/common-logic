@@ -263,6 +263,8 @@ namespace Microsoft.Liftr.Fluent
         Task<IRegistry> GetOrCreateACRAsync(Region location, string rgName, string acrName, IDictionary<string, string> tags);
 
         Task<IRegistry> GetACRAsync(string rgName, string acrName);
+
+        Task<IEnumerable<IRegistry>> ListACRAsync(string rgName);
         #endregion
 
         #region Deployments

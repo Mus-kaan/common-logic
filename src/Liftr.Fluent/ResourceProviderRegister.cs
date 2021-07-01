@@ -20,7 +20,7 @@ namespace Microsoft.Liftr.Fluent
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task RegisterBakeImageProvidersAndFeaturesAsync(ILiftrAzure liftrAzure)
+        public async Task RegisterBakeImageProvidersAndFeaturesAsync(ILiftrAzure liftrAzure, bool withACR)
         {
             if (liftrAzure == null)
             {
@@ -30,6 +30,12 @@ namespace Microsoft.Liftr.Fluent
             var providers = new List<string>(s_commonProviderList);
             providers.Add("Microsoft.ManagedIdentity");
             providers.Add("Microsoft.VirtualMachineImages");
+
+            if (withACR)
+            {
+                providers.Add("Microsoft.ContainerRegistry");
+            }
+
             await RegisterProvidersAsync(liftrAzure, s_commonProviderList);
 
             bool registered1 = await RegisterFeatureAsync(liftrAzure, "Microsoft.Compute", "GalleryPreview");

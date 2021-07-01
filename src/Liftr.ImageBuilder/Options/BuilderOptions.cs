@@ -48,6 +48,14 @@ namespace Microsoft.Liftr.ImageBuilder
         public bool ExportVHDToStorage { get; set; } = false;
 
         /// <summary>
+        /// We can provision an ACR for you to store your container images.
+        /// When this is enabled, a container registry will be created.
+        /// During image baking process, the ACR metadata like endpoint will be accessble for you.
+        /// You will also be able to get the credentials to pull down the images into your VM image.
+        /// </summary>
+        public bool UseACR { get; set; } = false;
+
+        /// <summary>
         /// The regions that the VM image will be replicated to in the shared image gallery.
         /// See details at: https://aka.ms/liftr/sig-replication
         /// </summary>

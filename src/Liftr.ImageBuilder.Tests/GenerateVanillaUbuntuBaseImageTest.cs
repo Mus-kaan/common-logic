@@ -50,8 +50,14 @@ namespace Microsoft.Liftr.ImageBuilder.Tests
 
                 var orchestrator = new ImageBuilderOrchestrator(options, AzFactory, TestCredentials.KeyVaultClient, timeSource, Logger);
 
-                (var kv, var gallery, var artifactStore, var stor) = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(InfrastructureType.BakeNewImageAndExport, SourceImageType.UbuntuServer1804, tags: tags);
-                Assert.NotNull(kv);
+                InfraOptions infraOptions = new InfraOptions()
+                {
+                    Type = InfraType.BakeImage,
+                    CreateExportStorage = true,
+                };
+
+                var resources = await orchestrator.CreateOrUpdateLiftrImageBuilderInfrastructureAsync(infraOptions, tags: tags);
+                Assert.NotNull(resources.KeyVault);
 
                 await orchestrator.BuildCustomizedSBIAsync(
                                 "img" + baseName,
