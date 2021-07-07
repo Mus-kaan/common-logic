@@ -135,16 +135,25 @@ namespace Microsoft.Liftr.KeyVault
 
         public async Task<CertificateOperation> CreateCertificateIfNotExistAsync(string certName, string issuerName, string certificateSubject, IList<string> subjectAlternativeNames, IDictionary<string, string> tags = null)
         {
-            var existingCert = await GetCertAsync(certName);
-            if (existingCert != null)
+            try
             {
-                var privateKeyBytes = Convert.FromBase64String(existingCert.Value);
-                using var certificate = new X509Certificate2(privateKeyBytes);
-                if (certificate.Subject.OrdinalStartsWith($"CN={certificateSubject}"))
+                var existingCert = await GetCertAsync(certName);
+                if (existingCert != null)
                 {
-                    _logger.Information("There already exist a certificate with name {certificateName} in vault '{vaultBaseUrl}' with the same subject {subjectName}. Skip creating a new one.", certName, _vaultBaseUrl, certificateSubject);
-                    return null;
+                    var privateKeyBytes = Convert.FromBase64String(existingCert.Value);
+                    using var certificate = new X509Certificate2(privateKeyBytes);
+                    if (certificate.Subject.OrdinalStartsWith($"CN={certificateSubject}"))
+                    {
+                        _logger.Information("There already exist a certificate with name {certificateName} in vault '{vaultBaseUrl}' with the same subject {subjectName}. Skip creating a new one.", certName, _vaultBaseUrl, certificateSubject);
+                        return null;
+                    }
                 }
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                _logger.Warning(ex, "Get existing certificate failed. Probably the existing one is in an invalid state. Try create a new one.");
             }
 
             return await CreateCertificateAsync(certName, issuerName, certificateSubject, subjectAlternativeNames, tags);
