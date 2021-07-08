@@ -110,5 +110,26 @@ namespace Microsoft.Liftr.Management.PostgreSQL
             {
             }
         }
+
+        public static Task ExportDiagnosticsToLogAnalyticsAsync(this ILiftrAzure liftrAzure, Server postgres, string logAnalyticsWorkspaceId)
+        {
+            if (liftrAzure == null)
+            {
+                throw new ArgumentNullException(nameof(liftrAzure));
+            }
+
+            if (postgres == null)
+            {
+                throw new ArgumentNullException(nameof(postgres));
+            }
+
+            return liftrAzure.FluentClient.DiagnosticSettings
+                    .Define(ShoeBoxExtensions.c_diagSettingsName)
+                    .WithResource(postgres.Id)
+                    .WithLogAnalytics(logAnalyticsWorkspaceId)
+                    .WithLog("PostgreSQLLogs", 365)
+                    .WithMetric("AllMetrics", TimeSpan.FromHours(1), 365)
+                    .CreateAsync();
+        }
     }
 }

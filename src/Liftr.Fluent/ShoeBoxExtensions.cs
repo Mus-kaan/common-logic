@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ContainerRegistry.Fluent;
+using Microsoft.Azure.Management.ContainerService.Fluent;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
@@ -14,7 +15,7 @@ namespace Microsoft.Liftr.Fluent
 {
     public static class ShoeBoxExtensions
     {
-        private const string c_diagSettingsName = "centralized-log-analytics";
+        public const string c_diagSettingsName = "centralized-log-analytics";
 
         public static Task ExportDiagnosticsToLogAnalyticsAsync(this ILiftrAzure liftrAzure, IVault kv, string logAnalyticsWorkspaceId)
         {
@@ -123,6 +124,31 @@ namespace Microsoft.Liftr.Fluent
                     .WithResource(vnet.Id)
                     .WithLogAnalytics(logAnalyticsWorkspaceId)
                     .WithLog("VMProtectionAlerts", 365)
+                    .WithMetric("AllMetrics", TimeSpan.FromHours(1), 365)
+                    .CreateAsync();
+        }
+
+        public static Task ExportDiagnosticsToLogAnalyticsAsync(this ILiftrAzure liftrAzure, IKubernetesCluster aks, string logAnalyticsWorkspaceId)
+        {
+            if (liftrAzure == null)
+            {
+                throw new ArgumentNullException(nameof(liftrAzure));
+            }
+
+            if (aks == null)
+            {
+                throw new ArgumentNullException(nameof(aks));
+            }
+
+            return liftrAzure.FluentClient.DiagnosticSettings
+                    .Define(c_diagSettingsName)
+                    .WithResource(aks.Id)
+                    .WithLogAnalytics(logAnalyticsWorkspaceId)
+                    .WithLog("kube-apiserver", 365)
+                    .WithLog("kube-controller-manager", 365)
+                    .WithLog("kube-scheduler", 365)
+                    .WithLog("cluster-autoscaler", 365)
+                    .WithLog("guard", 365)
                     .WithMetric("AllMetrics", TimeSpan.FromHours(1), 365)
                     .CreateAsync();
         }

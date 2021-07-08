@@ -215,6 +215,9 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     _logger.Information("Enable AKS Azure Monitor and send the diagnostics data to Log Analytics with Id '{logAnalyticsWorkspaceResourceId}'", computeOptions.LogAnalyticsWorkspaceResourceId);
                     await aks.Update().WithAddOnProfiles(aksAddOns).ApplyAsync();
                 }
+
+                _logger.Information("Update diagnostics setting and send AKS logs to Log Analytics with Id '{logAnalyticsWorkspaceResourceId}'", computeOptions.LogAnalyticsWorkspaceResourceId);
+                await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(aks, computeOptions.LogAnalyticsWorkspaceResourceId);
             }
 
             var aksMIObjectId = await liftrAzure.GetAKSMIAsync(rgName, aksName);
