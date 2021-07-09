@@ -54,126 +54,147 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [CheckInValidation(skipLinux: true)]
-        [PublicWestUS3]
+        [PublicWestUS2]
         public async Task RotateCosmosDBConnectionStringAsync()
         {
-            var client = Client;
-            var dbName = SdkContext.RandomResourceName("test-db", 15);
-            (var db, _) = await client.CreateCosmosDBAsync(Location, ResourceGroupName, dbName, TestCommon.Tags);
-
-            var ts = new MockTimeSource();
-            var keys1 = await db.GetConnectionStringsAsync();
-            var rotationManager = new CosmosDBCredentialLifeCycleManager(db, ts, Logger);
-
-            // The primary is the default active.
-            var conn = await rotationManager.GetActiveConnectionStringAsync();
-            Assert.Equal(keys1.PrimaryMongoDBConnectionString, conn);
-
-            var connRO = await rotationManager.GetActiveConnectionStringAsync(readOnly: true);
-            Assert.Equal(keys1.PrimaryReadOnlyMongoDBConnectionString, connRO);
-
-            ts.Add(TimeSpan.FromDays(2.3));
+            try
             {
-                conn = await rotationManager.GetActiveConnectionStringAsync();
+                var client = Client;
+                var dbName = SdkContext.RandomResourceName("test-db", 15);
+                var laName = SdkContext.RandomResourceName("testla", 15);
+                await client.GetOrCreateLogAnalyticsWorkspaceAsync(Location, ResourceGroupName, laName, Tags);
+                var la = $"/subscriptions/{client.FluentClient.SubscriptionId}/resourcegroups/{ResourceGroupName}/providers/microsoft.operationalinsights/workspaces/{laName}";
+                (var db, _) = await client.CreateCosmosDBAsync(Location, ResourceGroupName, dbName, Tags);
+
+                await client.ExportDiagnosticsToLogAnalyticsAsync(db, la);
+
+                var ts = new MockTimeSource();
+                var keys1 = await db.GetConnectionStringsAsync();
+                var rotationManager = new CosmosDBCredentialLifeCycleManager(db, ts, Logger);
+
+                // The primary is the default active.
+                var conn = await rotationManager.GetActiveConnectionStringAsync();
                 Assert.Equal(keys1.PrimaryMongoDBConnectionString, conn);
 
-                connRO = await rotationManager.GetActiveConnectionStringAsync(readOnly: true);
+                var connRO = await rotationManager.GetActiveConnectionStringAsync(readOnly: true);
                 Assert.Equal(keys1.PrimaryReadOnlyMongoDBConnectionString, connRO);
-            }
 
-            ts.Add(TimeSpan.FromDays(2.3));
-            {
-                conn = await rotationManager.GetActiveConnectionStringAsync();
-                Assert.Equal(keys1.PrimaryMongoDBConnectionString, conn);
+                ts.Add(TimeSpan.FromDays(2.3));
+                {
+                    conn = await rotationManager.GetActiveConnectionStringAsync();
+                    Assert.Equal(keys1.PrimaryMongoDBConnectionString, conn);
 
-                connRO = await rotationManager.GetActiveConnectionStringAsync(readOnly: true);
-                Assert.Equal(keys1.PrimaryReadOnlyMongoDBConnectionString, connRO);
-            }
+                    connRO = await rotationManager.GetActiveConnectionStringAsync(readOnly: true);
+                    Assert.Equal(keys1.PrimaryReadOnlyMongoDBConnectionString, connRO);
+                }
 
-            // make sure all are not rotated
-            var keys = await db.GetConnectionStringsAsync();
+                ts.Add(TimeSpan.FromDays(2.3));
+                {
+                    conn = await rotationManager.GetActiveConnectionStringAsync();
+                    Assert.Equal(keys1.PrimaryMongoDBConnectionString, conn);
 
-            Assert.Equal(keys1.PrimaryMongoDBConnectionString, keys.PrimaryMongoDBConnectionString);
-            Assert.Equal(keys1.PrimaryReadOnlyMongoDBConnectionString, keys.PrimaryReadOnlyMongoDBConnectionString);
-            Assert.Equal(keys1.SecondaryMongoDBConnectionString, keys.SecondaryMongoDBConnectionString);
-            Assert.Equal(keys1.SecondaryReadOnlyMongoDBConnectionString, keys.SecondaryReadOnlyMongoDBConnectionString);
+                    connRO = await rotationManager.GetActiveConnectionStringAsync(readOnly: true);
+                    Assert.Equal(keys1.PrimaryReadOnlyMongoDBConnectionString, connRO);
+                }
 
-            // This will trigger rotation
-            ts.Add(TimeSpan.FromDays(28));
-            {
-                // active is secondary.
-                conn = await rotationManager.GetActiveConnectionStringAsync();
-                keys = await db.GetConnectionStringsAsync();
+                // make sure all are not rotated
+                var keys = await db.GetConnectionStringsAsync();
 
-                // primary are not rotated
                 Assert.Equal(keys1.PrimaryMongoDBConnectionString, keys.PrimaryMongoDBConnectionString);
                 Assert.Equal(keys1.PrimaryReadOnlyMongoDBConnectionString, keys.PrimaryReadOnlyMongoDBConnectionString);
+                Assert.Equal(keys1.SecondaryMongoDBConnectionString, keys.SecondaryMongoDBConnectionString);
+                Assert.Equal(keys1.SecondaryReadOnlyMongoDBConnectionString, keys.SecondaryReadOnlyMongoDBConnectionString);
 
-                // secondary are rotated
-                Assert.NotEqual(keys1.SecondaryMongoDBConnectionString, keys.SecondaryMongoDBConnectionString);
-                Assert.NotEqual(keys1.SecondaryReadOnlyMongoDBConnectionString, keys.SecondaryReadOnlyMongoDBConnectionString);
+                // This will trigger rotation
+                ts.Add(TimeSpan.FromDays(28));
+                {
+                    // active is secondary.
+                    try
+                    {
+                        conn = await rotationManager.GetActiveConnectionStringAsync();
+                        keys = await db.GetConnectionStringsAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex, "rotation failed");
+                        throw;
+                    }
 
-                Assert.Equal(keys.SecondaryMongoDBConnectionString, conn);
+                    // primary are not rotated
+                    Assert.Equal(keys1.PrimaryMongoDBConnectionString, keys.PrimaryMongoDBConnectionString);
+                    Assert.Equal(keys1.PrimaryReadOnlyMongoDBConnectionString, keys.PrimaryReadOnlyMongoDBConnectionString);
 
-                connRO = await rotationManager.GetActiveConnectionStringAsync(readOnly: true);
-                Assert.Equal(keys.SecondaryReadOnlyMongoDBConnectionString, connRO);
+                    // secondary are rotated
+                    Assert.NotEqual(keys1.SecondaryMongoDBConnectionString, keys.SecondaryMongoDBConnectionString);
+                    Assert.NotEqual(keys1.SecondaryReadOnlyMongoDBConnectionString, keys.SecondaryReadOnlyMongoDBConnectionString);
+
+                    Assert.Equal(keys.SecondaryMongoDBConnectionString, conn);
+
+                    connRO = await rotationManager.GetActiveConnectionStringAsync(readOnly: true);
+                    Assert.Equal(keys.SecondaryReadOnlyMongoDBConnectionString, connRO);
+                }
+
+                var keys2 = await db.GetConnectionStringsAsync();
+
+                // in TTL, not rotate
+                ts.Add(TimeSpan.FromDays(2.3));
+                {
+                    conn = await rotationManager.GetActiveConnectionStringAsync();
+                    Assert.Equal(keys2.SecondaryMongoDBConnectionString, conn);
+
+                    connRO = await rotationManager.GetActiveConnectionStringAsync(readOnly: true);
+                    Assert.Equal(keys2.SecondaryReadOnlyMongoDBConnectionString, connRO);
+                }
+
+                // This will trigger rotation again
+                ts.Add(TimeSpan.FromDays(28));
+                {
+                    // active is primary.
+                    conn = await rotationManager.GetActiveConnectionStringAsync();
+                    keys = await db.GetConnectionStringsAsync();
+
+                    // primary are rotated
+                    Assert.NotEqual(keys2.PrimaryMongoDBConnectionString, keys.PrimaryMongoDBConnectionString);
+                    Assert.NotEqual(keys2.PrimaryReadOnlyMongoDBConnectionString, keys.PrimaryReadOnlyMongoDBConnectionString);
+
+                    // secondary are not rotated
+                    Assert.Equal(keys2.SecondaryMongoDBConnectionString, keys.SecondaryMongoDBConnectionString);
+                    Assert.Equal(keys2.SecondaryReadOnlyMongoDBConnectionString, keys.SecondaryReadOnlyMongoDBConnectionString);
+
+                    Assert.Equal(keys.PrimaryMongoDBConnectionString, conn);
+
+                    connRO = await rotationManager.GetActiveConnectionStringAsync(readOnly: true);
+                    Assert.Equal(keys.PrimaryReadOnlyMongoDBConnectionString, connRO);
+                }
+
+                var keys3 = await db.GetConnectionStringsAsync();
+
+                // explicit rotate
+                ts.Add(TimeSpan.FromDays(2.3));
+                await rotationManager.RotateCredentialAsync();
+                {
+                    // active is secondary.
+                    conn = await rotationManager.GetActiveConnectionStringAsync();
+                    keys = await db.GetConnectionStringsAsync();
+
+                    // primary are not rotated
+                    Assert.Equal(keys3.PrimaryMongoDBConnectionString, keys.PrimaryMongoDBConnectionString);
+                    Assert.Equal(keys3.PrimaryReadOnlyMongoDBConnectionString, keys.PrimaryReadOnlyMongoDBConnectionString);
+
+                    // secondary are rotated
+                    Assert.NotEqual(keys3.SecondaryMongoDBConnectionString, keys.SecondaryMongoDBConnectionString);
+                    Assert.NotEqual(keys3.SecondaryReadOnlyMongoDBConnectionString, keys.SecondaryReadOnlyMongoDBConnectionString);
+
+                    Assert.Equal(keys.SecondaryMongoDBConnectionString, conn);
+
+                    connRO = await rotationManager.GetActiveConnectionStringAsync(readOnly: true);
+                    Assert.Equal(keys.SecondaryReadOnlyMongoDBConnectionString, connRO);
+                }
             }
-
-            var keys2 = await db.GetConnectionStringsAsync();
-
-            // in TTL, not rotate
-            ts.Add(TimeSpan.FromDays(2.3));
+            catch (Exception ex)
             {
-                conn = await rotationManager.GetActiveConnectionStringAsync();
-                Assert.Equal(keys2.SecondaryMongoDBConnectionString, conn);
-
-                connRO = await rotationManager.GetActiveConnectionStringAsync(readOnly: true);
-                Assert.Equal(keys2.SecondaryReadOnlyMongoDBConnectionString, connRO);
-            }
-
-            // This will trigger rotation again
-            ts.Add(TimeSpan.FromDays(28));
-            {
-                // active is primary.
-                conn = await rotationManager.GetActiveConnectionStringAsync();
-                keys = await db.GetConnectionStringsAsync();
-
-                // primary are rotated
-                Assert.NotEqual(keys2.PrimaryMongoDBConnectionString, keys.PrimaryMongoDBConnectionString);
-                Assert.NotEqual(keys2.PrimaryReadOnlyMongoDBConnectionString, keys.PrimaryReadOnlyMongoDBConnectionString);
-
-                // secondary are not rotated
-                Assert.Equal(keys2.SecondaryMongoDBConnectionString, keys.SecondaryMongoDBConnectionString);
-                Assert.Equal(keys2.SecondaryReadOnlyMongoDBConnectionString, keys.SecondaryReadOnlyMongoDBConnectionString);
-
-                Assert.Equal(keys.PrimaryMongoDBConnectionString, conn);
-
-                connRO = await rotationManager.GetActiveConnectionStringAsync(readOnly: true);
-                Assert.Equal(keys.PrimaryReadOnlyMongoDBConnectionString, connRO);
-            }
-
-            var keys3 = await db.GetConnectionStringsAsync();
-
-            // explicit rotate
-            ts.Add(TimeSpan.FromDays(2.3));
-            await rotationManager.RotateCredentialAsync();
-            {
-                // active is secondary.
-                conn = await rotationManager.GetActiveConnectionStringAsync();
-                keys = await db.GetConnectionStringsAsync();
-
-                // primary are not rotated
-                Assert.Equal(keys3.PrimaryMongoDBConnectionString, keys.PrimaryMongoDBConnectionString);
-                Assert.Equal(keys3.PrimaryReadOnlyMongoDBConnectionString, keys.PrimaryReadOnlyMongoDBConnectionString);
-
-                // secondary are rotated
-                Assert.NotEqual(keys3.SecondaryMongoDBConnectionString, keys.SecondaryMongoDBConnectionString);
-                Assert.NotEqual(keys3.SecondaryReadOnlyMongoDBConnectionString, keys.SecondaryReadOnlyMongoDBConnectionString);
-
-                Assert.Equal(keys.SecondaryMongoDBConnectionString, conn);
-
-                connRO = await rotationManager.GetActiveConnectionStringAsync(readOnly: true);
-                Assert.Equal(keys.SecondaryReadOnlyMongoDBConnectionString, connRO);
+                Logger.Error(ex, "rotation test failed");
+                throw;
             }
         }
 
