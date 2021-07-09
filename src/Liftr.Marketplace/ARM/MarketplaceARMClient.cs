@@ -12,6 +12,7 @@ using Microsoft.Liftr.Marketplace.Exceptions;
 using Microsoft.Liftr.Marketplace.Utils;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ namespace Microsoft.Liftr.Marketplace.ARM
     {
         private const string ResourceTypePath = "api/saasresources/subscriptions";
         private const string PaymentValidationPath = "api/paymentValidation";
+        private const string MigrateSaasPath = "/migrateFromTenant";
         private readonly ILogger _logger;
         private readonly MarketplaceRestClient _marketplaceRestClient;
 
@@ -239,6 +241,139 @@ namespace Microsoft.Liftr.Marketplace.ARM
                 }
 
                 return PaymentValidationResponse.BuildValidationResponseFailed(HttpStatusCode.BadRequest, ex.Message);
+            }
+        }
+
+        public async Task<MarketplaceSubscriptionDetails> GetSubLevelSaasResourceAsync(string azSubscriptionId, string resourceGroup, string resourceName, MarketplaceRequestMetadata requestMetadata)
+        {
+            if (string.IsNullOrWhiteSpace(azSubscriptionId))
+            {
+                throw new ArgumentNullException(nameof(azSubscriptionId));
+            }
+
+            if (string.IsNullOrWhiteSpace(resourceName))
+            {
+                throw new ArgumentNullException(nameof(resourceName));
+            }
+
+            if (string.IsNullOrWhiteSpace(resourceGroup))
+            {
+                throw new ArgumentNullException(nameof(resourceGroup));
+            }
+
+            if (requestMetadata is null)
+            {
+                throw new ArgumentNullException(nameof(requestMetadata));
+            }
+
+            using var op = _logger.StartTimedOperation(nameof(GetSubLevelSaasResourceAsync));
+
+            var additionalHeaders = HttpRequestHelper.GetAdditionalMarketplaceHeaders(requestMetadata);
+            var requestPath = HttpRequestHelper.GetCompleteRequestPathForSubscriptionLevel(azSubscriptionId, resourceGroup, resourceName);
+
+            try
+            {
+                var getResponse = await _marketplaceRestClient.SendRequestAsync<MarketplaceSubscriptionDetails>(HttpMethod.Get, requestPath, additionalHeaders);
+                _logger.Information($"Get Subscription Level Saas Resource succesful for request {requestPath}");
+                return getResponse;
+            }
+            catch (MarketplaceException ex)
+            {
+                string errorMessage = $"Failed to get Subscription Level Saas Resource for request {requestPath} Error: {ex.Message}";
+                _logger.Error(ex, errorMessage);
+                op.FailOperation(errorMessage);
+                throw;
+            }
+        }
+
+        public async Task<MarketplaceSubscriptionDetails> GetTenantLevelSaasResourceAsync(string saasSubscriptionId, MarketplaceRequestMetadata requestMetadata)
+        {
+            if (string.IsNullOrWhiteSpace(saasSubscriptionId))
+            {
+                throw new ArgumentNullException(nameof(saasSubscriptionId));
+            }
+
+            if (requestMetadata is null)
+            {
+                throw new ArgumentNullException(nameof(requestMetadata));
+            }
+
+            using var op = _logger.StartTimedOperation(nameof(GetTenantLevelSaasResourceAsync));
+
+            var additionalHeaders = HttpRequestHelper.GetAdditionalMarketplaceHeaders(requestMetadata);
+            var requestPath = $"{ResourceTypePath}/{saasSubscriptionId}";
+
+            try
+            {
+                var getResponse = await _marketplaceRestClient.SendRequestAsync<MarketplaceSubscriptionDetails>(HttpMethod.Get, requestPath, additionalHeaders);
+                _logger.Information($"Get Tenant Level Saas Resource successful for request {requestPath}");
+                return getResponse;
+            }
+            catch (MarketplaceException ex)
+            {
+                string errorMessage = $"Failed to get Tenant Level Saas Resource for request {requestPath} with Error: {ex.Message}";
+                _logger.Error(ex, errorMessage);
+                op.FailOperation(errorMessage);
+                throw;
+            }
+        }
+
+        public async Task<MigrationResponse> MigrateSaasResourceAsync(string azSubscriptionId, string resourceGroup, string resourceName, MigrationRequest migrationRequest, MarketplaceRequestMetadata requestMetadata)
+        {
+            if (string.IsNullOrWhiteSpace(azSubscriptionId))
+            {
+                throw new ArgumentNullException(nameof(azSubscriptionId));
+            }
+
+            if (string.IsNullOrWhiteSpace(resourceName))
+            {
+                throw new ArgumentNullException(nameof(resourceName));
+            }
+
+            if (string.IsNullOrWhiteSpace(resourceGroup))
+            {
+                throw new ArgumentNullException(nameof(resourceGroup));
+            }
+
+            if (migrationRequest is null)
+            {
+                throw new ArgumentNullException(nameof(migrationRequest));
+            }
+
+            if (requestMetadata is null)
+            {
+                throw new ArgumentNullException(nameof(requestMetadata));
+            }
+
+            using var op = _logger.StartTimedOperation(nameof(MigrateSaasResourceAsync));
+
+            var additionalHeaders = HttpRequestHelper.GetAdditionalMarketplaceHeaders(requestMetadata);
+            var json = migrationRequest.ToJObject();
+            var requestPath = HttpRequestHelper.GetCompleteRequestPathForSubscriptionLevel(azSubscriptionId, resourceGroup, resourceName) + MigrateSaasPath;
+
+            try
+            {
+                var migrationResponse = await _marketplaceRestClient.SendRequestAsync<HttpResponseMessage>(new HttpMethod("PATCH"), requestPath, additionalHeaders, json);
+                _logger.Information($"Saas Migration successful with response {migrationResponse} for request {requestPath}");
+                return MigrationResponse.BuildMigrationResponseSuccess();
+            }
+            catch (MarketplaceException ex)
+            {
+                string errorMessage = $"Saas Migration failed with Exception {ex.Message} for request {requestPath}";
+                _logger.Error(ex, errorMessage);
+                op.FailOperation(errorMessage);
+
+                var requestFailedException = ex as RequestFailedException;
+
+                if (requestFailedException != null)
+                {
+                    var exceptionMessage = await requestFailedException.Response.Content.ReadAsStringAsync();
+                    var statusCode = requestFailedException.Response.StatusCode;
+                    _logger.Error(requestFailedException, exceptionMessage);
+                    return MigrationResponse.BuildMigrationResponseFailed(statusCode, exceptionMessage);
+                }
+
+                return MigrationResponse.BuildMigrationResponseFailed(HttpStatusCode.BadRequest, ex.Message);
             }
         }
     }

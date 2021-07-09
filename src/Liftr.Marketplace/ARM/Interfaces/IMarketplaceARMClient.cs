@@ -60,5 +60,34 @@ namespace Microsoft.Liftr.Marketplace.ARM.Interfaces
         /// <param name="requestMetadata"></param>
         /// <returns>Payment validation status</returns>
         Task<PaymentValidationResponse> ValidatesSaaSPurchasePaymentAsync(PaymentValidationRequest paymentValidationRequest, MarketplaceRequestMetadata requestMetadata);
+
+        /// <summary>
+        /// Migrates tenant level Saas resource to Subscription level
+        /// </summary>
+        /// <param name="azSubscriptionId"></param>
+        /// <param name="resourceGroup"></param>
+        /// <param name="resourceName"></param>
+        /// <param name="migrationRequest"></param>
+        /// <param name="requestMetadata"></param>
+        /// <returns></returns>
+        Task<MigrationResponse> MigrateSaasResourceAsync(string azSubscriptionId, string resourceGroup, string resourceName, MigrationRequest migrationRequest, MarketplaceRequestMetadata requestMetadata);
+
+        /// <summary>
+        /// Gets Saas resource details using subscription level API
+        /// </summary>
+        /// <param name="azSubscriptionId"></param>
+        /// <param name="resourceGroup"></param>
+        /// <param name="resourceName"></param>
+        /// <param name="requestMetadata"></param>
+        /// <returns>Saas resource details</returns>
+        Task<MarketplaceSubscriptionDetails> GetSubLevelSaasResourceAsync(string azSubscriptionId, string resourceGroup, string resourceName, MarketplaceRequestMetadata requestMetadata);
+
+        /// <summary>
+        /// Gets Saas resource details using tenant level API
+        /// </summary>
+        /// <param name="saasSubscriptionId"></param>
+        /// <param name="requestMetadata"></param>
+        /// <returns>Saas resource details</returns>
+        Task<MarketplaceSubscriptionDetails> GetTenantLevelSaasResourceAsync(string saasSubscriptionId, MarketplaceRequestMetadata requestMetadata);
     }
 }

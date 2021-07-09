@@ -284,6 +284,30 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
             Assert.True(validationResponse.IsSuccess);
         }
 
+        [Fact]
+        public async Task MigrateSaasAsync_Successful_Migration_Async()
+        {
+            var azSubId = "d3c0b378-d50b-4ac7-ac42-b9aacc66f6c5";
+            var resourceGroup = "hj-test";
+            var resourceName = "testMigration5";
+            var migrationRequest = new MigrationRequest()
+            {
+                SaasSubscriptionId = "a4ff2ab3-5e1c-4926-ca32-c9d52350608a",
+            };
+
+            var path = "migrateFromTenant";
+
+            using var handler = new MockHttpMessageHandler(null, path);
+            using var httpClient = new HttpClient(handler, false);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
+            var armClient = new MarketplaceARMClient(_marketplaceRestClient);
+
+            var migrationResponse = await armClient.MigrateSaasResourceAsync(azSubId, resourceGroup, resourceName, migrationRequest, _marketplaceRequestMetadata);
+            Assert.True(migrationResponse.IsSuccessful);
+        }
+
         /* [Fact(Skip = "Not implemented")]
         public async Task InitiateDeleteResource_throws_exception_if_resource_deletion_fails_Async()
         {
@@ -374,6 +398,11 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
                     var content = "Payment Validated!";
                     var responseContent = content.ToJson();
                     response.Content = new StringContent(responseContent);
+                }
+                else if (request.RequestUri.ToString().OrdinalContains("migrateFromTenant") && request.Method == HttpMethod.Patch)
+                {
+                    response.StatusCode = System.Net.HttpStatusCode.Accepted;
+                    response.Content = new StringContent(string.Empty.ToJson());
                 }
 
                 return response;
