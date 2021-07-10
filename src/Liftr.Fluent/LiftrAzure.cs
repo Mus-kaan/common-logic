@@ -90,6 +90,8 @@ namespace Microsoft.Liftr.Fluent
 
         public string DefaultSubnetName { get; } = "default";
 
+        public Serilog.ILogger Logger => _logger;
+
         public IAzure FluentClient { get; }
 
         public IAuthenticated Authenticated { get; }

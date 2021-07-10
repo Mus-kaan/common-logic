@@ -35,6 +35,8 @@ namespace Microsoft.Liftr.Fluent
 {
     public interface ILiftrAzure
     {
+        Serilog.ILogger Logger { get; }
+
         IAzure FluentClient { get; }
 
         IAuthenticated Authenticated { get; }

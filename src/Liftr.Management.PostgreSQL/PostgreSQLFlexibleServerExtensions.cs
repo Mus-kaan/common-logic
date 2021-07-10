@@ -111,7 +111,7 @@ namespace Microsoft.Liftr.Management.PostgreSQL
             }
         }
 
-        public static Task ExportDiagnosticsToLogAnalyticsAsync(this ILiftrAzure liftrAzure, Server postgres, string logAnalyticsWorkspaceId)
+        public static async Task ExportDiagnosticsToLogAnalyticsAsync(this ILiftrAzure liftrAzure, Server postgres, string logAnalyticsWorkspaceId)
         {
             if (liftrAzure == null)
             {
@@ -123,13 +123,21 @@ namespace Microsoft.Liftr.Management.PostgreSQL
                 throw new ArgumentNullException(nameof(postgres));
             }
 
-            return liftrAzure.FluentClient.DiagnosticSettings
-                    .Define(ShoeBoxExtensions.c_diagSettingsName)
-                    .WithResource(postgres.Id)
-                    .WithLogAnalytics(logAnalyticsWorkspaceId)
-                    .WithLog("PostgreSQLLogs", 365)
-                    .WithMetric("AllMetrics", TimeSpan.FromHours(1), 365)
-                    .CreateAsync();
+            try
+            {
+                await liftrAzure.FluentClient.DiagnosticSettings
+                        .Define(ShoeBoxExtensions.c_diagSettingsName)
+                        .WithResource(postgres.Id)
+                        .WithLogAnalytics(logAnalyticsWorkspaceId)
+                        .WithLog("PostgreSQLLogs", 365)
+                        .WithMetric("AllMetrics", TimeSpan.FromHours(1), 365)
+                        .CreateAsync();
+            }
+            catch (Azure.Management.Monitor.Fluent.Models.ErrorResponseException ex)
+            {
+                liftrAzure.Logger.Error(ex, "Failed adding postgres DS. errCode: {errCode}. errMsg: {errMsg}. req: {@request}", ex?.Body?.Code, ex?.Body?.Message, ex?.Request);
+                throw;
+            }
         }
     }
 }
