@@ -68,8 +68,23 @@ namespace Microsoft.Liftr.Fluent
             }
         }
 
-        private async Task RegisterProvidersAsync(ILiftrAzure liftrAzure, List<string> providerList)
+        public Task RegisterCommonProvidersAsync(ILiftrAzure liftrAzure)
         {
+            return RegisterProvidersAsync(liftrAzure, s_commonProviderList);
+        }
+
+        public async Task RegisterProvidersAsync(ILiftrAzure liftrAzure, IEnumerable<string> providerList)
+        {
+            if (liftrAzure == null)
+            {
+                throw new ArgumentNullException(nameof(liftrAzure));
+            }
+
+            if (providerList == null)
+            {
+                throw new ArgumentNullException(nameof(providerList));
+            }
+
             bool registering = false;
             try
             {
@@ -118,12 +133,14 @@ namespace Microsoft.Liftr.Fluent
             return registered;
         }
 
-        private static readonly List<string> s_commonProviderList = new List<string>()
+        public static readonly List<string> s_commonProviderList = new List<string>()
         {
             "Microsoft.Compute",
             "Microsoft.Storage",
             "Microsoft.Network",
             "Microsoft.KeyVault",
+            "Microsoft.Insights",
+            "Microsoft.OperationalInsights",
         };
 
         private static readonly List<string> s_genericHostingProviderList = new List<string>()
@@ -134,8 +151,6 @@ namespace Microsoft.Liftr.Fluent
             "Microsoft.DomainRegistration",
             "Microsoft.ContainerService",
             "Microsoft.ContainerRegistry",
-            "Microsoft.Insights",
-            "Microsoft.OperationalInsights",
             "Microsoft.OperationsManagement",
         };
     }
