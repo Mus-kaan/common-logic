@@ -103,7 +103,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             IIdentity msi,
             IStorageAccount acisStorageAccount,
             string globalCosmosDBResourceId,
-            IEnumerable<string> dataPlaneSubscriptions)
+            IEnumerable<string> dataPlaneSubscriptions,
+            IEnumerable<string> outboundIPList)
         {
             var liftrAzure = _azureClientFactory.GenerateLiftrAzure();
 
@@ -180,6 +181,11 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 if (dataPlaneSubscriptions != null)
                 {
                     dataAssets.DataPlaneSubscriptions = dataPlaneSubscriptions.Select(sub => new DataPlaneSubscriptionInfo() { SubscriptionId = sub });
+                }
+
+                if (outboundIPList?.Any() == true)
+                {
+                    dataAssets.OutboundIPList = outboundIPList;
                 }
 
                 _logger.Information("Puting the DataAssetOptions in the key vault ...");

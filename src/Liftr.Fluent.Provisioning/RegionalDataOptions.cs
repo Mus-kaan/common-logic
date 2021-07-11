@@ -32,6 +32,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public int DataPlaneStorageCountPerSubscription { get; set; }
 
+        public IEnumerable<string> OutboundIPList { get; set; }
+
         public bool EnableVNet { get; set; }
 
         public bool EnableThanos { get; set; }

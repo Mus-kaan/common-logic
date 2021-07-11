@@ -35,5 +35,11 @@ namespace Microsoft.Liftr.Contracts
 
         [JsonProperty("dpSubs")]
         public IEnumerable<DataPlaneSubscriptionInfo> DataPlaneSubscriptions { get; set; }
+
+        /// <summary>
+        /// The reserved outbound IP addresses of the cluster.
+        /// </summary>
+        [JsonProperty("IPs")]
+        public IEnumerable<string> OutboundIPList { get; set; }
     }
 }

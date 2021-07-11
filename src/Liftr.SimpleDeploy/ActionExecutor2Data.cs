@@ -9,6 +9,7 @@ using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
 using Microsoft.Liftr.Hosting.Contracts;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.SimpleDeploy
@@ -54,6 +55,12 @@ namespace Microsoft.Liftr.SimpleDeploy
                 DomainName = targetOptions.DomainName,
                 DNSZoneId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{globalRGName}/providers/Microsoft.Network/dnszones/{targetOptions.DomainName}",
             };
+
+            var ipList = await ipPool.ListAllIPAsync(regionalNamingContext.Location, IPCategory.Outbound);
+            if (ipList?.Any() == true)
+            {
+                dataOptions.OutboundIPList = ipList.Select(ip => ip.IPAddress);
+            }
 
             bool createVNet = targetOptions.IsAKS ? targetOptions.EnableVNet : true;
             var dataResources = await infra.CreateOrUpdateRegionalDataRGAsync(regionOptions.DataBaseName, regionalNamingContext, dataOptions, createVNet, allowedAcisExtensions);
