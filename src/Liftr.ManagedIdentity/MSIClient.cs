@@ -37,12 +37,12 @@ namespace Microsoft.Liftr.ManagedIdentity
         private bool _disposed = false;
 
         public MSIClient(
-            MSIClientOptions options,
+            IOptions<MSIClientOptions> options,
             ILogger logger,
             IHttpClientFactory httpClientFactory,
             IKeyVaultClient kvClient)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
+            _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
             _options.CheckValues();
 
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
