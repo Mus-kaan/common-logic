@@ -6,7 +6,6 @@ using FluentAssertions;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Liftr.Tests;
 using Microsoft.Liftr.Tests.Utilities.Trait;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
