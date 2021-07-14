@@ -125,7 +125,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     var db = await liftrAzure.GetCosmosDBAsync(dbId);
                     if (db == null)
                     {
-                        (db, _) = await liftrAzure.CreateCosmosDBAsync(namingContext.Location, rgName, cosmosName, namingContext.Tags);
+                        db = await liftrAzure.CreateCosmosDBAsync(namingContext.Location, rgName, cosmosName, namingContext.Tags);
                         await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(db, logAnalyticsWorkspaceId);
                         _logger.Information("Created CosmosDB with Id {ResourceId}", db.Id);
                     }

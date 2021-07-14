@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent
@@ -28,7 +29,8 @@ namespace Microsoft.Liftr.Fluent
             Region location,
             string rgName,
             string cosmosDBName,
-            IDictionary<string, string> tags)
+            IDictionary<string, string> tags,
+            CancellationToken cancellationToken = default)
         {
             if (liftrAzure == null)
             {
@@ -48,9 +50,9 @@ namespace Microsoft.Liftr.Fluent
             r.properties.locations[0].locationName = location.ToString();
             r.properties.locations[0].isZoneRedundant = AvailabilityZoneRegionLookup.HasSupportCosmosDB(location);
             templateContent = JsonConvert.SerializeObject(configObj, Formatting.Indented);
-            await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true);
+            await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true, cancellationToken: cancellationToken);
 
-            return await liftrAzure.GetCosmosDBAsync(rgName, cosmosDBName);
+            return await liftrAzure.GetCosmosDBAsync(rgName, cosmosDBName, cancellationToken);
         }
     }
 }

@@ -1,0 +1,353 @@
+﻿//-----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+//-----------------------------------------------------------------------------
+
+using Microsoft.Azure.Management.Dns.Fluent;
+using Microsoft.Azure.Management.Network.Fluent;
+using Microsoft.Azure.Management.Network.Fluent.Models;
+using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Microsoft.Azure.Management.TrafficManager.Fluent;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Microsoft.Liftr.Fluent
+{
+    internal partial class LiftrAzure
+    {
+        #region Network
+        public async Task<INetworkSecurityGroup> GetOrCreateDefaultNSGAsync(
+            Region location,
+            string rgName,
+            string nsgName,
+            IDictionary<string, string> tags,
+            CancellationToken cancellationToken = default)
+        {
+            var nsg = await GetNSGAsync(rgName, nsgName, cancellationToken);
+
+            if (nsg != null)
+            {
+                _logger.Information("Using existing nsg with id '{nsgId}'.", nsg.Id);
+                return nsg;
+            }
+
+            nsg = await FluentClient.NetworkSecurityGroups
+                .Define(nsgName)
+                .WithRegion(location)
+                .WithExistingResourceGroup(rgName)
+                .AllowAny80TCPInBound()
+                .AllowAny443TCPInBound()
+                .WithTags(tags)
+                .CreateAsync(cancellationToken);
+
+            _logger.Information("Created default nsg with id '{nsgId}'.", nsg.Id);
+            return nsg;
+        }
+
+        public Task<INetworkSecurityGroup> GetNSGAsync(string rgName, string nsgName, CancellationToken cancellationToken = default)
+        {
+            return FluentClient.NetworkSecurityGroups
+                .GetByResourceGroupAsync(rgName, nsgName, cancellationToken);
+        }
+
+        public async Task<INetwork> GetOrCreateVNetAsync(
+            Region location,
+            string rgName,
+            string vnetName,
+            IDictionary<string, string> tags,
+            string nsgId = null,
+            CancellationToken cancellationToken = default)
+        {
+            var vnet = await GetVNetAsync(rgName, vnetName, cancellationToken);
+
+            if (vnet == null)
+            {
+                vnet = await CreateVNetAsync(location, rgName, vnetName, tags, nsgId, cancellationToken);
+            }
+
+            return vnet;
+        }
+
+        public async Task<INetwork> GetVNetAsync(
+            string rgName,
+            string vnetName,
+            CancellationToken cancellationToken = default)
+        {
+            _logger.Information("Getting VNet. rgName: {rgName}, vnetName: {vnetName} ...", rgName, vnetName);
+            var vnet = await FluentClient
+                .Networks
+                .GetByResourceGroupAsync(rgName, vnetName, cancellationToken);
+
+            if (vnet == null)
+            {
+                _logger.Information("Cannot find VNet. rgName: {rgName}, vnetName: {vnetName} ...", rgName, vnetName);
+            }
+
+            return vnet;
+        }
+
+        public async Task<INetwork> CreateVNetAsync(
+            Region location,
+            string rgName,
+            string vnetName,
+            IDictionary<string, string> tags,
+            string nsgId = null,
+            CancellationToken cancellationToken = default)
+        {
+            _logger.Information("Creating vnet with name {vnetName} in {rgName}", vnetName, rgName);
+
+            var temp = FluentClient.Networks
+                .Define(vnetName)
+                .WithRegion(location)
+                .WithExistingResourceGroup(rgName)
+                .WithAddressSpace(c_vnetAddressSpace)
+                .DefineSubnet(DefaultSubnetName)
+                .WithAddressPrefix(c_defaultSubnetAddressSpace)
+                .WithAccessFromService(ServiceEndpointType.MicrosoftStorage)
+                .WithAccessFromService(ServiceEndpointType.MicrosoftAzureCosmosDB)
+                .WithAccessFromService(LiftrServiceEndpointType.MicrosoftKeyVault);
+
+            if (!string.IsNullOrEmpty(nsgId))
+            {
+                temp = temp.WithExistingNetworkSecurityGroup(nsgId);
+            }
+
+            var vnet = await temp.Attach().WithTags(tags).CreateAsync(cancellationToken);
+
+            _logger.Information("Created VNet with {resourceId}", vnet.Id);
+            return vnet;
+        }
+
+        public async Task<ISubnet> CreateNewSubnetAsync(
+            INetwork vnet,
+            string subnetName,
+            string nsgId = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (vnet == null)
+            {
+                return null;
+            }
+
+            var existingSubnets = vnet.Subnets;
+            if (existingSubnets == null || existingSubnets.Count == 0)
+            {
+                var ex = new InvalidOperationException($"To create a new subnet similar to the existing subnets, please make sure there is at least one subnet in the existing vnet '{vnet.Id}'.");
+                _logger.Error(ex, ex.Message);
+                throw ex;
+            }
+
+            _logger.Information("There exist {subnetCount} subnets in the vnet '{vnetId}'.", existingSubnets.Count(), vnet.Id);
+            if (existingSubnets.ContainsKey(subnetName))
+            {
+                return existingSubnets[subnetName];
+            }
+
+            var oneSubnetPrefix = existingSubnets.FirstOrDefault().Value.AddressPrefix;
+            var nonDefaultSubnets = existingSubnets.Where(kvp => !kvp.Key.OrdinalEquals(DefaultSubnetName)).Select(kvp => kvp.Value);
+            var largestValue = nonDefaultSubnets
+                .Select(subnet => int.Parse(subnet.AddressPrefix.Split('.')[2], CultureInfo.InvariantCulture))
+                .OrderByDescending(i => i)
+                .FirstOrDefault();
+
+            var newIPPart = largestValue + 1;
+            var parts = oneSubnetPrefix.Split('.');
+            parts[2] = newIPPart.ToString(CultureInfo.InvariantCulture);
+            var newCIDR = string.Join(".", parts);
+
+            _logger.Information("Adding a new subnet with name {subnetName} and CIDR {subnetCIDR} to vnet '{vnetId}'.", subnetName, newCIDR, vnet.Id);
+
+            var temp = vnet.Update()
+                .DefineSubnet(subnetName)
+                .WithAddressPrefix(newCIDR)
+                .WithAccessFromService(ServiceEndpointType.MicrosoftStorage)
+                .WithAccessFromService(ServiceEndpointType.MicrosoftAzureCosmosDB)
+                .WithAccessFromService(LiftrServiceEndpointType.MicrosoftKeyVault);
+
+            if (!string.IsNullOrEmpty(nsgId))
+            {
+                temp = temp.WithExistingNetworkSecurityGroup(nsgId);
+            }
+
+            await temp.Attach().ApplyAsync(cancellationToken);
+            await vnet.RefreshAsync(cancellationToken);
+            return vnet.Subnets[subnetName];
+        }
+
+        public async Task<ISubnet> GetSubnetAsync(string subnetId, CancellationToken cancellationToken = default)
+        {
+            var parsedSubnetId = new Liftr.Contracts.ResourceId(subnetId);
+            var vnet = await GetVNetAsync(parsedSubnetId.ResourceGroup, parsedSubnetId.ResourceName, cancellationToken);
+            if (vnet == null)
+            {
+                return null;
+            }
+
+            if (vnet.Subnets.ContainsKey(parsedSubnetId.ChildResourceName))
+            {
+                return vnet.Subnets[parsedSubnetId.ChildResourceName];
+            }
+
+            return null;
+        }
+
+        public async Task<IPublicIPAddress> GetOrCreatePublicIPAsync(
+            Region location,
+            string rgName,
+            string pipName,
+            IDictionary<string, string> tags,
+            PublicIPSkuType skuType = null,
+            CancellationToken cancellationToken = default)
+        {
+            var pip = await GetPublicIPAsync(rgName, pipName, cancellationToken);
+            if (pip == null)
+            {
+                pip = await CreatePublicIPAsync(location, rgName, pipName, tags, skuType, cancellationToken);
+            }
+
+            return pip;
+        }
+
+        public async Task<IPublicIPAddress> CreatePublicIPAsync(
+            Region location,
+            string rgName,
+            string pipName,
+            IDictionary<string, string> tags,
+            PublicIPSkuType skuType = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (skuType == null)
+            {
+                skuType = PublicIPSkuType.Basic;
+            }
+
+            _logger.Information("Start creating Public IP address with SKU: {skuType} with name: {pipName} in RG: {rgName} ...", skuType, pipName, rgName);
+
+            var pip = await FluentClient
+                .PublicIPAddresses
+                .Define(pipName)
+                .WithRegion(location)
+                .WithExistingResourceGroup(rgName)
+                .WithSku(skuType)
+                .WithStaticIP()
+                .WithLeafDomainLabel(pipName)
+                .WithTags(tags)
+                .CreateAsync(cancellationToken);
+
+            _logger.Information("Created Public IP address with resourceId: {resourceId}", pip.Id);
+            return pip;
+        }
+
+        public Task<IPublicIPAddress> GetPublicIPAsync(string rgName, string pipName, CancellationToken cancellationToken = default)
+        {
+            _logger.Information("Start getting Public IP with name: {pipName} ...", pipName);
+
+            return FluentClient
+                .PublicIPAddresses
+                .GetByResourceGroupAsync(rgName, pipName, cancellationToken);
+        }
+
+        public async Task<IEnumerable<IPublicIPAddress>> ListPublicIPAsync(string rgName, string namePrefix = null, CancellationToken cancellationToken = default)
+        {
+            _logger.Information($"Listing Public IP in resource group {rgName} with prefix {namePrefix} ...");
+
+            IEnumerable<IPublicIPAddress> ips = (await FluentClient
+                .PublicIPAddresses
+                .ListByResourceGroupAsync(rgName, loadAllPages: true, cancellationToken: cancellationToken)).ToList();
+
+            if (!string.IsNullOrEmpty(namePrefix))
+            {
+                ips = ips.Where((pip) => pip.Name.OrdinalStartsWith(namePrefix));
+            }
+
+            _logger.Information($"Found {ips.Count()} Public IP in resource group {rgName} with prefix {namePrefix}.");
+
+            return ips;
+        }
+
+        public async Task<ITrafficManagerProfile> GetOrCreateTrafficManagerAsync(
+            string rgName,
+            string tmName,
+            IDictionary<string, string> tags,
+            CancellationToken cancellationToken = default)
+        {
+            var tm = await GetTrafficManagerAsync(rgName, tmName, cancellationToken);
+            if (tm == null)
+            {
+                tm = await CreateTrafficManagerAsync(rgName, tmName, tags, cancellationToken);
+            }
+
+            return tm;
+        }
+
+        public async Task<ITrafficManagerProfile> CreateTrafficManagerAsync(
+            string rgName,
+            string tmName,
+            IDictionary<string, string> tags,
+            CancellationToken cancellationToken = default)
+        {
+            _logger.Information("Creating a Traffic Manager with name {@tmName} ...", tmName);
+            var tm = await FluentClient
+                .TrafficManagerProfiles
+                .Define(tmName)
+                .WithExistingResourceGroup(rgName)
+                .WithLeafDomainLabel(tmName)
+                .WithWeightBasedRouting()
+                .DefineExternalTargetEndpoint("default-endpoint")
+                    .ToFqdn("40.76.4.15") // microsoft.com
+                    .FromRegion(Region.USWest)
+                    .WithTrafficDisabled()
+                    .Attach()
+                .WithHttpsMonitoring(443, "/api/liveness-probe")
+                .WithTags(tags)
+                .CreateAsync(cancellationToken);
+
+            _logger.Information("Created Traffic Manager with Id {resourceId}", tm.Id);
+
+            return tm;
+        }
+
+        public async Task<ITrafficManagerProfile> GetTrafficManagerAsync(string tmId, CancellationToken cancellationToken = default)
+        {
+            _logger.Information("Getting a Traffic Manager with Id {resourceId} ...", tmId);
+            var tm = await FluentClient
+                .TrafficManagerProfiles
+                .GetByIdAsync(tmId, cancellationToken);
+
+            return tm;
+        }
+
+        public Task<ITrafficManagerProfile> GetTrafficManagerAsync(string rgName, string tmName, CancellationToken cancellationToken = default)
+        {
+            _logger.Information("Start getting Traffic Manager with name: {tmName} in RG {rgName} ...", tmName, rgName);
+            return FluentClient
+                .TrafficManagerProfiles
+                .GetByResourceGroupAsync(rgName, tmName, cancellationToken);
+        }
+
+        public Task<IDnsZone> GetDNSZoneAsync(string rgName, string dnsName, CancellationToken cancellationToken = default)
+        {
+            _logger.Information("Getting DNS zone with dnsName '{dnsName}' in RG '{resourceGroup}'.", dnsName, rgName);
+            return FluentClient
+                .DnsZones
+                .GetByResourceGroupAsync(rgName, dnsName, cancellationToken);
+        }
+
+        public async Task<IDnsZone> CreateDNSZoneAsync(string rgName, string dnsName, IDictionary<string, string> tags, CancellationToken cancellationToken = default)
+        {
+            var dns = await FluentClient
+                .DnsZones
+                .Define(dnsName)
+                .WithExistingResourceGroup(rgName)
+                .WithTags(tags)
+                .CreateAsync(cancellationToken);
+
+            _logger.Information("Created DNS zone with id '{resourceId}'.", dns.Id);
+            return dns;
+        }
+        #endregion
+    }
+}

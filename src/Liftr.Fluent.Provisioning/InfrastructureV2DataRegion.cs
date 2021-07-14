@@ -92,7 +92,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 provisionedResources.CosmosDBAccount = await liftrAzure.GetCosmosDBAsync(dbId);
                 if (provisionedResources.CosmosDBAccount == null)
                 {
-                    (var createdDb, _) = await liftrAzure.CreateCosmosDBAsync(namingContext.Location, rgName, cosmosName, namingContext.Tags, subnet);
+                    var createdDb = await liftrAzure.CreateCosmosDBAsync(namingContext.Location, rgName, cosmosName, namingContext.Tags, subnet);
                     provisionedResources.CosmosDBAccount = createdDb;
                     await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(provisionedResources.CosmosDBAccount, dataOptions.LogAnalyticsWorkspaceId);
                     _logger.Information("Created CosmosDB with Id {ResourceId}", provisionedResources.CosmosDBAccount.Id);

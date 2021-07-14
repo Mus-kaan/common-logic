@@ -36,7 +36,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             logs[4].MessageTemplate.Text
                 .Should().Be("Creating an ACR with name {acrName} ...");
 
-            logs[8].MessageTemplate.Text
+            logs[10].MessageTemplate.Text
                .Should().Be("Created ACR with Id {resourceId}.");
         }
     }

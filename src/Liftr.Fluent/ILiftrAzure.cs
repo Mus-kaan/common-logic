@@ -59,7 +59,7 @@ namespace Microsoft.Liftr.Fluent
 
         bool IsMicrosoftTenant();
 
-        Task<string> GetResourceAsync(string resourceId, string apiVersion);
+        Task<string> GetResourceAsync(string resourceId, string apiVersion, CancellationToken cancellationToken = default);
 
         Task PutResourceAsync(string resourceId, string apiVersion, string resourceBody, CancellationToken cancellationToken = default);
 
@@ -84,150 +84,293 @@ namespace Microsoft.Liftr.Fluent
         #endregion
 
         #region Resource Group
-        Task<IResourceGroup> GetOrCreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags);
+        Task<IResourceGroup> GetOrCreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags, CancellationToken cancellationToken = default);
 
-        Task<IResourceGroup> CreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags);
+        Task<IResourceGroup> CreateResourceGroupAsync(Region location, string rgName, IDictionary<string, string> tags, CancellationToken cancellationToken = default);
 
         IResourceGroup CreateResourceGroup(Region location, string rgName, IDictionary<string, string> tags);
 
-        Task<IResourceGroup> GetResourceGroupAsync(string rgName);
+        Task<IResourceGroup> GetResourceGroupAsync(string rgName, CancellationToken cancellationToken = default);
 
-        Task DeleteResourceGroupAsync(string rgName, bool noThrow = false);
+        Task DeleteResourceGroupAsync(string rgName, bool noThrow = false, CancellationToken cancellationToken = default);
 
         void DeleteResourceGroup(string rgName, bool noThrow = false);
 
-        Task DeleteResourceGroupWithTagAsync(string tagName, string tagValue, Func<IReadOnlyDictionary<string, string>, bool> tagsFilter = null);
+        Task DeleteResourceGroupWithTagAsync(string tagName, string tagValue, Func<IReadOnlyDictionary<string, string>, bool> tagsFilter = null, CancellationToken cancellationToken = default);
 
-        Task DeleteResourceGroupWithPrefixAsync(string rgNamePrefix);
+        Task DeleteResourceGroupWithPrefixAsync(string rgNamePrefix, CancellationToken cancellationToken = default);
 
-        Task DeleteResourceGroupWithNamePartAsync(string rgNamePart);
+        Task DeleteResourceGroupWithNamePartAsync(string rgNamePart, CancellationToken cancellationToken = default);
         #endregion Resource Group
 
         #region Storage Account
-        Task<IStorageAccount> GetOrCreateStorageAccountAsync(Region location, string rgName, string storageAccountName, IDictionary<string, string> tags, string accessFromSubnetId = null);
+        Task<IStorageAccount> GetOrCreateStorageAccountAsync(
+            Region location,
+            string rgName,
+            string storageAccountName,
+            IDictionary<string, string> tags,
+            string accessFromSubnetId = null,
+            CancellationToken cancellationToken = default);
 
-        Task<IStorageAccount> CreateStorageAccountAsync(Region location, string rgName, string storageAccountName, IDictionary<string, string> tags, string accessFromSubnetId = null);
+        Task<IStorageAccount> CreateStorageAccountAsync(
+            Region location,
+            string rgName,
+            string storageAccountName,
+            IDictionary<string, string> tags,
+            string accessFromSubnetId = null,
+            CancellationToken cancellationToken = default);
 
-        Task<IStorageAccount> GetStorageAccountAsync(string rgName, string storageAccountName);
+        Task<IStorageAccount> GetStorageAccountAsync(
+            string rgName,
+            string storageAccountName,
+            CancellationToken cancellationToken = default);
 
-        Task<IStorageAccount> FindStorageAccountAsync(string storageAccountName, string resourceGroupNamePrefix = null);
+        Task<IStorageAccount> FindStorageAccountAsync(
+            string storageAccountName,
+            string resourceGroupNamePrefix = null,
+            CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<IStorageAccount>> ListStorageAccountAsync(string rgName, string namePrefix = null);
+        Task<IEnumerable<IStorageAccount>> ListStorageAccountAsync(
+            string rgName,
+            string namePrefix = null,
+            CancellationToken cancellationToken = default);
 
-        Task GrantBlobContributorAsync(string subscriptionId, string objectId);
+        Task GrantBlobContributorAsync(
+            string subscriptionId,
+            string objectId,
+            CancellationToken cancellationToken = default);
 
-        Task GrantBlobContributorAsync(string subscriptionId, IIdentity msi);
+        Task GrantBlobContributorAsync(
+            string subscriptionId,
+            IIdentity msi,
+            CancellationToken cancellationToken = default);
 
-        Task GrantBlobContributorAsync(IResourceGroup rg, string objectId);
+        Task GrantBlobContributorAsync(
+            IResourceGroup rg,
+            string objectId,
+            CancellationToken cancellationToken = default);
 
-        Task GrantBlobContributorAsync(IResourceGroup rg, IIdentity msi);
+        Task GrantBlobContributorAsync(
+            IResourceGroup rg,
+            IIdentity msi,
+            CancellationToken cancellationToken = default);
 
-        Task GrantBlobContributorAsync(IStorageAccount storageAccount, string objectId);
+        Task GrantBlobContributorAsync(
+            IStorageAccount storageAccount,
+            string objectId,
+            CancellationToken cancellationToken = default);
 
-        Task GrantBlobContributorAsync(IStorageAccount storageAccount, IIdentity msi);
+        Task GrantBlobContributorAsync(
+            IStorageAccount storageAccount,
+            IIdentity msi,
+            CancellationToken cancellationToken = default);
 
-        Task GrantBlobContainerContributorAsync(IStorageAccount storageAccount, string containerName, string objectId);
+        Task GrantBlobContainerContributorAsync(
+            IStorageAccount storageAccount,
+            string containerName,
+            string objectId,
+            CancellationToken cancellationToken = default);
 
-        Task GrantBlobContainerContributorAsync(IStorageAccount storageAccount, string containerName, IIdentity msi);
+        Task GrantBlobContainerContributorAsync(
+            IStorageAccount storageAccount,
+            string containerName,
+            IIdentity msi,
+            CancellationToken cancellationToken = default);
 
-        Task GrantBlobContainerReaderAsync(IStorageAccount storageAccount, string containerName, string objectId);
+        Task GrantBlobContainerReaderAsync(
+            IStorageAccount storageAccount,
+            string containerName,
+            string objectId,
+            CancellationToken cancellationToken = default);
 
-        Task GrantBlobContainerReaderAsync(IStorageAccount storageAccount, string containerName, IIdentity msi);
+        Task GrantBlobContainerReaderAsync(
+            IStorageAccount storageAccount,
+            string containerName,
+            IIdentity msi,
+            CancellationToken cancellationToken = default);
 
-        Task GrantQueueContributorAsync(IResourceGroup rg, string objectId);
+        Task GrantQueueContributorAsync(
+            IResourceGroup rg,
+            string objectId,
+            CancellationToken cancellationToken = default);
 
-        Task GrantQueueContributorAsync(IResourceGroup rg, IIdentity msi);
+        Task GrantQueueContributorAsync(
+            IResourceGroup rg,
+            IIdentity msi,
+            CancellationToken cancellationToken = default);
 
-        Task GrantQueueContributorAsync(IStorageAccount storageAccount, IIdentity msi);
+        Task GrantQueueContributorAsync(
+            IStorageAccount storageAccount,
+            IIdentity msi,
+            CancellationToken cancellationToken = default);
 
-        Task GrantQueueContributorAsync(IStorageAccount storageAccount, string objectId);
+        Task GrantQueueContributorAsync(
+            IStorageAccount storageAccount,
+            string objectId,
+            CancellationToken cancellationToken = default);
 
-        Task DelegateStorageKeyOperationToKeyVaultAsync(IStorageAccount storageAccount);
+        Task DelegateStorageKeyOperationToKeyVaultAsync(IStorageAccount storageAccount, CancellationToken cancellationToken = default);
 
-        Task DelegateStorageKeyOperationToKeyVaultAsync(IResourceGroup rg);
+        Task DelegateStorageKeyOperationToKeyVaultAsync(IResourceGroup rg, CancellationToken cancellationToken = default);
         #endregion Storage Account
 
         #region Network
-        Task<INetworkSecurityGroup> GetNSGAsync(string rgName, string nsgName);
+        Task<INetworkSecurityGroup> GetNSGAsync(string rgName, string nsgName, CancellationToken cancellationToken = default);
 
-        Task<INetworkSecurityGroup> GetOrCreateDefaultNSGAsync(Region location, string rgName, string nsgName, IDictionary<string, string> tags);
+        Task<INetworkSecurityGroup> GetOrCreateDefaultNSGAsync(
+            Region location,
+            string rgName,
+            string nsgName,
+            IDictionary<string, string> tags,
+            CancellationToken cancellationToken = default);
 
-        Task<INetwork> GetOrCreateVNetAsync(Region location, string rgName, string vnetName, IDictionary<string, string> tags, string nsgId = null);
+        Task<INetwork> GetOrCreateVNetAsync(
+            Region location,
+            string rgName,
+            string vnetName,
+            IDictionary<string, string> tags,
+            string nsgId = null,
+            CancellationToken cancellationToken = default);
 
-        Task<INetwork> CreateVNetAsync(Region location, string rgName, string vnetName, IDictionary<string, string> tags, string nsgId = null);
+        Task<INetwork> CreateVNetAsync(
+            Region location,
+            string rgName,
+            string vnetName,
+            IDictionary<string, string> tags,
+            string nsgId = null,
+            CancellationToken cancellationToken = default);
 
-        Task<INetwork> GetVNetAsync(string rgName, string vnetName);
+        Task<INetwork> GetVNetAsync(string rgName, string vnetName, CancellationToken cancellationToken = default);
 
-        Task<ISubnet> CreateNewSubnetAsync(INetwork vnet, string subnetName, string nsgId = null);
+        Task<ISubnet> CreateNewSubnetAsync(
+            INetwork vnet,
+            string subnetName,
+            string nsgId = null,
+            CancellationToken cancellationToken = default);
 
-        Task<ISubnet> GetSubnetAsync(string subnetId);
+        Task<ISubnet> GetSubnetAsync(string subnetId, CancellationToken cancellationToken = default);
 
-        Task<IPublicIPAddress> GetOrCreatePublicIPAsync(Region location, string rgName, string pipName, IDictionary<string, string> tags, PublicIPSkuType skuType = null);
+        Task<IPublicIPAddress> GetOrCreatePublicIPAsync(
+            Region location,
+            string rgName,
+            string pipName,
+            IDictionary<string, string> tags,
+            PublicIPSkuType skuType = null,
+            CancellationToken cancellationToken = default);
 
-        Task<IPublicIPAddress> CreatePublicIPAsync(Region location, string rgName, string pipName, IDictionary<string, string> tags, PublicIPSkuType skuType = null);
+        Task<IPublicIPAddress> CreatePublicIPAsync(
+            Region location,
+            string rgName,
+            string pipName,
+            IDictionary<string, string> tags,
+            PublicIPSkuType skuType = null,
+            CancellationToken cancellationToken = default);
 
-        Task<IPublicIPAddress> GetPublicIPAsync(string rgName, string pipName);
+        Task<IPublicIPAddress> GetPublicIPAsync(
+            string rgName,
+            string pipName,
+            CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<IPublicIPAddress>> ListPublicIPAsync(string rgName, string namePrefix = null);
+        Task<IEnumerable<IPublicIPAddress>> ListPublicIPAsync(
+            string rgName,
+            string namePrefix = null,
+            CancellationToken cancellationToken = default);
 
-        Task<ITrafficManagerProfile> GetOrCreateTrafficManagerAsync(string rgName, string tmName, IDictionary<string, string> tags);
+        Task<ITrafficManagerProfile> GetOrCreateTrafficManagerAsync(
+            string rgName,
+            string tmName,
+            IDictionary<string, string> tags,
+            CancellationToken cancellationToken = default);
 
-        Task<ITrafficManagerProfile> CreateTrafficManagerAsync(string rgName, string tmName, IDictionary<string, string> tags);
+        Task<ITrafficManagerProfile> CreateTrafficManagerAsync(
+            string rgName,
+            string tmName,
+            IDictionary<string, string> tags,
+            CancellationToken cancellationToken = default);
 
-        Task<ITrafficManagerProfile> GetTrafficManagerAsync(string tmId);
+        Task<ITrafficManagerProfile> GetTrafficManagerAsync(string tmId, CancellationToken cancellationToken = default);
 
-        Task<ITrafficManagerProfile> GetTrafficManagerAsync(string rgName, string tmName);
+        Task<ITrafficManagerProfile> GetTrafficManagerAsync(string rgName, string tmName, CancellationToken cancellationToken = default);
 
-        Task<IDnsZone> GetDNSZoneAsync(string rgName, string dnsName);
+        Task<IDnsZone> GetDNSZoneAsync(string rgName, string dnsName, CancellationToken cancellationToken = default);
 
-        Task<IDnsZone> CreateDNSZoneAsync(string rgName, string dnsName, IDictionary<string, string> tags);
+        Task<IDnsZone> CreateDNSZoneAsync(string rgName, string dnsName, IDictionary<string, string> tags, CancellationToken cancellationToken = default);
         #endregion
 
         #region CosmosDB
-        Task<(ICosmosDBAccount cosmosDBAccount, string mongoConnectionString)> CreateCosmosDBAsync(
+        Task<ICosmosDBAccount> CreateCosmosDBAsync(
             Region location,
             string rgName,
             string cosmosDBName,
             IDictionary<string, string> tags,
-            ISubnet subnet = null);
+            ISubnet subnet = null,
+            CancellationToken cancellationToken = default);
 
-        Task<ICosmosDBAccount> GetCosmosDBAsync(string dbResourceId);
+        Task<ICosmosDBAccount> GetCosmosDBAsync(string dbResourceId, CancellationToken cancellationToken = default);
 
-        Task<ICosmosDBAccount> GetCosmosDBAsync(string rgName, string cosmosDBName);
+        Task<ICosmosDBAccount> GetCosmosDBAsync(string rgName, string cosmosDBName, CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<ICosmosDBAccount>> ListCosmosDBAsync(string rgName);
+        Task<IEnumerable<ICosmosDBAccount>> ListCosmosDBAsync(string rgName, CancellationToken cancellationToken = default);
         #endregion CosmosDB
 
         #region Key Vault
-        Task<IVault> GetOrCreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags);
+        Task<IVault> GetOrCreateKeyVaultAsync(
+            Region location,
+            string rgName,
+            string vaultName,
+            IDictionary<string, string> tags,
+            CancellationToken cancellationToken = default);
 
-        Task<IVault> GetOrCreateKeyVaultAsync(Region location, string rgName, string vaultName, string accessibleFromIP, IDictionary<string, string> tags);
+        Task<IVault> GetOrCreateKeyVaultAsync(
+            Region location,
+            string rgName,
+            string vaultName,
+            string accessibleFromIP,
+            IDictionary<string, string> tags,
+            CancellationToken cancellationToken = default);
 
-        Task<IVault> CreateKeyVaultAsync(Region location, string rgName, string vaultName, IDictionary<string, string> tags);
+        Task<IVault> CreateKeyVaultAsync(
+            Region location,
+            string rgName,
+            string vaultName,
+            IDictionary<string, string> tags,
+            CancellationToken cancellationToken = default);
 
-        Task<IVault> GetKeyVaultAsync(string rgName, string vaultName);
+        Task<IVault> GetKeyVaultAsync(string rgName, string vaultName, CancellationToken cancellationToken = default);
 
-        Task<IVault> GetKeyVaultByIdAsync(string kvResourceId);
+        Task<IVault> GetKeyVaultByIdAsync(string kvResourceId, CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<IVault>> ListKeyVaultAsync(string rgName, string namePrefix = null);
+        Task<IEnumerable<IVault>> ListKeyVaultAsync(string rgName, string namePrefix = null, CancellationToken cancellationToken = default);
 
-        Task WithKeyVaultAccessFromNetworkAsync(IVault vault, string ipAddress, string subnetId, bool enableVNetFilter = true);
+        Task WithKeyVaultAccessFromNetworkAsync(IVault vault, string ipAddress, string subnetId, bool enableVNetFilter = true, CancellationToken cancellationToken = default);
 
-        Task RemoveAccessPolicyAsync(string kvResourceId, string servicePrincipalObjectId);
+        Task RemoveAccessPolicyAsync(string kvResourceId, string servicePrincipalObjectId, CancellationToken cancellationToken = default);
 
-        Task GrantSelfKeyVaultAdminAccessAsync(IVault kv);
+        Task GrantSelfKeyVaultAdminAccessAsync(IVault kv, CancellationToken cancellationToken = default);
 
-        Task RemoveSelfKeyVaultAccessAsync(IVault kv);
+        Task RemoveSelfKeyVaultAccessAsync(IVault kv, CancellationToken cancellationToken = default);
         #endregion Key Vault
 
         #region Redis Cache
-        Task<IRedisCache> GetOrCreateRedisCacheAsync(Region location, string rgName, string redisCacheName, IDictionary<string, string> tags, IDictionary<string, string> redisConfig = null);
+        Task<IRedisCache> GetOrCreateRedisCacheAsync(
+            Region location,
+            string rgName,
+            string redisCacheName,
+            IDictionary<string, string> tags,
+            IDictionary<string, string> redisConfig = null,
+            CancellationToken cancellationToken = default);
 
-        Task<IRedisCache> GetRedisCachesAsync(string rgName, string redisCacheName);
+        Task<IRedisCache> GetRedisCachesAsync(string rgName, string redisCacheName, CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<IRedisCache>> ListRedisCacheAsync(string rgName);
+        Task<IEnumerable<IRedisCache>> ListRedisCacheAsync(string rgName, CancellationToken cancellationToken = default);
 
-        Task<IRedisCache> CreateRedisCacheAsync(Region location, string rgName, string redisCacheName, IDictionary<string, string> tags, IDictionary<string, string> redisConfig = null);
+        Task<IRedisCache> CreateRedisCacheAsync(
+            Region location,
+            string rgName,
+            string redisCacheName,
+            IDictionary<string, string> tags,
+            IDictionary<string, string> redisConfig = null,
+            CancellationToken cancellationToken = default);
         #endregion
 
         #region AKS
@@ -244,17 +387,18 @@ namespace Microsoft.Liftr.Fluent
             IDictionary<string, string> tags,
             ISubnet subnet = null,
             string agentPoolProfileName = "ap",
-            bool supportAvailabilityZone = false);
+            bool supportAvailabilityZone = false,
+            CancellationToken cancellationToken = default);
 
-        Task<IKubernetesCluster> GetAksClusterAsync(string aksResourceId);
+        Task<IKubernetesCluster> GetAksClusterAsync(string aksResourceId, CancellationToken cancellationToken = default);
 
-        Task<IKubernetesCluster> GetAksClusterAsync(string rgName, string aksName);
+        Task<IKubernetesCluster> GetAksClusterAsync(string rgName, string aksName, CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<IKubernetesCluster>> ListAksClusterAsync(string rgName);
+        Task<IEnumerable<IKubernetesCluster>> ListAksClusterAsync(string rgName, CancellationToken cancellationToken = default);
 
-        Task<string> GetAKSMIAsync(string rgName, string aksName);
+        Task<string> GetAKSMIAsync(string rgName, string aksName, CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<IIdentity>> ListAKSMCMIAsync(string AKSRGName, string AKSName, Region location);
+        Task<IEnumerable<IIdentity>> ListAKSMCMIAsync(string AKSRGName, string AKSName, Region location, CancellationToken cancellationToken = default);
         #endregion AKS
 
         #region Identity
@@ -274,7 +418,13 @@ namespace Microsoft.Liftr.Fluent
         #endregion
 
         #region Deployments
-        Task<IDeployment> CreateDeploymentAsync(Region location, string rgName, string template, string templateParameters = null, bool noLogging = false, CancellationToken cancellationToken = default);
+        Task<IDeployment> CreateDeploymentAsync(
+            Region location,
+            string rgName,
+            string template,
+            string templateParameters = null,
+            bool noLogging = false,
+            CancellationToken cancellationToken = default);
         #endregion
 
         #region Monitoring

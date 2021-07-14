@@ -7,6 +7,7 @@ using Microsoft.Azure.KeyVault.Models;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.KeyVault
@@ -53,12 +54,11 @@ namespace Microsoft.Liftr.KeyVault
 
         public Uri VaultUri { get; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "By Design.")]
-        public async Task<bool> ContainsSecretAsync(string secretName)
+        public async Task<bool> ContainsSecretAsync(string secretName, CancellationToken cancellationToken = default)
         {
             try
             {
-                var result = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, secretName);
+                var result = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, secretName, cancellationToken);
                 return result != null;
             }
             catch
@@ -67,12 +67,15 @@ namespace Microsoft.Liftr.KeyVault
             }
         }
 
-        public async Task<SecretBundle> GetSecretAsync(string secretName, bool noThrowNotFound = false)
+        public async Task<SecretBundle> GetSecretAsync(
+            string secretName,
+            bool noThrowNotFound = false,
+            CancellationToken cancellationToken = default)
         {
             _logger.Information("Start getting secret with name '{secretName}' in vault '{vaultBaseUrl}' ...", secretName, _vaultBaseUrl);
             try
             {
-                var result = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, secretName);
+                var result = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, secretName, cancellationToken);
                 _logger.Information("Finished getting secret with name: {secretName}.", secretName);
                 return result;
             }
@@ -82,11 +85,16 @@ namespace Microsoft.Liftr.KeyVault
             }
         }
 
-        public async Task<SecretBundle> SetSecretAsync(string secretName, string value, IDictionary<string, string> tags = null, bool setOnlyWhenDifferent = true)
+        public async Task<SecretBundle> SetSecretAsync(
+            string secretName,
+            string value,
+            IDictionary<string, string> tags = null,
+            bool setOnlyWhenDifferent = true,
+            CancellationToken cancellationToken = default)
         {
             if (setOnlyWhenDifferent)
             {
-                var existing = await GetSecretAsync(secretName, noThrowNotFound: true);
+                var existing = await GetSecretAsync(secretName, noThrowNotFound: true, cancellationToken: cancellationToken);
                 if (existing != null && existing.Value.StrictEquals(value))
                 {
                     _logger.Information("Didn't overwrite the current secret version since the new value is the same.");
@@ -95,16 +103,16 @@ namespace Microsoft.Liftr.KeyVault
             }
 
             _logger.Information("Start setting secret with name '{secretName}' in vault '{vaultBaseUrl}' ...", secretName, _vaultBaseUrl);
-            var result = await _keyVaultClient.SetSecretAsync(_vaultBaseUrl, secretName, value, tags);
+            var result = await _keyVaultClient.SetSecretAsync(_vaultBaseUrl, secretName, value, tags, cancellationToken: cancellationToken);
             _logger.Information("Finished setting secret with name: {secretName}.", secretName);
             return result;
         }
 
-        public async Task<IEnumerable<SecretItem>> ListSecretsAsync(string prefix = null)
+        public async Task<IEnumerable<SecretItem>> ListSecretsAsync(string prefix = null, CancellationToken cancellationToken = default)
         {
             List<SecretItem> result = new List<SecretItem>();
             _logger.Information("Start listing secrets with prefix '{prefix}' in vault '{vaultBaseUrl}' ...", prefix, _vaultBaseUrl);
-            var secrets = await _keyVaultClient.GetSecretsAsync(_vaultBaseUrl);
+            var secrets = await _keyVaultClient.GetSecretsAsync(_vaultBaseUrl, cancellationToken: cancellationToken);
             foreach (var secret in secrets)
             {
                 if (string.IsNullOrEmpty(prefix) || secret.Identifier.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
@@ -117,27 +125,33 @@ namespace Microsoft.Liftr.KeyVault
             return result;
         }
 
-        public async Task<IssuerBundle> GetCertificateIssuerAsync(string issuerName)
+        public async Task<IssuerBundle> GetCertificateIssuerAsync(string issuerName, CancellationToken cancellationToken = default)
         {
             _logger.Information("Start getting issuer with name '{issuerName}' in vault '{vaultBaseUrl}' ...", issuerName, _vaultBaseUrl);
-            var issuer = await _keyVaultClient.GetCertificateIssuerAsync(_vaultBaseUrl, issuerName);
+            var issuer = await _keyVaultClient.GetCertificateIssuerAsync(_vaultBaseUrl, issuerName, cancellationToken);
             _logger.Information("Finished getting issuer with name: {issuerName} .", issuerName);
             return issuer;
         }
 
-        public async Task<IssuerBundle> SetCertificateIssuerAsync(string issuerName, string provider)
+        public async Task<IssuerBundle> SetCertificateIssuerAsync(string issuerName, string provider, CancellationToken cancellationToken = default)
         {
             _logger.Information("Start getting issuer with name: '{issuerName}' provider '{provider}' in vault '{vaultBaseUrl}' ...", issuerName, provider, _vaultBaseUrl);
-            var issuer = await _keyVaultClient.SetCertificateIssuerAsync(_vaultBaseUrl, issuerName, provider);
+            var issuer = await _keyVaultClient.SetCertificateIssuerAsync(_vaultBaseUrl, issuerName, provider, cancellationToken: cancellationToken);
             _logger.Information("Finished getting issuer with name: {issuerName} .", issuerName);
             return issuer;
         }
 
-        public async Task<CertificateOperation> CreateCertificateIfNotExistAsync(string certName, string issuerName, string certificateSubject, IList<string> subjectAlternativeNames, IDictionary<string, string> tags = null)
+        public async Task<CertificateOperation> CreateCertificateIfNotExistAsync(
+            string certName,
+            string issuerName,
+            string certificateSubject,
+            IList<string> subjectAlternativeNames,
+            IDictionary<string, string> tags = null,
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var existingCert = await GetCertAsync(certName);
+                var existingCert = await GetCertAsync(certName, cancellationToken);
                 if (existingCert != null)
                 {
                     var privateKeyBytes = Convert.FromBase64String(existingCert.Value);
@@ -156,10 +170,16 @@ namespace Microsoft.Liftr.KeyVault
                 _logger.Warning(ex, "Get existing certificate failed. Probably the existing one is in an invalid state. Try create a new one.");
             }
 
-            return await CreateCertificateAsync(certName, issuerName, certificateSubject, subjectAlternativeNames, tags);
+            return await CreateCertificateAsync(certName, issuerName, certificateSubject, subjectAlternativeNames, tags, cancellationToken);
         }
 
-        public async Task<CertificateOperation> CreateCertificateAsync(string certName, string issuerName, string certificateSubject, IList<string> subjectAlternativeNames, IDictionary<string, string> tags = null)
+        public async Task<CertificateOperation> CreateCertificateAsync(
+            string certName,
+            string issuerName,
+            string certificateSubject,
+            IList<string> subjectAlternativeNames,
+            IDictionary<string, string> tags = null,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(certificateSubject))
             {
@@ -211,12 +231,12 @@ namespace Microsoft.Liftr.KeyVault
                     };
 
                     _logger.Information("Start creating certificate with name {@certificateName}, subject name {certSubjectName} and policy: {@certPolicy} in vault '{vaultBaseUrl}' ...", certName, certPolicy.X509CertificateProperties.Subject, certPolicy, _vaultBaseUrl);
-                    var certOperation = await _keyVaultClient.CreateCertificateAsync(_vaultBaseUrl, certName, certPolicy, certificateAttributes, tags);
+                    var certOperation = await _keyVaultClient.CreateCertificateAsync(_vaultBaseUrl, certName, certPolicy, certificateAttributes, tags, cancellationToken);
 
                     while (certOperation.Status.OrdinalEquals("InProgress"))
                     {
                         await Task.Delay(5000);
-                        certOperation = await _keyVaultClient.GetCertificateOperationAsync(_vaultBaseUrl, certName);
+                        certOperation = await _keyVaultClient.GetCertificateOperationAsync(_vaultBaseUrl, certName, cancellationToken);
                     }
 
                     _logger.Information("Finished cert cration with name '{certificateName}', subject name '{certSubjectName}'. Operation result: {@certOperation}", certName, certPolicy.X509CertificateProperties.Subject, certOperation);
@@ -228,7 +248,7 @@ namespace Microsoft.Liftr.KeyVault
                         throw new KeyVaultErrorException("Failed to create certificate. " + certOperation?.Error?.Message);
                     }
 
-                    await GetCertificateDetailsAsync(certName);
+                    await GetCertificateDetailsAsync(certName, cancellationToken);
                     return certOperation;
                 }
                 catch (Exception ex)
@@ -243,14 +263,15 @@ namespace Microsoft.Liftr.KeyVault
         /// Download the pfx part of the certificate.
         /// </summary>
         /// <param name="certName">Name of the cert.</param>
+        /// <param name="cancellationToken">cancellationToken</param>
         /// <returns>Value is base64 encoded pfx data</returns>
-        public async Task<SecretBundle> GetCertAsync(string certName)
+        public async Task<SecretBundle> GetCertAsync(string certName, CancellationToken cancellationToken = default)
         {
             try
             {
                 _logger.Information("Start getting certificate with name {certificateName} in vault '{vaultBaseUrl}' ...", certName, _vaultBaseUrl);
-                SecretBundle secret = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, certName);
-                await GetCertificateDetailsAsync(certName);
+                SecretBundle secret = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, certName, cancellationToken);
+                await GetCertificateDetailsAsync(certName, cancellationToken);
                 return secret;
             }
             catch (KeyVaultErrorException ex) when (ex.Response?.StatusCode == System.Net.HttpStatusCode.NotFound)
@@ -263,13 +284,14 @@ namespace Microsoft.Liftr.KeyVault
         /// Get details of the certificate.
         /// </summary>
         /// <param name="certName">Name of the cert.</param>
+        /// <param name="cancellationToken">cancellationToken</param>
         /// <returns>CertificateBundle object</returns>
-        public async Task<CertificateBundle> GetCertificateDetailsAsync(string certName)
+        public async Task<CertificateBundle> GetCertificateDetailsAsync(string certName, CancellationToken cancellationToken = default)
         {
             try
             {
                 _logger.Information("Fetching certificate details with name {certificateName} in vault '{vaultBaseUrl}' ...", certName, _vaultBaseUrl);
-                CertificateBundle certDetails = await _keyVaultClient.GetCertificateAsync(_vaultBaseUrl, certName);
+                CertificateBundle certDetails = await _keyVaultClient.GetCertificateAsync(_vaultBaseUrl, certName, cancellationToken);
                 var thumbprint = StringExtensions.GetStringFromBytes(certDetails.X509Thumbprint);
 
                 _logger.Information("Finished getting certificate details with name {certificateName}, Thumbprint: {thumbprint} and Id: {certId}...", certName, thumbprint, certDetails.Id);

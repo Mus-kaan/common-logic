@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent
@@ -32,7 +33,8 @@ namespace Microsoft.Liftr.Fluent
             Region location,
             string rgName,
             string vaultName,
-            IDictionary<string, string> tags)
+            IDictionary<string, string> tags,
+            CancellationToken cancellationToken)
         {
             if (liftrAzure == null)
             {
@@ -51,9 +53,9 @@ namespace Microsoft.Liftr.Fluent
                 tags,
                 softDeleteRetentionInDays: 15);
 
-            await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true);
+            await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true, cancellationToken: cancellationToken);
 
-            IVault vault = await liftrAzure.GetKeyVaultAsync(rgName, vaultName);
+            IVault vault = await liftrAzure.GetKeyVaultAsync(rgName, vaultName, cancellationToken);
 
             _logger.Information("Created Key Vault with resourceId {resourceId}", vault.Id);
 
@@ -66,7 +68,8 @@ namespace Microsoft.Liftr.Fluent
             string rgName,
             string vaultName,
             string ipAddress,
-            IDictionary<string, string> tags)
+            IDictionary<string, string> tags,
+            CancellationToken cancellationToken)
         {
             if (liftrAzure == null)
             {
@@ -94,9 +97,9 @@ namespace Microsoft.Liftr.Fluent
                 tags,
                 softDeleteRetentionInDays: 15);
 
-            await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true);
+            await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true, cancellationToken: cancellationToken);
 
-            IVault vault = await liftrAzure.GetKeyVaultAsync(rgName, vaultName);
+            IVault vault = await liftrAzure.GetKeyVaultAsync(rgName, vaultName, cancellationToken);
 
             _logger.Information("Created Key Vault with resourceId {resourceId}", vault.Id);
 
@@ -107,7 +110,8 @@ namespace Microsoft.Liftr.Fluent
             IVault vault,
             ILiftrAzure liftrAzure,
             string ipAddress,
-            string subnetId)
+            string subnetId,
+            CancellationToken cancellationToken)
         {
             var ips = new List<IPRule>();
             if (!string.IsNullOrEmpty(ipAddress))
@@ -147,7 +151,7 @@ namespace Microsoft.Liftr.Fluent
                 accessPolicies.Add(policy.Inner);
             }
 
-            var softDeleteTime = await GetSoftDeleteTimeAsync(vault, liftrAzure);
+            var softDeleteTime = await GetSoftDeleteTimeAsync(vault, liftrAzure, cancellationToken);
 
             var templateContent = GenerateKeyVaultTemplate(
                 vault.Region,
@@ -159,13 +163,13 @@ namespace Microsoft.Liftr.Fluent
                 tags,
                 softDeleteTime);
 
-            await liftrAzure.CreateDeploymentAsync(vault.Region, vault.ResourceGroupName, templateContent, noLogging: true);
+            await liftrAzure.CreateDeploymentAsync(vault.Region, vault.ResourceGroupName, templateContent, noLogging: true, cancellationToken: cancellationToken);
             _logger.Information("Key Vault '{kvId}' is accessible from IPs : '{@allowedIPs}', and subnets: '{@allowedSubnets}'.", vault.Id, ips, subnets);
         }
 
-        private static async Task<int> GetSoftDeleteTimeAsync(IVault vault, ILiftrAzure liftrAzure)
+        private static async Task<int> GetSoftDeleteTimeAsync(IVault vault, ILiftrAzure liftrAzure, CancellationToken cancellationToken)
         {
-            var currentTemplate = await liftrAzure.GetResourceAsync(vault.Id, "2019-09-01");
+            var currentTemplate = await liftrAzure.GetResourceAsync(vault.Id, "2019-09-01", cancellationToken);
             dynamic currentObject = JObject.Parse(currentTemplate);
             return (int)currentObject.properties.softDeleteRetentionInDays;
         }

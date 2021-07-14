@@ -26,14 +26,14 @@ namespace Microsoft.Liftr.DataSource.Mongo
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public Task WaitAsync()
+        public Task WaitAsync(CancellationToken cancellationToken = default)
         {
             if (_mu.CurrentCount == 2)
             {
                 _logger.Information("There is not so much concurrency quota left. Extra concurrent consumers need to enter wait queue.");
             }
 
-            return _mu.WaitAsync();
+            return _mu.WaitAsync(cancellationToken);
         }
 
         public void Release()
