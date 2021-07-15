@@ -409,7 +409,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     .DefineNewExtension("KVVMExtensionForLinux")
                     .WithPublisher("Microsoft.Azure.KeyVault")
                     .WithType("KeyVaultForLinux")
-                    .WithVersion("1.0")
+                    .WithVersion("2.0")
                     .WithMinorVersionAutoUpgrade()
                     .WithPublicSetting("secretsManagementSettings", secretsManagementSettings)
                     .Attach();
