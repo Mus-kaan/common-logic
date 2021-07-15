@@ -42,12 +42,18 @@ namespace Microsoft.Liftr.RPaaS
             _logger = logger ?? throw new ArgumentNullException(nameof(tokenCallback));
 
             logger.Information($"Loading token to make sure '{nameof(MetaRPStorageClient)}' is correctly initialized");
-#pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-            var token = tokenCallback(_options.UserRPTenantId).Result;
-#pragma warning restore Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
-            if (string.IsNullOrEmpty(token))
+            try
             {
-                throw new InvalidOperationException($"Cannot load token for {nameof(MetaRPStorageClient)}");
+                var token = tokenCallback(_options.UserRPTenantId).GetAwaiter().GetResult();
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new InvalidOperationException($"Cannot load token for {nameof(MetaRPStorageClient)}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"Cannot acquire FPA token for {nameof(MetaRPStorageClient)}");
+                throw;
             }
         }
 
