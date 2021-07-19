@@ -10,5 +10,8 @@
   ],
   "KeepAzureVMImageBuilderLogs": false,
   "ExportVHDToStorage": true,
-  "UseACR": true
+  "UseACR": true,
+  "AMEIssuedCertificates": {
+    "cert1": "invalid-test-image-builder.liftr-dev.net"
+  }
 }

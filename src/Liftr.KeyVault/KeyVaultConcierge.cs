@@ -6,6 +6,7 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.KeyVault.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,11 @@ namespace Microsoft.Liftr.KeyVault
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1054:Uri parameters should not be strings", Justification = "<Pending>")]
     public sealed class KeyVaultConcierge : IDisposable
     {
+        public const string OneCertPublicIssuer = "one-cert-public-issuer";
+        public const string OneCertPrivateIssuer = "one-cert-private-issuer";
+        public const string OneCertPublicProvider = "OneCertV2-PublicCA";
+        public const string OneCertPrivateProvider = "OneCertV2-PrivateCA";
+
         private readonly bool _needDispose = false;
         private readonly string _vaultBaseUrl;
         private readonly IKeyVaultClient _keyVaultClient;
@@ -108,11 +114,17 @@ namespace Microsoft.Liftr.KeyVault
             return result;
         }
 
-        public async Task<IEnumerable<SecretItem>> ListSecretsAsync(string prefix = null, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<SecretItem>> ListSecretsAsync(string prefix = null, bool ignorePFX = true, CancellationToken cancellationToken = default)
         {
             List<SecretItem> result = new List<SecretItem>();
             _logger.Information("Start listing secrets with prefix '{prefix}' in vault '{vaultBaseUrl}' ...", prefix, _vaultBaseUrl);
-            var secrets = await _keyVaultClient.GetSecretsAsync(_vaultBaseUrl, cancellationToken: cancellationToken);
+            IEnumerable<SecretItem> secrets = await _keyVaultClient.GetSecretsAsync(_vaultBaseUrl, cancellationToken: cancellationToken);
+
+            if (secrets?.Any() == true && ignorePFX)
+            {
+                secrets = secrets.Where(s => !s.ContentType.OrdinalEquals("application/x-pkcs12"));
+            }
+
             foreach (var secret in secrets)
             {
                 if (string.IsNullOrEmpty(prefix) || secret.Identifier.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
@@ -280,6 +292,18 @@ namespace Microsoft.Liftr.KeyVault
             }
         }
 
+        public async Task<X509Certificate2> LoadCertificateAsync(string certName, CancellationToken cancellationToken = default)
+        {
+            _logger.Information("Start loading certificate with name {CertificateName} from key vault with endpoint {KeyVaultEndpoint} ...", certName, _vaultBaseUrl);
+            SecretBundle secret = await _keyVaultClient.GetSecretAsync(_vaultBaseUrl, certName, cancellationToken);
+            var privateKeyBytes = Convert.FromBase64String(secret.Value);
+            string password = null;
+
+            // We need to specify the certificate as Exportable explicitly.
+            // On Linux keys are always exportable, but on Windows and macOS they aren't always.
+            return new X509Certificate2(privateKeyBytes, password, X509KeyStorageFlags.Exportable);
+        }
+
         /// <summary>
         /// Get details of the certificate.
         /// </summary>
@@ -302,6 +326,36 @@ namespace Microsoft.Liftr.KeyVault
                 _logger.Error(ex.Message);
                 throw;
             }
+        }
+
+        public async Task CreatePrivateIssuerCertificatesAsync(
+            Dictionary<string, string> certificates,
+            IDictionary<string, string> certificateTags,
+            CancellationToken cancellationToken = default)
+        {
+            if (certificates == null)
+            {
+                throw new ArgumentNullException(nameof(certificates));
+            }
+
+            await SetCertificateIssuerAsync(OneCertPrivateIssuer, OneCertPrivateProvider, cancellationToken);
+
+            foreach (var cert in certificates)
+            {
+                var certName = cert.Key;
+                var certSubject = cert.Value;
+
+                _logger.Information("Checking OneCert private issuer certificate in Key Vault with name '{certName}' and subject '{certSubject}'...", certName, certSubject);
+                await CreateCertificateIfNotExistAsync(certName, OneCertPrivateIssuer, certSubject, new List<string>() { certSubject }, certificateTags, cancellationToken);
+            }
+        }
+
+        public async Task<IEnumerable<CertificateItem>> ListCertificatesAsync(CancellationToken cancellationToken = default)
+        {
+            _logger.Information("Start listing certificates in vault '{vaultBaseUrl}' ...", _vaultBaseUrl);
+            var certificates = await _keyVaultClient.GetCertificatesAsync(_vaultBaseUrl, cancellationToken: cancellationToken);
+            _logger.Information("Listed {certificateCount} certificates.", certificates.Count());
+            return certificates;
         }
 
         public void Dispose()

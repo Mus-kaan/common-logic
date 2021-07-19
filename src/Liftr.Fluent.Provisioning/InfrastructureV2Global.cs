@@ -145,7 +145,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
         private async Task UpdatePartnerCredentialsAsync(string secretPrefix, PartnerCredentialUpdateOptions partnerCredentialUpdateConfig, KeyVaultConcierge kvValet)
         {
             _logger.Information("Create Certificate in Global Keyvault {keyvaultUri} for authenticating Secure Credential Sharing App.", kvValet.VaultUri);
-            await CreateKeyVaultCertificateAsync(kvValet, CertificateName.PartnerCredSharingAppCert, partnerCredentialUpdateConfig.CertificateSubjectName);
+            await CreateCrdentialSharingCertificateAsync(kvValet, CertificateName.PartnerCredSharingAppCert, partnerCredentialUpdateConfig.CertificateSubjectName);
             var certBundle = await kvValet.GetCertAsync(CertificateName.PartnerCredSharingAppCert);
             if (certBundle != null)
             {

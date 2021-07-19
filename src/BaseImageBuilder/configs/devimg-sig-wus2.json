@@ -11,5 +11,8 @@
     "westus2"
   ],
   "UseACR": true,
-  "ExportVHDToStorage": false // This is required to be used in the distribution step.
+  "ExportVHDToStorage": false, // This is required to be used in the distribution step.
+  "AMEIssuedCertificates": {
+    "cert2": "invalid-test-image-builder.liftr-dev.net"
+  }
 }

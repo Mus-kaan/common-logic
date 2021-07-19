@@ -130,6 +130,12 @@ namespace Microsoft.Liftr.ImageBuilder
                     await kvValet.SetSecretAsync("acr-password", acrCredentials.AccessKeys[AccessKeyType.Primary], tags);
                 }
 
+                if (_options?.AMEIssuedCertificates?.Any() == true)
+                {
+                    using var kvValet = new KeyVaultConcierge(_keyVault.VaultUri, _kvClient, _logger);
+                    await kvValet.CreatePrivateIssuerCertificatesAsync(_options.AMEIssuedCertificates, tags);
+                }
+
                 (var storageAcct, var contentStore) = await GetOrCreateContentStoreAsync(c_artifactStorageNamePrefix);
                 _artifactStore = contentStore;
 
@@ -751,13 +757,34 @@ namespace Microsoft.Liftr.ImageBuilder
                 throw ex;
             }
 
+            File.WriteAllText(Path.Combine(localUnzipFolder, c_packerFilesFolderName, $"tenant-id.txt"), _azFactory.TenantId);
             File.WriteAllText(Path.Combine(localUnzipFolder, c_packerFilesFolderName, $"image-name.txt"), imageName);
             File.WriteAllText(Path.Combine(localUnzipFolder, c_packerFilesFolderName, $"image-version.txt"), imageVersion);
             File.WriteAllText(Path.Combine(localUnzipFolder, c_packerFilesFolderName, $"source-image-type.txt"), sourceImageType.ToString());
 
+            _logger.Information($"Downloading supporting certificates from key vault ...");
+            var certificatesToCopy = await kvValet.ListCertificatesAsync();
+            var certDir = Path.Combine(localUnzipFolder, c_packerFilesFolderName, "certificates");
+
+            if (certificatesToCopy.Any())
+            {
+                Directory.CreateDirectory(certDir);
+            }
+
+            foreach (var certificate in certificatesToCopy)
+            {
+                var cert = await kvValet.LoadCertificateAsync(certificate.Identifier.Name);
+                var pem = cert.ExportCertificateAsPEM();
+                var certificateFilePath = Path.Combine(certDir, $"{certificate.Identifier.Name}.pem");
+                File.WriteAllText(certificateFilePath, pem);
+                _logger.Information("Downloaded '{certName}' to file '{certFile}' (contains both certificate and private key).", certificate.Identifier.Name, certificateFilePath);
+            }
+
+            _logger.Information("Downloaded {certificateCount} certificate from key vault.", certificatesToCopy.Count());
+
             _logger.Information($"Downloading supporting secrets from key vault ...");
-            int cnt = 0;
             var secretsToCopy = await kvValet.ListSecretsAsync();
+
             foreach (var secret in secretsToCopy)
             {
                 if (secret.Identifier.Name.OrdinalEquals(c_SBISASSecretName))
@@ -769,10 +796,9 @@ namespace Microsoft.Liftr.ImageBuilder
                 var secretFilePath = Path.Combine(localUnzipFolder, c_packerFilesFolderName, $"{secret.Identifier.Name}.txt");
                 File.WriteAllText(secretFilePath, secretBundle.Value);
                 _logger.Information("Downloaded '{secretName}' to file '{seceretFile}'", secret.Identifier.Name, secretFilePath);
-                cnt++;
             }
 
-            _logger.Information("Downloaded {copiedSecretCount} secrets from key vault.", cnt);
+            _logger.Information("Downloaded {copiedSecretCount} secrets from key vault.", secretsToCopy.Count());
 
             var generateZip = Path.Combine(workingFolder, $"{fileNameNoExt}.zip");
             ZipFile.CreateFromDirectory(localUnzipFolder, generateZip);

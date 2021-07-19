@@ -85,7 +85,11 @@ namespace Microsoft.Liftr.TokenManager
                         secretBundle.Attributes.Expires.Value.ToZuluString());
 
                     var privateKeyBytes = Convert.FromBase64String(secretBundle.Value);
-                    return new X509Certificate2(privateKeyBytes);
+                    string password = null;
+
+                    // We need to specify the certificate as Exportable explicitly.
+                    // On Linux keys are always exportable, but on Windows and macOS they aren't always.
+                    return new X509Certificate2(privateKeyBytes, password, X509KeyStorageFlags.Exportable);
                 }
                 catch (Exception ex)
                 {

@@ -81,6 +81,11 @@ namespace Microsoft.Liftr.ImageBuilder
         /// </summary>
         public string PackerVMSize { get; set; } = "Standard_D2s_v3";
 
+        /// <summary>
+        /// The certificates we want to provision and make available during Packer process.
+        /// </summary>
+        public Dictionary<string, string> AMEIssuedCertificates { get; set; } = new Dictionary<string, string>();
+
         public ContentStoreOptions ContentStoreOptions { get; set; } = new ContentStoreOptions();
 
         public void CheckValid()

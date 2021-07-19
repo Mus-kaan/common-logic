@@ -17,7 +17,6 @@ namespace Microsoft.Liftr.Fluent
         private readonly ILogger _logger;
         private readonly Func<AzureCredentials> _credentialsProvider;
         private readonly LiftrAzureOptions _options;
-        private readonly string _tenantId;
         private readonly string _spnObjectId;
         private readonly string _subscriptionId;
 
@@ -53,7 +52,7 @@ namespace Microsoft.Liftr.Fluent
                 throw new ArgumentNullException(nameof(tenantId));
             }
 
-            _tenantId = tenantId;
+            TenantId = tenantId;
             _spnObjectId = spnObjectId;
             _subscriptionId = subscriptionId;
             _logger = logger;
@@ -63,6 +62,8 @@ namespace Microsoft.Liftr.Fluent
         }
 
         public TokenCredential TokenCredential { get; }
+
+        public string TenantId { get; }
 
         public ILiftrAzure GenerateLiftrAzure(string subscriptionId = null, HttpLoggingDelegatingHandler.Level logLevel = HttpLoggingDelegatingHandler.Level.Basic)
         {
@@ -83,7 +84,7 @@ namespace Microsoft.Liftr.Fluent
 
             var azure = authenticated.WithSubscription(subscriptionId);
 
-            var client = new LiftrAzure(_tenantId, subscriptionId, _spnObjectId, TokenCredential, _credentialsProvider.Invoke(), azure, authenticated, _options, _logger);
+            var client = new LiftrAzure(TenantId, subscriptionId, _spnObjectId, TokenCredential, _credentialsProvider.Invoke(), azure, authenticated, _options, _logger);
 
             return client;
         }
