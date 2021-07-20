@@ -52,11 +52,17 @@ namespace Microsoft.Liftr.Fluent
                 throw new ArgumentNullException(nameof(tags));
             }
 
+            var caseInsensitiveTags = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var kvp in tags)
+            {
+                caseInsensitiveTags[kvp.Key] = kvp.Value;
+            }
+
             bool needTagUpdate = false;
 
             var activeCredential = ActiveCredentialType.Primary;
-            if (tags.ContainsKey(c_activeCredentailTypeTagName) &&
-                Enum.TryParse<ActiveCredentialType>(tags[c_activeCredentailTypeTagName], out var parsedActiveCredentail))
+            if (caseInsensitiveTags.ContainsKey(c_activeCredentailTypeTagName) &&
+                Enum.TryParse<ActiveCredentialType>(caseInsensitiveTags[c_activeCredentailTypeTagName], out var parsedActiveCredentail))
             {
                 activeCredential = parsedActiveCredentail;
             }
@@ -67,15 +73,15 @@ namespace Microsoft.Liftr.Fluent
             }
 
             var lastRotationTime = _timeSource.UtcNow;
-            if (tags.ContainsKey(c_lastRotationTimeTagName))
+            if (caseInsensitiveTags.ContainsKey(c_lastRotationTimeTagName))
             {
                 try
                 {
-                    lastRotationTime = tags[c_lastRotationTimeTagName].FromBase64().ParseZuluDateTime();
+                    lastRotationTime = caseInsensitiveTags[c_lastRotationTimeTagName].FromBase64().ParseZuluDateTime();
                 }
                 catch
                 {
-                    _logger.Information($"Cannot parse {c_lastRotationTimeTagName} tag. Use UtcNow as last rotation time. The invalid value is: {tags[c_lastRotationTimeTagName]}");
+                    _logger.Information($"Cannot parse {c_lastRotationTimeTagName} tag. Use UtcNow as last rotation time. The invalid value is: {caseInsensitiveTags[c_lastRotationTimeTagName]}");
                     needTagUpdate = true;
                 }
             }
