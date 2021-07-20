@@ -801,10 +801,10 @@ namespace Microsoft.Liftr.ImageBuilder
             }
 
             _logger.Information("Downloaded {copiedSecretCount} secrets from key vault.", secretsToCopy.Count());
-            ExtensionParameters.PackerFileFolder = Path.Combine(localUnzipFolder, c_packerFilesFolderName);
 
             if (ImageBuilderExtension.BeforeSendingArtifactsToPackerAsync != null)
             {
+                ExtensionParameters.PackerFileFolder = Path.Combine(localUnzipFolder, c_packerFilesFolderName);
                 using (var ops = _logger.StartTimedOperation($"{nameof(ImageBuilderExtension)}.{nameof(ImageBuilderExtension.BeforeSendingArtifactsToPackerAsync)}"))
                 {
                     try
