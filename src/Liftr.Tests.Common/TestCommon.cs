@@ -35,6 +35,8 @@ namespace Microsoft.Liftr
                 throw new ArgumentNullException(nameof(tags));
             }
 
+            var caseInsensitiveTags = new Dictionary<string, string>(tags, StringComparer.OrdinalIgnoreCase);
+
             try
             {
                 foreach (var kvp in Tags)
@@ -45,7 +47,7 @@ namespace Microsoft.Liftr
                         continue;
                     }
 
-                    if (!kvp.Value.StrictEquals(tags[kvp.Key]))
+                    if (!kvp.Value.StrictEquals(caseInsensitiveTags[kvp.Key]))
                     {
                         throw new InvalidOperationException($"Tags value not equal. Expect: {kvp.Value}, Actual: {tags[kvp.Key]}");
                     }
