@@ -75,6 +75,8 @@ namespace Microsoft.Liftr.ImageBuilder
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
+        public CallbackParameters ExtensionParameters { get; set; }
+
         public async Task<ImageBuilderInfraResources> CreateOrUpdateLiftrImageBuilderInfrastructureAsync(
             InfraOptions infraOptions,
             IDictionary<string, string> tags)
@@ -799,6 +801,24 @@ namespace Microsoft.Liftr.ImageBuilder
             }
 
             _logger.Information("Downloaded {copiedSecretCount} secrets from key vault.", secretsToCopy.Count());
+            ExtensionParameters.PackerFileFolder = Path.Combine(localUnzipFolder, c_packerFilesFolderName);
+
+            if (ImageBuilderExtension.BeforeSendingArtifactsToPackerAsync != null)
+            {
+                using (var ops = _logger.StartTimedOperation($"{nameof(ImageBuilderExtension)}.{nameof(ImageBuilderExtension.BeforeSendingArtifactsToPackerAsync)}"))
+                {
+                    try
+                    {
+                        await ImageBuilderExtension.BeforeSendingArtifactsToPackerAsync.Invoke(ExtensionParameters);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, $"Failed at executing {nameof(ImageBuilderExtension.BeforeSendingArtifactsToPackerAsync)}");
+                        ops.FailOperation(ex.Message);
+                        throw;
+                    }
+                }
+            }
 
             var generateZip = Path.Combine(workingFolder, $"{fileNameNoExt}.zip");
             ZipFile.CreateFromDirectory(localUnzipFolder, generateZip);

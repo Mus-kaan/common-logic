@@ -14,5 +14,8 @@
   "ExportVHDToStorage": false, // This is required to be used in the distribution step.
   "AMEIssuedCertificates": {
     "cert2": "invalid-test-image-builder.liftr-dev.net"
+  },
+  "Properties": {
+    "key1": "value1"
   }
 }

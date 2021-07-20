@@ -273,6 +273,7 @@ namespace Microsoft.Liftr.ImageBuilder
                         VHDStorageAccount = resources.ExportStorageAccount,
                         Gallery = resources.ImageGallery,
                     };
+                    orchestrator.ExtensionParameters = extensionParameters;
 
                     if (_options.Action == ActionType.BakeNewVersion)
                     {

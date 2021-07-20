@@ -1,0 +1,20 @@
+{
+  "SubscriptionId": "d21a525e-7c86-486d-a79e-a4f3622f639a",
+  "Location": "westus",
+  "ResourceGroupName": "LIBVanUBRG",
+  "ImageGalleryName": "LiftrUBSIG",
+  "PackerVMSize": "Standard_D4s_v3",
+  "RegionalReplicaCount": 1,
+  "ImageReplicationRegions": [
+    "westus"
+  ],
+  "KeepAzureVMImageBuilderLogs": false,
+  "ExportVHDToStorage": true,
+  "UseACR": true,
+  "AMEIssuedCertificates": {
+    "cert1": "invalid-test-image-builder.liftr-dev.net"
+  },
+  "Properties": {
+    "key1": "value1"
+  }
+}

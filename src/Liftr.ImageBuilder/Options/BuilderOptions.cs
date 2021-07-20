@@ -86,6 +86,11 @@ namespace Microsoft.Liftr.ImageBuilder
         /// </summary>
         public Dictionary<string, string> AMEIssuedCertificates { get; set; } = new Dictionary<string, string>();
 
+        /// <summary>
+        /// Custom configuration properties for extensibility.
+        /// </summary>
+        public Dictionary<string, string> Properties { get; set; } = new Dictionary<string, string>();
+
         public ContentStoreOptions ContentStoreOptions { get; set; } = new ContentStoreOptions();
 
         public void CheckValid()

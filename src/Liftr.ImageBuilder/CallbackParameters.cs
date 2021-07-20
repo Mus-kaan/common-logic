@@ -32,5 +32,12 @@ namespace Microsoft.Liftr.ImageBuilder
         public IGalleryImageVersion ImageVersion { get; set; }
 
         public Uri VHDUri { get; set; }
+
+        /// <summary>
+        /// The local packer files folder that we are processing.
+        /// This will be made available to packer steps.
+        /// You can put more binaries to this folder.
+        /// </summary>
+        public string PackerFileFolder { get; set; }
     }
 }
