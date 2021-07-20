@@ -35,18 +35,25 @@ namespace Microsoft.Liftr
                 throw new ArgumentNullException(nameof(tags));
             }
 
-            foreach (var kvp in Tags)
+            try
             {
-                if (kvp.Key.OrdinalEquals("ResourceCreationTimestamp"))
+                foreach (var kvp in Tags)
                 {
-                    // ignore the Tag in Zulu time format. It will be converted to not Zulu format by ARM.
-                    continue;
-                }
+                    if (kvp.Key.OrdinalEquals("ResourceCreationTimestamp"))
+                    {
+                        // ignore the Tag in Zulu time format. It will be converted to not Zulu format by ARM.
+                        continue;
+                    }
 
-                if (!kvp.Value.StrictEquals(tags[kvp.Key]))
-                {
-                    throw new InvalidOperationException($"Tags value not equal. Expect: {kvp.Value}, Actual: {tags[kvp.Key]}");
+                    if (!kvp.Value.StrictEquals(tags[kvp.Key]))
+                    {
+                        throw new InvalidOperationException($"Tags value not equal. Expect: {kvp.Value}, Actual: {tags[kvp.Key]}");
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Missing tags. Actual tags: {tags.ToJson()}. Details: " + ex.Message, ex);
             }
         }
 
