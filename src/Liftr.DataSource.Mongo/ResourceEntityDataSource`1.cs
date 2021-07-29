@@ -78,6 +78,45 @@ namespace Microsoft.Liftr.DataSource.Mongo
             }
         }
 
+        public virtual async Task<bool> ExistAsync(string entityId, CancellationToken cancellationToken = default)
+        {
+            var builder = Builders<TResource>.Filter;
+            var filter = builder.Eq(u => u.EntityId, entityId);
+
+            await _rateLimiter.WaitAsync(cancellationToken);
+            try
+            {
+                var count = await _collection.CountDocumentsAsync(filter, options: null, cancellationToken: cancellationToken);
+                return count > 0;
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
+        }
+
+        public virtual async Task<bool> ExistByResourceIdAsync(string resourceId, bool showActiveOnly = true, CancellationToken cancellationToken = default)
+        {
+            var builder = Builders<TResource>.Filter;
+            var filter = builder.Eq(u => u.ResourceId, resourceId);
+
+            if (showActiveOnly)
+            {
+                filter = filter & builder.Eq(u => u.Active, true);
+            }
+
+            await _rateLimiter.WaitAsync(cancellationToken);
+            try
+            {
+                var count = await _collection.CountDocumentsAsync(filter, options: null, cancellationToken: cancellationToken);
+                return count > 0;
+            }
+            finally
+            {
+                _rateLimiter.Release();
+            }
+        }
+
         public virtual async Task<IEnumerable<TResource>> ListAsync(string resourceId, bool showActiveOnly = true, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(resourceId))

@@ -43,6 +43,16 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
             var rid = "/subscriptions/b0a321d2-3073-44f0-b012-6e60db53ae22/resourceGroups/ngx-test-sbi0920-eus-rg/providers/Microsoft.Storage/storageAccounts/stngxtestsbi0920eus";
 
             var mockEntity = new MockResourceEntity() { ResourceId = rid, VNet = "VnetId123" };
+
+            // Not exist before insert.
+            {
+                var exist = await s.ExistAsync(mockEntity.EntityId);
+                Assert.False(exist);
+
+                exist = await s.ExistByResourceIdAsync(mockEntity.ResourceId);
+                Assert.False(exist);
+            }
+
             var entity1 = await s.AddAsync(mockEntity);
 
             // Can retrieve.
@@ -55,6 +65,12 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
                 var exceptedStr = entity1.ToJson();
                 var actualStr = retrieved.ToJson();
                 Assert.Equal(exceptedStr, actualStr);
+
+                var exist = await s.ExistAsync(mockEntity.EntityId);
+                Assert.True(exist);
+
+                exist = await s.ExistByResourceIdAsync(mockEntity.ResourceId);
+                Assert.True(exist);
             }
 
             // Can retrieve only by resoure id.

@@ -25,7 +25,17 @@ namespace Microsoft.Liftr.DataSource.Mongo
                     throw new InvalidOperationException($"Cannot find the credential for running the unit tests. It should be set in the environment variable with name {LIFTR_UNIT_TEST_MONGODB_CONNSTR_BASE64}. Details: https://aka.ms/liftr-test-cred");
                 }
 
-                return encodedConnStr.FromBase64();
+                // remove quote
+                encodedConnStr = encodedConnStr.Replace("\"", string.Empty);
+
+                try
+                {
+                    return encodedConnStr.FromBase64();
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException("cannot parse test db connection string: " + encodedConnStr, ex);
+                }
             }
         }
 

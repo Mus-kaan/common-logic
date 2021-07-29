@@ -19,6 +19,16 @@ namespace Microsoft.Liftr.DataSource
         Task<TResource> GetAsync(string entityId, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Check if there exist a document with the entity Id.
+        /// </summary>
+        Task<bool> ExistAsync(string entityId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Check if there exist a document with the resource Id.
+        /// </summary>
+        Task<bool> ExistByResourceIdAsync(string resourceId, bool showActiveOnly = true, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// List all the entities for a specific ARM resource Id.
         /// </summary>
         Task<IEnumerable<TResource>> ListAsync(string resourceId, bool showActiveOnly = true, CancellationToken cancellationToken = default);
