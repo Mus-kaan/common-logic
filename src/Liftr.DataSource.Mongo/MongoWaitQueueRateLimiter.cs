@@ -18,19 +18,20 @@ namespace Microsoft.Liftr.DataSource.Mongo
     public sealed class MongoWaitQueueRateLimiter : IDisposable
     {
         private readonly SemaphoreSlim _mu;
-        private readonly Serilog.ILogger _logger;
 
         public MongoWaitQueueRateLimiter(int maxConcurrency, Serilog.ILogger logger)
         {
             _mu = new SemaphoreSlim(maxConcurrency, maxConcurrency);
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
+
+        public Serilog.ILogger Logger { get; }
 
         public Task WaitAsync(CancellationToken cancellationToken = default)
         {
             if (_mu.CurrentCount == 2)
             {
-                _logger.Information("There is not so much concurrency quota left. Extra concurrent consumers need to enter wait queue.");
+                Logger.Information("There is not so much concurrency quota left. Extra concurrent consumers need to enter wait queue.");
             }
 
             return _mu.WaitAsync(cancellationToken);

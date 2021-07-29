@@ -10,7 +10,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
     public class MockEntityDataSource : ResourceEntityDataSource<MockResourceEntity>
     {
         public MockEntityDataSource(IMongoCollection<MockResourceEntity> collection, MongoWaitQueueRateLimiter rateLimiter, ITimeSource timeSource)
-            : base(collection, rateLimiter, timeSource, enableOptimisticConcurrencyControl: true)
+            : base(collection, rateLimiter, timeSource, enableOptimisticConcurrencyControl: true, logOperation: true)
         {
         }
     }
