@@ -45,6 +45,7 @@ namespace Microsoft.Liftr.SimpleDeploy
             }
 
             var parsedRegionInfo = GetRegionalOptions(targetOptions);
+            _callBackConfigs.RegionalNamingContext = parsedRegionInfo.RegionNamingContext;
             var regionOptions = parsedRegionInfo.RegionOptions;
             var regionalNamingContext = parsedRegionInfo.RegionNamingContext;
             var aksRGName = parsedRegionInfo.AKSRGName;

@@ -4,6 +4,7 @@
 
 using Microsoft.Azure.KeyVault;
 using Microsoft.Liftr.Fluent;
+using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Hosting.Contracts;
 
 namespace Microsoft.Liftr.SimpleDeploy
@@ -21,5 +22,9 @@ namespace Microsoft.Liftr.SimpleDeploy
         public HostingEnvironmentOptions EnvironmentOptions { get; set; }
 
         public Serilog.ILogger Logger { get; set; }
+
+        public NamingContext GlobalNamingContext { get; set; }
+
+        public NamingContext RegionalNamingContext { get; set; }
     }
 }

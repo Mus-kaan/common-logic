@@ -203,6 +203,7 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                     IPPoolManager ipPool = null;
                     var globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
+                    _callBackConfigs.GlobalNamingContext = globalNamingContext;
                     var globalRGName = globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
                     File.WriteAllText("global-vault-name.txt", globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
 
