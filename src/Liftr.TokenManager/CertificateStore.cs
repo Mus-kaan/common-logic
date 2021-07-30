@@ -53,7 +53,18 @@ namespace Microsoft.Liftr.TokenManager
                     return _cachedCertificates[certPath].Certificate;
                 }
 
-                var cert = await LoadCertificateFromKeyVaultAsync(keyVaultEndpoint, certificateName);
+                X509Certificate2 cert = null;
+                try
+                {
+                    cert = await LoadCertificateFromKeyVaultAsync(keyVaultEndpoint, certificateName);
+                }
+                catch (Exception ex) when (_cachedCertificates.ContainsKey(certPath))
+                {
+                    _logger.Error(ex, "Cannot refresh the certificate with path {certPath}. Stick with the old one.", certPath);
+                    _cachedCertificates[certPath].ValidTill = DateTimeOffset.UtcNow + _certificateCacheTTL;
+                    return _cachedCertificates[certPath].Certificate;
+                }
+
                 _cachedCertificates[certPath] = new CertificateCacheItem()
                 {
                     Certificate = cert,
