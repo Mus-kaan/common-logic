@@ -67,11 +67,14 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             }
 
             LogEventLevel? overrideLevel = null;
+
+            // Get trace context from Liftr headers.
             string levelOverwrite = GetHeaderValue(httpContext, HeaderConstants.LiftrLogLevelOverwrite);
             string clientRequestId = GetHeaderValue(httpContext, HeaderConstants.LiftrClientRequestId);
             string armRequestTrackingId = GetHeaderValue(httpContext, HeaderConstants.LiftrARMRequestTrackingId);
             string correlationtId = GetHeaderValue(httpContext, HeaderConstants.LiftrRequestCorrelationId);
 
+            // Get trace context from Microsoft public documented headers.
             if (string.IsNullOrEmpty(clientRequestId))
             {
                 clientRequestId = GetHeaderValue(httpContext, HeaderConstants.ARMClientRequestId);
@@ -97,6 +100,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 correlationtId = GetHeaderValue(httpContext, HeaderConstants.MarketplaceCorrelationId);
             }
 
+            // Set default trace context.
             if (string.IsNullOrEmpty(correlationtId))
             {
                 correlationtId = Guid.NewGuid().ToString();
