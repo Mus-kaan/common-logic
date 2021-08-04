@@ -41,11 +41,8 @@ namespace Microsoft.Liftr.Monitoring.Service
             _logger.Information(
                 "Obtaining token for tenant {@tenantId}.", tenantId);
 
-            var certificate = await _certificateStore.GetCertificateAsync(
-                _providerOptions.KeyVaultEndpoint, _providerOptions.CertificateName);
-
             var token = await _tokenManager.GetTokenAsync(
-                _providerOptions.ClientId, certificate, tenantId, sendX5c: true);
+                _providerOptions.KeyVaultEndpoint, _providerOptions.ClientId, _providerOptions.CertificateName, tenantId, sendX5c: true);
 
             _logger.Information(
                 "Obtained token for tenant {@tenantId}.", tenantId);
@@ -63,7 +60,7 @@ namespace Microsoft.Liftr.Monitoring.Service
                 _providerOptions.KeyVaultEndpoint, _providerOptions.CertificateName);
 
             var delegatingHandler = new WhaleDelegatingHandler(
-                _tokenManager, _providerOptions.ClientId, certificate);
+                _tokenManager, _providerOptions);
 
             // Using this flag will allow authenticating with the FPA as the rollover is enabled for that cert
             var isCertificateRollOverEnabled = true;

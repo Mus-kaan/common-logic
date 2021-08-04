@@ -3,12 +3,13 @@
 //-----------------------------------------------------------------------------
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.TokenManager
 {
     public interface ISingleTenantAppTokenProvider : IDisposable
     {
-        Task<string> GetTokenAsync();
+        Task<string> GetTokenAsync(CancellationToken cancellationToken = default);
     }
 }

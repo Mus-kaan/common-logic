@@ -8,5 +8,4 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.TokenManager.CertificateStore.GetCertificateAsync(System.Uri,System.String)~System.Threading.Tasks.Task{System.Security.Cryptography.X509Certificates.X509Certificate2}")]
-[assembly: SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.TokenManager.CertificateStore.GetCertificateAsync(System.Uri,System.String)~System.Threading.Tasks.Task{System.Security.Cryptography.X509Certificates.X509Certificate2}")]
+[assembly: SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.TokenManager.CertificateStore.GetCertificateAsync(System.Uri,System.String,System.Threading.CancellationToken)~System.Threading.Tasks.Task{System.Security.Cryptography.X509Certificates.X509Certificate2}")]

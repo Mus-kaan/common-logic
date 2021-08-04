@@ -4,7 +4,8 @@
 
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Services.AppAuthentication;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Identity.Client;
+using System;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 
@@ -17,21 +18,42 @@ namespace Microsoft.Liftr.KeyVault
             return new KeyVaultClient(
                 new KeyVaultClient.AuthenticationCallback(async (authority, resource, scope) =>
                 {
-                    var authContext = new AuthenticationContext(authority);
-                    var result = await authContext.AcquireTokenAsync(resource, new ClientCredential(clientId, clientSecret));
+                    var app = ConfidentialClientApplicationBuilder
+                    .Create(clientId)
+                    .WithClientSecret(clientSecret)
+                    .WithAuthority(new Uri(authority))
+                    .WithLegacyCacheCompatibility(false)
+                    .Build();
+
+                    var tokenScope = $"{resource}/.default";
+
+                    var result = await app
+                    .AcquireTokenForClient(new string[] { tokenScope })
+                    .ExecuteAsync();
+
                     return result.AccessToken;
 #pragma warning disable CA2000 // Dispose objects before losing scope
                 }), new HttpClient());
 #pragma warning restore CA2000 // Dispose objects before losing scope
         }
 
-        public static KeyVaultClient FromClientIdAndCertificate(string clientId, X509Certificate2 certificate, string aadEndPoint, string tenantId)
+        public static KeyVaultClient FromClientIdAndCertificate(string clientId, X509Certificate2 certificate)
         {
             return new KeyVaultClient(async (authority, resource, scope) =>
             {
-                var authenticationContext = new AuthenticationContext(authority: $"{aadEndPoint}/{tenantId}", validateAuthority: true);
-                var clientAssertionCertificate = new ClientAssertionCertificate(clientId, certificate);
-                var result = await authenticationContext.AcquireTokenAsync(resource, clientAssertionCertificate, sendX5c: true);
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(clientId)
+                    .WithCertificate(certificate)
+                    .WithAuthority(new Uri(authority))
+                    .WithLegacyCacheCompatibility(false)
+                    .Build();
+
+                var tokenScope = $"{resource}/.default";
+
+                var result = await app
+                .AcquireTokenForClient(new string[] { tokenScope })
+                .ExecuteAsync();
+
                 return result.AccessToken;
             });
         }

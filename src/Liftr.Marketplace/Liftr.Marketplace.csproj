@@ -11,6 +11,7 @@
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="$(PackageVersion_Microsoft_Azure_KeyVault)" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="$(PackageVersion_Microsoft_Extensions_Http)" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions)" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="$(PackageVersion_System_ComponentModel_Annotations)" />
     <PackageReference Include="System.Text.Json" Version="$(PackageVersion_System_Text_Json)" />
     <PackageReference Include="System.Text.Encodings.Web" Version="$(PackageVersion_System_Text_Encodings_Web)" />
   </ItemGroup>

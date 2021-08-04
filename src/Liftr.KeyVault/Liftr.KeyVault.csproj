@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="$(PackageVersion_Microsoft_Azure_KeyVault)" />
     <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="$(PackageVersion_Microsoft_Azure_Services_AppAuthentication)" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="$(PackageVersion_Microsoft_Identity_Client)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />

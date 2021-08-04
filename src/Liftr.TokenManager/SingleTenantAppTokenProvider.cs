@@ -5,6 +5,7 @@
 using Microsoft.Azure.KeyVault;
 using Microsoft.Liftr.TokenManager.Options;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.TokenManager
@@ -48,15 +49,18 @@ namespace Microsoft.Liftr.TokenManager
 
         public void Dispose()
         {
+            _tokenManager.Dispose();
             _certStore.Dispose();
         }
 
-        public async Task<string> GetTokenAsync()
+        public async Task<string> GetTokenAsync(CancellationToken cancellationToken = default)
         {
-#pragma warning disable CA2000 // Dispose objects before losing scope
-            var cert = await _certStore.GetCertificateAsync(_options.KeyVaultEndpoint, _options.CertificateName);
-#pragma warning restore CA2000 // Dispose objects before losing scope
-            return await _tokenManager.GetTokenAsync(_options.ApplicationId, cert, sendX5c: true);
+            return await _tokenManager.GetTokenAsync(
+                _options.KeyVaultEndpoint,
+                _options.ApplicationId,
+                _options.CertificateName,
+                sendX5c: true,
+                cancellationToken: cancellationToken);
         }
     }
 }

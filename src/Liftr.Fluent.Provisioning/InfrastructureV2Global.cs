@@ -151,7 +151,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             {
                 var privateKeyBytes = Convert.FromBase64String(certBundle.Value);
                 using var certificate = new X509Certificate2(privateKeyBytes);
-                var partnerKVClient = KeyVaultClientFactory.FromClientIdAndCertificate(partnerCredentialUpdateConfig.MultiTenantAppId, certificate, partnerCredentialUpdateConfig.AadEndpoint, partnerCredentialUpdateConfig.PartnerTenantId);
+                var partnerKVClient = KeyVaultClientFactory.FromClientIdAndCertificate(partnerCredentialUpdateConfig.MultiTenantAppId, certificate);
                 var secrets = await partnerKVClient.GetSecretsAsync(partnerCredentialUpdateConfig.PartnerKeyvaultEndpoint);
                 _logger.Information("List all secrets from partner keyvault.");
                 foreach (var secret in secrets)

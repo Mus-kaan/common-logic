@@ -19,7 +19,6 @@ namespace Microsoft.Liftr.TokenManager
     {
         private readonly IKeyVaultClient _kvClient;
         private readonly ILogger _logger;
-        private readonly TimeSpan _certificateCacheTTL;
         private readonly SemaphoreSlim _mu = new SemaphoreSlim(1, 1);
         private readonly Dictionary<string, CertificateCacheItem> _cachedCertificates = new Dictionary<string, CertificateCacheItem>();
 
@@ -27,15 +26,17 @@ namespace Microsoft.Liftr.TokenManager
         {
             _kvClient = kvClient ?? throw new ArgumentNullException(nameof(kvClient));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _certificateCacheTTL = certificateCacheTTL ?? TimeSpan.FromMinutes(30);
+            CertificateCacheTTL = certificateCacheTTL ?? TimeSpan.FromMinutes(30);
         }
+
+        public TimeSpan CertificateCacheTTL { get; }
 
         public void Dispose()
         {
             _mu.Dispose();
         }
 
-        public async Task<X509Certificate2> GetCertificateAsync(Uri keyVaultEndpoint, string certificateName)
+        public async Task<X509Certificate2> GetCertificateAsync(Uri keyVaultEndpoint, string certificateName, CancellationToken cancellationToken = default)
         {
             if (keyVaultEndpoint == null)
             {
@@ -44,7 +45,7 @@ namespace Microsoft.Liftr.TokenManager
 
             var certPath = $"{keyVaultEndpoint.AbsoluteUri}/certificates/{certificateName}";
 
-            await _mu.WaitAsync();
+            await _mu.WaitAsync(cancellationToken);
             try
             {
                 if (_cachedCertificates.ContainsKey(certPath)
@@ -56,19 +57,19 @@ namespace Microsoft.Liftr.TokenManager
                 X509Certificate2 cert = null;
                 try
                 {
-                    cert = await LoadCertificateFromKeyVaultAsync(keyVaultEndpoint, certificateName);
+                    cert = await LoadCertificateFromKeyVaultAsync(keyVaultEndpoint, certificateName, cancellationToken);
                 }
                 catch (Exception ex) when (_cachedCertificates.ContainsKey(certPath))
                 {
                     _logger.Error(ex, "Cannot refresh the certificate with path {certPath}. Stick with the old one.", certPath);
-                    _cachedCertificates[certPath].ValidTill = DateTimeOffset.UtcNow + _certificateCacheTTL;
+                    _cachedCertificates[certPath].ValidTill = DateTimeOffset.UtcNow + CertificateCacheTTL;
                     return _cachedCertificates[certPath].Certificate;
                 }
 
                 _cachedCertificates[certPath] = new CertificateCacheItem()
                 {
                     Certificate = cert,
-                    ValidTill = DateTimeOffset.UtcNow + _certificateCacheTTL,
+                    ValidTill = DateTimeOffset.UtcNow + CertificateCacheTTL,
                 };
 
                 return cert;
@@ -79,7 +80,7 @@ namespace Microsoft.Liftr.TokenManager
             }
         }
 
-        private async Task<X509Certificate2> LoadCertificateFromKeyVaultAsync(Uri keyVaultEndpoint, string certificateName)
+        private async Task<X509Certificate2> LoadCertificateFromKeyVaultAsync(Uri keyVaultEndpoint, string certificateName, CancellationToken cancellationToken)
         {
             using (var operation = _logger.StartTimedOperation(nameof(LoadCertificateFromKeyVaultAsync)))
             {
@@ -87,7 +88,7 @@ namespace Microsoft.Liftr.TokenManager
                 try
                 {
                     _logger.Information("Start loading certificate with name {CertificateName} from key vault with endpoint {KeyVaultEndpoint} ...", certificateName, keyVaultEndpoint.AbsoluteUri);
-                    var secretBundle = await _kvClient.GetSecretAsync(keyVaultEndpoint.AbsoluteUri, certificateName);
+                    var secretBundle = await _kvClient.GetSecretAsync(keyVaultEndpoint.AbsoluteUri, certificateName, cancellationToken);
 
                     _logger.Information(
                         "Loaded the certificate with secretIdentifier: {secretIdentifier}. certificateCreationTime: {certCreated} certificateExpireTime: {certExpire}",

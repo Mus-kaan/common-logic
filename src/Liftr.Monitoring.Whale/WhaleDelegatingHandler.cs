@@ -2,10 +2,10 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Monitoring.Whale.Options;
 using Microsoft.Liftr.TokenManager;
 using System;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,24 +18,16 @@ namespace Microsoft.Liftr.Monitoring.Whale
     public class WhaleDelegatingHandler : DelegatingHandler
     {
         private const string AuxiliaryTokenHeader = "x-ms-authorization-auxiliary";
+        private readonly AzureClientsProviderOptions _azureClientsProviderOptions;
         private readonly ITokenManager _tokenManager;
-        private readonly string _firstPartyClientId;
-        private readonly X509Certificate2 _firstPartyCertificate;
 
         public WhaleDelegatingHandler(
             ITokenManager tokenManager,
-            string firstPartyClientId,
-            X509Certificate2 firstPartyCertificate)
+            AzureClientsProviderOptions azureClientsProviderOptions)
             : base()
         {
-            if (string.IsNullOrWhiteSpace(firstPartyClientId))
-            {
-                throw new ArgumentNullException(nameof(firstPartyClientId));
-            }
-
+            _azureClientsProviderOptions = azureClientsProviderOptions ?? throw new ArgumentNullException(nameof(azureClientsProviderOptions));
             _tokenManager = tokenManager ?? throw new ArgumentNullException(nameof(tokenManager));
-            _firstPartyClientId = firstPartyClientId;
-            _firstPartyCertificate = firstPartyCertificate ?? throw new ArgumentNullException(nameof(firstPartyCertificate));
         }
 
         protected async override Task<HttpResponseMessage> SendAsync(
@@ -52,7 +44,10 @@ namespace Microsoft.Liftr.Monitoring.Whale
             {
                 // No need to specify the tenant as we want to load the token from the default one
                 var auxiliaryToken = await _tokenManager.GetTokenAsync(
-                    _firstPartyClientId, _firstPartyCertificate, sendX5c: true);
+                    _azureClientsProviderOptions.KeyVaultEndpoint,
+                    _azureClientsProviderOptions.ClientId,
+                    _azureClientsProviderOptions.CertificateName,
+                    sendX5c: true);
 
                 request.Headers.Add(AuxiliaryTokenHeader, $"Bearer {auxiliaryToken}");
             }
