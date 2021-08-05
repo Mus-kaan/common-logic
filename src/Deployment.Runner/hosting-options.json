@@ -28,19 +28,19 @@
       },
       "Global": {
         "Location": "centralus",
-        "BaseName": "gbl210501",
+        "BaseName": "gbl210701",
         "AddGlobalDB": true
       },
       "Regions": [
         {
           "Location": "westus2",
-          "DataBaseName": "da210601",
-          "ComputeBaseName": "co210701"
+          "DataBaseName": "da210801",
+          "ComputeBaseName": "co210805"
         },
         {
           "Location": "eastus",
-          "DataBaseName": "da210601",
-          "ComputeBaseName": "co210701"
+          "DataBaseName": "da210801",
+          "ComputeBaseName": "co210805"
         }
       ]
     },

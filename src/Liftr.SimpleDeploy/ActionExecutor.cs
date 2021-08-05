@@ -35,6 +35,8 @@ namespace Microsoft.Liftr.SimpleDeploy
         private readonly RunnerCommandOptions _commandOptions;
         private readonly HostingOptions _hostingOptions;
         private SimpleDeployConfigurations _callBackConfigs;
+        private IPPoolManager _ipPool;
+        private NamingContext _globalNamingContext;
 
         public ActionExecutor(
             Serilog.ILogger logger,
@@ -201,17 +203,13 @@ namespace Microsoft.Liftr.SimpleDeploy
                         File.WriteAllText("icm-email.txt", _hostingOptions.IcMNotificationEmail);
                     }
 
-                    IPPoolManager ipPool = null;
-                    var globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
-                    _callBackConfigs.GlobalNamingContext = globalNamingContext;
-                    var globalRGName = globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
-                    File.WriteAllText("global-vault-name.txt", globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
+                    _globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
+                    _callBackConfigs.GlobalNamingContext = _globalNamingContext;
+                    var globalRGName = _globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
+                    File.WriteAllText("global-vault-name.txt", _globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
 
-                    if (targetOptions.IPPerRegion > 0)
-                    {
-                        var ipNamePrefix = globalNamingContext.GenerateCommonName(targetOptions.Global.BaseName, noRegion: true);
-                        ipPool = new IPPoolManager(ipNamePrefix, azFactory, _logger);
-                    }
+                    var ipNamePrefix = _globalNamingContext.GenerateCommonName(targetOptions.Global.BaseName, noRegion: true);
+                    _ipPool = new IPPoolManager(ipNamePrefix, targetOptions.IsAKS, azFactory, _logger);
 
                     if (_commandOptions.Action == ActionType.ExportACRInformation)
                     {
@@ -226,12 +224,12 @@ namespace Microsoft.Liftr.SimpleDeploy
                     {
                         if (string.IsNullOrEmpty(targetOptions.LogAnalyticsWorkspaceId))
                         {
-                            targetOptions.LogAnalyticsWorkspaceId = $"/subscriptions/{azFactory.GenerateLiftrAzure().FluentClient.SubscriptionId}/resourcegroups/{globalRGName}/providers/microsoft.operationalinsights/workspaces/{globalNamingContext.LogAnalyticsName(targetOptions.Global.BaseName)}";
+                            targetOptions.LogAnalyticsWorkspaceId = $"/subscriptions/{azFactory.GenerateLiftrAzure().FluentClient.SubscriptionId}/resourcegroups/{globalRGName}/providers/microsoft.operationalinsights/workspaces/{_globalNamingContext.LogAnalyticsName(targetOptions.Global.BaseName)}";
                         }
 
                         if (_commandOptions.Action == ActionType.CreateOrUpdateRegionalData)
                         {
-                            await ManageDataResourcesAsync(targetOptions, kvClient, azFactory, _hostingOptions.AllowedAcisExtensions, ipPool);
+                            await ManageDataResourcesAsync(targetOptions, kvClient, azFactory, _hostingOptions.AllowedAcisExtensions);
                         }
                         else if (_commandOptions.Action == ActionType.CreateOrUpdateRegionalCompute)
                         {
@@ -247,7 +245,7 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                     {
                         var infra = new InfrastructureV2(azFactory, kvClient, _logger);
-                        var acr = await infra.GetACRAsync(targetOptions.Global.BaseName, globalNamingContext);
+                        var acr = await infra.GetACRAsync(targetOptions.Global.BaseName, _globalNamingContext);
                         _logger.Information($"Write ACR '{acr.Name}' information to disk.");
 
                         if (acr == null)
@@ -344,38 +342,32 @@ namespace Microsoft.Liftr.SimpleDeploy
             LiftrAzureFactory azFactory,
             string aksRGName,
             string aksName,
-            Region aksLocation,
-            HostingEnvironmentOptions targetOptions,
-            IPPoolManager ipPool)
+            Region aksLocation)
         {
-            if (targetOptions.IPPerRegion < 3)
-            {
-                return null;
-            }
-
-            IPublicIPAddress pip = null;
+            IPublicIPAddress inboundIP;
 
             var aksHelper = new AKSNetworkHelper(_logger);
-            pip = await aksHelper.GetAKSPublicIPAsync(azFactory.GenerateLiftrAzure(), aksRGName, aksName, aksLocation, IPCategory.Inbound);
+            inboundIP = await aksHelper.GetAKSInboundIPAsync(azFactory.GenerateLiftrAzure(), aksRGName, aksName, aksLocation);
 
-            if (pip == null)
+            if (inboundIP == null)
             {
-                pip = await ipPool.GetAvailableIPAsync(aksLocation, IPCategory.Inbound);
+                _logger.Information("The currenat AKS {aksName} does not have an associated IP address, assign a new one.", aksName);
+                inboundIP = await _ipPool.GetAvailableInboundIPAsync(aksLocation);
             }
 
-            if (pip != null)
+            if (inboundIP != null)
             {
-                File.WriteAllText("public-ip.txt", pip.IPAddress);
-                File.WriteAllText("public-ip-rg.txt", pip.ResourceGroupName);
+                File.WriteAllText("public-ip.txt", inboundIP.IPAddress);
+                File.WriteAllText("public-ip-rg.txt", inboundIP.ResourceGroupName);
             }
             else
             {
-                var ex = new InvalidOperationException("There is no available IP address for the AKS cluster to use. Please clean up old ones first.");
+                var ex = new InvalidOperationException("There is no available inbound IP address for the AKS cluster to use. Please clean up old ones first.");
                 _logger.Error(ex, ex.Message);
                 throw ex;
             }
 
-            return pip;
+            return inboundIP;
         }
 
         private static string ToSimpleName(string region)

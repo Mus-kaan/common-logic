@@ -28,7 +28,17 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             return NetworkHelper.AddPulicIpToTrafficManagerAsync(fluentClient, tmId, endpointName, ip, enabled, _logger);
         }
 
-        public async Task<IPublicIPAddress> GetAKSPublicIPAsync(ILiftrAzure liftrAzureClient, string AKSRGName, string AKSName, Region location, IPCategory ipCategory = IPCategory.InOutbound)
+        public Task<IPublicIPAddress> GetAKSInboundIPAsync(ILiftrAzure liftrAzureClient, string AKSRGName, string AKSName, Region location)
+        {
+            return GetAKSPublicIPAsync(liftrAzureClient, AKSRGName, AKSName, location, IPCategory.Inbound);
+        }
+
+        public Task<IPublicIPAddress> GetAKSOutboundIPAsync(ILiftrAzure liftrAzureClient, string AKSRGName, string AKSName, Region location)
+        {
+            return GetAKSPublicIPAsync(liftrAzureClient, AKSRGName, AKSName, location, IPCategory.Outbound);
+        }
+
+        private async Task<IPublicIPAddress> GetAKSPublicIPAsync(ILiftrAzure liftrAzureClient, string AKSRGName, string AKSName, Region location, IPCategory ipCategory)
         {
             if (liftrAzureClient == null)
             {
@@ -48,7 +58,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             return await GetAKSPublicIPAsync(liftrAzureClient.FluentClient, mcRGName, ipCategory);
         }
 
-        private async Task<IPublicIPAddress> GetAKSPublicIPAsync(IAzure fluentClient, string mcRGName, IPCategory ipCategory = IPCategory.InOutbound)
+        private async Task<IPublicIPAddress> GetAKSPublicIPAsync(IAzure fluentClient, string mcRGName, IPCategory ipCategory)
         {
             if (fluentClient == null)
             {
@@ -100,7 +110,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             {
                 var pip1 = await fluentClient.PublicIPAddresses.GetByIdAsync(lb.PublicIPAddressIds[0]);
                 var pip2 = await fluentClient.PublicIPAddresses.GetByIdAsync(lb.PublicIPAddressIds[1]);
-                pip = GetAKSPublicIPAddress(pip1, pip2, ipCategory);
+                pip = ChooseAKSPublicIPAddress(pip1, pip2, ipCategory);
             }
 
             if (ipAddressCount != 1 && ipAddressCount != 2)
@@ -115,7 +125,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             return pip;
         }
 
-        private static IPublicIPAddress GetAKSPublicIPAddress(IPublicIPAddress pip1, IPublicIPAddress pip2, IPCategory ipCategory = IPCategory.InOutbound)
+        private static IPublicIPAddress ChooseAKSPublicIPAddress(IPublicIPAddress pip1, IPublicIPAddress pip2, IPCategory ipCategory)
         {
             var pip1Name = pip1.Name;
             var pip2Name = pip2.Name;

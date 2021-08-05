@@ -18,23 +18,17 @@ namespace Microsoft.Liftr.SimpleDeploy
         private async Task ManageGlobalResourcesAsync(HostingEnvironmentOptions targetOptions, KeyVaultClient kvClient, LiftrAzureFactory azFactory)
         {
             var infra = new InfrastructureV2(azFactory, kvClient, _logger);
-            IPPoolManager ipPool = null;
-            var globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
-            var globalRGName = globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
-            File.WriteAllText("global-vault-name.txt", globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
+            var globalRGName = _globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
+            File.WriteAllText("global-vault-name.txt", _globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
 
             if (targetOptions.IPPerRegion > 0)
             {
-                var ipNamePrefix = globalNamingContext.GenerateCommonName(targetOptions.Global.BaseName, noRegion: true);
-
-                ipPool = new IPPoolManager(ipNamePrefix, azFactory, _logger);
-
-                await ipPool.ProvisionIPPoolAsync(targetOptions.Global.Location, targetOptions.IPPerRegion, globalNamingContext.Tags, targetOptions.IsAKS, targetOptions.Regions);
+                await _ipPool.ProvisionIPPoolAsync(targetOptions.Global.Location, targetOptions.IPPerRegion, _globalNamingContext.Tags, targetOptions.Regions);
             }
 
             var globalResources = await infra.CreateOrUpdateGlobalRGAsync(
                 targetOptions.Global.BaseName,
-                globalNamingContext,
+                _globalNamingContext,
                 targetOptions.DomainName,
                 targetOptions.Global.AddGlobalDB,
                 _hostingOptions.SecretPrefix,
@@ -49,9 +43,9 @@ namespace Microsoft.Liftr.SimpleDeploy
                     {
                         CallbackConfigurations = _callBackConfigs,
                         BaseName = targetOptions.Global.BaseName,
-                        NamingContext = globalNamingContext,
+                        NamingContext = _globalNamingContext,
                         Resources = globalResources,
-                        IPPoolManager = ipPool,
+                        IPPoolManager = _ipPool,
                     };
 
                     await SimpleDeployExtension.AfterProvisionGlobalResourcesAsync.Invoke(parameters);

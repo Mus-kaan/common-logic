@@ -55,7 +55,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 }
 
                 var aksHelper = new AKSNetworkHelper(_logger);
-                var inboundIP = await aksHelper.GetAKSPublicIPAsync(liftrAzure, aksRGName, aksName, aksRegion, IPCategory.Inbound);
+                var inboundIP = await aksHelper.GetAKSInboundIPAsync(liftrAzure, aksRGName, aksName, aksRegion);
                 if (inboundIP == null)
                 {
                     var errMsg = $"Cannot find the public Ip address for the AKS cluster. aksRGName:{aksRGName}, aksName:{aksName}, region:{aksRegion}.";

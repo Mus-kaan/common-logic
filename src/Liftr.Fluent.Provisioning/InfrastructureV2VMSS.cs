@@ -266,7 +266,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             if (provisionedResources.LoadBalancer == null)
             {
-                provisionedResources.ClusterIP = await ipPool.GetAvailableIPAsync(namingContext.Location);
+                provisionedResources.ClusterIP = await ipPool.GetAvailableInboundIPAsync(namingContext.Location);
                 if (provisionedResources.ClusterIP == null)
                 {
                     var errMsg = "Cannot find available IP address.";

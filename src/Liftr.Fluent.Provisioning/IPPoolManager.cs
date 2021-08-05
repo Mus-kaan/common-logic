@@ -8,7 +8,6 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Hosting.Contracts;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -20,36 +19,52 @@ namespace Microsoft.Liftr.Fluent.Provisioning
     public class IPPoolManager
     {
         public const string c_reservedNamePart = "rsvd-stdpip";
-        private readonly string _ipPoolRG;
-        private readonly string _inboundPoolRG;
-        private readonly string _outboundPoolRG;
+        private const string c_resourceGroupSufix = "ip-pool-rg";
+        private readonly bool _isAKS;
         private readonly string _namePrefix;
         private readonly ILiftrAzureFactory _azureClientFactory;
-        private readonly ILogger _logger;
+        private readonly Serilog.ILogger _logger;
 
+        /// <summary>
+        /// There will be two IP pools for AKS hosting, one for inbound IP another for outbound IP.
+        /// For VMSS hosting, there is only one IP pool. Both inbound and outbound will share the same IP.
+        /// </summary>
         public IPPoolManager(
             string namePrefix,
+            bool isAKS,
             ILiftrAzureFactory azureClientFactory,
-            ILogger logger)
+            Serilog.ILogger logger)
         {
             if (string.IsNullOrEmpty(namePrefix))
             {
                 throw new ArgumentNullException(nameof(namePrefix));
             }
 
-            _ipPoolRG = GetResourceGroupName(namePrefix, "ip-pool-rg");
-            _inboundPoolRG = GetResourceGroupName(namePrefix, "ip-pool-rg", IPCategory.Inbound);
-            _outboundPoolRG = GetResourceGroupName(namePrefix, "ip-pool-rg", IPCategory.Outbound);
+            _isAKS = isAKS;
             _namePrefix = namePrefix;
             _azureClientFactory = azureClientFactory ?? throw new ArgumentNullException(nameof(azureClientFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+            if (_isAKS)
+            {
+                OutboundIPPoolResourceGroupName = GetResourceGroupName(namePrefix, IPCategory.Outbound);
+                InboundIPPoolResourceGroupName = GetResourceGroupName(namePrefix, IPCategory.Inbound);
+            }
+            else
+            {
+                OutboundIPPoolResourceGroupName = GetResourceGroupName(namePrefix, IPCategory.InOutbound);
+                InboundIPPoolResourceGroupName = OutboundIPPoolResourceGroupName;
+            }
         }
+
+        public string OutboundIPPoolResourceGroupName { get; }
+
+        public string InboundIPPoolResourceGroupName { get; }
 
         public async Task ProvisionIPPoolAsync(
             Region poolLocation,
             int ipPerRegion,
             IDictionary<string, string> tags,
-            bool isAKS,
             IEnumerable<RegionOptions> regionOptions)
         {
             if (regionOptions == null || !regionOptions.Any())
@@ -65,33 +80,29 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                 var az = _azureClientFactory.GenerateLiftrAzure();
                 IResourceGroup rg = null, inboundRG = null, outboundRG = null;
 
-                if (isAKS)
+                if (_isAKS)
                 {
-                    inboundRG = await az.GetOrCreateResourceGroupAsync(poolLocation, _inboundPoolRG, tags);
-                    outboundRG = await az.GetOrCreateResourceGroupAsync(poolLocation, _outboundPoolRG, tags);
+                    inboundRG = await az.GetOrCreateResourceGroupAsync(poolLocation, InboundIPPoolResourceGroupName, tags);
+                    outboundRG = await az.GetOrCreateResourceGroupAsync(poolLocation, OutboundIPPoolResourceGroupName, tags);
                 }
                 else
                 {
-                    rg = await az.GetOrCreateResourceGroupAsync(poolLocation, _ipPoolRG, tags);
+                    rg = await az.GetOrCreateResourceGroupAsync(poolLocation, OutboundIPPoolResourceGroupName, tags);
                 }
-
-                bool availabilityZoneSupport = false;
 
                 foreach (var regionOption in regionOptions)
                 {
                     var region = regionOption.Location;
-                    availabilityZoneSupport = regionOption.SupportAvailabilityZone;
-                    _logger.Information($"For Region {region}, Availability Zone Support is {availabilityZoneSupport} and IP SKU Type is {PublicIPSkuType.Standard} and AKS hosting is set {isAKS}");
 
-                    if (isAKS)
+                    if (_isAKS)
                     {
-                        // Creating 1 inbound IP and 1 Outbound IP for AKS
+                        // AKS has separated inbound and outbound IP pool.
                         await ProvisionIPPoolAsync(region, ipPerRegion, tags, inboundRG, PublicIPSkuType.Standard, az, IPCategory.Inbound);
                         await ProvisionIPPoolAsync(region, ipPerRegion, tags, outboundRG, PublicIPSkuType.Standard, az, IPCategory.Outbound);
                     }
                     else
                     {
-                        await ProvisionIPPoolAsync(region, ipPerRegion, tags, rg, PublicIPSkuType.Standard, az);
+                        await ProvisionIPPoolAsync(region, ipPerRegion, tags, rg, PublicIPSkuType.Standard, az, IPCategory.InOutbound);
                     }
                 }
             }
@@ -102,7 +113,55 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
         }
 
-        public async Task<IEnumerable<IPublicIPAddress>> ListAllIPAsync(Region location, IPCategory ipCategory = IPCategory.InOutbound)
+        public Task<IEnumerable<IPublicIPAddress>> ListOutboundIPAsync(Region location)
+        {
+            if (_isAKS)
+            {
+                return ListIPAsync(location, IPCategory.Outbound);
+            }
+            else
+            {
+                return ListIPAsync(location, IPCategory.InOutbound);
+            }
+        }
+
+        public Task<IEnumerable<IPublicIPAddress>> ListInboundIPAsync(Region location)
+        {
+            if (_isAKS)
+            {
+                return ListIPAsync(location, IPCategory.Inbound);
+            }
+            else
+            {
+                return ListIPAsync(location, IPCategory.InOutbound);
+            }
+        }
+
+        public Task<IPublicIPAddress> GetAvailableInboundIPAsync(Region location)
+        {
+            if (_isAKS)
+            {
+                return GetAvailableIPAsync(location, IPCategory.Inbound);
+            }
+            else
+            {
+                return GetAvailableIPAsync(location, IPCategory.InOutbound);
+            }
+        }
+
+        public Task<IPublicIPAddress> GetAvailableOutboundIPAsync(Region location)
+        {
+            if (_isAKS)
+            {
+                return GetAvailableIPAsync(location, IPCategory.Outbound);
+            }
+            else
+            {
+                return GetAvailableIPAsync(location, IPCategory.InOutbound);
+            }
+        }
+
+        private async Task<IEnumerable<IPublicIPAddress>> ListIPAsync(Region location, IPCategory ipCategory)
         {
             if (location == null)
             {
@@ -111,25 +170,21 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
             var az = _azureClientFactory.GenerateLiftrAzure();
             var ipNamePrefix = GetIPNamePrefix(location, ipCategory);
-            IEnumerable<IPublicIPAddress> existingIPs = null;
+            IEnumerable<IPublicIPAddress> existingIPs;
 
-            if (ipCategory == IPCategory.Outbound)
+            if (ipCategory == IPCategory.Inbound)
             {
-                existingIPs = await az.ListPublicIPAsync(_outboundPoolRG, ipNamePrefix);
-            }
-            else if (ipCategory == IPCategory.Inbound)
-            {
-                existingIPs = await az.ListPublicIPAsync(_inboundPoolRG, ipNamePrefix);
+                existingIPs = await az.ListPublicIPAsync(InboundIPPoolResourceGroupName, ipNamePrefix);
             }
             else
             {
-                existingIPs = await az.ListPublicIPAsync(_ipPoolRG, ipNamePrefix);
+                existingIPs = await az.ListPublicIPAsync(OutboundIPPoolResourceGroupName, ipNamePrefix);
             }
 
             return existingIPs;
         }
 
-        public async Task<IPublicIPAddress> GetAvailableIPAsync(Region location, IPCategory ipCategory = IPCategory.InOutbound)
+        private async Task<IPublicIPAddress> GetAvailableIPAsync(Region location, IPCategory ipCategory)
         {
             if (location == null)
             {
@@ -139,32 +194,27 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var az = _azureClientFactory.GenerateLiftrAzure();
             var ipNamePrefix = GetIPNamePrefix(location, ipCategory);
             IEnumerable<IPublicIPAddress> existingIPs = null;
-            string ipPoolRG = string.Empty;
+            string poolResourceGroupName = string.Empty;
 
-            if (ipCategory == IPCategory.Outbound)
+            if (ipCategory == IPCategory.Inbound)
             {
-                existingIPs = await az.ListPublicIPAsync(_outboundPoolRG, ipNamePrefix);
-                ipPoolRG = _outboundPoolRG;
-            }
-            else if (ipCategory == IPCategory.Inbound)
-            {
-                existingIPs = await az.ListPublicIPAsync(_inboundPoolRG, ipNamePrefix);
-                ipPoolRG = _inboundPoolRG;
+                existingIPs = await az.ListPublicIPAsync(InboundIPPoolResourceGroupName, ipNamePrefix);
+                poolResourceGroupName = InboundIPPoolResourceGroupName;
             }
             else
             {
-                existingIPs = await az.ListPublicIPAsync(_ipPoolRG, ipNamePrefix);
-                ipPoolRG = _ipPoolRG;
+                existingIPs = await az.ListPublicIPAsync(OutboundIPPoolResourceGroupName, ipNamePrefix);
+                poolResourceGroupName = OutboundIPPoolResourceGroupName;
             }
 
             if (existingIPs is null || !existingIPs.Any())
             {
-                _logger.Information("In the IP pool with name '{rgName}', there are '{existingIPCount}' IPs in region {location}", ipPoolRG, existingIPs?.Count(), location.Name);
+                _logger.Information("In the IP pool with name '{rgName}', there are '{existingIPCount}' IPs in region {location}", poolResourceGroupName, existingIPs?.Count(), location.Name);
                 return null;
             }
 
             var availableIPs = existingIPs.Where(ip => !ip.HasAssignedLoadBalancer && !ip.HasAssignedNetworkInterface);
-            _logger.Information("In the IP pool with name '{rgName}', there are '{existingIPCount}' IPs in region {location}, '{availableIPCount}' IPs are available.", ipPoolRG, existingIPs?.Count(), location.Name, availableIPs?.Count());
+            _logger.Information("In the IP pool with name '{rgName}', there are '{existingIPCount}' IPs in region {location}, '{availableIPCount}' IPs are available.", poolResourceGroupName, existingIPs?.Count(), location.Name, availableIPs?.Count());
 
             if (availableIPs is null || !availableIPs.Any())
             {
@@ -182,7 +232,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             IResourceGroup rg,
             PublicIPSkuType ipSku,
             ILiftrAzure az,
-            IPCategory ipCategory = IPCategory.InOutbound)
+            IPCategory ipCategory)
         {
             var ipNamePrefix = GetIPNamePrefix(region, ipCategory);
             var existingIPs = await az.ListPublicIPAsync(rg.Name, ipNamePrefix);
@@ -199,7 +249,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             _logger.Information("Created {createdCount} IP addresses in the IP pool resource group '{rgId}'.", createdCount, rg.Id);
         }
 
-        private string GetIPNamePrefix(Region location, IPCategory ipCategory = IPCategory.InOutbound)
+        private string GetIPNamePrefix(Region location, IPCategory ipCategory)
         {
             if (ipCategory != IPCategory.InOutbound)
             {
@@ -219,17 +269,18 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             return $"{c_reservedNamePart}-{ipCategory}";
         }
 
-        private string GetResourceGroupName(string namePrefix, string suffix = null, IPCategory ipcategory = IPCategory.InOutbound, string delimiter = "-")
+        private string GetResourceGroupName(string namePrefix, IPCategory ipcategory)
         {
-            string rgName = string.Empty;
+            string delimiter = "-";
+            string rgName;
 
             if (ipcategory != IPCategory.InOutbound)
             {
-                rgName = $"{namePrefix}{delimiter}{ipcategory.ToString()}{delimiter}{suffix}";
+                rgName = $"{namePrefix}{delimiter}{ipcategory}{delimiter}{c_resourceGroupSufix}";
             }
             else
             {
-                rgName = $"{namePrefix}{delimiter}{suffix}";
+                rgName = $"{namePrefix}{delimiter}{c_resourceGroupSufix}";
             }
 
             return rgName;

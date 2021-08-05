@@ -30,19 +30,9 @@ namespace Microsoft.Liftr.SimpleDeploy
         {
             var liftrAzure = azFactory.GenerateLiftrAzure();
             var infra = new InfrastructureV2(azFactory, kvClient, _logger);
-            var globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
-            var globalRGName = globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
-            File.WriteAllText("global-vault-name.txt", globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
-
-            IPPoolManager ipPool = null;
-
+            var globalRGName = _globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
+            File.WriteAllText("global-vault-name.txt", _globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
             var aksHelper = new AKSNetworkHelper(_logger);
-
-            if (targetOptions.IPPerRegion > 0)
-            {
-                var ipNamePrefix = globalNamingContext.GenerateCommonName(targetOptions.Global.BaseName, noRegion: true);
-                ipPool = new IPPoolManager(ipNamePrefix, azFactory, _logger);
-            }
 
             var parsedRegionInfo = GetRegionalOptions(targetOptions);
             _callBackConfigs.RegionalNamingContext = parsedRegionInfo.RegionNamingContext;
@@ -58,11 +48,11 @@ namespace Microsoft.Liftr.SimpleDeploy
             {
                 DataBaseName = regionOptions.DataBaseName,
                 ComputeBaseName = regionOptions.ComputeBaseName,
-                GlobalKeyVaultResourceId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
+                GlobalKeyVaultResourceId = $"subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{_globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
                 LogAnalyticsWorkspaceResourceId = targetOptions.LogAnalyticsWorkspaceId,
                 SecretPrefix = _hostingOptions.SecretPrefix,
-                GlobalStorageResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}",
-                GlobalCosmosDBResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.DocumentDB/databaseAccounts/{globalNamingContext.CosmosDBName(targetOptions.Global.BaseName)}",
+                GlobalStorageResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{_globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}",
+                GlobalCosmosDBResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.DocumentDB/databaseAccounts/{_globalNamingContext.CosmosDBName(targetOptions.Global.BaseName)}",
                 DomainName = targetOptions.DomainName,
                 ZoneRedundant = regionOptions.ZoneRedundant,
                 OneCertCertificates = targetOptions.OneCertCertificates,
@@ -75,7 +65,7 @@ namespace Microsoft.Liftr.SimpleDeploy
 
             regionalNamingContext.Tags["DataRG"] = regionalNamingContext.ResourceGroupName(regionOptions.DataBaseName);
 
-            var acr = await infra.GetACRAsync(targetOptions.Global.BaseName, globalNamingContext);
+            var acr = await infra.GetACRAsync(targetOptions.Global.BaseName, _globalNamingContext);
             if (acr == null)
             {
                 var errMsg = "Cannot find the global ACR.";
@@ -85,7 +75,7 @@ namespace Microsoft.Liftr.SimpleDeploy
 
             IPublicIPAddress outboundIpAddress = null;
 
-            if (targetOptions.AKSConfigurations != null)
+            if (targetOptions.IsAKS)
             {
                 ProvisionedComputeResources computeResources = null;
 
@@ -95,7 +85,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     // Check if Outbound Public IP under AKS network already exists
                     try
                     {
-                        outboundIpAddress = await aksHelper.GetAKSPublicIPAsync(liftrAzure, aksRGName, aksName, aksRegion, IPCategory.Outbound);
+                        outboundIpAddress = await aksHelper.GetAKSOutboundIPAsync(liftrAzure, aksRGName, aksName, aksRegion);
                     }
                     catch (InvalidOperationException ex)
                     {
@@ -104,7 +94,7 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                     if (outboundIpAddress == null)
                     {
-                        outboundIpAddress = await ipPool.GetAvailableIPAsync(aksRegion, IPCategory.Outbound);
+                        outboundIpAddress = await _ipPool.GetAvailableOutboundIPAsync(aksRegion);
 
                         if (outboundIpAddress == null)
                         {
@@ -165,7 +155,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 IPublicIPAddress inboundIpAddress = null;
 
                 _logger.Information($"Writing Inbound Public IP to disk on file public-ip.txt for deployment of AKS {aksName} under resource group {aksRGName}");
-                inboundIpAddress = await WriteReservedInboundIPToDiskAsync(azFactory, aksRGName, aksName, parsedRegionInfo.AKSRegion, targetOptions, ipPool);
+                inboundIpAddress = await WriteReservedInboundIPToDiskAsync(azFactory, aksRGName, aksName, parsedRegionInfo.AKSRegion);
 
                 await GrantNetworkContributorRoleAsync(inboundIpAddress, computeResources, liftrAzure);
 
@@ -189,7 +179,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                             ComputeOptions = regionalComputeOptions,
                             RegionOptions = regionOptions,
                             Resources = computeResources,
-                            IPPoolManager = ipPool,
+                            IPPoolManager = _ipPool,
                         };
 
                         await SimpleDeployExtension.AfterProvisionRegionalAKSResourcesAsync.Invoke(parameters);
@@ -211,7 +201,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     targetOptions.VMSSConfigurations,
                     targetOptions.Geneva,
                     kvClient,
-                    ipPool,
+                    _ipPool,
                     targetOptions.EnableVNet,
                     certNameList);
 

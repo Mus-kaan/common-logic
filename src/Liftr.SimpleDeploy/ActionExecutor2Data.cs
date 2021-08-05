@@ -5,7 +5,6 @@
 using Microsoft.Azure.KeyVault;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Fluent;
-using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
 using Microsoft.Liftr.Hosting.Contracts;
 using System.IO;
@@ -20,14 +19,12 @@ namespace Microsoft.Liftr.SimpleDeploy
             HostingEnvironmentOptions targetOptions,
             KeyVaultClient kvClient,
             LiftrAzureFactory azFactory,
-            string allowedAcisExtensions,
-            IPPoolManager ipPool)
+            string allowedAcisExtensions)
         {
             var liftrAzure = azFactory.GenerateLiftrAzure();
             var infra = new InfrastructureV2(azFactory, kvClient, _logger);
-            var globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
-            var globalRGName = globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
-            File.WriteAllText("global-vault-name.txt", globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
+            var globalRGName = _globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
+            File.WriteAllText("global-vault-name.txt", _globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
 
             var parsedRegionInfo = GetRegionalOptions(targetOptions);
             _callBackConfigs.RegionalNamingContext = parsedRegionInfo.RegionNamingContext;
@@ -48,19 +45,19 @@ namespace Microsoft.Liftr.SimpleDeploy
                 EnableVNet = targetOptions.EnableVNet,
                 EnableThanos = _hostingOptions.EnableThanos,
                 DBSupport = _hostingOptions.DBSupport,
-                GlobalKeyVaultResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
-                GlobalStorageResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}",
-                GlobalCosmosDBResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.DocumentDB/databaseAccounts/{globalNamingContext.CosmosDBName(targetOptions.Global.BaseName)}",
-                GlobalTrafficManagerResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Network/trafficmanagerprofiles/{globalNamingContext.TrafficManagerName(targetOptions.Global.BaseName)}",
+                GlobalKeyVaultResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.KeyVault/vaults/{_globalNamingContext.KeyVaultName(targetOptions.Global.BaseName)}",
+                GlobalStorageResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Storage/storageAccounts/{_globalNamingContext.StorageAccountName(targetOptions.Global.BaseName)}",
+                GlobalCosmosDBResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.DocumentDB/databaseAccounts/{_globalNamingContext.CosmosDBName(targetOptions.Global.BaseName)}",
+                GlobalTrafficManagerResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Network/trafficmanagerprofiles/{_globalNamingContext.TrafficManagerName(targetOptions.Global.BaseName)}",
                 LogAnalyticsWorkspaceId = targetOptions.LogAnalyticsWorkspaceId,
                 DomainName = targetOptions.DomainName,
                 DNSZoneId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{globalRGName}/providers/Microsoft.Network/dnszones/{targetOptions.DomainName}",
             };
 
-            var ipList = await ipPool.ListAllIPAsync(regionalNamingContext.Location, IPCategory.Outbound);
-            if (ipList?.Any() == true)
+            var outboundIPList = await _ipPool.ListOutboundIPAsync(regionalNamingContext.Location);
+            if (outboundIPList?.Any() == true)
             {
-                dataOptions.OutboundIPList = ipList.Select(ip => ip.IPAddress);
+                dataOptions.OutboundIPList = outboundIPList.Select(ip => ip.IPAddress);
             }
 
             bool createVNet = targetOptions.IsAKS ? targetOptions.EnableVNet : true;
@@ -78,7 +75,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                         DataOptions = dataOptions,
                         RegionOptions = regionOptions,
                         Resources = dataResources,
-                        IPPoolManager = ipPool,
+                        IPPoolManager = _ipPool,
                     };
 
                     await SimpleDeployExtension.AfterProvisionRegionalDataResourcesAsync.Invoke(parameters);

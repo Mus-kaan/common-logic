@@ -30,7 +30,7 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [CheckInValidation(skipLinux: true)]
-        public async Task VerifyProvisioningIPPoolAsync()
+        public async Task VerifyAKSIPPoolAsync()
         {
             var shortPartnerName = "ip-pool";
             var location = TestCommon.Location;
@@ -46,52 +46,44 @@ namespace Microsoft.Liftr.Fluent.Tests
             var regions = new List<Region> { location, Region.USEast2 };
             IEnumerable<RegionOptions> regionOptions = GetRegionOptions(regions);
 
+            var azFactory = new LiftrAzureFactory(testScope.Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
+            var az = azFactory.GenerateLiftrAzure();
+            var pool = new IPPoolManager(prefix, true, azFactory, testScope.Logger);
             try
             {
-                var clientFactory = new LiftrAzureFactory(testScope.Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
-                var client = clientFactory.GenerateLiftrAzure();
+                await az.GetOrCreateResourceGroupAsync(location, rgName, context.Tags);
 
-                var pool = new IPPoolManager(prefix, clientFactory, testScope.Logger);
+                await pool.ProvisionIPPoolAsync(location, 5, context.Tags, regionOptions);
+                var ipList = await pool.ListOutboundIPAsync(location);
+                Assert.Equal(5, ipList.Count());
 
-                await pool.ProvisionIPPoolAsync(location, 5, context.Tags, false, regionOptions);
-                var allIPs = await pool.ListAllIPAsync(location);
-                Assert.Equal(5, allIPs.Count());
+                ipList = await pool.ListInboundIPAsync(location);
+                Assert.Equal(5, ipList.Count());
 
-                var ip1 = await pool.GetAvailableIPAsync(location);
-                Assert.EndsWith("-01", ip1.Name, StringComparison.Ordinal);
+                var inbound1 = await pool.GetAvailableInboundIPAsync(location);
+                Assert.EndsWith("-01", inbound1.Name, StringComparison.Ordinal);
+                Assert.Contains(IPCategory.Inbound.ToString(), inbound1.Name, StringComparison.Ordinal);
 
-                await pool.ProvisionIPPoolAsync(location, 1, context.Tags, true, regionOptions);
-                allIPs = await pool.ListAllIPAsync(location, IPCategory.Inbound);
-                Assert.Single(allIPs);
-
-                var ip2 = await pool.GetAvailableIPAsync(location, IPCategory.Inbound);
-                var ip2Name = ip2.Name;
-                Assert.Contains(IPCategory.Inbound.ToString(), ip2Name, StringComparison.Ordinal);
-
-                allIPs = await pool.ListAllIPAsync(location, IPCategory.Outbound);
-                Assert.Single(allIPs);
-
-                var ip3 = await pool.GetAvailableIPAsync(location, IPCategory.Outbound);
-                var ip3Name = ip3.Name;
-                Assert.Contains(IPCategory.Outbound.ToString(), ip3Name, StringComparison.Ordinal);
+                var outbound1 = await pool.GetAvailableOutboundIPAsync(location);
+                Assert.EndsWith("-01", outbound1.Name, StringComparison.Ordinal);
+                Assert.Contains(IPCategory.Outbound.ToString(), outbound1.Name, StringComparison.Ordinal);
 
                 // Test for not existing IPs
-                await pool.ProvisionIPPoolAsync(Region.USEast2, 1, context.Tags, true, regionOptions);
-                allIPs = await pool.ListAllIPAsync(Region.USEast2, IPCategory.Inbound);
-                Assert.Single(allIPs);
+                ipList = await pool.ListOutboundIPAsync(Region.IndiaWest);
+                Assert.Empty(ipList);
 
-                var ipNotExist = await pool.GetAvailableIPAsync(Region.UKSouth, IPCategory.Inbound);
+                var ipNotExist = await pool.GetAvailableInboundIPAsync(Region.UKSouth);
                 Assert.Null(ipNotExist);
 
-                var vnet = await client.GetOrCreateVNetAsync(location, rgName, "test-vnet", context.Tags);
+                var vnet = await az.GetOrCreateVNetAsync(location, rgName, "test-vnet", context.Tags);
 
                 // occupy the 01 ip.
-                var vm = await client.FluentClient.VirtualMachines.Define(SdkContext.RandomResourceName("vm", 3))
+                var vm = await az.FluentClient.VirtualMachines.Define(SdkContext.RandomResourceName("vm", 3))
                         .WithRegion(location)
                         .WithExistingResourceGroup(rgName)
                         .WithNewPrimaryNetwork("10.0.0.0/28")
                         .WithPrimaryPrivateIPAddressDynamic()
-                        .WithExistingPrimaryPublicIPAddress(ip1)
+                        .WithExistingPrimaryPublicIPAddress(inbound1)
                         .WithPopularLinuxImage(KnownLinuxVirtualMachineImage.UbuntuServer16_04_Lts)
                         .WithRootUsername("test-user-123")
                         .WithSsh(s_sampleSSHPublic)
@@ -99,13 +91,101 @@ namespace Microsoft.Liftr.Fluent.Tests
                         .WithTags(context.Tags)
                         .CreateAsync();
 
-                var ip4 = await pool.GetAvailableIPAsync(location);
+                var ip4 = await pool.GetAvailableInboundIPAsync(location);
                 Assert.EndsWith("-02", ip4.Name, StringComparison.Ordinal);
             }
             catch (Exception ex)
             {
                 testScope.Logger.Error(ex, ex.Message);
                 throw;
+            }
+            finally
+            {
+                _ = az.DeleteResourceGroupAsync(pool.OutboundIPPoolResourceGroupName);
+                _ = az.DeleteResourceGroupAsync(pool.InboundIPPoolResourceGroupName);
+                await Task.Delay(5000);
+            }
+        }
+
+        [CheckInValidation(skipLinux: true)]
+        public async Task VerifyVMSSIPPoolAsync()
+        {
+            var shortPartnerName = "ip-pool";
+            var location = TestCommon.Location;
+            var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, location);
+            TestCommon.AddCommonTags(context.Tags);
+
+            var baseName = SdkContext.RandomResourceName("v", 3);
+            var prefix = context.GenerateCommonName(baseName, noRegion: true);
+            var rgName = prefix + "-ip-pool-rg";
+
+            using var testScope = new TestResourceGroupScope(rgName);
+
+            var regions = new List<Region> { location, Region.USEast2 };
+            IEnumerable<RegionOptions> regionOptions = GetRegionOptions(regions);
+
+            var azFactory = new LiftrAzureFactory(testScope.Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
+            var az = azFactory.GenerateLiftrAzure();
+            var pool = new IPPoolManager(prefix, false, azFactory, testScope.Logger);
+            try
+            {
+                await az.GetOrCreateResourceGroupAsync(location, rgName, context.Tags);
+
+                await pool.ProvisionIPPoolAsync(location, 5, context.Tags, regionOptions);
+                var ipList = await pool.ListOutboundIPAsync(location);
+                Assert.Equal(5, ipList.Count());
+
+                ipList = await pool.ListInboundIPAsync(location);
+                Assert.Equal(5, ipList.Count());
+
+                var inbound1 = await pool.GetAvailableInboundIPAsync(location);
+                Assert.EndsWith("-01", inbound1.Name, StringComparison.Ordinal);
+                Assert.DoesNotContain(IPCategory.Inbound.ToString(), inbound1.Name, StringComparison.Ordinal);
+                Assert.DoesNotContain(IPCategory.Outbound.ToString(), inbound1.Name, StringComparison.Ordinal);
+                Assert.DoesNotContain(IPCategory.InOutbound.ToString(), inbound1.Name, StringComparison.Ordinal);
+
+                var outbound1 = await pool.GetAvailableOutboundIPAsync(location);
+                Assert.EndsWith("-01", outbound1.Name, StringComparison.Ordinal);
+                Assert.DoesNotContain(IPCategory.Inbound.ToString(), outbound1.Name, StringComparison.Ordinal);
+                Assert.DoesNotContain(IPCategory.Outbound.ToString(), outbound1.Name, StringComparison.Ordinal);
+                Assert.DoesNotContain(IPCategory.InOutbound.ToString(), outbound1.Name, StringComparison.Ordinal);
+
+                // Test for not existing IPs
+                ipList = await pool.ListOutboundIPAsync(Region.IndiaWest);
+                Assert.Empty(ipList);
+
+                var ipNotExist = await pool.GetAvailableInboundIPAsync(Region.UKSouth);
+                Assert.Null(ipNotExist);
+
+                var vnet = await az.GetOrCreateVNetAsync(location, rgName, "test-vnet", context.Tags);
+
+                // occupy the 01 ip.
+                var vm = await az.FluentClient.VirtualMachines.Define(SdkContext.RandomResourceName("vm", 3))
+                        .WithRegion(location)
+                        .WithExistingResourceGroup(rgName)
+                        .WithNewPrimaryNetwork("10.0.0.0/28")
+                        .WithPrimaryPrivateIPAddressDynamic()
+                        .WithExistingPrimaryPublicIPAddress(inbound1)
+                        .WithPopularLinuxImage(KnownLinuxVirtualMachineImage.UbuntuServer16_04_Lts)
+                        .WithRootUsername("test-user-123")
+                        .WithSsh(s_sampleSSHPublic)
+                        .WithSize(VirtualMachineSizeTypes.StandardDS2V2)
+                        .WithTags(context.Tags)
+                        .CreateAsync();
+
+                var ip4 = await pool.GetAvailableInboundIPAsync(location);
+                Assert.EndsWith("-02", ip4.Name, StringComparison.Ordinal);
+            }
+            catch (Exception ex)
+            {
+                testScope.Logger.Error(ex, ex.Message);
+                throw;
+            }
+            finally
+            {
+                _ = az.DeleteResourceGroupAsync(pool.OutboundIPPoolResourceGroupName);
+                _ = az.DeleteResourceGroupAsync(pool.InboundIPPoolResourceGroupName);
+                await Task.Delay(5000);
             }
         }
 

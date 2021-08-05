@@ -67,14 +67,14 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var client = regionalDataScope.Client;
 
                     var ipNamePrefix = context.GenerateCommonName(globalBaseName, noRegion: true);
-                    var ipPool = new IPPoolManager(ipNamePrefix, regionalDataScope.AzFactory, logger);
+                    var ipPool = new IPPoolManager(ipNamePrefix, false, regionalDataScope.AzFactory, logger);
 
                     var gblResources = await infra.CreateOrUpdateGlobalRGAsync(globalBaseName, context, $"{shortPartnerName}-{globalBaseName}.dummy.com", addGlobalDB: false, null);
 
                     var regions = new List<Region>() { context.Location };
                     IEnumerable<RegionOptions> regionOptions = GetRegionOptions(regions);
 
-                    await ipPool.ProvisionIPPoolAsync(context.Location, 3, context.Tags, false, regionOptions);
+                    await ipPool.ProvisionIPPoolAsync(context.Location, 3, context.Tags, regionOptions);
                     await client.GetOrCreateResourceGroupAsync(context.Location, dataRGName, context.Tags);
                     var laName = context.LogAnalyticsName("gbl001");
                     var logAnalytics = await client.GetOrCreateLogAnalyticsWorkspaceAsync(context.Location, dataRGName, laName, context.Tags);

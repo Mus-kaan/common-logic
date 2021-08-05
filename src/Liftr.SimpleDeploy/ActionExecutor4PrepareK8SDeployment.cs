@@ -20,16 +20,8 @@ namespace Microsoft.Liftr.SimpleDeploy
         {
             var liftrAzure = azFactory.GenerateLiftrAzure();
             var infra = new InfrastructureV2(azFactory, kvClient, _logger);
-            var globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
-            var globalRGName = globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
-            File.WriteAllText("global-vault-name.txt", globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
-
-            IPPoolManager ipPool = null;
-            if (targetOptions.IPPerRegion > 0)
-            {
-                var ipNamePrefix = globalNamingContext.GenerateCommonName(targetOptions.Global.BaseName, noRegion: true);
-                ipPool = new IPPoolManager(ipNamePrefix, azFactory, _logger);
-            }
+            var globalRGName = _globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
+            File.WriteAllText("global-vault-name.txt", _globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
 
             var parsedRegionInfo = GetRegionalOptions(targetOptions);
             var regionOptions = parsedRegionInfo.RegionOptions;
@@ -46,7 +38,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 throw new InvalidOperationException(errMsg);
             }
 
-            await WriteReservedInboundIPToDiskAsync(azFactory, aksRGName, aksName, parsedRegionInfo.AKSRegion, targetOptions, ipPool);
+            await WriteReservedInboundIPToDiskAsync(azFactory, aksRGName, aksName, parsedRegionInfo.AKSRegion);
 
             var regionalSubdomain = $"{regionalNamingContext.Location.ShortName()}.{targetOptions.DomainName}";
             File.WriteAllText("aks-domain.txt", $"{aksName}.{targetOptions.DomainName}");
@@ -67,7 +59,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                         CallbackConfigurations = _callBackConfigs,
                         BaseName = parsedRegionInfo.RegionOptions.ComputeBaseName,
                         NamingContext = regionalNamingContext,
-                        IPPoolManager = ipPool,
+                        IPPoolManager = _ipPool,
                     };
 
                     await SimpleDeployExtension.AfterPrepareK8SDeploymentAsync.Invoke(parameters);
