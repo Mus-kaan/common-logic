@@ -63,13 +63,28 @@ else
 fi
 
 if [[ -z $(command -v docker) ]]; then
-    echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
-    echo "[bake-image.sh] Installing docker CE ..."
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sh get-docker.sh
+  echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - "
+  echo "[bake-image.sh] Installing docker CE ..."
+  sudo apt-get update
+  sudo apt-get install -y \
+      software-properties-common \
+      apt-transport-https \
+      ca-certificates \
+      curl
+
+  # get-docker.sh using "gpg --dearmor" command, which will not work under Ubuntu 18.04 and many earlier versions.
+  # Instead the "apt-key add" has to be used to add needed key
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  sudo add-apt-repository \
+      "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+  sudo apt-get update
+  sudo apt-get install -y --no-install-recommends docker-ce
 else
-    echo "docker already installed."
+  echo "docker already installed."
 fi
+echo "docker version:"
+sudo docker version
 
 echo "******************************************************************************************"
 echo "[liftr-image-builder] [bake-image.sh | end] Finished backing VM image ..."
