@@ -36,6 +36,16 @@ namespace Microsoft.Liftr.TokenManager
             _mu.Dispose();
         }
 
+        /// <summary>
+        /// To avoid leak, the X509Certificate2 object needs to be disposed after usage.
+        /// However since this class doesn't know when the caller will finish using the cert object, there is no way for it to dispose the object
+        /// As a result, CertificateStore only caches the raw bytes internally. It always return a new X509Certificate2 object to caller.
+        /// It's the caller's responsibility to dispose the cert object after usage
+        /// </summary>
+        /// <param name="keyVaultEndpoint"></param>
+        /// <param name="certificateName"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task<X509Certificate2> GetCertificateAsync(Uri keyVaultEndpoint, string certificateName, CancellationToken cancellationToken = default)
         {
             if (keyVaultEndpoint == null)
@@ -51,10 +61,10 @@ namespace Microsoft.Liftr.TokenManager
                 if (_cachedCertificates.ContainsKey(certPath)
                     && DateTimeOffset.UtcNow < _cachedCertificates[certPath].ValidTill)
                 {
-                    return _cachedCertificates[certPath].Certificate;
+                    return CreateCert(_cachedCertificates[certPath].Certificate);
                 }
 
-                X509Certificate2 cert = null;
+                byte[] cert = null;
                 try
                 {
                     cert = await LoadCertificateFromKeyVaultAsync(keyVaultEndpoint, certificateName, cancellationToken);
@@ -63,7 +73,7 @@ namespace Microsoft.Liftr.TokenManager
                 {
                     _logger.Error(ex, "Cannot refresh the certificate with path {certPath}. Stick with the old one.", certPath);
                     _cachedCertificates[certPath].ValidTill = DateTimeOffset.UtcNow + CertificateCacheTTL;
-                    return _cachedCertificates[certPath].Certificate;
+                    return CreateCert(_cachedCertificates[certPath].Certificate);
                 }
 
                 _cachedCertificates[certPath] = new CertificateCacheItem()
@@ -72,7 +82,7 @@ namespace Microsoft.Liftr.TokenManager
                     ValidTill = DateTimeOffset.UtcNow + CertificateCacheTTL,
                 };
 
-                return cert;
+                return CreateCert(cert);
             }
             finally
             {
@@ -80,7 +90,7 @@ namespace Microsoft.Liftr.TokenManager
             }
         }
 
-        private async Task<X509Certificate2> LoadCertificateFromKeyVaultAsync(Uri keyVaultEndpoint, string certificateName, CancellationToken cancellationToken)
+        private async Task<byte[]> LoadCertificateFromKeyVaultAsync(Uri keyVaultEndpoint, string certificateName, CancellationToken cancellationToken)
         {
             using (var operation = _logger.StartTimedOperation(nameof(LoadCertificateFromKeyVaultAsync)))
             {
@@ -96,12 +106,7 @@ namespace Microsoft.Liftr.TokenManager
                         secretBundle.Attributes.Created.Value.ToZuluString(),
                         secretBundle.Attributes.Expires.Value.ToZuluString());
 
-                    var privateKeyBytes = Convert.FromBase64String(secretBundle.Value);
-                    string password = null;
-
-                    // We need to specify the certificate as Exportable explicitly.
-                    // On Linux keys are always exportable, but on Windows and macOS they aren't always.
-                    return new X509Certificate2(privateKeyBytes, password, X509KeyStorageFlags.Exportable);
+                    return Convert.FromBase64String(secretBundle.Value);
                 }
                 catch (Exception ex)
                 {
@@ -111,11 +116,19 @@ namespace Microsoft.Liftr.TokenManager
                 }
             }
         }
+
+        private static X509Certificate2 CreateCert(byte[] privateBytes)
+        {
+            // We need to specify the certificate as Exportable explicitly.
+            // On Linux keys are always exportable, but on Windows and macOS they aren't always.
+            string password = null;
+            return new X509Certificate2(privateBytes, password, X509KeyStorageFlags.Exportable);
+        }
     }
 
     internal class CertificateCacheItem
     {
-        public X509Certificate2 Certificate { get; set; }
+        public byte[] Certificate { get; set; }
 
         public DateTimeOffset ValidTill { get; set; }
     }
