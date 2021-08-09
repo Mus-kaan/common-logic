@@ -81,6 +81,12 @@ namespace Microsoft.Liftr.Marketplace.Utils
                 additionalHeaders.Add("x-ms-client-subscription-id", requestHeaders.MSClientSubscriptionId);
             }
 
+            // Header is required to support CSP purchase
+            if (!string.IsNullOrWhiteSpace(requestHeaders.MSClientGroupMembership) && string.IsNullOrWhiteSpace(requestHeaders.MSClientObjectId))
+            {
+                additionalHeaders.Add("x-ms-client-principal-group-membership", requestHeaders.MSClientGroupMembership);
+            }
+
             return additionalHeaders;
         }
 
