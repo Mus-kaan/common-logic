@@ -23,7 +23,7 @@ namespace Microsoft.Liftr.Fluent
             }
 
             var stream = assembly.GetManifestResourceStream(contentName);
-            var textStreamReader = new StreamReader(stream);
+            using var textStreamReader = new StreamReader(stream);
             return textStreamReader.ReadToEnd();
         }
 
