@@ -72,6 +72,24 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [Fact]
+        [PublicCentralUSEUAP]
+        public void PublicCentralUSEUAPTest()
+        {
+            Assert.Equal(CloudType.Public, TestCloudType);
+            Assert.Equal(AzureRegion.CentralUSEUAP.Name, TestAzureRegion.Name);
+            Assert.Equal("PublicCentralUSEUAP", TestRegionCategory);
+        }
+
+        [Fact]
+        [PublicEastUS2EUAP]
+        public void PublicEastUS2EUAPTest()
+        {
+            Assert.Equal(CloudType.Public, TestCloudType);
+            Assert.Equal(AzureRegion.EastUS2EUAP.Name, TestAzureRegion.Name);
+            Assert.Equal("PublicEastUS2EUAP", TestRegionCategory);
+        }
+
+        [Fact]
         [PublicEastUS2]
         public void PublicEastUS2Test()
         {
