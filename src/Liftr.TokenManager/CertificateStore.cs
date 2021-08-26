@@ -48,6 +48,11 @@ namespace Microsoft.Liftr.TokenManager
         /// <returns></returns>
         public async Task<X509Certificate2> GetCertificateAsync(Uri keyVaultEndpoint, string certificateName, CancellationToken cancellationToken = default)
         {
+            return CreateCert(await GetCertificateBytesAsync(keyVaultEndpoint, certificateName, cancellationToken));
+        }
+
+        public async Task<byte[]> GetCertificateBytesAsync(Uri keyVaultEndpoint, string certificateName, CancellationToken cancellationToken = default)
+        {
             if (keyVaultEndpoint == null)
             {
                 throw new ArgumentNullException(nameof(keyVaultEndpoint));
@@ -61,7 +66,7 @@ namespace Microsoft.Liftr.TokenManager
                 if (_cachedCertificates.ContainsKey(certPath)
                     && DateTimeOffset.UtcNow < _cachedCertificates[certPath].ValidTill)
                 {
-                    return CreateCert(_cachedCertificates[certPath].Certificate);
+                    return _cachedCertificates[certPath].Certificate;
                 }
 
                 byte[] cert = null;
@@ -73,7 +78,7 @@ namespace Microsoft.Liftr.TokenManager
                 {
                     _logger.Error(ex, "Cannot refresh the certificate with path {certPath}. Stick with the old one.", certPath);
                     _cachedCertificates[certPath].ValidTill = DateTimeOffset.UtcNow + CertificateCacheTTL;
-                    return CreateCert(_cachedCertificates[certPath].Certificate);
+                    return _cachedCertificates[certPath].Certificate;
                 }
 
                 _cachedCertificates[certPath] = new CertificateCacheItem()
@@ -82,7 +87,7 @@ namespace Microsoft.Liftr.TokenManager
                     ValidTill = DateTimeOffset.UtcNow + CertificateCacheTTL,
                 };
 
-                return CreateCert(cert);
+                return cert;
             }
             finally
             {

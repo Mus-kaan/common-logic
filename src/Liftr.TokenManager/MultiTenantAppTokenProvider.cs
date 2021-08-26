@@ -38,7 +38,9 @@ namespace Microsoft.Liftr.TokenManager
 
             logger.Information($"Load certificate to make sure the provider is initialized correctly.");
 #pragma warning disable Liftr1004 // Avoid calling System.Threading.Tasks.Task<TResult>.Result
+#pragma warning disable CA2000 // Dispose objects before losing scope
             var cert = _certStore.GetCertificateAsync(_options.KeyVaultEndpoint, _options.CertificateName).Result;
+#pragma warning restore CA2000 // Dispose objects before losing scope
             if (cert == null)
             {
                 throw new InvalidOperationException("Cannot load certificate.");
