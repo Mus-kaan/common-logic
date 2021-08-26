@@ -113,6 +113,17 @@ namespace Microsoft.Liftr.Fluent.Tests
                 // Calling the method multiple times should just have no effect without exceptions.
                 await serverClient.CreateUserIfNotExistAsync(dbUser, userPassword);
 
+                try
+                {
+                    await serverClient.UpdatePasswordAsync(dbUser, userPassword);
+                    await serverClient.UpdatePasswordAsync(dbUser, userPassword);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "update password failed");
+                    throw;
+                }
+
                 await serverClient.CreateDatabaseIfNotExistAsync(dbName);
                 await serverClient.CreateDatabaseIfNotExistAsync(dbName);
 

@@ -53,6 +53,36 @@ namespace Microsoft.Liftr.Management.PostgreSQL
             }
         }
 
+        public async Task UpdatePasswordAsync(string username, string password)
+        {
+            if (string.IsNullOrEmpty(username))
+            {
+                throw new ArgumentNullException(nameof(username));
+            }
+
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ArgumentNullException(nameof(password));
+            }
+
+            using var dbConnection = new NpgsqlConnection(_sqlOptions.ConnectionString);
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+            using var createCommand = new NpgsqlCommand($"ALTER USER {username} WITH PASSWORD '{password}'", dbConnection);
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+
+            await dbConnection.OpenAsync();
+            _logger.Information("Start updating password for DB user {username}", username);
+            try
+            {
+                await createCommand.ExecuteNonQueryAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Update password for user failed");
+                throw;
+            }
+        }
+
         public async Task DropUserAsync(string username)
         {
             if (string.IsNullOrEmpty(username))
