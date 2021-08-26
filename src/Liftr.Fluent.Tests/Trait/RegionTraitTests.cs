@@ -117,6 +117,15 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [Fact]
+        [PublicSouthCentralUS]
+        public void PublicSouthCentralUSTest()
+        {
+            Assert.Equal(CloudType.Public, TestCloudType);
+            Assert.Equal(AzureRegion.USSouthCentral.Name, TestAzureRegion.Name);
+            Assert.Equal("PublicSouthCentralUS", TestRegionCategory);
+        }
+
+        [Fact]
         [PublicWestUS2]
         public void PublicWestUS2Test()
         {
