@@ -127,6 +127,55 @@ namespace Liftr.Marketplace.Tests.Agreement
             Assert.Equal(agreementResponse.Properties.LicenseTextLink, response.Properties.LicenseTextLink);
         }
 
+        [Fact]
+        public async Task GetAgreement_Expected_Behavior_UsingTokenService_Async()
+        {
+            var marketplaceResourceProperties = CreateSaasResourceProperties("test");
+            var agreementResponse = CreateAgreementPayload();
+
+            _signAgreementRestClient
+                .Setup(x => x.SendRequestUsingTokenServiceAsync<AgreementResponse>(HttpMethod.Get, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<object>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(agreementResponse);
+
+            var response = await _agreementService.GetAgreementUsingTokenServiceAsync(marketplaceResourceProperties, _marketplaceRequestMetadata);
+            Assert.Equal(agreementResponse.Id, response.Id);
+            Assert.Equal(agreementResponse.Properties.LicenseTextLink, response.Properties.LicenseTextLink);
+        }
+
+        [Fact]
+        public async Task SignAgreement_Expected_Behavior_UsingTokenService_Async()
+        {
+            var marketplaceResourceProperties = CreateSaasResourceProperties("test");
+            var agreementResponse = CreateAgreementPayload();
+            agreementResponse.Properties.Accepted = true;
+
+            _signAgreementRestClient
+                .Setup(x => x.SendRequestUsingTokenServiceAsync<AgreementResponse>(HttpMethod.Put, It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<object>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(agreementResponse);
+
+            var response = await _agreementService.SignAgreementUsingTokenServiceAsync(marketplaceResourceProperties, _marketplaceRequestMetadata, agreementResponse);
+            Assert.Equal(agreementResponse.Id, response.Id);
+            Assert.True(response.Properties.Accepted);
+            Assert.Equal(agreementResponse.Properties.LicenseTextLink, response.Properties.LicenseTextLink);
+        }
+
+        [Fact]
+        public async Task GetAndSignAgreement_Expected_Behavior_UsingTokenService_Async()
+        {
+            var marketplaceResourceProperties = CreateSaasResourceProperties("test");
+            var agreementResponse = CreateAgreementPayload();
+            agreementResponse.Properties.Accepted = true;
+
+            _signAgreementRestClient
+                .Setup(x => x.SendRequestUsingTokenServiceAsync<AgreementResponse>(It.IsAny<HttpMethod>(), It.IsAny<string>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<object>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(agreementResponse);
+
+            var response = await _agreementService.SignAgreementUsingTokenServiceAsync(marketplaceResourceProperties, _marketplaceRequestMetadata, agreementResponse);
+            Assert.Equal(agreementResponse.Id, response.Id);
+            Assert.True(response.Properties.Accepted);
+            Assert.Equal(agreementResponse.Properties.LicenseTextLink, response.Properties.LicenseTextLink);
+        }
+
         public void Dispose()
         {
             Dispose(true);

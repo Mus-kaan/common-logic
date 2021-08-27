@@ -33,5 +33,29 @@ namespace Microsoft.Liftr.Marketplace.Agreement.Interfaces
         /// <remarks>
         /// </remarks>
         Task<AgreementResponse> SignAgreementAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata, AgreementResponse request);
+
+        /// <summary>
+        /// Gets Agreement Response. Use this function only if you have added Token service auth configurations.
+        /// </summary>
+        /// <returns>Agreement Response</returns>
+        /// <remarks>
+        /// </remarks>
+        Task<AgreementResponse> GetAgreementUsingTokenServiceAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata);
+
+        /// <summary>
+        /// Gets Agreement Response and then Signs the Agreement if not signed. Use this function only if you have added Token service auth configurations.
+        /// </summary>
+        /// <returns>Agreement Response</returns>
+        /// <remarks>
+        /// </remarks>
+        Task<AgreementResponse> GetandSignAgreementUsingTokenServiceAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata);
+
+        /// <summary>
+        /// Signs the Agreement if not signed. Use this function only if you have added Token service auth configurations.
+        /// </summary>
+        /// <returns>Agreement Response</returns>
+        /// <remarks>
+        /// </remarks>
+        Task<AgreementResponse> SignAgreementUsingTokenServiceAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata, AgreementResponse request);
     }
 }

@@ -123,5 +123,98 @@ namespace Microsoft.Liftr.Marketplace.Agreement.Service
                 throw;
             }
         }
+
+        public async Task<AgreementResponse> GetAgreementUsingTokenServiceAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata)
+        {
+            if (saasResourceProperties is null || !saasResourceProperties.IsValid())
+            {
+                throw new ArgumentNullException(nameof(saasResourceProperties), $"Please provide valid {nameof(MarketplaceSaasResourceProperties)}");
+            }
+
+            if (requestMetadata is null || !requestMetadata.IsValid())
+            {
+                throw new ArgumentNullException(nameof(requestMetadata), $"Please provide valid {nameof(MarketplaceRequestMetadata)}");
+            }
+
+            try
+            {
+                var resourceTypePath = HttpRequestHelper.GetCompleteRequestPathForAgreement(saasResourceProperties);
+                _logger.Information($"Request Path for {nameof(GetAgreementUsingTokenServiceAsync)}: {resourceTypePath}");
+                var additionalHeaders = HttpRequestHelper.GetAdditionalMarketplaceHeaders(requestMetadata);
+                var agreement = await _signAgreementRestClient.SendRequestUsingTokenServiceAsync<AgreementResponse>(HttpMethod.Get, resourceTypePath, additionalHeaders);
+                return agreement;
+            }
+            catch (MarketplaceException ex)
+            {
+                string errorMessage = $"[{nameof(GetAgreementUsingTokenServiceAsync)} Failed to get Agreement response. Error: {ex.Message}";
+                _logger.Error(ex, errorMessage);
+                throw;
+            }
+        }
+
+        public async Task<AgreementResponse> GetandSignAgreementUsingTokenServiceAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata)
+        {
+            if (saasResourceProperties is null || !saasResourceProperties.IsValid())
+            {
+                throw new ArgumentNullException(nameof(saasResourceProperties), $"Please provide valid {nameof(MarketplaceSaasResourceProperties)}");
+            }
+
+            if (requestMetadata is null || !requestMetadata.IsValid())
+            {
+                throw new ArgumentNullException(nameof(requestMetadata), $"Please provide valid {nameof(MarketplaceRequestMetadata)}");
+            }
+
+            try
+            {
+                var agreement = await GetAgreementUsingTokenServiceAsync(saasResourceProperties, requestMetadata);
+                var signedAgreement = await SignAgreementUsingTokenServiceAsync(saasResourceProperties, requestMetadata, agreement);
+                return signedAgreement;
+            }
+            catch (MarketplaceException ex)
+            {
+                string errorMessage = $"[{nameof(GetandSignAgreementUsingTokenServiceAsync)}] Failed to get Agreement response. Error: {ex.Message}";
+                _logger.Error(ex, errorMessage);
+                throw;
+            }
+        }
+
+        public async Task<AgreementResponse> SignAgreementUsingTokenServiceAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata, AgreementResponse request)
+        {
+            if (saasResourceProperties is null || !saasResourceProperties.IsValid())
+            {
+                throw new ArgumentNullException(nameof(saasResourceProperties), $"Please provide valid {nameof(MarketplaceSaasResourceProperties)}");
+            }
+
+            if (requestMetadata is null || !requestMetadata.IsValid())
+            {
+                throw new ArgumentNullException(nameof(requestMetadata), $"Please provide valid {nameof(MarketplaceRequestMetadata)}");
+            }
+
+            if (request is null || !request.IsValid())
+            {
+                throw new ArgumentNullException(nameof(request), $"Please provide valid {nameof(AgreementResponse)}");
+            }
+
+            if (request.Properties.Accepted)
+            {
+                return request;
+            }
+
+            try
+            {
+                request.Properties.Accepted = true;
+                var resourceTypePath = HttpRequestHelper.GetCompleteRequestPathForAgreement(saasResourceProperties);
+                _logger.Information($"Request Path for {nameof(SignAgreementUsingTokenServiceAsync)}: {resourceTypePath}");
+                var additionalHeaders = HttpRequestHelper.GetAdditionalMarketplaceHeaders(requestMetadata);
+                var agreement = await _signAgreementRestClient.SendRequestUsingTokenServiceAsync<AgreementResponse>(HttpMethod.Put, resourceTypePath, additionalHeaders, content: request.ToJObject());
+                return agreement;
+            }
+            catch (MarketplaceException ex)
+            {
+                string errorMessage = $"[{nameof(SignAgreementUsingTokenServiceAsync)}] Failed to get Agreement response. Error: {ex.Message}";
+                _logger.Error(ex, errorMessage);
+                throw;
+            }
+        }
     }
 }

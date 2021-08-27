@@ -10,7 +10,12 @@ namespace Microsoft.Liftr.Marketplace
         public const string BillingBatchUsageEventPath = "api/batchUsageEvent";
         public const string FulfillmentPath = "api/saas/subscriptions";
         public const string MarketplaceCreateSAASPath = "api/saasresources/subscriptions";
+        public const string TokenRequestPath = "OAuth2/marketplace/token";
+        public const string CertificateRequestPath = "OAuth2/marketplace/certificate";
         public const int PollingCount = 40;
+        public const int DefaultTTL = 10;
+        public const int SemaphoreInitialThreadCount = 1;
+        public const int SemaphoreMaxThreadCount = 1;
 
         // Marketplace Headers
         public const string MarketplaceRequestIdHeaderKey = "x-ms-requestid";

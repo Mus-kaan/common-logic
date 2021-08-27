@@ -23,6 +23,13 @@ namespace Microsoft.Liftr.Marketplace.Agreement.Interfaces
            Dictionary<string, string>? additionalHeaders = null,
            object? content = null,
            CancellationToken cancellationToken = default) where T : class;
+
+        Task<T> SendRequestUsingTokenServiceAsync<T>(
+          HttpMethod method,
+          string requestPath,
+          Dictionary<string, string>? additionalHeaders = null,
+          object? content = null,
+          CancellationToken cancellationToken = default) where T : class;
     }
 #nullable disable
 }
