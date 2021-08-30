@@ -287,6 +287,12 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 throw new ArgumentNullException(nameof(entity));
             }
 
+            if (!string.IsNullOrEmpty(entity.ResourceId))
+            {
+                // resource Id is case insensitive
+                entity.ResourceId = entity.ResourceId.ToUpperInvariant();
+            }
+
             var builder = Builders<TResource>.Filter;
             var filter = builder.Eq(u => u.EntityId, entity.EntityId);
 
