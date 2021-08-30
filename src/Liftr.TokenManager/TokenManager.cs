@@ -24,6 +24,10 @@ namespace Microsoft.Liftr.TokenManager
         public TokenManager(TokenManagerConfiguration tokenConfiguration, CertificateStore certificateStore = null, IMemoryCache memoryCache = null)
         {
             _tokenManagerConfiguration = tokenConfiguration ?? throw new ArgumentNullException(nameof(tokenConfiguration));
+
+            // Ensure AAD endpoint doesn't have any tailing whitespace or forward slash as it will be used to construct authority URL with tenant ID.
+            _tokenManagerConfiguration.AadEndpoint = _tokenManagerConfiguration.AadEndpoint.TrimEnd().TrimEnd('/');
+
             _certificateStore = certificateStore;
             if (memoryCache == null)
             {
