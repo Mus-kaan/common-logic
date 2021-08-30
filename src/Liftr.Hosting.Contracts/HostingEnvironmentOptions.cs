@@ -115,13 +115,13 @@ namespace Microsoft.Liftr.Hosting.Contracts
                 throw new InvalidHostingOptionException($"Please specify the Geneva certificate in the '{nameof(OneCertCertificates)}' section. The certification name must be '{CertificateName.GenevaClientCert}' and please specific a subject name.");
             }
 
-            if (IPPerRegion < 3)
+            if (IPPerRegion < 2)
             {
-                throw new InvalidHostingOptionException($"{nameof(IPPerRegion)} cannot be less than 3, since there will be no room for swap deployment..");
+                throw new InvalidHostingOptionException($"{nameof(IPPerRegion)} cannot be less than 2, since there will be no room for swap deployment..");
             }
-            else if (IPPerRegion > 100)
+            else if (IPPerRegion > 19)
             {
-                throw new InvalidHostingOptionException($"{nameof(IPPerRegion)} cannot be large than 100.");
+                throw new InvalidHostingOptionException($"{nameof(IPPerRegion)} cannot be large than 19.");
             }
 
             Geneva?.CheckValid();

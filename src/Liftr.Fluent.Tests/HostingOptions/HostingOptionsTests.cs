@@ -63,7 +63,7 @@ namespace Microsoft.Liftr.Fluent.Tests
 
             {
                 var devOptions = GetDevAKSHostingOptions();
-                devOptions.IPPerRegion = 2;
+                devOptions.IPPerRegion = 1;
                 Assert.Throws<InvalidHostingOptionException>(() =>
                 {
                     devOptions.CheckValid();
@@ -72,7 +72,7 @@ namespace Microsoft.Liftr.Fluent.Tests
 
             {
                 var devOptions = GetDevAKSHostingOptions();
-                devOptions.IPPerRegion = 200;
+                devOptions.IPPerRegion = 25;
                 Assert.Throws<InvalidHostingOptionException>(() =>
                 {
                     devOptions.CheckValid();
