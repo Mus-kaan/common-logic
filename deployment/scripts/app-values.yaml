@@ -1,7 +1,3 @@
-# Default values for RP web Svc.
-#
-# The following values are appended by pack.sh during builds through OneBranch Pipeline:
-#  - imageRegistry: The FQDN of the docker registry to pull the appconfigservice image from.
-#  - imageName: The repository name + tag for the RP web Svc docker image.
+# AKS App deploy configuration value overwrite
 
-replicaCount: 1
+exampleValue: 1
