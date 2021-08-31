@@ -79,7 +79,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 ProvisionedComputeResources computeResources = null;
 
                 // Find Outbound Public IP for AKS cluster creation
-                if (targetOptions.IPPerRegion >= 3)
+                if (targetOptions.IPPerRegion > 0)
                 {
                     // Check if Outbound Public IP under AKS network already exists
                     try
