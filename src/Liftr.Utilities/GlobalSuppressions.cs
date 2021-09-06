@@ -10,3 +10,4 @@ using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.Utilities.InstanceMetaHelper.GetMetaInfoAsync~System.Threading.Tasks.Task{Microsoft.Liftr.Utilities.MetaInfo}")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.Liftr.StringExtensions.IsBase64(System.String)~System.Boolean")]
+[assembly: SuppressMessage("Performance", "CA1815:Override equals and operator equals on value types", Justification = "<Pending>", Scope = "type", Target = "~T:Microsoft.Liftr.Utilities.ValueStopwatch")]

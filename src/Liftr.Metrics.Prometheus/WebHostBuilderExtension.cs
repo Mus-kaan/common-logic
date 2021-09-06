@@ -33,6 +33,7 @@ namespace Microsoft.Liftr.Metrics.Prom
                 {
                     staticLabels["Assembly"] = meta.AssemblyName;
                     staticLabels["Version"] = meta.Version;
+                    staticLabels["EnvMachine"] = Environment.MachineName;
 
                     if (instanceMeta?.Compute != null)
                     {
