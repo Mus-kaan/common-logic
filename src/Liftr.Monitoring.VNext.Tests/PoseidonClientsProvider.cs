@@ -7,11 +7,8 @@ using Microsoft.Azure.Management.ResourceGraph;
 using Microsoft.Liftr.Monitoring.Whale.Interfaces;
 using Microsoft.Liftr.TokenManager;
 using Microsoft.Rest;
-using Moq;
-using Serilog;
 using System;
 using System.Threading.Tasks;
-using Xunit;
 
 namespace Microsoft.Liftr.Datadog.Whale.Poseidon
 {

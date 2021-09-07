@@ -2,20 +2,17 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using System;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Monitoring.VNext.Whale.Client.Interfaces;
 using Microsoft.Liftr.Monitoring.Whale.Options;
 using Microsoft.Liftr.TokenManager;
 using Serilog;
+using System;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Monitoring.VNext.Whale.Client
 {

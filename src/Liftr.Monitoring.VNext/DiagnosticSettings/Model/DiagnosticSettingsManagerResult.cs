@@ -2,9 +2,9 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using System.Collections.Generic;
 using Microsoft.Liftr.Monitoring.Common.Models;
 using Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Interfaces;
+using System.Collections.Generic;
 
 namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model
 {

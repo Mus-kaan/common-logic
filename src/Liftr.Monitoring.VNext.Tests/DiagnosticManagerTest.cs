@@ -3,13 +3,11 @@
 //-----------------------------------------------------------------------------
 
 using Liftr.Monitoring.VNext.DiagnosticSettings;
-using Liftr.Monitoring.VNext.DiagnosticSettings.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Liftr.Contracts.MonitoringSvc;
 using Microsoft.Liftr.Datadog.Whale.Poseidon;
 using Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings;
 using Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model.Builders;
-using Microsoft.Liftr.Monitoring.VNext.Whale.Client.Interfaces;
 using Microsoft.Liftr.Monitoring.Whale.Interfaces;
 using Moq;
 using Serilog;

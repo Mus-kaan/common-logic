@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Liftr.Monitoring.VNext.Common.Interfaces;
-using Liftr.Monitoring.VNext.DiagnosticSettings.Interfaces;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DataSource.Mongo.MonitoringSvc;
 using Microsoft.Liftr.DataSource.MonitoringSvc;

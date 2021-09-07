@@ -2,9 +2,9 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using System;
 using Liftr.Monitoring.VNext.DiagnosticSettings.Interfaces;
 using Microsoft.Liftr.Contracts.MonitoringSvc;
+using System;
 
 namespace Liftr.Monitoring.VNext.DiagnosticSettings
 {

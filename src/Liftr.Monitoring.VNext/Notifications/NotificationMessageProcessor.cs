@@ -2,17 +2,17 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Liftr.Monitoring.Notifications.Interfaces;
+using Liftr.Monitoring.VNext.DiagnosticSettings.Interfaces;
+using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DataSource.Mongo.MonitoringSvc;
 using Microsoft.Liftr.DataSource.MonitoringSvc;
+using Microsoft.Liftr.Monitoring.Notifications.Interfaces;
+using Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings;
 using Serilog;
 using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings;
-using Microsoft.Liftr.Contracts;
-using Liftr.Monitoring.VNext.DiagnosticSettings.Interfaces;
 
 namespace Microsoft.Liftr.Monitoring.Notifications
 {
