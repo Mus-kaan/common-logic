@@ -17,6 +17,9 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Monitoring.Service
 {
+    /// <summary>
+    /// Use this Azure client provider to fetch new resource graph client and perform other interactions with it
+    /// </summary>
     public class AzureClientsProvider : IAzureClientsProvider
     {
         private readonly CertificateStore _certificateStore;
@@ -33,7 +36,7 @@ namespace Microsoft.Liftr.Monitoring.Service
             _providerOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            _tokenManager = new TokenManager.TokenManager(_providerOptions.TokenManagerConfiguration);
+            _tokenManager = new TokenManager.TokenManager(_providerOptions.TokenManagerConfiguration, _certificateStore);
         }
 
         public async Task<IResourceGraphClient> GetResourceGraphClientAsync(string tenantId)
