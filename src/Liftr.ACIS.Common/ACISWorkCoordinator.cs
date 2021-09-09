@@ -10,6 +10,7 @@ using Microsoft.Liftr.Logging.StaticLogger;
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.ACIS.Common
@@ -90,11 +91,18 @@ namespace Microsoft.Liftr.ACIS.Common
                                 if (status.Status == ACISOperationStatusType.Succeeded)
                                 {
                                     await _dataSource.DeleteEntityAsync(operationName, operationId);
+
+                                    // if the status.Result is a valid operationId, then
+                                    // delete the operation entry that is the parent of this current delegated operation
+                                    if (TryParseOperationId(status.Result, out var parentOperationName))
+                                    {
+                                        await _dataSource.DeleteEntityAsync(parentOperationName, status.Result);
+                                    }
                                 }
 
                                 return new ACISWorkResult()
                                 {
-                                    Succeeded = status.Status == ACISOperationStatusType.Succeeded,
+                                    Succeeded = status.Status == ACISOperationStatusType.Succeeded || status.Status == ACISOperationStatusType.Delegated,
                                     Result = status.Result,
                                 };
                             }
@@ -127,6 +135,20 @@ namespace Microsoft.Liftr.ACIS.Common
             {
                 StaticLiftrLogger.Flush();
             }
+        }
+
+        private bool TryParseOperationId(string operationId, out string operationName)
+        {
+            string operationIdPattern = @"^(\w+)-([0-9]{10})-(.+)$";
+            var matches = Regex.Matches(operationId, operationIdPattern, RegexOptions.IgnoreCase);
+            if (matches.Count == 1 && matches[0].Groups.Count == 4 && Guid.TryParse(matches[0].Groups[3].ToString(), out _))
+            {
+                operationName = matches[0].Groups[1].ToString();
+                return true;
+            }
+
+            operationName = string.Empty;
+            return false;
         }
 
         private void CheckLogs(ACISOperationStatusEntity oldStatus, ACISOperationStatusEntity newStatus)

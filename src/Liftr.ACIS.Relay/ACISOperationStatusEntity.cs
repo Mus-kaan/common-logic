@@ -16,6 +16,8 @@ namespace Microsoft.Liftr.ACIS.Relay
 
         public const string Failed = nameof(Failed);
 
+        public const string Delegated = nameof(Delegated);
+
         public const string Succeeded = nameof(Succeeded);
     }
 
@@ -45,6 +47,7 @@ namespace Microsoft.Liftr.ACIS.Relay
         public bool IsFinished()
         {
             return Status == ACISOperationStatusType.Failed
+                || Status == ACISOperationStatusType.Delegated
                 || Status == ACISOperationStatusType.Succeeded;
         }
 

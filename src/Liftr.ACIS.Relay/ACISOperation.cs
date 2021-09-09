@@ -28,6 +28,12 @@ namespace Microsoft.Liftr.ACIS.Relay
             _machineName = machineName ?? Environment.MachineName;
         }
 
+        public string OperationName => _statusEntity.OperationName;
+
+        public string OperationId => _statusEntity.OperationId;
+
+        public string Status => _statusEntity.Status;
+
         public Task LogErrorAsync(string message)
         {
             var logEntry = new LogEntry()
@@ -85,6 +91,16 @@ namespace Microsoft.Liftr.ACIS.Relay
             var entity = await _acisStatusDataSource.GetEntityAsync(_statusEntity.OperationName, _statusEntity.OperationId);
 
             entity.Status = ACISOperationStatusType.Succeeded;
+            entity.Result = result;
+
+            await _acisStatusDataSource.UpdateEntityAsync(entity);
+        }
+
+        public async Task DelegatedFinishAsync(string result)
+        {
+            var entity = await _acisStatusDataSource.GetEntityAsync(_statusEntity.OperationName, _statusEntity.OperationId);
+
+            entity.Status = ACISOperationStatusType.Delegated;
             entity.Result = result;
 
             await _acisStatusDataSource.UpdateEntityAsync(entity);
