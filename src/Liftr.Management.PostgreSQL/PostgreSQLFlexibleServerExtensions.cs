@@ -82,10 +82,22 @@ namespace Microsoft.Liftr.Management.PostgreSQL
                 throw new ArgumentNullException(nameof(ipAddress));
             }
 
-            using var client = liftrAzure.GetPostgreSQLFlexibleServerClient();
-            var ruleName = ipAddress.Replace(".", "_");
-            var newRule = new FirewallRule(ipAddress, ipAddress);
-            return await client.FirewallRules.CreateOrUpdateAsync(rgName, serverName, ruleName, newRule);
+            using var ops = liftrAzure.Logger.StartTimedOperation(nameof(PostgreSQLFlexibleServerAddIPAsync));
+            ops.SetContextProperty("postgresServerName", serverName);
+
+            try
+            {
+                using var client = liftrAzure.GetPostgreSQLFlexibleServerClient();
+                var ruleName = ipAddress.Replace(".", "_");
+                var newRule = new FirewallRule(ipAddress, ipAddress);
+                return await client.FirewallRules.CreateOrUpdateAsync(rgName, serverName, ruleName, newRule);
+            }
+            catch (Exception ex)
+            {
+                liftrAzure.Logger.Error(ex, "err_postgres_firewall_add_ip");
+                ops.FailOperation(ex.Message);
+                throw;
+            }
         }
 
         public static async Task PostgreSQLFlexibleServerRemoveIPAsync(this ILiftrAzure liftrAzure, string rgName, string serverName, string ipAddress)
@@ -100,14 +112,26 @@ namespace Microsoft.Liftr.Management.PostgreSQL
                 throw new ArgumentNullException(nameof(ipAddress));
             }
 
-            using var client = liftrAzure.GetPostgreSQLFlexibleServerClient();
-            var ruleName = ipAddress.Replace(".", "_");
+            using var ops = liftrAzure.Logger.StartTimedOperation(nameof(PostgreSQLFlexibleServerRemoveIPAsync));
+            ops.SetContextProperty("postgresServerName", serverName);
+
             try
             {
-                await client.FirewallRules.DeleteAsync(rgName, serverName, ruleName);
+                using var client = liftrAzure.GetPostgreSQLFlexibleServerClient();
+                var ruleName = ipAddress.Replace(".", "_");
+                try
+                {
+                    await client.FirewallRules.DeleteAsync(rgName, serverName, ruleName);
+                }
+                catch (Rest.Azure.CloudException ex) when (ex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                }
             }
-            catch (Rest.Azure.CloudException ex) when (ex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (Exception ex)
             {
+                liftrAzure.Logger.Error(ex, "err_postgres_firewall_remove_ip");
+                ops.FailOperation(ex.Message);
+                throw;
             }
         }
 
