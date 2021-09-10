@@ -10,15 +10,15 @@ linuxgenevaACR:
 # Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/references/linuxcontainers.html
 # latest prom mdm image version: https://msazure.visualstudio.com/Liftr/_build?definitionId=113171&_a=summary&view=runs
 mdsd:
-  dockerTag: master_20210808.1
+  dockerTag: master_20210905.1
 mdm:
-  dockerTag: master_20210808.1
+  dockerTag: master_20210905.1
 
 fluentd:
-  dockerTag: master_20210808.1
+  dockerTag: master_20210905.1
 
 secpack:
-  dockerTag: master_20210811.1
+  dockerTag: master_20210905.1
 
 promMdmConverter:
   name: prom-mdm-converter
