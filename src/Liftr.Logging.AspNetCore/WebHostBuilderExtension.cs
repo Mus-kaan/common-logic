@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Liftr.Configuration;
 using Microsoft.Liftr.DiagnosticSource;
+using Microsoft.Liftr.Logging.Contracts;
 using Microsoft.Liftr.Logging.Formatter;
 using Microsoft.Liftr.Utilities;
 using Serilog;
@@ -35,6 +36,11 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 throw new ArgumentNullException(nameof(webHostBuilder));
             }
 
+            var meta = InstanceMetaHelper.GetMetaInfoAsync().Result;
+            var instanceMeta = meta?.InstanceMeta;
+            var vmRegion = instanceMeta?.Compute?.Location;
+            var liftrTelemetryInitializer = new LiftrTelemetryInitializer(vmRegion);
+
             webHostBuilder
                 .UseSerilog((host, config) =>
                 {
@@ -50,13 +56,11 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                         config.ReadFrom.Configuration(host.Configuration).Enrich.FromLogContext();
                     }
 
-                    var meta = InstanceMetaHelper.GetMetaInfoAsync().Result;
-                    var instanceMeta = meta?.InstanceMeta;
                     if (instanceMeta != null)
                     {
                         config = config
                         .Enrich.WithProperty("AppVer", meta.Version)
-                        .Enrich.WithProperty("vmRegion", instanceMeta.Compute.Location)
+                        .Enrich.WithProperty(nameof(vmRegion), vmRegion)
                         .Enrich.WithProperty("vmName", instanceMeta.Compute.Name)
                         .Enrich.WithProperty("vmRG", instanceMeta.Compute.ResourceGroupName);
 
@@ -75,6 +79,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 })
                 .ConfigureServices((host, services) =>
                 {
+                    services.AddSingleton<ITelemetryInitializer>(liftrTelemetryInitializer);
+
                     LoggerExtensions.Options = host.Configuration.ExtractLoggingOptions();
                     var options = LoggerExtensions.Options;
 
