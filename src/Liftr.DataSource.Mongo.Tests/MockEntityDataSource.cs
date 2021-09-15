@@ -14,4 +14,12 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
         {
         }
     }
+
+    public class MockExtendedEntityDataSource : ResourceEntityDataSource<ExtendedMockResourceEntity>
+    {
+        public MockExtendedEntityDataSource(IMongoCollection<ExtendedMockResourceEntity> collection, MongoWaitQueueRateLimiter rateLimiter, ITimeSource timeSource)
+            : base(collection, rateLimiter, timeSource, enableOptimisticConcurrencyControl: true, logOperation: true)
+        {
+        }
+    }
 }

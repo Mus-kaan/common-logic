@@ -27,7 +27,6 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
 
             ResourceId = item.ResourceId;
             Active = item.Active;
-            ProvisioningState = item.ProvisioningState;
             CreatedUTC = item.CreatedUTC;
             LastModifiedUTC = item.LastModifiedUTC;
             ETag = item.ETag;

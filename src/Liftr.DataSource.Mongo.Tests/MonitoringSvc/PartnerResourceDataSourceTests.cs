@@ -122,7 +122,6 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc
             Assert.Equal(3, entities.Count());
 
             retrieved = await s.GetAsync(mockEntity.EntityId);
-            Assert.Equal(ProvisioningState.Deleting, retrieved.ProvisioningState);
             Assert.False(retrieved.Active);
 
             // Test delete

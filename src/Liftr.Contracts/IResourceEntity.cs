@@ -20,8 +20,6 @@ namespace Microsoft.Liftr.Contracts
 
         bool Active { get; set; }
 
-        ProvisioningState ProvisioningState { get; }
-
         DateTime CreatedUTC { get; }
 
         DateTime LastModifiedUTC { get; set; }

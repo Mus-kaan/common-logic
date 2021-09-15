@@ -232,7 +232,6 @@ namespace Microsoft.Liftr.DataSource.Mongo
             var filter = builder.Eq(u => u.EntityId, entityId);
             var update = Builders<TResource>.Update
                 .Set(u => u.Active, false)
-                .Set(u => u.ProvisioningState, ProvisioningState.Deleting)
                 .Set(u => u.LastModifiedUTC, _timeSource.UtcNow);
 
             var op = _logOperation ? _logger.StartTimedOperation($"{_collectionName}-{nameof(SoftDeleteAsync)}") : null;

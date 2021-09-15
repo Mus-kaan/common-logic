@@ -96,7 +96,6 @@ namespace Microsoft.Liftr.Monitoring.Whale.Poseidon.Tests
                     EncryptionAlgorithm = EncryptionAlgorithm.A256CBC,
                     ContentEncryptionIV = null,
                     Active = true,
-                    ProvisioningState = ProvisioningState.Succeeded,
                 };
 
                 await partnerDataSource.AddAsync(newEntity1);
@@ -116,7 +115,6 @@ namespace Microsoft.Liftr.Monitoring.Whale.Poseidon.Tests
                     EncryptionAlgorithm = EncryptionAlgorithm.A256CBC,
                     ContentEncryptionIV = null,
                     Active = true,
-                    ProvisioningState = ProvisioningState.Succeeded,
                 };
 
                 await partnerDataSource.AddAsync(newEntity2);

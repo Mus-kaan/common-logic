@@ -9,6 +9,7 @@ using System;
 
 namespace Microsoft.Liftr.DataSource.Mongo
 {
+    [BsonIgnoreExtraElements(Inherited = true)] // ignore the removed 'ProvisioningState'
     public abstract class BaseResourceEntity : IResourceEntity
     {
         protected BaseResourceEntity()
@@ -37,10 +38,6 @@ namespace Microsoft.Liftr.DataSource.Mongo
         /// </summary>
         [BsonElement("active")]
         public bool Active { get; set; } = true;
-
-        [BsonElement("provisionState")]
-        [BsonRepresentation(BsonType.String)]
-        public ProvisioningState ProvisioningState { get; set; } = ProvisioningState.Succeeded;
 
         [BsonElement("createdAt")]
         public DateTime CreatedUTC { get; set; } = LiftrDateTime.MinValue;
