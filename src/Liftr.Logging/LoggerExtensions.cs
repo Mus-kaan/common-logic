@@ -144,6 +144,17 @@ namespace Microsoft.Liftr
             logger.Verbose(EnrichMessage(messageTemplate, filePath, memberName, lineNumber));
         }
 
+        // This method is used to generate alert for critical workflows based up on a monitor
+        public static void LogAlert(this ILogger logger, string messageTemplate, string propertyName = "LogAlert", string propertyValue = "True", [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
+        {
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            logger.Error(EnrichMessage(messageTemplate, filePath, memberName, lineNumber) + $"'{propertyName}'", propertyValue);
+        }
+
         private static string EnrichMessage(string messageTemplate, string filePath, string memberName, int lineNumber)
         {
             return $"[{Path.GetFileName(filePath)}:{memberName}:{lineNumber}] {messageTemplate}";
