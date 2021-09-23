@@ -101,8 +101,12 @@ namespace Microsoft.Liftr.Queue
 
                             if (queueMessage.DequeueCount > _options.MaxDequeueCount)
                             {
+                                var endTme = _timeSource.UtcNow;
+                                var duration = endTme - message.CreatedAt.ParseZuluDateTime();
+
                                 _logger.Information(
-                                    "[DeleteMessage] Message exceeded the max dequeue count. DequeueCount '{DequeueCount}', CreatedAt '{CreatedAt}', InsertedOn '{InsertedOn}', ExpiresOn '{ExpiresOn}'",
+                                    "[DeleteMessage] Message exceeded the max dequeue count. DurationInSeconds: {DurationInSeconds}, DequeueCount '{DequeueCount}', CreatedAt '{CreatedAt}', InsertedOn '{InsertedOn}', ExpiresOn '{ExpiresOn}'",
+                                    duration.TotalSeconds,
                                     message.DequeueCount,
                                     message.CreatedAt,
                                     message.InsertedOn,
@@ -167,12 +171,40 @@ namespace Microsoft.Liftr.Queue
                                     }
                                     finally
                                     {
+                                        bool deleteMessage = false;
+                                        var endTme = _timeSource.UtcNow;
+                                        var duration = endTme - message.CreatedAt.ParseZuluDateTime();
+
                                         if (processingResult.SuccessfullyProcessed)
                                         {
-                                            var endTme = _timeSource.UtcNow;
-                                            var duration = endTme - message.CreatedAt.ParseZuluDateTime();
-                                            _logger.Information("[DeleteMessage] Finished processing queue message. DurationInSeconds: {DurationInSeconds}, CreatedAt:{CreatedAt}, FinishedAt: {FinishedAt}", duration.TotalSeconds, message.CreatedAt, endTme.ToZuluString());
+                                            _logger.Information(
+                                                "[DeleteMessage] Finished processing queue message. DurationInSeconds: {DurationInSeconds}, CreatedAt:{CreatedAt}, FinishedAt: {FinishedAt}",
+                                                duration.TotalSeconds,
+                                                message.CreatedAt,
+                                                endTme.ToZuluString());
 
+                                            deleteMessage = true;
+                                        }
+                                        else if (queueMessage.DequeueCount >= _options.MaxDequeueCount)
+                                        {
+                                            _logger.Information(
+                                                "[DeleteMessage] Failed processing queue message at max dequeue count. DurationInSeconds: {DurationInSeconds}, DequeueCount '{DequeueCount}', CreatedAt '{CreatedAt}', InsertedOn '{InsertedOn}', ExpiresOn '{ExpiresOn}'",
+                                                duration.TotalSeconds,
+                                                message.DequeueCount,
+                                                message.CreatedAt,
+                                                message.InsertedOn,
+                                                message.ExpiresOn);
+
+                                            deleteMessage = true;
+                                        }
+
+                                        if (!processingResult.SuccessfullyProcessed)
+                                        {
+                                            operation.FailOperation(processingResult.ProcessingError);
+                                        }
+
+                                        if (deleteMessage)
+                                        {
                                             await lease.SyncMutex.WaitAsync(cancellationToken);
                                             try
                                             {
@@ -182,10 +214,6 @@ namespace Microsoft.Liftr.Queue
                                             {
                                                 lease.SyncMutex.Release();
                                             }
-                                        }
-                                        else
-                                        {
-                                            operation.FailOperation(processingResult.ProcessingError);
                                         }
                                     }
                                 }
