@@ -6,6 +6,7 @@ using Microsoft.Liftr.Contracts;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -173,27 +174,10 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
             if (showActiveOnly)
             {
-                filter = filter & builder.Eq(u => u.Active, true);
+                filter &= builder.Eq(u => u.Active, true);
             }
 
-            var op = _logOperation ? _logger.StartTimedOperation($"{_collectionName}-{nameof(ListAsync)}") : null;
-            await _rateLimiter.WaitAsync(cancellationToken);
-            try
-            {
-                var cursor = await _collection.FindAsync(filter, options: null, cancellationToken: cancellationToken);
-                return await cursor.ToListAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, $"{nameof(ListAsync)} failed");
-                op?.FailOperation(ex.Message);
-                throw;
-            }
-            finally
-            {
-                _rateLimiter.Release();
-                op?.Dispose();
-            }
+            return await ListAsync(filter, cancellationToken, showActiveOnly);
         }
 
         public virtual async Task<IEnumerable<TResource>> ListAsync(bool showActiveOnly = true, CancellationToken cancellationToken = default)
@@ -206,24 +190,7 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 filter &= builder.Eq(u => u.Active, true);
             }
 
-            var op = _logOperation ? _logger.StartTimedOperation($"{_collectionName}-{nameof(ListAsync)}") : null;
-            await _rateLimiter.WaitAsync(cancellationToken);
-            try
-            {
-                var cursor = await _collection.FindAsync(filter, options: null, cancellationToken: cancellationToken);
-                return await cursor.ToListAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, $"{nameof(ListAsync)} failed");
-                op?.FailOperation(ex.Message);
-                throw;
-            }
-            finally
-            {
-                _rateLimiter.Release();
-                op?.Dispose();
-            }
+            return await ListAsync(filter, cancellationToken, showActiveOnly);
         }
 
         public virtual async Task<bool> SoftDeleteAsync(string entityId, CancellationToken cancellationToken = default)
@@ -315,6 +282,73 @@ namespace Microsoft.Liftr.DataSource.Mongo
             catch (Exception ex)
             {
                 _logger.Error(ex, $"{nameof(UpdateAsync)} failed");
+                op?.FailOperation(ex.Message);
+                throw;
+            }
+            finally
+            {
+                _rateLimiter.Release();
+                op?.Dispose();
+            }
+        }
+
+        protected async Task<IEnumerable<TResource>> ListAsync(
+            FilterDefinition<TResource> filter,
+            CancellationToken cancellationToken,
+            bool showActiveOnly = true,
+            FindOptions<TResource, TResource> options = null,
+            [CallerMemberName] string operationName = "")
+        {
+            var builder = Builders<TResource>.Filter;
+
+            if (showActiveOnly)
+            {
+                filter &= builder.Eq(u => u.Active, true);
+            }
+
+            var op = _logOperation ? _logger.StartTimedOperation($"{_collectionName}-{operationName}") : null;
+            await _rateLimiter.WaitAsync(cancellationToken);
+            try
+            {
+                var cursor = await _collection.FindAsync(filter, options: options, cancellationToken: cancellationToken);
+                return await cursor.ToListAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"{operationName} failed");
+                op?.FailOperation(ex.Message);
+                throw;
+            }
+            finally
+            {
+                _rateLimiter.Release();
+                op?.Dispose();
+            }
+        }
+
+        protected async Task<long> CountAsync(
+            FilterDefinition<TResource> filter,
+            CancellationToken cancellationToken,
+            bool showActiveOnly = true,
+            CountOptions options = null,
+            [CallerMemberName] string operationName = "")
+        {
+            var builder = Builders<TResource>.Filter;
+
+            if (showActiveOnly)
+            {
+                filter &= builder.Eq(u => u.Active, true);
+            }
+
+            var op = _logOperation ? _logger.StartTimedOperation($"{_collectionName}-{operationName}") : null;
+            await _rateLimiter.WaitAsync(cancellationToken);
+            try
+            {
+                return await _collection.CountDocumentsAsync(filter, options: options, cancellationToken: cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"{operationName} failed");
                 op?.FailOperation(ex.Message);
                 throw;
             }

@@ -73,7 +73,7 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
                 Assert.True(exist);
             }
 
-            // Can retrieve only by resoure id.
+            // Can retrieve only by resource id.
             {
                 var retrieved = await s.ListAsync(entity1.ResourceId);
 
@@ -82,9 +82,12 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
                 Assert.Equal(exceptedStr, actualStr);
             }
 
-            Assert.Null(await s.GetAsync(ObjectId.GenerateNewId().ToString()));
+            // Check empty/null result
+            {
+                Assert.Null(await s.GetAsync(ObjectId.GenerateNewId().ToString()));
 
-            Assert.Empty(await s.ListAsync(entity1.ResourceId + "asdasd"));
+                Assert.Empty(await s.ListAsync(entity1.ResourceId + "asdasd"));
+            }
 
             // Same EntityId throws.
             await Assert.ThrowsAsync<DuplicatedKeyException>(async () =>
