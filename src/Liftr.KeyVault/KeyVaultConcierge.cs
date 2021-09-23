@@ -161,25 +161,11 @@ namespace Microsoft.Liftr.KeyVault
             IDictionary<string, string> tags = null,
             CancellationToken cancellationToken = default)
         {
-            try
+            var hasExistingOne = await HasActiveCertificateAsync(certName, certificateSubject, cancellationToken);
+            if (hasExistingOne)
             {
-                var existingCert = await GetCertAsync(certName, cancellationToken);
-                if (existingCert != null)
-                {
-                    var privateKeyBytes = Convert.FromBase64String(existingCert.Value);
-                    using var certificate = new X509Certificate2(privateKeyBytes);
-                    if (certificate.Subject.OrdinalStartsWith($"CN={certificateSubject}"))
-                    {
-                        _logger.Information("There already exist a certificate with name {certificateName} in vault '{vaultBaseUrl}' with the same subject {subjectName}. Skip creating a new one.", certName, _vaultBaseUrl, certificateSubject);
-                        return null;
-                    }
-                }
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                _logger.Warning(ex, "Get existing certificate failed. Probably the existing one is in an invalid state. Try create a new one.");
+                _logger.Information("There already exist a certificate with name {certificateName} in vault '{vaultBaseUrl}' with the same subject {subjectName}. Skip creating a new one.", certName, _vaultBaseUrl, certificateSubject);
+                return null;
             }
 
             return await CreateCertificateAsync(certName, issuerName, certificateSubject, subjectAlternativeNames, tags, cancellationToken);
@@ -262,6 +248,22 @@ namespace Microsoft.Liftr.KeyVault
 
                     await GetCertificateDetailsAsync(certName, cancellationToken);
                     return certOperation;
+                }
+                catch (KeyVaultErrorException ex) when (ex.Message.OrdinalContains("Renewals paused"))
+                {
+                    // This is a temporary mitigation. The certificate is created but the certificate creation operation failed.
+                    // certificate auto renew is paused for now.
+                    // Details: https://portal.microsofticm.com/imp/v3/incidents/details/260897500/home
+                    // example exception: Microsoft.Azure.KeyVault.Models.KeyVaultErrorException : Failed to create certificate. Renewals paused for OneCertV2-PrivateCA in service configuration.
+                    _logger.Error(ex, "Encountered auto renew issue");
+                    var hasExistingOne = await HasActiveCertificateAsync(certName, certificateSubject, cancellationToken);
+                    if (hasExistingOne)
+                    {
+                        // the certificate is created successfully.
+                        return null;
+                    }
+
+                    throw;
                 }
                 catch (Exception ex)
                 {
@@ -364,6 +366,34 @@ namespace Microsoft.Liftr.KeyVault
             {
                 _keyVaultClient.Dispose();
             }
+        }
+
+        private async Task<bool> HasActiveCertificateAsync(
+            string certName,
+            string certificateSubject,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var existingCert = await GetCertAsync(certName, cancellationToken);
+                if (existingCert != null)
+                {
+                    var privateKeyBytes = Convert.FromBase64String(existingCert.Value);
+                    using var certificate = new X509Certificate2(privateKeyBytes);
+                    if (certificate.Subject.OrdinalStartsWith($"CN={certificateSubject}"))
+                    {
+                        return true;
+                    }
+                }
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                _logger.Warning(ex, "Get existing certificate failed. Probably the existing one is in an invalid state.");
+            }
+
+            return false;
         }
     }
 }
