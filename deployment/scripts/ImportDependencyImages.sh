@@ -62,14 +62,14 @@ set -x
 if [ "$ComputeType" = "aks" ]; then
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "import 'ingress-nginx' chart images"
-echo "import k8s.gcr.io/ingress-nginx/controller:v0.45.0"
-az acr import --name "$ACRName" --source k8s.gcr.io/ingress-nginx/controller:v0.45.0 --force
+echo "import k8s.gcr.io/ingress-nginx/controller:v1.0.1"
+az acr import --name "$ACRName" --source k8s.gcr.io/ingress-nginx/controller:v1.0.1 --force
 
 echo "import k8s.gcr.io/defaultbackend-amd64:1.5"
 az acr import --name "$ACRName" --source k8s.gcr.io/defaultbackend-amd64:1.5 --force
 
-echo "import docker.io/jettech/kube-webhook-certgen:v1.5.1"
-az acr import --name "$ACRName" --source docker.io/jettech/kube-webhook-certgen:v1.5.1 --force
+echo "import k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.0"
+az acr import --name "$ACRName" --source k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.0 --force
 
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "import 'kube-state-metrics' chart images"

@@ -14,6 +14,10 @@ spec:
     matchLabels:
       {{- include "aad-pod-identity.selectors" . | nindent 6 }}
       app.kubernetes.io/component: nmi
+{{- with .Values.nmi.updateStrategy }}
+  updateStrategy:
+{{ toYaml . | indent 4 }}
+{{- end }}
   template:
     metadata:
       labels:
@@ -110,6 +114,9 @@ spec:
           {{- end }}
           {{- if .Values.customUserAgent }}
           - --custom-user-agent={{ .Values.customUserAgent }}
+          {{- end }}
+          {{- if .Values.nmi.setRetryAfterHeader }}
+          - --set-retry-after-header={{ .Values.nmi.setRetryAfterHeader }}
           {{- end }}
         env:
           {{- if semverCompare "<= 1.6.1-0" .Values.nmi.tag }}
