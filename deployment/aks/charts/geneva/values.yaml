@@ -10,21 +10,21 @@ linuxgenevaACR:
 # Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/references/linuxcontainers.html
 # latest prom mdm image version: https://msazure.visualstudio.com/Liftr/_build?definitionId=113171&_a=summary&view=runs
 mdsd:
-  dockerTag: master_20210905.1
+  dockerTag: master_20210919.1
 mdm:
-  dockerTag: master_20210905.1
+  dockerTag: master_20210919.1
 
 fluentd:
-  dockerTag: master_20210905.1
+  dockerTag: master_20210919.1
 
 secpack:
-  dockerTag: master_20210905.1
+  dockerTag: master_20210919.1
 
 promMdmConverter:
   name: prom-mdm-converter
   replicas: 1
   promConverterImagePullPolicy: Always
-  dockerTag: 2.0.master.20210917.1
+  dockerTag: 2.0.master.20210917.2
 
   metrics: # Metrics below with a suffix "_named" or "_rate" are likely defined in the Prometheus configuration
     kube_pod_status_phase:
