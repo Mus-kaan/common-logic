@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Management.PostgreSQL
 {
-    public class PostgreSQLServerManagement
+    public class PostgreSQLServerManagement : IPostgreSQLServerManagement
     {
         private readonly PostgreSQLServerManagementOptions _sqlOptions;
         private readonly Serilog.ILogger _logger;
