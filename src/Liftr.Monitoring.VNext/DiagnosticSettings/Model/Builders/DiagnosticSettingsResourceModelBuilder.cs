@@ -43,6 +43,8 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model.Builders
             var res = new List<DiagnosticSettingsLogsOrMetricsModel>();
             var categories = await GetLogsCategoriesForResourceAsync(_armClient, monitoredResourceId, DiagnosticSettingsV2ApiVersion, tenantId);
             
+            _logger.Information("Log categories for resource {monitoredResourceId}. Categories: {categories}", monitoredResourceId, categories);
+            
             return categories.Select(category =>
             {
                 var logCategory = new DiagnosticSettingsLogsOrMetricsModel
@@ -64,7 +66,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model.Builders
             if (logCategories == null) {
                 DiagnosticSettingsCategoryResourceList categories = await ListCategoriesByResourceAsync(_armClient, resourceId, DiagnosticSettingsV2ApiVersion, tenantId) ?? new DiagnosticSettingsCategoryResourceList();
                 List<DiagnosticSettingsCategoryResource> categoriesValue = categories.Value;
-                logCategories = categoriesValue.Where(c => c.Type.Equals(Whale.Models.CategoryType.Logs)).ToList();
+                logCategories = categoriesValue.Where(c => c.Properties.CategoryType.Equals(CategoryType.Logs)).ToList();
 
                 _logger.Information("Setting log categories cache for resource provider type {resourceProviderType}", resourceProviderType);
                 _localCache.Set<List<DiagnosticSettingsCategoryResource>>(GetLogCategoryCacheKey(resourceProviderType), logCategories, 1, TimeSpan.FromMinutes(LocalCacheTTLInMin));

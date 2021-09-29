@@ -2,14 +2,12 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Liftr.Monitoring.VNext.Whale.Interfaces;
-
 namespace Microsoft.Liftr.Monitoring.VNext.Whale.Models
 {
     /// <summary>
     /// Diagnostic setting category resource details
     /// </summary>
-    public class DiagnosticSettingsCategoryResource : IDiagnosticSettingsCategoryResource
+    public class DiagnosticSettingsCategoryResource
     {
         /// <summary>
         /// Object id of the azure resource
