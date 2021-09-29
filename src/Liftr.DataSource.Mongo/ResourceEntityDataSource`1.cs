@@ -193,6 +193,11 @@ namespace Microsoft.Liftr.DataSource.Mongo
             return await ListAsync(filter, cancellationToken, showActiveOnly);
         }
 
+        public virtual Task<IAsyncCursor<TResource>> ListWithCursorAsync(bool showActiveOnly = true, CancellationToken cancellationToken = default)
+        {
+            return GetCursorAsync(Builders<TResource>.Filter.Empty, cancellationToken, showActiveOnly);
+        }
+
         public virtual async Task<bool> SoftDeleteAsync(string entityId, CancellationToken cancellationToken = default)
         {
             var builder = Builders<TResource>.Filter;
@@ -312,6 +317,39 @@ namespace Microsoft.Liftr.DataSource.Mongo
             {
                 var cursor = await _collection.FindAsync(filter, options: options, cancellationToken: cancellationToken);
                 return await cursor.ToListAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"{operationName} failed");
+                op?.FailOperation(ex.Message);
+                throw;
+            }
+            finally
+            {
+                _rateLimiter.Release();
+                op?.Dispose();
+            }
+        }
+
+        protected async Task<IAsyncCursor<TResource>> GetCursorAsync(
+            FilterDefinition<TResource> filter,
+            CancellationToken cancellationToken,
+            bool showActiveOnly = true,
+            FindOptions<TResource, TResource> options = null,
+            [CallerMemberName] string operationName = "")
+        {
+            var builder = Builders<TResource>.Filter;
+
+            if (showActiveOnly)
+            {
+                filter &= builder.Eq(u => u.Active, true);
+            }
+
+            var op = _logOperation ? _logger.StartTimedOperation($"{_collectionName}-{operationName}") : null;
+            await _rateLimiter.WaitAsync(cancellationToken);
+            try
+            {
+                return await _collection.FindAsync(filter, options: options, cancellationToken: cancellationToken);
             }
             catch (Exception ex)
             {

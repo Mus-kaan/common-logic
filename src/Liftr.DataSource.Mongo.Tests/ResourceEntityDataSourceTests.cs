@@ -6,6 +6,7 @@ using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DataSource.Mongo.Tests.Common;
 using Microsoft.Liftr.Logging;
 using MongoDB.Bson;
+using MongoDB.Driver;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -166,6 +167,35 @@ namespace Microsoft.Liftr.DataSource.Mongo.Tests
                 retrieved = await s.GetAsync(mockEntity.EntityId);
                 Assert.Equal("newVnet3333", retrieved.VNet);
             }
+        }
+
+        [CheckInValidation(skipLinux: true)]
+        public async Task VerifyListAsync()
+        {
+            var ts = new MockTimeSource();
+            using var rateLimiter = new MongoWaitQueueRateLimiter(100, TestLogger.VoidLogger);
+            MockEntityDataSource s = new MockEntityDataSource(_collectionScope.Collection, rateLimiter, ts);
+
+            var rid = "/subscriptions/b0a321d2-3073-44f0-b012-6e60db53ae22/resourceGroups/ngx-test-sbi0920-eus-rg/providers/Microsoft.Storage/storageAccounts/stngxtestsbi0920eus";
+            int totalCount = 101;
+
+            for (int i = 0; i < totalCount; i++)
+            {
+                var mockEntity = new MockResourceEntity() { ResourceId = rid + i, VNet = "VnetId123" + i };
+                var entity1 = await s.AddAsync(mockEntity);
+            }
+
+            var directListResult = await s.ListAsync();
+            Assert.Equal(totalCount, directListResult.Count());
+
+            int asyncListCount = 0;
+            var cursor = await s.ListWithCursorAsync();
+            await cursor.ForEachAsync((record) =>
+            {
+                asyncListCount++;
+            });
+
+            Assert.Equal(totalCount, asyncListCount);
         }
     }
 }
