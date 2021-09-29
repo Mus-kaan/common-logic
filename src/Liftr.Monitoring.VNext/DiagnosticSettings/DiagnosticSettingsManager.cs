@@ -3,13 +3,11 @@
 //-----------------------------------------------------------------------------
 
 using Liftr.Monitoring.VNext.DiagnosticSettings.Interfaces;
-using Microsoft.Azure.Management.Fluent;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Interfaces;
 using Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model;
 using Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model.Builders;
 using Microsoft.Liftr.Monitoring.VNext.Whale.Client.Interfaces;
-using Microsoft.Liftr.Monitoring.Whale.Interfaces;
 using Serilog;
 using System;
 using System.Threading.Tasks;
@@ -24,8 +22,6 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings
     /// </remarks>
     public class DiagnosticSettingsManager : IDiagnosticSettingsManager
     {
-        public const string DiagnosticSettingsV2ApiVersion = "2017-05-01-preview";
-        private readonly IAzureClientsProvider _clientProvider;
         private readonly IArmClient _armClient;
         private readonly DiagnosticSettingsResourceModelBuilder _dsV2ResourceModelBuilder;
         private readonly DiagnosticSettingsSubscriptionModelBuilder _dsV2SubscriptionModelBuilder;
@@ -33,14 +29,12 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings
         private readonly ILogger _logger;
 
         public DiagnosticSettingsManager(
-            IAzureClientsProvider clientProvider,
             DiagnosticSettingsResourceModelBuilder dsV2ResourceModelBuilder,
             DiagnosticSettingsSubscriptionModelBuilder dsV2SubscriptionModelBuilder,
             IDiagnosticSettingsNameProvider dsNameProvider,
             IArmClient armClient,
             ILogger logger)
         {
-            _clientProvider = clientProvider ?? throw new ArgumentNullException(nameof(clientProvider));
             _dsV2ResourceModelBuilder = dsV2ResourceModelBuilder ?? throw new ArgumentNullException(nameof(dsV2ResourceModelBuilder));
             _dsV2SubscriptionModelBuilder = dsV2SubscriptionModelBuilder ?? throw new ArgumentNullException(nameof(dsV2SubscriptionModelBuilder));
             _dsNameProvider = dsNameProvider ?? throw new ArgumentNullException(nameof(dsNameProvider));
@@ -64,7 +58,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings
 
             try
             {
-                var responseBody = await _armClient.GetResourceAsync(diagnosticSettingsId, DiagnosticSettingsV2ApiVersion, tenantId);
+                var responseBody = await _armClient.GetResourceAsync(diagnosticSettingsId, Constants.DiagnosticSettingsV2ApiVersion, tenantId);
                 var result = DiagnosticSettingsManagerResult.SuccessfulResult();
                 var diagnosticSettingsV2Model = responseBody.FromJson<DiagnosticSettingsModel>();
                 result.DiagnosticSettingsName = diagnosticSettingsV2Model.Name;
@@ -91,7 +85,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings
             try
             {
                 var diagnosticSettingsList = GetDiagnosticSettingsListId(monitoredResourceId);
-                var responseBody = await _armClient.GetResourceAsync(diagnosticSettingsList, DiagnosticSettingsV2ApiVersion, tenantId);
+                var responseBody = await _armClient.GetResourceAsync(diagnosticSettingsList, Constants.DiagnosticSettingsV2ApiVersion, tenantId);
                 var result = DiagnosticSettingsManagerResult.SuccessfulResult();
                 var diagnosticSettingsV2ListModel = responseBody.FromJson<DiagnosticSettingsModelList>();
                 result.DiagnosticSettingV2ModelList = diagnosticSettingsV2ListModel.Value;
@@ -143,7 +137,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings
 
             try
             {
-                await _armClient.DeleteResourceAsync(diagnosticSettingsId, DiagnosticSettingsV2ApiVersion, tenantId);
+                await _armClient.DeleteResourceAsync(diagnosticSettingsId, Constants.DiagnosticSettingsV2ApiVersion, tenantId);
                 return DiagnosticSettingsManagerResult.SuccessfulResult();
             }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -192,7 +186,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings
 
             try
             {
-                await _armClient.DeleteResourceAsync(diagnosticSettingsId, DiagnosticSettingsV2ApiVersion, tenantId);
+                await _armClient.DeleteResourceAsync(diagnosticSettingsId, Constants.DiagnosticSettingsV2ApiVersion, tenantId);
                 return DiagnosticSettingsManagerResult.SuccessfulResult();
             }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -221,14 +215,12 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings
                 throw new ArgumentNullException(nameof(diagnosticSettingsName));
             }
 
-            var parsedMonitoredResourceId = new ResourceId(monitoredResourceId);
             var diagnosticSettingsId = GetDiagnosticSettingsId(monitoredResourceId, diagnosticSettingsName);
-            var fluentClient = await GetFluentClientAsync(monitorId, tenantId);
 
-            string diagnosticSettingsBody = null;
+            string diagnosticSettingsBody;
             try
             {
-                diagnosticSettingsBody = await dsModelBuilder.BuildAllLogsAndNoMetricsDiagnosticSettingsBodyAsync(fluentClient, monitoredResourceId, diagnosticSettingsName, monitorId);
+                diagnosticSettingsBody = await dsModelBuilder.BuildAllLogsAndNoMetricsDiagnosticSettingsBodyAsync(_armClient, monitoredResourceId, diagnosticSettingsName, monitorId, Constants.DiagnosticSettingsV2ApiVersion, tenantId);
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
@@ -246,7 +238,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings
             try
             {
                 // TODO: Refactor PutResourceAsync in Common to throw an exception containing StatusCode (similar to ILiftrAzureExtention)
-                await _armClient.PutResourceAsync(diagnosticSettingsId, DiagnosticSettingsV2ApiVersion, diagnosticSettingsBody, tenantId);
+                await _armClient.PutResourceAsync(diagnosticSettingsId, Constants.DiagnosticSettingsV2ApiVersion, diagnosticSettingsBody, tenantId);
                 var result = DiagnosticSettingsManagerResult.SuccessfulResult();
                 result.DiagnosticSettingsName = diagnosticSettingsName;
                 return result;
@@ -263,13 +255,6 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings
 
                 return DiagnosticSettingsManagerResult.FailedResult();
             }
-        }
-
-        private async Task<IAzure> GetFluentClientAsync(string monitorId, string tenantId)
-        {
-            var parsedMonitorId = new ResourceId(monitorId);
-            var fluentClient = await _clientProvider.GetFluentClientAsync(parsedMonitorId.SubscriptionId, tenantId);
-            return fluentClient;
         }
     }
 }

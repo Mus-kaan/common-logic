@@ -2,9 +2,10 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Management.Fluent;
-using Microsoft.Azure.Management.Monitor.Fluent.Models;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Liftr.Monitoring.VNext.Whale.Client.Interfaces;
+using Microsoft.Liftr.Monitoring.VNext.Whale.Models;
+using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,6 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model.Builders
     public class DiagnosticSettingsResourceModelBuilder : DiagnosticSettingsModelBuilderBase
     {
         private const int LocalCacheTTLInMin = 60 * 24;
-        private const string LogCategoriesCachKeyPrefix = "LogCagtegories_CacheKey_";
         private readonly IMemoryCache _localCache;
         private readonly DiagnosticSettingsHelper _dsHelper;
         private readonly ILogger _logger;
@@ -28,40 +28,46 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model.Builders
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        protected override async Task<List<DiagnosticSettingsLogsOrMetricsModel>> BuildAllLogsDiagnosticSettingsPropertyAsync(IAzure fluentClient, string monitoredResourceId)
+        protected override async Task<List<DiagnosticSettingsLogsOrMetricsModel>> BuildAllLogsDiagnosticSettingsPropertyAsync(IArmClient _armClient, string monitoredResourceId, string DiagnosticSettingsV2ApiVersion, string tenantId)
         {
-            if (fluentClient == null)
+            if (_armClient == null)
             {
-                throw new ArgumentNullException(nameof(fluentClient));
+                throw new ArgumentNullException(nameof(_armClient));
+            }
+
+            if (tenantId == null)
+            {
+                throw new ArgumentNullException(nameof(tenantId));
             }
 
             var res = new List<DiagnosticSettingsLogsOrMetricsModel>();
-            var categories = await GetLogsCategoriesForResourceAsync(fluentClient, monitoredResourceId);
+            var categories = await GetLogsCategoriesForResourceAsync(_armClient, monitoredResourceId, DiagnosticSettingsV2ApiVersion, tenantId);
             
             return categories.Select(category =>
             {
-               var logCategory = new DiagnosticSettingsLogsOrMetricsModel();
-               logCategory.Category = category.Name;
-               logCategory.Enabled = true;
-               return logCategory;
+                var logCategory = new DiagnosticSettingsLogsOrMetricsModel
+                {
+                    Category = category.Name,
+                    Enabled = true
+                };
+                return logCategory;
             }).ToList();
         }
 
-        private async Task<List<IDiagnosticSettingsCategory>> GetLogsCategoriesForResourceAsync(IAzure fluentClient, string resourceId)
+        private async Task<List<DiagnosticSettingsCategoryResource>> GetLogsCategoriesForResourceAsync(IArmClient _armClient, string resourceId, string DiagnosticSettingsV2ApiVersion, string tenantId)
         {
             string resourceProviderType = _dsHelper.ExtractFullyQualifiedResourceProviderType(resourceId);
             _logger.Information("Started getting log categories for resource {resourceId} with fully qualified resourceProviderType {resourceProviderType}", resourceId, resourceProviderType);
 
-            var logCategories = _localCache.Get<List<IDiagnosticSettingsCategory>>(GetLogCategoryCacheKey(resourceProviderType));
+            var logCategories = _localCache.Get<List<DiagnosticSettingsCategoryResource>>(GetLogCategoryCacheKey(resourceProviderType));
 
             if (logCategories == null) {
-                var categories = await fluentClient.DiagnosticSettings
-                        .ListCategoriesByResourceAsync(resourceId) ?? new List<IDiagnosticSettingsCategory>();
-
-                logCategories = categories.Where(c => c.Type == CategoryType.Logs).ToList();
+                DiagnosticSettingsCategoryResourceList categories = await ListCategoriesByResourceAsync(_armClient, resourceId, DiagnosticSettingsV2ApiVersion, tenantId) ?? new DiagnosticSettingsCategoryResourceList();
+                List<DiagnosticSettingsCategoryResource> categoriesValue = categories.Value;
+                logCategories = categoriesValue.Where(c => c.Type.Equals(Whale.Models.CategoryType.Logs)).ToList();
 
                 _logger.Information("Setting log categories cache for resource provider type {resourceProviderType}", resourceProviderType);
-                _localCache.Set<List<IDiagnosticSettingsCategory>>(GetLogCategoryCacheKey(resourceProviderType), logCategories, 1, TimeSpan.FromMinutes(LocalCacheTTLInMin));
+                _localCache.Set<List<DiagnosticSettingsCategoryResource>>(GetLogCategoryCacheKey(resourceProviderType), logCategories, 1, TimeSpan.FromMinutes(LocalCacheTTLInMin));
             }
             else
             {
@@ -71,9 +77,34 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model.Builders
             return logCategories;
         }
 
+        private async Task<DiagnosticSettingsCategoryResourceList> ListCategoriesByResourceAsync(IArmClient _armClient, string resourceId, string apiVersion, string tenantId)
+        {
+            if (string.IsNullOrWhiteSpace(resourceId))
+            {
+                throw new ArgumentNullException(nameof(resourceId));
+            }
+
+            if (string.IsNullOrWhiteSpace(apiVersion))
+            {
+                throw new ArgumentNullException(nameof(apiVersion));
+            }
+
+            if (string.IsNullOrWhiteSpace(tenantId))
+            {
+                throw new ArgumentNullException(nameof(tenantId));
+            }
+
+            _logger.Information($"Fetching list of categories for resource: {resourceId} and tenant: {tenantId}");
+            string armDiagnosticSettingsCategoryList = Constants.ArmDiagnosticSettingsCategoryList;
+            string response = await _armClient.GetResourceAsync(resourceId + armDiagnosticSettingsCategoryList, apiVersion, tenantId);
+            _logger.Information($"Finished getting list of categories for resource: {resourceId}. Categories: {response}");
+            
+            return JsonConvert.DeserializeObject<DiagnosticSettingsCategoryResourceList>(response);
+        }
+
         private string GetLogCategoryCacheKey(string resourceProviderType)
         {
-            return $"{LogCategoriesCachKeyPrefix}-{resourceProviderType}";
+            return $"{Constants.LogCategoriesCachKeyPrefix}-{resourceProviderType}";
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Liftr.Monitoring.VNext.Tests
             var dsResourceModelBuilder = new DiagnosticSettingsResourceModelBuilder(_memoryCache, dsHelper, logger);
             var dsSubModelBuilder = new DiagnosticSettingsSubscriptionModelBuilder();
             var armClient = ArmClientTests.CreateArmClient(_testOutputHelper);
-            _dsManager = new DiagnosticSettingsManager(_azureClientsProvider, dsResourceModelBuilder, dsSubModelBuilder, nameProvider, armClient, logger);
+            _dsManager = new DiagnosticSettingsManager(dsResourceModelBuilder, dsSubModelBuilder, nameProvider, armClient, logger);
         }
 
         public void Dispose()

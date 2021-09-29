@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Management.Fluent;
+using Microsoft.Liftr.Monitoring.VNext.Whale.Client.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,15 +11,13 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model.Builders
 {
     public class DiagnosticSettingsSubscriptionModelBuilder : DiagnosticSettingsModelBuilderBase
     {
-        private static readonly List<string> s_subscriptionLogCategories = new List<string> { "Administrative", "Security", "ServiceHealth", "Alert", "Recommendation", "Policy", "Autoscale", "ResourceHealth" };
-
         public DiagnosticSettingsSubscriptionModelBuilder()
         {
         }
 
-        protected override async Task<List<DiagnosticSettingsLogsOrMetricsModel>> BuildAllLogsDiagnosticSettingsPropertyAsync(IAzure fluentClient, string monitoredResourceId)
+        protected override async Task<List<DiagnosticSettingsLogsOrMetricsModel>> BuildAllLogsDiagnosticSettingsPropertyAsync(IArmClient _armClient, string monitoredResourceId, string DiagnosticSettingsV2ApiVersion, string tenantId)
         {
-            var res = s_subscriptionLogCategories.Select(category =>
+            var res = Constants.SubscriptionLogCategories.Select(category =>
             {
                 var logCategory = new DiagnosticSettingsLogsOrMetricsModel();
                 logCategory.Category = category;

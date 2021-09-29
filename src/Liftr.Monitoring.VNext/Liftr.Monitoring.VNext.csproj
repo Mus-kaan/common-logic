@@ -13,7 +13,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Liftr.DataSource.Abstractions\Liftr.DataSource.Abstractions.csproj" />
     <ProjectReference Include="..\Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj" />
-    <ProjectReference Include="..\Liftr.Fluent\Liftr.Fluent.csproj" />
     <ProjectReference Include="..\Liftr.Monitoring.Whale\Liftr.Monitoring.Whale.csproj" />
     <ProjectReference Include="..\Liftr.Monitoring.VNext.Common\Liftr.Monitoring.VNext.Common.csproj" />
     <ProjectReference Include="..\Liftr.RPaaS.Hosting\Liftr.RPaaS.Hosting.csproj" />
@@ -21,7 +20,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Liftr.DataSource.Abstractions\Liftr.DataSource.Abstractions.csproj" />
     <ProjectReference Include="..\Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj" />
-    <ProjectReference Include="..\Liftr.Fluent\Liftr.Fluent.csproj" />
     <ProjectReference Include="..\Liftr.Monitoring.Whale\Liftr.Monitoring.Whale.csproj" />
     <ProjectReference Include="..\Liftr.Monitoring.VNext.Common\Liftr.Monitoring.VNext.Common.csproj" />
     <ProjectReference Include="..\Liftr.RPaaS.Hosting\Liftr.RPaaS.Hosting.csproj" />

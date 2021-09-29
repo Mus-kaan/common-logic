@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model;
 using Microsoft.Liftr.Monitoring.VNext.Whale.Client.Interfaces;
 using Microsoft.Liftr.Monitoring.Whale.Options;
 using Microsoft.Liftr.TokenManager;
@@ -23,7 +24,6 @@ namespace Microsoft.Liftr.Monitoring.VNext.Whale.Client
     {
         private const int MaxConcurrentUpdateRequests = 1;
         private const int DelayBetweenUpdateRequestsInSeconds = 1;
-        private const string ArmManagementEndpoint = "https://management.azure.com";
         private readonly AzureClientsProviderOptions _azureClientsProviderOptions;
         private readonly HttpClient _httpClient;
         private readonly SemaphoreSlim _semaphore;
@@ -49,9 +49,11 @@ namespace Microsoft.Liftr.Monitoring.VNext.Whale.Client
 
         public async Task<string> GetResourceAsync(string resourceId, string apiVersion, string tenantId)
         {
-            var uriBuilder = new UriBuilder(ArmManagementEndpoint);
-            uriBuilder.Path = resourceId;
-            uriBuilder.Query = $"api-version={apiVersion}";
+            var uriBuilder = new UriBuilder(Constants.ArmManagementEndpoint)
+            {
+                Path = resourceId,
+                Query = $"api-version={apiVersion}"
+            };
             _logger.Information($"Start getting resource at Uri: {uriBuilder.Uri}");
 
             using var request = await CreateRequestAsync(HttpMethod.Get, uriBuilder.Uri.ToString(), tenantId);
@@ -107,7 +109,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.Whale.Client
                 throw new ArgumentNullException(nameof(apiVersion));
             }
 
-            var uriBuilder = new UriBuilder(ArmManagementEndpoint);
+            var uriBuilder = new UriBuilder(Constants.ArmManagementEndpoint);
             uriBuilder.Path = resourceId;
             uriBuilder.Query = $"api-version={apiVersion}";
             _logger.Information($"Start deleting resource at Uri: {uriBuilder.Uri}");
@@ -163,7 +165,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.Whale.Client
 
         private async Task SendPutResourceRequestAsync(string resourceId, string apiVersion, string resourceBody, string tenantId, CancellationToken cancellationToken = default)
         {
-            var uriBuilder = new UriBuilder(ArmManagementEndpoint);
+            var uriBuilder = new UriBuilder(Constants.ArmManagementEndpoint);
             uriBuilder.Path = resourceId;
             uriBuilder.Query = $"api-version={apiVersion}";
             _logger.Information($"Start getting resource at Uri: {uriBuilder.Uri}");
