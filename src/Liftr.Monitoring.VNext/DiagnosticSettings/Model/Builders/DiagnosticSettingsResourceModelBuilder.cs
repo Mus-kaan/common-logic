@@ -43,7 +43,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model.Builders
             var res = new List<DiagnosticSettingsLogsOrMetricsModel>();
             var categories = await GetLogsCategoriesForResourceAsync(_armClient, monitoredResourceId, DiagnosticSettingsV2ApiVersion, tenantId);
             
-            _logger.Information("Log categories for resource {monitoredResourceId}. Categories: {categories}", monitoredResourceId, categories);
+            _logger.Information("Log categories for resource {@monitoredResourceId}. Categories: {@categories}", monitoredResourceId, categories);
             
             return categories.Select(category =>
             {
@@ -59,7 +59,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model.Builders
         private async Task<List<DiagnosticSettingsCategoryResource>> GetLogsCategoriesForResourceAsync(IArmClient _armClient, string resourceId, string DiagnosticSettingsV2ApiVersion, string tenantId)
         {
             string resourceProviderType = _dsHelper.ExtractFullyQualifiedResourceProviderType(resourceId);
-            _logger.Information("Started getting log categories for resource {resourceId} with fully qualified resourceProviderType {resourceProviderType}", resourceId, resourceProviderType);
+            _logger.Information("Started getting log categories for resource {@resourceId} with fully qualified resourceProviderType {@resourceProviderType}", resourceId, resourceProviderType);
 
             var logCategories = _localCache.Get<List<DiagnosticSettingsCategoryResource>>(GetLogCategoryCacheKey(resourceProviderType));
 
@@ -68,12 +68,12 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model.Builders
                 List<DiagnosticSettingsCategoryResource> categoriesValue = categories.Value;
                 logCategories = categoriesValue.Where(c => c.Properties.CategoryType.Equals(CategoryType.Logs)).ToList();
 
-                _logger.Information("Setting log categories cache for resource provider type {resourceProviderType}", resourceProviderType);
+                _logger.Information("Setting log categories cache for resource provider type {@resourceProviderType}", resourceProviderType);
                 _localCache.Set<List<DiagnosticSettingsCategoryResource>>(GetLogCategoryCacheKey(resourceProviderType), logCategories, 1, TimeSpan.FromMinutes(LocalCacheTTLInMin));
             }
             else
             {
-                _logger.Information("Retrieved logs categories successfully from local cache for resource provider type {resourceProviderType}", resourceProviderType);
+                _logger.Information("Retrieved logs categories successfully from local cache for resource provider type {@resourceProviderType}", resourceProviderType);
             }
 
             return logCategories;
