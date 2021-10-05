@@ -23,8 +23,9 @@
         "DatadogFirstPartyAppCert": "liftr-monitoring.first-party.liftr-dev.net"
       },
       "AKSConfigurations": {
-        "AKSMachineCount": 3,
-        "AKSMachineType": "Standard_DS2_v2"
+        "AKSMachineType": "Standard_DS2_v2",
+        "AKSAutoScaleMinCount": 2,
+        "AKSAutoScaleMaxCount": 4
       },
       "Global": {
         "Location": "centralus",
@@ -35,12 +36,12 @@
         {
           "Location": "westus2",
           "DataBaseName": "da210801",
-          "ComputeBaseName": "co210903"
+          "ComputeBaseName": "co211001"
         },
         {
           "Location": "eastus",
           "DataBaseName": "da210801",
-          "ComputeBaseName": "co210903"
+          "ComputeBaseName": "co211001"
         }
       ]
     },

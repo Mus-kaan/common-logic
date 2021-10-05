@@ -11,7 +11,6 @@ using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
-using Microsoft.Liftr.Hosting.Contracts;
 using Microsoft.Liftr.KeyVault;
 using Microsoft.Rest.Azure;
 using System;
@@ -182,9 +181,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     aksName,
                     sshUserName,
                     sshPublicKey,
-                    aksInfo.AKSMachineType,
-                    aksInfo.KubernetesVersion,
-                    aksInfo.AKSMachineCount,
+                    aksInfo,
                     outboundIpId,
                     namingContext.Tags,
                     subnet,

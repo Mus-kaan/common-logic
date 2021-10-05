@@ -4,6 +4,7 @@
 
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
+using Microsoft.Liftr.Fluent.Contracts;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -19,17 +20,22 @@ namespace Microsoft.Liftr.Fluent
         public static string GenerateAKSTemplate(
             Region location,
             string aksName,
-            string kubernetesVersion,
             string rootUserName,
             string sshPublicKey,
-            string vmSizeType,
-            int vmCount,
+            AKSInfo aksInfo,
             string agentPoolProfileName,
             IDictionary<string, string> tags,
             bool supportAvailabilityZone,
             string pIpId,
             ISubnet subnet = null)
         {
+            if (aksInfo == null)
+            {
+                throw new ArgumentNullException(nameof(aksInfo));
+            }
+
+            aksInfo.CheckValues();
+
             // https://docs.microsoft.com/en-us/azure/templates/microsoft.containerservice/2020-04-01/managedclusters#ManagedClusterIdentity
             if (location == null)
             {
@@ -51,13 +57,26 @@ namespace Microsoft.Liftr.Fluent
             r.tags = tags.ToJObject();
 
             var props = r.properties;
-            props.kubernetesVersion = kubernetesVersion;
+            props.kubernetesVersion = aksInfo.KubernetesVersion;
             props.dnsPrefix = aksName;
 
             var ap = props.agentPoolProfiles[0];
             ap.name = agentPoolProfileName;
-            ap.vmSize = vmSizeType;
-            ap.count = vmCount;
+            ap.vmSize = aksInfo.AKSMachineType.Value;
+
+            if (aksInfo.AKSMachineCount.HasValue)
+            {
+                ap.count = aksInfo.AKSMachineCount.Value;
+            }
+            else
+            {
+                // azure portal AKS template has a default 3 count when auto-scale is enabled.
+                ap.count = 3;
+
+                ap.enableAutoScaling = true;
+                ap.minCount = aksInfo.AKSAutoScaleMinCount.Value;
+                ap.maxCount = aksInfo.AKSAutoScaleMaxCount.Value;
+            }
 
             if (supportAvailabilityZone)
             {

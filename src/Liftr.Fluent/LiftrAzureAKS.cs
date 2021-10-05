@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.ContainerService.Fluent;
-using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
@@ -26,9 +25,7 @@ namespace Microsoft.Liftr.Fluent
             string aksName,
             string rootUserName,
             string sshPublicKey,
-            ContainerServiceVMSizeTypes vmSizeType,
-            string k8sVersion,
-            int vmCount,
+            AKSInfo aksInfo,
             string outboundIPId,
             IDictionary<string, string> tags,
             ISubnet subnet = null,
@@ -36,6 +33,11 @@ namespace Microsoft.Liftr.Fluent
             bool supportAvailabilityZone = false,
             CancellationToken cancellationToken = default)
         {
+            if (aksInfo == null)
+            {
+                throw new ArgumentNullException(nameof(aksInfo));
+            }
+
             Regex rx = new Regex(@"^[a-z][a-z0-9]{0,11}$");
             if (!rx.IsMatch(agentPoolProfileName))
             {
@@ -43,7 +45,7 @@ namespace Microsoft.Liftr.Fluent
             }
 
             _logger.Information($"Availability Zone Support is set {supportAvailabilityZone} for the Kuberenetes Cluster");
-            _logger.Information("Creating a Kubernetes cluster of version {kubernetesVersion} with name {aksName} ...", k8sVersion, aksName);
+            _logger.Information("Creating a Kubernetes cluster of version {kubernetesVersion} with name {aksName} ...", aksInfo.KubernetesVersion, aksName);
             _logger.Information($"Outbound IP {outboundIPId} is added to AKS cluster ARM Template...");
 
             using var ops = _logger.StartTimedOperation(nameof(CreateAksClusterAsync));
@@ -52,11 +54,9 @@ namespace Microsoft.Liftr.Fluent
                 var templateContent = AKSHelper.GenerateAKSTemplate(
                     region,
                     aksName,
-                    k8sVersion,
                     rootUserName,
                     sshPublicKey,
-                    vmSizeType.Value,
-                    vmCount,
+                    aksInfo,
                     agentPoolProfileName,
                     tags,
                     supportAvailabilityZone,

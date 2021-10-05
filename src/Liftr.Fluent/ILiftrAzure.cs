@@ -6,7 +6,6 @@ using Azure.Core;
 using Microsoft.Azure.Management.Compute.Fluent;
 using Microsoft.Azure.Management.ContainerRegistry.Fluent;
 using Microsoft.Azure.Management.ContainerService.Fluent;
-using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Dns.Fluent;
 using Microsoft.Azure.Management.Eventhub.Fluent;
@@ -22,6 +21,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Azure.Management.TrafficManager.Fluent;
+using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Contracts.AzureMonitor;
 using System;
 using System.Collections.Generic;
@@ -380,9 +380,7 @@ namespace Microsoft.Liftr.Fluent
             string aksName,
             string rootUserName,
             string sshPublicKey,
-            ContainerServiceVMSizeTypes vmSizeType,
-            string k8sVersion,
-            int vmCount,
+            AKSInfo aksInfo,
             string outboundIPId,
             IDictionary<string, string> tags,
             ISubnet subnet = null,

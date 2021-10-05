@@ -5,6 +5,7 @@
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Hosting.Contracts;
 using Newtonsoft.Json;
+using System;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -78,6 +79,147 @@ namespace Microsoft.Liftr.Fluent.Tests
                     devOptions.CheckValid();
                 });
             }
+        }
+
+        [Fact]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
+        public void AKSMachineTypeVerification()
+        {
+            var devOptions = GetDevAKSHostingOptions();
+            devOptions.AKSConfigurations.AKSMachineType = null;
+
+            try
+            {
+                devOptions.CheckValid();
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.OrdinalContains("AKSMachineType is not valid."))
+                {
+                    return;
+                }
+            }
+
+            throw new InvalidOperationException("Should throw");
+        }
+
+        [Fact]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
+        public void SelectAtLeastOneMachineConfiguration()
+        {
+            var devOptions = GetDevAKSHostingOptions();
+            devOptions.AKSConfigurations.AKSMachineCount = null;
+            devOptions.AKSConfigurations.AKSAutoScaleMinCount = null;
+
+            try
+            {
+                devOptions.CheckValid();
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.OrdinalContains("Please provide machine count information through either specify a fixed"))
+                {
+                    return;
+                }
+            }
+
+            throw new InvalidOperationException("Should throw");
+        }
+
+        [Fact]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
+        public void SelectAtMostOneMachineConfiguration()
+        {
+            var devOptions = GetDevAKSHostingOptions();
+            devOptions.AKSConfigurations.AKSMachineCount = 3;
+            devOptions.AKSConfigurations.AKSAutoScaleMinCount = 3;
+            devOptions.AKSConfigurations.AKSAutoScaleMaxCount = 5;
+
+            try
+            {
+                devOptions.CheckValid();
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.OrdinalContains("Cannot support both fixed machine count and auto-scale. Please choose one"))
+                {
+                    return;
+                }
+            }
+
+            throw new InvalidOperationException("Should throw");
+        }
+
+        [Fact]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
+        public void InvalidAutoScaleMin()
+        {
+            var devOptions = GetDevAKSHostingOptions();
+            devOptions.AKSConfigurations.AKSMachineCount = null;
+            devOptions.AKSConfigurations.AKSAutoScaleMinCount = 1;
+            devOptions.AKSConfigurations.AKSAutoScaleMaxCount = 6;
+
+            try
+            {
+                devOptions.CheckValid();
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.OrdinalContains("AKSAutoScaleMinCount should >= 2."))
+                {
+                    return;
+                }
+            }
+
+            throw new InvalidOperationException("Should throw");
+        }
+
+        [Fact]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
+        public void InvalidAutoScaleMax()
+        {
+            var devOptions = GetDevAKSHostingOptions();
+            devOptions.AKSConfigurations.AKSMachineCount = null;
+            devOptions.AKSConfigurations.AKSAutoScaleMinCount = 4;
+            devOptions.AKSConfigurations.AKSAutoScaleMaxCount = 600;
+
+            try
+            {
+                devOptions.CheckValid();
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.OrdinalContains("AKSAutoScaleMaxCount should <= 200"))
+                {
+                    return;
+                }
+            }
+
+            throw new InvalidOperationException("Should throw");
+        }
+
+        [Fact]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
+        public void ConflictAutoScaleMinAndMax()
+        {
+            var devOptions = GetDevAKSHostingOptions();
+            devOptions.AKSConfigurations.AKSMachineCount = null;
+            devOptions.AKSConfigurations.AKSAutoScaleMinCount = 7;
+            devOptions.AKSConfigurations.AKSAutoScaleMaxCount = 6;
+
+            try
+            {
+                devOptions.CheckValid();
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.OrdinalContains("AKSAutoScaleMinCount should <= AKSAutoScaleMaxCount"))
+                {
+                    return;
+                }
+            }
+
+            throw new InvalidOperationException("Should throw");
         }
 
         private static HostingOptions GetAKSHostingOptions()
