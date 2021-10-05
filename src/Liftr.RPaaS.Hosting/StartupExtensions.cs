@@ -40,35 +40,61 @@ namespace Microsoft.Liftr.RPaaS.Hosting
                     throw ex;
                 }
 
-                var kvClient = sp.GetService<IKeyVaultClient>();
-                if (kvClient == null)
+                var tokenProvider = GetTokenProvider(sp);
+
+                var httpClientFactory = sp.GetService<IHttpClientFactory>();
+                if (httpClientFactory == null)
                 {
-                    var ex = new InvalidOperationException("Cannot find a key vault client in the dependency injection container to initizlize RPaaS client.");
+                    var ex = new InvalidOperationException("Cannot find a httpClientFactory instance to initizlize RPaaS client.");
                     logger.LogError(ex.Message);
                     throw ex;
                 }
 
-                var fpaOptions = metaRPOptions.FPAOptions;
-                if (fpaOptions == null
-                || fpaOptions.KeyVaultEndpoint == null
-                || string.IsNullOrEmpty(fpaOptions.AadEndpoint)
-                || string.IsNullOrEmpty(fpaOptions.TargetResource)
-                || string.IsNullOrEmpty(fpaOptions.ApplicationId)
-                || string.IsNullOrEmpty(fpaOptions.CertificateName))
+                var metaRPClient = new MetaRPStorageClient(
+                    httpClientFactory.CreateClient(),
+                    metaRPOptions,
+                    (tenantId) =>
+                    {
+                        return tokenProvider.GetTokenAsync(tenantId);
+                    },
+                    logger);
+
+                return metaRPClient;
+            });
+        }
+
+        public static void AddMetaRPClientWithTokenProvider(this IServiceCollection services, IConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException(nameof(configuration));
+            }
+
+            services.AddSingleton<IMultiTenantAppTokenProvider, MultiTenantAppTokenProvider>((sp) =>
+            {
+                return GetTokenProvider(sp);
+            });
+
+            services.AddSingleton<IMetaRPStorageClient, MetaRPStorageClient>((sp) =>
+            {
+                var logger = sp.GetService<Serilog.ILogger>();
+
+                var metaRPOptions = sp.GetService<IOptions<MetaRPOptions>>().Value;
+
+                if (metaRPOptions == null)
                 {
-                    var ex = new InvalidOperationException($"Please make sure '{nameof(MetaRPOptions.FPAOptions)}' is set under the '{nameof(MetaRPOptions)}' section.");
+                    var ex = new InvalidOperationException($"Please make sure '{nameof(MetaRPOptions)}' section is set in the appsettings.");
                     logger.LogError(ex.Message);
                     throw ex;
                 }
 
-                if (string.IsNullOrEmpty(metaRPOptions.UserRPTenantId))
+                var tokenProvider = sp.GetService<IMultiTenantAppTokenProvider>();
+                if (tokenProvider == null)
                 {
-                    var ex = new InvalidOperationException($"Please make sure '{nameof(MetaRPOptions.UserRPTenantId)}' is set under the '{nameof(MetaRPOptions)}' section.");
+                    var ex = new InvalidOperationException("Cannot find IMultiTenantAppTokenProvider in the dependency injection container to initizlize RPaaS client.");
                     logger.LogError(ex.Message);
                     throw ex;
                 }
-
-                var tokenProvider = new MultiTenantAppTokenProvider(fpaOptions, kvClient, logger);
 
                 var httpClientFactory = sp.GetService<IHttpClientFactory>();
                 if (httpClientFactory == null)
@@ -136,6 +162,52 @@ namespace Microsoft.Liftr.RPaaS.Hosting
             {
                 options.AddPolicy(RPaaSAuthConstants.RPaaSAuthorizationRule, policy => policy.RequireClaim("appid", new[] { authOptions.RPaaSAppId }));
             });
+        }
+
+        private static MultiTenantAppTokenProvider GetTokenProvider(IServiceProvider sp)
+        {
+            var logger = sp.GetService<Serilog.ILogger>();
+
+            var metaRPOptions = sp.GetService<IOptions<MetaRPOptions>>().Value;
+
+            if (metaRPOptions == null)
+            {
+                var ex = new InvalidOperationException($"Please make sure '{nameof(MetaRPOptions)}' section is set in the appsettings.");
+                logger.LogError(ex.Message);
+                throw ex;
+            }
+
+            var kvClient = sp.GetService<IKeyVaultClient>();
+            if (kvClient == null)
+            {
+                var ex = new InvalidOperationException("Cannot find a key vault client in the dependency injection container to initizlize RPaaS client.");
+                logger.LogError(ex.Message);
+                throw ex;
+            }
+
+            var fpaOptions = metaRPOptions.FPAOptions;
+            if (fpaOptions == null
+            || fpaOptions.KeyVaultEndpoint == null
+            || string.IsNullOrEmpty(fpaOptions.AadEndpoint)
+            || string.IsNullOrEmpty(fpaOptions.TargetResource)
+            || string.IsNullOrEmpty(fpaOptions.ApplicationId)
+            || string.IsNullOrEmpty(fpaOptions.CertificateName))
+            {
+                var ex = new InvalidOperationException($"Please make sure '{nameof(MetaRPOptions.FPAOptions)}' is set under the '{nameof(MetaRPOptions)}' section.");
+                logger.LogError(ex.Message);
+                throw ex;
+            }
+
+            if (string.IsNullOrEmpty(metaRPOptions.UserRPTenantId))
+            {
+                var ex = new InvalidOperationException($"Please make sure '{nameof(MetaRPOptions.UserRPTenantId)}' is set under the '{nameof(MetaRPOptions)}' section.");
+                logger.LogError(ex.Message);
+                throw ex;
+            }
+
+            var tokenProvider = new MultiTenantAppTokenProvider(fpaOptions, kvClient, logger);
+
+            return tokenProvider;
         }
 
         private static string ValidateAadIssuer(string issuer, SecurityToken token, TokenValidationParameters options)

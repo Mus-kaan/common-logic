@@ -49,7 +49,7 @@ namespace SampleWebApp
                 metaRPOptions.FPAOptions.KeyVaultEndpoint = new Uri(Configuration[GlobalSettingConstants.VaultEndpoint]);
             });
 
-            services.AddMetaRPClient(Configuration);
+            services.AddMetaRPClientWithTokenProvider(Configuration);
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
