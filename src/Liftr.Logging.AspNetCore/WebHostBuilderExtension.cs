@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Destructurama;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Hosting;
@@ -54,6 +55,11 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                     else
                     {
                         config.ReadFrom.Configuration(host.Configuration).Enrich.FromLogContext();
+                    }
+
+                    if (options.AllowDestructureUsingAttributes)
+                    {
+                        config = config.Destructure.UsingAttributes();
                     }
 
                     if (instanceMeta != null)

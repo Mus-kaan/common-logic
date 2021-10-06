@@ -7,6 +7,7 @@
     <RootNamespace>Microsoft.Liftr.Logging.AspNetCore</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Destructurama.Attributed" Version="$(PackageVersion_Destructurama_Attributed)" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="$(PackageVersion_Microsoft_ApplicationInsights_AspNetCore)" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(PackageVersion_Microsoft_Extensions_Configuration_Json)" />
     <PackageReference Include="Serilog.AspNetCore" Version="$(PackageVersion_Serilog_AspNetCore)" />

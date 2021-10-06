@@ -10,6 +10,7 @@
     <PackageVersion_CommandLineParser>2.8.0</PackageVersion_CommandLineParser>
     <PackageVersion_coverlet_collector>1.2.0</PackageVersion_coverlet_collector>
     <PackageVersion_coverlet_msbuild>2.9.0</PackageVersion_coverlet_msbuild>
+    <PackageVersion_Destructurama_Attributed>3.0.0</PackageVersion_Destructurama_Attributed>
     <PackageVersion_FluentAssertions>5.9.0</PackageVersion_FluentAssertions>
     <PackageVersion_FluentAssertions>5.10.3</PackageVersion_FluentAssertions>
     <PackageVersion_Flurl>2.8.2</PackageVersion_Flurl>

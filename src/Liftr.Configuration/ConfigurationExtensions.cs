@@ -57,6 +57,7 @@ namespace Microsoft.Liftr.Configuration
                 LogTimedOperation = ExtractValue(configuration, nameof(LiftrLoggingOptions.LogTimedOperation), defaultValue: true),
                 LogRequest = ExtractValue(configuration, nameof(LiftrLoggingOptions.LogRequest), defaultValue: false),
                 AllowFilterDynamicOverride = ExtractValue(configuration, nameof(LiftrLoggingOptions.AllowFilterDynamicOverride), defaultValue: false),
+                AllowDestructureUsingAttributes = ExtractValue(configuration, nameof(LiftrLoggingOptions.AllowDestructureUsingAttributes), defaultValue: false),
                 MinimumLevel = ExtractMinimumLevel(configuration),
                 AppInsigthsInstrumentationKey = ExtractAppInsightsKey(configuration),
             };

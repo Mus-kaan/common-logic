@@ -19,6 +19,8 @@ namespace Microsoft.Liftr.Logging
 
         public bool AllowFilterDynamicOverride { get; internal set; } = false;
 
+        public bool AllowDestructureUsingAttributes { get; internal set; } = false;
+
         public LogEventLevel MinimumLevel { get; internal set; } = LogEventLevel.Information;
 
         public string AppInsigthsInstrumentationKey { get; internal set; } = null;
