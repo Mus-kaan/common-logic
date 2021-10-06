@@ -18,5 +18,7 @@ namespace Microsoft.Liftr.Management.PostgreSQL
         public Task DropDatabaseAsync(string dbName);
 
         public Task GrantDatabaseAccessAsync(string dbName, string user);
+
+        public Task KillProcessRelatedToDatabaseAsync(string dbName);
     }
 }

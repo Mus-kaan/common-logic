@@ -133,19 +133,22 @@ namespace Microsoft.Liftr.Management.PostgreSQL
 
         public async Task DropDatabaseAsync(string dbName)
         {
-            if (string.IsNullOrEmpty(dbName))
+            try
             {
-                throw new ArgumentNullException(nameof(dbName));
+                await DoDropDatabaseAsync(dbName);
             }
-
-            using var dbConnection = new NpgsqlConnection(_sqlOptions.ConnectionString);
-#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-            using var createCommand = new NpgsqlCommand($"DROP DATABASE IF EXISTS {dbName}", dbConnection);
-#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
-
-            await dbConnection.OpenAsync();
-            _logger.Information("Start executing DB command: {dbCommand}", createCommand.CommandText);
-            await createCommand.ExecuteNonQueryAsync();
+            catch (PostgresException ex) when (ex.SqlState.OrdinalEquals("55006"))
+            {
+                // "{databaseName}" is being accessed by other users
+                _logger.Warning(ex, $"Try to kill the process related to {dbName}, and retry dropping database");
+                await KillProcessRelatedToDatabaseAsync(dbName);
+                await DoDropDatabaseAsync(dbName);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Drop database failed");
+                throw;
+            }
         }
 
         public async Task GrantDatabaseAccessAsync(string dbName, string user)
@@ -165,6 +168,54 @@ namespace Microsoft.Liftr.Management.PostgreSQL
             using var dbConnection = new NpgsqlConnection(_sqlOptions.ConnectionString);
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
             using var createCommand = new NpgsqlCommand($"GRANT ALL ON DATABASE {dbName} TO {user}", dbConnection);
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+
+            await dbConnection.OpenAsync();
+            _logger.Information("Start executing DB command: {dbCommand}", createCommand.CommandText);
+            await createCommand.ExecuteNonQueryAsync();
+        }
+
+        // Query pg_stat_activity and get the pid values you want to kill, then issue SELECT pg_terminate_backend(pid int) to them.
+        // References:
+        // https://stackoverflow.com/questions/5408156/how-to-drop-a-postgresql-database-if-there-are-active-connections-to-it
+        // https://www.leeladharan.com/drop-a-postgresql-database-if-there-are-active-connections-to-it/
+        public async Task KillProcessRelatedToDatabaseAsync(string dbName)
+        {
+            if (string.IsNullOrEmpty(dbName))
+            {
+                throw new ArgumentNullException(nameof(dbName));
+            }
+
+            using var dbAdminConnection = new NpgsqlConnection(_sqlOptions.ConnectionString);
+            await dbAdminConnection.OpenAsync();
+
+            // Need to grant the admin user role "pg_signal_backend" to kill other process
+            // If it has been granted previously, it will skip without changing postgresql database
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+            using var grantCmd = new NpgsqlCommand($"GRANT pg_signal_backend TO {_sqlOptions.ServerAdminUsername}", dbAdminConnection);
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+            _logger.Information("Start executing grant pg_signal_backend command: {dbCommand}", grantCmd.CommandText);
+            await grantCmd.ExecuteNonQueryAsync();
+
+            // Kill processes related to the targeting database
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+            using var killProcessCommand = new NpgsqlCommand($"SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '{dbName}' AND pid <> pg_backend_pid()", dbAdminConnection);
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+
+            _logger.Information("Start executing DB command: {dbCommand}", killProcessCommand.CommandText);
+            await killProcessCommand.ExecuteNonQueryAsync();
+        }
+
+        private async Task DoDropDatabaseAsync(string dbName)
+        {
+            if (string.IsNullOrEmpty(dbName))
+            {
+                throw new ArgumentNullException(nameof(dbName));
+            }
+
+            using var dbConnection = new NpgsqlConnection(_sqlOptions.ConnectionString);
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+            using var createCommand = new NpgsqlCommand($"DROP DATABASE IF EXISTS {dbName}", dbConnection);
 #pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
 
             await dbConnection.OpenAsync();

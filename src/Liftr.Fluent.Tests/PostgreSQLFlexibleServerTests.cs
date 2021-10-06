@@ -9,6 +9,7 @@ using Microsoft.Liftr.Management.PostgreSQL;
 using Microsoft.Liftr.Tests;
 using Microsoft.Liftr.Tests.Utilities.Trait;
 using MongoDB.Bson;
+using Npgsql;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -32,7 +33,8 @@ namespace Microsoft.Liftr.Fluent.Tests
                 var azure = Client;
                 var name = SdkContext.RandomResourceName("tt-pgsql-flexible-", 15);
 
-                var adminUser = "testUser";
+                // user (aka role) of postgresql has to be lower-case, because for some reason the cmd "GRANT {role} to {user}" is converting the {user} to lower case, then add to table "pg_auth_members" under azure_sys/Catalogs/PostgreSQL_Catalog(pg_catalog). If the {user} is not lower case, it will throw "user(role) not found for lowerCaseOf{user}"
+                var adminUser = "test_user";
                 var adminPassword = Guid.NewGuid().ToString();
                 var createParameters = new Azure.Management.PostgreSQL.FlexibleServers.Models.Server()
                 {
@@ -130,6 +132,8 @@ namespace Microsoft.Liftr.Fluent.Tests
                 await serverClient.GrantDatabaseAccessAsync(dbName, dbUser);
                 await serverClient.GrantDatabaseAccessAsync(dbName, dbUser);
 
+                await TestKillProcessRelatedDBAsync(serverClient, sqlOptions.Server, dbUser, userPassword, dbName, options);
+
                 await serverClient.DropDatabaseAsync(dbName);
                 await serverClient.DropDatabaseAsync(dbName);
 
@@ -149,6 +153,37 @@ namespace Microsoft.Liftr.Fluent.Tests
                 Logger.Error(ex, "PostgreSQL flexible server test failed");
                 throw;
             }
+        }
+
+        private async Task TestKillProcessRelatedDBAsync(PostgreSQLServerManagement serverClient, string serverName, string dbUser, string userPassword, string dbName, PostgreSQLServerManagementOptions options)
+        {
+            // Create 2 additional user connections to the database
+            var userConnectionString = $"Server={serverName};Username={dbUser};Database={dbName};Port=5432;Password={userPassword};SSLMode=Require";
+
+            using var userConn1 = new NpgsqlConnection(userConnectionString);
+            using var userConn2 = new NpgsqlConnection(userConnectionString);
+            await userConn1.OpenAsync();
+            await userConn2.OpenAsync();
+
+            var countBefore = await CountActiveRecordAsync(options, dbName);
+            Assert.Equal(2, countBefore);
+
+            await serverClient.KillProcessRelatedToDatabaseAsync(dbName);
+
+            var countAfter = await CountActiveRecordAsync(options, dbName);
+            Assert.Equal(0, countAfter);
+        }
+
+        private static async Task<long> CountActiveRecordAsync(PostgreSQLServerManagementOptions options, string dbName)
+        {
+            using var superConn = new NpgsqlConnection(options.ConnectionString);
+            await superConn.OpenAsync();
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+            using var countCMD = new NpgsqlCommand($"SELECT COUNT(*) FROM pg_stat_activity WHERE pg_stat_activity.datname = '{dbName}' AND pid <> pg_backend_pid()", superConn);
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+
+            var res = await countCMD.ExecuteScalarAsync();
+            return (long)res;
         }
     }
 }
