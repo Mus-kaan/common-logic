@@ -34,6 +34,7 @@ if [ "$PublicIP" = "" ]; then
 $Helm upgrade $helmReleaseName --install --wait --timeout 25m \
 --create-namespace \
 -f nginx-values.yaml \
+-f nginx-custom-values.yaml \
 --set controller.image.repository="$liftrACRURI/ingress-nginx/controller" \
 --set controller.admissionWebhooks.patch.image.repository="$liftrACRURI/ingress-nginx/kube-webhook-certgen" \
 --set controller.service.enableHttp=false \
@@ -45,6 +46,7 @@ else
 $Helm upgrade $helmReleaseName --install --wait --timeout 25m \
 --create-namespace \
 -f nginx-values.yaml \
+-f nginx-custom-values.yaml \
 --set controller.image.repository="$liftrACRURI/ingress-nginx/controller" \
 --set controller.admissionWebhooks.patch.image.repository="$liftrACRURI/ingress-nginx/kube-webhook-certgen" \
 --set controller.service.enableHttp=false \

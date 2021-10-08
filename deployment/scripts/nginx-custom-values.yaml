@@ -1,0 +1,6 @@
+## We already have a 'nginx-values.yaml' that has lots of base values for liftr platform.
+## This new 'nginx-custom-values.yaml' is for per partner configuration.
+## This will overwrite 'nginx-values.yaml' values.
+
+controller:
+  replicaCount: 3
