@@ -32,14 +32,26 @@ namespace Microsoft.Liftr.Utilities
         {
             using (var httpClient = new HttpClient())
             {
-                httpClient.DefaultRequestHeaders.Add("Metadata", "True");
-
                 try
                 {
-                    var metaResponse = await httpClient.GetStringAsync(c_imdsUri);
-                    var instanceMetadata = JsonConvert.DeserializeObject<InstanceMetadata>(metaResponse);
-                    instanceMetadata.MachineNameEnv = Environment.MachineName;
-                    return instanceMetadata;
+                    using var imdsRequest = new HttpRequestMessage(HttpMethod.Get, c_imdsUri);
+                    imdsRequest.Headers.Add("Metadata", "true");
+                    var response = await httpClient.SendAsync(imdsRequest);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var metaResponse = await response.Content.ReadAsStringAsync();
+                        var instanceMetadata = JsonConvert.DeserializeObject<InstanceMetadata>(metaResponse);
+                        instanceMetadata.MachineNameEnv = Environment.MachineName;
+                        return instanceMetadata;
+                    }
+                    else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                    {
+                        var errorResponse = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine("IMDS return 400 with error message: " + errorResponse);
+                    }
+
+                    return null;
                 }
                 catch
                 {
