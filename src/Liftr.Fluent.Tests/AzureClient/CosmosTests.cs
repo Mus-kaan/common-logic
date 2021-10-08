@@ -53,7 +53,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             await MonitoringRelationshipDataSourceTests.RunRelationshipTestAsync(collection);
         }
 
-        [CheckInValidation(skipLinux: true)]
+        [CheckInValidation(Skip = "Cosmos db is flacky recently")]
         [PublicWestUS2]
         public async Task RotateCosmosDBConnectionStringAsync()
         {

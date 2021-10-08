@@ -76,95 +76,136 @@ namespace Microsoft.Liftr.Fluent
                 throw new ArgumentNullException(nameof(liftrAzure));
             }
 
-            _logger.Information("Creating a Key Vault with name '{vaultName}' only accessable from IP address '{ipAddress}' ...", vaultName, ipAddress);
-
-            var ips = new List<IPRule>()
+            using var ops = _logger.StartTimedOperation(nameof(CreateKeyVaultAsync));
+            try
             {
-                new IPRule()
+                _logger.Information("Creating a Key Vault with name '{vaultName}' only accessable from IP address '{ipAddress}' ...", vaultName, ipAddress);
+
+                var ips = new List<IPRule>()
                 {
-                    Value = ipAddress,
-                },
-            };
-            var subnets = new List<VirtualNetworkRule>();
+                    new IPRule()
+                    {
+                        Value = ipAddress,
+                    },
+                };
 
-            var templateContent = GenerateKeyVaultTemplate(
-                location,
-                vaultName,
-                liftrAzure.TenantId,
-                null,
-                ips,
-                subnets,
-                tags,
-                softDeleteRetentionInDays: 15);
+                var subnets = new List<VirtualNetworkRule>();
 
-            await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true, cancellationToken: cancellationToken);
+                var templateContent = GenerateKeyVaultTemplate(
+                    location,
+                    vaultName,
+                    liftrAzure.TenantId,
+                    null,
+                    ips,
+                    subnets,
+                    tags,
+                    softDeleteRetentionInDays: 15);
 
-            IVault vault = await liftrAzure.GetKeyVaultAsync(rgName, vaultName, cancellationToken);
+                await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true, cancellationToken: cancellationToken);
 
-            _logger.Information("Created Key Vault with resourceId {resourceId}", vault.Id);
+                IVault vault = await liftrAzure.GetKeyVaultAsync(rgName, vaultName, cancellationToken);
 
-            return vault;
+                _logger.Information("Created Key Vault with resourceId {resourceId}", vault.Id);
+
+                return vault;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Key Vault creation failed.");
+                ops.FailOperation(ex.Message);
+                throw;
+            }
         }
 
         public async Task WithAccessFromNetworkAsync(
             IVault vault,
             ILiftrAzure liftrAzure,
-            string ipAddress,
-            string subnetId,
-            CancellationToken cancellationToken)
+            IEnumerable<string> ipList,
+            IEnumerable<string> subnetList,
+            CancellationToken cancellationToken,
+            bool removeExistingIPs = true)
         {
-            var ips = new List<IPRule>();
-            if (!string.IsNullOrEmpty(ipAddress))
+            using var ops = _logger.StartTimedOperation("RestrictKeyVaultVNet");
+            try
             {
-                _logger.Information("Restrict the Key Vault '{kvId}' access to IP address '{ipAddress}'.", vault.Id, ipAddress);
-                ips.Add(new IPRule()
+                List<IPRule> ips = new List<IPRule>();
+                if (!removeExistingIPs && vault.Inner.Properties?.NetworkAcls?.IpRules != null)
                 {
-                    Value = ipAddress,
-                });
-            }
-
-            var subnets = new List<VirtualNetworkRule>();
-            if (vault.Inner.Properties?.NetworkAcls?.VirtualNetworkRules != null)
-            {
-                foreach (var role in vault.Inner.Properties.NetworkAcls.VirtualNetworkRules)
-                {
-                    subnets.Add(role);
+                    foreach (var ip in vault.Inner.Properties.NetworkAcls.IpRules)
+                    {
+                        ips.Add(ip);
+                    }
                 }
-            }
 
-            if (!string.IsNullOrEmpty(subnetId) &&
-                !subnets.Where(sub => sub.Id.OrdinalEquals(subnetId)).Any())
+                if (ipList != null)
+                {
+                    foreach (var ipAddress in ipList)
+                    {
+                        if (!ips.Where(i => i.Value.OrdinalEquals(ipAddress)).Any())
+                        {
+                            _logger.Information("Restricting the Key Vault '{kvId}' access to IP '{ip}'.", vault.Id, ipAddress);
+                            ips.Add(new IPRule()
+                            {
+                                Value = ipAddress,
+                            });
+                        }
+                    }
+                }
+
+                var subnets = new List<VirtualNetworkRule>();
+                if (vault.Inner.Properties?.NetworkAcls?.VirtualNetworkRules != null)
+                {
+                    foreach (var role in vault.Inner.Properties.NetworkAcls.VirtualNetworkRules)
+                    {
+                        subnets.Add(role);
+                    }
+                }
+
+                if (subnetList != null)
+                {
+                    foreach (var subnetId in subnetList)
+                    {
+                        if (!subnets.Where(sub => sub.Id.OrdinalEquals(subnetId)).Any())
+                        {
+                            _logger.Information("Restricting the Key Vault '{kvId}' access to subnet '{subnetId}'.", vault.Id, subnetId);
+                            subnets.Add(new VirtualNetworkRule(subnetId));
+                        }
+                    }
+                }
+
+                var tags = new Dictionary<string, string>();
+                foreach (var kvp in vault.Tags)
+                {
+                    tags[kvp.Key] = kvp.Value;
+                }
+
+                var accessPolicies = new List<AccessPolicyEntry>();
+                foreach (var policy in vault.AccessPolicies)
+                {
+                    accessPolicies.Add(policy.Inner);
+                }
+
+                var softDeleteTime = await GetSoftDeleteTimeAsync(vault, liftrAzure, cancellationToken);
+
+                var templateContent = GenerateKeyVaultTemplate(
+                    vault.Region,
+                    vault.Name,
+                    liftrAzure.TenantId,
+                    accessPolicies,
+                    ips,
+                    subnets,
+                    tags,
+                    softDeleteTime);
+
+                _logger.Information("Restricting Key Vault '{kvId}' to be accessible from IPs : '{@allowedIPs}', and subnets: '{@allowedSubnets}'", vault.Id, ips, subnets);
+                await liftrAzure.CreateDeploymentAsync(vault.Region, vault.ResourceGroupName, templateContent, noLogging: true, cancellationToken: cancellationToken);
+            }
+            catch (Exception ex)
             {
-                _logger.Information("Restrict the Key Vault '{kvId}' access to subnet '{subnetId}'.", vault.Id, subnetId);
-                subnets.Add(new VirtualNetworkRule(subnetId));
+                _logger.Error(ex, "Key Vault VNet restriction failed.");
+                ops.FailOperation(ex.Message);
+                throw;
             }
-
-            var tags = new Dictionary<string, string>();
-            foreach (var kvp in vault.Tags)
-            {
-                tags[kvp.Key] = kvp.Value;
-            }
-
-            var accessPolicies = new List<AccessPolicyEntry>();
-            foreach (var policy in vault.AccessPolicies)
-            {
-                accessPolicies.Add(policy.Inner);
-            }
-
-            var softDeleteTime = await GetSoftDeleteTimeAsync(vault, liftrAzure, cancellationToken);
-
-            var templateContent = GenerateKeyVaultTemplate(
-                vault.Region,
-                vault.Name,
-                liftrAzure.TenantId,
-                accessPolicies,
-                ips,
-                subnets,
-                tags,
-                softDeleteTime);
-
-            await liftrAzure.CreateDeploymentAsync(vault.Region, vault.ResourceGroupName, templateContent, noLogging: true, cancellationToken: cancellationToken);
-            _logger.Information("Key Vault '{kvId}' is accessible from IPs : '{@allowedIPs}', and subnets: '{@allowedSubnets}'.", vault.Id, ips, subnets);
         }
 
         private static async Task<int> GetSoftDeleteTimeAsync(IVault vault, ILiftrAzure liftrAzure, CancellationToken cancellationToken)

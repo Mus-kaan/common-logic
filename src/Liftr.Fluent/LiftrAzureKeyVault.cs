@@ -53,16 +53,37 @@ namespace Microsoft.Liftr.Fluent
             return kv;
         }
 
-        public async Task WithKeyVaultAccessFromNetworkAsync(
+        public Task WithKeyVaultAccessFromNetworkAsync(
             IVault vault,
             string ipAddress,
             string subnetId,
             bool enableVNetFilter = true,
+            bool removeExistingIPs = true,
+            CancellationToken cancellationToken = default)
+        {
+            IEnumerable<string> ipList = string.IsNullOrEmpty(ipAddress) ? null : new List<string> { ipAddress };
+            IEnumerable<string> subnetList = string.IsNullOrEmpty(subnetId) ? null : new List<string> { subnetId };
+            return WithKeyVaultAccessFromNetworkAsync(vault, ipList, subnetList, enableVNetFilter, removeExistingIPs, cancellationToken);
+        }
+
+        public async Task WithKeyVaultAccessFromNetworkAsync(
+            IVault vault,
+            IEnumerable<string> ipList,
+            IEnumerable<string> subnetList,
+            bool enableVNetFilter = true,
+            bool removeExistingIPs = true,
             CancellationToken cancellationToken = default)
         {
             if (vault == null)
             {
                 throw new ArgumentNullException(nameof(vault));
+            }
+
+            if (ipList == null && subnetList == null)
+            {
+#pragma warning disable CA2208 // Instantiate argument exceptions correctly
+                throw new ArgumentNullException($"{nameof(ipList)} and {nameof(subnetList)} cannot be both null");
+#pragma warning restore CA2208 // Instantiate argument exceptions correctly
             }
 
             if (!enableVNetFilter && vault?.Inner?.Properties?.NetworkAcls?.DefaultAction != NetworkRuleAction.Deny)
@@ -72,7 +93,7 @@ namespace Microsoft.Liftr.Fluent
             }
 
             var helper = new KeyVaultHelper(_logger);
-            await helper.WithAccessFromNetworkAsync(vault, this, ipAddress, subnetId, cancellationToken);
+            await helper.WithAccessFromNetworkAsync(vault, this, ipList, subnetList, cancellationToken, removeExistingIPs);
         }
 
         public async Task<IVault> CreateKeyVaultAsync(

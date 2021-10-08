@@ -342,7 +342,21 @@ namespace Microsoft.Liftr.Fluent
 
         Task<IEnumerable<IVault>> ListKeyVaultAsync(string rgName, string namePrefix = null, CancellationToken cancellationToken = default);
 
-        Task WithKeyVaultAccessFromNetworkAsync(IVault vault, string ipAddress, string subnetId, bool enableVNetFilter = true, CancellationToken cancellationToken = default);
+        Task WithKeyVaultAccessFromNetworkAsync(
+            IVault vault,
+            string ipAddress,
+            string subnetId,
+            bool enableVNetFilter = true,
+            bool removeExistingIPs = true,
+            CancellationToken cancellationToken = default);
+
+        Task WithKeyVaultAccessFromNetworkAsync(
+            IVault vault,
+            IEnumerable<string> ipList,
+            IEnumerable<string> subnetList,
+            bool enableVNetFilter = true,
+            bool removeExistingIPs = true,
+            CancellationToken cancellationToken = default);
 
         Task RemoveAccessPolicyAsync(string kvResourceId, string servicePrincipalObjectId, CancellationToken cancellationToken = default);
 
