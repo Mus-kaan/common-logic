@@ -10,7 +10,7 @@ metadata:
   annotations:
     description: {{ .Chart.Description }}
 spec:
-  replicas: {{ .Values.mic.replicas }}
+  replicas: 2
   selector:
     matchLabels:
       {{- include "aad-pod-identity.selectors" . | nindent 6 }}
@@ -23,11 +23,10 @@ spec:
       {{- if .Values.mic.podLabels }}
       {{- toYaml .Values.mic.podLabels | nindent 8 }}
       {{- end }}
+{{- if .Values.mic.podAnnotations }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/mic-secret.yaml") . | sha256sum }}
-        {{- if .Values.mic.podAnnotations }}
-        {{ toYaml .Values.mic.podAnnotations | nindent 8 }}
-        {{- end }}
+{{ toYaml .Values.mic.podAnnotations | indent 8 }}
+{{- end }}
     spec:
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:

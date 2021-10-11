@@ -6,8 +6,8 @@ items:
   - apiVersion: "aadpodidentity.k8s.io/v1"
     kind: AzureIdentity
     metadata:
-      name: {{ default $key $value.name }}
-      namespace: {{ default $.Release.Namespace $value.namespace }}
+      name: {{ $key }}
+      namespace: {{ default $.Release.Namespace .namespace }}
       labels:
         {{- include "aad-pod-identity.labels" $ | nindent 8 }}
     spec:
@@ -27,11 +27,11 @@ items:
     kind: AzureIdentityBinding
     metadata:
       name: {{ $value.binding.name }}
-      namespace: {{ default $.Release.Namespace $value.namespace }}
+      namespace: {{ default $.Release.Namespace .namespace }}
       labels:
         {{- include "aad-pod-identity.labels" $ | nindent 8 }}
     spec:
-      azureIdentity: {{ default $key $value.name }}
+      azureIdentity: {{ $key }}
       selector: {{ required "binding.selector is required!" $value.binding.selector }}
 {{- end }}
 {{- end -}}
