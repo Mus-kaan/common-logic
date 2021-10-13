@@ -8,6 +8,10 @@
         {
             "file": "\\src\\Liftr.Fluent.Tests\\PostgreSQLFlexibleServerTests.cs",
             "_justification": "The password is dynamiclly generated and the sql server will be deleted after test"
+        },
+        {
+            "file": "\\src\\Liftr.Fluent.Tests\\PostgreSQLFlexibleServerUserManagementTests.cs",
+            "_justification": "The password is dynamiclly generated and the sql server will be deleted after test"
         }
     ]
 }

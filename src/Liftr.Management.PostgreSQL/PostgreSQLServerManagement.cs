@@ -53,6 +53,137 @@ namespace Microsoft.Liftr.Management.PostgreSQL
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "<Pending>")]
+        public async Task CreateUsersIfNotExistAsync(
+            string roleName,
+            string username1,
+            string password1,
+            string username2,
+            string password2)
+        {
+            // See details here: https://kevinhakanson.com/2018-04-09-database-credential-rotation-in-postgresql
+            if (string.IsNullOrEmpty(roleName))
+            {
+                throw new ArgumentNullException(nameof(roleName));
+            }
+
+            if (string.IsNullOrEmpty(username1))
+            {
+                throw new ArgumentNullException(nameof(username1));
+            }
+
+            if (string.IsNullOrEmpty(password1))
+            {
+                throw new ArgumentNullException(nameof(password1));
+            }
+
+            if (string.IsNullOrEmpty(username2))
+            {
+                throw new ArgumentNullException(nameof(username2));
+            }
+
+            if (string.IsNullOrEmpty(password2))
+            {
+                throw new ArgumentNullException(nameof(password2));
+            }
+
+            using var ops = _logger.StartTimedOperation(nameof(CreateUsersIfNotExistAsync));
+            try
+            {
+                using var dbConnection = new NpgsqlConnection(_sqlOptions.ConnectionString);
+                await dbConnection.OpenAsync();
+
+                _logger.Information($"Creating a non-login role '{roleName}' that can be shared by multiple login users.");
+                {
+                    using var sqlCommand = new NpgsqlCommand($"CREATE ROLE {roleName} WITH NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT NOREPLICATION", dbConnection);
+                    try
+                    {
+                        _logger.Information("Start executing DB command: {dbCommand}", sqlCommand.CommandText);
+                        await sqlCommand.ExecuteNonQueryAsync();
+                    }
+                    catch (PostgresException ex) when (ex.SqlState.OrdinalEquals("42710"))
+                    {
+                        _logger.Warning(ex, "The DB role already exist. Skip.");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Create role failed");
+                        throw;
+                    }
+                }
+
+                _logger.Information($"Creating login user 1 '{username1}' with role '{roleName}'.");
+                {
+                    using var createCommand = new NpgsqlCommand($"CREATE ROLE {username1} WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION CONNECTION LIMIT 10 PASSWORD '{password1}' IN ROLE {roleName}", dbConnection);
+                    try
+                    {
+                        await createCommand.ExecuteNonQueryAsync();
+                    }
+                    catch (PostgresException ex) when (ex.SqlState.OrdinalEquals("42710"))
+                    {
+                        _logger.Warning(ex, "The DB user already exist. Skip.");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Create user failed");
+                        throw;
+                    }
+                }
+
+                _logger.Information($"Creating login user 2 '{username2}' with role '{roleName}'.");
+                {
+                    using var createCommand = new NpgsqlCommand($"CREATE ROLE {username2} WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION CONNECTION LIMIT 10 PASSWORD '{password2}' IN ROLE {roleName}", dbConnection);
+                    try
+                    {
+                        await createCommand.ExecuteNonQueryAsync();
+                    }
+                    catch (PostgresException ex) when (ex.SqlState.OrdinalEquals("42710"))
+                    {
+                        _logger.Warning(ex, "The DB user already exist. Skip.");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Create user failed");
+                        throw;
+                    }
+                }
+
+                _logger.Information($"Make user {username1} to take default role of {roleName}");
+                {
+                    using var sqlCommand = new NpgsqlCommand($"ALTER ROLE {username1} SET ROLE {roleName}", dbConnection);
+                    try
+                    {
+                        await sqlCommand.ExecuteNonQueryAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Update role for user failed");
+                        throw;
+                    }
+                }
+
+                _logger.Information($"Make user {username2} to take default role of {roleName}");
+                {
+                    using var sqlCommand = new NpgsqlCommand($"ALTER ROLE {username2} SET ROLE {roleName}", dbConnection);
+                    try
+                    {
+                        await sqlCommand.ExecuteNonQueryAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Update role for user failed");
+                        throw;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "failed at creating users");
+                ops.FailOperation(ex.Message);
+                throw;
+            }
+        }
+
         public async Task UpdatePasswordAsync(string username, string password)
         {
             if (string.IsNullOrEmpty(username))
@@ -68,7 +199,7 @@ namespace Microsoft.Liftr.Management.PostgreSQL
             using var dbConnection = new NpgsqlConnection(_sqlOptions.ConnectionString);
 #pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
             using var createCommand = new NpgsqlCommand($"ALTER USER {username} WITH PASSWORD '{password}'", dbConnection);
-#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
 
             await dbConnection.OpenAsync();
             _logger.Information("Start updating password for DB user {username}", username);
@@ -98,6 +229,13 @@ namespace Microsoft.Liftr.Management.PostgreSQL
             await dbConnection.OpenAsync();
             _logger.Information("Start executing DB command: {dbCommand}", createCommand.CommandText);
             await createCommand.ExecuteNonQueryAsync();
+        }
+
+        public async Task DropUsersAsync(string roleName, string username1, string username2)
+        {
+            await DropUserAsync(username2);
+            await DropUserAsync(username1);
+            await DropUserAsync(roleName);
         }
 
         public async Task CreateDatabaseIfNotExistAsync(string dbName)
