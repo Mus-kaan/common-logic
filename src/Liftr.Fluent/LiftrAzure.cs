@@ -526,17 +526,38 @@ namespace Microsoft.Liftr.Fluent
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex, "ARM deployment failed");
-                    if (ex is CloudException)
-                    {
-                        var cloudEx = ex as CloudException;
-                        _logger.Error("Failure details: " + cloudEx.Response.Content);
-                    }
-
-                    var error = await DeploymentExtensions.GetDeploymentErrorDetailsAsync(FluentClient.SubscriptionId, rgName, deploymentName, AzureCredentials);
-                    _logger.Error("ARM deployment with name {@deploymentName} Failed with Error: {@DeploymentError}", deploymentName, error);
                     ops.FailOperation("ARM deployment failed");
-                    throw new ARMDeploymentFailureException("ARM deployment failed", ex) { Details = error };
+
+                    try
+                    {
+                        var error = await DeploymentExtensions.GetDeploymentErrorDetailsAsync(FluentClient.SubscriptionId, rgName, deploymentName, AzureCredentials);
+                        _logger.Error(
+                            ex,
+                            "Failed ARM deployment with name {deploymentName} (in resource group '{rgName}' of subscription '{subscriptionId}'). Error: {@DeploymentError}",
+                            deploymentName,
+                            rgName,
+                            FluentClient.SubscriptionId,
+                            error);
+
+                        throw new ARMDeploymentFailureException("ARM deployment failed", ex) { Details = error };
+                    }
+                    catch
+                    {
+                        _logger.Error(
+                            ex,
+                            "Failed ARM deployment with name {deploymentName} (in resource group '{rgName}' of subscription '{subscriptionId}').",
+                            deploymentName,
+                            rgName,
+                            FluentClient.SubscriptionId);
+
+                        if (ex is CloudException)
+                        {
+                            var cloudEx = ex as CloudException;
+                            _logger.Error("Failure details: " + cloudEx.Response.Content);
+                        }
+
+                        throw new ARMDeploymentFailureException("ARM deployment failed", ex);
+                    }
                 }
             }
         }
