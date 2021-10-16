@@ -16,6 +16,7 @@ using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.KeyVault;
 using Microsoft.Liftr.Utilities;
 using Microsoft.Rest.Azure;
+using Polly;
 using Serilog.Context;
 using System;
 using System.Collections.Generic;
@@ -119,10 +120,12 @@ namespace Microsoft.Liftr.ImageBuilder
                 }
                 else
                 {
+                    var azEnv = _options.Cloud.LoadAzEnvironment();
+                    EnsureManagedIdentityIsAvailable(azEnv);
+
                     _logger.Information("Use Managed Identity to authenticate against Azure.");
                     kvClient = KeyVaultClientFactory.FromMSI();
 
-                    var azEnv = _options.Cloud.LoadAzEnvironment();
                     TokenCredentialOptions tokenCredentialOptions = new TokenCredentialOptions()
                     {
                         AuthorityHost = new Uri(azEnv.AuthenticationEndpoint),
@@ -188,6 +191,34 @@ namespace Microsoft.Liftr.ImageBuilder
                     _logger.Fatal(ex.Message);
                     throw ex;
                 }
+            }
+        }
+
+        private void EnsureManagedIdentityIsAvailable(AzureEnvironment azureEnvironment)
+        {
+            using (var operation = _logger.StartTimedOperation("EnsureManagedIdentityIsAvailable"))
+            {
+                _logger.Information("Authentication endpoint is: {authenticationEndpoint}", azureEnvironment.AuthenticationEndpoint);
+                var credentialOptions = new TokenCredentialOptions()
+                {
+                    AuthorityHost = new Uri(azureEnvironment.AuthenticationEndpoint),
+                };
+
+                var credential = new ManagedIdentityCredential(options: credentialOptions);
+                var scope = $"{azureEnvironment.ResourceManagerEndpoint}/.default";
+                _logger.Information("Scope is: {scope}", scope);
+                var tokenRequestContext = new TokenRequestContext(new string[] { scope });
+
+                var retryPolicy = Policy.Handle<CredentialUnavailableException>().WaitAndRetry(12, i => TimeSpan.FromSeconds(5)); // Retry for ~1 minute.
+
+                retryPolicy.Execute(() =>
+                {
+                    _logger.Information("Attempting to acquire access token from MSI endpoint.");
+
+                    _ = credential.GetToken(tokenRequestContext);
+
+                    _logger.Information("Successfully acquired access token from MSI endpoint.");
+                });
             }
         }
 

@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="$(PackageVersion_Azure_Identity)" />
     <PackageReference Include="CommandLineParser" Version="$(PackageVersion_CommandLineParser)" />
+    <PackageReference Include="Polly" Version="$(PackageVersion_Polly)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Blob\Liftr.Blob.csproj" />

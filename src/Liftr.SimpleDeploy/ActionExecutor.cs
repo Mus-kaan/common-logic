@@ -19,6 +19,7 @@ using Microsoft.Liftr.Hosting.Contracts;
 using Microsoft.Liftr.KeyVault;
 using Microsoft.Liftr.Utilities;
 using Microsoft.Rest.Azure;
+using Polly;
 using Serilog.Context;
 using System;
 using System.IO;
@@ -119,11 +120,13 @@ namespace Microsoft.Liftr.SimpleDeploy
                 }
                 else
                 {
+                    var azEnv = AzureEnvironment.AzureGlobalCloud;
+                    EnsureManagedIdentityIsAvailable(azEnv);
+
                     _logger.Information("Use Managed Identity to authenticate against Azure.");
                     kvClient = KeyVaultClientFactory.FromMSI();
 
                     // TODO: update for non-public cloud.
-                    var azEnv = AzureEnvironment.AzureGlobalCloud;
                     using TenantHelper tenantHelper = new TenantHelper(new Uri(azEnv.ResourceManagerEndpoint));
                     tenantId = await tenantHelper.GetTenantIdForSubscriptionAsync(hostingEnvironmentOptions.AzureSubscription.ToString());
 
@@ -176,6 +179,34 @@ namespace Microsoft.Liftr.SimpleDeploy
         public Task StopAsync(CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
+        }
+
+        private void EnsureManagedIdentityIsAvailable(AzureEnvironment azureEnvironment)
+        {
+            using (var operation = _logger.StartTimedOperation("EnsureManagedIdentityIsAvailable"))
+            {
+                _logger.Information("Authentication endpoint is: {authenticationEndpoint}", azureEnvironment.AuthenticationEndpoint);
+                var credentialOptions = new TokenCredentialOptions()
+                {
+                    AuthorityHost = new Uri(azureEnvironment.AuthenticationEndpoint),
+                };
+
+                var credential = new ManagedIdentityCredential(options: credentialOptions);
+                var scope = $"{azureEnvironment.ResourceManagerEndpoint}/.default";
+                _logger.Information("Scope is: {scope}", scope);
+                var tokenRequestContext = new TokenRequestContext(new string[] { scope });
+
+                var retryPolicy = Policy.Handle<CredentialUnavailableException>().WaitAndRetry(12, i => TimeSpan.FromSeconds(5)); // Retry for ~1 minute.
+
+                retryPolicy.Execute(() =>
+                {
+                    _logger.Information("Attempting to acquire access token from MSI endpoint.");
+
+                    _ = credential.GetToken(tokenRequestContext);
+
+                    _logger.Information("Successfully acquired access token from MSI endpoint.");
+                });
+            }
         }
 
         private async Task RunActionAsync(HostingEnvironmentOptions targetOptions, KeyVaultClient kvClient, LiftrAzureFactory azFactory)
