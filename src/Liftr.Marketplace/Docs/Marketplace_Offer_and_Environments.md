@@ -1,6 +1,6 @@
 # Marketplace Environment to use
 
-## Dev and Dogfood
+## Marketplace ARM Dev and Dogfood
 For our Dev and Dogfood, we will be using the Microsoft Dogfood tenant.
 
 ```
@@ -9,7 +9,7 @@ API-Version: 2018-08-31
 Target resource: 4c328f8a-1356-4991-883b-ff83cb17aba3
 AAD endpoint: https://login.windows-ppe.net
 ```
-## Production
+## Marketplace ARM Production
 
 For production, we will be using the Microsoft AME tenant.
 
@@ -19,6 +19,26 @@ API-Version: 2018-08-31
 Target resource: 62d94f6c-d599-489b-a797-3e10e42fbe22
 AAD endpoint: https://login.microsoftonline.com
 ```
+
+
+# Marketplace Agreement Dev and Dogfood
+
+```
+Marketplace commerce uri: https://marketplacecommerce-preview.azure.com
+API-Version: 2021-01-01
+TargetResource: 49d90b2f-8747-49fe-ae39-6746533935aa,
+AadEndpoint": https://login.microsoftonline.com,
+```
+
+# Marketplace Agreement Canary
+
+```
+Endpoint: https://marketplacecommerce-canary.azure.com, // Canary marketplace store api
+ApiVersion: 2021-01-01
+TargetResource: 2670464a-5454-4936-8fc3-20cb65e2481f,
+AadEndpoint": https://login.microsoftonline.com,
+```
+
 # Marketplace Offer in Partner Center
 
 Details on how to publish the offer can be found In the [Marketplace Saas Documentation](https://docs.microsoft.com/en-us/azure/marketplace/partner-center-portal/create-new-saas-offer)

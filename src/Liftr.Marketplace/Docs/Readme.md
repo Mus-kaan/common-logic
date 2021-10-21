@@ -12,20 +12,25 @@ The API spec of Marketplace can be found for [Dogfood](https://marketplaceapi.sp
 
 To use the `MarketplaceARMClient`:
 
-1. Add the following line to your Startup.cs - `services.AddMarketplaceARMClient(Configuration);` (Please refer to latest code in [StartupExtensions](../StartupExtensions.cs))
+1. Add the following line to your Startup.cs - `services.AddMarketplaceARMClientWithTokenService(Configuration);` (Please refer to latest code in [StartupExtensions](../StartupExtensions.cs))
 2. Add the MarketplaceSaasOptions in the  appsettings.json or in Keyvault
 
 ### Credentials to Use
-To call the Marketplace Internal APIs, Marketplace has whitelisted our **FirstPartyApp** to call their endpoint. The application id can be found [here](https://msazure.visualstudio.com/Liftr/_wiki/wikis/Liftr.wiki/42611/Monitoring-(log-forwarder-and-metrics-crawler)).
+To call the Marketplace Internal APIs, use the APP Id of the application that has been whitelisted to common token service. Refere [here](https://dev.azure.com/msazure/Liftr/_git/Liftr.Common?path=src/Liftr.Marketplace/Docs/Marketplace_Identities_And_Certificate.md&version=GC1cda9006b48681179c4e627a96dfc746d425517f&line=7&lineStartColumn=1&lineEndColumn=58&_a=contents)
+
 
 ```
-"MarketplaceARMClientOptions": {
+"MarketplaceARMClientAuthOptions": {
     "API": {
       "Endpoint": "https://marketplaceapi.spza-internal.net", // Dogfood marketplace
       "ApiVersion": "2018-08-31"
     },
-    "MarketplaceFPAOptions": {
-      "ApplicationId": "055caf97-1b4f-4730-9f5d-acc24b707b06",
+    "TokenServiceAPI": {
+      "Endpoint": "https://app-rel.wus2.gateway-dev.azliftr-test.io/", // dogfood common token service
+      "ApiVersion": "2020-03-20-preview"
+    },
+    "AuthOptions": {
+      "ApplicationId": "055caf97-1b4f-4730-9f5d-acc24b707b06", // AAD App-Id whitelisted to token service
       "CertificateName": "FirstPartyAppCert",
       "TargetResource": "4c328f8a-1356-4991-883b-ff83cb17aba3", //Dogfood marketplace target resource
       "AadEndpoint": "https://login.windows-ppe.net",
@@ -67,6 +72,41 @@ After creating this Service Principal, we need to [add the Certificate Based aut
     "TenantId": "f686d426-8d16-42db-81b7-ab578e110ccd" // Dogfood
   }
 },
+```
+
+# Marketplace Agreement Client
+
+## Function 
+Marketplace Agreement is a set of APIs that are used by partners to sign the agreement  between partner and marketplace authentication.
+Here is a list of the marketplace agreement APIs [here]https://marketplacecommerce-preview.azure.com/swagger/ui/index.
+
+## How to use ?
+
+To use `MarketplaceAgreementClient`:
+
+1. Add the following line to your Startup.cs - services.AddMarketplaceAgreementWithTokenService(Configuration);` (Please refer to latest code in [StartupExtensions](../StartupExtensions.cs))
+
+2. The AgreementClient uses the same set of credentials as the ARMClient as these are the ones that identify the partner to Marketplace.
+
+2. Add the MarketplaceAgreementClientAuthOptions(according to the environment Dogfood or Production) in the  appsettings.json or in Keyvault. Here is an example: 
+```
+ "MarketplaceAgreementClientAuthOptions": {
+    "API": {
+      "Endpoint": "https://marketplacecommerce-canary.azure.com", // Canary marketplace store api
+      "ApiVersion": "2021-01-01"
+    },
+    "TokenServiceAPI": {
+      "Endpoint": "https://app-rel.eus2.gateway-canary.azliftr.io/",
+      "ApiVersion": "2020-03-20-preview"
+    },
+    "AuthOptions": {
+      "AadEndpoint": "https://login.microsoftonline.com",
+      "ApplicationId": "d3244f1e-56a7-4819-80e9-a30a7a83dde8",
+      "CertificateName": "FirstPartyAppCert",
+      "TargetResource": "2670464a-5454-4936-8fc3-20cb65e2481f", // production marketplace target resource id
+      "TenantId": "33e01921-4d64-4f8c-a055-5bdaffd5e33d" // AME Tenant
+    }
+  }
 ```
 
 # Marketplace Billing Client
