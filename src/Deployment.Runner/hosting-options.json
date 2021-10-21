@@ -2,8 +2,8 @@
   "PartnerName": "SamplePartner",
   "ShortPartnerName": "sp",
   "SecretPrefix": "SampleRP",
-  //"IcMConnectorId": "2bb00c56-1a2d-477b-9b02-05562eb1f8b2",
-  //"IcMNotificationEmail": "your_email@microsoft.com",
+  // "IcMConnectorId": "a9a1e4bd-4c02-404f-b557-246dcabc298c",
+  // "IcMNotificationEmail": "ad4gprodalerts@microsoft.com",
   "EnableThanos": true,
   "Environments": [
     {

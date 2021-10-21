@@ -111,6 +111,16 @@ package:
         local_path: ".docker-images/testAggregator.json" # folder name '.docker-images' cannot be changed
         # 'sampleConsole' match the chart parameter name
         artifact_path: "docker-images/testAggregator.json"
+    - !!dockerbuildcommand
+      name: "Build prom2icm docker image"
+      context_folder: "src/Liftr.Prom2IcM"
+      repository_name: "prom2icm"
+      latest: false # Don't push the :latest tag since every deployment should refer to a build number.
+      publish_build_tag: true
+      metadata_file:
+        local_path: ".docker-images/prom2icm.json" # folder name '.docker-images' cannot be changed
+        # 'sampleConsole' match the chart parameter name
+        artifact_path: "docker-images/prom2icm.json"
     - !!buildcommand
       name: "Pack EV2 shell extension"
       command: "build/liftr-run-linux-pack-ev2-ext.sh"
