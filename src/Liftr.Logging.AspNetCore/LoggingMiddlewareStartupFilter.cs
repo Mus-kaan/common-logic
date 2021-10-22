@@ -11,10 +11,12 @@ namespace Microsoft.Liftr.Logging.AspNetCore
     internal class LoggingMiddlewareStartupFilter : IStartupFilter
     {
         private readonly bool _logRequest;
+        private readonly bool _logSubdomain;
 
-        public LoggingMiddlewareStartupFilter(bool logRequest)
+        public LoggingMiddlewareStartupFilter(bool logRequest, bool logSubdomain)
         {
             _logRequest = logRequest;
+            _logSubdomain = logSubdomain;
         }
 
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
@@ -22,7 +24,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             return app =>
             {
                 // Configure middleware
-                app.UseMiddleware<LoggingMiddleware>(_logRequest);
+                app.UseMiddleware<LoggingMiddleware>(_logRequest, _logSubdomain);
 
                 // Call the next configure method
                 next(app);

@@ -26,5 +26,7 @@ namespace Microsoft.Liftr.Logging
         public string AppInsigthsInstrumentationKey { get; internal set; } = null;
 
         public bool WriteToConsole { get; internal set; } = false;
+
+        public bool LogSubdomain { get; internal set; } = false;
     }
 }

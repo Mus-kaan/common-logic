@@ -24,7 +24,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 await Task.CompletedTask;
                 observeredValue = CallContextHolder.LogFilterOverwrite.Value;
             }, LoggerFactory.VoidLogger,
-                logRequest: true);
+                logRequest: true,
+                logSubdomain: false);
 
             var contextMock = new Mock<HttpContext>();
             StringValues val = new StringValues("debug");
@@ -45,7 +46,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 await Task.CompletedTask;
                 observeredValue = CallContextHolder.LogFilterOverwrite.Value;
             }, LoggerFactory.VoidLogger,
-                logRequest: true);
+                logRequest: true,
+                logSubdomain: false);
 
             var contextMock = new Mock<HttpContext>();
             StringValues val = new StringValues(new string[] { "debug", "information" });
@@ -66,7 +68,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 await Task.CompletedTask;
                 observeredValue = CallContextHolder.LogFilterOverwrite.Value;
             }, LoggerFactory.VoidLogger,
-                logRequest: true);
+                logRequest: true,
+                logSubdomain: false);
 
             var contextMock = new Mock<HttpContext>();
             StringValues val = new StringValues("debug");
@@ -87,7 +90,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 await Task.CompletedTask;
                 observeredValue = CallContextHolder.LogFilterOverwrite.Value;
             }, LoggerFactory.VoidLogger,
-                logRequest: true);
+                logRequest: true,
+                logSubdomain: false);
 
             var contextMock = new Mock<HttpContext>();
             StringValues val = new StringValues(new string[] { "debug", "information" });
@@ -108,7 +112,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 await Task.CompletedTask;
                 observeredValue = CallContextHolder.LogFilterOverwrite.Value;
             }, LoggerFactory.VoidLogger,
-                logRequest: true);
+                logRequest: true,
+                logSubdomain: false);
 
             var contextMock = new Mock<HttpContext>();
             StringValues val = new StringValues(new string[] { "error", "fatal" });
@@ -134,7 +139,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 observeredTrackingId = CallContextHolder.ARMRequestTrackingId.Value;
                 observeredCorrelationId = CallContextHolder.CorrelationId.Value;
             }, LoggerFactory.VoidLogger,
-                logRequest: true);
+                logRequest: true,
+                logSubdomain: false);
 
             var contextMock = new Mock<HttpContext>();
 
@@ -179,7 +185,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 await Task.CompletedTask;
                 observeredValue = CallContextHolder.CorrelationId.Value;
             }, LoggerFactory.VoidLogger,
-                logRequest: true);
+                logRequest: true,
+                logSubdomain: false);
 
             var contextMock = new Mock<HttpContext>();
             StringValues val = new StringValues("debug");
@@ -200,7 +207,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                     await Task.CompletedTask;
                     observeredValue = CallContextHolder.CorrelationId.Value;
                 }, LoggerFactory.VoidLogger,
-                logRequest: true);
+                logRequest: true,
+                logSubdomain: false);
 
             var res = new MockHttpResponse();
             res.StatusCode = 404;
@@ -231,7 +239,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                     await Task.CompletedTask;
                     observeredValue = CallContextHolder.CorrelationId.Value;
                 }, LoggerFactory.VoidLogger,
-                logRequest: true);
+                logRequest: true,
+                logSubdomain: false);
 
             var res = new MockHttpResponse();
             res.StatusCode = 200;

@@ -56,6 +56,7 @@ namespace Microsoft.Liftr.Configuration
                 RenderMessage = ExtractValue(configuration, nameof(LiftrLoggingOptions.RenderMessage), defaultValue: false),
                 LogTimedOperation = ExtractValue(configuration, nameof(LiftrLoggingOptions.LogTimedOperation), defaultValue: true),
                 LogRequest = ExtractValue(configuration, nameof(LiftrLoggingOptions.LogRequest), defaultValue: false),
+                LogSubdomain = ExtractValue(configuration, nameof(LiftrLoggingOptions.LogSubdomain), defaultValue: false),
                 AllowFilterDynamicOverride = ExtractValue(configuration, nameof(LiftrLoggingOptions.AllowFilterDynamicOverride), defaultValue: false),
                 AllowDestructureUsingAttributes = ExtractValue(configuration, nameof(LiftrLoggingOptions.AllowDestructureUsingAttributes), defaultValue: false),
                 MinimumLevel = ExtractMinimumLevel(configuration),

@@ -104,7 +104,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
 
                     services.AddSingleton<IStartupFilter>((sp) =>
                     {
-                        return new LoggingMiddlewareStartupFilter(options.LogRequest);
+                        return new LoggingMiddlewareStartupFilter(options.LogRequest, options.LogSubdomain);
                     });
 
                     services.AddSingleton<Serilog.ILogger>((sp) =>
