@@ -3,8 +3,8 @@
 
 version:
   name: "Liftr.Common"
-  major: 0 # The major version number.
-  minor: 6 # The minor version number
+  major: 1 # The major version number.
+  minor: 2110 # The minor version number
   system: "revisioncounter"
 
 test:

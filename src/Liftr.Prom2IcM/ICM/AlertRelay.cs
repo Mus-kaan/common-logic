@@ -205,6 +205,12 @@ namespace Microsoft.Liftr.Prom2IcM
                 return false;
             }
 
+            if (promAlert?.Labels?.Alertname?.OrdinalEquals("PrometheusNotConnectedToAlertmanagers") == true)
+            {
+                _logger.Information("PrometheusNotConnectedToAlertmanagers alert is skipped. This could be another prometheus server is not connected. However, since we received this alert here, this mean that it is already working.");
+                return false;
+            }
+
             if (promAlert?.Labels?.Alertname?.OrdinalEquals("TargetDown") == true
                 && promAlert?.Labels?.Job?.OrdinalEquals("app-pod") == true)
             {
