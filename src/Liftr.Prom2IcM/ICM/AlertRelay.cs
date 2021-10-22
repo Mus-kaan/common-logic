@@ -56,41 +56,43 @@ namespace Microsoft.Liftr.Prom2IcM
             {
                 foreach (var alert in webhookMessage.Alerts)
                 {
-                    if (alert?.Status?.OrdinalEquals("firing") == true)
+                    if (!ShouldProcessAlert(alert))
                     {
-                        var icmIncident = await TransformPrometheusAlertToIcmIncidentAsync(webhookMessage, alert);
-                        var icmClient = await _icmClientProvider.GetICMClientAsync();
+                        continue;
+                    }
 
-                        var incidentSourceId = icmIncident.Source.IncidentId;
+                    var icmIncident = await TransformPrometheusAlertToIcmIncidentAsync(webhookMessage, alert);
+                    var icmClient = await _icmClientProvider.GetICMClientAsync();
 
-                        try
+                    var incidentSourceId = icmIncident.Source.IncidentId;
+
+                    try
+                    {
+                        var existingIncidents = await icmClient.GetIncidentAlertSourceInfo2Async(_connectorId, new List<string> { incidentSourceId });
+                        if (existingIncidents?.Any() == true)
                         {
-                            var existingIncidents = await icmClient.GetIncidentAlertSourceInfo2Async(_connectorId, new List<string> { incidentSourceId });
-                            if (existingIncidents?.Any() == true)
-                            {
-                                _logger.Information(
-                                    "Skip creating new incident, since there are already incidents with the same incidentSourceId '{incidentSourceId}'. IncidentIdList: {@IncidentIdList}",
-                                    incidentSourceId,
-                                    existingIncidents.Select(incident => incident.IncidentId));
-                            }
-                            else
-                            {
-                                var result = await icmClient.AddOrUpdateIncident2Async(_connectorId, icmIncident, RoutingOptions.None);
-                                ProcessResult(result, icmIncident);
-                            }
+                            _logger.Information(
+                                "Skip creating new incident, since there are already incidents with the same incidentSourceId '{incidentSourceId}'. IncidentIdList: {@IncidentIdList}",
+                                incidentSourceId,
+                                existingIncidents.Select(incident => incident.IncidentId));
                         }
-                        catch (Exception e)
+                        else
                         {
-                            _logger.Error(e, "Failed to submit incident to IcM");
-
-                            if (IsTransientException(e))
-                            {
-                                _logger.Warning("Exception is transient and incident submit call should be retried");
-                            }
-
-                            // TODO: make sure AlertManager will retry the webhook if retuen is 500+.
-                            throw;
+                            var result = await icmClient.AddOrUpdateIncident2Async(_connectorId, icmIncident, RoutingOptions.None);
+                            ProcessResult(result, icmIncident);
                         }
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error(e, "Failed to submit incident to IcM");
+
+                        if (IsTransientException(e))
+                        {
+                            _logger.Warning("Exception is transient and incident submit call should be retried");
+                        }
+
+                        // TODO: make sure AlertManager will retry the webhook if retuen is 500+.
+                        throw;
                     }
                 }
             }
@@ -164,6 +166,53 @@ namespace Microsoft.Liftr.Prom2IcM
             }
 
             _logger.Information(string.Format(CultureInfo.InvariantCulture, fmt, result.IncidentId, source.Source.IncidentId, extra));
+        }
+
+        private bool ShouldProcessAlert(Alert promAlert)
+        {
+            if (promAlert?.Status?.OrdinalEquals("firing") != true)
+            {
+                return false;
+            }
+
+            if (promAlert?.Labels?.Alertname?.OrdinalEquals("Watchdog") == true)
+            {
+                // In prometheus, this is an alert meant to ensure that the entire alerting pipeline is functional.
+                // This alert is always firing, therefore it should always be firing in Alertmanager
+                // and always fire against a receiver.There are integrations with various notification
+                // mechanisms that send a notification when this alert is not firing.For example the
+                // "DeadMansSnitch" integration in PagerDuty.
+                _logger.Information("Watchdog alert is skipped.");
+                return false;
+            }
+
+            if (promAlert?.Labels?.Alertname?.OrdinalEquals("KubeSchedulerDown") == true)
+            {
+                // The Kubernetes scheduler is a control plane process which assigns Pods to Nodes.
+                // AKS is not running those contraol plane component in customer node pool.
+                // https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler/
+                _logger.Information("KubeSchedulerDown alert is skipped. kube-scheduler is managed by AKS instead of us users.");
+                return false;
+            }
+
+            if (promAlert?.Labels?.Alertname?.OrdinalEquals("KubeControllerManagerDown") == true)
+            {
+                // The Kubernetes controller manager is a daemon that embeds the core control loops shipped with Kubernetes.
+                // In applications of robotics and automation, a control loop is a non-terminating loop that regulates the state of the system.
+                // AKS is not running those contraol plane component in customer node pool.
+                // https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/
+                _logger.Information("KubeControllerManagerDown alert is skipped. kube-controller-manager is managed by AKS instead of us users.");
+                return false;
+            }
+
+            if (promAlert?.Labels?.Alertname?.OrdinalEquals("TargetDown") == true
+                && promAlert?.Labels?.Job?.OrdinalEquals("app-pod") == true)
+            {
+                // For our own metrics collection, we will poll the endpoint no matter if it is enabled.
+                return false;
+            }
+
+            return true;
         }
 
         private async Task<AlertSourceIncident> TransformPrometheusAlertToIcmIncidentAsync(WebhookMessage webhookMessage, Alert promAlert)

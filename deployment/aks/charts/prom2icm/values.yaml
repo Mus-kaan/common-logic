@@ -8,7 +8,7 @@ image:
   repository: liftracr.azurecr.io/artifact/c6ca85d0-80f3-49b5-b6c0-da1de7dbfc6f/buddy/prom2icm
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.6.01754.2459-0955aa56"
+  tag: "0.6.01755.2479-b9904fbf"
 
 imagePullSecrets: []
 nameOverride: ""

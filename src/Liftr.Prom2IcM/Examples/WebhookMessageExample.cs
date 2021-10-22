@@ -31,7 +31,7 @@ namespace Microsoft.Liftr.Prom2IcM.Examples
                 },
                 CommonAnnotations = new Annotation()
                 {
-                    Summary = "[Fake Testing] This is a testing alert from local debug. Prometheus is failing rule evaluations.",
+                    summary = "[Fake Testing] This is a testing alert from local debug. Prometheus is failing rule evaluations.",
                 },
                 ExternalURL = "http://prom-rel-kube-prometheus-s-alertmanager.prometheus:9093",
                 Alerts = new List<Alert>
@@ -46,8 +46,8 @@ namespace Microsoft.Liftr.Prom2IcM.Examples
                         },
                         Annotations = new Annotation()
                         {
-                            Description = "[FAKE testing] KubeControllerManager has disappeared from Prometheus target discovery.",
-                            Summary = "[FAKE testing] Target disappeared from Prometheus target discovery.",
+                            description = "[FAKE testing] KubeControllerManager has disappeared from Prometheus target discovery.",
+                            summary = "[FAKE testing] Target disappeared from Prometheus target discovery.",
                         },
                         StartsAt = "2020-11-22T23:55:20.148Z",
                         EndsAt = "0001-01-01T00:00:00Z",
@@ -63,8 +63,8 @@ namespace Microsoft.Liftr.Prom2IcM.Examples
                         },
                         Annotations = new Annotation()
                         {
-                            Description = "[FAKE testing] More than 10 404 response in the past 5 minutes",
-                            Summary = "[FAKE testing] Too many not found",
+                            description = "[FAKE testing] More than 10 404 response in the past 5 minutes",
+                            summary = "[FAKE testing] Too many not found",
                         },
                         StartsAt = "2020-11-23T02:42:10.221Z",
                         EndsAt = "0001-01-01T00:00:00Z",

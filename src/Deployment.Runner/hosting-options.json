@@ -2,8 +2,8 @@
   "PartnerName": "SamplePartner",
   "ShortPartnerName": "sp",
   "SecretPrefix": "SampleRP",
-  // "IcMConnectorId": "a9a1e4bd-4c02-404f-b557-246dcabc298c",
-  // "IcMNotificationEmail": "ad4gprodalerts@microsoft.com",
+  //"IcMConnectorId": "a9a1e4bd-4c02-404f-b557-246dcabc298c",
+  //"IcMNotificationEmail": "ad4gprodalerts@microsoft.com",
   "EnableThanos": true,
   "Environments": [
     {
@@ -36,12 +36,12 @@
         {
           "Location": "westus2",
           "DataBaseName": "da210801",
-          "ComputeBaseName": "co211005"
+          "ComputeBaseName": "co211022"
         },
         {
           "Location": "eastus",
           "DataBaseName": "da210801",
-          "ComputeBaseName": "co211005"
+          "ComputeBaseName": "co211022"
         }
       ]
     },

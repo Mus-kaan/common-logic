@@ -15,9 +15,7 @@ echo "************************************************************"
 # http://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_certificate
 $Helm upgrade $helmReleaseName --install --wait --timeout 10m \
 --create-namespace \
---set constructPEMChain=true \
---set secrets-store-csi-driver.enableSecretRotation=true \
---set secrets-store-csi-driver.rotationPollInterval=30m \
+-f kv-csi-values.yaml \
 --namespace "$namespace" csi-secrets-store-provider-azure-*.tgz
 
 echo "------------------------------------------------------------"

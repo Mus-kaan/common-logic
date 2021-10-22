@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Liftr.Prom2IcM.Examples;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Prom2IcM.Controllers
@@ -32,7 +34,15 @@ namespace Microsoft.Liftr.Prom2IcM.Controllers
         public async Task PostAsync(WebhookMessage webhookMessage)
         {
             // TODO: remove this detailed payload logging after this is very stable.
-            _logger.Information("webhookMessage: {@webhookMessage}", webhookMessage);
+            HttpContext.Request.Body.Seek(0, SeekOrigin.Begin);
+            using (StreamReader reader
+                  = new StreamReader(HttpContext.Request.Body, Encoding.UTF8, true, 1024))
+            {
+                var bodyStr = await reader.ReadToEndAsync();
+                _logger.Information("webhookRequestBody: {webhookRequestBody}", bodyStr);
+            }
+
+            _logger.Information("Parsed webhookMessage: {@webhookMessage}", webhookMessage);
             await _alertRelay.GenerateIcMIncidentAsync(webhookMessage);
         }
     }

@@ -64,8 +64,10 @@ namespace Microsoft.Liftr.Prom2IcM
             }
 
             incidentTitle = $"{incidentTitle} {promAlert.Labels.Alertname}";
-            var summary = promAlert.Annotations.Summary;
-            var description = promAlert.Annotations.Description;
+            var summary = promAlert.Annotations.summary;
+            var description = promAlert.Annotations.description;
+            var message = promAlert.Annotations.message ?? string.Empty;
+            var runbook_url = promAlert.Annotations.runbook_url ?? string.Empty;
 
             var incidentId = $"{ComputeSha256Hash(promAlert.Labels.Alertname)}-{incidentStartTime.Ticks}";
             var icmCorrelationId = HttpUtility.UrlEncode($"prom2icm://prom/{promAlert.Labels.Alertname}");
@@ -170,7 +172,15 @@ namespace Microsoft.Liftr.Prom2IcM
                 // one or more description entries may be submitted
                 DescriptionEntries = new[]
                 {
-                    GenerateXHtmlDescription(promAlert, computeInstanceMeta, incidentTitle, summary, description, now.AddMilliseconds(1)),
+                    GenerateXHtmlDescription(
+                        promAlert,
+                        computeInstanceMeta,
+                        incidentTitle,
+                        summary,
+                        description,
+                        message,
+                        runbook_url,
+                        now.AddMilliseconds(1)),
                 },
 
                 // Title is a mandatory field and must be non-empty, non-null, and consist of at least one non-whitespace character,
@@ -200,6 +210,8 @@ namespace Microsoft.Liftr.Prom2IcM
             string alertName,
             string summary,
             string description,
+            string message,
+            string runbook_url,
             DateTime date)
         {
             string xhtmlSanitized;
@@ -212,6 +224,8 @@ namespace Microsoft.Liftr.Prom2IcM
             htmlRaw = htmlRaw.Replace("ALERT_NAME", alertName, StringComparison.OrdinalIgnoreCase);
             htmlRaw = htmlRaw.Replace("SUMMARY_PLACEHOLDER", summary, StringComparison.OrdinalIgnoreCase);
             htmlRaw = htmlRaw.Replace("DESCRIPTION_PLACEHOLDER", description, StringComparison.OrdinalIgnoreCase);
+            htmlRaw = htmlRaw.Replace("MESSAGE_PLACEHOLDER", message, StringComparison.OrdinalIgnoreCase);
+            htmlRaw = htmlRaw.Replace("RUNBOOK_URL_PLACEHOLDER", runbook_url, StringComparison.OrdinalIgnoreCase);
 
             // set 'Labels'
             {

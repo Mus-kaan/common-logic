@@ -68,6 +68,8 @@ namespace Microsoft.Liftr.Prom2IcM
         /// identifies the entity that caused the alert
         /// </summary>
         public string GeneratorURL { get; set; }
+
+        public string Fingerprint { get; set; }
     }
 
     public class Label
@@ -87,10 +89,16 @@ namespace Microsoft.Liftr.Prom2IcM
         public string Severity { get; set; }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:Uri properties should not be strings", Justification = "<Pending>")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "<Pending>")]
     public class Annotation
     {
-        public string Description { get; set; }
+        public string description { get; set; }
 
-        public string Summary { get; set; }
+        public string summary { get; set; }
+
+        public string message { get; set; }
+
+        public string runbook_url { get; set; }
     }
 }

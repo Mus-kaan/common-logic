@@ -1,0 +1,18 @@
+# explicitly reconstruct the pem chain in the order: SERVER, INTERMEDIATE, ROOT
+constructPEMChain: true
+
+## Configuration values for the secrets-store-csi-driver dependency.
+## ref: https://github.com/kubernetes-sigs/secrets-store-csi-driver/tree/master/charts/secrets-store-csi-driver/README.md
+##
+secrets-store-csi-driver:
+  enableSecretRotation: true
+  rotationPollInterval: 30m
+
+linux:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 200m
+      memory: 100Mi
