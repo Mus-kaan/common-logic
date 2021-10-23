@@ -1,7 +1,11 @@
+# We need a separate ingress for the TM liveness ping. This one is not restricted to any host.
+# The TM ping traffic is pinging an IP instead of a host. Hence cannot be using the other one.
+# also, the other ingress will block '/metrics' which is outside of '/api/liveness-probe'.
+# Hence cannot be specified in one ingress.
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: {{ .Release.Name }}-gateway-web-ingress
+  name: {{ .Release.Name }}-gateway-web-tm-ping-ingress
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/managed-by: helm
@@ -11,29 +15,15 @@ metadata:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     # nginx.ingress.kubernetes.io/rewrite-target https://kubernetes.github.io/ingress-nginx/examples/rewrite/
 
-    # block Prometheus metrics endpoint
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      location /metrics {
-          deny all;
-          return 404;
-      }
-
 spec:
   rules:
-    - host:  {{ required "The hostname must be provided." .Values.hostname }}
-      http:
-          paths:
-          - backend:
+    - http:
+        paths:
+          - path: /api/liveness-probe
+            backend:
               serviceName: {{ .Release.Name }}-gateway-web-svc
               servicePort: 80
-            path: /
-    - host:  {{ required "The aksdomain must be provided." .Values.aksdomain }}
-      http:
-          paths:
-          - backend:
-              serviceName: {{ .Release.Name }}-gateway-web-svc
-              servicePort: 80
-            path: /
+
   # This section is only required if TLS is to be enabled for the Ingress
   tls:
       - hosts:

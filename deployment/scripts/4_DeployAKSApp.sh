@@ -62,3 +62,5 @@ fi
 
 echo "Successfully finished running: $currentScriptName"
 echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"
+echo "Print all ingress:"
+kubectl get ingress --all-namespaces

@@ -56,7 +56,8 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 httpContext.Response.StatusCode = (int)HttpStatusCode.OK;
                 if (meta != null)
                 {
-                    await httpContext.Response.WriteAsync(meta.ToJson(indented: true));
+                    var pingResult = LivenessPingResult.FromMetaInfo(meta);
+                    await httpContext.Response.WriteAsync(pingResult.ToJson(indented: true));
                 }
 
                 return;
