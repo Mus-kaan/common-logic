@@ -30,6 +30,7 @@ namespace Microsoft.Liftr.Fluent
             string rgName,
             string cosmosDBName,
             IDictionary<string, string> tags,
+            bool? isZoneRedundant = null,
             CancellationToken cancellationToken = default)
         {
             if (liftrAzure == null)
@@ -37,7 +38,8 @@ namespace Microsoft.Liftr.Fluent
                 throw new ArgumentNullException(nameof(liftrAzure));
             }
 
-            _logger.Information($"Creating a CosmosDB with name {cosmosDBName} ...");
+            isZoneRedundant = (isZoneRedundant ?? true) && AvailabilityZoneRegionLookup.HasSupportCosmosDB(location);
+            _logger.Information($"Creating a CosmosDB with name {cosmosDBName} with zone redudandancy set to {isZoneRedundant}...");
 
             // https://docs.microsoft.com/en-us/azure/templates/microsoft.documentdb/2021-04-15/databaseaccounts
             var templateContent = EmbeddedContentReader.GetContent(c_cosmosDBTemplateFile);
@@ -48,7 +50,7 @@ namespace Microsoft.Liftr.Fluent
             r.location = location.ToString();
             r.tags = tags.ToJObject();
             r.properties.locations[0].locationName = location.ToString();
-            r.properties.locations[0].isZoneRedundant = AvailabilityZoneRegionLookup.HasSupportCosmosDB(location);
+            r.properties.locations[0].isZoneRedundant = isZoneRedundant;
             templateContent = JsonConvert.SerializeObject(configObj, Formatting.Indented);
             await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true, cancellationToken: cancellationToken);
 

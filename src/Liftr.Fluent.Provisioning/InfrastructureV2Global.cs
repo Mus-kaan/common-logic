@@ -22,6 +22,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             NamingContext namingContext,
             string dnsName,
             bool addGlobalDB,
+            bool? createGlobalDBWithZoneRedundancy = null,
             string secretPrefix = null,
             PartnerCredentialUpdateOptions partnerCredentialUpdateConfig = null,
             string logAnalyticsWorkspaceId = null)
@@ -125,7 +126,7 @@ namespace Microsoft.Liftr.Fluent.Provisioning
                     var db = await liftrAzure.GetCosmosDBAsync(dbId);
                     if (db == null)
                     {
-                        db = await liftrAzure.CreateCosmosDBAsync(namingContext.Location, rgName, cosmosName, namingContext.Tags);
+                        db = await liftrAzure.CreateCosmosDBAsync(namingContext.Location, rgName, cosmosName, namingContext.Tags, isZoneRedundant: createGlobalDBWithZoneRedundancy);
                         await liftrAzure.ExportDiagnosticsToLogAnalyticsAsync(db, logAnalyticsWorkspaceId);
                         _logger.Information("Created CosmosDB with Id {ResourceId}", db.Id);
                     }

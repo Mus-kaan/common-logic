@@ -6,6 +6,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -49,6 +50,36 @@ namespace Microsoft.Liftr.Fluent.Tests
 
                 // Same deployment will not throw exception.
                 await infra.CreateOrUpdateGlobalRGAsync(globalCoreName, context, $"{globalCoreName}.dummy.com", addGlobalDB: false);
+            }
+        }
+
+        [CheckInValidation(skipLinux: true)]
+        public async Task VerifyGlobalResourceGroupWithoutZonalRedundancyAsync()
+        {
+            var shortPartnerName = "v2";
+            var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USWest2);
+            TestCommon.AddCommonTags(context.Tags);
+
+            var globalCoreName = SdkContext.RandomResourceName("v", 3);
+            var globalRGName = context.ResourceGroupName(globalCoreName);
+
+            using (var globalScope = new TestResourceGroupScope(globalRGName))
+            {
+                var clientFactory = new LiftrAzureFactory(globalScope.Logger, TestCredentials.TenantId, TestCredentials.ObjectId, TestCredentials.SubscriptionId, TestCredentials.TokenCredential, TestCredentials.GetAzureCredentials);
+                var client = clientFactory.GenerateLiftrAzure();
+                var infra = new InfrastructureV2(clientFactory, TestCredentials.KeyVaultClient, globalScope.Logger);
+
+                // This will take a long time. Be patient.
+                await infra.CreateOrUpdateGlobalRGAsync(globalCoreName, context, $"{globalCoreName}.dummy.com", addGlobalDB: true, createGlobalDBWithZoneRedundancy: false);
+
+                // Check
+                {
+                    var dbs = await client.ListCosmosDBAsync(globalScope.ResourceGroupName);
+                    Assert.Single(dbs);
+
+                    var db = dbs.First();
+                    Assert.Equal(false, db.Inner.Locations[0].IsZoneRedundant);
+                }
             }
         }
     }

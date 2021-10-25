@@ -20,13 +20,14 @@ namespace Microsoft.Liftr.Fluent
             string cosmosDBName,
             IDictionary<string, string> tags,
             ISubnet subnet = null,
+            bool? isZoneRedundant = null,
             CancellationToken cancellationToken = default)
         {
             var cosmosDBAccount = await GetCosmosDBAsync(rgName, cosmosDBName, cancellationToken);
             if (cosmosDBAccount == null)
             {
                 var helper = new CosmosDBHelper(_logger);
-                cosmosDBAccount = await helper.CreateCosmosDBAsync(this, location, rgName, cosmosDBName, tags, cancellationToken);
+                cosmosDBAccount = await helper.CreateCosmosDBAsync(this, location, rgName, cosmosDBName, tags, isZoneRedundant, cancellationToken);
 
                 if (subnet != null)
                 {

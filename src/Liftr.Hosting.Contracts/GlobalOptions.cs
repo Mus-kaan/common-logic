@@ -17,6 +17,8 @@ namespace Microsoft.Liftr.Hosting.Contracts
 
         public bool AddGlobalDB { get; set; } = false;
 
+        public bool? CreateGlobalDBWithZoneRedundancy { get; set; }
+
         public void CheckValid()
         {
             if (string.IsNullOrEmpty(BaseName))

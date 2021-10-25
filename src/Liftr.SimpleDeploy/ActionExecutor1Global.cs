@@ -30,6 +30,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 _globalNamingContext,
                 targetOptions.DomainName,
                 targetOptions.Global.AddGlobalDB,
+                targetOptions.Global.CreateGlobalDBWithZoneRedundancy,
                 _hostingOptions.SecretPrefix,
                 targetOptions.PartnerCredentialUpdateConfig,
                 targetOptions.LogAnalyticsWorkspaceId);

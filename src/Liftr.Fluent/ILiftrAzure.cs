@@ -304,6 +304,7 @@ namespace Microsoft.Liftr.Fluent
             string cosmosDBName,
             IDictionary<string, string> tags,
             ISubnet subnet = null,
+            bool? isZoneRedundant = null,
             CancellationToken cancellationToken = default);
 
         Task<ICosmosDBAccount> GetCosmosDBAsync(string dbResourceId, CancellationToken cancellationToken = default);
