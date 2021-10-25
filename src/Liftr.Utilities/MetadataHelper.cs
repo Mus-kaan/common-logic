@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -20,7 +21,15 @@ namespace Microsoft.Liftr
                 using (var client = new HttpClient())
                 {
                     var response = await client.GetAsync("https://api.ipify.org/");
-                    ip = await response.Content.ReadAsStringAsync();
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var ipLookUp = await response.Content.ReadAsStringAsync();
+
+                        if (IPAddress.TryParse(ipLookUp, out var _))
+                        {
+                            ip = ipLookUp;
+                        }
+                    }
                 }
             }
             catch { }
