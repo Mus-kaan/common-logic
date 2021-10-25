@@ -19,7 +19,7 @@ namespace Microsoft.Liftr.Fluent.Contracts.Tests
 
             Assert.Equal("wus2", Region.USWest2.ShortName());
 
-            Assert.Equal("wus3", Region.Create("westus3").ShortName());
+            Assert.Equal("wus3", Region.USWest3.ShortName());
 
             Assert.Equal("cus", Region.USCentral.ShortName());
 
@@ -93,7 +93,7 @@ namespace Microsoft.Liftr.Fluent.Contracts.Tests
                 i++;
             }
 
-            Assert.Equal(46, i);
+            Assert.Equal(47, i);
         }
 
         [Fact]

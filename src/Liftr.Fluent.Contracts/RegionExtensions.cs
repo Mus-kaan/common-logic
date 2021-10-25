@@ -12,7 +12,6 @@ namespace Microsoft.Liftr.Fluent.Contracts
     {
         private const string c_EastUS2EuapShortName = "eus2e";
         private const string c_CentralUSEuapShortName = "cuse";
-        private const string c_WestUS3ShortName = "wus3";
         private static readonly Region s_EastUS2Euap = Region.Create("eastus2euap");
         private static readonly Region s_CentralUSEuap = Region.Create("centraluseuap");
         private static readonly Region s_WestUS3 = Region.Create("westus3");
@@ -250,6 +249,10 @@ namespace Microsoft.Liftr.Fluent.Contracts
             {
                 return Region.USWest2;
             }
+            else if (location.OrdinalEquals("wus3"))
+            {
+                return Region.USWest3;
+            }
             else if (location.OrdinalEquals("cus"))
             {
                 return Region.USCentral;
@@ -433,10 +436,6 @@ namespace Microsoft.Liftr.Fluent.Contracts
             else if (location.OrdinalEquals(c_CentralUSEuapShortName))
             {
                 return s_CentralUSEuap;
-            }
-            else if (location.OrdinalEquals(c_WestUS3ShortName))
-            {
-                return s_WestUS3;
             }
 
             throw new ArgumentOutOfRangeException($"Short Azure region {location} is invalid.");
