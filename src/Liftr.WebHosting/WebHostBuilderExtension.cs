@@ -67,13 +67,7 @@ namespace Microsoft.Liftr.WebHosting
                 {
                     Console.WriteLine("Using Managed Identity to initialized key vault client and tokenCredential. Then add them to dependency injection container.");
                     kvClient = KeyVaultClientFactory.FromMSI();
-
-                    // Enabling retries here because there is a chance that the IDMS endpoint
-                    // will not be available by the time the application is starting up.
-                    var tokenCredentialOptions = new TokenCredentialOptions();
-                    tokenCredentialOptions.Retry.Delay = TimeSpan.FromSeconds(5);
-                    tokenCredentialOptions.Retry.MaxRetries = 12;
-                    tokenCredential = new ManagedIdentityCredential(options: tokenCredentialOptions);
+                    tokenCredential = new ManagedIdentityCredential();
                 }
                 else
                 {
