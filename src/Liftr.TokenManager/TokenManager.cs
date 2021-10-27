@@ -125,6 +125,7 @@ namespace Microsoft.Liftr.TokenManager
                     .WithCertificate(cert)
                     .WithAuthority(new Uri($"{_tokenManagerConfiguration.AadEndpoint}/{tenantId}"))
                     .WithLegacyCacheCompatibility(false)
+                    .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
                     .Build();
             });
 
@@ -148,6 +149,7 @@ namespace Microsoft.Liftr.TokenManager
                     .WithClientSecret(clientSecret)
                     .WithAuthority(new Uri($"{_tokenManagerConfiguration.AadEndpoint}/{tenantId}"))
                     .WithLegacyCacheCompatibility(false)
+                    .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
                     .Build();
             });
 
