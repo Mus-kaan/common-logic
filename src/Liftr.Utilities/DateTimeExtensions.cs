@@ -33,5 +33,10 @@ namespace Microsoft.Liftr
 
         public static DateTimeOffset Max(DateTimeOffset first, DateTimeOffset second) =>
             first > second ? first : second;
+
+        public static DateTime RoundUp(this DateTime value, TimeSpan interval)
+        {
+            return new DateTime((value.Ticks + interval.Ticks - 1) / interval.Ticks * interval.Ticks, value.Kind);
+        }
     }
 }

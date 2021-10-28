@@ -82,6 +82,19 @@ namespace Microsoft.Liftr.Utilities.Tests
             });
         }
 
+        [Theory]
+        [InlineData("2019-07-05T15:50:54.1793804Z", "2019-07-05T15:55:00.0000000Z")]
+        [InlineData("2019-07-05T15:13:38.4566118Z", "2019-07-05T15:15:00.0000000Z")]
+        [InlineData("2029-07-05T15:30:54.1793804Z", "2029-07-05T15:35:00.0000000Z")]
+        public void DateTimeRoundUp(string timeString, string exceptedRoundUp)
+        {
+            var parsed = timeString.ParseZuluDateTime();
+            var roundUp = parsed.RoundUp(TimeSpan.FromMinutes(5)).ToZuluString();
+            Assert.Equal(DateTimeKind.Utc, parsed.Kind);
+            Assert.Equal(timeString, parsed.ToZuluString());
+            Assert.Equal(exceptedRoundUp, roundUp);
+        }
+
         [Fact]
         public void JsonConverterTest()
         {

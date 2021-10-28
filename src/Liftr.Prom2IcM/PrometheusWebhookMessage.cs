@@ -7,6 +7,7 @@ using System.Collections.Generic;
 namespace Microsoft.Liftr.Prom2IcM
 {
     /// <summary>
+    /// Prometheus AlertManager webhook.
     /// https://godoc.org/github.com/prometheus/alertmanager/template#Data
     /// https://github.com/prometheus/alertmanager/blob/master/notify/webhook/webhook.go#L68
     /// https://github.com/prometheus/alertmanager/blob/master/template/template.go#L231
@@ -14,7 +15,7 @@ namespace Microsoft.Liftr.Prom2IcM
     /// https://github.com/idealista/prom2teams/blob/develop/prom2teams/prometheus/message_schema.py#L58
     /// https://github.com/bakins/alertmanager-webhook-example/blob/master/main.go
     /// </summary>
-    public class WebhookMessage
+    public class PrometheusWebhookMessage
     {
         public string Version { get; set; }
 

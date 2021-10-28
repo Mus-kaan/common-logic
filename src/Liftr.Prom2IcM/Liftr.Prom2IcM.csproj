@@ -19,6 +19,9 @@
     <ProjectReference Include="..\Liftr.WebHosting\Liftr.WebHosting.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="grafana-alert-template.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="alert-template.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

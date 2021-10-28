@@ -39,7 +39,7 @@ namespace Microsoft.Liftr.Prom2IcM
             _logger.Information("ICMClientOptions: {ICMClientOptions}", _options);
         }
 
-        public async Task GenerateIcMIncidentAsync(WebhookMessage webhookMessage)
+        public async Task GenerateIcMFromPrometheusAsync(PrometheusWebhookMessage webhookMessage)
         {
             if (webhookMessage == null)
             {
@@ -51,12 +51,12 @@ namespace Microsoft.Liftr.Prom2IcM
                 throw new InvalidOperationException($"'{nameof(webhookMessage.Alerts)}' are empty.");
             }
 
-            using var ops = _logger.StartTimedOperation(nameof(GenerateIcMIncidentAsync));
+            using var ops = _logger.StartTimedOperation(nameof(GenerateIcMFromGrafanaAsync));
             try
             {
                 foreach (var alert in webhookMessage.Alerts)
                 {
-                    if (!ShouldProcessAlert(alert))
+                    if (!ShouldProcessPrometheusAlert(alert))
                     {
                         continue;
                     }
@@ -99,6 +99,64 @@ namespace Microsoft.Liftr.Prom2IcM
             catch (Exception ex)
             {
                 _logger.Error(ex, "failed_prom2icm.");
+                ops.FailOperation(ex.Message);
+                throw;
+            }
+        }
+
+        public async Task GenerateIcMFromGrafanaAsync(GrafanaWebhookMessage webhookMessage)
+        {
+            if (webhookMessage == null)
+            {
+                throw new ArgumentNullException(nameof(webhookMessage));
+            }
+
+            if (webhookMessage.State?.OrdinalEquals("alerting") != true)
+            {
+                // TODO: We only trigger alerts for now. We can add auto-mitigation later.
+                return;
+            }
+
+            using var ops = _logger.StartTimedOperation(nameof(GenerateIcMFromGrafanaAsync));
+            try
+            {
+                var icmIncident = await TransformGrafanaAlertToIcmIncidentAsync(webhookMessage);
+                var icmClient = await _icmClientProvider.GetICMClientAsync();
+
+                var incidentSourceId = icmIncident.Source.IncidentId;
+
+                try
+                {
+                    var existingIncidents = await icmClient.GetIncidentAlertSourceInfo2Async(_connectorId, new List<string> { incidentSourceId });
+                    if (existingIncidents?.Any() == true)
+                    {
+                        _logger.Information(
+                            "Skip creating new incident, since there are already incidents with the same incidentSourceId '{incidentSourceId}'. IncidentIdList: {@IncidentIdList}",
+                            incidentSourceId,
+                            existingIncidents.Select(incident => incident.IncidentId));
+                    }
+                    else
+                    {
+                        var result = await icmClient.AddOrUpdateIncident2Async(_connectorId, icmIncident, RoutingOptions.None);
+                        ProcessResult(result, icmIncident);
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(e, "Failed to submit incident to IcM");
+
+                    if (IsTransientException(e))
+                    {
+                        // TODO: implement retry.
+                        _logger.Warning("Exception is transient and incident submit call should be retried");
+                    }
+
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "failed_grafana2icm.");
                 ops.FailOperation(ex.Message);
                 throw;
             }
@@ -168,7 +226,7 @@ namespace Microsoft.Liftr.Prom2IcM
             _logger.Information(string.Format(CultureInfo.InvariantCulture, fmt, result.IncidentId, source.Source.IncidentId, extra));
         }
 
-        private bool ShouldProcessAlert(Alert promAlert)
+        private bool ShouldProcessPrometheusAlert(Alert promAlert)
         {
             if (promAlert?.Status?.OrdinalEquals("firing") != true)
             {
@@ -221,11 +279,19 @@ namespace Microsoft.Liftr.Prom2IcM
             return true;
         }
 
-        private async Task<AlertSourceIncident> TransformPrometheusAlertToIcmIncidentAsync(WebhookMessage webhookMessage, Alert promAlert)
+        private async Task<AlertSourceIncident> TransformPrometheusAlertToIcmIncidentAsync(PrometheusWebhookMessage webhookMessage, Alert promAlert)
         {
             // Get information about the running Azure compute from the instance metadata service.
             var instanceMeta = await InstanceMetaHelper.GetMetaInfoAsync();
-            var incident = IncidentMessageGenerator.GenerateIncidentFromPrometheusAlert(webhookMessage, promAlert, instanceMeta, _options, _logger);
+            var incident = PrometheusIncidentMessageGenerator.GenerateIncidentFromPrometheusAlert(webhookMessage, promAlert, instanceMeta, _options, _logger);
+            return incident;
+        }
+
+        private async Task<AlertSourceIncident> TransformGrafanaAlertToIcmIncidentAsync(GrafanaWebhookMessage webhookMessage)
+        {
+            // Get information about the running Azure compute from the instance metadata service.
+            var instanceMeta = await InstanceMetaHelper.GetMetaInfoAsync();
+            var incident = GrafanaIncidentMessageGenerator.GenerateIncidentFromGrafanaAlert(webhookMessage, instanceMeta, _options, _logger);
             return incident;
         }
 

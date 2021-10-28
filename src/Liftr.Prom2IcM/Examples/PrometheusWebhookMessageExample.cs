@@ -7,11 +7,11 @@ using System.Collections.Generic;
 
 namespace Microsoft.Liftr.Prom2IcM.Examples
 {
-    public class WebhookMessageExample : IExamplesProvider<WebhookMessage>
+    public class PrometheusWebhookMessageExample : IExamplesProvider<PrometheusWebhookMessage>
     {
-        public WebhookMessage GetExamples()
+        public PrometheusWebhookMessage GetExamples()
         {
-            return new WebhookMessage()
+            return new PrometheusWebhookMessage()
             {
                 Version = "4",
                 GroupKey = "{}:{job=\"prom-rel-kube-prometheus-s-prometheus\"}",

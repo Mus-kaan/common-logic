@@ -13,16 +13,16 @@ using System.Threading.Tasks;
 namespace Microsoft.Liftr.Prom2IcM.Controllers
 {
     /// <summary>
-    /// This handles webhook from Prometheus alert manager. Please see <see cref="PrometheusWebhookMessage"/> for the webhook contract.
+    /// This handles webhook from Grafana alert notification.
     /// </summary>
-    [Route("[controller]")]
     [ApiController]
-    public class AlertsController : ControllerBase
+    [Route("[controller]")]
+    public class GrafanaAlertsController : ControllerBase
     {
         private readonly AlertRelay _alertRelay;
         private readonly Serilog.ILogger _logger;
 
-        public AlertsController(AlertRelay alertRelay, Serilog.ILogger logger)
+        public GrafanaAlertsController(AlertRelay alertRelay, Serilog.ILogger logger)
         {
             _alertRelay = alertRelay;
             _logger = logger;
@@ -30,8 +30,8 @@ namespace Microsoft.Liftr.Prom2IcM.Controllers
 
         [HttpPost]
         [SwaggerOperation(OperationId = "Post")]
-        [SwaggerRequestExample(typeof(PrometheusWebhookMessage), typeof(PrometheusWebhookMessageExample))]
-        public async Task PostAsync(PrometheusWebhookMessage webhookMessage)
+        [SwaggerRequestExample(typeof(GrafanaWebhookMessage), typeof(GrafanaWebhookMessageExample))]
+        public async Task PostAsync([FromBody] GrafanaWebhookMessage webhookMessage)
         {
             // TODO: remove this detailed payload logging after this is very stable.
             HttpContext.Request.Body.Seek(0, SeekOrigin.Begin);
@@ -39,11 +39,12 @@ namespace Microsoft.Liftr.Prom2IcM.Controllers
                   = new StreamReader(HttpContext.Request.Body, Encoding.UTF8, true, 1024))
             {
                 var bodyStr = await reader.ReadToEndAsync();
-                _logger.Information("prometheus webhookRequestBody: {prometheusWebhookRequestBody}", bodyStr);
+                _logger.Information("grafana webhookRequestBody: {grafanaWebhookRequestBody}", bodyStr);
             }
 
-            _logger.Information("Parsed prometheus webhookMessage: {@prometheusWebhookMessage}", webhookMessage);
-            await _alertRelay.GenerateIcMFromPrometheusAsync(webhookMessage);
+            _logger.Information("Parsed grafana webhookMessage: {@grafanaWebhookMessage}", webhookMessage);
+
+            await _alertRelay.GenerateIcMFromGrafanaAsync(webhookMessage);
         }
     }
 }
