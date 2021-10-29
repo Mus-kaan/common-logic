@@ -291,6 +291,11 @@ namespace Microsoft.Liftr.ImageBuilder
                     }
 
                     baseSBIVersion = await CheckLatestSourceSBIAndCacheLocallyAsync(sbiSASToken, sourceImageType, galleryClient);
+
+                    var sbiVersionTagValue = GetSBIVersionTagVaue(baseSBIVersion);
+                    imgVersionTags["SBI"] = "true";
+                    imgVersionTags["SBIVersion"] = sbiVersionTagValue;
+                    _logger.Information("SBIVersion Tag: {sbiVersionTagValue}", sbiVersionTagValue);
                 }
 
                 var artifactUrlWithSAS = await _artifactStore.UploadBuildArtifactsToSupportingStorageAsync(artifactPath);
@@ -455,6 +460,39 @@ namespace Microsoft.Liftr.ImageBuilder
                 rootOperation.FailOperation(ex.Message);
                 throw;
             }
+        }
+
+        internal static string GetSBIVersionTagVaue(IGalleryImageVersion sourceImageVersion)
+        {
+            var versionLabelStr = sourceImageVersion.Tags[c_SBIVersionTag]; // e.g. U1804LTS_Co-4
+            if (string.IsNullOrEmpty(versionLabelStr))
+            {
+                throw new InvalidOperationException("Cannot figure out source sbi version label.");
+            }
+
+            return ParseSBIVersionTag(versionLabelStr);
+        }
+
+        internal static string ParseSBIVersionTag(string sbiLabel)
+        {
+            // "U1804LTS_Ni-1" -> "18.04_Ni-1"
+            // "U1804FIPS_Ni-4" -> "18.04_Ni-4-FIPS"
+            var parts = sbiLabel.Split('_');
+            if (parts.Length != 2)
+            {
+                throw new InvalidOperationException($"The SBI version label {sbiLabel} is not in the correct format as 'U1804LTS_Ni-1'");
+            }
+
+            if (parts[0].OrdinalEquals("U1804LTS"))
+            {
+                return $"18.04_{parts[1]}";
+            }
+            else if (parts[0].OrdinalEquals("U1804FIPS"))
+            {
+                return $"18.04_{parts[1]}-FIPS";
+            }
+
+            throw new InvalidOperationException($"The SBI version label {sbiLabel} cannot be parsed.");
         }
 
         private async Task CleanUpAsync(IAzure az, string imageName, ImageGalleryClient galleryClient)
