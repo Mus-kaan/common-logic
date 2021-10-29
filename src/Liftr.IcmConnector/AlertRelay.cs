@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.AzureAd.Icm.Types;
-using Microsoft.Extensions.Options;
 using Microsoft.Liftr.Utilities;
 using System;
 using System.Collections.Generic;
@@ -13,7 +12,7 @@ using System.Net;
 using System.ServiceModel;
 using System.Threading.Tasks;
 
-namespace Microsoft.Liftr.Prom2IcM
+namespace Microsoft.Liftr.IcmConnector
 {
     /// <summary>
     /// This class convert Prometheus alert manager webhook to IcM alerts.
@@ -23,20 +22,13 @@ namespace Microsoft.Liftr.Prom2IcM
     /// </summary>
     public class AlertRelay
     {
-        private readonly ICMClientOptions _options;
         private readonly IICMClientProvider _icmClientProvider;
-        private readonly Guid _connectorId;
         private readonly Serilog.ILogger _logger;
 
-        public AlertRelay(IOptions<ICMClientOptions> options, IICMClientProvider icmClientProvider, Serilog.ILogger logger)
+        public AlertRelay(IICMClientProvider icmClientProvider, Serilog.ILogger logger)
         {
-            _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
             _icmClientProvider = icmClientProvider ?? throw new ArgumentNullException(nameof(icmClientProvider));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-            _options.CheckValid();
-            _connectorId = Guid.Parse(_options.IcmConnectorId);
-            _logger.Information("ICMClientOptions: {ICMClientOptions}", _options);
         }
 
         public async Task GenerateIcMFromPrometheusAsync(PrometheusWebhookMessage webhookMessage)
@@ -54,6 +46,16 @@ namespace Microsoft.Liftr.Prom2IcM
             using var ops = _logger.StartTimedOperation(nameof(GenerateIcMFromGrafanaAsync));
             try
             {
+                var icmClient = await _icmClientProvider.GetICMClientAsync();
+                if (icmClient == null)
+                {
+                    _logger.Warning("Cannot get IcM client. Probably IcM is not enabled.");
+                    return;
+                }
+
+                var icmClientOptions = _icmClientProvider.GetClientOptions();
+                var connectorId = Guid.Parse(icmClientOptions.IcmConnectorId);
+
                 foreach (var alert in webhookMessage.Alerts)
                 {
                     if (!ShouldProcessPrometheusAlert(alert))
@@ -62,13 +64,12 @@ namespace Microsoft.Liftr.Prom2IcM
                     }
 
                     var icmIncident = await TransformPrometheusAlertToIcmIncidentAsync(webhookMessage, alert);
-                    var icmClient = await _icmClientProvider.GetICMClientAsync();
 
                     var incidentSourceId = icmIncident.Source.IncidentId;
 
                     try
                     {
-                        var existingIncidents = await icmClient.GetIncidentAlertSourceInfo2Async(_connectorId, new List<string> { incidentSourceId });
+                        var existingIncidents = await icmClient.GetIncidentAlertSourceInfo2Async(connectorId, new List<string> { incidentSourceId });
                         if (existingIncidents?.Any() == true)
                         {
                             _logger.Information(
@@ -78,7 +79,7 @@ namespace Microsoft.Liftr.Prom2IcM
                         }
                         else
                         {
-                            var result = await icmClient.AddOrUpdateIncident2Async(_connectorId, icmIncident, RoutingOptions.None);
+                            var result = await icmClient.AddOrUpdateIncident2Async(connectorId, icmIncident, RoutingOptions.None);
                             ProcessResult(result, icmIncident);
                         }
                     }
@@ -120,14 +121,23 @@ namespace Microsoft.Liftr.Prom2IcM
             using var ops = _logger.StartTimedOperation(nameof(GenerateIcMFromGrafanaAsync));
             try
             {
-                var icmIncident = await TransformGrafanaAlertToIcmIncidentAsync(webhookMessage);
                 var icmClient = await _icmClientProvider.GetICMClientAsync();
+                if (icmClient == null)
+                {
+                    _logger.Warning("Cannot get IcM client. Probably IcM is not enabled.");
+                    return;
+                }
+
+                var icmClientOptions = _icmClientProvider.GetClientOptions();
+                var connectorId = Guid.Parse(icmClientOptions.IcmConnectorId);
+
+                var icmIncident = await TransformGrafanaAlertToIcmIncidentAsync(webhookMessage);
 
                 var incidentSourceId = icmIncident.Source.IncidentId;
 
                 try
                 {
-                    var existingIncidents = await icmClient.GetIncidentAlertSourceInfo2Async(_connectorId, new List<string> { incidentSourceId });
+                    var existingIncidents = await icmClient.GetIncidentAlertSourceInfo2Async(connectorId, new List<string> { incidentSourceId });
                     if (existingIncidents?.Any() == true)
                     {
                         _logger.Information(
@@ -137,7 +147,7 @@ namespace Microsoft.Liftr.Prom2IcM
                     }
                     else
                     {
-                        var result = await icmClient.AddOrUpdateIncident2Async(_connectorId, icmIncident, RoutingOptions.None);
+                        var result = await icmClient.AddOrUpdateIncident2Async(connectorId, icmIncident, RoutingOptions.None);
                         ProcessResult(result, icmIncident);
                     }
                 }
@@ -283,7 +293,7 @@ namespace Microsoft.Liftr.Prom2IcM
         {
             // Get information about the running Azure compute from the instance metadata service.
             var instanceMeta = await InstanceMetaHelper.GetMetaInfoAsync();
-            var incident = PrometheusIncidentMessageGenerator.GenerateIncidentFromPrometheusAlert(webhookMessage, promAlert, instanceMeta, _options, _logger);
+            var incident = PrometheusIncidentMessageGenerator.GenerateIncidentFromPrometheusAlert(webhookMessage, promAlert, instanceMeta, _icmClientProvider.GetClientOptions(), _logger);
             return incident;
         }
 
@@ -291,7 +301,7 @@ namespace Microsoft.Liftr.Prom2IcM
         {
             // Get information about the running Azure compute from the instance metadata service.
             var instanceMeta = await InstanceMetaHelper.GetMetaInfoAsync();
-            var incident = GrafanaIncidentMessageGenerator.GenerateIncidentFromGrafanaAlert(webhookMessage, instanceMeta, _options, _logger);
+            var incident = GrafanaIncidentMessageGenerator.GenerateIncidentFromGrafanaAlert(webhookMessage, instanceMeta, _icmClientProvider.GetClientOptions(), _logger);
             return incident;
         }
 

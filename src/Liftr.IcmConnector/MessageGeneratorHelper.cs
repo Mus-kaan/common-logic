@@ -2,17 +2,11 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.AzureAd.Icm.Types;
-using Microsoft.AzureAd.Icm.XhtmlUtility;
-using Microsoft.Liftr.Utilities;
-using System;
 using System.Globalization;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using System.Web;
 
-namespace Microsoft.Liftr.Prom2IcM
+namespace Microsoft.Liftr.IcmConnector
 {
     internal static class MessageGeneratorHelper
     {

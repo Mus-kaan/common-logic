@@ -5,10 +5,12 @@
 using Microsoft.AzureAd.Icm.Types;
 using System.Threading.Tasks;
 
-namespace Microsoft.Liftr.Prom2IcM
+namespace Microsoft.Liftr.IcmConnector
 {
     public interface IICMClientProvider
     {
         Task<ITaskBasedConnector> GetICMClientAsync();
+
+        ICMClientOptions GetClientOptions();
     }
 }

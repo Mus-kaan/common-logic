@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Liftr.Prom2IcM
+namespace Microsoft.Liftr.IcmConnector
 {
     /// <summary>
     /// https://grafana.com/docs/grafana/latest/alerting/old-alerting/notifications/#webhook

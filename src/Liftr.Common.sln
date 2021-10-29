@@ -237,6 +237,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Prom2IcM", "Liftr.Pro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Prom2IcM.Tests", "Liftr.Prom2IcM.Tests\Liftr.Prom2IcM.Tests.csproj", "{B69EB5A6-4E67-4934-9E8C-2DA68D7802D0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.IcmConnector", "Liftr.IcmConnector\Liftr.IcmConnector.csproj", "{C5A6410C-9288-4F90-AC79-6FDAA02D2C69}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -671,6 +673,10 @@ Global
 		{B69EB5A6-4E67-4934-9E8C-2DA68D7802D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B69EB5A6-4E67-4934-9E8C-2DA68D7802D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B69EB5A6-4E67-4934-9E8C-2DA68D7802D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5A6410C-9288-4F90-AC79-6FDAA02D2C69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5A6410C-9288-4F90-AC79-6FDAA02D2C69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5A6410C-9288-4F90-AC79-6FDAA02D2C69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5A6410C-9288-4F90-AC79-6FDAA02D2C69}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -723,6 +729,7 @@ Global
 		{761F6735-C315-4B28-B03A-B506ED532053} = {E6C8A847-172D-4E1A-ADFB-AC96B7C1314F}
 		{93464F96-B498-44CA-93BF-487CE05A7B81} = {68E3352C-81F5-40A6-8236-4CB91035212C}
 		{B69EB5A6-4E67-4934-9E8C-2DA68D7802D0} = {68E3352C-81F5-40A6-8236-4CB91035212C}
+		{C5A6410C-9288-4F90-AC79-6FDAA02D2C69} = {68E3352C-81F5-40A6-8236-4CB91035212C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CF8F327F-EB87-482C-861B-2D635AB4E992}

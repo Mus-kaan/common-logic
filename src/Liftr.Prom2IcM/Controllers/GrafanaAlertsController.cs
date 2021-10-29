@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Liftr.IcmConnector;
 using Microsoft.Liftr.Prom2IcM.Examples;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;

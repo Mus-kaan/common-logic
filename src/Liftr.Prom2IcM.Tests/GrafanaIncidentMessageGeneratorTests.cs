@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Liftr.IcmConnector;
 using Xunit;
 
 namespace Microsoft.Liftr.Prom2IcM.Tests

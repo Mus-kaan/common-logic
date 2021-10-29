@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Microsoft.Liftr.Prom2IcM
+namespace Microsoft.Liftr.IcmConnector
 {
     public class ICMClientOptions
     {

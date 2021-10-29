@@ -7,6 +7,7 @@ using Microsoft.AzureAd.Icm.Types;
 using Microsoft.AzureAd.Icm.WebService.Client;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Microsoft.Liftr.IcmConnector;
 using Microsoft.Liftr.TokenManager;
 using System;
 using System.Threading;
@@ -35,6 +36,12 @@ namespace Microsoft.Liftr.Prom2IcM
             _certStore.Dispose();
             _icmClient.Dispose();
             base.Dispose();
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1024:Use properties where appropriate", Justification = "<Pending>")]
+        public ICMClientOptions GetClientOptions()
+        {
+            return _options;
         }
 
         public async Task<ITaskBasedConnector> GetICMClientAsync()

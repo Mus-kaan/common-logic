@@ -7,22 +7,17 @@
     <UserSecretsId>a230081a-dccc-49c9-ba47-651d22e0bd9a</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AzureAd.Icm.WebService.Client" Version="$(PackageVersion_Microsoft_AzureAd_Icm_WebService_Client)" />
-    <PackageReference Include="Microsoft.AzureAd.Icm.XhtmlUtility" Version="$(PackageVersion_Microsoft_AzureAd_Icm_XhtmlUtility)" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="$(PackageVersion_Swashbuckle_AspNetCore_Filters)" />
-    <PackageReference Include="HtmlAgilityPack" Version="$(PackageVersion_HtmlAgilityPack)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Hosting.Swagger\Liftr.Hosting.Swagger.csproj" />
+    <ProjectReference Include="..\Liftr.IcmConnector\Liftr.IcmConnector.csproj" />
     <ProjectReference Include="..\Liftr.Logging.AspNetCore\Liftr.Logging.AspNetCore.csproj" />
     <ProjectReference Include="..\Liftr.TokenManager\Liftr.TokenManager.csproj" />
     <ProjectReference Include="..\Liftr.WebHosting\Liftr.WebHosting.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="grafana-alert-template.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="alert-template.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

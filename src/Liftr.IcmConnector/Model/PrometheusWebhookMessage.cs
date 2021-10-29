@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Liftr.Prom2IcM
+namespace Microsoft.Liftr.IcmConnector
 {
     /// <summary>
     /// Prometheus AlertManager webhook.
@@ -45,6 +45,7 @@ namespace Microsoft.Liftr.Prom2IcM
         /// <summary>
         /// backlink to the Alertmanager.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:Uri properties should not be strings", Justification = "<Pending>")]
         public string ExternalURL { get; set; }
 
         public IEnumerable<Alert> Alerts { get; set; }
@@ -68,6 +69,7 @@ namespace Microsoft.Liftr.Prom2IcM
         /// <summary>
         /// identifies the entity that caused the alert
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:Uri properties should not be strings", Justification = "<Pending>")]
         public string GeneratorURL { get; set; }
 
         public string Fingerprint { get; set; }

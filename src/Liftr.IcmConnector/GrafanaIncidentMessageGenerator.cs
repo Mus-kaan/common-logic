@@ -6,21 +6,18 @@ using Microsoft.AzureAd.Icm.Types;
 using Microsoft.AzureAd.Icm.XhtmlUtility;
 using Microsoft.Liftr.Utilities;
 using System;
-using System.Globalization;
-using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 
-namespace Microsoft.Liftr.Prom2IcM
+namespace Microsoft.Liftr.IcmConnector
 {
-    public static class PrometheusIncidentMessageGenerator
+    public static class GrafanaIncidentMessageGenerator
     {
-        private const string c_nullTimeStamp = "0001-01-01T00:00:00Z";
-        private static readonly TenantHelper s_tenantHelper = new TenantHelper();
-        private static string s_alertTemplateContent = File.ReadAllText("alert-template.html");
+        private static string s_alertTemplateContent = EmbeddedContentReader.GetContent("Microsoft.Liftr.IcmConnector.grafana-alert-template.html");
 
-        public static AlertSourceIncident GenerateIncidentFromPrometheusAlert(
-            PrometheusWebhookMessage webhookMessage,
-            Alert promAlert,
+        public static AlertSourceIncident GenerateIncidentFromGrafanaAlert(
+            GrafanaWebhookMessage webhookMessage,
             MetaInfo computeMeta,
             ICMClientOptions icmOptions,
             Serilog.ILogger logger)
@@ -30,9 +27,9 @@ namespace Microsoft.Liftr.Prom2IcM
                 throw new ArgumentNullException(nameof(webhookMessage));
             }
 
-            if (promAlert == null)
+            if (string.IsNullOrEmpty(webhookMessage.Title))
             {
-                throw new ArgumentNullException(nameof(promAlert));
+                throw new ArgumentException($"The Grafana webhook {nameof(webhookMessage.Title)} cannot be null.");
             }
 
             if (icmOptions == null)
@@ -48,62 +45,27 @@ namespace Microsoft.Liftr.Prom2IcM
             // computeMeta can be null when IMDS is not available, e.g. local debug, not in azure.
             var computeInstanceMeta = computeMeta?.InstanceMeta?.Compute;
 
-            var incidentStartTime = DateTime.Parse(promAlert.StartsAt, CultureInfo.InvariantCulture).ToUniversalTime();
-            DateTime? incidentEndTime = null;
-            if (!string.IsNullOrEmpty(promAlert.EndsAt) &&
-                !promAlert.EndsAt.OrdinalEquals(c_nullTimeStamp))
-            {
-                incidentEndTime = DateTime.Parse(promAlert.EndsAt, CultureInfo.InvariantCulture).ToUniversalTime();
-            }
+            var incidentStartTimeBucket = DateTime.UtcNow.RoundUp(TimeSpan.FromMinutes(10));
+            var incidentTitle = webhookMessage.Title;
 
-            var incidentTitle = "[Prometheus]";
-            if (!string.IsNullOrEmpty(computeInstanceMeta?.Location))
-            {
-                incidentTitle = $"{incidentTitle}[{computeInstanceMeta?.Location}]";
-            }
-
-            incidentTitle = $"{incidentTitle} {promAlert.Labels.Alertname}";
-            var summary = promAlert.Annotations.summary;
-            var description = promAlert.Annotations.description;
-            var message = promAlert.Annotations.message ?? string.Empty;
-            var runbook_url = promAlert.Annotations.runbook_url ?? string.Empty;
-
-            var incidentId = $"{MessageGeneratorHelper.ComputeSha256Hash(promAlert.Labels.Alertname)}-{incidentStartTime.Ticks}";
-            var icmCorrelationId = HttpUtility.UrlEncode($"prom2icm://prom/{promAlert.Labels.Alertname}");
+            var incidentId = $"{MessageGeneratorHelper.ComputeSha256Hash(webhookMessage.RuleId + incidentTitle + incidentStartTimeBucket.ToZuluString())}";
+            var icmCorrelationId = HttpUtility.UrlEncode($"prom2icm://prom/{webhookMessage.Title}");
 
             var incidentLocation = new IncidentLocation()
             {
-                DataCenter = computeInstanceMeta?.Location ?? "UnknownDataCenter",
-                DeviceGroup = computeInstanceMeta?.ResourceGroupName ?? "UnknownDeviceGroup",
-                DeviceName = computeInstanceMeta?.Name ?? "UnknownDeviceName",
-                Environment = computeInstanceMeta?.AzEnvironment ?? "UnknownEnvironment",
-                ServiceInstanceId = computeInstanceMeta?.ResourceId ?? "UnknownServiceInstanceId",
+                Environment = "Grafana",
             };
 
-            var severity = 4;
-            try
-            {
-                var parsedSeverity = int.Parse(promAlert.Labels.Severity, CultureInfo.InvariantCulture);
-                if (parsedSeverity >= 0 && parsedSeverity <= 4)
-                {
-                    severity = parsedSeverity;
-                }
-            }
-            catch
-            {
-            }
+            var severity = ExtractSeverityFromMessage(webhookMessage.Message);
 
             logger.Information("incidentId: {incidentId}, icmCorrelationId: {icmCorrelationId}, incidentLocation: {incidentLocation}", incidentId, icmCorrelationId, incidentLocation);
 
             DateTime now = DateTime.UtcNow;
-            (var icmDescription, var icmSummary) = GenerateXHtmlDescription(
-                        promAlert,
+
+            (var description, var summary) = GenerateXHtmlDescription(
+                        webhookMessage,
                         computeInstanceMeta,
                         incidentTitle,
-                        summary,
-                        description,
-                        message,
-                        runbook_url,
                         now.AddMilliseconds(1));
 
             // Note that this does not specify all possible incident fields, but does specify the recommended minimum fields and some
@@ -113,7 +75,7 @@ namespace Microsoft.Liftr.Prom2IcM
                 // Alert source information is source-specific information provided by the alert source
                 Source = new AlertSourceInfo
                 {
-                    Origin = "Prometheus",
+                    Origin = "Grafana",
 
                     // Set this to be the alias or email address of the user requesting incident creation if creating on behalf of another user so they will receive notifications.
                     // This can also be an email address that is not associated with any contact that will be CC'ed on all notifications for this incident.
@@ -128,7 +90,7 @@ namespace Microsoft.Liftr.Prom2IcM
                     //   code checks the Source.ModifiedDate of the existing incident and compares it to the Source.ModifiedDate
                     //   being sent here. Updates that have a Source.ModifiedDate date equal or less than the value in the existing
                     //   incident are discarded as they are considered to have been already applied.
-                    CreateDate = incidentStartTime,
+                    CreateDate = DateTime.UtcNow,
                     ModifiedDate = now,
 
                     // the Source.IncidentId field is a id unique to the alert source for an incident. The combination of this field
@@ -177,12 +139,12 @@ namespace Microsoft.Liftr.Prom2IcM
                 //   existing incidents and changing the status to mitigated or resolved.
                 Status = IncidentStatus.Active,
 
-                Summary = icmSummary,
+                Summary = summary,
 
                 // one or more description entries may be submitted
                 DescriptionEntries = new[]
                 {
-                    icmDescription,
+                    description,
                 },
 
                 // Title is a mandatory field and must be non-empty, non-null, and consist of at least one non-whitespace character,
@@ -206,16 +168,83 @@ namespace Microsoft.Liftr.Prom2IcM
             };
         }
 
+        public static int ExtractSeverityFromMessage(string message)
+        {
+            var parsedSeverity = 4;
+
+            if (TryExtractSeverityFromMessage(message, @"\[Severity(?<servStr>\d+)]", out parsedSeverity))
+            {
+                return parsedSeverity;
+            }
+
+            if (TryExtractSeverityFromMessage(message, @"\[Severity (?<servStr>\d+)]", out parsedSeverity))
+            {
+                return parsedSeverity;
+            }
+
+            if (TryExtractSeverityFromMessage(message, @"\[Sev(?<servStr>\d+)]", out parsedSeverity))
+            {
+                return parsedSeverity;
+            }
+
+            if (TryExtractSeverityFromMessage(message, @"\[Sev (?<servStr>\d+)]", out parsedSeverity))
+            {
+                return parsedSeverity;
+            }
+
+            if (TryExtractSeverityFromMessage(message, @"\[severity(?<servStr>\d+)]", out parsedSeverity))
+            {
+                return parsedSeverity;
+            }
+
+            if (TryExtractSeverityFromMessage(message, @"\[severity (?<servStr>\d+)]", out parsedSeverity))
+            {
+                return parsedSeverity;
+            }
+
+            if (TryExtractSeverityFromMessage(message, @"\[sev(?<servStr>\d+)]", out parsedSeverity))
+            {
+                return parsedSeverity;
+            }
+
+            if (TryExtractSeverityFromMessage(message, @"\[sev (?<servStr>\d+)]", out parsedSeverity))
+            {
+                return parsedSeverity;
+            }
+
+            return parsedSeverity;
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "Liftr1004:Avoid calling System.Threading.Tasks.Task<TResult>.Result", Justification = "<Pending>")]
+        private static bool TryExtractSeverityFromMessage(string message, string patternStr, out int parsedSeverity)
+        {
+            parsedSeverity = 4;
+            try
+            {
+                Regex pattern = new Regex(patternStr);
+                Match match = pattern.Match(message);
+                if (match.Success && int.TryParse(match.Groups["servStr"].Value, out parsedSeverity))
+                {
+                    if (parsedSeverity < 0 || parsedSeverity > 4)
+                    {
+                        parsedSeverity = 4;
+                        return false;
+                    }
+
+                    return true;
+                }
+            }
+            catch
+            {
+            }
+
+            return false;
+        }
+
         private static (DescriptionEntry, string) GenerateXHtmlDescription(
-            Alert promAlert,
+            GrafanaWebhookMessage webhookMessage,
             ComputeMetadata computeMeta,
             string alertName,
-            string summary,
-            string description,
-            string message,
-            string runbook_url,
             DateTime date)
         {
             string xhtmlSanitized;
@@ -223,55 +252,20 @@ namespace Microsoft.Liftr.Prom2IcM
             string htmlRaw = s_alertTemplateContent;
             string errors;
 
-            htmlRaw = htmlRaw.Replace("ALERT_NAME", alertName, StringComparison.OrdinalIgnoreCase);
-            htmlRaw = htmlRaw.Replace("SUMMARY_PLACEHOLDER", summary, StringComparison.OrdinalIgnoreCase);
-            htmlRaw = htmlRaw.Replace("DESCRIPTION_PLACEHOLDER", description, StringComparison.OrdinalIgnoreCase);
-            htmlRaw = htmlRaw.Replace("MESSAGE_PLACEHOLDER", message, StringComparison.OrdinalIgnoreCase);
-            htmlRaw = htmlRaw.Replace("RUNBOOK_URL_PLACEHOLDER", runbook_url, StringComparison.OrdinalIgnoreCase);
+            htmlRaw = htmlRaw.Replace("ALERT_NAME", alertName);
+            htmlRaw = htmlRaw.Replace("MESSAGE_PLACEHOLDER", webhookMessage.Message);
 
-            // set 'Labels'
+            var evalMatchesTableContentSB = new StringBuilder();
+
+            foreach (var match in webhookMessage.EvalMatches)
             {
-                var serv = promAlert?.Labels?.Severity ?? "Serv4";
-                htmlRaw = htmlRaw.Replace("SEVERITY_PLACEHOLDER", serv, StringComparison.OrdinalIgnoreCase);
-
-                var job = promAlert?.Labels?.Job ?? "Unknown Job";
-                htmlRaw = htmlRaw.Replace("JOB_PLACEHOLDER", job, StringComparison.OrdinalIgnoreCase);
+                evalMatchesTableContentSB.Append($"<tr><td>{match.Metric}</td><td>{match.Value}</td></tr>");
             }
 
-            // set 'Cluster'
-            try
-            {
-                var loc = computeMeta?.Location ?? "Unknown";
-                htmlRaw = htmlRaw.Replace("LOCATION_PLACEHOLDER", loc, StringComparison.OrdinalIgnoreCase);
+            htmlRaw = htmlRaw.Replace("EVAL_MATCH_PLACEHOLDER", evalMatchesTableContentSB.ToString());
 
-                var subId = computeMeta?.SubscriptionId ?? "Unknown";
-                htmlRaw = htmlRaw.Replace("SUBSCRITPTION_ID_PLACEHOLDER", subId, StringComparison.OrdinalIgnoreCase);
-
-                var aksId = "Unknown";
-                if (!string.IsNullOrEmpty(computeMeta?.SubscriptionId) &&
-                    !string.IsNullOrEmpty(computeMeta?.ResourceGroupName))
-                {
-                    var parts = computeMeta.ResourceGroupName.Split('_');
-                    if (parts.Length == 4)
-                    {
-                        aksId = $"/subscriptions/{subId}/resourceGroups/{parts[1]}/providers/Microsoft.ContainerService/managedClusters/{parts[2]}";
-                        try
-                        {
-                            var tenantId = s_tenantHelper.GetTenantIdForSubscriptionAsync(subId).Result;
-                            var aksPortalLink = "https://portal.azure.com/?feature.customportal=false#@" + tenantId + "/resource" + aksId + "/overview";
-                            htmlRaw = htmlRaw.Replace("https://aka.ms/prom2icm", aksPortalLink, StringComparison.OrdinalIgnoreCase);
-                        }
-                        catch
-                        {
-                        }
-                    }
-                }
-
-                htmlRaw = htmlRaw.Replace("AKS_RID_PLACEHOLDER", aksId, StringComparison.OrdinalIgnoreCase);
-            }
-            catch
-            {
-            }
+            // TODO: fix this deep link.
+            htmlRaw = htmlRaw.Replace("GRAFANA_LINK_PLACEHOLDER", webhookMessage.RuleUrl);
 
             // IcM's web method WILL NOT run this as it expects the connector to submit valid XHTML
             if (XmlSanitizer.TryMakeXHtml(htmlRaw, out xhtmlValid, out errors) == false)
@@ -295,19 +289,19 @@ namespace Microsoft.Liftr.Prom2IcM
             // All the comments in the PlainText description entry apply to XHTML description entries as well and will not be
             //  duplicated below except for the important length limitation one.  The server will truncate the Text field if it has
             //  more than 2MB characters, which will in turn likely cause XHTML to become invalid and displayed as plain text.
-            var result = new DescriptionEntry
+            var description = new DescriptionEntry
             {
                 Cause = DescriptionEntryCause.Created,
                 Date = date,
                 SubmitDate = date,
-                SubmittedBy = "prom2icm",
+                SubmittedBy = "grafana2icm",
                 RenderType = DescriptionTextRenderType.Html,
 
                 // this text field must be 2MB or fewer characters, including all markup characters
                 Text = xhtmlSanitized,
             };
 
-            return (result, xhtmlSanitized);
+            return (description, xhtmlSanitized);
         }
     }
 }
