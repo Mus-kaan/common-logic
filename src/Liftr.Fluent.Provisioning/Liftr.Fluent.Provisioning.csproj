@@ -13,6 +13,9 @@
     <ProjectReference Include="..\Liftr.KeyVault\Liftr.KeyVault.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Azure.Storage.Blobs" Version="$(PackageVersion_Azure_Storage_Blobs)" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="**\*.json"></EmbeddedResource>
   </ItemGroup>
 </Project>

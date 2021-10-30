@@ -82,6 +82,14 @@ namespace Microsoft.Liftr.SimpleDeploy
                     await dnsZone.Update().DefineARecordSet("thanos-1-" + aksName).WithIPv4Address(inboundIP.IPAddress).WithTimeToLive(60).Attach().ApplyAsync();
                     _logger.Information("Successfully added DNS A record '{recordName}' to IP '{ipAddress}'.", aksName, inboundIP.IPAddress);
 
+                    if (!string.IsNullOrEmpty(targetOptions.ThanosClientIPRange))
+                    {
+                        // Thanos is enabled.
+                        ThanosAssetRegistryManager thanosAssetManager = new ThanosAssetRegistryManager(azFactory, _hostingOptions, targetOptions, _logger);
+                        var aksId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{aksRGName}/providers/Microsoft.ContainerService/managedClusters/{aksName}";
+                        await thanosAssetManager.UpdateAKSThanosEndpointsAsync(aksId, aksRegion, $"thanos-0-{aksName}.{targetOptions.DomainName}", $"thanos-0-{aksName}.{targetOptions.DomainName}");
+                    }
+
                     if (_commandOptions.Action == ActionType.UpdateComputeIPInTrafficManager)
                     {
                         var epName = $"{aksRGName}-{SdkContext.RandomResourceName(string.Empty, 5).Substring(0, 3)}";

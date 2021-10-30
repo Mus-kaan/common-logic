@@ -28,6 +28,13 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
+    "5_eastus-tm": {
+      "commandName": "Project",
+      "commandLineArgs": "-a UpdateComputeIPInTrafficManager -e Test -r eastus --authFile my.azureauth-ms.auth.json",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
     "1_vmss-global": {
       "commandName": "Project",
       "commandLineArgs": "-a CreateOrUpdateGlobal -e Test -r global -f vmss-hosting-options.json --authFile my.azureauth-ms.auth.json",
