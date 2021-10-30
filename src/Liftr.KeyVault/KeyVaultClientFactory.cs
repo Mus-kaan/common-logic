@@ -23,7 +23,6 @@ namespace Microsoft.Liftr.KeyVault
                     .WithClientSecret(clientSecret)
                     .WithAuthority(new Uri(authority))
                     .WithLegacyCacheCompatibility(false)
-                    .WithAzureRegion(ConfidentialClientApplication.AttemptRegionDiscovery)
                     .Build();
 
                     var tokenScope = $"{resource}/.default";
