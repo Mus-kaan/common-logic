@@ -87,7 +87,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                         // Thanos is enabled.
                         ThanosAssetRegistryManager thanosAssetManager = new ThanosAssetRegistryManager(azFactory, _hostingOptions, targetOptions, _logger);
                         var aksId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{aksRGName}/providers/Microsoft.ContainerService/managedClusters/{aksName}";
-                        await thanosAssetManager.UpdateAKSThanosEndpointsAsync(aksId, aksRegion, $"thanos-0-{aksName}.{targetOptions.DomainName}", $"thanos-0-{aksName}.{targetOptions.DomainName}");
+                        await thanosAssetManager.UpdateAKSThanosEndpointsAsync(aksId, aksRegion, $"thanos-0-{aksName}.{targetOptions.DomainName}", $"thanos-1-{aksName}.{targetOptions.DomainName}");
                     }
 
                     if (_commandOptions.Action == ActionType.UpdateComputeIPInTrafficManager)
