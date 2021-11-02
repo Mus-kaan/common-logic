@@ -34,6 +34,7 @@ namespace Microsoft.Liftr.Fluent
             if (withACR)
             {
                 providers.Add("Microsoft.ContainerRegistry");
+                providers.Add("Microsoft.EventGrid");
             }
 
             await RegisterProvidersAsync(liftrAzure, s_commonProviderList);
@@ -152,6 +153,7 @@ namespace Microsoft.Liftr.Fluent
             "Microsoft.ContainerService",
             "Microsoft.ContainerRegistry",
             "Microsoft.OperationsManagement",
+            "Microsoft.EventGrid",
         };
     }
 }

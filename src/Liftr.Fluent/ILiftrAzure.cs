@@ -425,6 +425,8 @@ namespace Microsoft.Liftr.Fluent
         #region ACR
         Task<IRegistry> GetOrCreateACRAsync(Region location, string rgName, string acrName, IDictionary<string, string> tags);
 
+        Task ConfigureImageScanningAsync(IRegistry acr);
+
         Task<IRegistry> GetACRAsync(string rgName, string acrName);
 
         Task<IEnumerable<IRegistry>> ListACRAsync(string rgName);

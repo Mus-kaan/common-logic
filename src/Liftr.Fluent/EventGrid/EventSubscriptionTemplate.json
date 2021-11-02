@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "resources": [
+    {
+      "type": "Microsoft.EventGrid/eventSubscriptions",
+      "apiVersion": "2020-10-15-preview",
+      "name": "scanonpush",
+      "scope":  "WILL_BE_CHANGED [parameters('scope')]",
+      "properties": {
+        "topic": "WILL_BE_CHANGED [parameters('resourceId')]",
+        "destination": {
+          "endpointType": "WebHook",
+          "properties": {
+            "endpointUrl": "WILL_BE_CHANGED [parameters('endpoint')]",
+            "maxEventsPerBatch": 1,
+            "preferredBatchSizeInKilobytes": 64
+          }
+        },
+        "filter": {
+          "includedEventTypes": [
+            "Microsoft.ContainerRegistry.ImagePushed"
+          ],
+          "advancedFilters": [],
+          "enableAdvancedFilteringOnArrays": true
+        },
+        "labels": [],
+        "eventDeliverySchema": "EventGridSchema"
+      }
+    }
+  ]
+}

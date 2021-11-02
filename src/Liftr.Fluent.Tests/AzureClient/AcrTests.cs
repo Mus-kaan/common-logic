@@ -38,6 +38,12 @@ namespace Microsoft.Liftr.Fluent.Tests
 
             logs[10].MessageTemplate.Text
                .Should().Be("Created ACR with Id {resourceId}.");
+
+            logs[12].MessageTemplate.Text
+                .Should().StartWith("Creating an Event Subscription with name");
+
+            logs[17].MessageTemplate.Text
+                .Should().Be("Created Event Subscription for Image Scanning");
         }
     }
 }

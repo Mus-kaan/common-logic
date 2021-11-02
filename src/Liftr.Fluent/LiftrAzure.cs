@@ -468,7 +468,21 @@ namespace Microsoft.Liftr.Fluent
                 _logger.Information("Created ACR with Id {resourceId}.", acr.Id);
             }
 
+            await ConfigureImageScanningAsync(acr);
+
             return acr;
+        }
+
+        public async Task ConfigureImageScanningAsync(IRegistry acr)
+        {
+            var eventGridHelper = new EventGridHelper(_logger);
+            var scope = "Microsoft.ContainerRegistry/registries/" + acr.Name;
+            bool imageScanConfigured = await eventGridHelper.IsEventSubscriptionExistingAsync(this, scope);
+            if (!imageScanConfigured)
+            {
+                await eventGridHelper.CreateImageScanningEventSubscriptionForACRAsync(this, acr);
+                _logger.Information("Created Event Subscription for Image Scanning");
+            }
         }
 
         public Task<IRegistry> GetACRAsync(string rgName, string acrName)

@@ -107,6 +107,7 @@ namespace Microsoft.Liftr.ImageBuilder
                     else
                     {
                         acr = acrList.First();
+                        await liftrAzure.ConfigureImageScanningAsync(acr);
                     }
                 }
 
