@@ -4,5 +4,6 @@ namespace Liftr.Monitoring.VNext.DiagnosticSettings.Interfaces
     {
         string GetDiagnosticSettingNameForResourceV2();
         string GetPrefixedResourceProviderName();
+        string GetPrefixedWithObservabilityResourceProviderName();
     }
 }
