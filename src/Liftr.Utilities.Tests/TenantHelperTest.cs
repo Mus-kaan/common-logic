@@ -14,7 +14,7 @@ namespace Microsoft.Liftr.Utilities.Tests
         public async Task CanGetTenantIdAsync()
         {
             using var helper = new TenantHelper(new Uri("https://management.azure.com"));
-            var tenantId = await helper.GetTenantIdForSubscriptionAsync("8f59a6fe-696c-45e1-8a91-d2ccb55871fc");
+            var tenantId = await helper.GetTenantIdForSubscriptionAsync("f885cf14-b751-43c1-9536-dc5b1be02bc0"); // subscription 'LiftrToolsUnitTestONLY'
             Assert.Equal("72f988bf-86f1-41af-91ab-2d7cd011db47", tenantId);
         }
     }
