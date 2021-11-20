@@ -5,6 +5,7 @@
 using Microsoft.Liftr.Marketplace.Contracts;
 using Serilog;
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -51,6 +52,8 @@ namespace Microsoft.Liftr.Marketplace.Utils
         public async Task<T> PollOperationAsync<T>(int maxRetries) where T : BaseOperationResponse
         {
             string errorMessage;
+            HttpStatusCode[] transientErrorHttpStatusCodes = GetTransientErrorHttpStatusCodesWorthRetrying();
+
             for (int retryCount = 1; retryCount <= maxRetries; retryCount++)
             {
                 await Task.Delay(_retryAfter);
@@ -61,6 +64,12 @@ namespace Microsoft.Liftr.Marketplace.Utils
                 if (!response.IsSuccessStatusCode)
                 {
                     errorMessage = $"Async Polling failed with StatusCode: {response.StatusCode}.";
+                    if (transientErrorHttpStatusCodes.Contains(response.StatusCode))
+                    {
+                        _logger.Information($"{errorMessage} Trying again.");
+                        continue;
+                    }
+
                     var ex = await PollingExceptionHelper.CreatePollingExceptionForFailResponseAsync(_originalRequest, _operationLocation, errorMessage, response);
                     _logger.Error(ex.Message);
                     throw ex;
@@ -122,6 +131,16 @@ namespace Microsoft.Liftr.Marketplace.Utils
                 _logger.Error(ex.Message);
                 throw ex;
             }
+        }
+
+        private static HttpStatusCode[] GetTransientErrorHttpStatusCodesWorthRetrying()
+        {
+            return new HttpStatusCode[]
+            {
+                HttpStatusCode.BadGateway, // 502
+                HttpStatusCode.ServiceUnavailable, // 503
+                HttpStatusCode.GatewayTimeout, // 504
+            };
         }
 
         private HttpRequestMessage CreatePollingRequest()
