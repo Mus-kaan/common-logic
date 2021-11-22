@@ -239,6 +239,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Prom2IcM.Tests", "Lif
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.IcmConnector", "Liftr.IcmConnector\Liftr.IcmConnector.csproj", "{C5A6410C-9288-4F90-AC79-6FDAA02D2C69}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.ManagedIdentity.DataSource", "Liftr.ManagedIdentity.DataSource\Liftr.ManagedIdentity.DataSource.csproj", "{1BD4C3F0-5088-46AE-AE4A-545E895733E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.ManagedIdentity.DataSource.Hosting", "Liftr.ManagedIdentity.DataSource.Hosting\Liftr.ManagedIdentity.DataSource.Hosting.csproj", "{B1AA74BA-F69A-49E0-A1FB-2F6BAECEAF17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -677,6 +681,14 @@ Global
 		{C5A6410C-9288-4F90-AC79-6FDAA02D2C69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5A6410C-9288-4F90-AC79-6FDAA02D2C69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5A6410C-9288-4F90-AC79-6FDAA02D2C69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BD4C3F0-5088-46AE-AE4A-545E895733E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BD4C3F0-5088-46AE-AE4A-545E895733E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BD4C3F0-5088-46AE-AE4A-545E895733E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BD4C3F0-5088-46AE-AE4A-545E895733E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1AA74BA-F69A-49E0-A1FB-2F6BAECEAF17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1AA74BA-F69A-49E0-A1FB-2F6BAECEAF17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1AA74BA-F69A-49E0-A1FB-2F6BAECEAF17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1AA74BA-F69A-49E0-A1FB-2F6BAECEAF17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
