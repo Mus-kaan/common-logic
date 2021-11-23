@@ -40,6 +40,8 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         public bool DBSupport { get; set; } = true;
 
+        public bool? CreateDBWithZoneRedundancy { get; set; }
+
         public void CheckValid()
         {
             if (string.IsNullOrEmpty(DomainName))

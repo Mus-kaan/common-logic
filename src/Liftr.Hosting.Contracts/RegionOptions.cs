@@ -25,6 +25,8 @@ namespace Microsoft.Liftr.Hosting.Contracts
 
         public bool ZoneRedundant { get; set; }
 
+        public bool? CreateDBWithZoneRedundancy { get; set; }
+
         public IEnumerable<string> DataPlaneSubscriptions { get; set; }
 
         public Dictionary<string, string> Properties { get; set; }

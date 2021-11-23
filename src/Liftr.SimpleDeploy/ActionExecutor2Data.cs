@@ -51,6 +51,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 GlobalTrafficManagerResourceId = $"/subscriptions/{targetOptions.AzureSubscription}/resourceGroups/{globalRGName}/providers/Microsoft.Network/trafficmanagerprofiles/{_globalNamingContext.TrafficManagerName(targetOptions.Global.BaseName)}",
                 LogAnalyticsWorkspaceId = targetOptions.LogAnalyticsWorkspaceId,
                 DomainName = targetOptions.DomainName,
+                CreateDBWithZoneRedundancy = regionOptions.CreateDBWithZoneRedundancy,
                 DNSZoneId = $"/subscriptions/{liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{globalRGName}/providers/Microsoft.Network/dnszones/{targetOptions.DomainName}",
             };
 

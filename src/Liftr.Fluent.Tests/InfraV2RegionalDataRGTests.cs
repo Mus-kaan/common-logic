@@ -80,5 +80,42 @@ namespace Microsoft.Liftr.Fluent.Tests
                 }
             }
         }
+
+        [CheckInValidation(skipLinux: true)]
+        public async Task VerifyRegionalCosmosDBResourceCreationWithoutZonalRedundancyAsync()
+        {
+            var shortPartnerName = SdkContext.RandomResourceName("v", 6);
+            var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USWest2);
+            TestCommon.AddCommonTags(context.Tags);
+
+            var baseName = "data";
+            var rgName = context.ResourceGroupName(baseName);
+
+            var dataOptions = JsonConvert.DeserializeObject<RegionalDataOptions>(File.ReadAllText("TestDataOptions.json"));
+            dataOptions.EnableVNet = true;
+            dataOptions.CreateDBWithZoneRedundancy = false;
+
+            using (var regionalDataScope = new TestResourceGroupScope(rgName))
+            {
+                var infra = new InfrastructureV2(regionalDataScope.AzFactory, TestCredentials.KeyVaultClient, regionalDataScope.Logger);
+                var client = regionalDataScope.Client;
+
+                await client.GetOrCreateResourceGroupAsync(context.Location, rgName, context.Tags);
+                var laName = context.LogAnalyticsName("gbl001");
+                var logAnalytics = await client.GetOrCreateLogAnalyticsWorkspaceAsync(context.Location, rgName, laName, context.Tags);
+                dataOptions.LogAnalyticsWorkspaceId = $"/subscriptions/{client.FluentClient.SubscriptionId}/resourcegroups/{rgName}/providers/microsoft.operationalinsights/workspaces/{laName}";
+
+                var resources = await infra.CreateOrUpdateRegionalDataRGAsync(baseName, context, dataOptions, dataOptions.EnableVNet, "Liftr");
+
+                // Check zone redundancy of cosmos db
+                {
+                    var dbs = await client.ListCosmosDBAsync(regionalDataScope.ResourceGroupName);
+                    Assert.Single(dbs);
+
+                    var db = dbs.First();
+                    Assert.Equal(false, db.Inner.Locations[0].IsZoneRedundant);
+                }
+            }
+        }
     }
 }
