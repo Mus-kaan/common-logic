@@ -4,6 +4,7 @@
     <TargetFramework>$(LiftrClassLibraryTargetFramework21)</TargetFramework>
     <RootNamespace>Microsoft.Liftr.ManagedIdentity.DataSource.Hosting</RootNamespace>
     <AssemblyName>Microsoft.Liftr.ManagedIdentity.DataSource.Hosting</AssemblyName>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
