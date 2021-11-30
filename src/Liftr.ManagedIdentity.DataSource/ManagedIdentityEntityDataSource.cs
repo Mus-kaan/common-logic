@@ -43,23 +43,5 @@ namespace Microsoft.Liftr.ManagedIdentity.DataSource
                 _rateLimiter.Release();
             }
         }
-
-        public async Task<IAsyncEnumerable<ManagedIdentityEntity>> ListNearExpiryIdentitiesAsync(DateTimeOffset expiryThreshold, CancellationToken cancellationToken = default)
-        {
-            var builder = Builders<ManagedIdentityEntity>.Filter;
-            var expiryDateTime = new DateTime(expiryThreshold.Ticks, DateTimeKind.Utc);
-            var filter = builder.Lt(miEntity => miEntity.Identity.RenewAfter, expiryDateTime);
-
-            await _rateLimiter.WaitAsync();
-            try
-            {
-                var cursor = await _collection.FindAsync<ManagedIdentityEntity>(filter, null, cancellationToken);
-                return cursor.ToAsyncEnumerable();
-            }
-            finally
-            {
-                _rateLimiter.Release();
-            }
-        }
     }
 }

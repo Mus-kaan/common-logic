@@ -41,33 +41,5 @@ namespace Microsoft.Liftr.ManagedIdentity.DataSource
         /// </summary>
         [BsonElement("resource_id")]
         public string ResourceId { get; set; }
-
-        /// <summary>
-        /// The certificate cannot be used to auth to AAD or MSI data plane before this time
-        /// </summary>
-        [BsonElement("not_before")]
-        [BsonRepresentation(BsonType.Document)]
-        public DateTimeOffset? NotBefore { get; set; }
-
-        /// <summary>
-        /// The certificate cannot be used to auth to AAD after this time.
-        /// </summary>
-        [BsonElement("not_after")]
-        [BsonRepresentation(BsonType.Document)]
-        public DateTimeOffset? NotAfter { get; set; }
-
-        /// <summary>
-        /// The certificate can be renewed via the MSI data plane after this time.
-        /// </summary>
-        [BsonElement("renew_after")]
-        [BsonRepresentation(BsonType.Document)]
-        public DateTimeOffset? RenewAfter { get; set; }
-
-        /// <summary>
-        /// The certificate cannot be used to auth to MSI data plane after this time.
-        /// </summary>
-        [BsonElement("cannot_renew_after")]
-        [BsonRepresentation(BsonType.Document)]
-        public DateTimeOffset? CannotRenewAfter { get; set; }
     }
 }
