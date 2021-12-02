@@ -8,6 +8,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Microsoft.Liftr.ManagedIdentity.DataSource
 {
+    [BsonIgnoreExtraElements]
     public class ManagedIdentityEntity : BaseResourceEntity
     {
         [BsonElement("identity")]
