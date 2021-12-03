@@ -23,3 +23,6 @@ https://dev.azure.com/msazure/One/_git/Compute-Runtime-Tux-GenevaContainers?path
 # key vault CSI
 https://github.com/Azure/secrets-store-csi-driver-provider-azure
 https://github.com/kubernetes-sigs/secrets-store-csi-driver.git
+
+# keda
+https://github.com/kedacore/charts/tree/master/keda

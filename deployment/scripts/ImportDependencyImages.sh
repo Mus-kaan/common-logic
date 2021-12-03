@@ -61,6 +61,14 @@ set -x
 
 if [ "$ComputeType" = "aks" ]; then
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
+echo "import 'keda' chart images"
+echo "import ghcr.io/kedacore/keda:2.5.0"
+az acr import --name "$ACRName" --source ghcr.io/kedacore/keda:2.5.0 --force
+
+echo "import ghcr.io/kedacore/keda-metrics-apiserver:2.5.0"
+az acr import --name "$ACRName" --source ghcr.io/kedacore/keda-metrics-apiserver:2.5.0 --force
+
+echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
 echo "import 'ingress-nginx' chart images"
 echo "import k8s.gcr.io/ingress-nginx/controller:v1.0.1"
 az acr import --name "$ACRName" --source k8s.gcr.io/ingress-nginx/controller:v1.0.1 --force
