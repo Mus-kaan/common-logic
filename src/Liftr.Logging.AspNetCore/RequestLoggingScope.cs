@@ -15,7 +15,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
         private ITimedOperation _operation;
 
         public RequestLoggingScope(
-            HttpRequest request,
+            HttpContext context,
             Serilog.ILogger logger,
             bool logRequest,
             string correlationtId)
@@ -25,6 +25,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                 return;
             }
 
+            var request = context?.Request;
             var requestPath = request?.Path.Value;
             if (string.IsNullOrEmpty(requestPath))
             {
@@ -72,10 +73,16 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             }
         }
 
-        public void Finish(HttpResponse response, Exception ex = null)
+        public void Finish(HttpContext context, Exception ex = null)
         {
+            var response = context?.Response;
             if (_operation != null)
             {
+                if (context.Items.TryGetValue("resourceId", out object resourceId))
+                {
+                    _operation.SetContextProperty("resourceId", ((string)resourceId).ToUpperInvariant());
+                }
+
                 if (ex == null)
                 {
                     _operation.SetResult(response.StatusCode);

@@ -166,16 +166,16 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             using (new LogContextPropertyScope("LiftrCorrelationId", correlationtId))
             using (new LogContextPropertyScope("Subdomain", subdomain))
             {
-                var scope = new RequestLoggingScope(httpContext?.Request, _logger, _logRequest, correlationtId);
+                var scope = new RequestLoggingScope(httpContext, _logger, _logRequest, correlationtId);
                 try
                 {
                     await _next(httpContext);
-                    scope.Finish(httpContext?.Response);
+                    scope.Finish(httpContext);
                 }
                 catch (Exception ex)
                 {
                     _logger.Error(ex, "Unhandled exception.");
-                    scope.Finish(httpContext?.Response, ex);
+                    scope.Finish(httpContext, ex);
                     throw;
                 }
             }
