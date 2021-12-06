@@ -41,6 +41,7 @@ namespace Microsoft.Liftr.SimpleDeploy
             var aksName = parsedRegionInfo.AKSName;
             var aksRegion = parsedRegionInfo.AKSRegion;
             var enableAKSAvailabilityZone = parsedRegionInfo.EnableAvailabilityZone;
+            var regionalAKSMachineType = parsedRegionInfo.RegionOptions.RegionalAKSMachineType;
             regionalNamingContext.Tags["GlobalRG"] = globalRGName;
 
             RegionalComputeOptions regionalComputeOptions = new RegionalComputeOptions()
@@ -114,6 +115,12 @@ namespace Microsoft.Liftr.SimpleDeploy
                         targetOptions.AKSConfigurations.KubernetesVersion,
                         regionOptions.KubernetesVersion);
                     targetOptions.AKSConfigurations.KubernetesVersion = regionOptions.KubernetesVersion;
+                }
+
+                if (regionalAKSMachineType != null)
+                {
+                    _logger.Information($"Changing to {regionalAKSMachineType} SKU for region {regionalNamingContext.Location} due to regional configuration change");
+                    targetOptions.AKSConfigurations.AKSMachineType = regionalAKSMachineType;
                 }
 
                 computeResources = await infra.CreateOrUpdateRegionalAKSRGAsync(

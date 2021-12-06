@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Azure.Management.ContainerService.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Newtonsoft.Json;
@@ -32,6 +33,13 @@ namespace Microsoft.Liftr.Hosting.Contracts
         public Dictionary<string, string> Properties { get; set; }
 
         public bool SupportAvailabilityZone { get; set; } = true;
+
+        /// <summary>
+        /// AKS Machine Type. This one will overwrite the global setting of <seealso cref="AKSInfo.AKSMachineType"/>.
+        /// </summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [JsonConverter(typeof(ContainerServiceVMSizeTypesConverter))]
+        public ContainerServiceVMSizeTypes RegionalAKSMachineType { get; set; } = null;
 
         public void CheckValid(bool isAKS)
         {
