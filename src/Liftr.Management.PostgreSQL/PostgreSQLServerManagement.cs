@@ -44,7 +44,7 @@ namespace Microsoft.Liftr.Management.PostgreSQL
             }
             catch (PostgresException ex) when (ex.SqlState.OrdinalEquals("42710"))
             {
-                _logger.Warning(ex, "The DB user already exist. Skip.");
+                _logger.Warning("The DB user already exist. Skip. " + ex.Message);
             }
             catch (Exception ex)
             {
@@ -103,7 +103,7 @@ namespace Microsoft.Liftr.Management.PostgreSQL
                     }
                     catch (PostgresException ex) when (ex.SqlState.OrdinalEquals("42710"))
                     {
-                        _logger.Warning(ex, "The DB role already exist. Skip.");
+                        _logger.Warning("The non-login role already exist. Skip. " + ex.Message);
                     }
                     catch (Exception ex)
                     {
@@ -121,7 +121,7 @@ namespace Microsoft.Liftr.Management.PostgreSQL
                     }
                     catch (PostgresException ex) when (ex.SqlState.OrdinalEquals("42710"))
                     {
-                        _logger.Warning(ex, "The DB user already exist. Skip.");
+                        _logger.Warning("The login user 1 already exist. Skip. " + ex.Message);
                     }
                     catch (Exception ex)
                     {
@@ -139,7 +139,7 @@ namespace Microsoft.Liftr.Management.PostgreSQL
                     }
                     catch (PostgresException ex) when (ex.SqlState.OrdinalEquals("42710"))
                     {
-                        _logger.Warning(ex, "The DB user already exist. Skip.");
+                        _logger.Warning("The login user 2 already exist. Skip. " + ex.Message);
                     }
                     catch (Exception ex)
                     {
