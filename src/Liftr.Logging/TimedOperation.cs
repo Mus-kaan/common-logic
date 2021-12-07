@@ -89,8 +89,11 @@ namespace Microsoft.Liftr.Logging
 
             if (LoggerExtensions.Options.LogTimedOperation)
             {
-                using var scope = new NoAppInsightsScope(skipAppInsights);
-                _logger.Information($"Start TimedOperation '{Name}' with '{{TimedOperationId}}' at StartTime {{StartTime}}.", _operationId, _startTime);
+                using (var scope = new NoAppInsightsScope(skipAppInsights))
+                using (new LogContextPropertyScope("TimedOperationName", Name))
+                {
+                    _logger.Information($"Start TimedOperation '{Name}' with '{{TimedOperationId}}' at StartTime {{StartTime}}.", _operationId, _startTime);
+                }
             }
         }
 
@@ -121,14 +124,17 @@ namespace Microsoft.Liftr.Logging
 
             if (LoggerExtensions.Options.LogTimedOperation)
             {
-                using var scope = new NoAppInsightsScope(_skipAppInsights);
-                if (_statusCode == null)
+                using (var scope = new NoAppInsightsScope(_skipAppInsights))
+                using (new LogContextPropertyScope("TimedOperationName", Name))
                 {
-                    _logger.Information("Finished TimedOperation '" + Name + "' with '{TimedOperationId}'. Successful: {isSuccessful}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationId, _isSuccessful, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
-                }
-                else
-                {
-                    _logger.Information("Finished TimedOperation '" + Name + "' with '{TimedOperationId}'. Successful: {isSuccessful}. StatusCode: {statusCode}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationId, _isSuccessful, _statusCode.Value, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
+                    if (_statusCode == null)
+                    {
+                        _logger.Information("Finished TimedOperation '" + Name + "' with '{TimedOperationId}'. Successful: {isSuccessful}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationId, _isSuccessful, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
+                    }
+                    else
+                    {
+                        _logger.Information("Finished TimedOperation '" + Name + "' with '{TimedOperationId}'. Successful: {isSuccessful}. StatusCode: {statusCode}. Duration: {DurationMs} ms. Properties: {Properties}. StartTime: {StartTime}, StopTime: {StopTime}", _operationId, _isSuccessful, _statusCode.Value, _sw.ElapsedMilliseconds, _properties, _startTime, DateTime.UtcNow.ToZuluString());
+                    }
                 }
             }
 

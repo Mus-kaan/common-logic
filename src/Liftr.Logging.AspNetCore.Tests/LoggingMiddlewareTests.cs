@@ -25,6 +25,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 observeredValue = CallContextHolder.LogFilterOverwrite.Value;
             }, LoggerFactory.VoidLogger,
                 logRequest: true,
+                logHostName: false,
                 logSubdomain: false);
 
             var contextMock = new Mock<HttpContext>();
@@ -47,6 +48,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 observeredValue = CallContextHolder.LogFilterOverwrite.Value;
             }, LoggerFactory.VoidLogger,
                 logRequest: true,
+                logHostName: false,
                 logSubdomain: false);
 
             var contextMock = new Mock<HttpContext>();
@@ -69,6 +71,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 observeredValue = CallContextHolder.LogFilterOverwrite.Value;
             }, LoggerFactory.VoidLogger,
                 logRequest: true,
+                logHostName: false,
                 logSubdomain: false);
 
             var contextMock = new Mock<HttpContext>();
@@ -91,6 +94,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 observeredValue = CallContextHolder.LogFilterOverwrite.Value;
             }, LoggerFactory.VoidLogger,
                 logRequest: true,
+                logHostName: false,
                 logSubdomain: false);
 
             var contextMock = new Mock<HttpContext>();
@@ -113,6 +117,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 observeredValue = CallContextHolder.LogFilterOverwrite.Value;
             }, LoggerFactory.VoidLogger,
                 logRequest: true,
+                logHostName: false,
                 logSubdomain: false);
 
             var contextMock = new Mock<HttpContext>();
@@ -140,6 +145,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 observeredCorrelationId = CallContextHolder.CorrelationId.Value;
             }, LoggerFactory.VoidLogger,
                 logRequest: true,
+                logHostName: false,
                 logSubdomain: false);
 
             var contextMock = new Mock<HttpContext>();
@@ -186,6 +192,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                 observeredValue = CallContextHolder.CorrelationId.Value;
             }, LoggerFactory.VoidLogger,
                 logRequest: true,
+                logHostName: false,
                 logSubdomain: false);
 
             var contextMock = new Mock<HttpContext>();
@@ -208,6 +215,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                     observeredValue = CallContextHolder.CorrelationId.Value;
                 }, LoggerFactory.VoidLogger,
                 logRequest: true,
+                logHostName: false,
                 logSubdomain: false);
 
             var res = new MockHttpResponse();
@@ -240,6 +248,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore.Tests
                     observeredValue = CallContextHolder.CorrelationId.Value;
                 }, LoggerFactory.VoidLogger,
                 logRequest: true,
+                logHostName: false,
                 logSubdomain: false);
 
             var res = new MockHttpResponse();

@@ -83,6 +83,11 @@ namespace Microsoft.Liftr.Logging.AspNetCore
                     _operation.SetContextProperty("resourceId", ((string)resourceId).ToUpperInvariant());
                 }
 
+                if (context.Items.TryGetValue("tenantId", out object tenantId))
+                {
+                    _operation.SetContextProperty("tenantId", (string)tenantId);
+                }
+
                 if (ex == null)
                 {
                     _operation.SetResult(response.StatusCode);

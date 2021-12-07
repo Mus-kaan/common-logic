@@ -27,6 +27,8 @@ namespace Microsoft.Liftr.Logging
 
         public bool WriteToConsole { get; internal set; } = false;
 
+        public bool LogHostName { get; internal set; } = false;
+
         public bool LogSubdomain { get; internal set; } = false;
     }
 }

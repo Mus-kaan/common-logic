@@ -24,14 +24,16 @@ namespace Microsoft.Liftr.Logging.AspNetCore
         private readonly RequestDelegate _next;
         private readonly Serilog.ILogger _logger;
         private readonly bool _logRequest;
+        private readonly bool _logHostName;
         private readonly bool _logSubdomain;
 
-        public LoggingMiddleware(RequestDelegate next, Serilog.ILogger logger, bool logRequest, bool logSubdomain)
+        public LoggingMiddleware(RequestDelegate next, Serilog.ILogger logger, bool logRequest, bool logSubdomain, bool logHostName)
         {
             _next = next;
             _logger = logger;
             _logRequest = logRequest;
             _logSubdomain = logSubdomain;
+            _logHostName = logHostName;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Middleware should fail silently.")]
@@ -164,6 +166,7 @@ namespace Microsoft.Liftr.Logging.AspNetCore
             using (new LogContextPropertyScope("LiftrClientReqId", clientRequestId))
             using (new LogContextPropertyScope("LiftrTrackingId", armRequestTrackingId))
             using (new LogContextPropertyScope("LiftrCorrelationId", correlationtId))
+            using (new LogContextPropertyScope("HostName", _logHostName ? hostName : string.Empty))
             using (new LogContextPropertyScope("Subdomain", subdomain))
             {
                 var scope = new RequestLoggingScope(httpContext, _logger, _logRequest, correlationtId);
