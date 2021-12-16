@@ -19,16 +19,16 @@ namespace Microsoft.Liftr.ACIS.Contracts
         /// <summary>
         /// Option for API token update.
         /// </summary>
-        public bool APIToken { get; set; }
+        public bool IsUpdateAPIToken { get; set; }
 
         /// <summary>
         /// Option for shipping token update.
         /// </summary>
-        public bool ShippingToken { get; set; }
+        public bool IsUpdateShippingToken { get; set; }
 
         /// <summary>
         /// Option for marketplace resource Id update.
         /// </summary>
-        public bool MarketplaceResourceId { get; set; }
+        public bool IsUpdateMarketplaceResourceId { get; set; }
     }
 }
