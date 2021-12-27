@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>Microsoft.Liftr.IdempotentRPWorker</AssemblyName>
+    <RootNamespace>Microsoft.Liftr.IdempotentRPWorker</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
+    <ProjectReference Include="..\Liftr.Marketplace\Liftr.Marketplace.csproj" />
+    <ProjectReference Include="..\Liftr.Polly\Liftr.Polly.csproj" />
+    <ProjectReference Include="..\Liftr.Queue\Liftr.Queue.csproj" />
+    <ProjectReference Include="..\Liftr.RPaaS.Abstractions\Liftr.RPaaS.Abstractions.csproj" />
+    <ProjectReference Include="..\Liftr.RPaaS\Liftr.RPaaS.csproj" />
+    <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
+  </ItemGroup>
+
+</Project>

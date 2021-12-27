@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29306.81
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31825.309
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DataSource.Mongo", "Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj", "{629A2EE7-20D0-47D7-A9A9-638BA7EF6AD2}"
 EndProject
@@ -237,11 +237,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Prom2IcM", "Liftr.Pro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.Prom2IcM.Tests", "Liftr.Prom2IcM.Tests\Liftr.Prom2IcM.Tests.csproj", "{B69EB5A6-4E67-4934-9E8C-2DA68D7802D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.IcmConnector", "Liftr.IcmConnector\Liftr.IcmConnector.csproj", "{C5A6410C-9288-4F90-AC79-6FDAA02D2C69}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.IcmConnector", "Liftr.IcmConnector\Liftr.IcmConnector.csproj", "{C5A6410C-9288-4F90-AC79-6FDAA02D2C69}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.ManagedIdentity.DataSource", "Liftr.ManagedIdentity.DataSource\Liftr.ManagedIdentity.DataSource.csproj", "{1BD4C3F0-5088-46AE-AE4A-545E895733E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.ManagedIdentity.DataSource", "Liftr.ManagedIdentity.DataSource\Liftr.ManagedIdentity.DataSource.csproj", "{1BD4C3F0-5088-46AE-AE4A-545E895733E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.ManagedIdentity.DataSource.Hosting", "Liftr.ManagedIdentity.DataSource.Hosting\Liftr.ManagedIdentity.DataSource.Hosting.csproj", "{B1AA74BA-F69A-49E0-A1FB-2F6BAECEAF17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.ManagedIdentity.DataSource.Hosting", "Liftr.ManagedIdentity.DataSource.Hosting\Liftr.ManagedIdentity.DataSource.Hosting.csproj", "{B1AA74BA-F69A-49E0-A1FB-2F6BAECEAF17}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.IdempotentRPWorker", "Liftr.IdempotentRPWorker\Liftr.IdempotentRPWorker.csproj", "{D0A0217A-C1F0-443B-B701-16E2A944BEFA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.IdempotentRPWorker.Tests", "Liftr.IdempotentRPWorker.Tests\Liftr.IdempotentRPWorker.Tests.csproj", "{8DD25692-1208-4C69-A2FE-4BD9B54AA02C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -689,6 +693,14 @@ Global
 		{B1AA74BA-F69A-49E0-A1FB-2F6BAECEAF17}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1AA74BA-F69A-49E0-A1FB-2F6BAECEAF17}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1AA74BA-F69A-49E0-A1FB-2F6BAECEAF17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0A0217A-C1F0-443B-B701-16E2A944BEFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0A0217A-C1F0-443B-B701-16E2A944BEFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0A0217A-C1F0-443B-B701-16E2A944BEFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0A0217A-C1F0-443B-B701-16E2A944BEFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DD25692-1208-4C69-A2FE-4BD9B54AA02C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DD25692-1208-4C69-A2FE-4BD9B54AA02C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DD25692-1208-4C69-A2FE-4BD9B54AA02C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DD25692-1208-4C69-A2FE-4BD9B54AA02C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
