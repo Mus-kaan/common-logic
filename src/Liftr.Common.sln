@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.0.31825.309
+VisualStudioVersion = 17.1.31911.260
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.DataSource.Mongo", "Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj", "{629A2EE7-20D0-47D7-A9A9-638BA7EF6AD2}"
 EndProject
@@ -243,9 +243,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.ManagedIdentity.DataS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.ManagedIdentity.DataSource.Hosting", "Liftr.ManagedIdentity.DataSource.Hosting\Liftr.ManagedIdentity.DataSource.Hosting.csproj", "{B1AA74BA-F69A-49E0-A1FB-2F6BAECEAF17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.IdempotentRPWorker", "Liftr.IdempotentRPWorker\Liftr.IdempotentRPWorker.csproj", "{D0A0217A-C1F0-443B-B701-16E2A944BEFA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.IdempotentRPWorker", "Liftr.IdempotentRPWorker\Liftr.IdempotentRPWorker.csproj", "{D0A0217A-C1F0-443B-B701-16E2A944BEFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.IdempotentRPWorker.Tests", "Liftr.IdempotentRPWorker.Tests\Liftr.IdempotentRPWorker.Tests.csproj", "{8DD25692-1208-4C69-A2FE-4BD9B54AA02C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.IdempotentRPWorker.Tests", "Liftr.IdempotentRPWorker.Tests\Liftr.IdempotentRPWorker.Tests.csproj", "{8DD25692-1208-4C69-A2FE-4BD9B54AA02C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.PerformanceTelemetry", "Liftr.PerformanceTelemetry\Liftr.PerformanceTelemetry.csproj", "{AA27E201-8944-43EF-B925-C7FD5ABA7782}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -701,6 +703,10 @@ Global
 		{8DD25692-1208-4C69-A2FE-4BD9B54AA02C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8DD25692-1208-4C69-A2FE-4BD9B54AA02C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8DD25692-1208-4C69-A2FE-4BD9B54AA02C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA27E201-8944-43EF-B925-C7FD5ABA7782}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA27E201-8944-43EF-B925-C7FD5ABA7782}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA27E201-8944-43EF-B925-C7FD5ABA7782}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA27E201-8944-43EF-B925-C7FD5ABA7782}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
