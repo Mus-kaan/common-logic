@@ -1,5 +1,5 @@
 {{- /*
-Generated from 'kubernetes-system-scheduler' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/kubernetes-prometheusRule.yaml
+Generated from 'kubernetes-system-scheduler' group from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/kubernetesControlPlane-prometheusRule.yaml
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
 */ -}}
@@ -28,7 +28,7 @@ spec:
     - alert: KubeSchedulerDown
       annotations:
         description: KubeScheduler has disappeared from Prometheus target discovery.
-        runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubeschedulerdown
+        runbook_url: https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubeschedulerdown
         summary: Target disappeared from Prometheus target discovery.
       expr: absent(up{job="kube-scheduler"} == 1)
       for: 15m

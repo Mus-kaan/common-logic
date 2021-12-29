@@ -14,7 +14,7 @@ workspace_options:
 version:
   name: "Liftr.Common"
   major: 2 # The major version number.
-  minor: 2110 # The minor version number
+  minor: 2201 # The minor version number
   system: "revisioncounter"
 
 package_sources:

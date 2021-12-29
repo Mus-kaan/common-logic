@@ -25,26 +25,44 @@ def change_style(style, representer):
 # Source files list
 charts = [
     {
-        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/kubernetes-prometheusRule.yaml',
+        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/alertmanager-prometheusRule.yaml',
         'destination': '../templates/prometheus/rules-1.14',
         'min_kubernetes': '1.14.0-0'
     },
     {
-        'source': 'https://raw.githubusercontent.com/etcd-io/website/master/content/docs/v3.4.0/op-guide/etcd3_alert.rules.yml',
+        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/kubePrometheus-prometheusRule.yaml',
         'destination': '../templates/prometheus/rules-1.14',
         'min_kubernetes': '1.14.0-0'
     },
     {
-        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/release-0.1/manifests/prometheus-rules.yaml',
-        'destination': '../templates/prometheus/rules',
-        'min_kubernetes': '1.10.0-0',
-        'max_kubernetes': '1.14.0-0'
+        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/kubernetesControlPlane-prometheusRule.yaml',
+        'destination': '../templates/prometheus/rules-1.14',
+        'min_kubernetes': '1.14.0-0'
     },
     {
-        'source': 'https://raw.githubusercontent.com/etcd-io/website/master/content/docs/v3.4.0/op-guide/etcd3_alert.rules.yml',
-        'destination': '../templates/prometheus/rules',
-        'min_kubernetes': '1.10.0-0',
-        'max_kubernetes': '1.14.0-0'
+        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/kubeStateMetrics-prometheusRule.yaml',
+        'destination': '../templates/prometheus/rules-1.14',
+        'min_kubernetes': '1.14.0-0'
+    },
+    {
+        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/nodeExporter-prometheusRule.yaml',
+        'destination': '../templates/prometheus/rules-1.14',
+        'min_kubernetes': '1.14.0-0'
+    },
+    {
+        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/prometheus-prometheusRule.yaml',
+        'destination': '../templates/prometheus/rules-1.14',
+        'min_kubernetes': '1.14.0-0'
+    },
+    {
+        'source': 'https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/prometheusOperator-prometheusRule.yaml',
+        'destination': '../templates/prometheus/rules-1.14',
+        'min_kubernetes': '1.14.0-0'
+    },
+    {
+        'source': 'https://raw.githubusercontent.com/etcd-io/website/master/content/en/docs/v3.4/op-guide/etcd3_alert.rules.yml',
+        'destination': '../templates/prometheus/rules-1.14',
+        'min_kubernetes': '1.14.0-0'
     },
 ]
 
@@ -93,6 +111,7 @@ alert_condition_map = {
     'NodeExporterDown': '.Values.nodeExporter.enabled',
     'CoreDNSDown': '.Values.kubeDns.enabled',
     'AlertmanagerDown': '.Values.alertmanager.enabled',
+    'AggregatedAPIDown': 'semverCompare ">=1.18.0-0" $kubeTargetVersion',
 }
 
 replacement_map = {
@@ -110,12 +129,6 @@ replacement_map = {
         'init': '{{- $namespace := printf "%s" (include "kube-prometheus-stack.namespace" .) }}'},
     'alertmanager-$1': {
         'replacement': '$1',
-        'init': ''},
-    'https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#': {
-        'replacement': '{{ .Values.defaultRules.runbookUrl }}',
-        'init': ''},
-    'https://github.com/prometheus-operator/kube-prometheus/wiki/': {
-        'replacement': '{{ .Values.defaultRules.runbookUrl }}alert-name-',
         'init': ''},
     'job="kube-state-metrics"': {
         'replacement': 'job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"',
