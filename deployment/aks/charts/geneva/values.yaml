@@ -10,9 +10,9 @@ linuxgenevaACR:
 # Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/references/linuxcontainers.html
 # latest prom mdm image version: https://msazure.visualstudio.com/Liftr/_build?definitionId=113171&_a=summary&view=runs
 mdsd:
-  dockerTag: master_20211209.1
+  dockerTag: master_20211223.1
 mdm:
-  dockerTag: master_20211120.1
+  dockerTag: master_20211223.1
 
 fluentd:
   dockerTag: master_20210928.1
