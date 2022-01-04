@@ -1,0 +1,6 @@
+# This will overwrite 'prometheus-stack-values.yaml'
+# grafana:
+#   enabled: true
+#   ingress:
+#     ## If true, Grafana Ingress will be created
+#     enabled: false

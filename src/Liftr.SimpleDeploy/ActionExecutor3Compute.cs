@@ -9,6 +9,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Fluent;
+using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
 using Microsoft.Liftr.Hosting.Contracts;
 using Microsoft.Rest.Azure;
@@ -165,9 +166,12 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                 await GrantNetworkContributorRoleAsync(inboundIpAddress, computeResources, liftrAzure);
 
+                var regionalSubdomain = $"{regionalNamingContext.Location.ShortName()}.{targetOptions.DomainName}";
                 File.WriteAllText("vault-name.txt", computeResources.KeyVault.Name);
                 File.WriteAllText("aks-kv.txt", computeResources.KeyVault.VaultUri);
                 File.WriteAllText("aks-domain.txt", $"{computeResources.AKS.Name}.{targetOptions.DomainName}");
+                File.WriteAllText("domain-name.txt", targetOptions.DomainName);
+                File.WriteAllText("regional-domain-name.txt", regionalSubdomain);
                 File.WriteAllText("aks-name.txt", computeResources.AKS.Name);
                 File.WriteAllText("aks-rg.txt", computeResources.AKS.ResourceGroupName);
                 File.WriteAllText("msi-resourceId.txt", computeResources.ManagedIdentity.Id);

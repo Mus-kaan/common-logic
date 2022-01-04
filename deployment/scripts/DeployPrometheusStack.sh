@@ -146,6 +146,7 @@ echo "helm upgrade $helmReleaseName. PromConfigFile: $PromConfigFile ..."
 $Helm upgrade $helmReleaseName kube-prometheus-stack-*.tgz --install --wait \
 --namespace $namespace \
 -f $PromConfigFile \
+-f prometheus-stack-custom-values.yaml \
 --set prometheusOperator.createCustomResource=false \
 --set prometheusOperator.admissionWebhooks.enabled=false \
 --set prometheusOperator.tlsProxy.enabled=false \
