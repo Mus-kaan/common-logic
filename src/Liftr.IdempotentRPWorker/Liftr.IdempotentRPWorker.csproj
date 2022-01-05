@@ -7,7 +7,9 @@
     <AssemblyName>Microsoft.Liftr.IdempotentRPWorker</AssemblyName>
     <RootNamespace>Microsoft.Liftr.IdempotentRPWorker</RootNamespace>
   </PropertyGroup>
-
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="$(PackageVersion_Microsoft_AspNetCore_Http_Extensions)" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Contracts\Liftr.Contracts.csproj" />
     <ProjectReference Include="..\Liftr.Marketplace\Liftr.Marketplace.csproj" />
