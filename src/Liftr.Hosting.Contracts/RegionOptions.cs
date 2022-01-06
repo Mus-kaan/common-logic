@@ -35,11 +35,11 @@ namespace Microsoft.Liftr.Hosting.Contracts
         public bool SupportAvailabilityZone { get; set; } = true;
 
         /// <summary>
-        /// AKS Machine Type. This one will overwrite the global setting of <seealso cref="AKSInfo.AKSMachineType"/>.
+        /// AKS or VMSS Machine Type (SKU). This one will overwrite the global setting of <seealso cref="AKSInfo.AKSMachineType"/> and <seealso cref="VMSSMachineInfo.VMSize"/>.
         /// </summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         [JsonConverter(typeof(ContainerServiceVMSizeTypesConverter))]
-        public ContainerServiceVMSizeTypes RegionalAKSMachineType { get; set; } = null;
+        public ContainerServiceVMSizeTypes RegionalMachineType { get; set; } = null;
 
         public void CheckValid(bool isAKS)
         {

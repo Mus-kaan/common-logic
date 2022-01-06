@@ -42,7 +42,7 @@ namespace Microsoft.Liftr.SimpleDeploy
             var aksName = parsedRegionInfo.AKSName;
             var aksRegion = parsedRegionInfo.AKSRegion;
             var enableAKSAvailabilityZone = parsedRegionInfo.EnableAvailabilityZone;
-            var regionalAKSMachineType = parsedRegionInfo.RegionOptions.RegionalAKSMachineType;
+            var regionalMachineType = parsedRegionInfo.RegionOptions.RegionalMachineType;
             regionalNamingContext.Tags["GlobalRG"] = globalRGName;
 
             RegionalComputeOptions regionalComputeOptions = new RegionalComputeOptions()
@@ -118,10 +118,10 @@ namespace Microsoft.Liftr.SimpleDeploy
                     targetOptions.AKSConfigurations.KubernetesVersion = regionOptions.KubernetesVersion;
                 }
 
-                if (regionalAKSMachineType != null)
+                if (regionalMachineType != null)
                 {
-                    _logger.Information($"Changing to {regionalAKSMachineType} SKU for region {regionalNamingContext.Location} due to regional configuration change");
-                    targetOptions.AKSConfigurations.AKSMachineType = regionalAKSMachineType;
+                    _logger.Information($"Changing to {regionalMachineType} SKU for region {regionalNamingContext.Location} due to regional configuration change");
+                    targetOptions.AKSConfigurations.AKSMachineType = regionalMachineType;
                 }
 
                 computeResources = await infra.CreateOrUpdateRegionalAKSRGAsync(
@@ -203,6 +203,12 @@ namespace Microsoft.Liftr.SimpleDeploy
                 if (targetOptions.OneCertCertificates?.ContainsKey(CertificateName.GenevaClientCert) == true)
                 {
                     targetOptions.Geneva.GENEVA_CERT_SAN = targetOptions.OneCertCertificates[CertificateName.GenevaClientCert];
+                }
+
+                if (regionalMachineType != null)
+                {
+                    _logger.Information($"Changing to {regionalMachineType} SKU for region {regionalNamingContext.Location} due to regional configuration change");
+                    targetOptions.VMSSConfigurations.VMSize = regionalMachineType.Value;
                 }
 
                 var vmss = await infra.CreateOrUpdateRegionalVMSSRGAsync(
