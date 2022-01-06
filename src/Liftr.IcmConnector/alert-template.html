@@ -5,7 +5,7 @@
         <br />
         <div>
             <h2>Summary</h2>
-            <p>SUMMARY_PLACEHOLDER</p>
+            <p>[TIMESTAMP_UTC_PLACEHOLDER (UTC)] SUMMARY_PLACEHOLDER</p>
             <br />
         </div>
 
@@ -59,6 +59,38 @@
                     </td>
                 </tr>
             </table>
+        </div>
+
+        <div style="width:100%">
+            <h2 style="background-color: #6495ed; color: #fff; margin-bottom: 0">AKS cheat sheet</h2>
+
+            <div>
+                <h3>Install kubectl</h3>
+                <p>az aks install-cli</p>
+                <br />
+            </div>
+
+            <div>
+                <h3>Connect kubectl to AKS</h3>
+                <p>az account set --subscription SUBSCRITPTION_ID_PLACEHOLDER</p>
+                <p>az aks get-credentials --resource-group AKS_RESOURCEGROUP_PLACEHOLDER --name AKS_RESOURCENAME_PLACEHOLDER</p>
+                <br />
+            </div>
+
+            <div>
+                <h3>Connect to in-cluster Grafana</h3>
+                <p>kubectl port-forward -n prometheus service/prom-rel-grafana 7654:80</p>
+                <p>Open this link in browser (username: 'admin', password: 'prom-operator'.): <a href="http://localhost:7654" target="_blank">http://localhost:7654</a></p>
+                <br />
+            </div>
+
+            <div>
+                <h3>Common kubectl commands</h3>
+                <p>kubectl get all</p>
+                <p>kubectl describe service/app-rel-gateway-web-svc</p>
+                <p>kubectl logs -l app=app-rel-gateway-web</p>
+                <br />
+            </div>
         </div>
     </div>
 </body>

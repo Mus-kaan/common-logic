@@ -63,6 +63,20 @@ namespace Microsoft.Liftr.IcmConnector
                         continue;
                     }
 
+                    bool isFiring = false;
+                    if (alert?.Status?.OrdinalEquals("firing") == true)
+                    {
+                        isFiring = true;
+                    }
+                    else if (alert?.Status?.OrdinalEquals("resolved") == true && !string.IsNullOrEmpty(alert.EndsAt))
+                    {
+                        isFiring = false;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
                     var icmIncident = await TransformPrometheusAlertToIcmIncidentAsync(webhookMessage, alert);
 
                     var incidentSourceId = icmIncident.Source.IncidentId;
@@ -70,17 +84,37 @@ namespace Microsoft.Liftr.IcmConnector
                     try
                     {
                         var existingIncidents = await icmClient.GetIncidentAlertSourceInfo2Async(connectorId, new List<string> { incidentSourceId });
-                        if (existingIncidents?.Any() == true)
+                        if (isFiring)
                         {
-                            _logger.Information(
-                                "Skip creating new incident, since there are already incidents with the same incidentSourceId '{incidentSourceId}'. IncidentIdList: {@IncidentIdList}",
-                                incidentSourceId,
-                                existingIncidents.Select(incident => incident.IncidentId));
+                            // alert firing.
+                            if (existingIncidents?.Any() == true)
+                            {
+                                _logger.Information(
+                                    "Skip creating new incident, since there are already incidents with the same incidentSourceId '{incidentSourceId}'. IncidentIdList: {@IncidentIdList}",
+                                    incidentSourceId,
+                                    existingIncidents.Select(incident => incident.IncidentId));
+                            }
+                            else
+                            {
+                                var result = await icmClient.AddOrUpdateIncident2Async(connectorId, icmIncident, RoutingOptions.None);
+                                ProcessResult(result, icmIncident);
+                            }
                         }
                         else
                         {
-                            var result = await icmClient.AddOrUpdateIncident2Async(connectorId, icmIncident, RoutingOptions.None);
-                            ProcessResult(result, icmIncident);
+                            // alert resolved.
+                            if (existingIncidents?.Any() != true)
+                            {
+                                _logger.Information(
+                                    "Skip mitigating incident, since there are no incidents with the same incidentSourceId '{incidentSourceId}'. IncidentIdList: {@IncidentIdList}",
+                                    incidentSourceId,
+                                    existingIncidents.Select(incident => incident.IncidentId));
+                            }
+                            else
+                            {
+                                var result = await icmClient.AddOrUpdateIncident2Async(connectorId, icmIncident, RoutingOptions.None);
+                                ProcessResult(result, icmIncident);
+                            }
                         }
                     }
                     catch (Exception e)
@@ -238,11 +272,6 @@ namespace Microsoft.Liftr.IcmConnector
 
         private bool ShouldProcessPrometheusAlert(Alert promAlert)
         {
-            if (promAlert?.Status?.OrdinalEquals("firing") != true)
-            {
-                return false;
-            }
-
             if (promAlert?.Labels?.Alertname?.OrdinalEquals("Watchdog") == true)
             {
                 // In prometheus, this is an alert meant to ensure that the entire alerting pipeline is functional.

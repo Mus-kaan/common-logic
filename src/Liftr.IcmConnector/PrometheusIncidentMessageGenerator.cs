@@ -16,6 +16,7 @@ namespace Microsoft.Liftr.IcmConnector
         private const string c_nullTimeStamp = "0001-01-01T00:00:00Z";
         private static readonly TenantHelper s_tenantHelper = new TenantHelper();
         private static string s_alertTemplateContent = EmbeddedContentReader.GetContent("Microsoft.Liftr.IcmConnector.alert-template.html");
+        private static string s_alertMitigationTemplateContent = EmbeddedContentReader.GetContent("Microsoft.Liftr.IcmConnector.alert-mitigation-template.html");
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>")]
         public static AlertSourceIncident GenerateIncidentFromPrometheusAlert(
@@ -48,6 +49,7 @@ namespace Microsoft.Liftr.IcmConnector
             // computeMeta can be null when IMDS is not available, e.g. local debug, not in azure.
             var computeInstanceMeta = computeMeta?.InstanceMeta?.Compute;
 
+            bool isFiring = promAlert?.Status?.OrdinalEquals("firing") == true;
             var incidentStartTime = DateTime.Parse(promAlert.StartsAt, CultureInfo.InvariantCulture).ToUniversalTime();
             DateTime? incidentEndTime = null;
             if (!string.IsNullOrEmpty(promAlert.EndsAt) &&
@@ -99,6 +101,7 @@ namespace Microsoft.Liftr.IcmConnector
             (var icmDescription, var icmSummary) = GenerateXHtmlDescription(
                         promAlert,
                         computeInstanceMeta,
+                        isFiring,
                         incidentTitle,
                         summary,
                         description,
@@ -129,7 +132,7 @@ namespace Microsoft.Liftr.IcmConnector
                     //   being sent here. Updates that have a Source.ModifiedDate date equal or less than the value in the existing
                     //   incident are discarded as they are considered to have been already applied.
                     CreateDate = incidentStartTime,
-                    ModifiedDate = now,
+                    ModifiedDate = isFiring ? incidentStartTime : incidentEndTime.Value,
 
                     // the Source.IncidentId field is a id unique to the alert source for an incident. The combination of this field
                     //  and the alert source id associated with the connector id specified when uploading an incident is how IcM
@@ -175,7 +178,7 @@ namespace Microsoft.Liftr.IcmConnector
                 //   would use this state and may be deprecated in the future.
                 //  Note: IcM does not allow insertion of mitigated or resolved incidents, though of course IcM does support updating
                 //   existing incidents and changing the status to mitigated or resolved.
-                Status = IncidentStatus.Active,
+                Status = isFiring ? IncidentStatus.Active : IncidentStatus.Mitigated,
 
                 Summary = icmSummary,
 
@@ -211,6 +214,7 @@ namespace Microsoft.Liftr.IcmConnector
         private static (DescriptionEntry, string) GenerateXHtmlDescription(
             Alert promAlert,
             ComputeMetadata computeMeta,
+            bool isFiring,
             string alertName,
             string summary,
             string description,
@@ -220,10 +224,11 @@ namespace Microsoft.Liftr.IcmConnector
         {
             string xhtmlSanitized;
             string xhtmlValid;
-            string htmlRaw = s_alertTemplateContent;
+            string htmlRaw = isFiring ? s_alertTemplateContent : s_alertMitigationTemplateContent;
             string errors;
 
             htmlRaw = htmlRaw.Replace("ALERT_NAME", alertName);
+            htmlRaw = htmlRaw.Replace("TIMESTAMP_UTC_PLACEHOLDER", date.ToZuluString());
             htmlRaw = htmlRaw.Replace("SUMMARY_PLACEHOLDER", summary);
             htmlRaw = htmlRaw.Replace("DESCRIPTION_PLACEHOLDER", description);
             htmlRaw = htmlRaw.Replace("MESSAGE_PLACEHOLDER", message);
@@ -244,8 +249,11 @@ namespace Microsoft.Liftr.IcmConnector
                 var loc = computeMeta?.Location ?? "Unknown";
                 htmlRaw = htmlRaw.Replace("LOCATION_PLACEHOLDER", loc);
 
-                var subId = computeMeta?.SubscriptionId ?? "Unknown";
+                var subId = computeMeta?.SubscriptionId ?? "<subscription-id>";
                 htmlRaw = htmlRaw.Replace("SUBSCRITPTION_ID_PLACEHOLDER", subId);
+
+                var aksRG = "<aks-resource-group>";
+                var aksResourceName = "<aks-resource-name>";
 
                 var aksId = "Unknown";
                 if (!string.IsNullOrEmpty(computeMeta?.SubscriptionId) &&
@@ -255,6 +263,8 @@ namespace Microsoft.Liftr.IcmConnector
                     if (parts.Length == 4)
                     {
                         aksId = $"/subscriptions/{subId}/resourceGroups/{parts[1]}/providers/Microsoft.ContainerService/managedClusters/{parts[2]}";
+                        aksRG = parts[1];
+                        aksResourceName = parts[2];
                         try
                         {
                             var tenantId = s_tenantHelper.GetTenantIdForSubscriptionAsync(subId).Result;
@@ -268,6 +278,8 @@ namespace Microsoft.Liftr.IcmConnector
                 }
 
                 htmlRaw = htmlRaw.Replace("AKS_RID_PLACEHOLDER", aksId);
+                htmlRaw = htmlRaw.Replace("AKS_RESOURCEGROUP_PLACEHOLDER", aksRG);
+                htmlRaw = htmlRaw.Replace("AKS_RESOURCENAME_PLACEHOLDER", aksResourceName);
             }
             catch
             {
