@@ -1,6 +1,6 @@
 {
   "Options": {
-    "GlobalKeyVaultResourceId": "/subscriptions/f885cf14-b751-43c1-9536-dc5b1be02bc0/resourceGroups/ut-test-gbl200701-cus-rg/providers/Microsoft.KeyVault/vaults/uttestgbl200701cuskv",
+    "GlobalKeyVaultResourceId": "<dynamic-for-each-test>",
     "DataBaseName": "da200701",
     "SecretPrefix": "UnitTestRP"
   },

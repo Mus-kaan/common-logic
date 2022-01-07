@@ -12,12 +12,13 @@
         "GenevaClientCert": "ib-rp-mds-agent.geneva.keyvault.liftr-dev.net"
       },
       "AKSConfigurations": {
-        "AKSMachineType": "Standard_DS2_v2"
+        "AKSMachineType": "Standard_DS2_v2",
+        "AKSAutoScaleMinCount": 2,
+        "AKSAutoScaleMaxCount": 4
       },
       "Global": {
         "Location": "centralus",
-        "BaseName": "gbl200701",
-        "AddGlobalDB": true
+        "BaseName": "gbl220101"
       },
       "Regions": [
         {

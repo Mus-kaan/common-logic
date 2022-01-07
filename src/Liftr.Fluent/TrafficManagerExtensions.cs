@@ -136,7 +136,18 @@ namespace Microsoft.Liftr
                     update = update.WithoutEndpoint(ep);
                 }
 
-                tm = await update.ApplyAsync();
+                try
+                {
+                    tm = await update.ApplyAsync();
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+                {
+                    // This is nice to have cleanup. Failure should not fail the operation.
+                    logger.Error(ex, "Failed at removing {@endpointsToRemove} from traffic manager {tmId}.", endpointsToRemove, tm.Id);
+                    tm = await tm.RefreshAsync();
+                }
             }
 
             logger.Information("Add the TM as a new endpoint with name {EndpointName}.", endpointName);

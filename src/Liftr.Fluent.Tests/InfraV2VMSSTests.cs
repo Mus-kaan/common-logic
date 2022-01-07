@@ -70,17 +70,17 @@ namespace Microsoft.Liftr.Fluent.Tests
                     var ipPool = new IPPoolManager(ipNamePrefix, false, regionalDataScope.AzFactory, logger);
 
                     var gblResources = await infra.CreateOrUpdateGlobalRGAsync(globalBaseName, context, $"{shortPartnerName}-{globalBaseName}.dummy.com", addGlobalDB: false);
+                    dataOptions.GlobalKeyVaultResourceId = gblResources.KeyVault.Id;
+                    model.Options.GlobalKeyVaultResourceId = gblResources.KeyVault.Id;
 
                     var regions = new List<Region>() { context.Location };
                     IEnumerable<RegionOptions> regionOptions = GetRegionOptions(regions);
 
                     await ipPool.ProvisionIPPoolAsync(context.Location, 3, context.Tags, regionOptions);
                     await client.GetOrCreateResourceGroupAsync(context.Location, dataRGName, context.Tags);
-                    var laName = context.LogAnalyticsName("gbl001");
-                    var logAnalytics = await client.GetOrCreateLogAnalyticsWorkspaceAsync(context.Location, dataRGName, laName, context.Tags);
-                    dataOptions.LogAnalyticsWorkspaceId = $"/subscriptions/{client.FluentClient.SubscriptionId}/resourcegroups/{dataRGName}/providers/microsoft.operationalinsights/workspaces/{laName}";
+
+                    using (var globalKVValet = new KeyVaultConcierge(gblResources.KeyVault.VaultUri, TestCredentials.KeyVaultClient, logger))
                     {
-                        using var globalKVValet = new KeyVaultConcierge(gblResources.KeyVault.VaultUri, TestCredentials.KeyVaultClient, logger);
                         await globalKVValet.SetSecretAsync("SSHUserName", rootUserName, context.Tags);
                         await globalKVValet.SetSecretAsync("SSHPublicKey", sshPublicKey, context.Tags);
                         await globalKVValet.SetSecretAsync("SSHPassword", Guid.NewGuid().ToString(), context.Tags);

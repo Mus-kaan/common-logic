@@ -22,22 +22,44 @@ namespace Microsoft.Liftr.Fluent
 
         public async Task<string> GetActiveConnectionStringAsync(bool readOnly = false)
         {
-            var activeCredential = await CheckAndRotateAsync(forceRotate: false);
-            var keys = await _db.GetConnectionStringsAsync();
+            using var ops = _logger.StartTimedOperation(nameof(GetActiveConnectionStringAsync));
+            ops.SetContextProperty("cosmosDdId", _db.Id);
 
-            if (activeCredential == ActiveCredentialType.Primary)
+            try
             {
-                return readOnly ? keys.PrimaryReadOnlyMongoDBConnectionString : keys.PrimaryMongoDBConnectionString;
+                var activeCredential = await CheckAndRotateAsync(forceRotate: false);
+                var keys = await _db.GetConnectionStringsAsync();
+
+                if (activeCredential == ActiveCredentialType.Primary)
+                {
+                    return readOnly ? keys.PrimaryReadOnlyMongoDBConnectionString : keys.PrimaryMongoDBConnectionString;
+                }
+                else
+                {
+                    return readOnly ? keys.SecondaryReadOnlyMongoDBConnectionString : keys.SecondaryMongoDBConnectionString;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return readOnly ? keys.SecondaryReadOnlyMongoDBConnectionString : keys.SecondaryMongoDBConnectionString;
+                ops.FailOperation(ex.Message);
+                throw;
             }
         }
 
-        public override Task RotateCredentialAsync()
+        public override async Task RotateCredentialAsync()
         {
-            return CheckAndRotateAsync(forceRotate: true);
+            using var ops = _logger.StartTimedOperation(nameof(RotateCredentialAsync));
+            ops.SetContextProperty("cosmosDdId", _db.Id);
+
+            try
+            {
+                await CheckAndRotateAsync(forceRotate: true);
+            }
+            catch (Exception ex)
+            {
+                ops.FailOperation(ex.Message);
+                throw;
+            }
         }
 
         private async Task<ActiveCredentialType> CheckAndRotateAsync(bool forceRotate)
