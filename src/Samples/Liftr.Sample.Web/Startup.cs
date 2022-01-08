@@ -4,6 +4,7 @@
 
 using Azure.Core;
 using Azure.Storage.Queues;
+using Liftr.Sample.Web;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -174,6 +175,9 @@ namespace Microsoft.Liftr.Sample.Web
             services.AddRazorPages();
 
             services.AddAppInsightsProfiler(_configuration);
+
+            services.AddSingleton<HealthCheckBackgroundService>();
+            services.AddHostedService(sp => sp.GetRequiredService<HealthCheckBackgroundService>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

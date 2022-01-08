@@ -1,0 +1,21 @@
+﻿@page
+@model Liftr.Sample.Web.Pages.HealthCheckModel
+@{
+}
+
+<form method="POST">
+    <div class="form-group">
+        <label for="userLabel">Is Healthy</label>
+        <input asp-for="IsHealthy" type="text" class="form-control" id="isHealthy" aria-describedby="healthyHelp" required>
+        <small id="healthyHelp" class="form-text text-muted">Please set 'true' or 'false' for is healthy</small>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>
+
+<br />
+
+<div>
+    <h2>Is Healthy</h2>
+    <pre>@ViewData["pageMessage"]</pre>
+</div>

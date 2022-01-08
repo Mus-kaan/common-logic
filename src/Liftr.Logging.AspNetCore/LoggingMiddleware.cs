@@ -54,6 +54,20 @@ namespace Microsoft.Liftr.Logging.AspNetCore
 
             if (httpContext.Request?.Path.Value?.OrdinalStartsWith("/api/liveness-probe") == true)
             {
+                if (HealthCheckExtension.GetHealthCheckStatus != null)
+                {
+                    var healthy = HealthCheckExtension.GetHealthCheckStatus();
+
+                    if (!healthy)
+                    {
+                        // In k8s, any code greater than or equal to 200 and less than 400 indicates success. Any other code indicates failure.
+                        // https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+                        httpContext.Response.StatusCode = 503; // Service Unavailable
+                        await httpContext.Response.WriteAsync("Liveness probe extension callback failed.");
+                        return;
+                    }
+                }
+
                 var meta = await InstanceMetaHelper.GetMetaInfoAsync();
                 httpContext.Response.StatusCode = (int)HttpStatusCode.OK;
                 if (meta != null)
