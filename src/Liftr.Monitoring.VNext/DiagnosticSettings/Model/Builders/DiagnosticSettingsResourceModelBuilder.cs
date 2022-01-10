@@ -61,7 +61,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model.Builders
             string resourceProviderType = _dsHelper.ExtractFullyQualifiedResourceProviderType(resourceId);
             _logger.Information("Started getting log categories for resource {@resourceId} with fully qualified resourceProviderType {@resourceProviderType}", resourceId, resourceProviderType);
 
-            var logCategories = _localCache.Get<List<DiagnosticSettingsCategoryResource>>(GetLogCategoryCacheKey(resourceProviderType));
+            List<DiagnosticSettingsCategoryResource> logCategories = null;
 
             if (logCategories == null) {
                 DiagnosticSettingsCategoryResourceList categories = await ListCategoriesByResourceAsync(_armClient, resourceId, DiagnosticSettingsV2ApiVersion, tenantId) ?? new DiagnosticSettingsCategoryResourceList();
