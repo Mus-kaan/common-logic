@@ -1,0 +1,147 @@
+#################################################################################
+#                           OneBranch Pipelines                                 #
+# EasyStart:      https://aka.ms/obpipelines/easystart/samples                  #
+# Documentation:  https://aka.ms/obpipelines                                    #
+# Yaml Schema:    https://aka.ms/obpipelines/yaml/schema                        #
+# Retail Tasks:   https://aka.ms/obpipelines/tasks                              #
+# Support:        https://aka.ms/onebranchsup                                    #
+#################################################################################
+
+trigger: none # https://aka.ms/obpipelines/triggers
+
+parameters: # parameters are shown up in ADO UI in a build queue time
+- name: 'debug'
+  displayName: 'Enable debug output'
+  type: boolean
+  default: true
+
+variables:
+  CDP_DEFINITION_BUILD_COUNT: $[counter('', 0)] # needed for onebranch.pipeline.version task https://aka.ms/obpipelines/versioning
+  system.debug: ${{ parameters.debug }}
+  
+  ROOT: $(Build.SourcesDirectory)
+  REPOROOT: $(ROOT)\src
+  OUTPUTROOT: $(ROOT)\bin
+
+  WindowsContainerImage: 'cdpxwin1809.azurecr.io/global/vse2019:latest' # Docker image which is used to build the project https://aka.ms/obpipelines/containers
+
+resources:
+  repositories: 
+    - repository: templates
+      type: git
+      name: OneBranch.Pipelines/GovernedTemplates
+      ref: refs/heads/main
+
+extends:
+  template: v2/OneBranch.Official.CrossPlat.yml@templates # https://aka.ms/obpipelines/templates
+  parameters:
+    globalSdl:
+      perStage:
+        sdl_sources:
+          checkout_all_repos: true
+      eslint:
+        enabled: true
+      credscan:
+        enabled: true
+        suppressionsFile: $(ROOT)\.config\CredScanSuppressions.json
+      binskim:
+        enabled: true
+        analyzeTargetGlob: |
+          **/Microsoft.Liftr.*.dll
+          **/Microsoft.Liftr.*.exe
+      cg:
+        failOnAlert: false
+      sbom:
+        enabled: true
+      tsa:
+        enabled: false
+
+    stages:
+    - stage: build
+      jobs:
+      - job: main
+        pool:
+          type: windows  # read more about custom job pool types at https://aka.ms/obpipelines/yaml/jobs
+        
+        variables: # More settings at https://aka.ms/obpipelines/yaml/jobs
+          ob_outputDirectory: '$(OUTPUTROOT)' # this directory is uploaded to pipeline artifacts, reddog and cloudvault. More info at https://aka.ms/obpipelines/artifacts
+          ob_git_checkout: true
+          
+        steps: # These steps will be run in unrestricted container's network
+                    
+          - task: onebranch.pipeline.version@1 # generates automatic version. For other versioning options check https://aka.ms/obpipelines/versioning
+            displayName: 'Setup BuildNumber'
+            inputs:
+              system: 'buildrevision'
+              major: '6'
+              minor: '0'
+              exclude_commit: false
+
+          - task: NuGetCommand@2
+            inputs:
+              command: 'custom'
+              arguments: 'config -configfile $(REPOROOT)\NuGet.Config'
+
+          - task: CmdLine@2
+            displayName: 'Restore Windows'
+            inputs:
+              script: '$(ROOT)\build\run-windows-restore.cmd'
+
+          - task: CmdLine@2
+            displayName: 'Build Windows'
+            inputs:
+              script: '$(ROOT)\build\run-windows-build.cmd'
+
+          - task: CmdLine@2
+            displayName: 'Run Tests'
+            inputs:
+              script: '$(ROOT)\build\run-windows-tests.cmd'
+              workingDirectory: '$(ROOT)'
+              failOnStderr: true
+          
+          - task: PublishTestResults@2
+            displayName: 'Run Tests (PublishTestResults)'
+            inputs:
+              testResultsFormat: 'VSTest'
+              testResultsFiles: '**/*.trx'
+              failTaskOnFailedTests: true
+              testRunTitle: 'Tests'
+              buildPlatform: 'Any CPU'
+              buildConfiguration: 'Debug'
+
+          - task: CmdLine@2
+            displayName: 'Package'
+            inputs:
+              script: '$(ROOT)\build\run-windows-pack.cmd'
+          
+          - task: CopyFiles@2
+            displayName: 'Copy bin contents'
+            inputs:
+              SourceFolder: '$(REPOROOT)'
+              Contents: |
+                */bin/*/*/Microsoft.Liftr.*.dll
+                */bin/*/*/Microsoft.Liftr.*.exe
+                !**/*Debug/**
+                !**/*.Tests/**
+                !**/*.Tests.*/**
+                !**/*.Test/**
+                !**/Samples/**
+                !**/BaseImageBuilder/**
+                !**/Deployment.Runner/**
+              TargetFolder: '$(OUTPUTROOT)\build\bin'
+
+          - task: CopyFiles@2
+            displayName: 'Copy nupkgs contents'
+            inputs:
+              SourceFolder: '$(ROOT)\nupkgs'
+              Contents: '**'
+              TargetFolder: '$(OUTPUTROOT)\package\nupkgs'
+
+          - task: onebranch.pipeline.signing@1
+            displayName: 'Sign binaries'
+            inputs:
+              command: 'sign'
+              signing_environment: 'azure-ado'
+              signing_profile: 'internal_azure_service'
+              files_to_sign: '**/*.exe;**/*.dll;**/*.psl;**/*.psml;**/*.js;**/*.nupkg'
+              search_root: ' $(OUTPUTROOT)'
