@@ -97,6 +97,8 @@ namespace Microsoft.Liftr.Marketplace.ARM
                 var json = saasResourceProperties.ToJObject();
                 var createdResource = await _marketplaceRestClient.SendRequestWithPollingAsync<BaseOperationResponse>(HttpMethod.Put, resourceTypePath, additionalHeaders, json);
                 var subscriptionDetails = createdResource.SubscriptionDetails;
+
+                // the following log message is being used in Common Telemetry System. Please inform the team at liftrcts@microsoft.com if you change the message or format
                 _logger.Information($"Marketplace Subscription level SAAS resource has been successfully created. \n SAAS ResourceId: {subscriptionDetails.Id}, Name: {subscriptionDetails.Name}, Plan: {subscriptionDetails.PlanId}, Offer: {subscriptionDetails.OfferId}, Publisher: {subscriptionDetails.PublisherId}, SAAS Subscription Status: {subscriptionDetails.SaasSubscriptionStatus}, Azure Subscription: {subscriptionDetails.AdditionalMetadata?.AzureSubscriptionId}");
                 return subscriptionDetails;
             }

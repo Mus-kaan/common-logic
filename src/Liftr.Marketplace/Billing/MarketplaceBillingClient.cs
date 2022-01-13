@@ -73,6 +73,7 @@ namespace Microsoft.Liftr.Marketplace.Billing
             var stringContent = JsonConvert.SerializeObject(marketplaceUsageEventRequest);
             request.Content = new StringContent(stringContent, Encoding.UTF8, "application/json");
 
+             // the following log message is being used in Common Telemetry System. Please inform the team at liftrcts@microsoft.com if you change the message or format
             _logger.Information($"[{MarketplaceConstants.SAASLogTag} {MarketplaceConstants.BillingLogTag}] [{nameof(SendUsageEventAsync)}] Sending request for UsageEvent: requestUri: {@request.RequestUri}, requestId: {requestMetadata.MSRequestId}, correlationId: {requestMetadata.MSCorrelationId}");
 
             HttpResponseMessage httpResponse = await httpClient.SendAsync(request, cancellationToken);
