@@ -42,8 +42,12 @@ namespace Microsoft.Liftr.PerformanceTelemetry
                 throw new ArgumentNullException(nameof(logger), $"Please provide valid {nameof(logger)}");
             }
 
-
-            logger.Information($"Performance insight details captured for Operation: {mainOperationName}, Partner: {partner}, UniqueIdentifierType: {uniqueIdentifierType}, UniqueIdentifierId: {uniqueIdentifierId}, OperationType: {operationType}, SubOperationName: {subOperationName}, Status: {status}");
+            string subOperationVal = null;
+            if(subOperationName != null)
+            {
+                subOperationVal = subOperationName.Value;
+            }
+            logger.Information($"Performance insight details captured for Operation: {mainOperationName.Value}, Partner: {partner}, UniqueIdentifierType: {uniqueIdentifierType}, UniqueIdentifierId: {uniqueIdentifierId}, OperationType: {operationType}, SubOperationName: {subOperationVal}, Status: {status}");
         }
     }
 }
