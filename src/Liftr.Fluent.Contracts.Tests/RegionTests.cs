@@ -76,6 +76,8 @@ namespace Microsoft.Liftr.Fluent.Contracts.Tests
             Assert.Equal("bj", Region.ChinaNorth.ShortName());
 
             Assert.Equal("sha", Region.ChinaEast.ShortName());
+
+            Assert.Equal("cse", Region.Create("swedencentral").ShortName());
         }
 
         [Fact]

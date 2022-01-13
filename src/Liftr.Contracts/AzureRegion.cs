@@ -113,6 +113,7 @@ namespace Microsoft.Liftr.Contracts
             return Name;
         }
 
+        // Short name is mainly from the ISO abbreviation: https://www.ncbi.nlm.nih.gov/books/NBK7249/
         #region Americas
         public static readonly AzureRegion USWest = new AzureRegion("westus", "West US", "wus");
         public static readonly AzureRegion USWest2 = new AzureRegion("westus2", "West US 2", "wus2");
@@ -140,6 +141,7 @@ namespace Microsoft.Liftr.Contracts
         public static readonly AzureRegion UKWest = new AzureRegion("ukwest", "UK West", "wuk");
         public static readonly AzureRegion FranceCentral = new AzureRegion("francecentral", "France Central", "cfr");
         public static readonly AzureRegion FranceSouth = new AzureRegion("francesouth", "France South", "sfr");
+        public static readonly AzureRegion SwedenCentral = new AzureRegion("swedencentral", "Sweden Central", "cse"); // 'se' is two character abbreviation for 'Sweden' from ISO
         public static readonly AzureRegion SwitzerlandNorth = new AzureRegion("switzerlandnorth", "Switzerland North", "nch");
         public static readonly AzureRegion SwitzerlandWest = new AzureRegion("switzerlandwest", "Switzerland West", "wch");
         public static readonly AzureRegion GermanyNorth = new AzureRegion("germanynorth", "GermanyNorth", "nde");
@@ -205,6 +207,7 @@ namespace Microsoft.Liftr.Contracts
             AzureRegion.UKWest,
             AzureRegion.FranceCentral,
             AzureRegion.FranceSouth,
+            AzureRegion.SwedenCentral,
             AzureRegion.SwitzerlandNorth,
             AzureRegion.SwitzerlandWest,
             AzureRegion.GermanyNorth,

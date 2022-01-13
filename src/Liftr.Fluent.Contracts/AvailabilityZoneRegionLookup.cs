@@ -30,6 +30,7 @@ namespace Microsoft.Liftr.Fluent.Contracts
                 Region.EuropeWest,
                 Region.USWest2,
                 Region.USSouthCentral,
+                Region.USWest3,
             };
 
         // https://docs.microsoft.com/en-us/azure/cosmos-db/high-availability#availability-zone-support
@@ -42,9 +43,11 @@ namespace Microsoft.Liftr.Fluent.Contracts
                 Region.USEast2,
                 Region.USSouthCentral,
                 Region.USWest2,
+                Region.USWest3,
                 Region.FranceCentral,
                 Region.GermanyWestCentral,
                 Region.EuropeNorth,
+                Region.NorwayEast,
                 Region.UKSouth,
                 Region.EuropeWest,
                 Region.SouthAfricaNorth,
@@ -53,6 +56,7 @@ namespace Microsoft.Liftr.Fluent.Contracts
                 Region.JapanEast,
                 Region.KoreaCentral,
                 Region.AsiaSouthEast,
+                Region.AsiaEast,
             };
 
         // https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/overview#azure-regions
@@ -70,6 +74,8 @@ namespace Microsoft.Liftr.Fluent.Contracts
                 Region.AustraliaEast,
                 Region.CanadaCentral,
                 Region.FranceCentral,
+                Region.GermanyWestCentral,
+                Region.USSouthCentral,
             };
 
         // https://docs.microsoft.com/en-us/azure/storage/common/storage-redundancy#zone-redundant-storage

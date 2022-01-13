@@ -75,6 +75,8 @@ namespace Microsoft.Liftr.Contracts.Tests
             Assert.Equal("bj", AzureRegion.ChinaNorth.ShortName);
 
             Assert.Equal("sha", AzureRegion.ChinaEast.ShortName);
+
+            Assert.Equal("cse", AzureRegion.SwedenCentral.ShortName);
         }
 
         [Fact]
@@ -92,7 +94,7 @@ namespace Microsoft.Liftr.Contracts.Tests
                 i++;
             }
 
-            Assert.Equal(49, i);
+            Assert.Equal(50, i);
         }
 
         [Fact]
