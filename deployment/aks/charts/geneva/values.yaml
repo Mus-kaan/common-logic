@@ -12,7 +12,7 @@ linuxgenevaACR:
 mdsd:
   dockerTag: master_20211223.1
 mdm:
-  dockerTag: master_20211223.1
+  dockerTag: master_20220111.2
 
 fluentd:
   dockerTag: master_20210928.1
