@@ -5,6 +5,7 @@
   "DomainName": "sample-partner-test-ame.azliftr-test.io",
   "DNSZoneId": "/subscriptions/f885cf14-b751-43c1-9536-dc5b1be02bc0/resourceGroups/ut-test-gbl220101-cus-rg/providers/Microsoft.Network/dnszones/sample-partner-test-ame.azliftr-test.io",
   "SecretPrefix": "UnitTestRP",
+  "CreateDBWithZoneRedundancy": false,
   "OneCertCertificates": {
     "GenevaClientCert": "antares-mds-agent.geneva.keyvault.liftr-dev.net",
     "ClientCert": "antares-mds-agent.geneva.keyvault.liftr-dev.net"

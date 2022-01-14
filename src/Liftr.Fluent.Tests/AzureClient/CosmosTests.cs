@@ -36,7 +36,7 @@ namespace Microsoft.Liftr.Fluent.Tests
 
             // Second deployment will not fail.
             var location = Location;
-            await client.CreateCosmosDBAsync(location, ResourceGroupName, dbName, TestCommon.Tags);
+            await client.CreateCosmosDBAsync(location, ResourceGroupName, dbName, TestCommon.Tags, isZoneRedundant: false);
 
             var dbs = await client.ListCosmosDBAsync(ResourceGroupName);
             Assert.Single(dbs);
@@ -45,7 +45,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             Assert.Equal(dbName, db.Name);
             TestCommon.CheckCommonTags(db.Inner.Tags);
             Assert.Single(db.Inner.Locations);
-            Assert.Equal(AvailabilityZoneRegionLookup.HasSupportCosmosDB(location), db.Inner.Locations[0].IsZoneRedundant);
+            Assert.Equal(false, db.Inner.Locations[0].IsZoneRedundant);
             var keys1 = await db.GetConnectionStringsAsync();
             var option = new MockMongoOptions() { ConnectionString = keys1.PrimaryMongoDBConnectionString, DatabaseName = "unit-test" };
             var collectionFactory = new MongoCollectionsFactory(option, Logger);
@@ -64,7 +64,7 @@ namespace Microsoft.Liftr.Fluent.Tests
                 var laName = SdkContext.RandomResourceName("testla", 15);
                 await client.GetOrCreateLogAnalyticsWorkspaceAsync(Location, ResourceGroupName, laName, Tags);
                 var la = $"/subscriptions/{client.FluentClient.SubscriptionId}/resourcegroups/{ResourceGroupName}/providers/microsoft.operationalinsights/workspaces/{laName}";
-                var db = await client.CreateCosmosDBAsync(Location, ResourceGroupName, dbName, Tags);
+                var db = await client.CreateCosmosDBAsync(Location, ResourceGroupName, dbName, Tags, isZoneRedundant: false);
 
                 await client.ExportDiagnosticsToLogAnalyticsAsync(db, la);
 
@@ -206,10 +206,10 @@ namespace Microsoft.Liftr.Fluent.Tests
             var vnet = await client.GetOrCreateVNetAsync(Location, ResourceGroupName, SdkContext.RandomResourceName("test-vnet", 15), TestCommon.Tags);
             var subnet = vnet.Subnets[client.DefaultSubnetName];
             var dbName = SdkContext.RandomResourceName("test-db", 15);
-            var dbAccount = await client.CreateCosmosDBAsync(Location, ResourceGroupName, dbName, TestCommon.Tags, subnet);
+            var dbAccount = await client.CreateCosmosDBAsync(Location, ResourceGroupName, dbName, TestCommon.Tags, subnet, isZoneRedundant: false);
 
             // Second deployment will not fail.
-            await client.CreateCosmosDBAsync(Location, ResourceGroupName, dbName, TestCommon.Tags);
+            await client.CreateCosmosDBAsync(Location, ResourceGroupName, dbName, TestCommon.Tags, isZoneRedundant: false);
 
             var dbs = await client.ListCosmosDBAsync(ResourceGroupName);
             Assert.Single(dbs);
