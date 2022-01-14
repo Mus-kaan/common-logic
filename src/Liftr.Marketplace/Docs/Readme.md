@@ -178,3 +178,18 @@ After creating this Service Principal, we need to add the Certificate Based auth
   }
 },
 ```
+
+# Steps to allow successful purchase of your marketplace offer
+
+After setting up your offer with all identities and authentication certificates, you need to ensure that a customer can purchase the offer.
+
+You need to:
+1. Allow-list your offer on Marketplace RP
+2. Allow-list your offer as Liftr offer on Marketplace portal
+3. Redirect your offer to Liftr creation flow
+
+These steps are outlined [here](./Marketplace_Development_Setup)
+
+A customer can only purchase a Marketplace offer with an allowlisted subscription. More details can be found [here](onenote:https://microsoft.sharepoint.com/teams/LiftrDev/SiteAssets/LiftrDev%20Notebook/Marketplace.one#How%20to%20use%20PAYG%20subscription%20in%20Prod&section-id=%7B8F301136-9B49-451C-9603-73362AE83B69%7D&page-id=%7BFE053CFE-FD1B-417B-8211-0BE9222902A3%7D&object-id=%7B56B92A30-026D-4505-971F-D08DEB37E7C1%7D&17)
+
+*NB: Once you have created a new tenant and subscription, please ping Arieh Faiga (arfaiga@microsoft.com) with the subscription id and tenant id and he will add it to the allowed list of test subscriptions.*
