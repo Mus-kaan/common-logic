@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>$(LiftrClassLibraryTargetFramework21)</TargetFramework>
+		<IsPackable>true</IsPackable>
+		<AssemblyName>Microsoft.Liftr.DBService.Contracts</AssemblyName>
+		<RootNamespace>Microsoft.Liftr.DBService.Contracts</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup>
+	  <PackageReference Include="MongoDB.Driver" Version="$(PackageVersion_MongoDB_Driver)" />
+	  <PackageReference Include="Newtonsoft.Json" Version="$(PackageVersion_Newtonsoft_Json)" />
+	</ItemGroup>
+</Project>
