@@ -57,7 +57,8 @@ namespace Microsoft.Liftr.Metrics.AspNetCore
             }
             catch (Exception ex)
             {
-                _logger.Error("Exception during metric middleware - {message}", ex.Message);
+                _logger.Error(ex, "Exception during metric middleware - {message}", ex.Message);
+                throw;
             }
         }
     }

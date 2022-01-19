@@ -4,7 +4,6 @@
 
 using Azure.Core;
 using Azure.Storage.Queues;
-using Liftr.Metrics.AOP;
 using Liftr.Sample.WorkerService;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,6 +15,7 @@ using Microsoft.Liftr.GenericHosting;
 using Microsoft.Liftr.Logging.GenericHosting;
 using Microsoft.Liftr.Logging.Metrics;
 using Microsoft.Liftr.Metrics;
+using Microsoft.Liftr.Metrics.AOP;
 using Microsoft.Liftr.Queue;
 using MongoDB.Driver;
 using Serilog;
@@ -36,6 +36,8 @@ namespace Microsoft.Liftr.Sample.WorkerService
             .UseLiftrLogger()
             .ConfigureServices((hostContext, services) =>
             {
+                var logger = services.BuildServiceProvider().GetService<ILogger>();
+
                 var configuration = hostContext.Configuration;
                 services.AddSingleton<ITimeSource, SystemTimeSource>();
 
@@ -101,7 +103,18 @@ namespace Microsoft.Liftr.Sample.WorkerService
                 var testProxy = serviceProvider.GetService<ITestClass>();
                 testProxy.TestMethod();
                 testProxy.TestMethodAsync();
-                testProxy.TestMethodWithExceptionAsync();
+
+#pragma warning disable CA1031 // Do not catch general exception types
+                try
+                {
+                    testProxy.TestMethodWithExceptionAsync();
+                }
+                catch (Exception ex)
+                {
+                    logger.Information(ex, $"Expected exception was thrown from the proxied {nameof(TestClass.TestMethodWithExceptionAsync)}.");
+                }
+#pragma warning restore CA1031 // Do not catch general exception types
+
                 services.AddHostedService<Worker>();
             });
     }

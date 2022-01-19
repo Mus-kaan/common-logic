@@ -4,10 +4,9 @@
 
 using Castle.DynamicProxy;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Liftr.Metrics.AOP;
 using System.Linq;
 
-namespace Liftr.Metrics.AOP
+namespace Microsoft.Liftr.Metrics.AOP
 {
     /// <summary>
     /// Extension Methods for the <see cref="IServiceCollection"/>

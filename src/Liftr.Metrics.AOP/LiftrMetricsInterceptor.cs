@@ -63,12 +63,11 @@ namespace Microsoft.Liftr.Metrics.AOP
 
                 invocation.ReturnValue = InterceptAsync((dynamic)invocation.ReturnValue);
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
             {
                 status = Constants.FailureStatus;
-                _logger.Error("Exception in InterceptAsyncMethod : {exception}}", ex.Message);
+                _logger.Error(ex, "Exception in InterceptAsyncMethod : {exception}}", ex.Message);
+                throw;
             }
             finally
             {
@@ -102,19 +101,16 @@ namespace Microsoft.Liftr.Metrics.AOP
 
                 // Executing the actual method
                 invocation.Proceed();
-
-                // After method execution
-                stopwatch.Stop();
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
             {
-                _logger.Error("Exception: {exception}}", ex.Message);
                 status = Constants.FailureStatus;
+                _logger.Error(ex, "Exception in InterceptSyncMethod: {exception}}", ex.Message);
+                throw;
             }
             finally
             {
+                stopwatch.Stop();
                 var className = invocation.TargetType.Name;
                 var methodName = invocation.MethodInvocationTarget.Name;
                 var metricName = GetMetricName(invocation, Constants.DefaultMetricName);
