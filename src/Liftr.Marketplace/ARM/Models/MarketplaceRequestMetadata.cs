@@ -37,7 +37,7 @@ namespace Microsoft.Liftr.Marketplace.ARM.Models
             // TODO: figure out which ones are the really used ones.
             // 'MSClientPrincipalId'and 'MSClientPrincipalName' are empty for serivce principal.
             // 'MSClientObjectId' is empty for CSP Subscription
-            return !string.IsNullOrEmpty(MSClientTenantId);
+            return !string.IsNullOrWhiteSpace(MSClientTenantId);
         }
     }
 }

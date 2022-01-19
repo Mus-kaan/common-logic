@@ -23,7 +23,6 @@ namespace Microsoft.Liftr.Marketplace.ARM
     public sealed class MarketplaceARMClient : IMarketplaceARMClient
     {
         private const string ResourceTypePath = "api/saasresources/subscriptions";
-        private const string PaymentValidationPath = "api/paymentValidation";
         private const string MigrateSaasPath = "/migrateFromTenant";
         private readonly ILogger _logger;
         private readonly MarketplaceRestClient _marketplaceRestClient;
@@ -203,31 +202,50 @@ namespace Microsoft.Liftr.Marketplace.ARM
             }
         }
 
-        public async Task<PaymentValidationResponse> ValidatesSaaSPurchasePaymentAsync(PaymentValidationRequest paymentValidationRequest, MarketplaceRequestMetadata requestMetadata)
+        /// <summary>
+        /// For Subscription level purchase eligibility check
+        /// </summary>
+        /// <param name="resourceName"></param>
+        /// <param name="resourceGroup"></param>
+        /// <param name="mpCheckEligibilityRequest"></param>
+        /// <param name="mpRequestMetadata"></param>
+        /// <returns>Payment validation status</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<PaymentValidationResponse> ValidatesSaaSPurchasePaymentAsync(string resourceName, string resourceGroup, MPCheckEligibilityRequest mpCheckEligibilityRequest, MarketplaceRequestMetadata mpRequestMetadata)
         {
-            if (paymentValidationRequest is null || !paymentValidationRequest.IsValid())
-            {
-                throw new ArgumentNullException(nameof(paymentValidationRequest), $"Please provide valid {nameof(PaymentValidationRequest)}");
-            }
-
-            if (requestMetadata is null || !requestMetadata.IsValid())
-            {
-                throw new ArgumentNullException(nameof(requestMetadata), $"Please provide valid {nameof(MarketplaceRequestMetadata)}");
-            }
+            ValidateSaaSPurchaseRequest(resourceName, resourceGroup, mpCheckEligibilityRequest, mpRequestMetadata);
 
             using var op = _logger.StartTimedOperation(nameof(ValidatesSaaSPurchasePaymentAsync));
+            var azSubscriptionId = mpCheckEligibilityRequest.PaymentChannelMetadata.AzureSubscriptionId;
+
             try
             {
-                _logger.Information($"Starting SaaS Purchase Payment Validation for Azure Subscription: {paymentValidationRequest.AzureSubscriptionId}, plan: {paymentValidationRequest.PlanId}, offer: {paymentValidationRequest.OfferId}, publisher: {paymentValidationRequest.PublisherId}");
-                var additionalHeaders = HttpRequestHelper.GetAdditionalMarketplaceHeaders(requestMetadata);
-                var json = paymentValidationRequest.ToJObject();
-                var validationResponse = await _marketplaceRestClient.SendRequestAsync<string>(HttpMethod.Post, PaymentValidationPath, additionalHeaders, json);
-                _logger.Information($"SaaS Purchase Payment is succesfully validated with response {validationResponse} for Azure Subscription: {paymentValidationRequest.AzureSubscriptionId}, plan: {paymentValidationRequest.PlanId}, offer: {paymentValidationRequest.OfferId}, publisher: {paymentValidationRequest.PublisherId}");
+                _logger.Information($"Starting SaaS Purchase Payment Validation for Azure Subscription: {azSubscriptionId}, plan: {mpCheckEligibilityRequest.PlanId}, offer: {mpCheckEligibilityRequest.OfferId}, publisher: {mpCheckEligibilityRequest.PublisherId}");
+                var subscriptionLevelPaymentValidationPath = HttpRequestHelper.GetCompleteRequestPathForSubscriptionLevel(azSubscriptionId, resourceGroup, resourceName) + "/eligibilityCheck";
+                var additionalHeaders = HttpRequestHelper.GetAdditionalMarketplaceHeaders(mpRequestMetadata);
+                var paymentValidationJson = mpCheckEligibilityRequest.ToJObject();
+                var validationResponse = await _marketplaceRestClient.SendRequestAsync<MPCheckEligibilityResponse>(HttpMethod.Put, subscriptionLevelPaymentValidationPath, additionalHeaders, paymentValidationJson);
+
+                if (validationResponse == null)
+                {
+                    _logger.Information($"SaaS Purchase Payment validation failed for Azure Subscription: {azSubscriptionId}, plan: {mpCheckEligibilityRequest.PlanId}, offer: {mpCheckEligibilityRequest.OfferId}, publisher: {mpCheckEligibilityRequest.PublisherId}");
+                    return PaymentValidationResponse.BuildValidationResponseFailed(HttpStatusCode.BadRequest, $"SaaS Purchase Payment Check Failed as {nameof(validationResponse)} was null");
+                }
+                else if (!validationResponse.IsEligible)
+                {
+                    _logger.Information($"SaaS Purchase Payment validation failed for Azure Subscription: {azSubscriptionId}, plan: {mpCheckEligibilityRequest.PlanId}, offer: {mpCheckEligibilityRequest.OfferId}, publisher: {mpCheckEligibilityRequest.PublisherId}");
+                    return PaymentValidationResponse.BuildValidationResponseFailed(HttpStatusCode.BadRequest, $"SaaS Purchase Payment Check Failed as {nameof(validationResponse)} was {validationResponse.ToJsonString()}");
+                }
+                else
+                {
+                    _logger.Information($"SaaS Purchase Payment is succesfully validated with response '{validationResponse.ToJsonString()}' for Azure Subscription: {azSubscriptionId}, plan: {mpCheckEligibilityRequest.PlanId}, offer: {mpCheckEligibilityRequest.OfferId}, publisher: {mpCheckEligibilityRequest.PublisherId}");
+                }
+
                 return PaymentValidationResponse.BuildValidationResponseSuccessful();
             }
             catch (MarketplaceException ex)
             {
-                string errorMessage = $"Failed to validate SaaS purchase payment for the Azure subscription: {paymentValidationRequest.AzureSubscriptionId}. Error: {ex.Message}";
+                string errorMessage = $"Failed to validate SaaS Subscription level payment for the Azure subscription: {azSubscriptionId}. Error: {ex.Message}";
                 _logger.Error(ex, errorMessage);
                 op.FailOperation(errorMessage);
 
@@ -241,6 +259,13 @@ namespace Microsoft.Liftr.Marketplace.ARM
                     return PaymentValidationResponse.BuildValidationResponseFailed(statusCode, exceptionMessage);
                 }
 
+                return PaymentValidationResponse.BuildValidationResponseFailed(HttpStatusCode.BadRequest, ex.Message);
+            }
+            catch (HttpRequestException ex)
+            {
+                string errorMessage = $"Failed to validate SaaS Subscription level payment for the Azure subscription: {azSubscriptionId}. Error: {ex.Message}";
+                _logger.Error(ex, errorMessage);
+                op.FailOperation(errorMessage);
                 return PaymentValidationResponse.BuildValidationResponseFailed(HttpStatusCode.BadRequest, ex.Message);
             }
         }
@@ -375,6 +400,37 @@ namespace Microsoft.Liftr.Marketplace.ARM
                 }
 
                 return MigrationResponse.BuildMigrationResponseFailed(HttpStatusCode.BadRequest, ex.Message);
+            }
+        }
+
+        private static void ValidateSaaSPurchaseRequest(string resourceName, string resourceGroup, MPCheckEligibilityRequest mpCheckEligibilityRequest, MarketplaceRequestMetadata mpRequestMetadata)
+        {
+            if (mpCheckEligibilityRequest is null)
+            {
+                throw new ArgumentNullException(nameof(mpCheckEligibilityRequest), $"Please provide valid {nameof(MPCheckEligibilityRequest)}");
+            }
+            else if (!mpCheckEligibilityRequest.IsValid())
+            {
+                throw new MissingFieldException(nameof(mpCheckEligibilityRequest), $"Atleast one of the mandotory fields of '{nameof(mpCheckEligibilityRequest)}' failed IsNullOrWhiteSpace check");
+            }
+
+            if (mpRequestMetadata is null)
+            {
+                throw new ArgumentNullException(nameof(mpRequestMetadata), $"Please provide valid {nameof(MarketplaceRequestMetadata)}");
+            }
+            else if (!mpRequestMetadata.IsValid())
+            {
+                throw new MissingFieldException(nameof(mpCheckEligibilityRequest), $"Atleast one of the mandotory fields of '{nameof(mpRequestMetadata)}' failed IsNullOrWhiteSpace check");
+            }
+
+            if (string.IsNullOrWhiteSpace(resourceName))
+            {
+                throw new ArgumentNullException(nameof(resourceName), $"Please provide valid {nameof(resourceName)}");
+            }
+
+            if (string.IsNullOrWhiteSpace(resourceGroup))
+            {
+                throw new ArgumentNullException(nameof(resourceGroup), $"Please provide valid {nameof(resourceGroup)}");
             }
         }
     }

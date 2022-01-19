@@ -54,12 +54,14 @@ namespace Microsoft.Liftr.Marketplace.ARM.Interfaces
         Task<MarketplaceSaasTokenResponse> GetAccessTokenAsync(string resourceId);
 
         /// <summary>
-        /// Validates the SaaS Purchase Payment
+        /// Validates the SaaS Purchase Payment at Subscription level
         /// </summary>
-        /// <param name="paymentValidationRequest"></param>
-        /// <param name="requestMetadata"></param>
+        /// <param name="resourceName"></param>
+        /// <param name="resourceGroup"></param>
+        /// <param name="mpCheckEligibilityRequest"></param>
+        /// <param name="mpRequestMetadata"></param>
         /// <returns>Payment validation status</returns>
-        Task<PaymentValidationResponse> ValidatesSaaSPurchasePaymentAsync(PaymentValidationRequest paymentValidationRequest, MarketplaceRequestMetadata requestMetadata);
+        Task<PaymentValidationResponse> ValidatesSaaSPurchasePaymentAsync(string resourceName, string resourceGroup, MPCheckEligibilityRequest mpCheckEligibilityRequest, MarketplaceRequestMetadata mpRequestMetadata);
 
         /// <summary>
         /// Migrates tenant level Saas resource to Subscription level

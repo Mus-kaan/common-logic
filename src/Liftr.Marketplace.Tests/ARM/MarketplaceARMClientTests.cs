@@ -9,6 +9,7 @@ using Microsoft.Liftr.Marketplace.ARM.Models;
 using Microsoft.Liftr.Marketplace.Contracts;
 using Microsoft.Liftr.Marketplace.Saas.Contracts;
 using Microsoft.Liftr.Marketplace.Tests;
+using Microsoft.Liftr.Marketplace.Utils;
 using Moq;
 using System;
 using System.Net.Http;
@@ -21,7 +22,11 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
     public class MarketplaceARMClientTests
     {
         private readonly Uri _marketplaceEndpoint = new Uri("https://marketplaceapi.microsoft.com");
+        private readonly Uri _marketplacePaymentValidationEndpoint = new Uri("https://main.prod.marketplacesaas.azure.com/");
         private readonly string _version = "2018-08-31";
+        private readonly string _resourceName = "dummyResource";
+        private readonly string _resourceGroup = "dummyRG";
+        private readonly string _azureSubscriptionId = "dummySubsID_001";
         private readonly MarketplaceARMClient _armClient;
         private readonly Mock<IHttpClientFactory> _httpClientFactory;
 
@@ -260,28 +265,51 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
         [Fact]
         public async Task ValidatesSaaSPurchasePaymentAsync_Validates_SaaS_Purchase_Payment_Async()
         {
-            var paymentValidationRequest = new PaymentValidationRequest()
+            var paymentValidationRequest = new MPCheckEligibilityRequest()
             {
-                TenantId = "tenantId",
-                AzureSubscriptionId = "subscription1",
+                PaymentChannelMetadata = new PaymentChannelMetadata() { AzureSubscriptionId = _azureSubscriptionId },
                 PlanId = "PAYG",
                 OfferId = "offer",
                 TermId = "hdcbvgdjk",
-                PublisherId = "confluent",
-                Email = "rohanand@microsoft.com",
+                PublisherId = "datadog",
             };
 
-            var path = "paymentValidation";
+            var path = HttpRequestHelper.GetCompleteRequestPathForSubscriptionLevel(_azureSubscriptionId, _resourceGroup, _resourceName) + "/eligibilityCheck";
 
             using var handler = new MockHttpMessageHandler(null, path);
             using var httpClient = new HttpClient(handler, false);
             _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplacePaymentValidationEndpoint, _version, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
             var armClient = new MarketplaceARMClient(_marketplaceRestClient);
 
-            var validationResponse = await armClient.ValidatesSaaSPurchasePaymentAsync(paymentValidationRequest, _marketplaceRequestMetadata);
+            var validationResponse = await armClient.ValidatesSaaSPurchasePaymentAsync(_resourceName, _resourceGroup, paymentValidationRequest, _marketplaceRequestMetadata);
             Assert.True(validationResponse.IsSuccess);
+        }
+
+        [Fact]
+        public async Task ValidatesSaaSPurchasePaymentAsync_Validates_SaaS_Purchase_Payment_Failure_Async()
+        {
+            var paymentValidationRequest = new MPCheckEligibilityRequest()
+            {
+                PaymentChannelMetadata = new PaymentChannelMetadata() { AzureSubscriptionId = _azureSubscriptionId },
+                PlanId = "PAYG",
+                OfferId = "offer",
+                TermId = "failure", // this 'failure' value serves as a unique value to identify when the mock SendAsync() should return a response which has isEligible set as False
+                PublisherId = "datadog",
+            };
+
+            var path = HttpRequestHelper.GetCompleteRequestPathForSubscriptionLevel(_azureSubscriptionId, _resourceGroup, _resourceName) + "/eligibilityCheck";
+
+            using var handler = new MockHttpMessageHandler(null, path);
+            using var httpClient = new HttpClient(handler, false);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplacePaymentValidationEndpoint, _version, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
+            var armClient = new MarketplaceARMClient(_marketplaceRestClient);
+
+            var validationResponse = await armClient.ValidatesSaaSPurchasePaymentAsync(_resourceName, _resourceGroup, paymentValidationRequest, _marketplaceRequestMetadata);
+            Assert.False(validationResponse.IsSuccess);
         }
 
         [Fact]
@@ -367,7 +395,23 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
                 await Task.Yield();
                 var response = new HttpResponseMessage();
 
-                if (request.RequestUri.ToString().OrdinalContains("saasresources") && request.Method == HttpMethod.Put)
+                if (request.RequestUri.ToString().OrdinalContains("eligibilityCheck") && request.Method == HttpMethod.Put)
+                {
+                    var requestContent = await request.Content.ReadAsStringAsync();
+                    if (requestContent.Contains("failure", StringComparison.OrdinalIgnoreCase))
+                    {
+                        response.StatusCode = System.Net.HttpStatusCode.OK;
+                        var content = new MPCheckEligibilityResponse() { IsEligible = false, ErrorMessage = string.Empty };
+                        response.Content = new StringContent(content.ToJson());
+                    }
+                    else
+                    {
+                        response.StatusCode = System.Net.HttpStatusCode.OK;
+                        var content = new MPCheckEligibilityResponse() { IsEligible = true, ErrorMessage = string.Empty };
+                        response.Content = new StringContent(content.ToJson());
+                    }
+                }
+                else if (request.RequestUri.ToString().OrdinalContains("saasresources") && request.Method == HttpMethod.Put)
                 {
                     response = MockAsyncOperationHelper.AcceptedResponseWithOperationLocation(_operationLocation);
                 }

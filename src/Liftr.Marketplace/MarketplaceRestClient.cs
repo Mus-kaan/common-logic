@@ -109,19 +109,19 @@ namespace Microsoft.Liftr.Marketplace
                 }
 
                 var result = (await response.Content.ReadAsStringAsync()).FromJson<T>();
-                _logger.Information($"Request: {request.RequestUri} succeeded for SAAS operation");
+                _logger.Information($"Request: {request.RequestUri} succeeded for SAAS operation, correlationId: {correlationId}");
 
                 return result;
             }
             catch (HttpRequestException ex)
             {
-                var errorMessage = $"The request: {method}:{request.RequestUri} failed for SAAS operation";
+                var errorMessage = $"The request: {method}:{request.RequestUri} failed for SAAS operation, correlationId: {correlationId}";
                 if (ex.Message != null)
                 {
-                    errorMessage += $"Reason: {ex.Message}";
+                    errorMessage += $" Reason: {ex.Message}";
                 }
 
-                _logger.Error(errorMessage);
+                _logger.Error(errorMessage, ex);
                 throw;
             }
         }
