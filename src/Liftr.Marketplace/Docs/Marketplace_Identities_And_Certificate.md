@@ -2,7 +2,7 @@
 
 ## Marketplace Internal APIs (MarketplaceARMClient)
 
-For calling the Marketplace Internal APIs(/api/saasresources), we will be using a FirstPartyApp that has been whitelisted with Marketplace for all Liftr Partners. A common token service has been created to allow Liftr partners to authenticate their applications to Marketplace.
+For calling the Marketplace Internal APIs(/api/saasresources), we will be using a FirstPartyApp that has been allowed with Marketplace for all Liftr Partners. A common token service has been created to allow Liftr partners to authenticate their applications to Marketplace.
 
 `Below are the steps to onboard to common token service:`
 
@@ -14,7 +14,7 @@ For calling the Marketplace Internal APIs(/api/saasresources), we will be using 
    If using  AAD Application:
 	- Run SNI tool for the generated certificate and AAD-Application's appId [see here](https://dev.azure.com/msazure/Liftr/_git/Liftr.Common?path=src/Liftr.Marketplace/Docs/Marketplace_Identities_And_Certificate.md&version=GCce89eeb7df6ea2e3d0f7c20aa2c486aaa134a6a6&line=21&lineStartColumn=1&lineEndColumn=65&_a=contents)
 
-4. Whitelist the Application on Common token service [Sample PR](https://msazure.visualstudio.com/Liftr/_git/Liftr.Gateway/pullrequest/5095641)
+4. Allow the Application on Common token service [Sample PR](https://msazure.visualstudio.com/Liftr/_git/Liftr.Gateway/pullrequest/5095641)
 
 
 ## Marketplace Fulfillment and Billing APIs (MarketplaceFulfillmentClient, MarketplaceBillingClient)

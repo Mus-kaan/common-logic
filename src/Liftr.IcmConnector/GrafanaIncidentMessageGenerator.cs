@@ -81,7 +81,7 @@ namespace Microsoft.Liftr.IcmConnector
                     // This can also be an email address that is not associated with any contact that will be CC'ed on all notifications for this incident.
                     // Examples of an alias (without quotes): 'test', 'foo'
                     // Examples of a valid email address (without quotes): 'test@microsoft.com', 'example@microsoft.com'
-                    // Email address must be from a white-listed domain (see below for set of whitelisted domain). Email address from arbitrary domains like gmail.com, hotmail.com etc. will be ignored.
+                    // Email address must be from a white-listed domain (see below for set of allowed domain). Email address from arbitrary domains like gmail.com, hotmail.com etc. will be ignored.
                     CreatedBy = icmOptions.NotificationEmail,
 
                     // for a fire and forget connector, Source.CreateDate and Source.ModifiedDate are pretty much the same.
@@ -160,7 +160,7 @@ namespace Microsoft.Liftr.IcmConnector
                         // If a match is found to a contact for either the alias or the email address, that contact will be added as a subscriber to the incident.
                         // Examples of an alias (without quotes): 'test', 'foo'
                         // Examples of a valid email address (without quotes): 'test@microsoft.com', 'example@microsoft.com'
-                        // Email address must be from a white-listed domain (see below for set of whitelisted domain).
+                        // Email address must be from a white-listed domain (see below for set of allowed domain).
                         // Email address from arbitrary domains like gmail.com, hotmail.com etc. will be ignored.
                         new EmailNotificationSubscriptionRef { Type = IcmConstants.IncidentSubscriberIdTypes.EmailAddressIdType, Value = icmOptions.NotificationEmail },
                     },
@@ -273,9 +273,9 @@ namespace Microsoft.Liftr.IcmConnector
                 throw new InvalidOperationException("HTML could not be made into valid XHTML\n" + errors);
             }
 
-            // IcM's web method WILL run this sanitization on all XHMTL it receives as it must validate that no non-whitelisted tags
+            // IcM's web method WILL run this sanitization on all XHMTL it receives as it must validate that no non-allowed tags
             //  or attributes are present.  The two "false" parameters are intended to match the way the server calls this utility
-            //  method, which causes non-whitelisted elements to be stripped out and will require at least one XHTML tag.
+            //  method, which causes non-allowed elements to be stripped out and will require at least one XHTML tag.
             if (XmlSanitizer.SanitizeXml(xhtmlValid, false, false, out xhtmlSanitized, out errors) == false)
             {
                 //// instead of rejecting the incident by throwing an exception, the IcM server will does the following the event that

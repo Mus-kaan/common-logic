@@ -7,26 +7,26 @@
 # Support:        https://aka.ms/onebranchsup                                    #
 #################################################################################
 
-trigger: none # https://aka.ms/obpipelines/triggers
+trigger: # https://aka.ms/obpipelines/triggers
+  - master
 
 parameters: # parameters are shown up in ADO UI in a build queue time
-- name: 'debug'
-  displayName: 'Enable debug output'
-  type: boolean
-  default: true
+  - name: "debug"
+    displayName: "Enable debug output"
+    type: boolean
+    default: true
 
 variables:
   CDP_DEFINITION_BUILD_COUNT: $[counter('', 0)] # needed for onebranch.pipeline.version task https://aka.ms/obpipelines/versioning
   system.debug: ${{ parameters.debug }}
-  
-  ROOT: $(Build.SourcesDirectory)
-  REPOROOT: $(ROOT)\src
-  OUTPUTROOT: $(ROOT)\bin
 
-  WindowsContainerImage: 'cdpxwin1809.azurecr.io/global/vse2019:latest' # Docker image which is used to build the project https://aka.ms/obpipelines/containers
+  MajorVersion: 0
+  MinorVersion: 7
+
+  WindowsContainerImage: "cdpxwin1809.azurecr.io/global/vse2019:latest" # Docker image which is used to build the project https://aka.ms/obpipelines/containers
 
 resources:
-  repositories: 
+  repositories:
     - repository: templates
       type: git
       name: OneBranch.Pipelines/GovernedTemplates
@@ -35,15 +35,14 @@ resources:
 extends:
   template: v2/OneBranch.NonOfficial.CrossPlat.yml@templates # https://aka.ms/obpipelines/templates
   parameters:
-    globalSdl:
-      perStage:
-        sdl_sources:
-          checkout_all_repos: true
-      eslint:
-        enabled: true
+    globalSdl: # https://aka.ms/obpipelines/sdl
+      tsa:
+        enabled: true # SDL results of non-official builds aren't uploaded to TSA by default.
       credscan:
         enabled: true
-        suppressionsFile: $(ROOT)\.config\CredScanSuppressions.json
+        suppressionsFile: $(Build.SourcesDirectory)\.config\CredScanSuppressions.json
+      policheck:
+        break: true # always break the build on policheck issues. You can disable it by setting to 'false'
       binskim:
         enabled: true
         analyzeTargetGlob: |
@@ -53,95 +52,81 @@ extends:
         failOnAlert: false
       sbom:
         enabled: true
-      tsa:
-        enabled: false
 
     stages:
-    - stage: build
-      jobs:
-      - job: main
-        pool:
-          type: windows  # read more about custom job pool types at https://aka.ms/obpipelines/yaml/jobs
-        
-        variables: # More settings at https://aka.ms/obpipelines/yaml/jobs
-          ob_outputDirectory: '$(OUTPUTROOT)' # this directory is uploaded to pipeline artifacts, reddog and cloudvault. More info at https://aka.ms/obpipelines/artifacts
-          ob_git_checkout: true
-          
-        steps: # These steps will be run in unrestricted container's network
-                    
-          - task: onebranch.pipeline.version@1 # generates automatic version. For other versioning options check https://aka.ms/obpipelines/versioning
-            displayName: 'Setup BuildNumber'
-            inputs:
-              system: 'buildrevision'
-              major: '0'
-              minor: '7'
-              exclude_commit: false
+      - stage: build
+        jobs:
+          - job: main
+            pool:
+              type: windows # read more about custom job pool types at https://aka.ms/obpipelines/yaml/jobs
 
-          - task: NuGetCommand@2
-            inputs:
-              command: 'custom'
-              arguments: 'config -configfile $(REPOROOT)\NuGet.Config'
+            variables: # More settings at https://aka.ms/obpipelines/yaml/jobs
+              ob_outputDirectory: '$(Build.SourcesDirectory)\out' # this directory is uploaded to pipeline artifacts, reddog and cloudvault. More info at https://aka.ms/obpipelines/artifacts
+              # https://aka.ms/obpipelines/sdl
+              ob_sdl_binskim_enabled: true # you can disable sdl tools in non-official build
+              ob_sdl_binskim_break: true # always break the build on binskim issues. You can disable it by setting to 'false'
+              ob_sdl_binskim_scanOutputDirectoryOnly: true
+              ob_sdl_roslyn_break: true
+              # ob_sdl_suppression_suppressionFile: $(Build.SourcesDirectory)\.gdn\job.gdnsuppress
 
-          - task: CmdLine@2
-            displayName: 'Restore Windows'
-            inputs:
-              script: '$(ROOT)\build\run-windows-restore.cmd'
+            steps: # These steps will be run in unrestricted container's network
+              - task: onebranch.pipeline.version@1 # generates automatic version. For other versioning options check https://aka.ms/obpipelines/versioning
+                displayName: "Setup BuildNumber"
+                inputs:
+                  system: "buildrevision"
+                  major: "$(MajorVersion)"
+                  minor: "$(MinorVersion)"
+                  exclude_commit: false
 
-          - task: CmdLine@2
-            displayName: 'Build Windows'
-            inputs:
-              script: '$(ROOT)\build\run-windows-build.cmd'
+              - task: NuGetCommand@2
+                inputs:
+                  command: "custom"
+                  arguments: 'config -configfile $(Build.SourcesDirectory)\src\NuGet.Config'
 
-          - task: CmdLine@2
-            displayName: 'Run Tests'
-            inputs:
-              script: '$(ROOT)\build\run-windows-tests.cmd'
-              workingDirectory: '$(ROOT)'
-              failOnStderr: true
-          
-          - task: PublishTestResults@2
-            displayName: 'Run Tests (PublishTestResults)'
-            inputs:
-              testResultsFormat: 'VSTest'
-              testResultsFiles: '**/*.trx'
-              failTaskOnFailedTests: true
-              testRunTitle: 'Tests'
-              buildPlatform: 'Any CPU'
-              buildConfiguration: 'Debug'
+              - task: CmdLine@2
+                displayName: "Restore"
+                inputs:
+                  script: '$(Build.SourcesDirectory)\build\run-windows-restore.cmd'
 
-          - task: CmdLine@2
-            displayName: 'Package'
-            inputs:
-              script: '$(ROOT)\build\run-windows-pack.cmd'
-          
-          - task: CopyFiles@2
-            displayName: 'Copy bin contents'
-            inputs:
-              SourceFolder: '$(REPOROOT)'
-              Contents: |
-                */bin/*/*/Microsoft.Liftr.*.dll
-                */bin/*/*/Microsoft.Liftr.*.exe
-                !**/*Debug/**
-                !**/*.Tests/**
-                !**/*.Tests.*/**
-                !**/*.Test/**
-                !**/Samples/**
-                !**/BaseImageBuilder/**
-                !**/Deployment.Runner/**
-              TargetFolder: '$(OUTPUTROOT)\build\bin'
+              - task: CmdLine@2
+                displayName: "Build"
+                inputs:
+                  script: '$(Build.SourcesDirectory)\build\run-windows-build.cmd'
 
-          - task: CopyFiles@2
-            displayName: 'Copy nupkgs contents'
-            inputs:
-              SourceFolder: '$(ROOT)\nupkgs'
-              Contents: '**'
-              TargetFolder: '$(OUTPUTROOT)\package\nupkgs'
+              - task: CmdLine@2
+                displayName: "Test"
+                inputs:
+                  script: '$(Build.SourcesDirectory)\build\run-windows-tests.cmd'
+                  workingDirectory: "$(Build.SourcesDirectory)"
+                  failOnStderr: true
 
-          - task: onebranch.pipeline.signing@1
-            displayName: 'Sign binaries'
-            inputs:
-              command: 'sign'
-              signing_environment: 'azure-ado'
-              signing_profile: 'internal_azure_service'
-              files_to_sign: '**/*.exe;**/*.dll;**/*.psl;**/*.psml;**/*.js;**/*.nupkg'
-              search_root: ' $(OUTPUTROOT)'
+              - task: PublishTestResults@2
+                displayName: "Run Tests (PublishTestResults)"
+                inputs:
+                  testResultsFormat: "VSTest"
+                  testResultsFiles: "**/*.trx"
+                  failTaskOnFailedTests: true
+                  testRunTitle: "Tests"
+                  buildPlatform: "Any CPU"
+                  buildConfiguration: "Debug"
+
+              - task: CmdLine@2
+                displayName: "Package"
+                inputs:
+                  script: '$(Build.SourcesDirectory)\build\run-windows-pack.cmd'
+
+              - task: CopyFiles@2 # https://docs.microsoft.com/azure/devops/pipelines/tasks/utility/copy-files
+                displayName: "Copy build output to upload folder"
+                inputs:
+                  SourceFolder: "$(Build.SourcesDirectory)"
+                  Contents: |
+                    **\bin\**
+                    !**\*.pfx
+                  TargetFolder: '$(Build.SourcesDirectory)\out\build\bin'
+
+              - task: CopyFiles@2
+                displayName: "Copy nupkgs contents"
+                inputs:
+                  SourceFolder: '$(Build.SourcesDirectory)\nupkgs'
+                  Contents: "**"
+                  TargetFolder: '$(Build.SourcesDirectory)\out\package\nupkgs'

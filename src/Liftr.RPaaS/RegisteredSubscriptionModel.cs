@@ -92,8 +92,8 @@ namespace Microsoft.Liftr.RPaaS
         public SubscriptionState SubscriptionState { get; set; }
 
         /// <summary>
-        /// Optional. The placement requirement for the subscription based on its country
-        /// of origin / offer type / offer category / etc. This is used in geo-fencing
+        /// Optional. The placement requirement for the subscription based on its
+        /// origin / offer type / offer category / etc. This is used in geo-fencing
         /// of certain regions or regulatory boundaries (e.g. Australia ring-fencing).
         /// </summary>
         public string LocationPlacementId { get; set; }

@@ -16,7 +16,7 @@ To use the `MarketplaceARMClient`:
 2. Add the MarketplaceSaasOptions in the  appsettings.json or in Keyvault
 
 ### Credentials to Use
-To call the Marketplace Internal APIs, use the APP Id of the application that has been whitelisted to common token service. Refere [here](https://dev.azure.com/msazure/Liftr/_git/Liftr.Common?path=src/Liftr.Marketplace/Docs/Marketplace_Identities_And_Certificate.md&version=GC1cda9006b48681179c4e627a96dfc746d425517f&line=7&lineStartColumn=1&lineEndColumn=58&_a=contents)
+To call the Marketplace Internal APIs, use the APP Id of the application that has been allowed to common token service. Refere [here](https://dev.azure.com/msazure/Liftr/_git/Liftr.Common?path=src/Liftr.Marketplace/Docs/Marketplace_Identities_And_Certificate.md&version=GC1cda9006b48681179c4e627a96dfc746d425517f&line=7&lineStartColumn=1&lineEndColumn=58&_a=contents)
 
 
 ```
@@ -30,7 +30,7 @@ To call the Marketplace Internal APIs, use the APP Id of the application that ha
       "ApiVersion": "2020-03-20-preview"
     },
     "AuthOptions": {
-      "ApplicationId": "055caf97-1b4f-4730-9f5d-acc24b707b06", // AAD App-Id whitelisted to token service
+      "ApplicationId": "055caf97-1b4f-4730-9f5d-acc24b707b06", // AAD App-Id allowed to token service
       "CertificateName": "FirstPartyAppCert",
       "TargetResource": "4c328f8a-1356-4991-883b-ff83cb17aba3", //Dogfood marketplace target resource
       "AadEndpoint": "https://login.windows-ppe.net",

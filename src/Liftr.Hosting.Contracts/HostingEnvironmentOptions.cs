@@ -55,8 +55,8 @@ namespace Microsoft.Liftr.Hosting.Contracts
         public string LogAnalyticsWorkspaceId { get; set; }
 
         /// <summary>
-        /// This will map to the Thanos ingress 'nginx.ingress.kubernetes.io/whitelist-source-range'.
-        /// You can specify allowed client IP source ranges through the nginx.ingress.kubernetes.io/whitelist-source-range annotation.
+        /// This will map to the Thanos nginx ingress allowed source IP range.
+        /// You can specify allowed client IP source ranges through the nginx ingress annotation.
         /// The value is a comma separated list of CIDRs, e.g. 10.0.0.0/24,172.10.0.1.
         /// </summary>
         public string ThanosClientIPRange { get; set; }

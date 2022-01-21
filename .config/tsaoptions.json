@@ -1,0 +1,9 @@
+{
+    "codebaseName": "Liftr.Common",
+    "areaPath": "Liftr",
+    "iterationPath": "Liftr\\Platform",
+    "notificationAliases": [
+        "liftr-tools-tsa@microsoft.com"
+    ],
+    "template": "TFSMSAzure"
+}
