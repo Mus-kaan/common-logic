@@ -191,6 +191,9 @@ namespace Microsoft.Liftr.Monitoring.VNext.Whale
                 monitorId,
                 partnerEntityId);
 
+            _logger.Information(
+                $"Processing auto-monitor message for resource {monitorId} with sku: {monitorResource.SkuName}.");
+
             var monitorLocation = monitorResource.Location
                     .Replace(" ", string.Empty).ToLowerInvariant();
 

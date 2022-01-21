@@ -30,5 +30,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.Whale.Models
         ///     The location of the resource.
         /// </summary>
         public string Location { get; set; }
+
+        public string SkuName { get; set; } = string.Empty;
     }
 }
