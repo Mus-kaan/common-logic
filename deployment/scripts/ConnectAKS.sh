@@ -20,6 +20,8 @@ AKSName=$(<bin/aks-name.txt)
 fi
 echo "AKSName: $AKSName"
 
-# Connect AKS cluster
-echo "az aks get-credentials -g $AKSRGName -n $AKSName"
-az aks get-credentials -g "$AKSRGName" -n "$AKSName"
+# Connect AKS cluster - get credential for local admin account
+# If AAD is not enabled for AKS cluster, with/without `--admin` won't make difference; if enabled,
+# the local admin account credential will bypass AAD authentication to unblock us here
+echo "az aks get-credentials -g $AKSRGName -n $AKSName --admin"
+az aks get-credentials -g "$AKSRGName" -n "$AKSName" --admin
