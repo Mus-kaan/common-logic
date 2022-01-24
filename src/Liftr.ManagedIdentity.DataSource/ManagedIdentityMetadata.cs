@@ -12,29 +12,34 @@ namespace Microsoft.Liftr.ManagedIdentity.DataSource
     public class ManagedIdentityMetadata
     {
         /// <summary>
-        /// The Application/client ID from AAD identifying the service principal backing the identity
+        /// The AAD client id for the managed identity.
         /// </summary>
         [BsonElement("client_id")]
         public string ClientId { get; set; }
 
         /// <summary>
-        /// A URL which can be used to retrieve the MSI identity. This is same as the x-ms-identity-url header value returned by ARM when an identity is enabled
-        /// on a resource.
+        /// A refreshed version of the URL used to retrieve credentials for the managed identity.
         /// </summary>
         [BsonElement("client_secret_url")]
         public Uri ClientSecretUrl { get; set; }
 
         /// <summary>
-        /// The tenant ID under which the user assigned identity is created.
+        /// The AAD tenant ID for the managed identity.
         /// </summary>
         [BsonElement("tenant_id")]
         public string TenantId { get; set; }
 
         /// <summary>
-        /// The object/principal ID from AAD identifying the service principal backing the identity.
+        /// The AAD object ID for the managed identity.
         /// </summary>
         [BsonElement("object_id")]
         public string ObjectId { get; set; }
+
+        /// <summary>
+        /// The AAD authentication endpoint for the managed identity. You can make token request toward this authentication endpoint.
+        /// </summary>
+        [BsonElement("authentication_endpoint")]
+        public Uri AuthenticationEndpoint { get; set; }
 
         /// <summary>
         /// The ARM resource ID of the user assigned identity. The value is NULL for system assigned identity.

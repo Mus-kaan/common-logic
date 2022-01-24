@@ -25,7 +25,7 @@ namespace Microsoft.Liftr.ManagedIdentity
 {
     public class MSIClient : IMSIClient
     {
-        private const string MSI_ApiVersion = "2018-10-01-PREVIEW";
+        private const string MSI_ApiVersion = "2020-08-31";
         private const string JsonMediaType = "application/json";
         private const string BearerAuthenticationScheme = "Bearer";
 

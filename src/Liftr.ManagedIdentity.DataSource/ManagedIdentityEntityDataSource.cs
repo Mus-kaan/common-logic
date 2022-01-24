@@ -6,8 +6,6 @@ using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.DataSource.Mongo;
 using MongoDB.Driver;
 using System;
-using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.ManagedIdentity.DataSource

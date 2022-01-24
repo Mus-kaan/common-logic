@@ -8,49 +8,66 @@ using System;
 namespace Microsoft.Liftr.ManagedIdentity.Models
 {
     /// <summary>
-    /// The properties of an identity credentials as returned by MSI resource provider.
+    /// The properties of an identity credential as returned by MSI resource provider.
     /// </summary>
     public class IdentityCredential
     {
         /// <summary>
-        /// The Application/client ID from AAD identifying the service principal backing the identity
+        /// The AAD client ID for the managed identity.
         /// </summary>
         [JsonProperty("client_id")]
         public string ClientId { get; set; }
 
         /// <summary>
-        /// A base64 encoded string containing certificate bytes
+        /// The base64 encoded private key X509 certificate for the managed identity.
         /// </summary>
         [JsonProperty("client_secret")]
         public string ClientSecret { get; set; }
 
         /// <summary>
-        /// A URL which can be used to retrieve the MSI identity. This is same as the x-ms-identity-url header value returned by ARM when an identity is enabled
-        /// on a resource.
+        /// A refreshed version of the URL used to retrieve credentials for the managed identity.
         /// </summary>
         [JsonProperty("client_secret_url")]
         public string ClientSecretUrl { get; set; }
 
         /// <summary>
-        /// The certificate cannot be used to auth to AAD or MSI data plane before this time
+        /// The AAD tenant ID for the managed identity.
+        /// </summary>
+        [JsonProperty("tenant_id")]
+        public string TenantId { get; set; }
+
+        /// <summary>
+        /// The AAD object ID for the managed identity.
+        /// </summary>
+        [JsonProperty("object_id")]
+        public string ObjectId { get; set; }
+
+        /// <summary>
+        /// The AAD authentication endpoint for the managed identity. You can make token request toward this authentication endpoint.
+        /// </summary>
+        [JsonProperty("authentication_endpoint")]
+        public string AuthenticationEndpoint { get; set; }
+
+        /// <summary>
+        /// The time at which the managed identity credential becomes valid for retireving AAD tokens.
         /// </summary>
         [JsonProperty("not_before")]
         public DateTimeOffset? NotBefore { get; set; }
 
         /// <summary>
-        /// The certificate cannot be used to auth to AAD after this time.
+        /// The time at which the managed identity credential becomes invalid for retireving AAD tokens.
         /// </summary>
         [JsonProperty("not_after")]
         public DateTimeOffset? NotAfter { get; set; }
 
         /// <summary>
-        /// The certificate can be renewed via the MSI data plane after this time.
+        /// The time after which a call to the managed identity client_secret_url will return a new credential.
         /// </summary>
         [JsonProperty("renew_after")]
         public DateTimeOffset? RenewAfter { get; set; }
 
         /// <summary>
-        /// The certificate cannot be used to auth to MSI data plane after this time.
+        /// The time after which the managed identity client_secret cannot be used to call client_secret_url for a refreshed credential.
         /// </summary>
         [JsonProperty("cannot_renew_after")]
         public DateTimeOffset? CannotRenewAfter { get; set; }
