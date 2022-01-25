@@ -253,7 +253,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings
                     monitoredResourceId,
                     monitorId);
 
-                return DiagnosticSettingsManagerResult.FailedResult();
+                return DiagnosticSettingsManagerResult.FailedResult(ex.Message);
             }
         }
     }

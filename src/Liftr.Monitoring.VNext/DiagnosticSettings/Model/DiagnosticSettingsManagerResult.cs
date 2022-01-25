@@ -20,6 +20,8 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model
 
         public List<DiagnosticSettingsModel> DiagnosticSettingV2ModelList { get; set; }
 
+        public string FailureMessage { get; set; }
+
         public static DiagnosticSettingsManagerResult SuccessfulResult(MonitoringStatusReason reason = MonitoringStatusReason.CapturedByRules)
         {
             var res = new DiagnosticSettingsManagerResult();
@@ -33,6 +35,15 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model
             var res = new DiagnosticSettingsManagerResult();
             res.SuccessfulOperation = false;
             res.Reason = reason;
+            return res;
+        }
+
+        public static DiagnosticSettingsManagerResult FailedResult(string failureMessage, MonitoringStatusReason reason = MonitoringStatusReason.Other)
+        {
+            var res = new DiagnosticSettingsManagerResult();
+            res.SuccessfulOperation = false;
+            res.Reason = reason;
+            res.FailureMessage = failureMessage;
             return res;
         }
     }

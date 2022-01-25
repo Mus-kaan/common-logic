@@ -31,5 +31,10 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Interfaces
         /// The result of of a List Diagnostic Settings Get
         /// </summary>
         List<DiagnosticSettingsModel> DiagnosticSettingV2ModelList { get; set; }
+
+        /// <summary>
+        /// The failure message of request
+        /// </summary>
+        public string FailureMessage { get; set; }
     }
 }
