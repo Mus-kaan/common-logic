@@ -10,13 +10,13 @@ namespace Microsoft.Liftr.DBService.Contracts.Interfaces
     public interface IEntity
     {
         [JsonProperty(PropertyName = "id")]
-        string Id { get; set; } // id of the actual entity which derives from it. liftr id/partner id/mp id
-
-        string EntityId { get; } // just a guid
+        string Id { get; set; } // mongo id of the liftr/partner/mp resource
 
         string ResourceId { get; } // arm resource id
 
         string AzSubsId { get; set; } // partition key
+
+        string TenantId { get; set; } // tenat id
 
         string ResourceName { get; set; }
 
@@ -27,5 +27,7 @@ namespace Microsoft.Liftr.DBService.Contracts.Interfaces
         DateTime LastModifiedUTC { get; set; }
 
         string ETag { get; set; }
+
+        bool IsDeleted { get; set; }
     }
 }

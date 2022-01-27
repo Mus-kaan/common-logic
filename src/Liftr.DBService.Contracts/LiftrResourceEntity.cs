@@ -8,17 +8,13 @@ namespace Microsoft.Liftr.DBService.Contracts
 {
     public class LiftrResourceEntity : BaseEntity
     {
-        public LiftrResourceEntity(string id)
+        public LiftrResourceEntity(string liftrResourceId)
         {
-            Id = id;
-            ResourceId = id;
+            ResourceId = liftrResourceId;
         }
 
         [BsonElement("resourceType")]
         public string ResourceType { get; set; }
-
-        [BsonElement("tenantId")]
-        public string TenantId { get; set; }
 
         [BsonElement("resourceGroup")]
         public string ResourceGroup { get; set; }
@@ -31,5 +27,11 @@ namespace Microsoft.Liftr.DBService.Contracts
 
         [BsonElement("userDetail")]
         public UserDetail UserDetail { get; set; }
+
+        [BsonElement("mpResourceId")]
+        public string MarketplaceResourceId { get; set; }
+
+        [BsonElement("partnerResourceId")]
+        public string PartnerResourceId { get; set; }
     }
 }

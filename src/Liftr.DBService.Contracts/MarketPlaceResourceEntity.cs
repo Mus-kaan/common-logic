@@ -9,11 +9,14 @@ namespace Microsoft.Liftr.DBService.Contracts
 {
     public class MarketPlaceResourceEntity : BaseEntity
     {
-        public MarketPlaceResourceEntity(string liftrResourceId, string mpId)
+        public MarketPlaceResourceEntity(string liftrResourceId, string mpResourceId)
         {
             ResourceId = liftrResourceId;
-            Id = mpId;
+            MarketPlaceResourceId = mpResourceId;
         }
+
+        [BsonElement("mpResourceid")]
+        public string MarketPlaceResourceId { get; set; }
 
         [BsonElement("publisherId")]
         public string PublisherId { get; set; }

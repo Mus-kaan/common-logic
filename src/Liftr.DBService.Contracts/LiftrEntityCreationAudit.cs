@@ -15,7 +15,5 @@ namespace Microsoft.Liftr.DBService.Contracts
         {
             TenantId = tenantId;
         }
-
-        public string TenantId { get; set; }
     }
 }

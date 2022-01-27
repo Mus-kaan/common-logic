@@ -16,5 +16,7 @@ namespace Microsoft.Liftr.DBService.Contracts
         Failed = 7,
         Unsubscribed = 8,
         Updating = 9,
+        PlanChanged = 10,
+        PlanRenew = 11,
     }
 }
