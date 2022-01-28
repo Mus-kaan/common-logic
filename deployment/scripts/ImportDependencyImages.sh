@@ -14,7 +14,7 @@ fi
 echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/references/linuxcontainers.html"
 IMG_mdsd="genevamdsd:master_20211223.1"
 IMG_mdm="genevamdm:master_20220111.2"
-IMG_fluentd="genevafluentd_td-agent:master_20210928.1"
+IMG_fluentd="genevafluentd_td-agent:master_20220121.1"
 IMG_azsecpack="genevasecpackinstall:master_20211102.2"
 IMG_prommdm="shared/prom-mdm-converter:2.0.master.20211213.1"
 
