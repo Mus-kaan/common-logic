@@ -2,7 +2,10 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 
 namespace Microsoft.Liftr.DBService.Contracts
@@ -42,9 +45,13 @@ namespace Microsoft.Liftr.DBService.Contracts
         [BsonElement("quantity")]
         public int Quantity { get; set; }
 
+        [JsonConverter(typeof(StringEnumConverter))]
+        [BsonRepresentation(BsonType.String)]
         [BsonElement("saasSubscriptionStatus")]
         public SaasSubscriptionStatus SaasSubscriptionStatus { get; set; }
 
+        [JsonConverter(typeof(StringEnumConverter))]
+        [BsonRepresentation(BsonType.String)]
         [BsonElement("billingTermType")]
         public BillingTermTypes BillingTermType { get; set; }
 
