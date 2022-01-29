@@ -230,33 +230,43 @@ namespace Microsoft.Liftr.ImageBuilder
              CancellationToken cancellationToken = default)
         {
             // https://github.com/Azure/azure-rest-api-specs/blob/master/specification/imagebuilder/resource-manager/Microsoft.VirtualMachineImages/stable/2020-02-14/imagebuilder.json#L280
+            using (var ops = _logger.StartTimedOperation(nameof(DeleteVMImageBuilderTemplateAsync)))
             using (var handler = new AzureApiAuthHandler(_liftrAzure.AzureCredentials))
             using (var httpClient = new HttpClient(handler))
             {
-                _logger.Information("Delete AIB template. rgName: {rgName}. templateName: {templateName}", rgName, templateName);
-                var uriBuilder = new UriBuilder(_liftrAzure.AzureCredentials.Environment.ResourceManagerEndpoint);
-                uriBuilder.Path =
-                    $"/subscriptions/{_liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{templateName}";
-                uriBuilder.Query = $"api-version={c_AIBAPIVersion}";
-                var deleteResponse = await httpClient.DeleteAsync(uriBuilder.Uri, cancellationToken);
-
-                if (!deleteResponse.IsSuccessStatusCode)
+                try
                 {
-                    _logger.Error("Delete AIB template {templateName} in {rgName} failed. Status code: {deleteResponseStatusCode}", templateName, rgName, deleteResponse.StatusCode);
-                    if (deleteResponse?.Content != null)
+                    _logger.Information("Delete AIB template. rgName: {rgName}. templateName: {templateName}", rgName, templateName);
+                    var uriBuilder = new UriBuilder(_liftrAzure.AzureCredentials.Environment.ResourceManagerEndpoint);
+                    uriBuilder.Path =
+                        $"/subscriptions/{_liftrAzure.FluentClient.SubscriptionId}/resourceGroups/{rgName}/providers/Microsoft.VirtualMachineImages/imageTemplates/{templateName}";
+                    uriBuilder.Query = $"api-version={c_AIBAPIVersion}";
+                    var deleteResponse = await httpClient.DeleteAsync(uriBuilder.Uri, cancellationToken);
+
+                    if (!deleteResponse.IsSuccessStatusCode)
                     {
-                        var errorContent = await deleteResponse.Content.ReadAsStringAsync();
-                        _logger.Error("Response body: {errorContent}", errorContent);
+                        _logger.Error("Delete AIB template {templateName} in {rgName} failed. Status code: {deleteResponseStatusCode}", templateName, rgName, deleteResponse.StatusCode);
+                        if (deleteResponse?.Content != null)
+                        {
+                            var errorContent = await deleteResponse.Content.ReadAsStringAsync();
+                            _logger.Error("Response body: {errorContent}", errorContent);
+                        }
+
+                        throw new InvalidOperationException("Delete template failed.");
+                    }
+                    else if (deleteResponse.StatusCode == HttpStatusCode.Accepted)
+                    {
+                        var asyncOperationResponse = await WaitAsyncOperationAsync(httpClient, deleteResponse, cancellationToken);
                     }
 
-                    throw new InvalidOperationException("Delete template failed.");
+                    _logger.Information("Delete AIB template succeeded. rgName: {rgName}. templateName: {templateName}", rgName, templateName);
                 }
-                else if (deleteResponse.StatusCode == HttpStatusCode.Accepted)
+                catch (Exception ex)
                 {
-                    var asyncOperationResponse = await WaitAsyncOperationAsync(httpClient, deleteResponse, cancellationToken);
+                    _logger.Error(ex, ex.Message);
+                    ops.FailOperation(ex.Message);
+                    throw;
                 }
-
-                _logger.Information("Delete AIB template succeeded. rgName: {rgName}. templateName: {templateName}", rgName, templateName);
             }
         }
 

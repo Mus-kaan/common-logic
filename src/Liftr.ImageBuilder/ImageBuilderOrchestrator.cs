@@ -440,7 +440,10 @@ namespace Microsoft.Liftr.ImageBuilder
                 if (!_options.KeepAzureVMImageBuilderLogs)
                 {
                     _logger.Information("Clean up Azure VM Image Builder logs by deleting ther AIB template.");
-                    await aibClient.DeleteVMImageBuilderTemplateAsync(_options.ResourceGroupName, templateName, cancellationToken);
+                    var forget = aibClient.DeleteVMImageBuilderTemplateAsync(_options.ResourceGroupName, templateName, cancellationToken);
+
+                    // make sure the forget will be scheduled.
+                    await Task.Delay(1000);
                 }
 
                 _logger.Information("The new image version can be found at Shared Image Gallery Image version resource Id: {sigVerionId}", sigImgVersion.Id);
