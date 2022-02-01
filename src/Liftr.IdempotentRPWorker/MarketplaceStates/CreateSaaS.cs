@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 using Microsoft.Liftr.Contracts;
 using Microsoft.Liftr.Contracts.Marketplace;
+using Microsoft.Liftr.IdempotentRPWorker.Constants;
 using Microsoft.Liftr.IdempotentRPWorker.Contracts;
 using Microsoft.Liftr.IdempotentRPWorker.Utils;
 using Microsoft.Liftr.Marketplace;
@@ -81,18 +82,18 @@ namespace Microsoft.Liftr.IdempotentRPWorker.MarketplaceStates
             stateContext = stateContext ?? throw new ArgumentNullException(nameof(stateContext));
             if (_saaSClientHack.ShouldIgnoreSaaSCreateFailure(stateContext.SubscriptionId))
             {
-                _logger.Information($"[{nameof(CreateSaaS)}] Skipping Saas deletion for ignored subscription {stateContext.SubscriptionId}");
+                _logger.Information($"[{nameof(CreateSaaS)}] [{MPConstants.SAASLogTag}] Skipping Saas deletion for ignored subscription {stateContext.SubscriptionId}");
                 return stateContext;
             }
 
             if (stateContext.IsSaaSDeleted)
             {
-                _logger.Information($"[{nameof(CreateSaaS)}] SaaS resource is already deleted for Marketplace Subscription Id {stateContext.MarketplaceContext.MarketplaceSubscription}");
+                _logger.Information($"[{nameof(CreateSaaS)}] [{MPConstants.SAASLogTag}] SaaS resource is already deleted for Marketplace Subscription Id {stateContext.MarketplaceContext.MarketplaceSubscription}");
                 return stateContext;
             }
 
             _logger.Information(
-                $"[{nameof(DeleteSaaS)}] Deleting Marketplace subscription: {stateContext.SubscriptionId} for resource: {resource.Id}",
+                $"[{nameof(DeleteSaaS)}] [{MPConstants.SAASLogTag}] Deleting Marketplace subscription: {stateContext.SubscriptionId} for resource: {resource.Id}",
                 stateContext.MarketplaceContext.MarketplaceSubscription,
                 resource.Id,
                 stateContext.TenantId);
@@ -118,7 +119,7 @@ namespace Microsoft.Liftr.IdempotentRPWorker.MarketplaceStates
                 }
 
                 _logger.Information(
-                $"[{nameof(DeleteSaaS)}] Marketplace SaaS resource: {stateContext.MarketplaceContext.MarketplaceSubscription} successfully deleted for resource: {resource.Id}",
+                $"[{nameof(DeleteSaaS)}] [{MPConstants.SAASLogTag}] Marketplace SaaS resource: {stateContext.MarketplaceContext.MarketplaceSubscription} successfully deleted for resource: {resource.Id}",
                 stateContext.MarketplaceContext.MarketplaceSubscription,
                 resource.Id,
                 stateContext.TenantId);
@@ -127,12 +128,12 @@ namespace Microsoft.Liftr.IdempotentRPWorker.MarketplaceStates
             }
             catch (MarketplaceException ex)
             {
-                errorMessage = $"[{nameof(CreateSaaS)}] Deletion of marketplace SAAS Resource {stateContext.MarketplaceContext.MarketplaceSubscription} Failed. Error: {ex.Message}";
+                errorMessage = $"[{nameof(CreateSaaS)}] [{MPConstants.SAASLogTag}] Deletion of marketplace SAAS Resource {stateContext.MarketplaceContext.MarketplaceSubscription} Failed. Error: {ex.Message}";
                 throw;
             }
             catch (Exception ex)
             {
-                errorMessage = $"[{nameof(CreateSaaS)}] Deletion of marketplace SAAS Resource {stateContext.MarketplaceContext.MarketplaceSubscription} Failed. Error: {ex.Message}";
+                errorMessage = $"[{nameof(CreateSaaS)}] [{MPConstants.SAASLogTag}] Deletion of marketplace SAAS Resource {stateContext.MarketplaceContext.MarketplaceSubscription} Failed. Error: {ex.Message}";
                 throw;
             }
 
@@ -176,12 +177,12 @@ namespace Microsoft.Liftr.IdempotentRPWorker.MarketplaceStates
             }
             catch (MarketplaceException mex)
             {
-                errorMessage = $"[{nameof(CreateSAASResourceAsync)}] Failed to Create saas resource. Error: {mex.Message}";
+                errorMessage = $"[{nameof(CreateSAASResourceAsync)}] [{MPConstants.SAASLogTag}] Failed to Create saas resource. Error: {mex.Message}";
                 throw;
             }
             catch (Exception ex)
             {
-                errorMessage = $"[{nameof(CreateSAASResourceAsync)}] Failed to Create saas resource. Error: {ex.Message}";
+                errorMessage = $"[{nameof(CreateSAASResourceAsync)}] [{MPConstants.SAASLogTag}] Failed to Create saas resource. Error: {ex.Message}";
                 throw;
             }
         }

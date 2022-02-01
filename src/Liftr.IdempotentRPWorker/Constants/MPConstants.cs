@@ -12,5 +12,6 @@ namespace Microsoft.Liftr.IdempotentRPWorker.Constants
         public const string FakeSaaSResource = "FAKE_MP_RESOURCE";
         public const string EntityNotFound = "EntityNotFound";
         public const double MarketplaceRetryWaitForEntityNotFound = 60.0;
+        public const string SAASLogTag = "SAAS";
     }
 }
