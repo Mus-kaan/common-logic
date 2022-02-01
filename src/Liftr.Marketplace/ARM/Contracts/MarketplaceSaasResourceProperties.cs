@@ -43,5 +43,8 @@ namespace Microsoft.Liftr.Marketplace.ARM.Contracts
     {
         [JsonProperty("AzureSubscriptionId")]
         public string AzureSubscriptionId { get; set; }
+
+        [JsonProperty("ResourceGroup")]
+        public string ResourceGroup { get; set; }
     }
 }

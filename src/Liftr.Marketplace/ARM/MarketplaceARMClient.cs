@@ -110,6 +110,63 @@ namespace Microsoft.Liftr.Marketplace.ARM
             }
         }
 
+        public async Task<MarketplaceSubscriptionDetails> UpdateSaaSResourceAsync(
+            string azureSubscriptionId,
+            string resourceGroup,
+            string resourceName,
+            MarketplaceRequestMetadata requestMetadata,
+            MarketplaceSaasResourceProperties updatedSaasResourceProperties)
+        {
+            if (string.IsNullOrWhiteSpace(azureSubscriptionId))
+            {
+                throw new ArgumentNullException(nameof(azureSubscriptionId), $"Please provide valid {nameof(azureSubscriptionId)}");
+            }
+
+            if (string.IsNullOrWhiteSpace(resourceGroup))
+            {
+                throw new ArgumentNullException(nameof(resourceGroup), $"Please provide valid {nameof(resourceGroup)}");
+            }
+
+            if (string.IsNullOrWhiteSpace(resourceName))
+            {
+                throw new ArgumentNullException(nameof(resourceName), $"Please provide valid {nameof(resourceName)}");
+            }
+
+            if (updatedSaasResourceProperties is null)
+            {
+                throw new ArgumentNullException(nameof(updatedSaasResourceProperties), $"Please provide valid {nameof(MarketplaceSaasResourceProperties)}");
+            }
+
+            if (requestMetadata is null || !requestMetadata.IsValid())
+            {
+                throw new ArgumentNullException(nameof(requestMetadata), $"Please provide valid {nameof(MarketplaceRequestMetadata)}");
+            }
+
+            using var op = _logger.StartTimedOperation(nameof(CreateSaaSResourceAsync));
+            try
+            {
+                _logger.Information($"Subscription Level SAAS resource update parameters: SubscriptionId: {azureSubscriptionId}, ResourceGroup: {resourceGroup}, ResourceName: {resourceName}");
+
+                var resourceTypePath = HttpRequestHelper.GetCompleteRequestPathForSubscriptionLevel(azureSubscriptionId, resourceGroup, resourceName);
+                _logger.Information($"Request Path at Subscription Level: {resourceTypePath}");
+                var additionalHeaders = HttpRequestHelper.GetAdditionalMarketplaceHeaders(requestMetadata);
+                var json = updatedSaasResourceProperties.ToJObject();
+                var updatedResource = await _marketplaceRestClient.SendRequestWithPollingAsync<BaseOperationResponse>(new HttpMethod("PATCH"), resourceTypePath, additionalHeaders, json);
+                var subscriptionDetails = updatedResource.SubscriptionDetails;
+
+                // the following log message is being used in Common Telemetry System. Please inform the team at liftrcts@microsoft.com if you change the message or format
+                _logger.Information($"Marketplace Subscription level SAAS resource has been successfully updated. \n SAAS ResourceId: {subscriptionDetails.Id}, Name: {subscriptionDetails.Name}, Plan: {subscriptionDetails.PlanId}, Offer: {subscriptionDetails.OfferId}, Publisher: {subscriptionDetails.PublisherId}, SAAS Subscription Status: {subscriptionDetails.SaasSubscriptionStatus}, Azure Subscription: {subscriptionDetails.AdditionalMetadata?.AzureSubscriptionId}");
+                return subscriptionDetails;
+            }
+            catch (MarketplaceException ex)
+            {
+                string errorMessage = $"Failed to update subscription level marketplace SAAS resource while making create request. Error: {ex.Message}";
+                _logger.Error(ex, errorMessage);
+                op.FailOperation(errorMessage);
+                throw;
+            }
+        }
+
         public async Task<MarketplaceSaasTokenResponse> GetAccessTokenAsync(string resourceId)
         {
             var resourcePath = ResourceTypePath + "/" + resourceId + "/generateToken";

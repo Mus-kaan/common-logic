@@ -27,6 +27,14 @@ namespace Microsoft.Liftr.Marketplace.ARM.Interfaces
         Task<MarketplaceSubscriptionDetails> CreateSaaSResourceAsync(MarketplaceSaasResourceProperties saasResourceProperties, MarketplaceRequestMetadata requestMetadata, string resourceGroup);
 
         /// <summary>
+        /// Update one subscription SaaS resource. The changed field can be Plan, Quantity, Azure Subscription or Resource Group
+        /// </summary>
+        /// <remarks>
+        /// https://main.prod.marketplacesaas.azure.com/swagger/index.html#/SubscriptionLevelSaaS/SubscriptionLevelSaaS_Patch
+        /// </remarks>
+        Task<MarketplaceSubscriptionDetails> UpdateSaaSResourceAsync(string azureSubscriptionId, string resourceGroup, string resourceName, MarketplaceRequestMetadata requestMetadata, MarketplaceSaasResourceProperties updatedSaasResourceProperties);
+
+        /// <summary>
         /// Deletes a Marketplace Saas resource
         /// </summary>
         /// <remarks>

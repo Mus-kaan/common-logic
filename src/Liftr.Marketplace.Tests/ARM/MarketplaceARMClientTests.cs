@@ -209,6 +209,78 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
         }
 
         [Fact]
+        public async Task UpdateSaaSResourceAsync_Invalid_Prameters_Throws_Async()
+        {
+            var armClient = new MarketplaceARMClient(_marketplaceRestClient);
+
+            var azureSubscriptionId = "00000000-0000-0000-0000-000000000000";
+
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await _armClient.UpdateSaaSResourceAsync(azureSubscriptionId, "rg", "name", _marketplaceRequestMetadata, null));
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await _armClient.UpdateSaaSResourceAsync(azureSubscriptionId, "rg", "name", new MarketplaceRequestMetadata(), CreateSaasResourceProperties("test")));
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await _armClient.UpdateSaaSResourceAsync(string.Empty, "rg", "name", _marketplaceRequestMetadata, CreateSaasResourceProperties("test")));
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await _armClient.UpdateSaaSResourceAsync(azureSubscriptionId, string.Empty, "name", _marketplaceRequestMetadata, CreateSaasResourceProperties("test")));
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await _armClient.UpdateSaaSResourceAsync(azureSubscriptionId, "rg", string.Empty, _marketplaceRequestMetadata, CreateSaasResourceProperties("test")));
+        }
+
+        [Fact]
+        public async Task UpdateSaaSResourceAsync_Updates_resource_at_subscritpion_level_with_polling_Async()
+        {
+            var resourceName = $"test-{Guid.NewGuid()}";
+            var resourceGroup = "saas-test";
+            var saasResource = new BaseOperationResponse()
+            {
+                SubscriptionDetails = new MarketplaceSubscriptionDetails()
+                {
+                    Name = resourceName,
+                    Id = Guid.NewGuid().ToString(),
+                },
+            };
+            var operationLocation = "https://mockoperationlocation.com";
+
+            using var handler = new MockHttpMessageHandler(saasResource, operationLocation);
+            using var httpClient = new HttpClient(handler, false);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
+            var armClient = new MarketplaceARMClient(_marketplaceRestClient);
+
+            var updatedResource = await armClient.UpdateSaaSResourceAsync("a4ff2ab3-5e1c-4926-ca32-c9d52350608a", resourceGroup, resourceName, _marketplaceRequestMetadata, new MarketplaceSaasResourceProperties());
+
+            Assert.Equal(updatedResource.Id, saasResource.SubscriptionDetails.Id);
+        }
+
+        [Fact]
+        public async Task UpdateSaaSResourceAsync_Updates_resource_at_subscriptionLevel_when_operation_returns_InProgress_Async()
+        {
+            var resourceName = $"test-{Guid.NewGuid()}";
+            var resourceGroup = "saas-test";
+            var marketplaceOfferDetail = CreateSaasResourceProperties(resourceName);
+
+            var saasResource = new BaseOperationResponse()
+            {
+                SubscriptionDetails = new MarketplaceSubscriptionDetails()
+                {
+                    Name = resourceName,
+                    Id = Guid.NewGuid().ToString(),
+                },
+                Status = OperationStatus.Succeeded,
+            };
+
+            var operationLocation = "https://mockoperationlocation.com";
+
+            using var handler = new MockHttpMessageHandler(saasResource, operationLocation, true);
+            using var httpClient = new HttpClient(handler, false);
+            _httpClientFactory.Setup(client => client.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            _marketplaceRestClient = new MarketplaceRestClient(_marketplaceEndpoint, _version, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
+            var armClient = new MarketplaceARMClient(_marketplaceRestClient);
+
+            var updatedResource = await armClient.UpdateSaaSResourceAsync("a4ff2ab3-5e1c-4926-ca32-c9d52350608a", resourceGroup, resourceName, _marketplaceRequestMetadata, new MarketplaceSaasResourceProperties());
+
+            Assert.Equal(updatedResource.Id, saasResource.SubscriptionDetails.Id);
+        }
+
+        [Fact]
         public async Task DeleteSaaSResourceAsync_Deletes_resource_at_subscriptionLevel_with_polling_Async()
         {
             var resourceName = $"test-{Guid.NewGuid()}";
@@ -412,6 +484,10 @@ namespace Microsoft.Liftr.Marketplace.ARM.Tests
                     }
                 }
                 else if (request.RequestUri.ToString().OrdinalContains("saasresources") && request.Method == HttpMethod.Put)
+                {
+                    response = MockAsyncOperationHelper.AcceptedResponseWithOperationLocation(_operationLocation);
+                }
+                else if (request.RequestUri.ToString().OrdinalContains("resources") && !request.RequestUri.ToString().OrdinalContains("/migrateFromTenant") && request.Method == HttpMethod.Patch)
                 {
                     response = MockAsyncOperationHelper.AcceptedResponseWithOperationLocation(_operationLocation);
                 }
