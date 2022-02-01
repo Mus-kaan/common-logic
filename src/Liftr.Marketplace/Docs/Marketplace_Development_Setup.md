@@ -18,9 +18,9 @@ This involves adding the `offer_id` of your marketplace offer to a list of offer
 ## How to allowlist Marketplace offer with publishing team
 
 This involves changing the properties of your offer by adding `HideFromSaasBlade=True` flag that allows the saas resource to be created as a liftr offer.
-- Create an ICM ticket to Marketplace Pubishing Team to add this flag. This should be done on the live offer. Set **OWNING TEAM - CPX-MIX- Ingestion Publishing Service**
+1. Create an ICM ticket to Marketplace Pubishing Team to add this flag. This should be done on the live offer. Set **OWNING TEAM - CPX-MIX-Ingestion Publishing Service**
 
-- You can also request that `DoNotSendEmail=True` flag to be set on your offer if you do not wish to receive an email every time a new saas resouce is purchased.
+2. Create an ICM ticket to Marketplace Pubishing Team to add `disableSendEmailOnPurchase=True` flag on your offer to disable receiving an email every time a new saas resouce is purchased. (Should be done for Liftr offers)
 
 - See example [ICM Ticket](https://portal.microsofticm.com/imp/v3/incidents/details/270693746/home)
 
