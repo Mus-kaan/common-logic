@@ -81,9 +81,9 @@ namespace Liftr.Monitoring.VNext.Tests
             var mockAzureClientsProviderOptions = new Mock<AzureClientsProviderOptions>().Object;
             var kvClient = new Mock<IKeyVaultClient>().Object;
             var mockLogger = new Mock<ILogger>().Object;
-            #pragma warning disable CA2000 // Dispose objects before losing scope
+#pragma warning disable CA2000 // Dispose objects before losing scope
             return new ArmClient(mockAzureClientsProviderOptions, new CertificateStore(kvClient, mockLogger), new HttpClient(), mockLogger);
-            #pragma warning restore CA2000 // Dispose objects before losing scope
+#pragma warning restore CA2000 // Dispose objects before losing scope
         }
     }
 }

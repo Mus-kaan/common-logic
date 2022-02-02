@@ -20,7 +20,7 @@ namespace Microsoft.Liftr.IdempotentRPWorker.Contracts
 
         public RPWorkerQueueCommandEnum WorkerCommand { get; private set; }
 
-        public string TenantId { get;  set; }
+        public string TenantId { get; set; }
 
         public string SubscriptionId { get; set; }
 

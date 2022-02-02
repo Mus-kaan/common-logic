@@ -20,7 +20,7 @@ namespace Microsoft.Liftr.Fluent.Tests
         {
         }
 
-        [Fact(Skip ="Used for local development")]
+        [Fact(Skip = "Used for local development")]
         public async Task VerifyDatabaseCreationAsync()
         {
             var objectId = ObjectId.GenerateNewId().ToString();

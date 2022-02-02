@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Liftr.Monitoring.VNext.Whale.Models
 {
-    public  class DiagnosticSettingsCategoryResourceList
+    public class DiagnosticSettingsCategoryResourceList
     {
         public List<DiagnosticSettingsCategoryResource> Value { get; set; }
     }

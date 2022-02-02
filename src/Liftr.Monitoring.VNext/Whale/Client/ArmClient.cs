@@ -37,7 +37,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.Whale.Client
             ILogger logger)
         {
             _azureClientsProviderOptions = azureClientsProviderOptions ?? throw new ArgumentNullException(nameof(azureClientsProviderOptions));
-            if(certificateStore == null)
+            if (certificateStore == null)
             {
                 throw new ArgumentNullException(nameof(certificateStore));
             }
@@ -141,17 +141,17 @@ namespace Microsoft.Liftr.Monitoring.VNext.Whale.Client
                 throw new ArgumentException($"'{nameof(tenantId)}' cannot be null or empty.", nameof(tenantId));
             }
 
-            var accessToken = await _tokenManager.GetTokenAsync(_azureClientsProviderOptions.KeyVaultEndpoint, 
+            var accessToken = await _tokenManager.GetTokenAsync(_azureClientsProviderOptions.KeyVaultEndpoint,
                 _azureClientsProviderOptions.ClientId,
                 _azureClientsProviderOptions.CertificateName,
-                tenantId, 
+                tenantId,
                 sendX5c: true);
-            
+
             if (accessToken == null)
             {
                 throw new InvalidOperationException($"Unable to obtain token for FPA {_azureClientsProviderOptions.ClientId}");
             }
-            
+
             var request = new HttpRequestMessage(httpMethod, url);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 

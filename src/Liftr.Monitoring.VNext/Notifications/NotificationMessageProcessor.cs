@@ -96,7 +96,7 @@ namespace Microsoft.Liftr.Monitoring.Notifications
                 _logger.Information("Notification Event is of type `Write`");
                 var prefixedProviderName = _dsNameProvider.GetPrefixedResourceProviderName();
                 var prefixedProviderNameObservability = _dsNameProvider.GetPrefixedWithObservabilityResourceProviderName();
-                return !string.IsNullOrEmpty(monitorId) && 
+                return !string.IsNullOrEmpty(monitorId) &&
                     (monitorId.OrdinalContains(prefixedProviderName) || monitorId.OrdinalContains(prefixedProviderNameObservability)) ? monitorId : null;
             }
 

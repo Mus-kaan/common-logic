@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>$(LiftrClassLibraryTargetFramework)</TargetFramework>
     <IsPackable>true</IsPackable>
@@ -19,5 +18,4 @@
     <ProjectReference Include="..\Liftr.RPaaS\Liftr.RPaaS.csproj" />
     <ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
   </ItemGroup>
-
 </Project>

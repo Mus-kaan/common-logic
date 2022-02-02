@@ -27,7 +27,7 @@ namespace Microsoft.Liftr.PerformanceTelemetry
         /// <exception cref="ArgumentNullException"></exception>
         public static void OperationDetails(MainOperationNameBaseType mainOperationName, Partners partner, UniqueIdentifierTypes uniqueIdentifierType, string uniqueIdentifierId, OperationTypes operationType, SubOperationNameBaseType subOperationName, Statuses status, ILogger logger)
         {
-            if(mainOperationName is null)
+            if (mainOperationName is null)
             {
                 throw new ArgumentNullException(nameof(mainOperationName), $"Please provide valid {nameof(mainOperationName)}");
             }
@@ -43,7 +43,7 @@ namespace Microsoft.Liftr.PerformanceTelemetry
             }
 
             string subOperationVal = null;
-            if(subOperationName != null)
+            if (subOperationName != null)
             {
                 subOperationVal = subOperationName.Value;
             }

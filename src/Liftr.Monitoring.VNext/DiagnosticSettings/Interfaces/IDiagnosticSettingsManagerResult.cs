@@ -10,7 +10,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Interfaces
 {
     public interface IDiagnosticSettingsManagerResult
     {
-        bool SuccessfulOperation { get;  }
+        bool SuccessfulOperation { get; }
 
         /// <summary>
         /// The reason for the operation status, in case of adding a diagnostic setting.

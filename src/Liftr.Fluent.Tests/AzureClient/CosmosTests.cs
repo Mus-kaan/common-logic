@@ -8,7 +8,6 @@ using Microsoft.Liftr.DataSource.Mongo;
 using Microsoft.Liftr.DataSource.Mongo.MonitoringSvc;
 using Microsoft.Liftr.DataSource.Mongo.Tests.Common;
 using Microsoft.Liftr.DataSource.Mongo.Tests.MonitoringSvc;
-using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Tests;
 using Microsoft.Liftr.Tests.Utilities.Trait;
 using System;

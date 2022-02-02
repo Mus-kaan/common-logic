@@ -18,7 +18,7 @@ namespace Liftr.Monitoring.VNext.DiagnosticSettings
         {
             DiagnosticNamePrefix = monitoringResourceProvider.ToString().ToUpperInvariant();
             PrefixedResourceProvider = "providers/Microsoft." + monitoringResourceProvider.ToString();
-            PrefixedResourceProviderObservability = "providers/"+ monitoringResourceProvider.ToString()+".Observability";
+            PrefixedResourceProviderObservability = "providers/" + monitoringResourceProvider.ToString() + ".Observability";
         }
 
         public string GetDiagnosticSettingNameForResourceV2()

@@ -42,9 +42,9 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model.Builders
 
             var res = new List<DiagnosticSettingsLogsOrMetricsModel>();
             var categories = await GetLogsCategoriesForResourceAsync(_armClient, monitoredResourceId, DiagnosticSettingsV2ApiVersion, tenantId);
-            
+
             _logger.Information("Log categories for resource {@monitoredResourceId}. Categories: {@categories}", monitoredResourceId, categories);
-            
+
             return categories.Select(category =>
             {
                 var logCategory = new DiagnosticSettingsLogsOrMetricsModel
@@ -63,7 +63,8 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model.Builders
 
             List<DiagnosticSettingsCategoryResource> logCategories = null;
 
-            if (logCategories == null) {
+            if (logCategories == null)
+            {
                 DiagnosticSettingsCategoryResourceList categories = await ListCategoriesByResourceAsync(_armClient, resourceId, DiagnosticSettingsV2ApiVersion, tenantId) ?? new DiagnosticSettingsCategoryResourceList();
                 List<DiagnosticSettingsCategoryResource> categoriesValue = categories.Value;
                 logCategories = categoriesValue.Where(c => c.Properties.CategoryType.Equals(CategoryType.Logs)).ToList();
@@ -100,7 +101,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model.Builders
             string armDiagnosticSettingsCategoryList = Constants.ArmDiagnosticSettingsCategoryList;
             string response = await _armClient.GetResourceAsync(resourceId + armDiagnosticSettingsCategoryList, apiVersion, tenantId);
             _logger.Information($"Finished getting list of categories for resource: {resourceId}. Categories: {response}");
-            
+
             return JsonConvert.DeserializeObject<DiagnosticSettingsCategoryResourceList>(response);
         }
 

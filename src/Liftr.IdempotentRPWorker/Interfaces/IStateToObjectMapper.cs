@@ -2,8 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Liftr.IdempotentRPWorker;
-
 namespace Microsoft.Liftr.IdempotentRPWorker.Interfaces
 {
     /// <summary>

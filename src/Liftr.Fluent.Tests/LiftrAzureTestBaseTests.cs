@@ -28,7 +28,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             Assert.Equal(AzureRegion.USWest2.Name, TestResourceGroup.Region.Name);
         }
 
-        [Fact(Skip ="Local only")]
+        [Fact(Skip = "Local only")]
         [DogfoodEastUS]
         public void DogfoodEastUSTest()
         {

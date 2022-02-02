@@ -3,15 +3,8 @@
 //-----------------------------------------------------------------------------
 using Microsoft.Liftr.IdempotentRPWorker;
 using Microsoft.Liftr.IdempotentRPWorker.Contracts;
-using Microsoft.Liftr.IdempotentRPWorker.Interfaces;
 using Microsoft.Liftr.IdempotentRPWorker.Service;
-using Microsoft.Liftr.IdempotentRPWorker.Utils;
-using Moq;
-using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Liftr.IdempotentRPWorker.Tests

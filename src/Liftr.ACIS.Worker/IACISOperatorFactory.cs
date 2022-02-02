@@ -6,6 +6,6 @@ namespace Microsoft.Liftr.ACIS.Worker
 {
     public interface IACISOperatorFactory
     {
-       IACISOperationProcessor GetOperator(string OperationName);
+        IACISOperationProcessor GetOperator(string OperationName);
     }
 }

@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Liftr.IdempotentRPWorker;
 using Microsoft.Liftr.IdempotentRPWorker.Contracts;
 using Microsoft.Liftr.IdempotentRPWorker.Interfaces;
 using System.Collections.Generic;
