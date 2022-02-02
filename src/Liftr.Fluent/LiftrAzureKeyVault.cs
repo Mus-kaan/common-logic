@@ -96,6 +96,25 @@ namespace Microsoft.Liftr.Fluent
             await helper.WithAccessFromNetworkAsync(vault, this, ipList, subnetList, cancellationToken, removeExistingIPs);
         }
 
+        public async Task TurnOffKeyVaultVNetAsync(
+            IVault vault,
+            CancellationToken cancellationToken = default)
+        {
+            if (vault == null)
+            {
+                throw new ArgumentNullException(nameof(vault));
+            }
+
+            if (vault?.Inner?.Properties?.NetworkAcls?.DefaultAction != NetworkRuleAction.Deny)
+            {
+                _logger.Information("VNet since Network isolation is not enabled for key vault {kvId}", vault.Id);
+                return;
+            }
+
+            var helper = new KeyVaultHelper(_logger);
+            await helper.TurnOffKeyVaultNetworkRestrictionAsync(vault, this, cancellationToken);
+        }
+
         public async Task<IVault> CreateKeyVaultAsync(
             Region location,
             string rgName,

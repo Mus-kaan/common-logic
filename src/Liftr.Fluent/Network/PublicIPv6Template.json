@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "resources": [
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2019-02-01",
+      "name": "WILL_BE_CHANGED public ip name",
+      "location": "WILL_BE_CHANGED westus",
+      "tags": {
+        "WILL_BE_CHANGED_displayName": "tag value"
+      },
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "publicIPAddressVersion": "IPv6",
+        "dnsSettings": {
+          "domainNameLabel": "WILL_BE_CHANGED public ip name"
+        }
+      }
+    }
+  ]
+}

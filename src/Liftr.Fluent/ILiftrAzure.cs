@@ -15,6 +15,7 @@ using Microsoft.Azure.Management.Monitor.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Network.Fluent.Models;
+using Microsoft.Azure.Management.Network.Models;
 using Microsoft.Azure.Management.Redis.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
@@ -54,6 +55,8 @@ namespace Microsoft.Liftr.Fluent
         string SPNObjectId { get; }
 
         string DefaultSubnetName { get; }
+
+        string PrivateEndpointProxySubnetName { get; }
 
         bool IsAMETenant();
 
@@ -248,7 +251,17 @@ namespace Microsoft.Liftr.Fluent
             string nsgId = null,
             CancellationToken cancellationToken = default);
 
+        Task<Subnet> CreateIPv6SubnetAsync(
+            INetwork vnet,
+            string subnetName,
+            INetworkSecurityGroup nsg,
+            string ipv4AddressPrefix,
+            string ipv6AddressPrefix,
+            CancellationToken cancellationToken = default);
+
         Task<ISubnet> GetSubnetAsync(string subnetId, CancellationToken cancellationToken = default);
+
+        Task<Subnet> GetIPv6SubnetAsync(INetwork vnet, string subnetName, CancellationToken cancellationToken = default);
 
         Task<IPublicIPAddress> GetOrCreatePublicIPAsync(
             Region location,
@@ -258,6 +271,13 @@ namespace Microsoft.Liftr.Fluent
             PublicIPSkuType skuType = null,
             CancellationToken cancellationToken = default);
 
+        Task<IPublicIPAddress> GetOrCreatePublicIPv6Async(
+            Region location,
+            string rgName,
+            string pipName,
+            IDictionary<string, string> tags,
+            CancellationToken cancellationToken = default);
+
         Task<IPublicIPAddress> CreatePublicIPAsync(
             Region location,
             string rgName,
@@ -265,6 +285,13 @@ namespace Microsoft.Liftr.Fluent
             IDictionary<string, string> tags,
             PublicIPSkuType skuType = null,
             CancellationToken cancellationToken = default);
+
+        Task<IPublicIPAddress> CreatePublicIPv6Async(
+           Region location,
+           string rgName,
+           string pipName,
+           IDictionary<string, string> tags,
+           CancellationToken cancellationToken = default);
 
         Task<IPublicIPAddress> GetPublicIPAsync(
             string rgName,
@@ -357,6 +384,10 @@ namespace Microsoft.Liftr.Fluent
             IEnumerable<string> subnetList,
             bool enableVNetFilter = true,
             bool removeExistingIPs = true,
+            CancellationToken cancellationToken = default);
+
+        Task TurnOffKeyVaultVNetAsync(
+            IVault vault,
             CancellationToken cancellationToken = default);
 
         Task RemoveAccessPolicyAsync(string kvResourceId, string servicePrincipalObjectId, CancellationToken cancellationToken = default);

@@ -5,6 +5,7 @@
 using Microsoft.Azure.Management.Dns.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Network.Fluent.Models;
+using Microsoft.Azure.Management.Network.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.TrafficManager.Fluent;
 using System;
@@ -18,6 +19,13 @@ namespace Microsoft.Liftr.Fluent
 {
     internal partial class LiftrAzure
     {
+        public const string c_vnetAddressSpace = "10.66.0.0/16";                // 10.66.0.0 - 10.66.255.255 (65536 addresses)
+        public const string c_defaultSubnetAddressSpace = "10.66.255.0/24";     // 10.66.255.0 - 10.66.255.255 (256 addresses)
+
+        public string DefaultSubnetName { get; } = "default";
+
+        public string PrivateEndpointProxySubnetName { get; } = "pe-proxy";
+
         #region Network
         public async Task<INetworkSecurityGroup> GetOrCreateDefaultNSGAsync(
             Region location,
@@ -147,8 +155,13 @@ namespace Microsoft.Liftr.Fluent
             }
 
             var oneSubnetPrefix = existingSubnets.FirstOrDefault().Value.AddressPrefix;
-            var nonDefaultSubnets = existingSubnets.Where(kvp => !kvp.Key.OrdinalEquals(DefaultSubnetName)).Select(kvp => kvp.Value);
-            var largestValue = nonDefaultSubnets
+
+            var nonReservedSubnets = existingSubnets
+                .Where(kvp => !kvp.Key.OrdinalEquals(DefaultSubnetName))
+                .Where(kvp => !kvp.Key.OrdinalEquals(PrivateEndpointProxySubnetName))
+                .Select(kvp => kvp.Value);
+
+            var largestValue = nonReservedSubnets
                 .Select(subnet => int.Parse(subnet.AddressPrefix.Split('.')[2], CultureInfo.InvariantCulture))
                 .OrderByDescending(i => i)
                 .FirstOrDefault();
@@ -177,6 +190,44 @@ namespace Microsoft.Liftr.Fluent
             return vnet.Subnets[subnetName];
         }
 
+        public async Task<Subnet> CreateIPv6SubnetAsync(
+            INetwork vnet,
+            string subnetName,
+            INetworkSecurityGroup nsg,
+            string ipv4AddressPrefix,
+            string ipv6AddressPrefix,
+            CancellationToken cancellationToken = default)
+        {
+            if (vnet == null)
+            {
+                throw new ArgumentNullException(nameof(vnet));
+            }
+
+            if (string.IsNullOrEmpty(subnetName))
+            {
+                throw new ArgumentNullException(nameof(subnetName));
+            }
+
+            if (nsg == null)
+            {
+                throw new ArgumentNullException(nameof(nsg));
+            }
+
+            if (string.IsNullOrEmpty(ipv4AddressPrefix))
+            {
+                throw new ArgumentNullException(nameof(ipv4AddressPrefix));
+            }
+
+            if (string.IsNullOrEmpty(ipv6AddressPrefix))
+            {
+                throw new ArgumentNullException(nameof(ipv6AddressPrefix));
+            }
+
+            await IPv6SubnetHelper.CreateIPv6SubnetAsync(this, vnet, subnetName, nsg, ipv4AddressPrefix, ipv6AddressPrefix, cancellationToken);
+
+            return await GetIPv6SubnetAsync(vnet, subnetName, cancellationToken);
+        }
+
         public async Task<ISubnet> GetSubnetAsync(string subnetId, CancellationToken cancellationToken = default)
         {
             var parsedSubnetId = new Liftr.Contracts.ResourceId(subnetId);
@@ -194,6 +245,11 @@ namespace Microsoft.Liftr.Fluent
             return null;
         }
 
+        public Task<Subnet> GetIPv6SubnetAsync(INetwork vnet, string subnetName, CancellationToken cancellationToken = default)
+        {
+            return IPv6SubnetHelper.GetSubnetAsync(this, vnet, subnetName, cancellationToken);
+        }
+
         public async Task<IPublicIPAddress> GetOrCreatePublicIPAsync(
             Region location,
             string rgName,
@@ -206,6 +262,22 @@ namespace Microsoft.Liftr.Fluent
             if (pip == null)
             {
                 pip = await CreatePublicIPAsync(location, rgName, pipName, tags, skuType, cancellationToken);
+            }
+
+            return pip;
+        }
+
+        public async Task<IPublicIPAddress> GetOrCreatePublicIPv6Async(
+            Region location,
+            string rgName,
+            string pipName,
+            IDictionary<string, string> tags,
+            CancellationToken cancellationToken = default)
+        {
+            var pip = await GetPublicIPAsync(rgName, pipName, cancellationToken);
+            if (pip == null)
+            {
+                pip = await CreatePublicIPv6Async(location, rgName, pipName, tags, cancellationToken);
             }
 
             return pip;
@@ -238,6 +310,24 @@ namespace Microsoft.Liftr.Fluent
                 .CreateAsync(cancellationToken);
 
             _logger.Information("Created Public IP address with resourceId: {resourceId}", pip.Id);
+            return pip;
+        }
+
+        public async Task<IPublicIPAddress> CreatePublicIPv6Async(
+            Region location,
+            string rgName,
+            string pipName,
+            IDictionary<string, string> tags,
+            CancellationToken cancellationToken = default)
+        {
+            _logger.Information("Start creating Public IPv6 address with name: {pipName} in RG: {rgName} ...", pipName, rgName);
+
+            var helper = new PublicIPv6Helper(_logger);
+            await helper.CreatePublicIPv6Async(this, location, rgName, pipName, tags);
+
+            var pip = await GetPublicIPAsync(rgName, pipName, cancellationToken);
+
+            _logger.Information("Created Public IPv6 address with resourceId: {resourceId}", pip.Id);
             return pip;
         }
 

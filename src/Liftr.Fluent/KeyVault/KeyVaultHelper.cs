@@ -51,7 +51,8 @@ namespace Microsoft.Liftr.Fluent
                 null,
                 null,
                 tags,
-                softDeleteRetentionInDays: 15);
+                softDeleteRetentionInDays: 15,
+                enableVNet: false);
 
             await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true, cancellationToken: cancellationToken);
 
@@ -99,7 +100,8 @@ namespace Microsoft.Liftr.Fluent
                     ips,
                     subnets,
                     tags,
-                    softDeleteRetentionInDays: 15);
+                    softDeleteRetentionInDays: 15,
+                    enableVNet: true);
 
                 await liftrAzure.CreateDeploymentAsync(location, rgName, templateContent, noLogging: true, cancellationToken: cancellationToken);
 
@@ -195,9 +197,72 @@ namespace Microsoft.Liftr.Fluent
                     ips,
                     subnets,
                     tags,
-                    softDeleteTime);
+                    softDeleteTime,
+                    enableVNet: true);
 
                 _logger.Information("Restricting Key Vault '{kvId}' to be accessible from IPs : '{@allowedIPs}', and subnets: '{@allowedSubnets}'", vault.Id, ips, subnets);
+                await liftrAzure.CreateDeploymentAsync(vault.Region, vault.ResourceGroupName, templateContent, noLogging: true, cancellationToken: cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Key Vault VNet restriction failed.");
+                ops.FailOperation(ex.Message);
+                throw;
+            }
+        }
+
+        public async Task TurnOffKeyVaultNetworkRestrictionAsync(
+            IVault vault,
+            ILiftrAzure liftrAzure,
+            CancellationToken cancellationToken)
+        {
+            using var ops = _logger.StartTimedOperation("TurnOffKeyVaultNetworkRestrictionAsync");
+            try
+            {
+                List<IPRule> ips = new List<IPRule>();
+                if (vault.Inner.Properties?.NetworkAcls?.IpRules != null)
+                {
+                    foreach (var ip in vault.Inner.Properties.NetworkAcls.IpRules)
+                    {
+                        ips.Add(ip);
+                    }
+                }
+
+                var subnets = new List<VirtualNetworkRule>();
+                if (vault.Inner.Properties?.NetworkAcls?.VirtualNetworkRules != null)
+                {
+                    foreach (var role in vault.Inner.Properties.NetworkAcls.VirtualNetworkRules)
+                    {
+                        subnets.Add(role);
+                    }
+                }
+
+                var tags = new Dictionary<string, string>();
+                foreach (var kvp in vault.Tags)
+                {
+                    tags[kvp.Key] = kvp.Value;
+                }
+
+                var accessPolicies = new List<AccessPolicyEntry>();
+                foreach (var policy in vault.AccessPolicies)
+                {
+                    accessPolicies.Add(policy.Inner);
+                }
+
+                var softDeleteTime = await GetSoftDeleteTimeAsync(vault, liftrAzure, cancellationToken);
+
+                var templateContent = GenerateKeyVaultTemplate(
+                    vault.Region,
+                    vault.Name,
+                    liftrAzure.TenantId,
+                    accessPolicies,
+                    ips,
+                    subnets,
+                    tags,
+                    softDeleteTime,
+                    enableVNet: false);
+
+                _logger.Information("Turning off Key Vault '{kvId}' network restrictions ...", vault.Id);
                 await liftrAzure.CreateDeploymentAsync(vault.Region, vault.ResourceGroupName, templateContent, noLogging: true, cancellationToken: cancellationToken);
             }
             catch (Exception ex)
@@ -223,7 +288,8 @@ namespace Microsoft.Liftr.Fluent
             IEnumerable<IPRule> ips,
             IEnumerable<VirtualNetworkRule> subnets,
             IDictionary<string, string> tags,
-            int softDeleteRetentionInDays)
+            int softDeleteRetentionInDays,
+            bool enableVNet)
         {
             // https://docs.microsoft.com/en-us/rest/api/keyvault/vaults/createorupdate#create-or-update-a-vault-with-network-acls
             if (location == null)
@@ -263,6 +329,10 @@ namespace Microsoft.Liftr.Fluent
             if (ips == null && subnets == null)
             {
                 props.networkAcls = null;
+            }
+            else
+            {
+                props.networkAcls.defaultAction = enableVNet ? "Deny" : "Allow";
             }
 
             return JsonConvert.SerializeObject(configObj, Formatting.Indented);

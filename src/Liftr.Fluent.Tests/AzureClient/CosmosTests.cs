@@ -27,12 +27,20 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [CheckInValidation(skipLinux: true)]
-        [PublicWestUS3]
+        [PublicWestCentralUS]
         public async Task CanCreateCosmosDBAsync()
         {
             var client = Client;
             var dbName = SdkContext.RandomResourceName("test-db", 15);
-            var dbAccount = await client.CreateCosmosDBAsync(Location, ResourceGroupName, dbName, TestCommon.Tags);
+            try
+            {
+                var dbAccount = await client.CreateCosmosDBAsync(Location, ResourceGroupName, dbName, TestCommon.Tags);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "create cosmos db failed");
+                throw;
+            }
 
             // Second deployment will not fail.
             var location = Location;

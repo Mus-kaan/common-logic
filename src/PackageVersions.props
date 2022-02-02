@@ -27,10 +27,11 @@
     <PackageVersion_Microsoft_Azure_Cosmos_Table>1.0.8</PackageVersion_Microsoft_Azure_Cosmos_Table>
     <PackageVersion_Microsoft_Azure_KeyVault>3.0.5</PackageVersion_Microsoft_Azure_KeyVault>
     <PackageVersion_Microsoft_Azure_KeyVault_Extensions>3.0.5</PackageVersion_Microsoft_Azure_KeyVault_Extensions>
+    <PackageVersion_Microsoft_Azure_Management_EventGrid>6.2.0-preview</PackageVersion_Microsoft_Azure_Management_EventGrid>
     <PackageVersion_Microsoft_Azure_Management_Fluent>1.38.0</PackageVersion_Microsoft_Azure_Management_Fluent>
+    <PackageVersion_Microsoft_Azure_Management_Network>21.0.0</PackageVersion_Microsoft_Azure_Management_Network>
     <PackageVersion_Microsoft_Azure_Management_PostgreSQL>0.9.5-preview</PackageVersion_Microsoft_Azure_Management_PostgreSQL>
     <PackageVersion_Microsoft_Azure_Management_ResourceGraph>2.0</PackageVersion_Microsoft_Azure_Management_ResourceGraph>
-    <PackageVersion_Microsoft_Azure_Management_EventGrid>6.2.0-preview</PackageVersion_Microsoft_Azure_Management_EventGrid>
     <PackageVersion_Microsoft_Azure_Services_AppAuthentication>1.5.0</PackageVersion_Microsoft_Azure_Services_AppAuthentication>
     <PackageVersion_Microsoft_Azure_Storage_Blob>11.1.5</PackageVersion_Microsoft_Azure_Storage_Blob>
     <PackageVersion_Microsoft_Azure_Storage_Queue>11.2.2</PackageVersion_Microsoft_Azure_Storage_Queue>

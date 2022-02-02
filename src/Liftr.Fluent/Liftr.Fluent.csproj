@@ -12,12 +12,13 @@
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="$(PackageVersion_Azure_Identity)" />
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="$(PackageVersion_Microsoft_Azure_KeyVault)" />
+    <PackageReference Include="Microsoft.Azure.Management.Network" Version="$(PackageVersion_Microsoft_Azure_Management_Network)" />
     <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="$(PackageVersion_Microsoft_Azure_Services_AppAuthentication)" />
     <PackageReference Include="Microsoft.CSharp" Version="$(PackageVersion_Microsoft_CSharp)" />
     <PackageReference Include="Polly.Contrib.WaitAndRetry" Version="$(PackageVersion_Polly_Contrib_WaitAndRetry)" />
     <PackageReference Include="Polly.Extensions.Http" Version="$(PackageVersion_Polly_Extensions_Http)" />
     <PackageReference Include="System.Text.Encodings.Web" Version="$(PackageVersion_System_Text_Encodings_Web)" />
-	  <PackageReference Include="Microsoft.Azure.Management.EventGrid" Version="$(PackageVersion_Microsoft_Azure_Management_EventGrid)" />
+    <PackageReference Include="Microsoft.Azure.Management.EventGrid" Version="$(PackageVersion_Microsoft_Azure_Management_EventGrid)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Fluent.Contracts\Liftr.Fluent.Contracts.csproj" />

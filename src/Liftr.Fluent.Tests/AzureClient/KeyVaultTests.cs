@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.Azure.Management.KeyVault.Fluent.Models;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Liftr.KeyVault;
 using System;
@@ -110,6 +111,14 @@ namespace Microsoft.Liftr.Fluent.Tests
                     kv = await kv.RefreshAsync();
                     Assert.Equal(2, kv.Inner.Properties.NetworkAcls.VirtualNetworkRules.Count);
                     Assert.Equal(1, kv.AccessPolicies.Count);
+
+                    // turn off VNet
+                    await azure.TurnOffKeyVaultVNetAsync(kv);
+
+                    kv = await kv.RefreshAsync();
+                    Assert.Equal(NetworkRuleAction.Allow, kv.Inner.Properties.NetworkAcls.DefaultAction);
+                    Assert.Equal(2, kv.Inner.Properties.NetworkAcls.VirtualNetworkRules.Count);
+                    Assert.Equal(1, kv.AccessPolicies.Count);
                 }
                 catch (Exception ex)
                 {
@@ -119,7 +128,7 @@ namespace Microsoft.Liftr.Fluent.Tests
             }
         }
 
-        [CheckInValidation(Skip = "Certificate creation is flacky recently.")]
+        [CheckInValidation(skipLinux: true)]
         public async Task CanCreateCertificateInKeyVaultAsync()
         {
             using (var scope = new TestResourceGroupScope("unittest-kv-", _output))
@@ -167,10 +176,9 @@ namespace Microsoft.Liftr.Fluent.Tests
                         var certName = SdkContext.RandomResourceName("ssl", 8);
                         var subjectName = certName + ".azliftr-test.io";
                         var subjectAlternativeNames = new List<string>() { "*." + subjectName };
-                        var certIssuerName = "one-cert-issuer";
 
-                        await valet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
-                        await valet.CreateCertificateAsync(certName, certIssuerName, subjectName, subjectAlternativeNames, TestCommon.Tags);
+                        await valet.SetCertificateIssuerAsync(KeyVaultConcierge.OneCertPublicIssuer, KeyVaultConcierge.OneCertPublicProvider);
+                        await valet.CreateCertificateAsync(certName, KeyVaultConcierge.OneCertPublicIssuer, subjectName, subjectAlternativeNames, TestCommon.Tags);
                         var cert = await valet.GetCertAsync(certName);
                     }
 
@@ -180,10 +188,9 @@ namespace Microsoft.Liftr.Fluent.Tests
                         var certName = SdkContext.RandomResourceName("ame", 8);
                         var subjectName = certName + ".liftr-dev.net";
                         var subjectAlternativeNames = new List<string>() { "*." + subjectName };
-                        var certIssuerName = "one-cert-issuer";
 
-                        await valet.SetCertificateIssuerAsync(certIssuerName, "OneCert");
-                        await valet.CreateCertificateAsync(certName, certIssuerName, subjectName, subjectAlternativeNames, TestCommon.Tags);
+                        await valet.SetCertificateIssuerAsync(KeyVaultConcierge.OneCertPrivateIssuer, KeyVaultConcierge.OneCertPrivateProvider);
+                        await valet.CreateCertificateAsync(certName, KeyVaultConcierge.OneCertPrivateIssuer, subjectName, subjectAlternativeNames, TestCommon.Tags);
                         var cert = await valet.GetCertAsync(certName);
                     }
 

@@ -74,7 +74,7 @@ namespace Microsoft.Liftr
                 return storageAccount;
             }
 
-            if (storageAccount.Inner.NetworkRuleSet.DefaultAction == DefaultAction.Allow)
+            if (enableVNetFilter && storageAccount.Inner.NetworkRuleSet.DefaultAction == DefaultAction.Allow)
             {
                 storageAccount = await storageAccount.Update()
                     .WithAccessFromSelectedNetworks()
@@ -105,7 +105,7 @@ namespace Microsoft.Liftr
                 return storageAccount;
             }
 
-            if (storageAccount.Inner.NetworkRuleSet.DefaultAction == DefaultAction.Allow)
+            if (enableVNetFilter && storageAccount.Inner.NetworkRuleSet.DefaultAction == DefaultAction.Allow)
             {
                 storageAccount = await storageAccount.Update()
                     .WithAccessFromSelectedNetworks()
@@ -168,6 +168,28 @@ namespace Microsoft.Liftr
             }
 
             return await update.ApplyAsync();
+        }
+
+        public static async Task<IStorageAccount> TurnOffVNetAsync(this IStorageAccount storageAccount, Serilog.ILogger logger)
+        {
+            if (storageAccount == null)
+            {
+                throw new ArgumentNullException(nameof(storageAccount));
+            }
+
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
+
+            if (storageAccount.Inner?.NetworkRuleSet?.DefaultAction == DefaultAction.Allow)
+            {
+                logger.Information("Skip turning off VNet of storage account with Id '{storageId}' since the Network filter is not enabled.", storageAccount.Id);
+                return storageAccount;
+            }
+
+            logger.Information("Turning off VNet of storage account with Id '{storageId}'.", storageAccount.Id);
+            return await storageAccount.Update().WithAccessFromAllNetworks().ApplyAsync();
         }
     }
 }

@@ -46,8 +46,6 @@ namespace Microsoft.Liftr.Fluent
     /// </summary>
     internal partial class LiftrAzure : ILiftrAzure
     {
-        public const string c_vnetAddressSpace = "10.66.0.0/16";                // 10.66.0.0 - 10.66.255.255 (65536 addresses)
-        public const string c_defaultSubnetAddressSpace = "10.66.255.0/24";     // 10.66.255.0 - 10.66.255.255 (256 addresses)
         public const string c_AspEnv = "ASPNETCORE_ENVIRONMENT";
         private readonly LiftrAzureOptions _options;
         private readonly ILogger _logger;
@@ -79,8 +77,6 @@ namespace Microsoft.Liftr.Fluent
         public string DefaultSubscriptionId { get; }
 
         public string SPNObjectId { get; }
-
-        public string DefaultSubnetName { get; } = "default";
 
         public Serilog.ILogger Logger => _logger;
 
