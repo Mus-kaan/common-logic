@@ -158,7 +158,6 @@ $Helm upgrade $helmReleaseName kube-prometheus-stack-*.tgz --install --wait \
 --set alertmanager.alertmanagerSpec.image.repository="$liftrACRURI/prometheus/alertmanager" \
 --set prometheusOperator.admissionWebhooks.patch.image.repository="$liftrACRURI/jettech/kube-webhook-certgen" \
 --set prometheusOperator.image.repository="$liftrACRURI/prometheus-operator/prometheus-operator" \
---set prometheusOperator.configmapReloadImage.repository="$liftrACRURI/jimmidyson/configmap-reload" \
 --set prometheusOperator.prometheusConfigReloaderImage.repository="$liftrACRURI/prometheus-operator/prometheus-config-reloader" \
 --set prometheus.prometheusSpec.image.repository="$liftrACRURI/prometheus/prometheus" \
 --set kube-state-metrics.image.repository="$liftrACRURI/kube-state-metrics/kube-state-metrics" \

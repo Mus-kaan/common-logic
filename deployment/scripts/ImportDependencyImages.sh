@@ -109,9 +109,6 @@ az acr import --name "$ACRName" --source quay.io/prometheus-operator/prometheus-
 echo "import quay.io/thanos/thanos:v0.23.1"
 az acr import --name "$ACRName" --source quay.io/thanos/thanos:v0.23.1 --force
 
-echo "import docker.io/jimmidyson/configmap-reload:v0.4.0"
-az acr import --name "$ACRName" --source docker.io/jimmidyson/configmap-reload:v0.4.0 --force
-
 echo "import quay.io/prometheus-operator/prometheus-config-reloader:v0.53.1"
 az acr import --name "$ACRName" --source quay.io/prometheus-operator/prometheus-config-reloader:v0.53.1 --force
 
