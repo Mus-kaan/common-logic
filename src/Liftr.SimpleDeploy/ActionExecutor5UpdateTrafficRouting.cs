@@ -10,7 +10,6 @@ using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
 using Microsoft.Liftr.Hosting.Contracts;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.SimpleDeploy
@@ -29,7 +28,6 @@ namespace Microsoft.Liftr.SimpleDeploy
             var infra = new InfrastructureV2(azFactory, kvClient, _logger);
             var globalNamingContext = new NamingContext(_hostingOptions.PartnerName, _hostingOptions.ShortPartnerName, targetOptions.EnvironmentName, targetOptions.Global.Location);
             var globalRGName = globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
-            File.WriteAllText("global-vault-name.txt", globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
 
             var parsedRegionInfo = GetRegionalOptions(targetOptions);
             var regionOptions = parsedRegionInfo.RegionOptions;

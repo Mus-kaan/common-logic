@@ -7,7 +7,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Liftr.Fluent;
 using Microsoft.Liftr.Fluent.Provisioning;
 using Microsoft.Liftr.Hosting.Contracts;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.SimpleDeploy
@@ -18,7 +17,6 @@ namespace Microsoft.Liftr.SimpleDeploy
         {
             var infra = new InfrastructureV2(azFactory, kvClient, _logger);
             var globalRGName = _globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
-            File.WriteAllText("global-vault-name.txt", _globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
 
             if (targetOptions.IPPerRegion > 0)
             {

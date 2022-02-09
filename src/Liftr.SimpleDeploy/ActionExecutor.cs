@@ -238,6 +238,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                     _callBackConfigs.GlobalNamingContext = _globalNamingContext;
                     var globalRGName = _globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
                     File.WriteAllText("global-vault-name.txt", _globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
+                    File.WriteAllText("global-rg.txt", globalRGName);
 
                     var ipNamePrefix = _globalNamingContext.GenerateCommonName(targetOptions.Global.BaseName, noRegion: true);
                     _ipPool = new IPPoolManager(ipNamePrefix, targetOptions.IsAKS, azFactory, _logger);

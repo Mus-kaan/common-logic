@@ -20,8 +20,6 @@ namespace Microsoft.Liftr.SimpleDeploy
         {
             var liftrAzure = azFactory.GenerateLiftrAzure();
             var infra = new InfrastructureV2(azFactory, kvClient, _logger);
-            var globalRGName = _globalNamingContext.ResourceGroupName(targetOptions.Global.BaseName);
-            File.WriteAllText("global-vault-name.txt", _globalNamingContext.KeyVaultName(targetOptions.Global.BaseName));
 
             var parsedRegionInfo = GetRegionalOptions(targetOptions);
             var regionOptions = parsedRegionInfo.RegionOptions;
