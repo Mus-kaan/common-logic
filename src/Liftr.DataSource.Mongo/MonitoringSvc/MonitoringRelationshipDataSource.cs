@@ -42,10 +42,10 @@ namespace Microsoft.Liftr.DataSource.Mongo.MonitoringSvc
                     throw new ArgumentException($"'{nameof(entity.TenantId)}' cannot be empty.");
                 }
 
-                if (!ResourceId.TryParse(entity.MonitoredResourceId, out _) &&
-                    !entity.MonitoredResourceId.OrdinalStartsWith("/SUBSCRIPTIONS/"))
+                // removing the resource id limitation to support tenant because it won't adhere to the resourceid format
+                if (string.IsNullOrEmpty(entity.MonitoredResourceId))
                 {
-                    throw new ArgumentException($"'{nameof(entity.MonitoredResourceId)}' '{entity.MonitoredResourceId}' is not in valid format.");
+                    throw new ArgumentException($"'{nameof(entity.MonitoredResourceId)}' cannot be empty.");
                 }
 
                 if (!ObjectId.TryParse(entity.PartnerEntityId, out _))

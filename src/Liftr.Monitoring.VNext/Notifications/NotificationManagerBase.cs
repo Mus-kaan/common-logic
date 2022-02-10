@@ -53,7 +53,7 @@ namespace Microsoft.Liftr.Monitoring.Notifications
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task ProcessNotificationAsync(string diagnosticSettingsId, string monitorId, string tenantId, string operationType)
+        public virtual async Task ProcessNotificationAsync(string diagnosticSettingsId, string monitorId, string tenantId, string operationType)
         {
             if (diagnosticSettingsId == null)
             {
@@ -259,7 +259,7 @@ namespace Microsoft.Liftr.Monitoring.Notifications
             }
         }
 
-        private async Task AddDBEntitiesIfNeededAsync(MonitoringRelationshipModel relationshipModel, ITimedOperation operation)
+        protected async Task AddDBEntitiesIfNeededAsync(MonitoringRelationshipModel relationshipModel, ITimedOperation operation)
         {
             if (relationshipModel == null)
             {
@@ -318,7 +318,7 @@ namespace Microsoft.Liftr.Monitoring.Notifications
             }
         }
 
-        private async Task DeleteRelationshipEntityOfDeletedUserDiagnosticSettingsAsync(MonitoringRelationshipModel relationshipModel, ITimedOperation operation)
+        protected async Task DeleteRelationshipEntityOfDeletedUserDiagnosticSettingsAsync(MonitoringRelationshipModel relationshipModel, ITimedOperation operation)
         {
             if (relationshipModel == null)
             {

@@ -49,5 +49,19 @@ namespace Liftr.Monitoring.VNext.Tests
             var dsName = _helper.BuildDiagnosticSettingsID(VNextTestConstants.AcrId, "DS01");
             Assert.Equal("/subscriptions/db854c4a-c5d8-4dad-955c-0d30d1869217/resourcegroups/unittestsrg/providers/microsoft.containerregistry/registries/vnextacr01/providers/Microsoft.Datadog/ds01", dsName);
         }
+
+        [Fact]
+        public void ExtractDiagnosticSettingsNameForAAD()
+        {
+            var dsName = _helper.ExtractDiagnosticSettingsNameForAAD(VNextTestConstants.TenantDiagnosticSettingIDExample);
+            Assert.Equal("vakuncha0941", dsName);
+        }
+
+        [Fact]
+        public void DoesDiagnosticSettingsBelongToTenant()
+        {
+            var isTenantDS = _helper.DoesDiagnosticSettingsBelongToTenant(VNextTestConstants.TenantDiagnosticSettingIDExample);
+            Assert.True(isTenantDS);
+        }
     }
 }

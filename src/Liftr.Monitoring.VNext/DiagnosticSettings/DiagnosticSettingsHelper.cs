@@ -12,6 +12,7 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings
     public class DiagnosticSettingsHelper
     {
         private const string DiagnosticSettingsProvider = "/providers/microsoft.insights/diagnosticSettings";
+        public const string TenantDiagnosticSettingsProvider = "/providers/microsoft.aadiam/diagnosticSettings";
         private readonly IDiagnosticSettingsNameProvider _dsNameProvider;
         private readonly ILogger _logger;
 
@@ -63,6 +64,27 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings
             return DiagnosticSettingsName;
         }
 
+        public string ExtractDiagnosticSettingsNameForAAD(string diagnosticSettingsId)
+        {
+            if (string.IsNullOrWhiteSpace(diagnosticSettingsId))
+            {
+                throw new ArgumentNullException(nameof(diagnosticSettingsId));
+            }
+
+            _logger.Information("Extracting DiagnosticSettingsName for AAD Diagnostic Settings {diagnosticSettingsId}.", diagnosticSettingsId);
+            var ind = diagnosticSettingsId.IndexOf(TenantDiagnosticSettingsProvider, StringComparison.OrdinalIgnoreCase);
+
+            if (ind == -1)
+            {
+                throw new FormatException("Invalid Diagnostic Settings ID format");
+            }
+
+            var DiagnosticSettingsName = diagnosticSettingsId.Substring(ind + TenantDiagnosticSettingsProvider.Length + 1);
+
+            _logger.Information("Finished extracting DiagnosticSettingsName for aad Diagnostic Settings {diagnosticSettingsId}. Value is {DiagnosticSettingsName}", diagnosticSettingsId, DiagnosticSettingsName);
+            return DiagnosticSettingsName;
+        }
+
         public bool DoesDiagnosticSettingsBelongToSubscription(string diagnosticSettingsId)
         {
             if (string.IsNullOrWhiteSpace(diagnosticSettingsId))
@@ -73,6 +95,15 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings
             string monitoredResourceId = ExtractMonitoredResourceId(diagnosticSettingsId);
             var parsedResourceId = new ResourceId(monitoredResourceId);
             return monitoredResourceId.EndsWith(parsedResourceId.SubscriptionId, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public bool DoesDiagnosticSettingsBelongToTenant(string diagnosticSettingsId)
+        {
+            if (string.IsNullOrWhiteSpace(diagnosticSettingsId))
+            {
+                throw new ArgumentNullException(nameof(diagnosticSettingsId));
+            }
+            return diagnosticSettingsId.Contains(TenantDiagnosticSettingsProvider, StringComparison.OrdinalIgnoreCase);
         }
 
         public string ExtractFullyQualifiedResourceProviderType(string resourceId)

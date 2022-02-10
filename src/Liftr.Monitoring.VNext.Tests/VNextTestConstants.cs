@@ -14,6 +14,8 @@ namespace Liftr.Monitoring.VNext.Tests
         // Used to test Get DS operations
         public const string AcrId = "/subscriptions/db854c4a-c5d8-4dad-955c-0d30d1869217/resourceGroups/UnitTestsRG/providers/Microsoft.ContainerRegistry/registries/VNextACR01";
 
+        public const string TenantDiagnosticSettingIDExample = "/providers/microsoft.aadiam/diagnosticSettings/vakuncha0941";
+
         // Used to test Create/Delete DS operations
         public const string CreateAcrId = "/subscriptions/db854c4a-c5d8-4dad-955c-0d30d1869217/resourceGroups/UnitTestsRG/providers/Microsoft.ContainerRegistry/registries/VNextACR01Create";
         public const string ResourceDiagnosticSettingsId = "/subscriptions/db854c4a-c5d8-4dad-955c-0d30d1869217/resourceGroups/UnitTestsRG/providers/Microsoft.ContainerRegistry/registries/VNextACR01/providers/microsoft.insights/diagnosticSettings/VNextDS_01";
