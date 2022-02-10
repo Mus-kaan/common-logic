@@ -30,6 +30,8 @@ namespace Microsoft.Liftr.Fluent.Tests
         [PublicWestUS3]
         public async Task VerifyDataAndAKSAvailabilityZoneSupportAsync()
         {
+            using var tmLock = await AcquireTrafficManaderTestLockAsync();
+
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);
             var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Location);
             TestCommon.AddCommonTags(context.Tags);

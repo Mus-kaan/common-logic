@@ -6,6 +6,8 @@ using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
+using Microsoft.Liftr.Tests;
+using Microsoft.Liftr.Tests.Utilities.Trait;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -17,18 +19,22 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Fluent.Tests
 {
-    public sealed class InfraV2RegionalDataRGTests
+    public sealed class InfraV2RegionalDataRGTests : LiftrAzureTestBase
     {
         private readonly ITestOutputHelper _output;
 
         public InfraV2RegionalDataRGTests(ITestOutputHelper output)
+            : base(output)
         {
             _output = output;
         }
 
         [CheckInValidation(skipLinux: true)]
+        [PublicWestUS]
         public async Task VerifyRegionalDataResourceCreationAsync()
         {
+            using var tmLock = await AcquireTrafficManaderTestLockAsync();
+
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);
             var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USWest);
             TestCommon.AddCommonTags(context.Tags);
@@ -45,8 +51,8 @@ namespace Microsoft.Liftr.Fluent.Tests
             {
                 try
                 {
-                    var infra = new InfrastructureV2(regionalDataScope.AzFactory, TestCredentials.KeyVaultClient, regionalDataScope.Logger);
-                    var client = regionalDataScope.Client;
+                    var infra = new InfrastructureV2(AzFactory, TestCredentials.KeyVaultClient, regionalDataScope.Logger);
+                    var client = Client;
 
                     await client.GetOrCreateResourceGroupAsync(context.Location, rgName, context.Tags);
 
@@ -82,8 +88,11 @@ namespace Microsoft.Liftr.Fluent.Tests
         }
 
         [CheckInValidation(skipLinux: true)]
+        [PublicWestUS2]
         public async Task VerifyRegionalCosmosDBResourceCreationWithoutZonalRedundancyAsync()
         {
+            using var tmLock = await AcquireTrafficManaderTestLockAsync();
+
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);
             var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USWest2);
             TestCommon.AddCommonTags(context.Tags);

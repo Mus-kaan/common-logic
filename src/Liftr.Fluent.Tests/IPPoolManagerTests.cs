@@ -11,6 +11,7 @@ using Microsoft.Liftr.Fluent.Provisioning;
 using Microsoft.Liftr.Hosting.Contracts;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -62,11 +63,11 @@ namespace Microsoft.Liftr.Fluent.Tests
 
                 var inbound1 = await pool.GetAvailableInboundIPAsync(location);
                 Assert.EndsWith("-01", inbound1.Name, StringComparison.Ordinal);
-                Assert.Contains(IPCategory.Inbound.ToString(), inbound1.Name, StringComparison.Ordinal);
+                Assert.Contains(nameof(IPCategory.Inbound), inbound1.Name, StringComparison.Ordinal);
 
                 var outbound1 = await pool.GetAvailableOutboundIPAsync(location);
                 Assert.EndsWith("-01", outbound1.Name, StringComparison.Ordinal);
-                Assert.Contains(IPCategory.Outbound.ToString(), outbound1.Name, StringComparison.Ordinal);
+                Assert.Contains(nameof(IPCategory.Outbound), outbound1.Name, StringComparison.Ordinal);
 
                 // Test for not existing IPs
                 ipList = await pool.ListOutboundIPAsync(Region.IndiaWest);
@@ -140,15 +141,15 @@ namespace Microsoft.Liftr.Fluent.Tests
 
                 var inbound1 = await pool.GetAvailableInboundIPAsync(location);
                 Assert.EndsWith("-01", inbound1.Name, StringComparison.Ordinal);
-                Assert.DoesNotContain(IPCategory.Inbound.ToString(), inbound1.Name, StringComparison.Ordinal);
-                Assert.DoesNotContain(IPCategory.Outbound.ToString(), inbound1.Name, StringComparison.Ordinal);
-                Assert.DoesNotContain(IPCategory.InOutbound.ToString(), inbound1.Name, StringComparison.Ordinal);
+                Assert.DoesNotContain(nameof(IPCategory.Inbound), inbound1.Name, StringComparison.Ordinal);
+                Assert.DoesNotContain(nameof(IPCategory.Outbound), inbound1.Name, StringComparison.Ordinal);
+                Assert.DoesNotContain(nameof(IPCategory.InOutbound), inbound1.Name, StringComparison.Ordinal);
 
                 var outbound1 = await pool.GetAvailableOutboundIPAsync(location);
                 Assert.EndsWith("-01", outbound1.Name, StringComparison.Ordinal);
-                Assert.DoesNotContain(IPCategory.Inbound.ToString(), outbound1.Name, StringComparison.Ordinal);
-                Assert.DoesNotContain(IPCategory.Outbound.ToString(), outbound1.Name, StringComparison.Ordinal);
-                Assert.DoesNotContain(IPCategory.InOutbound.ToString(), outbound1.Name, StringComparison.Ordinal);
+                Assert.DoesNotContain(nameof(IPCategory.Inbound), outbound1.Name, StringComparison.Ordinal);
+                Assert.DoesNotContain(nameof(IPCategory.Outbound), outbound1.Name, StringComparison.Ordinal);
+                Assert.DoesNotContain(nameof(IPCategory.InOutbound), outbound1.Name, StringComparison.Ordinal);
 
                 // Test for not existing IPs
                 ipList = await pool.ListOutboundIPAsync(Region.IndiaWest);

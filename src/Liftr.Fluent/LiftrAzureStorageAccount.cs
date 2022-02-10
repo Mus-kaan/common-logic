@@ -8,6 +8,7 @@ using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.Storage.Fluent;
 using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Rest.Azure;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -45,33 +46,42 @@ namespace Microsoft.Liftr.Fluent
             CancellationToken cancellationToken = default)
         {
             _logger.Information("Creating storage account with name {storageAccountName} in {rgName}", storageAccountName, rgName);
-
-            var storageAccountCreatable = FluentClient.StorageAccounts
-                .Define(storageAccountName)
-                .WithRegion(location)
-                .WithExistingResourceGroup(rgName)
-                .WithOnlyHttpsTraffic()
-                .WithGeneralPurposeAccountKindV2()
-                .WithTags(tags);
-
-            if (!string.IsNullOrEmpty(accessFromSubnetId))
+            using var ops = _logger.StartTimedOperation(nameof(CreateStorageAccountAsync));
+            try
             {
-                storageAccountCreatable = storageAccountCreatable
-                    .WithAccessFromSelectedNetworks()
-                    .WithAccessFromNetworkSubnet(accessFromSubnetId);
-            }
+                var storageAccountCreatable = FluentClient.StorageAccounts
+                    .Define(storageAccountName)
+                    .WithRegion(location)
+                    .WithExistingResourceGroup(rgName)
+                    .WithOnlyHttpsTraffic()
+                    .WithGeneralPurposeAccountKindV2()
+                    .WithTags(tags);
 
-            if (AvailabilityZoneRegionLookup.HasSupportStorage(location))
+                if (!string.IsNullOrEmpty(accessFromSubnetId))
+                {
+                    storageAccountCreatable = storageAccountCreatable
+                        .WithAccessFromSelectedNetworks()
+                        .WithAccessFromNetworkSubnet(accessFromSubnetId);
+                }
+
+                if (AvailabilityZoneRegionLookup.HasSupportStorage(location))
+                {
+                    // GZRS & RAGZRS also have zone redundant but might violate "data resident" as the paired region might be out of GEO
+                    storageAccountCreatable = storageAccountCreatable
+                        .WithSku(StorageAccountSkuType.Standard_ZRS);
+                }
+
+                var storageAccount = await storageAccountCreatable.CreateAsync(cancellationToken);
+
+                _logger.Information("Created storage account with {resourceId}", storageAccount.Id);
+                return storageAccount;
+            }
+            catch (Exception ex)
             {
-                // GZRS & RAGZRS also have zone redundant but might violate "data resident" as the paired region might be out of GEO
-                storageAccountCreatable = storageAccountCreatable
-                    .WithSku(StorageAccountSkuType.Standard_ZRS);
+                _logger.Error(ex, "Create storage account failed");
+                ops.FailOperation(ex.Message);
+                throw;
             }
-
-            var storageAccount = await storageAccountCreatable.CreateAsync(cancellationToken);
-
-            _logger.Information("Created storage account with {resourceId}", storageAccount.Id);
-            return storageAccount;
         }
 
         public async Task<IStorageAccount> GetStorageAccountAsync(

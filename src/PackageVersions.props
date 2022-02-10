@@ -11,6 +11,7 @@
     <PackageVersion_coverlet_collector>1.2.0</PackageVersion_coverlet_collector>
     <PackageVersion_coverlet_msbuild>2.9.0</PackageVersion_coverlet_msbuild>
     <PackageVersion_Destructurama_Attributed>3.0.0</PackageVersion_Destructurama_Attributed>
+    <PackageVersion_DistributedLock>2.3.0</PackageVersion_DistributedLock>
     <PackageVersion_FluentAssertions>5.9.0</PackageVersion_FluentAssertions>
     <PackageVersion_FluentAssertions>5.10.3</PackageVersion_FluentAssertions>
     <PackageVersion_Flurl>2.8.2</PackageVersion_Flurl>
@@ -78,7 +79,7 @@
     <PackageVersion_System_ComponentModel_Annotations>5.0.0</PackageVersion_System_ComponentModel_Annotations>
     <PackageVersion_System_Diagnostics_DiagnosticSource>4.7.1</PackageVersion_System_Diagnostics_DiagnosticSource>
     <PackageVersion_System_IdentityModel_Tokens_Jwt>5.6.0</PackageVersion_System_IdentityModel_Tokens_Jwt>
-    <PackageVersion_System_Runtime_Caching>4.5.0</PackageVersion_System_Runtime_Caching>
+    <PackageVersion_System_Runtime_Caching>4.7.0</PackageVersion_System_Runtime_Caching>
     <PackageVersion_System_Text_Encodings_Web>4.7.2</PackageVersion_System_Text_Encodings_Web>
     <PackageVersion_System_Text_Json>4.7.2</PackageVersion_System_Text_Json>
     <PackageVersion_xunit>2.4.1</PackageVersion_xunit>

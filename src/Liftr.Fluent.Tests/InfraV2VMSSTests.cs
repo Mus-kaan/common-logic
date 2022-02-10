@@ -8,6 +8,8 @@ using Microsoft.Liftr.Fluent.Contracts;
 using Microsoft.Liftr.Fluent.Provisioning;
 using Microsoft.Liftr.Hosting.Contracts;
 using Microsoft.Liftr.KeyVault;
+using Microsoft.Liftr.Tests;
+using Microsoft.Liftr.Tests.Utilities.Trait;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -18,18 +20,22 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Fluent.Tests
 {
-    public sealed class InfraV2VMSSTests
+    public sealed class InfraV2VMSSTests : LiftrAzureTestBase
     {
         private readonly ITestOutputHelper _output;
 
         public InfraV2VMSSTests(ITestOutputHelper output)
+            : base(output)
         {
             _output = output;
         }
 
         [CheckInValidation(skipLinux: true)]
+        [PublicWestUS2]
         public async Task VerifyRegionalDataAndComputeCreationAsync()
         {
+            using var tmLock = await AcquireTrafficManaderTestLockAsync();
+
             var rootUserName = "aksuser";
             var sshPublicKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIoUCnmwyMDFAf0Ia/OnCTR3g9uxp6uxU/"
             + "Sa4VwFEFpOmMH9fUZcSGPMlAZLtXYUrgsNDLDr22wXI8wd8AXQJTxnxmgSISENVVFntC+1WCETQFMZ4BkEeLCGL0s"
@@ -63,11 +69,11 @@ namespace Microsoft.Liftr.Fluent.Tests
                 var logger = globalScope.Logger;
                 try
                 {
-                    var infra = new InfrastructureV2(regionalDataScope.AzFactory, TestCredentials.KeyVaultClient, regionalDataScope.Logger);
-                    var client = regionalDataScope.Client;
+                    var infra = new InfrastructureV2(AzFactory, TestCredentials.KeyVaultClient, regionalDataScope.Logger);
+                    var client = Client;
 
                     var ipNamePrefix = context.GenerateCommonName(globalBaseName, noRegion: true);
-                    var ipPool = new IPPoolManager(ipNamePrefix, false, regionalDataScope.AzFactory, logger);
+                    var ipPool = new IPPoolManager(ipNamePrefix, false, AzFactory, logger);
 
                     var gblResources = await infra.CreateOrUpdateGlobalRGAsync(globalBaseName, context, $"{shortPartnerName}-{globalBaseName}.dummy.com", addGlobalDB: false);
                     dataOptions.GlobalKeyVaultResourceId = gblResources.KeyVault.Id;

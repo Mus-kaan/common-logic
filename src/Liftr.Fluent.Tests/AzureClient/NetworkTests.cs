@@ -23,6 +23,8 @@ namespace Microsoft.Liftr.Fluent.Tests
         [PublicWestUS2]
         public async Task CanCreateTrafficManagerAsync()
         {
+            using var tmLock = await AcquireTrafficManaderTestLockAsync();
+
             var client = Client;
             var tmName = SdkContext.RandomResourceName("test-tm", 15);
             var pipName = SdkContext.RandomResourceName("pip", 9);
