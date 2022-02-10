@@ -7,6 +7,10 @@
       "type": "Microsoft.ContainerService/managedClusters",
       "location": "WILL_BE_CHANGED [parameters('location')]",
       "name": "PLACEHOLDER_AKS_NAME",
+      "sku": {
+        "name": "Basic",
+        "tier": "Paid"
+      },
       "tags": {
         "WILL_BE_CHANGED_displayName": "Key Vault with logging"
       },

@@ -73,6 +73,8 @@ namespace Microsoft.Liftr.Fluent.Tests
                     TestCommon.Tags,
                     agentPoolProfileName: "spdev");
 
+                Assert.Equal(ManagedClusterSKUTier.Paid, created.Inner.Sku.Tier);
+
                 var resources = await client.ListAksClusterAsync(ResourceGroupName);
                 Assert.Single(resources);
 
