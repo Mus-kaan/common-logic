@@ -20,14 +20,14 @@ namespace Microsoft.Liftr.Fluent
             _db = db ?? throw new ArgumentNullException(nameof(db));
         }
 
-        public async Task<string> GetActiveConnectionStringAsync(bool readOnly = false)
+        public async Task<string> GetActiveConnectionStringAsync(bool readOnly = false, bool skipRotate = false)
         {
             using var ops = _logger.StartTimedOperation(nameof(GetActiveConnectionStringAsync));
             ops.SetContextProperty("cosmosDdId", _db.Id);
 
             try
             {
-                var activeCredential = await CheckAndRotateAsync(forceRotate: false);
+                var activeCredential = await CheckAndRotateAsync(forceRotate: false, skipRotate: skipRotate);
                 var keys = await _db.GetConnectionStringsAsync();
 
                 if (activeCredential == ActiveCredentialType.Primary)
@@ -62,7 +62,7 @@ namespace Microsoft.Liftr.Fluent
             }
         }
 
-        private async Task<ActiveCredentialType> CheckAndRotateAsync(bool forceRotate)
+        private async Task<ActiveCredentialType> CheckAndRotateAsync(bool forceRotate, bool skipRotate = false)
         {
             var activeState = GetCurrentStateFromTags(_db.Tags);
             var lastRotationTime = activeState.LastRotationTime;
@@ -70,7 +70,8 @@ namespace Microsoft.Liftr.Fluent
             var needTagUpdate = activeState.NeedTagUpdate;
 
             var validTill = lastRotationTime + TimeSpan.FromDays(_rotateAfterDays);
-            if (forceRotate || _timeSource.UtcNow > validTill)
+            _logger.LogInformation("Skip the db connection string rotation flag is set to {skipRotate}.", skipRotate);
+            if (!skipRotate && (forceRotate || _timeSource.UtcNow > validTill))
             {
                 if (forceRotate)
                 {
