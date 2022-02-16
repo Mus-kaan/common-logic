@@ -29,8 +29,6 @@ namespace Microsoft.Liftr.Fluent.Tests
         [PublicWestUS2]
         public async Task VerifyGlobalResourceGroupAsync()
         {
-            using var tmLock = await AcquireTrafficManaderTestLockAsync();
-
             var shortPartnerName = "v2";
             var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USWest);
             TestCommon.AddCommonTags(context.Tags);
@@ -62,8 +60,6 @@ namespace Microsoft.Liftr.Fluent.Tests
         [PublicWestUS2]
         public async Task VerifyGlobalResourceGroupWithoutZonalRedundancyAsync()
         {
-            using var tmLock = await AcquireTrafficManaderTestLockAsync();
-
             var shortPartnerName = "v2";
             var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USWest2);
             TestCommon.AddCommonTags(context.Tags);

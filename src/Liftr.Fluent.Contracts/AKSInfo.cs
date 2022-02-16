@@ -29,7 +29,7 @@ namespace Microsoft.Liftr.Fluent.Contracts
         /// Please check the release change to avoid breaking change:
         /// https://github.com/Azure/AKS/releases
         /// </summary>
-        public string KubernetesVersion { get; set; } = "1.21.2";
+        public string KubernetesVersion { get; set; } = "1.21.7";
 
         public void CheckValues()
         {

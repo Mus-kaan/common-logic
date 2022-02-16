@@ -34,8 +34,6 @@ namespace Microsoft.Liftr.Fluent.Tests
         [PublicWestUS2]
         public async Task VerifyRegionalDataAndComputeCreationAsync()
         {
-            using var tmLock = await AcquireTrafficManaderTestLockAsync();
-
             var rootUserName = "aksuser";
             var sshPublicKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIoUCnmwyMDFAf0Ia/OnCTR3g9uxp6uxU/"
             + "Sa4VwFEFpOmMH9fUZcSGPMlAZLtXYUrgsNDLDr22wXI8wd8AXQJTxnxmgSISENVVFntC+1WCETQFMZ4BkEeLCGL0s"

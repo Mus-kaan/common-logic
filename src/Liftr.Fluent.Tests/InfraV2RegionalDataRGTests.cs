@@ -33,8 +33,6 @@ namespace Microsoft.Liftr.Fluent.Tests
         [PublicWestUS]
         public async Task VerifyRegionalDataResourceCreationAsync()
         {
-            using var tmLock = await AcquireTrafficManaderTestLockAsync();
-
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);
             var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USWest);
             TestCommon.AddCommonTags(context.Tags);
@@ -91,8 +89,6 @@ namespace Microsoft.Liftr.Fluent.Tests
         [PublicWestUS2]
         public async Task VerifyRegionalCosmosDBResourceCreationWithoutZonalRedundancyAsync()
         {
-            using var tmLock = await AcquireTrafficManaderTestLockAsync();
-
             var shortPartnerName = SdkContext.RandomResourceName("v", 6);
             var context = new NamingContext("Infrav2Partner", shortPartnerName, EnvironmentType.Test, Region.USWest2);
             TestCommon.AddCommonTags(context.Tags);
