@@ -20,6 +20,7 @@ namespace Microsoft.Liftr.Fluent.Contracts
                 Region.USCentral,
                 Region.USEast,
                 Region.USEast2,
+                Region.Create("eastus2euap"),
                 Region.FranceCentral,
                 Region.GermanyWestCentral,
                 Region.JapanEast,
