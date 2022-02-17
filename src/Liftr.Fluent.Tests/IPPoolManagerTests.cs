@@ -11,7 +11,6 @@ using Microsoft.Liftr.Fluent.Provisioning;
 using Microsoft.Liftr.Hosting.Contracts;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -62,6 +61,19 @@ namespace Microsoft.Liftr.Fluent.Tests
                 Assert.Equal(5, ipList.Count());
 
                 var inbound1 = await pool.GetAvailableInboundIPAsync(location);
+                Assert.EndsWith("-01", inbound1.Name, StringComparison.Ordinal);
+                Assert.Contains(nameof(IPCategory.Inbound), inbound1.Name, StringComparison.Ordinal);
+
+                // test remove and recreate
+                await az.DeleteResourceAsync(inbound1.Id, "2020-08-01");
+                ipList = await pool.ListInboundIPAsync(location);
+                Assert.Equal(4, ipList.Count());
+
+                await pool.ProvisionIPPoolAsync(location, 5, context.Tags, regionOptions);
+                ipList = await pool.ListInboundIPAsync(location);
+                Assert.Equal(5, ipList.Count());
+
+                inbound1 = await pool.GetAvailableInboundIPAsync(location);
                 Assert.EndsWith("-01", inbound1.Name, StringComparison.Ordinal);
                 Assert.Contains(nameof(IPCategory.Inbound), inbound1.Name, StringComparison.Ordinal);
 

@@ -237,13 +237,24 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             var ipNamePrefix = GetIPNamePrefix(region, ipCategory);
             var existingIPs = await az.ListPublicIPAsync(rg.Name, ipNamePrefix);
             var currentCount = existingIPs.Count();
-            var createdCount = 0;
-            _logger.Information($"Existing IPs count is {currentCount}");
-            for (int i = currentCount + 1; i <= ipPerRegion; i++)
+            _logger.Information($"Existing IP count is {currentCount} in rg '{rg.Name}' with name prefix '{ipNamePrefix}'.");
+
+            if (currentCount >= ipPerRegion)
             {
-                var pip = await az.GetOrCreatePublicIPAsync(region, rg.Name, GetIPName(region, i, ipNamePrefix), tags, ipSku);
-                _logger.Information("Created public IP: {pipAddress}", pip.Inner.IpAddress);
-                createdCount++;
+                return;
+            }
+
+            var createdCount = 0;
+
+            for (int i = 1; createdCount < (ipPerRegion - currentCount); i++)
+            {
+                var pip = await az.GetPublicIPAsync(rg.Name, GetIPName(region, i, ipNamePrefix));
+                if (pip == null)
+                {
+                    pip = await az.GetOrCreatePublicIPAsync(region, rg.Name, GetIPName(region, i, ipNamePrefix), tags, ipSku);
+                    _logger.Information("Created public IP: {pipAddress}", pip.Inner.IpAddress);
+                    createdCount++;
+                }
             }
 
             _logger.Information("Created {createdCount} IP addresses in the IP pool resource group '{rgId}'.", createdCount, rg.Id);
