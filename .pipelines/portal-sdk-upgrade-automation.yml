@@ -1,0 +1,216 @@
+# This pipeline is used to update the portal sdk to the latest version and raise a PR
+# Please check the below wiki for more details -
+# https://devdividc.azurewebsites.net/liftr/Confluent/portal_sdk_upgrade_1.html?q=Portal%20Upgrade
+
+trigger:
+- develop
+
+pool:
+  vmImage: windows-latest
+
+variables:
+  REQ_PORTAL_VERSION: ''
+  BASE_BRANCH: 'origin/develop'
+  NUGET_CREDENTIALPROVIDER_MSAL_ENABLED: true
+  NUGET_PLUGIN_HANDSHAKE_TIMEOUT_IN_SECONDS: 120
+  NUGET_PLUGIN_REQUEST_TIMEOUT_IN_SECONDS: 120
+  PORTAL_BRANCH_PREFIX: 'features/users/portal/portalupdate-'
+  LIFTR_REPO_BASE_URL: 'https://msazure.visualstudio.com/DefaultCollection/Liftr/_git/'
+  LIFTR_REPO_BASE_API: 'https://dev.azure.com/msazure/c98f36e6-db73-400c-b0ac-d24cf73bd450/_apis/git/repositories/'
+
+steps:
+- task: PowerShell@2
+  displayName: Get Portal Version
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Get latest PortalSDK versions from ibiza download page and output it as an array
+      $WebResponse = Invoke-WebRequest "https://aka.ms/portalfx/downloads"
+      $text = $WebResponse.Content
+      $regexPattern = "Download\s*(\d+\.\d+\.\d+\.\d+)\s*: Production"
+      $matches = Select-String -InputObject $text -Pattern $regexPattern -AllMatches
+      $versionsArray = New-Object Collections.Generic.List[Version]
+      foreach ($match in $matches.Matches)
+      {
+          $versionsArray.Add($match.Groups[1].Value) | Out-Null
+      }
+      # Get the most supported version, which is the oldest version.
+      $versionsArray.Sort()
+      $version = $versionsArray[0]
+      Write-Host "Latest Supported Portal SDK version: $version"
+      $major = $version.Major
+      $minor = $version.Minor
+      $build = $version.Build
+      $revision = $version.Revision
+      $required_version = "$major.$minor.$build"
+      Write-Host "Setting the Environmental variable REQ_PORTAL_VERSION : $required_version"
+      Write-Host "##vso[task.setvariable variable=REQ_PORTAL_VERSION;]$required_version";
+- task: PowerShell@2
+  displayName: 'Clone $(PARTNER_SERVICE)'
+  inputs:
+    targetType: inline
+    script: |
+      Write-Host "REQ_PORTAL_VERSION : $(REQ_PORTAL_VERSION)"
+      $portalSDKBranchName="$(PORTAL_BRANCH_PREFIX)$(REQ_PORTAL_VERSION)"
+      Write-Host "Portal SDK Branch Name: $portalSDKBranchName"
+      $curDir=Get-Location
+      Write-Host "Current Directory: $curDir"
+      $repoDir="$curDir\$(PARTNER_SERVICE)"
+      Write-Host "RepoDir: $repoDir"
+      git version
+      $repo = "$(LIFTR_REPO_BASE_URL)$(PARTNER_SERVICE)"
+      Write-Host "get remote origin"
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" remote -v
+      Write-Host "add remote origin"
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" remote add origi  n $repo
+      Write-Host "Cloning repo: $repo"
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" clone $repo
+      Write-Host "Cloning Succeeded, changing directory to $repoDir"
+      cd $repoDir
+      Write-Host "Git Fetch all branches from partner repo $(PARTNER_SERVICE)"
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" fetch --all
+      Write-Host "Creating a new branch : $portalSDKBranchName from base branch: $(BASE_BRANCH)"
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" checkout -b $portalSDKBranchName $(BASE_BRANCH)
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push origin $portalSDKBranchName
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" pull
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" branch
+- task: UseDotNet@2
+  displayName: Install DotNet
+  continueOnError: true
+  inputs:
+    packageType: 'sdk'
+    version: 3.1.200
+    performMultiLevelLookup: true
+- task: npmAuthenticate@0
+  inputs:
+    workingFile: '$(PARTNER_SERVICE)\src\Portal\Default\Extension\.npmrc'
+  displayName: Npm Auth (Extension)
+- task: npmAuthenticate@0
+  inputs:
+    workingFile: '$(PARTNER_SERVICE)\src\Portal\Default\Extension.UnitTests\.npmrc'
+  displayName: Npm Auth (Unit Tests)
+- task: npmAuthenticate@0
+  inputs:
+    workingFile: '$(PARTNER_SERVICE)\src\Portal\Default\Extension.E2ETests\.npmrc'
+  displayName: Npm Auth (E2E)
+- task: NuGetAuthenticate@0
+  displayName: Nuget Auth
+- task: Npm@1
+  displayName: Install AzurePortalCli
+  inputs:
+    workingDir: '$(PARTNER_SERVICE)\src\Portal'
+    command: custom
+    customCommand: "install -g @microsoft/azureportalcli@$(REQ_PORTAL_VERSION)"
+    customRegistry: useFeed
+    customFeed: AzurePortal
+- script: |
+    ap update
+  displayName: Portal SDK Upgrade
+  workingDirectory: '$(PARTNER_SERVICE)\src\Portal'  
+- script: |
+    set PATH=%PATH%;%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin
+    dotnet restore
+  displayName: Restore
+  workingDirectory: '$(PARTNER_SERVICE)\src\Portal\Default\Extension'
+- task: PowerShell@2
+  displayName: Build All
+  inputs:
+    targetType: 'inline'
+    script: |
+      Write-Host "REQ_PORTAL_VERSION : $(REQ_PORTAL_VERSION)"
+      $portalSDKBranchName="$(PORTAL_BRANCH_PREFIX)$(REQ_PORTAL_VERSION)"
+      Write-Host "portalSDK Branch Name: $portalSDKBranchName"
+      $curDir=Get-Location
+      Write-Host "Current Directory: $curDir"
+      $portalDir="$curDir\$(PARTNER_SERVICE)\src\Portal"
+      Write-Host "Portal Directory: $portalDir"
+      $liftrExtensionRoot="$portalDir\Default\Extension"
+      Write-Host "Portal Extension Directory: $liftrExtensionRoot"
+      $env:path +=";${Env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin"
+      function Verify-PortalBuilds {
+      		Write-Host "Verifying Portal Extension Build"
+      		cd $portalDir\Default\Extension
+          DeleteFolderIfExists "$portalDir\Default\Extension\obj"
+          ap restore
+      		ap build
+      		cd $portalDir
+      		Write-Host "Verifying Portal Extension.UnitTests Build"
+      		cd $portalDir\Default\Extension.UnitTests
+          DeleteFolderIfExists "$portalDir\Default\Extension.UnitTests\obj"
+          ap restore
+          ap build
+      		cd $portalDir
+      		Write-Host "Verifying Portal Extension.E2ETests Build"
+      		cd $portalDir\Default\Extension.E2ETests
+          DeleteFolderIfExists "$portalDir\Default\Extension.E2ETests\obj"
+          ap restore
+          ap build
+      		cd $portalDir
+      }
+      function DeleteFolderIfExists {
+          param (
+              [Parameter(Mandatory = $false)][string] $path
+          )
+          Write-Host "Deleting the folder : $path"
+          if( Test-Path "$path" ){
+            Remove-Item -Recurse -Force $path
+          }
+      }
+      Verify-PortalBuilds
+- task: PowerShell@2
+  displayName: 'Create PullRequest'
+  inputs:
+    targetType: inline
+    script: |
+      $portalSDKBranchName="$(PORTAL_BRANCH_PREFIX)$(REQ_PORTAL_VERSION)"
+      Write-Host "Portal SDK Branch Name: $portalSDKBranchName"
+      $repositoryIdMapping = @{
+        "Liftr.Datadog" = "48e3f720-fcbd-4969-a383-2b86cf060de5";
+        "Liftr.Confluent" = "50a383f1-d180-4eb1-baa4-6c54e5847283";
+        "Liftr.Logz" = "5e4d3ff1-166d-43eb-97c2-24bb83a1480e";
+        "Liftr.DataX" = "88774b61-39d6-4a31-9296-ce406fabe575";
+        "Liftr.Dynatrace" = "641a684a-a861-42b3-a2df-7575fdecbcf6";
+      }
+      $curDir=Get-Location
+      Write-Host "Current Directory: $curDir"
+      $portalDir="$curDir\$(PARTNER_SERVICE)\src\Portal"
+      cd $portalDir
+      git config user.email "liftrconfluentdev@microsoft.com"
+      git config user.name "PortalSDKBuildPipeline"
+      git add .config
+      git status
+      $repositoryId = $repositoryIdMapping["$(PARTNER_SERVICE)"]
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" remote -v
+      Write-Host "Pull and merge changes from origin"
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" pull
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" merge $(BASE_BRANCH)
+      #resetting the .npmrc files which were updated during npm authentication 
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" checkout $portalDir\Default\Extension\.npmrc
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" checkout $portalDir\Default\Extension.UnitTests\.npmrc
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" checkout $portalDir\Default\Extension.E2ETests\.npmrc
+      $commitMsg = "updated portal sdk to version: $env:REQ_PORTAL_VERSION" 
+      Write-Host "Git Commit:$commitMsg"
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" commit -a -m $commitMsg
+      Write-Host "Git Push"
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push -f origin HEAD:$portalSDKBranchName
+      Write-Host "Raising Pull Request from $portalSDKBranchName to $(BASE_BRANCH)"
+      $url="$(LIFTR_REPO_BASE_API)$repositoryId/pullrequests?api-version=6.0"
+      $Header = @{
+                      Authorization = "Bearer $(System.AccessToken)"
+                 }
+      $Body = 	@{
+                    sourceRefName = "refs/heads/features/users/portal/portalupdate-$(REQ_PORTAL_VERSION)"
+                    targetRefName = "refs/heads/develop"
+                    title = "Portal SDK Update $(REQ_PORTAL_VERSION)"
+                    description =  "updating portal sdk version to $(REQ_PORTAL_VERSION)"
+                 }
+      $Body | ConvertTo-Json
+      $Parameters = @{
+                        Method = "POST"
+                        Uri =  $url
+                        Headers = $Header
+                        Body = ($Body | ConvertTo-Json) 
+                        ContentType = "application/json"
+                      }
+      $Parameters | ConvertTo-Json
+      Invoke-RestMethod @Parameters
