@@ -37,23 +37,23 @@ namespace Microsoft.Liftr.DBService.Contracts
         public string TermUnit { get; set; }
 
         [BsonElement("startDate")]
-        public DateTime StartDate { get; set; }
+        public DateTime? StartDate { get; set; }
 
         [BsonElement("endDate")]
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
         [BsonElement("quantity")]
-        public int Quantity { get; set; }
+        public int? Quantity { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
         [BsonRepresentation(BsonType.String)]
         [BsonElement("saasSubscriptionStatus")]
-        public SaasSubscriptionStatus SaasSubscriptionStatus { get; set; }
+        public SaasSubscriptionStatus? SaasSubscriptionStatus { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
         [BsonRepresentation(BsonType.String)]
         [BsonElement("billingTermType")]
-        public BillingTermTypes BillingTermType { get; set; }
+        public BillingTermTypes? BillingTermType { get; set; }
 
         [BsonElement("resourceUri")]
         public Uri ResourceUri { get; set; }
