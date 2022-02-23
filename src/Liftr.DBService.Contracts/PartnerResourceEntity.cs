@@ -7,7 +7,7 @@ using System;
 
 namespace Microsoft.Liftr.DBService.Contracts
 {
-    public class PartnerResourceEntity : BaseEntity
+    public class PartnerResourceEntity : BaseRpEntity
     {
         public PartnerResourceEntity(string liftrResourceId, string partnerResourceId)
         {

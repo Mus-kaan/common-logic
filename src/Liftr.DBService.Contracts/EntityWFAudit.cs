@@ -6,7 +6,7 @@ using System;
 
 namespace Microsoft.Liftr.DBService.Contracts
 {
-    public class EntityWFAudit<TSTage, TResource> : BaseEntity where TSTage : Enum
+    public class EntityWFAudit<TSTage, TResource> : BaseRpEntity where TSTage : Enum
     {
         public EntityWFAudit(string resourceId, TSTage stage, TResource resource)
         {

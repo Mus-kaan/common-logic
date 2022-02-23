@@ -6,7 +6,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Microsoft.Liftr.DBService.Contracts
 {
-    public class LiftrResourceEntity : BaseEntity
+    public class LiftrResourceEntity : BaseRpEntity
     {
         public LiftrResourceEntity(string liftrResourceId)
         {

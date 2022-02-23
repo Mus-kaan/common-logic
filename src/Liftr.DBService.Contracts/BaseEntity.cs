@@ -5,8 +5,6 @@
 using Microsoft.Liftr.DBService.Contracts.Interfaces;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using System;
 
 namespace Microsoft.Liftr.DBService.Contracts
@@ -22,15 +20,6 @@ namespace Microsoft.Liftr.DBService.Contracts
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
 
-        [BsonElement("resourceName")]
-        public string ResourceName { get; set; }
-
-        [BsonElement("azSubsId")]
-        public string AzSubsId { get; set; }
-
-        [BsonElement("tenantId")]
-        public string TenantId { get; set; }
-
         [BsonElement("active")]
         public bool Active { get; set; } = true;
 
@@ -44,15 +33,10 @@ namespace Microsoft.Liftr.DBService.Contracts
         [BsonElement("eTag")]
         public string ETag { get; set; }
 
-        [BsonElement("armResourceId")]
-        public string ResourceId { get; set; } // ARM resource id;
-
-        [JsonConverter(typeof(StringEnumConverter))]
-        [BsonRepresentation(BsonType.String)]
-        [BsonElement("workflowType")]
-        public WorkflowTypeEnum WorkflowType { get; set; } // either through create flow or linking;
-
         [BsonElement("isDeleted")]
         public bool IsDeleted { get; set; } = false;
+
+        [BsonElement("resourceId")]
+        public string ResourceId { get; set; }
     }
 }

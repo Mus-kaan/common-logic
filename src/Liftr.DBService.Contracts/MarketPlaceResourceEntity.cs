@@ -10,7 +10,7 @@ using System;
 
 namespace Microsoft.Liftr.DBService.Contracts
 {
-    public class MarketPlaceResourceEntity : BaseEntity
+    public class MarketPlaceResourceEntity : BaseRpEntity
     {
         public MarketPlaceResourceEntity(string liftrResourceId, string mpResourceId)
         {

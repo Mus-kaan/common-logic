@@ -14,12 +14,6 @@ namespace Microsoft.Liftr.DBService.Contracts.Interfaces
 
         string ResourceId { get; } // arm resource id
 
-        string AzSubsId { get; set; } // partition key
-
-        string TenantId { get; set; } // tenat id
-
-        string ResourceName { get; set; }
-
         bool Active { get; set; }
 
         DateTime CreatedUTC { get; }
