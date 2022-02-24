@@ -121,14 +121,21 @@ namespace Microsoft.Liftr.Monitoring.VNext.Whale.Client
 
             if (deleteResponse.StatusCode != HttpStatusCode.OK)
             {
-                _logger.Error($"Deleting resource at Uri: '{uriBuilder.Uri}' failed with error code '{deleteResponse.StatusCode}'");
-                if (deleteResponse?.Content != null)
+                if (deleteResponse.StatusCode == HttpStatusCode.NotFound)
                 {
-                    var errorContent = await deleteResponse.Content.ReadAsStringAsync();
-                    _logger.Error("Error response body: {errorContent}", errorContent);
+                    _logger.Information("The resource {resourceId} is not found. Skipping the deletion of the diagnostic settings", resourceId);
                 }
+                else
+                {
+                    _logger.Error($"Deleting resource at Uri: '{uriBuilder.Uri}' failed with error code '{deleteResponse.StatusCode}'");
+                    if (deleteResponse?.Content != null)
+                    {
+                        var errorContent = await deleteResponse.Content.ReadAsStringAsync();
+                        _logger.Error("Error response body: {errorContent}", errorContent);
+                    }
 
-                throw new InvalidOperationException($"Delete resource with id '{resourceId}' failed.");
+                    throw new InvalidOperationException($"Delete resource with id '{resourceId}' failed.");
+                }
             }
 
             _logger.Information($"Finished deleting resource at Uri: {uriBuilder.Uri}");
