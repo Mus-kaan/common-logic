@@ -16,9 +16,9 @@ namespace Microsoft.Liftr.DBService.Contracts.Interfaces
 
         bool Active { get; set; }
 
-        DateTime CreatedUTC { get; }
+        DateTime CreatedUtc { get; }
 
-        DateTime LastModifiedUTC { get; set; }
+        DateTime LastModifiedUtc { get; set; }
 
         string ETag { get; set; }
 

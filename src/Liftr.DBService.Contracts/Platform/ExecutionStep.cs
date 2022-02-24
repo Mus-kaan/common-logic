@@ -15,15 +15,15 @@ namespace Microsoft.Liftr.DBService.Contracts.Platform
     {
         public ExecutionStep(string name, string data)
         {
-            StepName = string.IsNullOrWhiteSpace(name) ? throw new ArgumentNullException(nameof(name)) : name;
+            Name = string.IsNullOrWhiteSpace(name) ? throw new ArgumentNullException(nameof(name)) : name;
             Data = string.IsNullOrWhiteSpace(data) ? throw new ArgumentNullException(nameof(data)) : data;
         }
 
         [BsonElement("name")]
-        public string StepName { get; set; }
+        public string Name { get; set; }
 
         [BsonElement("description")]
-        public string StepDescription { get; set; }
+        public string Description { get; set; }
 
         [BsonElement("status")]
         [JsonConverter(typeof(StringEnumConverter))]
@@ -33,11 +33,11 @@ namespace Microsoft.Liftr.DBService.Contracts.Platform
         [BsonElement("data")]
         public string Data { get; set; }
 
-        [BsonElement("createdAt")]
-        public DateTime CreatedUTC { get; set; } = DateTime.UtcNow;
+        [BsonElement("createdUtc")]
+        public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
 
-        [BsonElement("lastModified")]
-        public DateTime LastModifiedUTC { get; set; } = DateTime.UtcNow;
+        [BsonElement("lastModifiedUtc")]
+        public DateTime LastModifiedUtc { get; set; } = DateTime.UtcNow;
 
         [BsonElement("hasChildSteps")]
         public bool HasChildSteps { get; set; }

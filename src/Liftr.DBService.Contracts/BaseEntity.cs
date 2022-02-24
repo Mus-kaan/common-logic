@@ -23,11 +23,11 @@ namespace Microsoft.Liftr.DBService.Contracts
         [BsonElement("active")]
         public bool Active { get; set; } = true;
 
-        [BsonElement("createdUTC")]
-        public DateTime CreatedUTC { get; set; } = DateTime.UtcNow;
+        [BsonElement("createdUtc")]
+        public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
 
-        [BsonElement("lastModifiedUTC")]
-        public DateTime LastModifiedUTC { get; set; } = DateTime.UtcNow;
+        [BsonElement("lastModifiedUtc")]
+        public DateTime LastModifiedUtc { get; set; } = DateTime.UtcNow;
 
         [BsonIgnoreIfDefault]
         [BsonElement("eTag")]
