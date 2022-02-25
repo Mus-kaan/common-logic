@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Liftr.Logging.Metrics;
 using Microsoft.Liftr.Utilities;
+using Serilog;
 using System;
 using System.Collections.Generic;
 
@@ -19,16 +20,11 @@ namespace Microsoft.Liftr.Metrics.AspNetCore
         /// <param name="services"></param>
         /// <param name="configuration"></param>
         /// <param name="serviceName"></param>
-        /// <param name="logger"></param>
-        public static void AddMetricSenderService(this IServiceCollection services, IConfiguration configuration, string serviceName, Serilog.ILogger logger)
+        public static void AddMetricSenderService(this IServiceCollection services, IConfiguration configuration, string serviceName)
         {
-            if (logger == null)
-            {
-                throw new ArgumentNullException(nameof(logger));
-            }
-
             services.AddSingleton<IMetricSender>((sp) =>
             {
+                var logger = sp.GetService<ILogger>();
                 var meta = InstanceMetaHelper.GetMetaInfoAsync().GetAwaiter().GetResult();
                 var instanceMeta = meta.InstanceMeta;
                 Dictionary<string, string> defaultDimensions = null;
