@@ -83,7 +83,8 @@ stages:
             inputs:
               SourceFolder: "$(Build.SourcesDirectory)"
               Contents: |
-                **\bin\**
+                **\bin\**\Microsoft.Liftr.*.dll
+                **\bin\**\Microsoft.Liftr.*.exe
                 !**\*.pfx
                 !**\*.Tests\**
               TargetFolder: '$(Build.SourcesDirectory)\out\build\bin'
