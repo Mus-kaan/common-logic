@@ -1,0 +1,96 @@
+stages:
+  - stage: windows_build
+    jobs:
+      - job: main
+        pool:
+          type: windows # read more about custom job pool types at https://aka.ms/obpipelines/yaml/jobs
+
+        variables: # More settings at https://aka.ms/obpipelines/yaml/jobs
+          ob_outputDirectory: '$(Build.SourcesDirectory)\out' # this directory is uploaded to pipeline artifacts, reddog and cloudvault. More info at https://aka.ms/obpipelines/artifacts
+          # https://aka.ms/obpipelines/sdl
+          ob_sdl_binskim_enabled: true # you can disable sdl tools in non-official build
+          ob_sdl_binskim_break: true # always break the build on binskim issues. You can disable it by setting to 'false'
+          ob_sdl_binskim_scanOutputDirectoryOnly: true
+          ob_sdl_roslyn_break: true
+          # ob_sdl_suppression_suppressionFile: $(Build.SourcesDirectory)\.gdn\job.gdnsuppress
+
+        steps: # These steps will be run in unrestricted container's network
+          - task: onebranch.pipeline.version@1 # generates automatic version. For other versioning options check https://aka.ms/obpipelines/versioning
+            displayName: "Setup BuildNumber"
+            inputs:
+              system: "RevisionCounter"
+              major: "$(MajorVersion)"
+              minor: "$(MinorVersion)"
+              exclude_commit: false
+
+          - task: NuGetCommand@2
+            inputs:
+              command: "custom"
+              arguments: 'config -configfile $(Build.SourcesDirectory)\src\NuGet.Config'
+
+          - task: CmdLine@2
+            displayName: "Restore"
+            inputs:
+              script: '$(Build.SourcesDirectory)\build\run-windows-restore.cmd'
+
+          - task: CmdLine@2
+            displayName: "Build"
+            inputs:
+              script: '$(Build.SourcesDirectory)\build\run-windows-build.cmd'
+
+          - task: onebranch.pipeline.signing@1 # https://aka.ms/obpipelines/signing
+            displayName: "Sign build outputs"
+            inputs:
+              command: "sign"
+              signing_environment: "azure-ado"
+              signing_profile: "internal_azure_service"
+              files_to_sign: "**/*.exe;**/*.dll"
+              search_root: "$(Build.SourcesDirectory)/src"
+
+          - task: CmdLine@2
+            displayName: "Test"
+            inputs:
+              script: '$(Build.SourcesDirectory)\build\run-windows-tests.cmd'
+              workingDirectory: "$(Build.SourcesDirectory)"
+              failOnStderr: true
+
+          - task: PublishTestResults@2
+            displayName: "Run Tests (PublishTestResults)"
+            inputs:
+              testResultsFormat: "VSTest"
+              testResultsFiles: "**/*.trx"
+              failTaskOnFailedTests: true
+              testRunTitle: "Tests"
+              buildPlatform: "Any CPU"
+              buildConfiguration: "Debug"
+
+          - task: CmdLine@2
+            displayName: "Package"
+            inputs:
+              script: '$(Build.SourcesDirectory)\build\run-windows-pack.cmd'
+
+          - task: onebranch.pipeline.signing@1 # https://aka.ms/obpipelines/signing
+            displayName: "Sign nuget package"
+            inputs:
+              command: "sign"
+              signing_environment: "azure-ado"
+              signing_profile: "internal_azure_service"
+              files_to_sign: "**/*.nupkg"
+              search_root: "$(Build.SourcesDirectory)/nupkgs"
+
+          - task: CopyFiles@2 # https://docs.microsoft.com/azure/devops/pipelines/tasks/utility/copy-files
+            displayName: "Copy build output to upload folder"
+            inputs:
+              SourceFolder: "$(Build.SourcesDirectory)"
+              Contents: |
+                **\bin\**
+                !**\*.pfx
+                !**\*.Tests\**
+              TargetFolder: '$(Build.SourcesDirectory)\out\build\bin'
+
+          - task: CopyFiles@2
+            displayName: "Copy nupkgs contents"
+            inputs:
+              SourceFolder: '$(Build.SourcesDirectory)\nupkgs'
+              Contents: "**"
+              TargetFolder: '$(Build.SourcesDirectory)\out\package\nupkgs'
