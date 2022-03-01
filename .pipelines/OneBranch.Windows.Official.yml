@@ -8,7 +8,9 @@
 #################################################################################
 
 trigger: # https://aka.ms/obpipelines/triggers
-  - master
+  branches:
+    include:
+      - master
 
 parameters: # parameters are shown up in ADO UI in a build queue time
   - name: "debug"
@@ -33,7 +35,7 @@ resources:
       ref: refs/heads/main
 
 extends:
-  template: v2/OneBranch.NonOfficial.CrossPlat.yml@templates # https://aka.ms/obpipelines/templates
+  template: v2/OneBranch.Official.CrossPlat.yml@templates # https://aka.ms/obpipelines/templates
   parameters:
     globalSdl: # https://aka.ms/obpipelines/sdl
       tsa:
