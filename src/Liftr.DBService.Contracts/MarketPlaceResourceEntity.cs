@@ -18,43 +18,55 @@ namespace Microsoft.Liftr.DBService.Contracts
             MarketPlaceResourceId = mpResourceId;
         }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("mpResourceid")]
         public string MarketPlaceResourceId { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("publisherId")]
         public string PublisherId { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("offerId")]
         public string OfferId { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("planId")]
         public string PlanId { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("beneficiaryEmailId")]
         public string BeneficiaryEmailId { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("termUnit")]
         public string TermUnit { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("startDate")]
         public DateTime? StartDate { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("endDate")]
         public DateTime? EndDate { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("quantity")]
         public int? Quantity { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [JsonConverter(typeof(StringEnumConverter))]
         [BsonRepresentation(BsonType.String)]
         [BsonElement("saasSubscriptionStatus")]
         public SaasSubscriptionStatus? SaasSubscriptionStatus { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [JsonConverter(typeof(StringEnumConverter))]
         [BsonRepresentation(BsonType.String)]
         [BsonElement("billingTermType")]
         public BillingTermTypes? BillingTermType { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("resourceUri")]
         public Uri ResourceUri { get; set; }
     }

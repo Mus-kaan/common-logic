@@ -15,9 +15,11 @@ namespace Microsoft.Liftr.DBService.Contracts
             PartnerResourceId = partnerResourceId;
         }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("partnerResourceId")]
         public string PartnerResourceId { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("ssoUrl")]
         public Uri SSOUrl { get; set; }
     }

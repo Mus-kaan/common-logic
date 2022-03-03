@@ -13,24 +13,31 @@ namespace Microsoft.Liftr.DBService.Contracts
             ResourceId = liftrResourceId;
         }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("resourceType")]
         public string ResourceType { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("resourceGroup")]
         public string ResourceGroup { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("region")]
         public string Region { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("provisioningState")]
         public string ProvisioningState { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("userDetail")]
         public UserDetail UserDetail { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("mpResourceId")]
         public string MarketplaceResourceId { get; set; }
 
+        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("partnerResourceId")]
         public string PartnerResourceId { get; set; }
     }
