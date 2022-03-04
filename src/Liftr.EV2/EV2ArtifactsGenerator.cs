@@ -204,7 +204,8 @@ namespace Microsoft.Liftr.EV2
                     regions,
                     outputDirectory,
                     description: "Import Application Images",
-                    entryScript: "0_ImportAppImage.sh");
+                    entryScript: "0_ImportAppImage.sh",
+                    uploadImageToACR: true);
             }
         }
 
@@ -294,7 +295,8 @@ namespace Microsoft.Liftr.EV2
                     regions,
                     outputDirectory,
                     description: "Deploy AKS applications",
-                    entryScript: "4_DeployAKSApp.sh");
+                    entryScript: "4_DeployAKSApp.sh",
+                    uploadImageToACR: true);
             }
         }
 
@@ -338,7 +340,8 @@ namespace Microsoft.Liftr.EV2
             IEnumerable<string> regions,
             string outputDirectory,
             string description,
-            string entryScript)
+            string entryScript,
+            bool uploadImageToACR = false)
         {
             if (ev2Options == null)
             {
@@ -382,7 +385,8 @@ namespace Microsoft.Liftr.EV2
                     envName,
                     region,
                     entryScript,
-                    targetEnvironment.RunnerInformation);
+                    targetEnvironment.RunnerInformation,
+                    uploadImageToACR ? ev2Options.OneBranchContainerImages : null);
                 File.WriteAllText(parameterFilePath, parameters.ToJsonString(indented: true));
             }
         }
@@ -510,7 +514,8 @@ namespace Microsoft.Liftr.EV2
             string envName,
             string region,
             string entryScript,
-            EV2RunnerInfomation runnerInfo)
+            EV2RunnerInfomation runnerInfo,
+            string[] oneBranchContainerImages)
         {
             if (string.IsNullOrEmpty(envName))
             {
@@ -553,6 +558,24 @@ namespace Microsoft.Liftr.EV2
                     Name = "GenevaParametersFile",
                     Value = $"geneva.{ToSimpleName(envName)}.values.yaml",
                 });
+            }
+
+            if (oneBranchContainerImages?.Length > 0)
+            {
+                foreach (var image in oneBranchContainerImages)
+                {
+                    var envVariable = new ShellEnvironmentVariable()
+                    {
+                        Name = image.Replace("-", string.Empty, StringComparison.OrdinalIgnoreCase), // we cannot have '-' in environment variable.
+                        AsSecureValue = true,
+                        Reference = new ParameterReference()
+                        {
+                            Path = $"docker-images/{image}.tar.gz",
+                        },
+                    };
+
+                    envVariables.Add(envVariable);
+                }
             }
 
             var shellLaunch = new ShellLaunch()

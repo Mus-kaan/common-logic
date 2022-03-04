@@ -53,6 +53,37 @@ namespace Microsoft.Liftr.EV2.Tests
         }
 
         [Fact]
+        public void VerifyOneBranchGenerateArtifacts()
+        {
+            var artifact = new EV2ArtifactsGenerator(_logger);
+
+            var ev2Options = JsonConvert.DeserializeObject<EV2HostingOptions>(File.ReadAllText("TestEv2OneBranchHostingOptions.json"));
+            var hostingOptions = JsonConvert.DeserializeObject<HostingOptions>(File.ReadAllText("TestHostingOptions.json"));
+
+            var dir = Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString());
+
+            artifact.GenerateArtifacts(ev2Options, hostingOptions, dir);
+
+            var folders = Directory.GetDirectories(dir);
+
+            Assert.Equal(6, folders.Length);
+            {
+                var filePath = Path.Combine(dir, "1_global", "ServiceModel.DogFood.json");
+                Assert.True(File.Exists(filePath), $"'{filePath}' should exist.");
+            }
+
+            {
+                var filePath = Path.Combine(dir, "1_global", "RolloutSpec.DogFood.global.json");
+                Assert.True(File.Exists(filePath), $"'{filePath}' should exist.");
+            }
+
+            {
+                var filePath = Path.Combine(dir, "1_global", "parameters", "DogFood", "RolloutParameters.DogFood.global.json");
+                Assert.True(File.Exists(filePath), $"'{filePath}' should exist.");
+            }
+        }
+
+        [Fact]
         public void VerifyGenerateImageBuilderArtifacts()
         {
             var artifact = new EV2ArtifactsGenerator(_logger);

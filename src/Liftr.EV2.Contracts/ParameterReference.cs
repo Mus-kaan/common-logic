@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Liftr.EV2.Contracts
@@ -17,7 +16,6 @@ namespace Microsoft.Liftr.EV2.Contracts
         /// </summary>
         public ParameterReference()
         {
-            Parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -38,6 +36,6 @@ namespace Microsoft.Liftr.EV2.Contracts
         /// <summary>
         /// The provider parameters.
         /// </summary>
-        public IDictionary<string, string> Parameters { get; private set; }
+        public IDictionary<string, string> Parameters { get; set; }
     }
 }

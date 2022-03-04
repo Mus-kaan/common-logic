@@ -1,0 +1,32 @@
+{
+  "ServiceTreeName": "Sample Service Tree Name",
+  "ServiceTreeId": "c40f3dd2-9bf7-4d98-a2e3-48bcdc77dcd6",
+  "NotificationEmail": "asdas@microsoft.com",
+  "TargetEnvironments": [
+    {
+      "EnvironmentName": "Production",
+      "RunnerInformation": {
+        "Location": "West US",
+        "SubscriptionId": "0e8673f6-fc02-42b2-b5ce-1b1bf81329d9",
+        "UserAssignedManagedIdentityResourceId": "/subscriptions/0e8673f6-fc02-42b2-b5ce-1b1bf81329d9/resourceGroups/ev2-wus-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ev2-prod-shell-wus-msi",
+        "UserAssignedManagedIdentityObjectId": "0e8673f6-fc02-42b2-b5ce-1b1bf81329d9"
+      }
+    },
+    {
+      "EnvironmentName": "DogFood",
+      "RunnerInformation": {
+        "Location": "West US",
+        "SubscriptionId": "d8f298fb-60f5-4676-a7d3-25442ec5ce1e",
+        "UserAssignedManagedIdentityResourceId": "/subscriptions/d8f298fb-60f5-4676-a7d3-25442ec5ce1e/resourceGroups/ev2-df-wus-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ev2-df-shell-wus-msi",
+        "UserAssignedManagedIdentityObjectId": "0e8673f6-fc02-42b2-b5ce-1b1bf81329d9"
+      }
+    }
+  ],
+  "OneBranchContainerImages": [
+    "sample-web-common-repo",
+    "sample-worker-common-repo",
+    "sample-console-common-repo",
+    "test-result-aggregator",
+    "prom2icm"
+  ]
+}
