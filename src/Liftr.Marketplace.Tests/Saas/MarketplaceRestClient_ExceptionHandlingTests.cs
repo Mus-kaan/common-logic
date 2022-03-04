@@ -47,7 +47,9 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             {
                 StatusCode = HttpStatusCode.OK,
                 Content = new StringContent(failedPurchaseResponse.ToJson(), Encoding.UTF8, "application/json"),
+                RequestMessage = new HttpRequestMessage() { },
             };
+            pollingResponse.RequestMessage.Headers.Add("Authorization", "test-bearer-token");
 
             var mockMessageHandler = new Mock<HttpMessageHandler>();
             mockMessageHandler.Protected()
@@ -60,6 +62,7 @@ namespace Microsoft.Liftr.Marketplace.Saas.Tests
             _marketplaceRestClient = new MarketplaceRestClient(_endpoint, ApiVersion, _logger, _httpClientFactory.Object, () => Task.FromResult("mockToken"));
             Func<Task> act = async () => await _marketplaceRestClient.SendRequestWithPollingAsync<TestResource>(HttpMethod.Put, "/retry/test", content: "somecontent");
             act.Should().Throw<PurchaseFailureException>().Where(e => e.ErrorType == errortype && e.RawErrorMessage.OrdinalEquals(errorMessage));
+            Assert.Null(pollingResponse.RequestMessage.Headers.Authorization);
         }
     }
 }

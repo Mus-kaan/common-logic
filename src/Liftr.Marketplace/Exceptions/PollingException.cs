@@ -36,6 +36,12 @@ namespace Microsoft.Liftr.Marketplace.Exceptions
                 throw new ArgumentNullException(nameof(originalRequest));
             }
 
+            // remove the bearer token from the response headers
+            if (response?.RequestMessage?.Headers != null)
+            {
+                response.RequestMessage.Headers.Authorization = null;
+            }
+
             OriginalRequestUri = originalRequest.RequestUri;
             PollingOperationUri = operationUri;
             OriginalRequestMethod = originalRequest.Method;

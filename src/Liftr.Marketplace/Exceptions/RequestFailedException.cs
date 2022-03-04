@@ -30,6 +30,12 @@ namespace Microsoft.Liftr.Marketplace.Exceptions
 
         internal static async Task<RequestFailedException> CreateAsync(HttpRequestMessage request, HttpResponseMessage response)
         {
+            if (response?.RequestMessage?.Headers != null)
+            {
+                // remove the authorization token from request headers
+                response.RequestMessage.Headers.Authorization = null;
+            }
+
             var message = await ExceptionMessageUtils.BuildRequestFailedMessageAsync(request, response);
 
             var marketplaceException = new RequestFailedException(message)
