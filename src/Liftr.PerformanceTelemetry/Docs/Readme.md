@@ -22,13 +22,13 @@ Reference PR - https://msazure.visualstudio.com/Liftr/_git/Liftr.Logz/pullreques
 ## Tips on using the dashboard
 1. Please find the [Liftr performance dashboard here](https://dataexplorer.azure.com/dashboards/95f2c1a8-9f33-47fd-8c20-fb10e3aa1322).
 2. The dropdown options - 
-    - Time range - will be applied to all the tiles and represents exactly what is says i.e showing the performance of the APIs for the time range selected.
-    - Partners - will also be applied to all the tiles represents exactly what is says i.e showing the performance of the APIs for the selected liftr partners for the time range selected.
+    - Time range - will be applied to all the tiles and represents exactly what it says i.e showing the performance of the APIs for the time range selected.
+    - Partners - will also be applied to all the tiles represents exactly what it says i.e showing the performance of the APIs for the selected liftr partners for the time range selected.
     - Environment - will also be applied to all the tiles represents exactly what is says i.e showing the performance of the APIs for that environment for the selected liftr partners for the time range selected. We have regions eastus and eastus2 under canary environment and any other region goes inside the Production environment.
     - Region - This selection overrides the Environment selection. This also applies to all the tiles and can be leveraged to have more control over the results. One can add the region(eg - westus2) into this field and the results will be shown accordingly.
     - Percentile - will be applied to all the tiles expect the tabular tiles named - *Details of Arm operations* and *Details of internal/dependent operations* respectively. Please use this dropdown to toggle between P50, P75, P90, P95 and P99 options respectively and the results in the tiles will change accordingly.
-    - Arm OperationName - this is a textual field and the user is free to add any Arm operation of their choice and the results of all the tiles will update accordingly. 
-    - Internal/Dependent OperationName - this is also a textual field and will update all the tiles dedicated on tracking and showing the latencies of dependent operations i.e tiles - *Latency by percentile for internal/dependent Operations*, *Average percentile latency of all internal/dependent operations(in secs)* and *Details of internal/dependent operations*.
+    - Arm OperationName - this is a single selection dynamic dropdown field that gets updated based on the 4 parameters selected - *Region, Environment, Time range and Partners*.
+    - Internal/Dependent OperationName - this is a single selection dynamic dropdown field that gets updated based on the 5 parameters selected - *Region, Environment, Time range, Partners and Arm OperationName*.
     - UniqueidentifierId - The user can track the detailed latencies of an uniqueIdentierId by passing it in this textual field. This field will updated the tiles with names - *Details of Arm operations* and *Details of internal/dependent operations* respectively.
     - CorrelationId - The user can track the detailed latencies wrt a correlationId by passing it in this textual field. This field will updated the tiles with names - *Details of Arm operations* and *Details of internal/dependent operations* respectively.
 
