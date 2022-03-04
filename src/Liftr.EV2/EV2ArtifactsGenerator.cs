@@ -143,7 +143,8 @@ namespace Microsoft.Liftr.EV2
                 image.Bake.RunnerInformation.UserAssignedManagedIdentityResourceId,
                 image.Bake.RunnerInformation.UserAssignedManagedIdentityObjectId,
                 image.Bake.Cloud,
-                entryScript: "1_BakeVMImage.sh");
+                entryScript: "1_BakeVMImage.sh",
+                oneBranchContainerImages: image.OneBranchContainerImages);
             File.WriteAllText(parameterFilePath, parameters.ToJsonString(indented: true));
         }
 
@@ -177,7 +178,8 @@ namespace Microsoft.Liftr.EV2
                 distribute.RunnerInformation.UserAssignedManagedIdentityResourceId,
                 distribute.RunnerInformation.UserAssignedManagedIdentityObjectId,
                 distribute.Cloud,
-                entryScript: "2_ImportVMImage.sh");
+                entryScript: "2_ImportVMImage.sh",
+                oneBranchContainerImages: null);
             File.WriteAllText(parameterFilePath, parameters.ToJsonString(indented: true));
         }
 
@@ -628,7 +630,8 @@ namespace Microsoft.Liftr.EV2
             string managedIdentityResourceId,
             Guid managedIdentityObjectId,
             CloudType cloud,
-            string entryScript)
+            string entryScript,
+            string[] oneBranchContainerImages)
         {
             if (options == null)
             {
@@ -663,6 +666,24 @@ namespace Microsoft.Liftr.EV2
                     Value = cloud.ToString(),
                 },
             };
+
+            if (oneBranchContainerImages?.Length > 0)
+            {
+                foreach (var image in oneBranchContainerImages)
+                {
+                    var envVariable = new ShellEnvironmentVariable()
+                    {
+                        Name = image.Replace("-", string.Empty, StringComparison.OrdinalIgnoreCase), // we cannot have '-' in environment variable.
+                        AsSecureValue = true,
+                        Reference = new ParameterReference()
+                        {
+                            Path = $"docker-images/{image}.tar.gz",
+                        },
+                    };
+
+                    envVariables.Add(envVariable);
+                }
+            }
 
             var shellLaunch = new ShellLaunch()
             {

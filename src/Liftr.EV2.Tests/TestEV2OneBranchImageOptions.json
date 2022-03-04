@@ -1,0 +1,47 @@
+{
+  "ServiceTreeName": "Sample Service Tree Name",
+  "ServiceTreeId": "c40f3dd2-9bf7-4d98-a2e3-48bcdc77dcd6",
+  "NotificationEmail": "asdasd@microsoft.com",
+  "Images": [
+    {
+      "ImageName": "TestBaseImage",
+      "SourceImage": "U1804LTS",
+      "Environment": "prod",
+      "Bake": {
+        "ConfigurationPath": "config.json",
+        "RunnerInformation": {
+          "Location": "West US",
+          "SubscriptionId": "d21a525e-7c86-486d-a79e-a4f3622f639a",
+          "UserAssignedManagedIdentityResourceId": "/subscriptions/d21a525e-7c86-486d-a79e-a4f3622f639a/resourceGroups/5e-ev2-msi-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/5e-ev2-msi",
+          "UserAssignedManagedIdentityObjectId": "2de0ece1-7346-4dc1-9688-13f67d009795"
+        }
+      },
+      "Distribute": [
+        {
+          "Cloud": "Mooncake",
+          "ConfigurationPath": "configMC.json",
+          "RunnerInformation": {
+            "Location": "China North",
+            "SubscriptionId": "9e1082b4-f487-48ab-8f48-638b38548e9b",
+            "UserAssignedManagedIdentityResourceId": "/subscriptions/9e1082b4-f487-48ab-8f48-638b38548e9b/resourceGroups/5e-ev2-msi-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/5e-ev2-msi",
+            "UserAssignedManagedIdentityObjectId": "72329cee-3147-4c69-beb1-f2c4c4f62136"
+          }
+        },
+        {
+          "Cloud": "Fairfax",
+          "ConfigurationPath": "configFF.json",
+          "RunnerInformation": {
+            "Location": "MayField",
+            "SubscriptionId": "149e15c8-e8cb-47b2-a97d-ccd2f30ca879",
+            "UserAssignedManagedIdentityResourceId": "/subscriptions/149e15c8-e8cb-47b2-a97d-ccd2f30ca879/resourceGroups/5e-ev2-msi-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/5e-ev2-msi",
+            "UserAssignedManagedIdentityObjectId": "d4690eda-0408-457e-bc3d-4285165bbf83"
+          }
+        }
+      ],
+      "OneBranchContainerImages": [
+        "test-result-aggregator",
+        "onbranch-sample-image-name"
+      ]
+    }
+  ]
+}

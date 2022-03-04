@@ -112,6 +112,42 @@ namespace Microsoft.Liftr.EV2.Tests
         }
 
         [Fact]
+        public void VerifyGenerateOneBranchImageBuilderArtifacts()
+        {
+            var artifact = new EV2ArtifactsGenerator(_logger);
+
+            var options = JsonConvert.DeserializeObject<EV2ImageBuilderOptions>(File.ReadAllText("TestEV2OneBranchImageOptions.json"));
+
+            var dir = Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString());
+
+            artifact.GenerateImageBuilderArtifacts(options, dir);
+
+            var folders = Directory.GetDirectories(dir);
+
+            Assert.Single(folders);
+
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.TestBaseImage-bake.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutSpec.TestBaseImage-bake.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutParameters.TestBaseImage-bake.json")));
+
+            // bake stage can contain the container image reference
+            var parameterContent = File.ReadAllText(Path.Combine(dir, "image_builder", "RolloutParameters.TestBaseImage-bake.json"));
+            Assert.Contains("onbranch-sample-image-name.tar.gz", parameterContent, StringComparison.OrdinalIgnoreCase);
+
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.TestBaseImage-dist2-Fairfax.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutSpec.TestBaseImage-dist2-Fairfax.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutParameters.TestBaseImage-dist2-Fairfax.json")));
+
+            // distribute stage should not contain the container image reference
+            parameterContent = File.ReadAllText(Path.Combine(dir, "image_builder", "RolloutParameters.TestBaseImage-dist2-Fairfax.json"));
+            Assert.DoesNotContain("onbranch-sample-image-name.tar.gz", parameterContent, StringComparison.OrdinalIgnoreCase);
+
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.TestBaseImage-dist1-Mooncake.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutSpec.TestBaseImage-dist1-Mooncake.json")));
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutParameters.TestBaseImage-dist1-Mooncake.json")));
+        }
+
+        [Fact]
         public void VerifyGenerateImageBuilderArtifactsWithRolloutName()
         {
             var artifact = new EV2ArtifactsGenerator(_logger);

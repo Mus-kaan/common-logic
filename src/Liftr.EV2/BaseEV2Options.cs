@@ -13,7 +13,5 @@ namespace Microsoft.Liftr.EV2
         public Guid ServiceTreeId { get; set; }
 
         public string NotificationEmail { get; set; }
-
-        public string[] OneBranchContainerImages { get; set; }
     }
 }

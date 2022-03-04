@@ -80,6 +80,8 @@ namespace Microsoft.Liftr.EV2
         /// </summary>
         public IEnumerable<EnvironmentOptions> Distribute { get; set; }
 
+        public string[] OneBranchContainerImages { get; set; }
+
         public void CheckValid()
         {
             if (string.IsNullOrEmpty(ImageName))

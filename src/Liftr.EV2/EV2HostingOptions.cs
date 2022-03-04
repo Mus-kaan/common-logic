@@ -10,6 +10,8 @@ namespace Microsoft.Liftr.EV2
 {
     public class EV2HostingOptions : BaseEV2Options
     {
+        public string[] OneBranchContainerImages { get; set; }
+
         public IEnumerable<TargetEnvironment> TargetEnvironments { get; set; }
 
         public void CheckValid()
