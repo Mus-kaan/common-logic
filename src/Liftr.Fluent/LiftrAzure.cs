@@ -744,6 +744,33 @@ namespace Microsoft.Liftr.Fluent
                 return null;
             }
         }
+
+        public async Task<IEnumerable<IGalleryImageVersion>> ListImageVersionsAsync(
+            string rgName,
+            string galleryName,
+            string imageName)
+        {
+            if (string.IsNullOrEmpty(rgName))
+            {
+                throw new ArgumentNullException(nameof(rgName));
+            }
+
+            if (string.IsNullOrEmpty(galleryName))
+            {
+                throw new ArgumentNullException(nameof(galleryName));
+            }
+
+            if (string.IsNullOrEmpty(imageName))
+            {
+                throw new ArgumentNullException(nameof(imageName));
+            }
+
+            _logger.Information($"Listing image versions for: resourceGroup={rgName}, gallery={galleryName}, image={imageName}");
+            IEnumerable<IGalleryImageVersion> galleryImageVersions = await FluentClient.GalleryImageVersions
+                .ListByGalleryImageAsync(rgName, galleryName, imageName);
+
+            return galleryImageVersions;
+        }
         #endregion
 
         public async Task<string> WaitAsyncOperationAsync(

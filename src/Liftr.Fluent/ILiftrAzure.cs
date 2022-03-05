@@ -495,6 +495,11 @@ namespace Microsoft.Liftr.Fluent
             string galleryName,
             string imageName,
             string imageVersionName);
+
+        Task<IEnumerable<IGalleryImageVersion>> ListImageVersionsAsync(
+            string rgName,
+            string galleryName,
+            string imageName);
         #endregion
     }
 }
