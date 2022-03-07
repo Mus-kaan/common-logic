@@ -13,7 +13,6 @@ namespace Microsoft.Liftr.DBService.Contracts
             ResourceId = liftrResourceId;
         }
 
-        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("resourceType")]
         public string ResourceType { get; set; }
 
@@ -21,7 +20,6 @@ namespace Microsoft.Liftr.DBService.Contracts
         [BsonElement("resourceGroup")]
         public string ResourceGroup { get; set; }
 
-        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("region")]
         public string Region { get; set; }
 

@@ -22,11 +22,9 @@ namespace Microsoft.Liftr.DBService.Contracts
         [BsonElement("mpResourceid")]
         public string MarketPlaceResourceId { get; set; }
 
-        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("publisherId")]
         public string PublisherId { get; set; }
 
-        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("offerId")]
         public string OfferId { get; set; }
 
@@ -42,7 +40,6 @@ namespace Microsoft.Liftr.DBService.Contracts
         [BsonElement("termUnit")]
         public string TermUnit { get; set; }
 
-        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("startDate")]
         public DateTime? StartDate { get; set; }
 
@@ -66,7 +63,6 @@ namespace Microsoft.Liftr.DBService.Contracts
         [BsonElement("billingTermType")]
         public BillingTermTypes? BillingTermType { get; set; }
 
-        [EntityUpdateAttribute(allowed: true)]
         [BsonElement("resourceUri")]
         public Uri ResourceUri { get; set; }
     }
