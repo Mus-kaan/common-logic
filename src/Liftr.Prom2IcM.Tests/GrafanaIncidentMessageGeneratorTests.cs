@@ -2,13 +2,50 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
+using Microsoft.AzureAd.Icm.Types;
 using Microsoft.Liftr.IcmConnector;
+using Microsoft.Liftr.Tests;
+using System;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Liftr.Prom2IcM.Tests
 {
-    public class GrafanaIncidentMessageGeneratorTests
+    public class GrafanaIncidentMessageGeneratorTests : LiftrTestBase
     {
+        public GrafanaIncidentMessageGeneratorTests(ITestOutputHelper output)
+            : base(output)
+        {
+        }
+
+        [Fact]
+        public void VerifyFiring()
+        {
+            var icmOptions = new ICMClientOptions()
+            {
+                NotificationEmail = "fake-email@asd.com",
+                IcmRoutingId = Guid.NewGuid().ToString(),
+            };
+
+            var resolvingWebhook = "{\"title\":\"[OK] Production integration test failure alert\",\"ruleId\":4,\"ruleName\":\"Production integration test failure alert\",\"state\":\"ok\",\"evalMatches\":[],\"orgId\":1,\"dashboardId\":9,\"panelId\":2,\"tags\":{},\"ruleUrl\":\"https://dashboard.wus2.observability-ms.azgrafana-test.io/d/test-integration/test-integration?tab=alert\u0026viewPanel=2\u0026orgId=1\",\"imageUrl\":\"https://stgmdevda211225wus2x.blob.core.windows.net/img-renderer-container/yu1zfiIwBSlISS5M06VJ9OB129S7CT.png\",\"message\":\"[sev3]  There are at least 2 failed integration test run in the past hour. Please see details in Jenkins: \nhttps://jenkins.cicd.azliftr-test.io/\"}";
+            var grafanaWebhookMessage = resolvingWebhook.FromJson<GrafanaWebhookMessage>();
+
+            var generated = GrafanaIncidentMessageGenerator.GenerateIncidentFromGrafanaAlert(grafanaWebhookMessage, icmOptions, Logger);
+            Assert.Equal("Production integration test failure alert", generated.Title);
+            Assert.Equal(IncidentStatus.Active, generated.Status);
+        }
+
+        [Theory]
+        [InlineData("[OK] Production integration test failure alert", "Production integration test failure alert")]
+        [InlineData("[Alerting] Production integration test failure alert", "Production integration test failure alert")]
+        [InlineData("Production integration test failure alert", "Production integration test failure alert")]
+        [InlineData("Product[ion integratio]n test failure alert", "Product[ion integratio]n test failure alert")]
+        public void VerifyNormalizeTitle(string message, string parsedTitle)
+        {
+            var output = GrafanaIncidentMessageGenerator.NormalizeGrafanaAlertTitle(message);
+            Assert.Equal(parsedTitle, output);
+        }
+
         [Fact]
         public void VerifyParseSeverity()
         {

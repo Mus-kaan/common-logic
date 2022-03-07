@@ -7,7 +7,7 @@ replicaCount: 1
 image:
   repository: liftracr.azurecr.io/artifact/c6ca85d0-80f3-49b5-b6c0-da1de7dbfc6f/buddy/prom2icm
   pullPolicy: IfNotPresent
-  tag: "1.2201.01872.2767-8f3d31c1"
+  tag: "1.2201.01891.2844-6d1b2e1b"
 
 imagePullSecrets: []
 nameOverride: ""

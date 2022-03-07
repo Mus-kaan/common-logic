@@ -18,7 +18,6 @@ namespace Microsoft.Liftr.IcmConnector
 
         public static AlertSourceIncident GenerateIncidentFromGrafanaAlert(
             GrafanaWebhookMessage webhookMessage,
-            MetaInfo computeMeta,
             ICMClientOptions icmOptions,
             Serilog.ILogger logger)
         {
@@ -42,14 +41,12 @@ namespace Microsoft.Liftr.IcmConnector
                 throw new ArgumentNullException(nameof(logger));
             }
 
-            // computeMeta can be null when IMDS is not available, e.g. local debug, not in azure.
-            var computeInstanceMeta = computeMeta?.InstanceMeta?.Compute;
-
-            var incidentStartTimeBucket = DateTime.UtcNow.RoundUp(TimeSpan.FromMinutes(10));
-            var incidentTitle = webhookMessage.Title;
+            // In case we have multiple replicated Grafana instances firing the same alert, we want to avoid too many duplicated alerts.
+            var incidentStartTimeBucket = DateTime.UtcNow.RoundUp(TimeSpan.FromHours(3));
+            var incidentTitle = NormalizeGrafanaAlertTitle(webhookMessage.Title);
 
             var incidentId = $"{MessageGeneratorHelper.ComputeSha256Hash(webhookMessage.RuleId + incidentTitle + incidentStartTimeBucket.ToZuluString())}";
-            var icmCorrelationId = HttpUtility.UrlEncode($"prom2icm://prom/{webhookMessage.Title}");
+            var icmCorrelationId = HttpUtility.UrlEncode($"grafana2icm://grafana/{incidentTitle}");
 
             var incidentLocation = new IncidentLocation()
             {
@@ -58,13 +55,12 @@ namespace Microsoft.Liftr.IcmConnector
 
             var severity = ExtractSeverityFromMessage(webhookMessage.Message);
 
-            logger.Information("incidentId: {incidentId}, icmCorrelationId: {icmCorrelationId}, incidentLocation: {incidentLocation}", incidentId, icmCorrelationId, incidentLocation);
+            logger.Information("[grafana2icm] incidentId: {incidentId}, icmCorrelationId: {icmCorrelationId}, incidentLocation: {incidentLocation}, incidentStartTimeBucket: {incidentStartTimeBucket}", incidentId, icmCorrelationId, incidentLocation, incidentStartTimeBucket);
 
             DateTime now = DateTime.UtcNow;
 
             (var description, var summary) = GenerateXHtmlDescription(
                         webhookMessage,
-                        computeInstanceMeta,
                         incidentTitle,
                         now.AddMilliseconds(1));
 
@@ -168,6 +164,22 @@ namespace Microsoft.Liftr.IcmConnector
             };
         }
 
+        public static string NormalizeGrafanaAlertTitle(string title)
+        {
+            // "[Alerting] Production integration test failure alert" -> "Production integration test failure alert"
+            // "[OK] Production integration test failure alert" -> "Production integration test failure alert"
+            if (title != null && title.OrdinalStartsWith("[") && title.OrdinalContains("]"))
+            {
+                var removeBracket = title.Substring(title.OrdinalIndexOf("]") + 1).Trim();
+                if (removeBracket.Length > 2)
+                {
+                    return removeBracket;
+                }
+            }
+
+            return title;
+        }
+
         public static int ExtractSeverityFromMessage(string message)
         {
             var parsedSeverity = 4;
@@ -243,7 +255,6 @@ namespace Microsoft.Liftr.IcmConnector
 
         private static (DescriptionEntry, string) GenerateXHtmlDescription(
             GrafanaWebhookMessage webhookMessage,
-            ComputeMetadata computeMeta,
             string alertName,
             DateTime date)
         {

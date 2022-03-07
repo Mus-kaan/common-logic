@@ -165,7 +165,7 @@ namespace Microsoft.Liftr.IcmConnector
                 var icmClientOptions = _icmClientProvider.GetClientOptions();
                 var connectorId = Guid.Parse(icmClientOptions.IcmConnectorId);
 
-                var icmIncident = await TransformGrafanaAlertToIcmIncidentAsync(webhookMessage);
+                var icmIncident = TransformGrafanaAlertToIcmIncident(webhookMessage);
 
                 var incidentSourceId = icmIncident.Source.IncidentId;
 
@@ -315,6 +315,36 @@ namespace Microsoft.Liftr.IcmConnector
                 return false;
             }
 
+            if (promAlert?.Labels?.Alertname?.OrdinalEquals("KubeAggregatedAPIErrors") == true)
+            {
+                _logger.Information("KubeAggregatedAPIErrors alert is skipped. This is mostly transient and do not have easy intervention steps.");
+                return false;
+            }
+
+            if (promAlert?.Labels?.Alertname?.OrdinalEquals("KubeAPIErrorBudgetBurn") == true)
+            {
+                _logger.Information("KubeAPIErrorBudgetBurn alert is skipped. This is mostly transient and do not have easy intervention steps.");
+                return false;
+            }
+
+            if (promAlert?.Labels?.Alertname?.OrdinalEquals("KubeAggregatedAPIDown") == true && promAlert?.Annotations?.description?.OrdinalContains("metrics.k8s.io") == true)
+            {
+                _logger.Information("KubeAggregatedAPIDown alert is skipped. The metrics API is not very critical for us.");
+                return false;
+            }
+
+            if (promAlert?.Labels?.Alertname?.OrdinalEquals("AlertmanagerFailedToSendAlerts") == true || promAlert?.Labels?.Alertname?.OrdinalEquals("AlertmanagerClusterFailedToSendAlerts") == true)
+            {
+                _logger.Information($"{promAlert?.Labels?.Alertname} alert is skipped. Probably other alertManager channels are impacted. However. this does matter too much for us science this IcM connector already received the alert.");
+                return false;
+            }
+
+            if (promAlert?.Labels?.Alertname?.OrdinalEquals("KubeProxyDown") == true)
+            {
+                _logger.Information("KubeProxyDown alert is skipped. KubeProxy does not have runtime impact on application.");
+                return false;
+            }
+
             return true;
         }
 
@@ -326,11 +356,10 @@ namespace Microsoft.Liftr.IcmConnector
             return incident;
         }
 
-        private async Task<AlertSourceIncident> TransformGrafanaAlertToIcmIncidentAsync(GrafanaWebhookMessage webhookMessage)
+        private AlertSourceIncident TransformGrafanaAlertToIcmIncident(GrafanaWebhookMessage webhookMessage)
         {
             // Get information about the running Azure compute from the instance metadata service.
-            var instanceMeta = await InstanceMetaHelper.GetMetaInfoAsync();
-            var incident = GrafanaIncidentMessageGenerator.GenerateIncidentFromGrafanaAlert(webhookMessage, instanceMeta, _icmClientProvider.GetClientOptions(), _logger);
+            var incident = GrafanaIncidentMessageGenerator.GenerateIncidentFromGrafanaAlert(webhookMessage, _icmClientProvider.GetClientOptions(), _logger);
             return incident;
         }
 

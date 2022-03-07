@@ -14,5 +14,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Prom2IcM\Liftr.Prom2IcM.csproj" />
+    <ProjectReference Include="..\Liftr.Tests.Common\Liftr.Tests.Common.csproj" />
   </ItemGroup>
 </Project>
