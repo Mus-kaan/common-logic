@@ -33,7 +33,14 @@ fi
 # CDPx Versioning: https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/325/Versioning
 ImageVersion=$(<numeric.packageversion.info)
 
-ImageMetadataDir="$CurrentDir/cdpx-images"
+CraneFile="crane"
+
+#If crane is in EV2 tar, this came from a onebranch build
+if [ -f "$CraneFile" ]; then
+    ImageMetadataDir="$CurrentDir/docker-image-metadata"
+else
+    ImageMetadataDir="$CurrentDir/cdpx-images"
+fi
 
 if [ -d $ImageMetadataDir ]; then
     echo "=============================================================================================="
@@ -67,10 +74,15 @@ if [ -d $ImageMetadataDir ]; then
 
     ./AzLogin.sh
 
-    ./ImportCDPxImages.sh \
-    --ACRName="$ACRName" \
-    --ImageMetadataDir="$ImageMetadataDir" \
-    --DeploymentSubscriptionId="$DeploymentSubscriptionId"
+    #If crane is in EV2 tar, this came from a onebranch build
+    if [ -f "$CraneFile" ]; then
+        ./ImportImagesFromTarArtifacts.sh
+    else
+        ./ImportCDPxImages.sh \
+        --ACRName="$ACRName" \
+        --ImageMetadataDir="$ImageMetadataDir" \
+        --DeploymentSubscriptionId="$DeploymentSubscriptionId"
+    fi
 
     ImportImageScript="$CurrentDir/ImportDependencyImages.sh"
 

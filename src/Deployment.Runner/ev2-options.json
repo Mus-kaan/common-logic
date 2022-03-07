@@ -21,5 +21,12 @@
         "UserAssignedManagedIdentityObjectId": "bb8eb613-5ffd-4ece-b7c2-6821b19a69c2"
       }
     }
+  ],
+  "OneBranchContainerImages": [
+    "sample-web-common-repo",
+    "sample-worker-common-repo",
+    "sample-console-common-repo",
+    "test-result-aggregator",
+    "prom2icm"
   ]
 }

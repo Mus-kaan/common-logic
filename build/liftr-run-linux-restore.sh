@@ -42,5 +42,5 @@ chmod +x "$Helm"
 cd $SrcRoot/src/Samples/Liftr.Sample.Web
 dotnet tool restore
 
-echo "Successfully finished pakcage restore!"
+echo "Successfully finished package restore!"
 echo "**********[Liftr]**********[https://aka.ms/liftr]**********[Liftr]**********[https://aka.ms/liftr]**********"

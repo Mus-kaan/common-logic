@@ -2,10 +2,10 @@
 
 ./build/liftr-run-linux-build.sh
 
-./build/liftr-run-linux-pack.sh
+./build/liftr-run-linux-pack-onebranch.sh
 
-./build/liftr-run-linux-pack-ev2-ext.sh
+./build/liftr-run-linux-move-artifacts-onebranch.sh
 
-./build/liftr-run-linux-pack-ev2-vmss.sh
+./build/liftr-run-linux-pack-ev2-ext-onebranch.sh
 
-./build/liftr-run-linux-pack-baseimage.sh
+cp -r ./docker-images ./out-ev2/tar-tmp

@@ -31,8 +31,14 @@ fi
 
 ./ConnectAKS.sh
 
-./ImportCDPxImages.sh \
---DeploymentSubscriptionId="$DeploymentSubscriptionId"
+CraneFile="crane"
+#If crane is in EV2 tar, this came from a onebranch build
+if [ -f "$CraneFile" ]; then
+    ./PushImageToACR.sh
+else
+    ./ImportCDPxImages.sh \
+    --DeploymentSubscriptionId="$DeploymentSubscriptionId"
+fi
 
 ./DeployAKSApp.sh \
 --DeploymentSubscriptionId="$DeploymentSubscriptionId" \

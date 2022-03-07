@@ -27,8 +27,14 @@ fi
 
 ./AzLogin.sh
 
-./ImportCDPxImages.sh \
---DeploymentSubscriptionId="$DeploymentSubscriptionId"
+CraneFile="crane"
+#If crane is in EV2 tar, this came from a onebranch build
+if [ -f "$CraneFile" ]; then
+    ./PushImageToACR.sh
+else
+    ./ImportCDPxImages.sh \
+    --DeploymentSubscriptionId="$DeploymentSubscriptionId"
+fi
 
 echo "Successfully finished running: $currentScriptName"
 echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"
