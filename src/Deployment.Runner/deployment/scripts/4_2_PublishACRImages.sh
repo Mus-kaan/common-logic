@@ -81,6 +81,10 @@ else
     if [ -f "$UnzippedTarImagePath" ]; then
         echo "Docker push $UnzippedTarImagePath to $DestImageFullName"
         $Crane push $UnzippedTarImagePath $DestImageFullName
+    elif [ -f "$TarImagePath" ]; then
+        echo "Docker push $TarImagePath to $DestImageFullName"
+        gunzip $TarImagePath
+        $Crane push $UnzippedTarImagePath $DestImageFullName
     else
         echo "Cannot find tar file at $UnzippedTarImagePath. Exiting..."
         exit 1
