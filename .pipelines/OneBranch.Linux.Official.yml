@@ -44,17 +44,17 @@ extends:
       binskim:
         enabled: true
         analyzeTargetGlob: "**/Microsoft.Liftr.*.dll"
-      eslint:
-        enabled: false
       cg:
         failOnAlert: true
       credscan:
         enabled: true
         suppressionsFile: $(Build.SourcesDirectory)/.config/CredScanSuppressions.json
+      policheck:
+        break: true # always break the build on policheck issues. You can disable it by setting to 'false'
       sbom:
         enabled: true
       tsa:
-        enabled: false
+        enabled: true
       perStage:
         sdl_sources:
           checkout_all_repos: true
