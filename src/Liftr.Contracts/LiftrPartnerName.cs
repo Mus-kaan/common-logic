@@ -12,5 +12,6 @@ namespace Microsoft.Liftr.Contracts
         Logz,
         Nginx,
         Dynatrace,
+        Qumulo,
     }
 }
