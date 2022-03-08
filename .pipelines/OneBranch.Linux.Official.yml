@@ -59,5 +59,8 @@ extends:
         sdl_sources:
           checkout_all_repos: true
 
+    featureFlags:
+      linuxEsrpSigningPreview: true
+
     stages:
       - template: /.pipelines/OneBranch.Linux.yml@self
