@@ -41,6 +41,7 @@ namespace Microsoft.Liftr.Metrics.Prom
                     var summaryName = PrometheusHelper.ConvertToPrometheusMetricsName("app_" + name + "DurationMilliseconds");
 
                     var labelNames = new List<string> { "result" };
+
                     if (timedOperation.MetricLabels?.Any() == true)
                     {
                         labelNames.AddRange(timedOperation.MetricLabels.Select(kvp => kvp.Key));
@@ -63,18 +64,26 @@ namespace Microsoft.Liftr.Metrics.Prom
                 });
 
                 var labelValues = new List<string> { timedOperation.IsSuccessful ? "success" : "failure" };
+
                 if (timedOperation.MetricLabels?.Any() == true)
                 {
                     labelValues.AddRange(timedOperation.MetricLabels.Select(kvp => kvp.Value));
                 }
 
-                summary
-                    .WithLabels(labelValues.ToArray())
-                    .Observe(timedOperation.ElapsedMilliseconds);
+                try
+                {
+                    summary
+                        .WithLabels(labelValues.ToArray())
+                        .Observe(timedOperation.ElapsedMilliseconds);
+                }
+                catch (Exception ex)
+                {
+                    Serilog.Log.Warning(ex, $"err_emit_prom_metrics. timedOperationName: {timedOperation.Name}, labelNames: ({string.Join(", ", summary.LabelNames)}), labelValues: ({string.Join(", ", labelValues)})");
+                }
             }
             catch (Exception ex)
             {
-                Serilog.Log.Warning(ex, "Failed at generating Prometheus metrics");
+                Serilog.Log.Warning(ex, $"err_emit_prom_metrics. Failed at generating Prometheus metrics. timedOperationName: {timedOperation.Name}");
             }
         }
     }
