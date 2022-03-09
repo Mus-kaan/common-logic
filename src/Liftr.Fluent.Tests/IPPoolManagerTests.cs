@@ -60,6 +60,12 @@ namespace Microsoft.Liftr.Fluent.Tests
                 ipList = await pool.ListInboundIPAsync(location);
                 Assert.Equal(5, ipList.Count());
 
+                ipList = await pool.ListOutboundIPAsync();
+                Assert.Equal(10, ipList.Count());
+
+                ipList = await pool.ListInboundIPAsync();
+                Assert.Equal(10, ipList.Count());
+
                 var inbound1 = await pool.GetAvailableInboundIPAsync(location);
                 Assert.EndsWith("-01", inbound1.Name, StringComparison.Ordinal);
                 Assert.Contains(nameof(IPCategory.Inbound), inbound1.Name, StringComparison.Ordinal);

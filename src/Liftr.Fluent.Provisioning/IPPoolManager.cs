@@ -125,6 +125,18 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             }
         }
 
+        public Task<IEnumerable<IPublicIPAddress>> ListOutboundIPAsync()
+        {
+            if (_isAKS)
+            {
+                return ListIPAsync(IPCategory.Outbound);
+            }
+            else
+            {
+                return ListIPAsync(IPCategory.InOutbound);
+            }
+        }
+
         public Task<IEnumerable<IPublicIPAddress>> ListInboundIPAsync(Region location)
         {
             if (_isAKS)
@@ -134,6 +146,18 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             else
             {
                 return ListIPAsync(location, IPCategory.InOutbound);
+            }
+        }
+
+        public Task<IEnumerable<IPublicIPAddress>> ListInboundIPAsync()
+        {
+            if (_isAKS)
+            {
+                return ListIPAsync(IPCategory.Inbound);
+            }
+            else
+            {
+                return ListIPAsync(IPCategory.InOutbound);
             }
         }
 
@@ -159,6 +183,24 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             {
                 return GetAvailableIPAsync(location, IPCategory.InOutbound);
             }
+        }
+
+        private async Task<IEnumerable<IPublicIPAddress>> ListIPAsync(IPCategory ipCategory)
+        {
+            var az = _azureClientFactory.GenerateLiftrAzure();
+            var ipNamePrefix = GetIPNamePrefix(ipCategory);
+            IEnumerable<IPublicIPAddress> existingIPs;
+
+            if (ipCategory == IPCategory.Inbound)
+            {
+                existingIPs = await az.ListPublicIPAsync(InboundIPPoolResourceGroupName, ipNamePrefix);
+            }
+            else
+            {
+                existingIPs = await az.ListPublicIPAsync(OutboundIPPoolResourceGroupName, ipNamePrefix);
+            }
+
+            return existingIPs;
         }
 
         private async Task<IEnumerable<IPublicIPAddress>> ListIPAsync(Region location, IPCategory ipCategory)
@@ -262,12 +304,17 @@ namespace Microsoft.Liftr.Fluent.Provisioning
 
         private string GetIPNamePrefix(Region location, IPCategory ipCategory)
         {
+            return $"{GetIPNamePrefix(ipCategory)}{location.ShortName()}-";
+        }
+
+        private string GetIPNamePrefix(IPCategory ipCategory)
+        {
             if (ipCategory != IPCategory.InOutbound)
             {
-                return $"{_namePrefix}-{GetReservedNamePartWithCategory(ipCategory.ToString())}-{location.ShortName()}-";
+                return $"{_namePrefix}-{GetReservedNamePartWithCategory(ipCategory.ToString())}-";
             }
 
-            return $"{_namePrefix}-{c_reservedNamePart}-{location.ShortName()}-";
+            return $"{_namePrefix}-{c_reservedNamePart}-";
         }
 
         private static string GetIPName(Region location, int cnt, string ipNamePrefix)
