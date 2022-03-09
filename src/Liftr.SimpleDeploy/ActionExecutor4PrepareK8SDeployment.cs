@@ -36,7 +36,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                 throw new InvalidOperationException(errMsg);
             }
 
-            await WriteReservedInboundIPToDiskAsync(azFactory, aksRGName, aksName, parsedRegionInfo.AKSRegion);
+            var inboundIP = await WriteReservedInboundIPToDiskAsync(azFactory, aksRGName, aksName, parsedRegionInfo.AKSRegion);
 
             var regionalSubdomain = $"{regionalNamingContext.Location.ShortName()}.{targetOptions.DomainName}";
             File.WriteAllText("aks-domain.txt", $"{aksName}.{targetOptions.DomainName}");
@@ -58,6 +58,7 @@ namespace Microsoft.Liftr.SimpleDeploy
                         BaseName = parsedRegionInfo.RegionOptions.ComputeBaseName,
                         NamingContext = regionalNamingContext,
                         IPPoolManager = _ipPool,
+                        AKSInboundIP = inboundIP,
                     };
 
                     await SimpleDeployExtension.AfterPrepareK8SDeploymentAsync.Invoke(parameters);
