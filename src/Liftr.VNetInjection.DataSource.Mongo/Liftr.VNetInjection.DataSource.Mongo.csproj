@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>$(LiftrClassLibraryTargetFramework21)</TargetFramework>
+		<RootNamespace>Microsoft.Liftr.VNetInjection.DataSource.Mongo</RootNamespace>
+		<AssemblyName>Microsoft.Liftr.VNetInjection.DataSource.Mongo</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Liftr.DataSource.Mongo\Liftr.DataSource.Mongo.csproj" />
+	</ItemGroup>
+
+</Project>

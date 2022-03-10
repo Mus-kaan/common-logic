@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>$(LiftrClassLibraryTargetFramework21)</TargetFramework>
+		<RootNamespace>Microsoft.Liftr.VNetInjection.DataSource.Mongo.Hosting</RootNamespace>
+		<AssemblyName>Microsoft.Liftr.VNetInjection.DataSource.Mongo.Hosting</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions)" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Liftr.VNetInjection.DataSource.Mongo\Liftr.VNetInjection.DataSource.Mongo.csproj" />
+	</ItemGroup>
+</Project>
