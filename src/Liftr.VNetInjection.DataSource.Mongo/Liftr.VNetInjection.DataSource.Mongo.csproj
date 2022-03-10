@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+		<IsPackable>true</IsPackable>
 		<TargetFramework>$(LiftrClassLibraryTargetFramework21)</TargetFramework>
 		<RootNamespace>Microsoft.Liftr.VNetInjection.DataSource.Mongo</RootNamespace>
 		<AssemblyName>Microsoft.Liftr.VNetInjection.DataSource.Mongo</AssemblyName>
