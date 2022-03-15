@@ -18,6 +18,6 @@ namespace Microsoft.Liftr.Monitoring.VNext.DiagnosticSettings.Model
 
         public static List<string> SubscriptionLogCategories = new List<string> { "Administrative", "Security", "ServiceHealth", "Alert", "Recommendation", "Policy", "Autoscale", "ResourceHealth" };
 
-        public const string DiagnosticSettingsV2ApiVersion = "2017-05-01-preview";
+        public const string DiagnosticSettingsV2ApiVersion = "2021-05-01-preview";
     }
 }
