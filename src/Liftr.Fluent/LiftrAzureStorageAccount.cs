@@ -352,6 +352,31 @@ namespace Microsoft.Liftr.Fluent
             }
         }
 
+        public Task GrantTableContributorAsync(IStorageAccount storageAccount, IIdentity msi, CancellationToken cancellationToken = default)
+            => GrantTableContributorAsync(storageAccount, msi.GetObjectId(), cancellationToken);
+
+        public async Task GrantTableContributorAsync(IStorageAccount storageAccount, string objectId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await Authenticated.RoleAssignments
+                              .Define(SdkContext.RandomGuid())
+                              .ForObjectId(objectId)
+                              .WithRoleDefinition(GetStorageTableDataContributorRoleDefinitionId())
+                              .WithScope(storageAccount.Id)
+                              .CreateAsync(cancellationToken);
+                _logger.Information("Granted 'Storage Table Data Contributor' storage account '{resourceId}' to SPN with object Id {objectId}. roleDefinitionId: {roleDefinitionId}", storageAccount.Id, objectId, GetStorageQueueDataContributorRoleDefinitionId());
+            }
+            catch (CloudException ex) when (ex.IsDuplicatedRoleAssignment())
+            {
+            }
+            catch (CloudException ex) when (ex.IsMissUseAppIdAsObjectId())
+            {
+                _logger.Error("The object Id '{objectId}' is the object Id of the Application. Please use the object Id of the Service Principal. Details: https://aka.ms/liftr/sp-objectid-vs-app-objectid", objectId);
+                throw;
+            }
+        }
+
         public async Task DelegateStorageKeyOperationToKeyVaultAsync(IStorageAccount storageAccount, CancellationToken cancellationToken = default)
         {
             try
@@ -396,6 +421,9 @@ namespace Microsoft.Liftr.Fluent
 
         private string GetStorageQueueDataContributorRoleDefinitionId()
             => $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/974c5e8b-45b9-4653-ba55-5f855dd0fb88"; // Storage Queue Data Contributor
+
+        private string GetStorageTableDataContributorRoleDefinitionId()
+            => $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3"; // Storage Table Data Contributor
 
         private string GetStorageAccountKeyOperatorRoleDefinitionId()
             => $"/subscriptions/{FluentClient.SubscriptionId}/providers/Microsoft.Authorization/roleDefinitions/81a9662b-bebf-436f-a333-f67b29880f12"; // Storage Account Key Operator Service Role
