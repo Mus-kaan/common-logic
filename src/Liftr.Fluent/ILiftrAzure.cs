@@ -212,6 +212,16 @@ namespace Microsoft.Liftr.Fluent
             string objectId,
             CancellationToken cancellationToken = default);
 
+        Task GrantTableContributorAsync(
+            IStorageAccount storageAccount,
+            IIdentity msi,
+            CancellationToken cancellationToken = default);
+
+        Task GrantTableContributorAsync(
+            IStorageAccount storageAccount,
+            string objectId,
+            CancellationToken cancellationToken = default);
+
         Task DelegateStorageKeyOperationToKeyVaultAsync(IStorageAccount storageAccount, CancellationToken cancellationToken = default);
 
         Task DelegateStorageKeyOperationToKeyVaultAsync(IResourceGroup rg, CancellationToken cancellationToken = default);
