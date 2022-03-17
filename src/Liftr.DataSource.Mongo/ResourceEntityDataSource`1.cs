@@ -266,10 +266,11 @@ namespace Microsoft.Liftr.DataSource.Mongo
 
             var builder = Builders<TResource>.Filter;
             var filter = builder.Eq(u => u.EntityId, entity.EntityId);
+            var currentEntityLMT = entity.LastModifiedUTC;
 
             if (_enableOptimisticConcurrencyControl)
             {
-                filter &= builder.Eq(u => u.LastModifiedUTC, entity.LastModifiedUTC);
+                filter &= builder.Eq(u => u.LastModifiedUTC, currentEntityLMT);
             }
 
             var op = _logOperation ? _logger.StartTimedOperation($"{_collectionName}-{nameof(UpdateAsync)}") : null;
@@ -281,12 +282,13 @@ namespace Microsoft.Liftr.DataSource.Mongo
                 var replaceResult = await _collection.ReplaceOneAsync(filter, entity, options, cancellationToken);
                 if (replaceResult.ModifiedCount != 1)
                 {
-                    throw new UpdateConflictException($"The update failed due to conflict. The entity with object Id '{entity.EntityId}' might be deleted. Or the {nameof(entity.LastModifiedUTC)} does not match with '{entity.LastModifiedUTC.ToZuluString()}'.");
+                    throw new UpdateConflictException($"The update failed due to conflict. The entity with object Id '{entity.EntityId}' might be deleted. Or the {nameof(entity.LastModifiedUTC)} does not match with '{currentEntityLMT.ToZuluString()}'.");
                 }
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, $"{nameof(UpdateAsync)} failed");
+                entity.LastModifiedUTC = currentEntityLMT; // revert the LMT if update failed
                 op?.FailOperation(ex.Message);
                 throw;
             }
