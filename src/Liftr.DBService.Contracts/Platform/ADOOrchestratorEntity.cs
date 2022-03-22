@@ -12,9 +12,9 @@ using System.Collections.Generic;
 
 namespace Microsoft.Liftr.DBService.Contracts.Platform
 {
-    public class OrchestratorEntity : BaseEntity
+    public class ADOOrchestratorEntity : BaseEntity
     {
-        public OrchestratorEntity(string serviceTreeId, string repoName)
+        public ADOOrchestratorEntity(string serviceTreeId, string repoName)
         {
             ServiceTreeId = string.IsNullOrWhiteSpace(serviceTreeId) ? throw new ArgumentNullException(nameof(serviceTreeId)) : serviceTreeId;
             RepoName = string.IsNullOrWhiteSpace(repoName) ? throw new ArgumentNullException(nameof(repoName)) : repoName;
@@ -33,9 +33,6 @@ namespace Microsoft.Liftr.DBService.Contracts.Platform
         [BsonRepresentation(BsonType.String)]
         [BsonElement("status")]
         public ExecutionStatus Status { get; set; } = ExecutionStatus.New;
-
-        [BsonElement("executionResults")]
-        public IDictionary<string, string> ExecutionResults { get; set; }
 
         [BsonElement("executionSteps")]
         public IEnumerable<ExecutionStep> ExecutionSteps { get; set; }

@@ -28,7 +28,7 @@ namespace Microsoft.Liftr.DBService.Contracts.Platform
         [BsonElement("status")]
         [JsonConverter(typeof(StringEnumConverter))]
         [BsonRepresentation(BsonType.String)]
-        public PlatformExecutionStatus Status { get; set; }
+        public ExecutionStatus Status { get; set; }
 
         [BsonElement("data")]
         public string Data { get; set; }

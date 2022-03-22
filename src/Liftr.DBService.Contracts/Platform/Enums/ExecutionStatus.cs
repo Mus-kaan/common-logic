@@ -4,7 +4,7 @@
 
 namespace Microsoft.Liftr.DBService.Contracts.Platform.Enums
 {
-    public enum PlatformExecutionStatus
+    public enum ExecutionStatus
     {
         New,
         InProgress,
