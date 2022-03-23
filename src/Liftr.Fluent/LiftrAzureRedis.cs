@@ -20,13 +20,16 @@ namespace Microsoft.Liftr.Fluent
             string redisCacheName,
             IDictionary<string, string> tags,
             IDictionary<string, string> redisConfig = null,
+            RedisOptions.RedisSkuOption sku = RedisOptions.defaultSku,
+            int capacity = RedisOptions.defaultCapacity,
+            int shardCount = RedisOptions.defaultShardCount,
             CancellationToken cancellationToken = default)
         {
             var rc = await GetRedisCachesAsync(rgName, redisCacheName, cancellationToken);
 
             if (rc == null)
             {
-                rc = await CreateRedisCacheAsync(location, rgName, redisCacheName, tags, redisConfig, cancellationToken);
+                rc = await CreateRedisCacheAsync(location, rgName, redisCacheName, tags, redisConfig, sku, capacity, shardCount, cancellationToken);
             }
 
             return rc;
@@ -61,17 +64,54 @@ namespace Microsoft.Liftr.Fluent
             string redisCacheName,
             IDictionary<string, string> tags,
             IDictionary<string, string> redisConfig = null,
+            RedisOptions.RedisSkuOption sku = RedisOptions.defaultSku,
+            int capacity = RedisOptions.defaultCapacity,
+            int shardCount = RedisOptions.defaultShardCount,
             CancellationToken cancellationToken = default)
         {
             _logger.Information($"Creating a RedisCache with name {redisCacheName} ...");
+            _logger.Information($"RedisCache capacity : {capacity}");
 
-            var creatable = FluentClient.RedisCaches
-            .Define(redisCacheName)
-            .WithRegion(location)
-            .WithExistingResourceGroup(rgName)
-            .WithStandardSku(1)
-            .WithMinimumTlsVersion(TlsVersion.OneFullStopTwo)
-            .WithTags(tags);
+            Azure.Management.Redis.Fluent.RedisCache.Definition.IWithCreate creatable;
+
+            if (sku == RedisOptions.RedisSkuOption.Basic)
+            {
+                _logger.Information($"RedisCache SKU : BASIC");
+
+                creatable = FluentClient.RedisCaches
+                .Define(redisCacheName)
+                .WithRegion(location)
+                .WithExistingResourceGroup(rgName)
+                .WithBasicSku(capacity)
+                .WithMinimumTlsVersion(TlsVersion.OneFullStopTwo)
+                .WithTags(tags);
+            }
+            else if (sku == RedisOptions.RedisSkuOption.Premium)
+            {
+                _logger.Information($"RedisCache SKU : PREMIUM");
+                _logger.Information($"RedisCache shard count : {shardCount}");
+
+                creatable = FluentClient.RedisCaches
+                .Define(redisCacheName)
+                .WithRegion(location)
+                .WithExistingResourceGroup(rgName)
+                .WithPremiumSku(capacity)
+                .WithShardCount(shardCount)
+                .WithMinimumTlsVersion(TlsVersion.OneFullStopTwo)
+                .WithTags(tags);
+            }
+            else
+            {
+                _logger.Information($"RedisCache SKU : STANDARD");
+
+                creatable = FluentClient.RedisCaches
+                .Define(redisCacheName)
+                .WithRegion(location)
+                .WithExistingResourceGroup(rgName)
+                .WithStandardSku(capacity)
+                .WithMinimumTlsVersion(TlsVersion.OneFullStopTwo)
+                .WithTags(tags);
+            }
 
             if (redisConfig != null)
             {

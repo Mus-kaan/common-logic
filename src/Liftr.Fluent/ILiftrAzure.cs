@@ -414,6 +414,9 @@ namespace Microsoft.Liftr.Fluent
             string redisCacheName,
             IDictionary<string, string> tags,
             IDictionary<string, string> redisConfig = null,
+            RedisOptions.RedisSkuOption sku = RedisOptions.defaultSku,
+            int capacity = RedisOptions.defaultCapacity,
+            int shardCount = RedisOptions.defaultShardCount,
             CancellationToken cancellationToken = default);
 
         Task<IRedisCache> GetRedisCachesAsync(string rgName, string redisCacheName, CancellationToken cancellationToken = default);
@@ -426,6 +429,9 @@ namespace Microsoft.Liftr.Fluent
             string redisCacheName,
             IDictionary<string, string> tags,
             IDictionary<string, string> redisConfig = null,
+            RedisOptions.RedisSkuOption sku = RedisOptions.defaultSku,
+            int capacity = RedisOptions.defaultCapacity,
+            int shardCount = RedisOptions.defaultShardCount,
             CancellationToken cancellationToken = default);
         #endregion
 
