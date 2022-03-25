@@ -14,12 +14,6 @@ namespace Microsoft.Liftr.DBService.Contracts.Platform
 {
     public class ExecutionStep
     {
-        public ExecutionStep(string name, string data)
-        {
-            Name = string.IsNullOrWhiteSpace(name) ? throw new ArgumentNullException(nameof(name)) : name;
-            Data = string.IsNullOrWhiteSpace(data) ? throw new ArgumentNullException(nameof(data)) : data;
-        }
-
         [BsonElement("name")]
         public string Name { get; set; }
 
