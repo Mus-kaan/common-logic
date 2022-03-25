@@ -8,6 +8,7 @@ using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Liftr.DBService.Contracts.Platform
 {
@@ -33,6 +34,9 @@ namespace Microsoft.Liftr.DBService.Contracts.Platform
         [BsonElement("data")]
         public string Data { get; set; }
 
+        [BsonElement("result")]
+        public string Result { get; set; }
+
         [BsonElement("createdUtc")]
         public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
 
@@ -41,5 +45,8 @@ namespace Microsoft.Liftr.DBService.Contracts.Platform
 
         [BsonElement("hasChildSteps")]
         public bool HasChildSteps { get; set; }
+
+        [BsonElement("executionSteps")]
+        public IEnumerable<ExecutionStep> ExecutionSteps { get; set; }
     }
 }

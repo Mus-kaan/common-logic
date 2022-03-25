@@ -29,9 +29,6 @@ namespace Microsoft.Liftr.DBService.Contracts.Platform
         [BsonElement("repoName")]
         public string RepoName { get; set; }
 
-        [BsonElement("repoId")]
-        public string RepoId { get; set; }
-
         [JsonConverter(typeof(StringEnumConverter))]
         [BsonRepresentation(BsonType.String)]
         [BsonElement("status")]
