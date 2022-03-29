@@ -1,0 +1,30 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger: none
+
+pool:
+  vmImage: windows-latest
+
+steps: 
+- task: AzureCLI@2
+  name: 'DEV_Vulnerable_Images_Update'
+  inputs:
+    azureSubscription: 'Liftr Platform Service - AKS Hosting'
+    scriptType: 'ps'
+    scriptLocation: 'scriptPath'
+    scriptPath: '$(System.DefaultWorkingDirectory)\.config\UpdateLiftrCommonImages.ps1'
+    arguments: '-ACRNAME "liftrcommondevacr"'
+    failOnStandardError: true
+
+- task: AzureCLI@2
+  name: 'PROD_Vulnerable_Images_Update'
+  inputs:
+    azureSubscription: 'Liftr-Platform-Prod-005'
+    scriptType: 'ps'
+    scriptLocation: 'scriptPath'
+    scriptPath: '$(System.DefaultWorkingDirectory)\.config\UpdateLiftrCommonImages.ps1'
+    arguments: '-ACRNAME "liftrcommonprodacr"'
+    failOnStandardError: true
