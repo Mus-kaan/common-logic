@@ -184,6 +184,12 @@ namespace Microsoft.Liftr.Fluent.Contracts
         public string LeafDomainName(string baseName)
             => SdkContext.RandomResourceName($"{ShortPartnerName}-{baseName}-{Environment.ShortName()}-{Location.ShortName()}-", 25);
 
+        public string LiftrCommonACRName()
+            => GenerateLiftrCommonName("acr", delimiter: string.Empty);
+
+        public static string LiftrCommonACREndpoint(string baseName)
+            => GenerateACREndpointName(baseName);
+
         public string GenerateCommonName(string baseName, string suffix = null, bool noRegion = false, string delimiter = "-")
         {
             var name = $"{ShortPartnerName}{delimiter}{Environment.ShortName()}{delimiter}{baseName}";
@@ -197,6 +203,34 @@ namespace Microsoft.Liftr.Fluent.Contracts
             {
                 name = $"{name}{delimiter}{suffix}";
             }
+
+            return name;
+        }
+
+        public string GenerateLiftrCommonName(string suffix = null, string delimiter = "-")
+        {
+            var name = $"liftr{delimiter}common";
+
+            if (Environment.ShortName() == "dev")
+            {
+                name = $"{name}{delimiter}{Environment.ShortName()}";
+            }
+            else
+            {
+                name = $"{name}{delimiter}prod";
+            }
+
+            if (!string.IsNullOrEmpty(suffix))
+            {
+                name = $"{name}{delimiter}{suffix}";
+            }
+
+            return name;
+        }
+
+        public static string GenerateACREndpointName(string baseName, string delimiter = ".")
+        {
+            var name = $"{baseName}{delimiter}azurecr{delimiter}io";
 
             return name;
         }

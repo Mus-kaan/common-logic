@@ -15,6 +15,7 @@ using Microsoft.Liftr.KeyVault;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -83,6 +84,27 @@ namespace Microsoft.Liftr.Fluent.Provisioning
             catch (Exception ex)
             {
                 _logger.Error(ex, $"{nameof(GetACRAsync)} failed.");
+                throw;
+            }
+        }
+
+        public string GetLiftrCommonACREndpoint(NamingContext namingContext)
+        {
+            if (namingContext == null)
+            {
+                throw new ArgumentNullException(nameof(namingContext));
+            }
+
+            try
+            {
+                var acrName = namingContext.LiftrCommonACRName();
+                var acrEndpoint = NamingContext.LiftrCommonACREndpoint(acrName);
+
+                return acrEndpoint;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"{nameof(GetLiftrCommonACREndpoint)} failed.");
                 throw;
             }
         }

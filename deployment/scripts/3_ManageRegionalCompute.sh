@@ -23,6 +23,26 @@ if [ "$ComputeType" = "" ]; then
 ComputeType=$(<bin/compute-type.txt)
 fi
 
+if [ "$MDM_IMAGE_VERSION" = "" ]; then
+MDM_IMAGE_VERSION="latest"
+fi
+
+if [ "$MDSD_IMAGE_VERSION" = "" ]; then
+MDSD_IMAGE_VERSION="latest"
+fi
+
+if [ "$FLUENTD_IMAGE_VERSION" = "" ]; then
+FLUENTD_IMAGE_VERSION="latest"
+fi
+
+if [ "$AZSECPACK_IMAGE_VERSION" = "" ]; then
+AZSECPACK_IMAGE_VERSION="latest"
+fi
+
+if [ "$PROMMDMCONVERTER_IMAGE_VERSION" = "" ]; then
+PROMMDMCONVERTER_IMAGE_VERSION="latest"
+fi
+
 if [ "$ComputeType" = "vmss" ]; then
   echo "Successfully finished running: $currentScriptName"
   echo "**********[Liftr]**********[Liftr]**********[Liftr]**********[Liftr]**********"
@@ -68,7 +88,12 @@ fi
 --environmentName="$APP_ASPNETCORE_ENVIRONMENT" \
 --compactRegion="$REGION" \
 --Region="$REGION" \
---gcs_region="$REGION"
+--gcs_region="$REGION" \
+--mdmVersion="$MDM_IMAGE_VERSION" \
+--mdsdVersion="$MDSD_IMAGE_VERSION" \
+--fluentdVersion="$FLUENTD_IMAGE_VERSION" \
+--secpackVersion="$AZSECPACK_IMAGE_VERSION" \
+--prommdmconverterVersion="$PROMMDMCONVERTER_IMAGE_VERSION"
 
 for script in "$CurrentDir"/3_*.sh
 do

@@ -22,6 +22,7 @@ using Microsoft.Rest.Azure;
 using Polly;
 using Serilog.Context;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -289,6 +290,21 @@ namespace Microsoft.Liftr.SimpleDeploy
 
                         File.WriteAllText("acr-name.txt", acr.Name);
                         File.WriteAllText("acr-endpoint.txt", acr.LoginServerUrl);
+
+                        if (_hostingOptions.EnableLiftrCommonImages)
+                        {
+                            var liftrcommonacr = infra.GetLiftrCommonACREndpoint(_globalNamingContext);
+                            _logger.Information($"Write Liftr Common ACR Endpoint '{liftrcommonacr}' information to disk.");
+
+                            if (liftrcommonacr == null)
+                            {
+                                var errMsg = "Cannot find the Liftr Common ACR.";
+                                _logger.Fatal(errMsg);
+                                throw new InvalidOperationException(errMsg);
+                            }
+
+                            File.WriteAllText("liftr-common-acr-endpoint.txt", liftrcommonacr);
+                        }
                     }
 
                     if (SimpleDeployExtension.AfterRunAsync != null)

@@ -357,6 +357,9 @@ namespace Microsoft.Liftr.EV2
 
             Directory.CreateDirectory(outputDirectory);
 
+            var scopeBindings = AssembleScopeBindings();
+            File.WriteAllText(Path.Combine(outputDirectory, ArtifactConstants.c_ScopeBindingsFileName), scopeBindings.ToJsonString(indented: true));
+
             var envName = targetEnvironment.EnvironmentName.ToString();
 
             var serviceModel = AssembleServiceModel(
@@ -391,6 +394,57 @@ namespace Microsoft.Liftr.EV2
                     uploadImageToACR ? ev2Options.OneBranchContainerImages : null);
                 File.WriteAllText(parameterFilePath, parameters.ToJsonString(indented: true));
             }
+        }
+
+        /// <summary>
+        /// Generates scope binding file template. Navigate to below links for details on working of the code.
+        /// https://msazure.visualstudio.com/Azure-Express/_git/Samples?path=/ServiceGroupRoot/ScopeBindings.json
+        /// https://ev2docs.azure.net/features/parameterization/dynamicbindings.html
+        /// </summary>
+        private static ScopeBindingsModel AssembleScopeBindings()
+        {
+            var bindings = new List<Bindings>()
+            {
+                new Bindings()
+                {
+                    Find = "__MDM_IMAGE_VERSION__",
+                    ReplaceWith = "latest",
+                },
+                new Bindings()
+                {
+                    Find = "__MDSD_IMAGE_VERSION__",
+                    ReplaceWith = "latest",
+                },
+                new Bindings()
+                {
+                    Find = "__FLUENTD_IMAGE_VERSION__",
+                    ReplaceWith = "latest",
+                },
+                new Bindings()
+                {
+                    Find = "__AZSECPACK_IMAGE_VERSION__",
+                    ReplaceWith = "latest",
+                },
+                new Bindings()
+                {
+                    Find = "__PROMMDMCONVERTER_IMAGE_VERSION__",
+                    ReplaceWith = "latest",
+                },
+            };
+
+            var scopeBindings = new ScopeBindingsModel()
+            {
+                ScopeBindings = new List<ScopeBindings>()
+                {
+                    new ScopeBindings()
+                    {
+                        ScopeTagName = ArtifactConstants.c_LiftrCommonImageVersions,
+                        Bindings = bindings,
+                    },
+                },
+            };
+
+            return scopeBindings;
         }
 
         private static ServiceModel AssembleServiceModel(
@@ -453,6 +507,13 @@ namespace Microsoft.Liftr.EV2
                             Location = ev2ShellLocation,
                             InstanceOf = ArtifactConstants.c_EV2ServiceResourceGroupDefinitionName,
                             AzureSubscriptionId = ev2ShellSubscriptionId,
+                            ScopeTags = new List<ScopeTag>()
+                            {
+                                new ScopeTag()
+                                {
+                                    Name = ArtifactConstants.c_LiftrCommonImageVersions,
+                                },
+                            },
                             ServiceResources = regions.Select(r => new ServiceResource()
                             {
                                 Name = "ShellExt" + r,
@@ -477,6 +538,7 @@ namespace Microsoft.Liftr.EV2
                 RolloutMetadata = new RolloutMetadata()
                 {
                     ServiceModelPath = $"ServiceModel.{envName}.json",
+                    ScopeBindingsPath = ArtifactConstants.c_ScopeBindingsFileName,
                     Name = description,
                     RolloutType = RolloutType.Major,
                     BuildSource = new BuildSource()
@@ -545,6 +607,36 @@ namespace Microsoft.Liftr.EV2
                 {
                     Name = "RunnerSPNObjectId",
                     Value = runnerInfo.UserAssignedManagedIdentityObjectId.ToString(),
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "MDM_IMAGE_VERSION",
+                    Value = "__MDM_IMAGE_VERSION__",
+                    EnableScopeTagBindings = true,
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "MDSD_IMAGE_VERSION",
+                    Value = "__MDSD_IMAGE_VERSION__",
+                    EnableScopeTagBindings = true,
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "FLUENTD_IMAGE_VERSION",
+                    Value = "__FLUENTD_IMAGE_VERSION__",
+                    EnableScopeTagBindings = true,
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "AZSECPACK_IMAGE_VERSION",
+                    Value = "__AZSECPACK_IMAGE_VERSION__",
+                    EnableScopeTagBindings = true,
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "PROMMDMCONVERTER_IMAGE_VERSION",
+                    Value = "__PROMMDMCONVERTER_IMAGE_VERSION__",
+                    EnableScopeTagBindings = true,
                 },
             };
 
@@ -664,6 +756,36 @@ namespace Microsoft.Liftr.EV2
                 {
                     Name = "Cloud",
                     Value = cloud.ToString(),
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "MDM_IMAGE_VERSION",
+                    Value = "__MDM_IMAGE_VERSION__",
+                    EnableScopeTagBindings = true,
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "MDSD_IMAGE_VERSION",
+                    Value = "__MDSD_IMAGE_VERSION__",
+                    EnableScopeTagBindings = true,
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "FLUENTD_IMAGE_VERSION",
+                    Value = "__FLUENTD_IMAGE_VERSION__",
+                    EnableScopeTagBindings = true,
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "AZSECPACK_IMAGE_VERSION",
+                    Value = "__AZSECPACK_IMAGE_VERSION__",
+                    EnableScopeTagBindings = true,
+                },
+                new ShellEnvironmentVariable()
+                {
+                    Name = "PROMMDMCONVERTER_IMAGE_VERSION",
+                    Value = "__PROMMDMCONVERTER_IMAGE_VERSION__",
+                    EnableScopeTagBindings = true,
                 },
             };
 

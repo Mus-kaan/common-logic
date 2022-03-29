@@ -24,6 +24,10 @@ namespace Microsoft.Liftr.EV2
 
         public const string c_EV2ServiceResourceGroupDefinitionName = "liftr-ev2-shell-deployment";
 
+        public const string c_LiftrCommonImageVersions = "LiftrCommonImageVersions";
+
+        public const string c_ScopeBindingsFileName = "ScopeBindings.json";
+
         public static string ServiceModelFileName(EnvironmentType environment)
         {
             return $"ServiceModel.{environment}.json";

@@ -28,5 +28,11 @@ namespace Microsoft.Liftr.EV2.Contracts
         /// Gets or sets the secret value.
         /// </summary>
         public bool? AsSecureValue { get; set; }
+
+        /// <summary>
+        /// Enables scope tag bindings.
+        /// https://ev2docs.azure.net/features/parameterization/bindings.html?q=EnableScopeTagBind
+        /// </summary>
+        public bool EnableScopeTagBindings { get; set; } = false;
     }
 }

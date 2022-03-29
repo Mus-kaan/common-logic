@@ -57,6 +57,12 @@ if [ "$ComputeType" = "" ]; then
 ComputeType=$(<bin/compute-type.txt)
 fi
 
+if [ "$liftrcommonACRURI" = "" ]; then
+    if [ -f 'bin/liftr-common-acr-endpoint.txt' ]; then
+        liftrcommonACRURI=$(<bin/liftr-common-acr-endpoint.txt)
+    fi
+fi
+
 set -x
 
 if [ "$ComputeType" = "aks" ]; then
@@ -117,15 +123,17 @@ az acr import --name "$ACRName" --source quay.io/prometheus/prometheus:v2.32.1 -
 fi
 
 echo "~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~[Liftr]~~~~~~~~~~[https://aka.ms/liftr]~~~~~~~~~~"
-echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/environments/linuxcontainers.html"
-echo "import geneva images"
 
-az acr import --name "$ACRName" --source linuxgeneva-microsoft.azurecr.io/$IMG_mdsd --force
-az acr import --name "$ACRName" --source linuxgeneva-microsoft.azurecr.io/$IMG_mdm --force
-az acr import --name "$ACRName" --source linuxgeneva-microsoft.azurecr.io/$IMG_fluentd --force
-az acr import --name "$ACRName" --source linuxgeneva-microsoft.azurecr.io/$IMG_azsecpack --force
-
-az acr import --name "$ACRName" --source liftrmsacr.azurecr.io/$IMG_prommdm --force
+# If this is set to True, Geneva images will be pulled directly from Liftr Common ACR during deployment.
+if [ "$liftrcommonACRURI" = "" ]; then
+    echo "Latest geneva image versions: https://genevamondocs.azurewebsites.net/collect/environments/linuxcontainers.html"
+    echo "import geneva images"
+    az acr import --name "$ACRName" --source linuxgeneva-microsoft.azurecr.io/$IMG_mdsd --force
+    az acr import --name "$ACRName" --source linuxgeneva-microsoft.azurecr.io/$IMG_mdm --force
+    az acr import --name "$ACRName" --source linuxgeneva-microsoft.azurecr.io/$IMG_fluentd --force
+    az acr import --name "$ACRName" --source linuxgeneva-microsoft.azurecr.io/$IMG_azsecpack --force
+    az acr import --name "$ACRName" --source liftrmsacr.azurecr.io/$IMG_prommdm --force
+fi
 
 set +x
 echo "Imported all the dependency images"

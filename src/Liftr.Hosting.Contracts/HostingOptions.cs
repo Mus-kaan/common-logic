@@ -41,6 +41,11 @@ namespace Microsoft.Liftr.Hosting.Contracts
         public bool EnableThanos { get; set; } = false;
 
         /// <summary>
+        /// Automation mode for geneva and some other images. Using Liftr Common image versions.
+        /// </summary>
+        public bool EnableLiftrCommonImages { get; set; } = false;
+
+        /// <summary>
         /// The IcM connector Id. https://aka.ms/prom2icm
         /// </summary>
         public string IcMConnectorId { get; set; }
