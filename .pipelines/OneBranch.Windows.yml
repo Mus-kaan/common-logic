@@ -75,7 +75,7 @@ stages:
               command: "sign"
               signing_environment: "azure-ado"
               signing_profile: "internal_azure_service"
-              files_to_sign: "**/*.nupkg"
+              files_to_sign: "**/*.nupkg;**/*.ps1"
               search_root: "$(Build.SourcesDirectory)/nupkgs"
 
           - task: CopyFiles@2 # https://docs.microsoft.com/azure/devops/pipelines/tasks/utility/copy-files
