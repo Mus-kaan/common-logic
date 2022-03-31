@@ -44,7 +44,7 @@ stages:
               command: "sign"
               signing_environment: "azure-ado"
               signing_profile: "internal_azure_service"
-              files_to_sign: "**/*.exe;**/*.dll"
+              files_to_sign: "**/*.exe;**/*.dll;**/*.ps1"
               search_root: "$(Build.SourcesDirectory)/src"
 
           - task: CmdLine@2
