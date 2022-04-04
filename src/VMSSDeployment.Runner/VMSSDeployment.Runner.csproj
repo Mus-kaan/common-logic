@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
+    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
     <AssemblyName>Deployment.Runner</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
