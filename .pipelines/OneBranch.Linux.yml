@@ -50,7 +50,7 @@
               command: "sign"
               signing_environment: "azure-ado"
               signing_profile: "internal_azure_service"
-              files_to_sign: "!**/*.Tests.dll;**/bin/Release/**/Microsoft.Liftr.*.dll;**/bin/Release/**/Microsoft.Liftr.*.exe;**/*.ps1"
+              files_to_sign: "!**/*.Tests.dll;**/bin/Release/**/Microsoft.Liftr.*.dll;**/bin/Release/**/Microsoft.Liftr.*.exe"
               search_root: "$(Build.SourcesDirectory)/src"
 
           - task: Bash@3

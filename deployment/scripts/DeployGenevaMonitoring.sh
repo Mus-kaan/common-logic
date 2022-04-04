@@ -254,3 +254,10 @@ fi
 echo "-------------------------------------"
 echo "Finished helm upgrade geneva chart"
 echo "-------------------------------------"
+
+
+if [ "$liftrcommonACRURI" != "" ]; then
+    echo "Starting to clear cached images which do not have a container associated with them..."
+    ./ClearCachedImages.sh "$AKSName"
+    echo "Cleared cached images from the VMs."
+fi

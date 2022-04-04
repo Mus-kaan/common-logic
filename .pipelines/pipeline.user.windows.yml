@@ -12,7 +12,7 @@ environment:
 # https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/2350/Code-Sign-Validation
 signing_options:
   profile: "internal_azure_service" # This service deploys to Azure!
-  codesign_validation_glob_pattern: '+:file|**\bin\*\Microsoft.Liftr.*.dll;+:file|**\bin\*\Microsoft.Liftr.*.exe;+:file|**\*.ps1;-:file|**\*.Tests\**'
+  codesign_validation_glob_pattern: '+:file|**\bin\*\Microsoft.Liftr.*.dll;+:file|**\bin\*\Microsoft.Liftr.*.exe;-:file|**\*.Tests\**'
 
 version:
   name: "Liftr.Common"
