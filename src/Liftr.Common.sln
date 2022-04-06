@@ -267,6 +267,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.VNetInjection.DataSou
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Liftr.VNetInjection.DataSource.Mongo.Tests", "Liftr.VNetInjection.DataSource.Mongo.Tests\Liftr.VNetInjection.DataSource.Mongo.Tests.csproj", "{9E2ABB68-1679-460B-ABB8-3F2D0DF94460}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Liftr.Platform.Contracts", "Liftr.Platform.Contracts\Liftr.Platform.Contracts.csproj", "{01AE44CE-9C8E-4CF1-951B-8583F62EC8C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -745,6 +747,10 @@ Global
 		{9E2ABB68-1679-460B-ABB8-3F2D0DF94460}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E2ABB68-1679-460B-ABB8-3F2D0DF94460}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E2ABB68-1679-460B-ABB8-3F2D0DF94460}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01AE44CE-9C8E-4CF1-951B-8583F62EC8C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01AE44CE-9C8E-4CF1-951B-8583F62EC8C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01AE44CE-9C8E-4CF1-951B-8583F62EC8C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01AE44CE-9C8E-4CF1-951B-8583F62EC8C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -86,5 +86,6 @@
     <PackageVersion_xunit_assert>2.4.1</PackageVersion_xunit_assert>
     <PackageVersion_xunit_extensibility_execution>2.4.1</PackageVersion_xunit_extensibility_execution>
     <PackageVersion_xunit_runner_visualstudio>2.4.1</PackageVersion_xunit_runner_visualstudio>
+	<PackageVersion_RestSharp>106.13.0</PackageVersion_RestSharp>
   </PropertyGroup>
 </Project>

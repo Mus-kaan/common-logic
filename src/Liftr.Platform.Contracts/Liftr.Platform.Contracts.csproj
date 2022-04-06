@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+	<TargetFramework>$(LiftrClassLibraryTargetFramework21)</TargetFramework>
+	<IsPackable>true</IsPackable>
+	<AssemblyName>Microsoft.Liftr.Platform.Contracts</AssemblyName>
+	<RootNamespace>Microsoft.Liftr.Platform.Contracts</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="MongoDB.Driver" Version="$(PackageVersion_MongoDB_Driver)" />
+	<PackageReference Include="Newtonsoft.Json" Version="$(PackageVersion_Newtonsoft_Json)" />
+	<PackageReference Include="RestSharp" Version="$(PackageVersion_RestSharp)" />
+	<PackageReference Include="Serilog" Version="$(PackageVersion_Serilog)" />
+  </ItemGroup>
+  <ItemGroup>
+	<ProjectReference Include="..\Liftr.Utilities\Liftr.Utilities.csproj" />
+  </ItemGroup>
+</Project>

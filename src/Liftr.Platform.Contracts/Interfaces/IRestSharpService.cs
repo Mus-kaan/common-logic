@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Microsoft.Liftr.DBService.Contracts.Interfaces
+namespace Microsoft.Liftr.Platform.Contracts.Interfaces
 {
     public interface IRestSharpService<TEntity, TResult>
     {
