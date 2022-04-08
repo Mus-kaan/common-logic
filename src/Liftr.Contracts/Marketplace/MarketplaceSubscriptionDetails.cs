@@ -8,7 +8,7 @@ using System;
 
 namespace Microsoft.Liftr.Contracts.Marketplace
 {
-    // https://msazure.visualstudio.com/One/_git/AAPT-SPZA?path=%2Fsrc%2Fsource%2FMicrosoft.MarketPlace.Common.Models%2FSaasV2%2FSubscriptionStatusV2.cs&_a=contents&version=GBmaster
+    // https://msazure.visualstudio.com/Marketplace/_git/CPX-Marketplace-SaaS?path=%2Fsrc%2Fsource%2FMicrosoft.MarketPlace.Common.Models%2FSaasV2%2FSubscriptionStatusV2.cs&_a=contents&version=GBmaster
     [JsonConverter(typeof(StringEnumConverter))]
     public enum SaasSubscriptionStatus
     {
@@ -16,6 +16,8 @@ namespace Microsoft.Liftr.Contracts.Marketplace
         Subscribed,
         Suspended,
         Unsubscribed,
+        NotStarted,
+        FulfillmentRequested,
     }
 
     // https://msazure.visualstudio.com/One/_git/AAPT-SPZA?path=%2Fsrc%2Fsource%2FMicrosoft.MarketPlace.Common.Models%2FSaasV2%2FSubscriptionV2.cs&_a=contents&version=GBmaster
