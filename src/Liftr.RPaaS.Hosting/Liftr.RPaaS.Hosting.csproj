@@ -13,6 +13,9 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="$(PackageVersion_Microsoft_Extensions_Http)" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="$(PackageVersion_Microsoft_Extensions_Http_Polly)" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(PackageVersion_Microsoft_Extensions_Options_ConfigurationExtensions)" />
+    <PackageReference Include="Microsoft.Identity.ServiceEssentials.AspNetCore" Version="$(PackageVersion_Microsoft_Identity_ServiceEssentials_AspNetCore)" />
+    <PackageReference Include="Microsoft.IdentityModel.S2S.Configuration" Version="$(PackageVersion_Microsoft_IdentityModel_S2S_Configuration)" />
+    <PackageReference Include="Microsoft.IdentityModel.S2S.Extensions.AspNetCore" Version="$(PackageVersion_Microsoft_IdentityModel_S2S_Extensions_AspNetCore)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.Logging\Liftr.Logging.csproj" />

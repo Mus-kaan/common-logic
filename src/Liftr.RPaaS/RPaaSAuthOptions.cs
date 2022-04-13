@@ -22,21 +22,6 @@ namespace Microsoft.Liftr.RPaaS
         public string Audience { get; set; }
 
         /// <summary>
-        /// The authentication endpoint.
-        /// </summary>
-        public Uri Instance { get; set; }
-
-        /// <summary>
-        /// The tenant ID. Should be "common", since it's a multi-tenant scenario.
-        /// </summary>
-        public string TenantId { get; set; }
-
-        /// <summary>
-        /// Our app id.
-        /// </summary>
-        public string ClientId { get; set; }
-
-        /// <summary>
         /// Whether RPaaS Auth process should be skipped (e.g. in dev environment)
         /// </summary>
         public bool ShouldSkip { get; set; } = false;

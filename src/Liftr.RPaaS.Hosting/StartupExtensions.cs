@@ -10,6 +10,8 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.Identity.ServiceEssentials.Extensions.AspNetCoreMiddleware;
+using Microsoft.IdentityModel.S2S.Extensions.AspNetCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Liftr.TokenManager;
 using System;
@@ -117,12 +119,15 @@ namespace Microsoft.Liftr.RPaaS.Hosting
             });
         }
 
-        public static void AddRPaaSAuthentication(this IServiceCollection services, RPaaSAuthOptions authOptions)
+        public static void AddRPaaSAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            if (authOptions == null)
+            if (configuration == null)
             {
-                throw new ArgumentNullException(nameof(authOptions));
+                throw new ArgumentNullException(nameof(configuration));
             }
+
+            var authOptions = new RPaaSAuthOptions();
+            configuration.GetSection(nameof(RPaaSAuthOptions)).Bind(authOptions);
 
             if (authOptions.ShouldSkip)
             {
@@ -139,13 +144,8 @@ namespace Microsoft.Liftr.RPaaS.Hosting
                 return;
             }
 
-            services.AddAuthentication(options => options.DefaultScheme = AzureADDefaults.JwtBearerAuthenticationScheme)
-                .AddAzureADBearer(options =>
-                {
-                    options.Instance = authOptions.Instance.OriginalString;
-                    options.TenantId = authOptions.TenantId;
-                    options.ClientId = authOptions.ClientId;
-                });
+            services.AddAuthentication(options => options.DefaultScheme = S2SAuthenticationDefaults.AuthenticationScheme)
+                    .AddMiseWithDefaultAuthentication(configuration);
 
             services.Configure<JwtBearerOptions>(AzureADDefaults.JwtBearerAuthenticationScheme, options =>
             {
