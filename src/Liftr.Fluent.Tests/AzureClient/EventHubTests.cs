@@ -53,5 +53,45 @@ namespace Microsoft.Liftr.Fluent.Tests
             var created2 = await az.GetOrCreateEventHubNamespaceAsync(TestCommon.Location, ResourceGroupName, namespaceName, TestCommon.EventHubThroughputUnits, TestCommon.EventHubMaxThroughputUnits, TestCommon.Tags);
             Assert.Equal(2, created.ListEventHubs().Count());
         }
+
+        [CheckInValidation(skipLinux: true)]
+        [PublicEastUS]
+        public async Task CanAddConsumerGroupsAsync()
+        {
+            var az = Client;
+            var namespaceName = SdkContext.RandomResourceName("evn", 15);
+            var ehn = await az.GetOrCreateEventHubNamespaceAsync(TestCommon.Location, ResourceGroupName, namespaceName, TestCommon.EventHubThroughputUnits, TestCommon.EventHubMaxThroughputUnits, TestCommon.Tags);
+            var hubName = SdkContext.RandomResourceName("hub", 15);
+            var eh = await az.GetOrCreateEventHubAsync(TestCommon.Location, ResourceGroupName, namespaceName, hubName, TestCommon.EventHubPartitionCount, TestCommon.EventHubThroughputUnits, TestCommon.EventHubMaxThroughputUnits, TestCommon.EventHubConsumerGroups, TestCommon.Tags);
+            var actualConsumerGroups = eh.ListConsumerGroups().Select(s => s.Name).ToList();
+            Assert.All(TestCommon.EventHubConsumerGroups, item => Assert.Contains(item, actualConsumerGroups));
+
+            var cgName = SdkContext.RandomResourceName("cg", 5);
+            await az.AddConsumerGroupAsync(cgName, eh);
+
+            actualConsumerGroups = eh.ListConsumerGroups().Select(s => s.Name).ToList();
+            Assert.Contains(cgName, actualConsumerGroups);
+
+            // Second call to add same CG doesnt fail
+            await az.AddConsumerGroupAsync(cgName, eh);
+
+            Assert.Equal(4, eh.ListConsumerGroups().Count());
+        }
+
+        [CheckInValidation(skipLinux: true)]
+        [PublicEastUS]
+        public async Task CanAddEventHubRoleAsync()
+        {
+            var az = Client;
+            var namespaceName = SdkContext.RandomResourceName("evn", 15);
+            var hubName = SdkContext.RandomResourceName("hub", 15);
+            var eh = await az.GetOrCreateEventHubAsync(TestCommon.Location, ResourceGroupName, namespaceName, hubName, TestCommon.EventHubPartitionCount, TestCommon.EventHubThroughputUnits, TestCommon.EventHubMaxThroughputUnits, TestCommon.EventHubConsumerGroups, TestCommon.Tags);
+
+            var msi1 = await az.CreateMSIAsync(TestCommon.Location, ResourceGroupName, SdkContext.RandomResourceName("msi", 15), TestCommon.Tags);
+            await az.GrantEventHubReceiverRoleAsync(msi1.GetObjectId(), eh);
+
+            var roleAssignments = az.Authenticated.RoleAssignments.ListByScope(eh.Id);
+            Assert.NotEmpty(roleAssignments);
+        }
     }
 }

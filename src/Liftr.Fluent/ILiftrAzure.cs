@@ -10,6 +10,7 @@ using Microsoft.Azure.Management.CosmosDB.Fluent;
 using Microsoft.Azure.Management.Dns.Fluent;
 using Microsoft.Azure.Management.Eventhub.Fluent;
 using Microsoft.Azure.Management.Fluent;
+using Microsoft.Azure.Management.Graph.RBAC.Fluent;
 using Microsoft.Azure.Management.KeyVault.Fluent;
 using Microsoft.Azure.Management.Monitor.Fluent;
 using Microsoft.Azure.Management.Msi.Fluent;
@@ -503,6 +504,16 @@ namespace Microsoft.Liftr.Fluent
         Task<IEventHubNamespace> GetOrCreateEventHubNamespaceAsync(Region location, string rgName, string name, int throughtputUnits, int maxThroughtputUnits, IDictionary<string, string> tags);
 
         Task<IEventHub> GetOrCreateEventHubAsync(Region location, string rgName, string namespaceName, string hubName, int partitionCount, int throughtputUnits, int maxThroughtputUnits, IList<string> consumerGroups, IDictionary<string, string> tags);
+
+        Task<IEventHub> GetEventHubAsync(string rgName, string namespaceName, string hubName);
+
+        Task GrantEventHubRoleAsync(string objectId, IEventHub eventHub, BuiltInRole role, CancellationToken cancellationToken = default);
+
+        Task GrantEventHubReceiverRoleAsync(string objectId, IEventHub eventHub, CancellationToken cancellationToken = default);
+
+        Task GrantEventHubSenderRoleAsync(string objectId, IEventHub eventHub, CancellationToken cancellationToken = default);
+
+        Task AddConsumerGroupAsync(string consumerGroupName, IEventHub eventHub, CancellationToken cancellationToken = default);
         #endregion
 
         #region Shared Image Gallery
@@ -516,6 +527,7 @@ namespace Microsoft.Liftr.Fluent
             string rgName,
             string galleryName,
             string imageName);
+
         #endregion
     }
 }
