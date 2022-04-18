@@ -385,7 +385,8 @@ namespace Microsoft.Liftr.EV2
                     envName,
                     simplifiedRegion,
                     description: $"[{envName}][{region}] {description}",
-                    ev2Options.NotificationEmail);
+                    ev2Options.NotificationEmail,
+                    ArtifactConstants.c_ScopeBindingsFileName);
                 File.WriteAllText(Path.Combine(outputDirectory, ArtifactConstants.RolloutSpecFileName(targetEnvironment.EnvironmentName, simplifiedRegion)), rollputSpec.ToJsonString(indented: true));
 
                 var parameterFileName = ArtifactConstants.RolloutParametersFileName(targetEnvironment.EnvironmentName.ToString(), simplifiedRegion);
@@ -537,14 +538,15 @@ namespace Microsoft.Liftr.EV2
             string envName,
             string region,
             string description,
-            string email)
+            string email,
+            string scopeBindingsPath = null)
         {
             var spec = new RolloutSpecification()
             {
                 RolloutMetadata = new RolloutMetadata()
                 {
                     ServiceModelPath = $"ServiceModel.{envName}.json",
-                    ScopeBindingsPath = ArtifactConstants.c_ScopeBindingsFileName,
+                    ScopeBindingsPath = scopeBindingsPath,
                     Name = description,
                     RolloutType = RolloutType.Major,
                     BuildSource = new BuildSource()
