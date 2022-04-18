@@ -117,6 +117,9 @@ namespace Microsoft.Liftr.EV2
             var fileBaseName = string.IsNullOrEmpty(image.Bake.Name) ? $"{image.ImageName}-bake" : image.Bake.Name;
             var regions = new List<string>() { "Global" };
 
+            var scopeBindings = AssembleScopeBindings();
+            File.WriteAllText(Path.Combine(outputDirectory, ArtifactConstants.c_ScopeBindingsFileName), scopeBindings.ToJsonString(indented: true));
+
             var serviceModel = AssembleServiceModel(
                         "Production", // hard code the env name for image builder artifacts.
                         regions,
@@ -152,6 +155,9 @@ namespace Microsoft.Liftr.EV2
         {
             var fileBaseName = string.IsNullOrEmpty(distribute.Name) ? $"{image.ImageName}-dist{num}-{distribute.Cloud}" : distribute.Name;
             var regions = new List<string>() { "Global" };
+
+            var scopeBindings = AssembleScopeBindings();
+            File.WriteAllText(Path.Combine(outputDirectory, ArtifactConstants.c_ScopeBindingsFileName), scopeBindings.ToJsonString(indented: true));
 
             var serviceModel = AssembleServiceModel(
                         "Production", // hard code the env name for image builder artifacts.

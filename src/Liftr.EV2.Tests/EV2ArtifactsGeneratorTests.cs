@@ -109,6 +109,8 @@ namespace Microsoft.Liftr.EV2.Tests
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.TestBaseImage-dist1-Mooncake.json")));
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutSpec.TestBaseImage-dist1-Mooncake.json")));
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutParameters.TestBaseImage-dist1-Mooncake.json")));
+
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ScopeBindings.json")));
         }
 
         [Fact]
@@ -145,6 +147,8 @@ namespace Microsoft.Liftr.EV2.Tests
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.TestBaseImage-dist1-Mooncake.json")));
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutSpec.TestBaseImage-dist1-Mooncake.json")));
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutParameters.TestBaseImage-dist1-Mooncake.json")));
+
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ScopeBindings.json")));
         }
 
         [Fact]
@@ -173,6 +177,8 @@ namespace Microsoft.Liftr.EV2.Tests
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.DistributeToProd.json")));
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutSpec.DistributeToProd.json")));
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "RolloutParameters.DistributeToProd.json")));
+
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ScopeBindings.json")));
         }
 
         [Fact]
@@ -217,6 +223,8 @@ namespace Microsoft.Liftr.EV2.Tests
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.DevImageBake.json")));
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.ProdImageBake.json")));
             Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ServiceModel.ProdImageDistrib.json")));
+
+            Assert.True(File.Exists(Path.Combine(dir, "image_builder", "ScopeBindings.json")));
         }
 
         [Fact]
