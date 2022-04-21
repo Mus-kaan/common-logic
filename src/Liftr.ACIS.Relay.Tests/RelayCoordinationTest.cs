@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Cosmos.Table;
+using Azure.Data.Tables;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Storage.Queue;
 using Microsoft.Liftr.ACIS.Common;
@@ -40,11 +40,11 @@ namespace Microsoft.Liftr.ACIS.Relay.Tests
 #pragma warning restore CS0618 // Type or member is obsolete
                 };
 
-                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(options.StorageAccountConnectionString);
-                CloudTableClient tableClient = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
-                var table = tableClient.GetTableReference(options.OperationStatusTableName);
-                await table.CreateIfNotExistsAsync();
-                var dataSource = new ACISOperationStatusEntityDataSource(table);
+                var serviceClient = new TableServiceClient(options.StorageAccountConnectionString);
+                var tableClient = serviceClient.GetTableClient(options.OperationStatusTableName);
+                await tableClient.CreateIfNotExistsAsync();
+
+                var dataSource = new ACISOperationStatusEntityDataSource(tableClient);
 
                 // Create queue.
                 {
@@ -111,11 +111,11 @@ namespace Microsoft.Liftr.ACIS.Relay.Tests
 #pragma warning restore CS0618 // Type or member is obsolete
                 };
 
-                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(options.StorageAccountConnectionString);
-                CloudTableClient tableClient = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
-                var table = tableClient.GetTableReference(options.OperationStatusTableName);
-                await table.CreateIfNotExistsAsync();
-                var dataSource = new ACISOperationStatusEntityDataSource(table);
+                var serviceClient = new TableServiceClient(options.StorageAccountConnectionString);
+                var tableClient = serviceClient.GetTableClient(options.OperationStatusTableName);
+                await tableClient.CreateIfNotExistsAsync();
+
+                var dataSource = new ACISOperationStatusEntityDataSource(tableClient);
 
                 // Create queue.
                 {

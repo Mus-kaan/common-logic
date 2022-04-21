@@ -7,7 +7,7 @@
     <RootNamespace>Microsoft.Liftr.ACIS.Relay</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="$(PackageVersion_Microsoft_Azure_Cosmos_Table)" />
+    <PackageReference Include="Azure.Data.Tables" Version="$(PackageVersion_Azure_Data_Tables)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Liftr.ACIS.Relay.Abstractions\Liftr.ACIS.Relay.Abstractions.csproj" />

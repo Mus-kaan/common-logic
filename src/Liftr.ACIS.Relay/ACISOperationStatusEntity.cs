@@ -2,7 +2,9 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Cosmos.Table;
+using Azure;
+using Azure.Data.Tables;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,17 +23,22 @@ namespace Microsoft.Liftr.ACIS.Relay
         public const string Succeeded = nameof(Succeeded);
     }
 
-    public class ACISOperationStatusEntity : TableEntity
+    public class ACISOperationStatusEntity : ITableEntity
     {
         public ACISOperationStatusEntity()
         {
         }
 
         public ACISOperationStatusEntity(string operationName, string operationId)
-            : base(operationName, operationId)
         {
             OperationName = operationName;
             OperationId = operationId;
+
+            // Using the operationName as the PartitionKey since it is a required field
+            PartitionKey = operationName;
+
+            // Using the operationId as the RowKey since it is a required field
+            RowKey = operationId;
         }
 
         public string OperationName { get; set; }
@@ -43,6 +50,14 @@ namespace Microsoft.Liftr.ACIS.Relay
         public string Result { get; set; }
 
         public string Logs { get; set; }
+
+        public string PartitionKey { get; set; }
+
+        public string RowKey { get; set; }
+
+        public DateTimeOffset? Timestamp { get; set; }
+
+        public ETag ETag { get; set; }
 
         public bool IsFinished()
         {

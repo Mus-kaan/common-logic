@@ -31,5 +31,13 @@ namespace Microsoft.Liftr.ACIS.Contracts
 
         public const string GetMarketplaceResourceByMonitor = nameof(GetMarketplaceResourceByMonitor);
         #endregion
+
+        #region Nginx
+        public const string GetNginxDeployment = nameof(GetNginxDeployment);
+        public const string GetDeploymentsBySubscription = nameof(GetDeploymentsBySubscription);
+        public const string GetMarketplaceResourceByDeployment = nameof(GetMarketplaceResourceByDeployment);
+        public const string GetOrganizationInfoFromPartner = nameof(GetOrganizationInfoFromPartner);
+        public const string GetDeploymentsFromPartner = nameof(GetDeploymentsFromPartner);
+        #endregion
     }
 }

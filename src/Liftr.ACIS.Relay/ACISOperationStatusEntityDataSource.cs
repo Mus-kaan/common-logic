@@ -2,7 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Cosmos.Table;
+using Azure;
+using Azure.Data.Tables;
 using System;
 using System.Threading.Tasks;
 
@@ -10,41 +11,42 @@ namespace Microsoft.Liftr.ACIS.Relay
 {
     public class ACISOperationStatusEntityDataSource : IACISOperationStatusEntityDataSource
     {
-        private readonly CloudTable _table;
+        private readonly TableClient _tableClient;
 
-        public ACISOperationStatusEntityDataSource(CloudTable table)
+        public ACISOperationStatusEntityDataSource(TableClient tableClient)
         {
-            _table = table ?? throw new ArgumentNullException(nameof(table));
+            _tableClient = tableClient ?? throw new ArgumentNullException(nameof(tableClient));
         }
 
         public async Task<ACISOperationStatusEntity> InsertEntityAsync(string operationName, string operationId)
         {
             var entity = new ACISOperationStatusEntity(operationName, operationId);
-
-            TableOperation insertOperation = TableOperation.Insert(entity);
-            var insertResult = await _table.ExecuteAsync(insertOperation);
-
-            return insertResult.Result as ACISOperationStatusEntity;
+            await _tableClient.UpsertEntityAsync(entity, TableUpdateMode.Merge);
+            return entity;
         }
 
         public async Task<ACISOperationStatusEntity> GetEntityAsync(string operationName, string operationId)
         {
-            TableOperation retrieveOperation = TableOperation.Retrieve<ACISOperationStatusEntity>(operationName, operationId);
-            TableResult result = await _table.ExecuteAsync(retrieveOperation);
-
-            if (result.HttpStatusCode == 404)
+            var result = new ACISOperationStatusEntity();
+            try
             {
-                return null;
+                result = await _tableClient.GetEntityAsync<ACISOperationStatusEntity>(operationName, operationId);
+            }
+            catch (RequestFailedException exception)
+            {
+                if (exception.Status == 404)
+                {
+                    return null;
+                }
             }
 
-            return result.Result as ACISOperationStatusEntity;
+            return result;
         }
 
         public async Task<ACISOperationStatusEntity> UpdateEntityAsync(ACISOperationStatusEntity entity)
         {
-            var operation = TableOperation.Replace(entity);
-            var result = await _table.ExecuteAsync(operation);
-            return result.Result as ACISOperationStatusEntity;
+            await _tableClient.UpsertEntityAsync(entity, TableUpdateMode.Replace);
+            return entity;
         }
 
         public async Task DeleteEntityAsync(string operationName, string operationId)
@@ -56,8 +58,7 @@ namespace Microsoft.Liftr.ACIS.Relay
                 return;
             }
 
-            TableOperation deleteOperation = TableOperation.Delete(entity);
-            await _table.ExecuteAsync(deleteOperation);
+            await _tableClient.DeleteEntityAsync(operationName, operationId);
         }
     }
 }

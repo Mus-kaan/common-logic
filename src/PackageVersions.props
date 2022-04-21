@@ -2,6 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PackageVersion_Azure_Core>1.20.0</PackageVersion_Azure_Core>
+    <PackageVersion_Azure_Data_Tables>12.2.1</PackageVersion_Azure_Data_Tables>
     <PackageVersion_Azure_Identity>1.5.0</PackageVersion_Azure_Identity>
     <PackageVersion_Azure_Storage_Blobs>12.10.0</PackageVersion_Azure_Storage_Blobs>
     <PackageVersion_Azure_Storage_Queues>12.8.0</PackageVersion_Azure_Storage_Queues>
@@ -25,7 +26,6 @@
     <PackageVersion_Microsoft_AspNetCore_Authentication_JwtBearer>3.1.18</PackageVersion_Microsoft_AspNetCore_Authentication_JwtBearer>
     <PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>2.2.0</PackageVersion_Microsoft_AspNetCore_Hosting_Abstractions>
     <PackageVersion_Microsoft_AspNetCore_Http_Extensions>2.2.0</PackageVersion_Microsoft_AspNetCore_Http_Extensions>
-    <PackageVersion_Microsoft_Azure_Cosmos_Table>1.0.8</PackageVersion_Microsoft_Azure_Cosmos_Table>
     <PackageVersion_Microsoft_Azure_KeyVault>3.0.5</PackageVersion_Microsoft_Azure_KeyVault>
     <PackageVersion_Microsoft_Azure_KeyVault_Extensions>3.0.5</PackageVersion_Microsoft_Azure_KeyVault_Extensions>
     <PackageVersion_Microsoft_Azure_Management_EventGrid>6.2.0-preview</PackageVersion_Microsoft_Azure_Management_EventGrid>

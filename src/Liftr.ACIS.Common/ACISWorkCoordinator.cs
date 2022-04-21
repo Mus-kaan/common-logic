@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //-----------------------------------------------------------------------------
 
-using Microsoft.Azure.Cosmos.Table;
+using Azure.Data.Tables;
 using Microsoft.Liftr.ACIS.Logging;
 using Microsoft.Liftr.ACIS.Relay;
 using Microsoft.Liftr.Contracts;
@@ -45,10 +45,10 @@ namespace Microsoft.Liftr.ACIS.Common
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _timeout = timeout.HasValue ? timeout.Value : TimeSpan.FromMinutes(5);
 
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(options.StorageAccountConnectionString);
-            CloudTableClient tableClient = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
-            var table = tableClient.GetTableReference(_options.OperationStatusTableName);
-            _dataSource = new ACISOperationStatusEntityDataSource(table);
+            var serviceClient = new TableServiceClient(options.StorageAccountConnectionString);
+            var tableClient = serviceClient.GetTableClient(_options.OperationStatusTableName);
+
+            _dataSource = new ACISOperationStatusEntityDataSource(tableClient);
 
             _q = new ACISQueueWriter(options, logger.Logger);
         }
