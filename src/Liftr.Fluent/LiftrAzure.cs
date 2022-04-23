@@ -472,7 +472,7 @@ namespace Microsoft.Liftr.Fluent
         public async Task ConfigureImageScanningAsync(IRegistry acr)
         {
             var eventGridHelper = new EventGridHelper(_logger);
-            var scope = "Microsoft.ContainerRegistry/registries/" + acr.Name;
+            var scope = $"/subscriptions/{DefaultSubscriptionId}/resourceGroups/{acr.ResourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{acr.Name}";
             bool imageScanConfigured = await eventGridHelper.IsEventSubscriptionExistingAsync(this, scope);
             if (!imageScanConfigured)
             {

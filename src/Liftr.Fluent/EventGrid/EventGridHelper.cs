@@ -8,6 +8,7 @@ using Microsoft.Azure.Management.EventGrid.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Microsoft.Liftr.Fluent
@@ -48,7 +49,7 @@ namespace Microsoft.Liftr.Fluent
                 eventGridManagementClient.Dispose();
             }
 
-            return result.Response.StatusCode.Equals(200);
+            return result.Response.StatusCode.Equals(HttpStatusCode.OK);
         }
 
         public async Task CreateImageScanningEventSubscriptionForACRAsync(
