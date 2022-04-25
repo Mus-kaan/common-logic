@@ -23,39 +23,41 @@ namespace Microsoft.Liftr.Platform.Contracts
             _logTag = logTag ?? throw new ArgumentNullException(nameof(logTag));
         }
 
-        public async Task<TResult> CreateAsync(T entity, IDictionary<string, string> headers, Uri endpoint)
+        public async Task<TResult> CreateAsync(T entity, IDictionary<string, string> headers, Uri endpoint, IDictionary<string, string> parameters = null)
         {
             var httpMethod = Method.POST;
             var restRequest = new RestRequest(httpMethod);
             restRequest.AddJsonBody(entity.ToJsonString());
 
-            return await ExecuteAsync(restRequest, headers, endpoint, httpMethod);
+            return await ExecuteAsync(restRequest, headers, parameters, endpoint, httpMethod);
         }
 
-        public async Task<TResult> GetAsync(IDictionary<string, string> headers, Uri endpoint)
+        public async Task<TResult> GetAsync(IDictionary<string, string> headers, Uri endpoint, IDictionary<string, string> parameters = null)
         {
             var httpMethod = Method.GET;
             var restRequest = new RestRequest(httpMethod);
 
-            return await ExecuteAsync(restRequest, headers, endpoint, httpMethod);
+            return await ExecuteAsync(restRequest, headers, parameters, endpoint, httpMethod);
         }
 
-        public async Task<TResult> UpdateAsync(T entity, IDictionary<string, string> headers, Uri endpoint)
+        public async Task<TResult> UpdateAsync(T entity, IDictionary<string, string> headers, Uri endpoint, IDictionary<string, string> parameters = null)
         {
             var httpMethod = Method.PATCH;
             var restRequest = new RestRequest(httpMethod);
             restRequest.AddJsonBody(entity.ToJsonString());
 
-            return await ExecuteAsync(restRequest, headers, endpoint, httpMethod);
+            return await ExecuteAsync(restRequest, headers, parameters, endpoint, httpMethod);
         }
 
         private async Task<TResult> ExecuteAsync(
             RestRequest restRequest,
             IDictionary<string, string> headers,
+            IDictionary<string, string> parameters,
             Uri endpoint,
             Method httpMethod)
         {
             ValidateAndAddHeaders(headers, restRequest);
+            AddParameters(parameters, restRequest);
             var restClient = new RestClient(endpoint);
             var restResponse = await restClient.ExecuteAsync(restRequest);
             if (restResponse.IsSuccessful)
@@ -82,6 +84,17 @@ namespace Microsoft.Liftr.Platform.Contracts
             foreach (var key in headers.Keys)
             {
                 restRequest.AddHeader(key, headers[key]);
+            }
+        }
+
+        private static void AddParameters(IDictionary<string, string> parameters, RestRequest restRequest)
+        {
+            if (parameters != null)
+            {
+                foreach (var key in parameters.Keys)
+                {
+                    restRequest.AddParameter(key, parameters[key]);
+                }
             }
         }
     }
