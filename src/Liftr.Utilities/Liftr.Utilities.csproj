@@ -8,5 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="$(PackageVersion_Newtonsoft_Json)" />
+	<PackageReference Include="Azure.Storage.Blobs" Version="$(PackageVersion_Azure_Storage_Blobs)" />
+	<PackageReference Include="Serilog" Version="$(PackageVersion_Serilog)" />
   </ItemGroup>
 </Project>
