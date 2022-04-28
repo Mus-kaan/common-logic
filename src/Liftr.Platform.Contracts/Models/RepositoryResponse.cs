@@ -20,6 +20,11 @@ namespace Microsoft.Liftr.Platform.Contracts.Models
         public Uri RepositoryUri { get; set; }
 
         /// <summary>
+        /// Repository URL for cloning. The forrmat is https://{org}@dev.azure.com/{org}/{project}/_git/{reponame}
+        /// </summary>
+        public Uri RepoRemoteUrl { get; set; }
+
+        /// <summary>
         /// List of build definition URIs
         /// </summary>
         public List<string> BuildDefinitionUris { get; set; }
