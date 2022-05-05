@@ -70,5 +70,11 @@ namespace Microsoft.Liftr.IdempotentRPWorker.Contracts
         Terminated,
         Failed,
         Succeeded,
+
+        WaitForCreateAck,
+
+        CallbackNotReceivedFromPartner,
+
+        AddTimeoutMessage,
     }
 }
