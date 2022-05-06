@@ -6,7 +6,7 @@ k8s-enter(){
     node=${args[0]}
     unset args[0]
     node_cmd=${args[@]}
-    image="debian"
+    image="mcr.microsoft.com/cbl-mariner/base/core:1.0"
     pod="clear-cached-images"
     namespace="monitoring"
     echo "spawning $pod on $node"
