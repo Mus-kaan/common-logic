@@ -13,7 +13,7 @@ namespace Microsoft.Liftr.IdempotentRPWorker
         /// The ARM id of the resource.
         /// </summary>
         [SwaggerExtension(MarkAsReadOnly = true)]
-        public new string Id
+        public override string Id
         {
             get
             {
@@ -30,7 +30,7 @@ namespace Microsoft.Liftr.IdempotentRPWorker
         /// The name of the resource.
         /// </summary>
         [SwaggerExtension(MarkAsReadOnly = true)]
-        public new string Name
+        public override string Name
         {
             get
             {
