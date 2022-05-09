@@ -49,7 +49,7 @@ namespace Microsoft.Liftr.DBService.Contracts.Platform
             var executionStep = ExecutionSteps?.FirstOrDefault(p => p.Name.Equals(stepName, StringComparison.Ordinal));
             if (executionStep == null)
             {
-                throw new InvalidOperationException($"Unable to find Pipeline Execution data for step {stepName}, serviceTreeName {ServiceTreeName}, repoName {RepoName}");
+                throw new InvalidOperationException($"Unable to find execution data for step {stepName}, serviceTreeName {ServiceTreeName}, repoName {RepoName}");
             }
 
             return executionStep;

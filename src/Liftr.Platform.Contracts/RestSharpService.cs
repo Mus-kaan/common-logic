@@ -40,6 +40,14 @@ namespace Microsoft.Liftr.Platform.Contracts
             return await ExecuteAsync(restRequest, headers, parameters, endpoint, httpMethod);
         }
 
+        public async Task<TResult> DeleteAsync(IDictionary<string, string> headers, Uri endpoint, IDictionary<string, string> parameters = null)
+        {
+            var httpMethod = Method.DELETE;
+            var restRequest = new RestRequest(httpMethod);
+
+            return await ExecuteAsync(restRequest, headers, parameters, endpoint, httpMethod);
+        }
+
         public async Task<TResult> UpdateAsync(T entity, IDictionary<string, string> headers, Uri endpoint, IDictionary<string, string> parameters = null)
         {
             var httpMethod = Method.PATCH;

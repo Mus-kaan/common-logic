@@ -15,5 +15,7 @@ namespace Microsoft.Liftr.Platform.Contracts.Interfaces
         Task<TResult> GetAsync(IDictionary<string, string> headers, Uri endpoint, IDictionary<string, string> parameters = null);
 
         Task<TResult> UpdateAsync(TEntity entity, IDictionary<string, string> headers, Uri endpoint, IDictionary<string, string> parameters = null);
+
+        Task<TResult> DeleteAsync(IDictionary<string, string> headers, Uri endpoint, IDictionary<string, string> parameters = null);
     }
 }
