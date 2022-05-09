@@ -53,7 +53,7 @@ namespace Microsoft.Liftr.Hosting.Contracts
                 throw new InvalidHostingOptionException($"{nameof(ComputeBaseName)} cannot be null or empty.");
             }
 
-            if (isAKS && SupportAvailabilityZone)
+            if (ZoneRedundant && isAKS && SupportAvailabilityZone)
             {
                 AvailabilityZoneRegionLookup.HasSupportAKS(Location);
             }
