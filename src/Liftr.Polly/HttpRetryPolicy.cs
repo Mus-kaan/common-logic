@@ -30,8 +30,22 @@ namespace Microsoft.Liftr.Polly
                             delay,
                             onRetry: (outcome, timespan, retryAttempt, context) =>
                             {
+                                var response_status_code = outcome.Result.StatusCode;
+                                var response_message = outcome.Result.ReasonPhrase;
+                                var response_headers = outcome.Result.Headers.ToString();
+                                var response_content = outcome.Result.Content.ToString();
+
                                 var logger = services.GetService<ILogger>();
-                                logger.Warning("Request: {requestMethod} {requestUrl} failed. Delaying for {delay}ms, then retrying {retry}.", request.Method, request.RequestUri, timespan.TotalMilliseconds, retryAttempt);
+                                logger.Error(
+                                             "Request: {requestMethod} {requestUrl} failed with HTTP StatusCode = {StatusCode}  ReasonPhrase = {ReasonPhrase}  ResponseHeaders = {ResponseHeader}, ResponseBody = {ResponseBody}  Delaying for {delay}ms, then retrying {retry}.",
+                                             request.Method,
+                                             request.RequestUri,
+                                             response_status_code,
+                                             response_message,
+                                             response_headers,
+                                             response_content,
+                                             timespan.TotalMilliseconds,
+                                             retryAttempt);
                             });
         }
 
