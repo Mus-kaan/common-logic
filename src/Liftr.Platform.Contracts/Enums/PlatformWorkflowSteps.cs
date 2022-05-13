@@ -8,8 +8,8 @@ namespace Microsoft.Liftr.Platform.Contracts.Enums
     {
         ADO = 0,
         AppCodeGen = 1,
-        ADOPolicy = 2,
-        BuildPipelines = 3,
-        ReleasePipelines = 4,
+        BuildPipelines = 2,
+        ReleasePipelines = 3,
+        ADOPolicy = 4,
     }
 }
