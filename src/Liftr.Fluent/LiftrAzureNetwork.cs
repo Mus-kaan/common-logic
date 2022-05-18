@@ -3,11 +3,14 @@
 //-----------------------------------------------------------------------------
 
 using Microsoft.Azure.Management.Dns.Fluent;
+using Microsoft.Azure.Management.Network;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Network.Fluent.Models;
 using Microsoft.Azure.Management.Network.Models;
+using Microsoft.Azure.Management.PrivateDns.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Core;
 using Microsoft.Azure.Management.TrafficManager.Fluent;
+using Microsoft.Liftr.Fluent.Network;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -243,6 +246,31 @@ namespace Microsoft.Liftr.Fluent
             }
 
             return null;
+        }
+
+        public async Task<IPrivateDnsZone> CreateNewPrivateDNSZoneAsync(LiftrAzure liftrAzure, string name, string linkName, string rg, PrivateEndpoint privateEndpoint, string vnet, CancellationToken cancellationToken = default)
+        {
+            var ipv4Address = await PrivateEndpointHelper.GetIPAddressAsync(liftrAzure, rg, privateEndpoint);
+            var privateDnsZone = await FluentClient.PrivateDnsZones.Define(name).
+                                                    WithExistingResourceGroup(rg).
+                                                    DefineARecordSet("*").
+                                                    WithIPv4Address(ipv4Address).
+                                                    Attach().
+                                                    CreateAsync(cancellationToken);
+
+            privateDnsZone = await privateDnsZone.Update().
+                                DefineVirtualNetworkLink(linkName).
+                                EnableAutoRegistration().
+                                WithReferencedVirtualNetworkId(vnet).
+                                Attach().
+                                ApplyAsync(cancellationToken);
+
+            return privateDnsZone;
+        }
+
+        public Task<PrivateEndpoint> CreatePrivateEndpointAsync(ILiftrAzure liftrAzure, string name, string rg, string subnet, string location, string privateLinkServiceId, CancellationToken cancellationToken = default)
+        {
+            return PrivateEndpointHelper.CreatePrivateEndpointAsync(liftrAzure, name, rg, subnet, location, privateLinkServiceId, cancellationToken);
         }
 
         public Task<Subnet> GetIPv6SubnetAsync(INetwork vnet, string subnetName, CancellationToken cancellationToken = default)
