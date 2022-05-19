@@ -14,6 +14,8 @@ namespace Microsoft.Liftr.Platform.Contracts
 {
     public class RestSharpService<T, TResult> : IRestSharpService<T, TResult>
     {
+        private const int TimeoutMillis = 5 * 60 * 1000;
+        private const int ReadWriteTimeoutMillis = TimeoutMillis;
         private readonly ILogger _logger;
         private readonly string _logTag;
 
@@ -67,6 +69,8 @@ namespace Microsoft.Liftr.Platform.Contracts
             ValidateAndAddHeaders(headers, restRequest);
             AddParameters(parameters, restRequest);
             var restClient = new RestClient(endpoint);
+            restClient.Timeout = TimeoutMillis;
+            restClient.ReadWriteTimeout = ReadWriteTimeoutMillis;
             var restResponse = await restClient.ExecuteAsync(restRequest);
             if (restResponse.IsSuccessful)
             {
