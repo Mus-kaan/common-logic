@@ -248,9 +248,9 @@ namespace Microsoft.Liftr.Fluent
             return null;
         }
 
-        public async Task<IPrivateDnsZone> CreateNewPrivateDNSZoneAsync(LiftrAzure liftrAzure, string name, string linkName, string rg, PrivateEndpoint privateEndpoint, string vnet, CancellationToken cancellationToken = default)
+        public async Task<IPrivateDnsZone> CreateNewPrivateDNSZoneAsync(string name, string linkName, string rg, PrivateEndpoint privateEndpoint, string vnet, CancellationToken cancellationToken = default)
         {
-            var ipv4Address = await PrivateEndpointHelper.GetIPAddressAsync(liftrAzure, rg, privateEndpoint);
+            var ipv4Address = await PrivateEndpointHelper.GetIPAddressAsync(this, rg, privateEndpoint);
             var privateDnsZone = await FluentClient.PrivateDnsZones.Define(name).
                                                     WithExistingResourceGroup(rg).
                                                     DefineARecordSet("*").
@@ -268,9 +268,9 @@ namespace Microsoft.Liftr.Fluent
             return privateDnsZone;
         }
 
-        public Task<PrivateEndpoint> CreatePrivateEndpointAsync(ILiftrAzure liftrAzure, string name, string rg, string subnet, string location, string privateLinkServiceId, CancellationToken cancellationToken = default)
+        public Task<PrivateEndpoint> CreatePrivateEndpointAsync(string name, string rg, string subnet, string location, string privateLinkServiceId, CancellationToken cancellationToken = default)
         {
-            return PrivateEndpointHelper.CreatePrivateEndpointAsync(liftrAzure, name, rg, subnet, location, privateLinkServiceId, cancellationToken);
+            return PrivateEndpointHelper.CreatePrivateEndpointAsync(this, name, rg, subnet, location, privateLinkServiceId, cancellationToken);
         }
 
         public Task<Subnet> GetIPv6SubnetAsync(INetwork vnet, string subnetName, CancellationToken cancellationToken = default)

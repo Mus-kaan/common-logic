@@ -17,6 +17,7 @@ using Microsoft.Azure.Management.Msi.Fluent;
 using Microsoft.Azure.Management.Network.Fluent;
 using Microsoft.Azure.Management.Network.Fluent.Models;
 using Microsoft.Azure.Management.Network.Models;
+using Microsoft.Azure.Management.PrivateDns.Fluent;
 using Microsoft.Azure.Management.Redis.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent.Authentication;
@@ -268,6 +269,22 @@ namespace Microsoft.Liftr.Fluent
             INetworkSecurityGroup nsg,
             string ipv4AddressPrefix,
             string ipv6AddressPrefix,
+            CancellationToken cancellationToken = default);
+
+        Task<IPrivateDnsZone> CreateNewPrivateDNSZoneAsync(
+            string name,
+            string linkName,
+            string rg,
+            PrivateEndpoint privateEndpoint,
+            string vnet,
+            CancellationToken cancellationToken = default);
+
+        Task<PrivateEndpoint> CreatePrivateEndpointAsync(
+            string name,
+            string rg,
+            string subnet,
+            string location,
+            string privateLinkServiceId,
             CancellationToken cancellationToken = default);
 
         Task<ISubnet> GetSubnetAsync(string subnetId, CancellationToken cancellationToken = default);
