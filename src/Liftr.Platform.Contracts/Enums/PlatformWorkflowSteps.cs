@@ -11,5 +11,6 @@ namespace Microsoft.Liftr.Platform.Contracts.Enums
         BuildPipelines = 2,
         ReleasePipelines = 3,
         ADOPolicy = 4,
+        Telemetry = 5,
     }
 }
