@@ -14,7 +14,7 @@ namespace Microsoft.Liftr.PerformanceTelemetry
     public static class TelemetryCapture
     {
         /// <summary>
-        /// This method will be called from each RP as they import the package.
+        /// This method will be called from RP's passing their RP name parameter 'partner' of string type as they import the package.
         /// </summary>
         /// <param name="mainOperationName">Pass a valid operation name everytime the RP calls the method</param>
         /// <param name="partner">Pass the RP name from which the method was called</param>
@@ -24,8 +24,8 @@ namespace Microsoft.Liftr.PerformanceTelemetry
         /// <param name="subOperationName">Pass the sub operation, if it's an operation within an operation. Doc for more details - //todo. Please pass null object if it's the main operation calling this method and there is no suboperation</param>
         /// <param name="status">Pass 'None' while passing 'Start' as the argument to operationType</param>
         /// <param name="logger"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public static void OperationDetails(MainOperationNameBaseType mainOperationName, Partners partner, UniqueIdentifierTypes uniqueIdentifierType, string uniqueIdentifierId, OperationTypes operationType, SubOperationNameBaseType subOperationName, Statuses status, ILogger logger)
+        /// <exception cref="ArgumentNullException"></exception>      
+        public static void OperationDetails(MainOperationNameBaseType mainOperationName, string partner, UniqueIdentifierTypes uniqueIdentifierType, string uniqueIdentifierId, OperationTypes operationType, SubOperationNameBaseType subOperationName, Statuses status, ILogger logger)
         {
             if (mainOperationName is null)
             {
@@ -48,6 +48,23 @@ namespace Microsoft.Liftr.PerformanceTelemetry
                 subOperationVal = subOperationName.Value;
             }
             logger.Information($"Performance insight details captured for Operation: {mainOperationName.Value}, Partner: {partner}, UniqueIdentifierType: {uniqueIdentifierType}, UniqueIdentifierId: {uniqueIdentifierId}, OperationType: {operationType}, SubOperationName: {subOperationVal}, Status: {status}");
+        }
+
+        /// <summary>
+        /// This method will be called from RP's passing their RP name parameter 'partner' of enum type as they import the package.
+        /// </summary>
+        /// <param name="mainOperationName">Pass a valid operation name everytime the RP calls the method</param>
+        /// <param name="partner">Pass the RP name from which the method was called</param>
+        /// <param name="uniqueIdentifierType"></param>
+        /// <param name="uniqueIdentifierId"></param>
+        /// <param name="operationType">Pass Start when it's the start of the operation, or else pass Stop</param>
+        /// <param name="subOperationName">Pass the sub operation, if it's an operation within an operation. Doc for more details - //todo. Please pass null object if it's the main operation calling this method and there is no suboperation</param>
+        /// <param name="status">Pass 'None' while passing 'Start' as the argument to operationType</param>
+        /// <param name="logger"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static void OperationDetails(MainOperationNameBaseType mainOperationName, Partners partner, UniqueIdentifierTypes uniqueIdentifierType, string uniqueIdentifierId, OperationTypes operationType, SubOperationNameBaseType subOperationName, Statuses status, ILogger logger)
+        {
+            OperationDetails(mainOperationName, partner.ToString(), uniqueIdentifierType, uniqueIdentifierId, operationType, subOperationName, status, logger);
         }
     }
 }
