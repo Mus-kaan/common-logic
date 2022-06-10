@@ -13,5 +13,6 @@ namespace Microsoft.Liftr.PerformanceTelemetry.Models.Enums
         Dynatrace,
         Elastic,
         Logz,
+        Nginx,
     }
 }

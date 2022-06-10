@@ -33,11 +33,16 @@ namespace Microsoft.Liftr.ACIS.Contracts
         #endregion
 
         #region Nginx
-        public const string GetNginxDeployment = nameof(GetNginxDeployment);
-        public const string GetDeploymentsBySubscription = nameof(GetDeploymentsBySubscription);
+        public const string ListAllDeploymentsBySubscriptionId = nameof(ListAllDeploymentsBySubscriptionId);
         public const string GetMarketplaceResourceByDeployment = nameof(GetMarketplaceResourceByDeployment);
-        public const string GetOrganizationInfoFromPartner = nameof(GetOrganizationInfoFromPartner);
-        public const string GetDeploymentsFromPartner = nameof(GetDeploymentsFromPartner);
+        public const string GetNginxDeployment = nameof(GetNginxDeployment);
+        public const string GetNginxPartnerDeployment = nameof(GetNginxPartnerDeployment);
+        public const string ListPartnerDeployments = nameof(ListPartnerDeployments);
+        public const string GetPartnerOrgInfo = nameof(GetPartnerOrgInfo);
+        public const string GetVNetInjectionEntityByDeployment = nameof(GetVNetInjectionEntityByDeployment);
+        public const string GetHOBOBillingEntity = nameof(GetHOBOBillingEntity);
+        public const string GetNginxConfig = nameof(GetNginxConfig);
+        public const string CleanupBrokenRPaaSEntityAsync = nameof(CleanupBrokenRPaaSEntityAsync);
         #endregion
     }
 }
