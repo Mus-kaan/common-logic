@@ -13,5 +13,6 @@ namespace Microsoft.Liftr.Contracts
         Nginx,
         Dynatrace,
         Qumulo,
+        PaloAlto,
     }
 }
