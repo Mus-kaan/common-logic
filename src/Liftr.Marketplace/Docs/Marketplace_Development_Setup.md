@@ -28,3 +28,4 @@ This involves changing the properties of your offer by adding `HideFromSaasBlade
 
 Setting the create button on the Marketplace offer to redirect to the create flow developed by the Liftr team.
 - Create an ICM Ticket to Marketplace Portal team and request that they do this redirect for you. Set **OWNING TEAM - CPX-MIX- Ingestion Publishing Service**
+- See example [ICM Ticket](https://portal.microsofticm.com/imp/v3/incidents/details/242741634/home).
