@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>$(LiftrExeTargetFramework)</TargetFramework>
+    <TargetFramework>$(LiftrClassLibraryTargetFramework21)</TargetFramework>
     <IsPackable>true</IsPackable>
     <AssemblyName>Microsoft.Liftr.PerformanceTelemetry</AssemblyName>
     <RootNamespace>Microsoft.Liftr.PerformanceTelemetry</RootNamespace>
